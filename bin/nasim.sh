@@ -11,6 +11,10 @@ nasim() {
 
       export ANTHROPIC_BASE_URL="$OLLAMA_URL"
       export ANTHROPIC_AUTH_TOKEN="ollama"
+      
+      # Add these two new lines:
+      export CLAUDE_CODE_MAX_OUTPUT_TOKENS="128000"
+      export CLAUDE_CODE_DISABLE_THINKING="1"
 
       echo "🟢 nasim STARTED → Claude Code now uses LOCAL Ollama"
       echo "Model backend: $OLLAMA_URL"
@@ -21,6 +25,8 @@ nasim() {
 
       unset ANTHROPIC_BASE_URL
       unset ANTHROPIC_AUTH_TOKEN
+      unset CLAUDE_CODE_MAX_OUTPUT_TOKENS
+      unset CLAUDE_CODE_DISABLE_THINKING
 
       echo "🔵 nasim STOPPED → Claude Code now uses Anthropic cloud"
       echo "Backend reset to default Claude"
