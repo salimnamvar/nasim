@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**locllm** — Local LLM Machine. A personal GitHub project (`salimnamvar/locllm`).
+**nasim** — Local LLM Machine. A personal GitHub project (`salimnamvar/nasim`).
 
 Current state: blueprint phase (`feature/blueprint`). No source code exists yet.
 
