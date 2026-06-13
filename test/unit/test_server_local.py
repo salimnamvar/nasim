@@ -142,3 +142,78 @@ def test_count_tokens_handles_tools_and_system(path):
     )
     assert resp.status_code == 200
     assert resp.json()["input_tokens"] >= 1
+
+
+def test_health_vram_warning_when_model_cpu_offloaded(monkeypatch):
+    """Health reports vram_warning when a running model exceeds GPU VRAM (AP-12)."""
+    _GPU_SIZE = 12_000_000_000  # 12 GB GPU
+    _MODEL_SIZE = 24_000_000_000  # 24 GB model — cannot fit, gets split
+    _VRAM_USED = int(_GPU_SIZE * 0.45)  # ~45% on GPU, 55% on CPU
+
+    class _Client:
+        def __init__(self, *a, **k):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *a):
+            return False
+
+        async def get(self, url: str, **k):
+            class _R:
+                status_code = 200
+
+                def json(self_inner):
+                    if url.endswith("/api/tags"):
+                        return {"models": [{"name": "big-model:latest", "size": _MODEL_SIZE}]}
+                    if url.endswith("/api/ps"):
+                        return {"models": [{"name": "big-model:latest", "size": _MODEL_SIZE, "size_vram": _VRAM_USED}]}
+                    return {}
+
+            return _R()
+
+    monkeypatch.setattr(server.httpx, "AsyncClient", _Client)
+    resp = client.get("/health")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert "vram_warning" in body
+    assert "big-model:latest" in body["vram_warning"]
+    assert "CPU" in body["vram_warning"]
+
+
+def test_health_no_vram_warning_when_model_gpu_resident(monkeypatch):
+    """Health omits vram_warning when the running model fits fully in VRAM."""
+    _MODEL_SIZE = 5_000_000_000  # 5 GB model — fits on GPU
+    _VRAM_USED = _MODEL_SIZE  # all in VRAM
+
+    class _Client:
+        def __init__(self, *a, **k):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *a):
+            return False
+
+        async def get(self, url: str, **k):
+            class _R:
+                status_code = 200
+
+                def json(self_inner):
+                    if url.endswith("/api/tags"):
+                        return {"models": [{"name": "small-model:7b", "size": _MODEL_SIZE}]}
+                    if url.endswith("/api/ps"):
+                        return {"models": [{"name": "small-model:7b", "size": _MODEL_SIZE, "size_vram": _VRAM_USED}]}
+                    return {}
+
+            return _R()
+
+    monkeypatch.setattr(server.httpx, "AsyncClient", _Client)
+    resp = client.get("/health")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert "vram_warning" not in body

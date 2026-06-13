@@ -63,3 +63,25 @@ backend. Unset them on `stop`.
 ## AP-11 — Asserting a capability without a test
 Every ✅ in the capability matrix is backed by a runnable assertion. A claim of
 "works" with no test does not count and must not be marked green.
+
+## AP-12 — Oversized model running in CPU/GPU split mode
+**Symptom:** 40+ minutes per response with no file writes; model reads one file,
+re-plans, reads one file again in an infinite loop; "nothing happens". **Root
+cause:** the selected model (e.g. `qwen3.6:latest` at 23 GB) exceeds the GPU's
+VRAM (11 GB on `black`'s GTX 1080 Ti). Ollama splits the model across CPU RAM
+and GPU VRAM (~59% CPU / 41% GPU), making each token generation 10–100× slower
+than GPU-only. Under this load the model never reaches the synthesis/write phase.
+**Fix:** always use a GPU-resident model — one whose size fits within the card's
+VRAM. On `black` (11 GB): `qwen2.5-coder:14b` (9 GB) or `qwen2.5-coder:7b`
+(4.7 GB). Run `nasim models` to see sizes. The bridge now detects and reports
+CPU offload via `/api/ps` — `nasim status` shows `VRAM: !!` when this condition
+is active. Never `/model`-switch to a model whose size exceeds GPU VRAM for an
+agentic task.
+
+## AP-13 — Misconception: file operations run on the Ollama server
+File operations (Read, Write, Edit, Bash) are executed by the `claude` binary on
+the **client machine** (`salim-hp`), not on `black`. The model on `black` only
+emits `tool_use` JSON blocks that describe what to do; `claude` executes them
+locally. If no files are being written, the model has not reached the
+write/synthesis phase — it is stuck in earlier steps. This is always a model
+capability or speed issue (see AP-01, AP-12), never a file-routing issue.

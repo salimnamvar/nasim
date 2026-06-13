@@ -142,6 +142,7 @@ class NasimController:
                     "available_models": available,
                     "recommended_model": health.get("recommended_model"),
                     "warn": active not in available if available else False,
+                    "vram_warning": health.get("vram_warning"),
                 }
                 success = True
         return (success, result)
@@ -178,6 +179,8 @@ class NasimController:
         if backend == "ollama":
             health_ok, health = self._get_json("/health")
             report["bridge"] = health.get("status", "?") if (health_ok and health) else "unreachable"
+            if health_ok and health and health.get("vram_warning"):
+                report["vram_warning"] = health["vram_warning"]
         return (True, report)
 
     def models(self) -> Tuple[bool, List[Dict[str, Any]]]:
@@ -195,6 +198,7 @@ class NasimController:
             default = health.get("default_model")
             fast = health.get("fast_model")
             recommended = health.get("recommended_model")
+            model_sizes = health.get("model_sizes", {})
             for name in health.get("available_models", []):
                 tags = []
                 if name == default:
@@ -203,5 +207,6 @@ class NasimController:
                     tags.append("fast")
                 if name == recommended:
                     tags.append("recommended")
-                result.append({"name": name, "tags": tags})
+                size_gb = model_sizes.get(name)
+                result.append({"name": name, "tags": tags, "size_gb": size_gb})
         return (success, result)

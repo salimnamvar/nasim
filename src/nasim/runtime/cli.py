@@ -30,6 +30,9 @@ def _print_start(a_report: Dict[str, Any]) -> None:
         recommended = a_report.get("recommended_model")
         print(f"  WARNING : recommended model '{recommended}' is not on the server;")
         print(f"            agentic reliability will suffer — pull it: ollama pull {recommended}")
+    if a_report.get("vram_warning"):
+        print(f"  VRAM    : !! {a_report['vram_warning']}")
+        print(f"            Run 'nasim models' to see sizes; use /model to pick a GPU-resident one")
     print("  Tip     : launch 'claude' in THIS shell; use /model to switch")
 
 
@@ -41,14 +44,18 @@ def _print_status(a_report: Dict[str, Any]) -> None:
     if a_report["backend"] == "ollama":
         print(f"Tunnel  : {'yes' if a_report['tunnel_alive'] else 'no'}")
         print(f"Bridge  : {a_report.get('bridge', '?')}")
+        if a_report.get("vram_warning"):
+            print(f"VRAM    : !! {a_report['vram_warning']}")
+            print(f"          Use 'nasim models' to see sizes; pick a GPU-resident model")
 
 
 def _print_models(a_entries: List[Dict[str, Any]]) -> None:
-    """Print the model inventory with default/fast/recommended tags."""
+    """Print the model inventory with sizes and default/fast/recommended tags."""
     print("Ollama models (via bridge):")
     for entry in a_entries:
-        suffix = f"  [{', '.join(entry['tags'])}]" if entry["tags"] else ""
-        print(f"  {entry['name']}{suffix}")
+        tags_str = f"  [{', '.join(entry['tags'])}]" if entry["tags"] else ""
+        size_str = f"  {entry['size_gb']}GB" if entry.get("size_gb") is not None else ""
+        print(f"  {entry['name']}{size_str}{tags_str}")
 
 
 def main(a_argv: Optional[List[str]] = None) -> int:

@@ -71,12 +71,43 @@ def _dump(a_label: str, a_payload: Dict[str, Any]) -> None:
 
 @app.get("/health")
 async def health() -> Dict[str, Any]:
-    """Report bridge and Ollama status plus available models."""
+    """Report bridge and Ollama status plus available models and VRAM health.
+
+    In addition to the model inventory, this endpoint queries ``/api/ps`` to
+    detect models that exceed GPU VRAM and are running in CPU/GPU split mode.
+    Split-mode inference is severely degraded (10–100× slower than GPU-only) and
+    is the most common cause of multi-minute response times with no output.
+    """
     result: Dict[str, Any]
     try:
         async with httpx.AsyncClient(timeout=5) as client:
-            resp = await client.get(f"{_CONFIG.ollama_url}/api/tags")
-            models = [m["name"] for m in resp.json().get("models", [])]
+            tags_resp = await client.get(f"{_CONFIG.ollama_url}/api/tags")
+            tag_data = tags_resp.json().get("models", [])
+            models = [m["name"] for m in tag_data]
+            model_sizes: Dict[str, float] = {m["name"]: round(m.get("size", 0) / 1e9, 1) for m in tag_data}
+
+            # Detect CPU offload: any running model whose size > VRAM usage.
+            vram_warning: str | None = None
+            try:
+                ps_resp = await client.get(f"{_CONFIG.ollama_url}/api/ps")
+                ps_models = ps_resp.json().get("models", [])
+                warnings = []
+                for m in ps_models:
+                    size = m.get("size", 0)
+                    size_vram = m.get("size_vram", 0)
+                    if size > 0 and size_vram < size:
+                        pct_gpu = round(size_vram / size * 100)
+                        pct_cpu = 100 - pct_gpu
+                        size_gb = round(size / 1e9, 1)
+                        warnings.append(
+                            f"{m['name']} ({size_gb}GB) is {pct_gpu}%GPU/{pct_cpu}%CPU — "
+                            f"CPU offload causes severe slowdown; pick a GPU-resident model"
+                        )
+                if warnings:
+                    vram_warning = "; ".join(warnings)
+            except Exception as ps_exc:  # noqa: BLE001 — non-fatal diagnostic
+                logger.debug("ps check failed: %s", ps_exc)
+
         result = {
             "status": "ok",
             "ollama": "connected",
@@ -85,7 +116,10 @@ async def health() -> Dict[str, Any]:
             "recommended_model": _CONFIG.recommended_model,
             "num_ctx": _CONFIG.num_ctx,
             "available_models": models,
+            "model_sizes": model_sizes,
         }
+        if vram_warning:
+            result["vram_warning"] = vram_warning
     except Exception as exc:  # noqa: BLE001 — health must never raise
         result = {"status": "degraded", "ollama": "unreachable", "error": str(exc)}
     return result
