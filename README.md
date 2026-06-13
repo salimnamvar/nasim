@@ -1,56 +1,81 @@
-Nasim toggles Claude Code between the Anthropic cloud and a local Ollama backend
-running on the `black` machine, reached over an SSH tunnel to the Nasim Bridge.
+Nasim routes the real Claude Code CLI to local Ollama models on a remote server
+instead of the Anthropic cloud, with a guaranteed one-command rollback.
+
+It does **not** fork or patch the `claude` binary. It drives the real CLI through
+environment variables and surgical, fully-reverted edits to its config, fronted
+by a translating proxy (the *bridge*) that speaks the Anthropic Messages API on
+one side and Ollama's chat API on the other.
 
 ## What it does
 
-- `nasim start` — opens an SSH tunnel to the bridge on `black`, points Claude
-  Code at it (`ANTHROPIC_BASE_URL`), injects the available Ollama models into the
-  `/model` picker, and selects the bridge default model.
+- `nasim start` — opens an SSH tunnel to the bridge, points Claude Code at it
+  (`ANTHROPIC_BASE_URL`), injects the available Ollama models into the `/model`
+  picker, and selects the recommended model.
 - `nasim stop` — kills the tunnel, unsets the redirect, removes every injected
-  Ollama model from the picker, and restores the exact `/model` selection that
-  was active before start. Full rollback to Claude Code defaults.
+  model from the picker, and restores the exact `/model` selection from before
+  start. Full, tested rollback to Claude Code defaults.
 - `nasim status` — backend, tunnel liveness, bridge health, active model.
-- `nasim models` — lists the Ollama models the bridge exposes.
+- `nasim models` — the Ollama models the bridge exposes, tagged default/fast.
 
-It does **not** fork or patch the Claude Code binary; it drives the real `claude`
-through environment variables and surgical edits to its config, all reverted on
-stop.
+It does **not** modify the `claude` binary; every change is reverted on stop.
 
 ## Architecture
 
 ```
-salim-hp (client)                    black (server)
-claude  →  localhost:18080  ──SSH──►  127.0.0.1:8080 (nasim-bridge)  →  Ollama
+client                                  server (configurable)
+claude → localhost:18080 ──SSH -L──► 127.0.0.1:8080 (nasim-bridge) → Ollama
 ```
 
-The bridge translates the Anthropic Messages API to Ollama's chat API. It binds
-to localhost on `black`, so the SSH tunnel is the only access path.
+The bridge binds to `127.0.0.1` on the server, so the SSH tunnel is the only
+access path. Point Nasim at any host by editing `cfg/nasim.toml` `[server].host`
+(or `NASIM_REMOTE_HOST`) — no code change. See [docs/architecture.md](docs/architecture.md).
 
 ## Requirements
 
-- Passphrase-less SSH access to `black` (`ssh black` must work non-interactively).
-- `nasim-bridge.service` running on `black` (listens on `127.0.0.1:8080`).
-- `curl` and `python3` available on the client.
+- Passphrase-less SSH to the server (`ssh <host>` works non-interactively).
+- The `nasim-bridge` service running on the server (`make deploy`).
+- `python3` (3.11+) and `ssh` on the client. The client toggle uses only the
+  standard library.
 
 ## Install
 
 ```bash
-./install.sh           # adds 'source .../bin/nasim.sh' to your shell profile
-source ~/.bashrc       # or open a new shell
+./install.sh        # sources bin/nasim.sh from your shell profile
+source ~/.bashrc    # or open a new shell
 ```
 
 `nasim` is a shell function, so it must be sourced — that is how `nasim start`
-can export the redirect into the shell you launch `claude` from. Run `nasim
-start` and `claude` in the same terminal.
+exports the redirect into the shell you launch `claude` from. Run `nasim start`
+and `claude` in the **same** terminal.
 
 ## Usage
 
 ```bash
-nasim start
-claude            # now routed to Ollama on black; /model lists Ollama models
+nasim start         # route Claude Code to Ollama; lists available models
+claude              # now backed by Ollama; /model lists the Ollama tags
 nasim status
-nasim stop        # back to Anthropic cloud, picker and model selection restored
+nasim stop          # back to the Anthropic cloud; picker + model restored
 ```
+
+## Deploy the bridge to the server
+
+```bash
+make deploy         # rsync src/ + cfg/ to the server, restart the service
+```
+
+## Develop and test
+
+```bash
+make lint           # ruff + black --check + import smoke
+make test           # unit tests — fast, no network
+make integration    # live bridge endpoint tests (needs SSH + service)
+make capability     # Anthropic-API capability matrix (live)
+make loop           # full CI/CD loop: lint→unit→deploy→integration→capability→rollback
+make loop E2E=1     # also drive the real claude binary against Ollama (slow)
+```
+
+The test suite is exhaustive and mapped to a capability matrix — every green cell
+is backed by a runnable assertion. See [docs/capability-matrix.md](docs/capability-matrix.md).
 
 ## Uninstall
 
@@ -58,20 +83,21 @@ nasim stop        # back to Anthropic cloud, picker and model selection restored
 ./uninstall.sh
 ```
 
-## Tests
+## Known limitation (model-bound, not a routing fault)
 
-```bash
-bash test/test_nasim.sh
-```
+The bridge faithfully relays tools and tool calls; whether a *local* model drives
+a multi-tool agentic task well depends on the model and the GPU. Small models
+degrade under a large system prompt + many tools, and a model too big for the GPU
+spills to CPU and slows sharply. Use a capable coder model that fits the GPU, and
+keep the injected context lean. Full analysis, measurements, and tuning live in
+[docs/model-guidance.md](docs/model-guidance.md).
 
-The suite (43 assertions) covers start/stop/status/models, model injection, the
-real round-trip through the tunnel, and the full rollback contract — including
-healing a `/model` pick of an Ollama tag back to the original on stop. See
-[docs/audit.md](docs/audit.md) for the audit, model inventory, and known limits.
+## Documentation
 
-## Known limitation
-
-Small models (e.g. `qwen2.5-coder:7b`) are less reliable inside Claude Code's
-agentic loop and may emit spurious tool calls; use the `14b` default for agentic
-work, or point the bridge at a stronger model. This is a model-capability bound,
-not a routing fault — see [docs/audit.md](docs/audit.md).
+| Doc | Contents |
+| --- | --- |
+| [docs/architecture.md](docs/architecture.md) | Topology, module decomposition, boundary rules |
+| [docs/methodology.md](docs/methodology.md) | The plan→…→monitor CI/CD loop |
+| [docs/capability-matrix.md](docs/capability-matrix.md) | Every tested capability and its status |
+| [docs/runbook.md](docs/runbook.md) | Deploy, operate, relocate the server, troubleshoot |
+| [docs/model-guidance.md](docs/model-guidance.md) | Model/hardware ceiling, the tool-call diagnosis, tuning |
