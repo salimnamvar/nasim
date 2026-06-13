@@ -2,141 +2,183 @@
 
 **Date:** 2026-06-13
 **Branch:** feature/implementation
-**Scope:** Why `nasim start` did not route Claude Code to Ollama; fix and success criteria.
+**Scope:** Correct, tested start/stop/status/models for routing Claude Code on
+`salim-hp` (client) to Ollama on `black` (server) through the Nasim Bridge, with
+a guaranteed full rollback to Anthropic defaults on `nasim stop`.
 
 ---
 
-## 1. Problem Statement
-
-After running `nasim start`, Claude Code continued to use Anthropic cloud rather than
-the local Ollama instance on `black`. A `qwen3.6:latest` model was manually added via
-Claude Code's `/model` interface but also failed to respond.
-
----
-
-## 2. Root Cause
-
-### RC-01 — Wrong endpoint URL (Critical)
-
-`nasim.sh` set:
-```
-ANTHROPIC_BASE_URL=http://192.168.70.125:11434
-```
-Port `11434` is Ollama's native API (`/api/chat`). It does not implement the
-Anthropic Messages API (`POST /v1/messages`). Claude Code talks Anthropic protocol,
-so every request errored or timed out.
-
-### RC-02 — Bridge bound to localhost only (Contributing)
-
-The `nasim-bridge.service` on `black` listens on `127.0.0.1:8080` — not on the LAN
-IP. Even if `nasim.sh` had used port `8080`, the direct network call would have been
-refused. The bridge is only reachable via an SSH tunnel.
-
-### RC-03 — Custom model entry not needed (Confusion)
-
-The manually-added `qwen3.6:latest` entry in Claude Code's `/model` interface was
-pointing at the wrong URL (Ollama port direct). Even if the URL were correct, this
-approach duplicates what `ANTHROPIC_BASE_URL` already does. The env-var redirect
-causes the bridge's `/v1/models` endpoint to populate the model list automatically
-— no manual entry required.
-
----
-
-## 3. Fix Applied
-
-`bin/nasim.sh` was rewritten to:
-
-1. **`nasim start`**
-   - Kill any existing SSH tunnel on port `18080`
-   - Open `ssh -f -N -L 18080:127.0.0.1:8080 black`
-   - Set `ANTHROPIC_BASE_URL=http://localhost:18080`
-   - Set `ANTHROPIC_AUTH_TOKEN=nasim`
-   - Run bridge health check and print available models
-
-2. **`nasim stop`**
-   - Kill tunnel by stored PID (fallback: `pkill` pattern)
-   - `unset` all four env vars
-   - Write `anthropic` to state file
-
-3. **`nasim status`** — shows backend, tunnel liveness, bridge health
-
-4. **`nasim models`** — lists Ollama models without starting/stopping
-
-**No changes** to `nasim-bridge.service` on `black` were required. The bridge is
-correct; only the client-side routing was broken.
-
----
-
-## 4. Architecture
+## 1. Topology
 
 ```
-salim-hp                          black (192.168.70.125)
-─────────────────────             ────────────────────────────
-claude (CLI)                      nasim-bridge (port 8080)
-  │                                   │
-  │ Anthropic API                     │ translates: Anthropic ↔ Ollama
-  ▼                                   ▼
-localhost:18080 ──SSH tunnel──► 127.0.0.1:8080
-                                       │
-                               Ollama (:11434)
-                                       │
-                               qwen3.6:latest / qwen2.5-coder:*
+salim-hp (client)                         black (server, 192.168.70.125)
+──────────────────────────                ────────────────────────────────────
+claude 2.1.177 (real binary)              nasim-bridge.service  (127.0.0.1:8080)
+  │  Anthropic Messages API                 │  translator.py: Anthropic <-> Ollama
+  ▼                                         ▼
+localhost:18080 ──SSH tunnel (-L)──► 127.0.0.1:8080
+                                            │
+                                    Ollama 0.30.7 (:11434)  — GTX 1080 Ti 11GB
 ```
 
-When `ANTHROPIC_BASE_URL=http://localhost:18080` is set:
-- Claude Code sends all API requests to the bridge
-- Claude Code calls `GET /v1/models` on startup → bridge returns Ollama model list → those appear in `/model`
-- When user picks a model via `/model`, the model name is sent in the request body → bridge maps it to the correct Ollama tag
-
-When `nasim stop` is called:
-- Tunnel is destroyed → bridge is unreachable
-- `ANTHROPIC_BASE_URL` is unset → Claude Code reverts to `api.anthropic.com`
-- The custom model entry manually added via `/model` remains in Claude Code's config but is harmless (bridge URL is no longer active)
+The bridge listens on `127.0.0.1` only — it is never exposed on the LAN. The sole
+path from the client is the SSH local-forward `nasim start` opens.
 
 ---
 
-## 5. Success Criteria
+## 2. Ollama Model Inventory (audited on black, 2026-06-13)
 
-| # | Criterion | Test |
-|---|-----------|------|
-| SC-01 | Bridge on black responds to health check via SSH | TC01 |
-| SC-02 | `nasim start` opens SSH tunnel on port 18080 | TC02 |
-| SC-03 | `ANTHROPIC_BASE_URL` is set to `http://localhost:18080` | TC02 |
-| SC-04 | Bridge health check passes through the tunnel | TC03 |
-| SC-05 | Bridge returns Ollama model list through tunnel | TC04 |
-| SC-06 | A non-streaming message round-trip completes end-to-end | TC05 |
-| SC-07 | `nasim status` reports correct state while running | TC06 |
-| SC-08 | `nasim stop` kills tunnel process | TC07 |
-| SC-09 | `nasim stop` unsets `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` | TC07 |
-| SC-10 | Port 18080 is closed after stop | TC08 |
-| SC-11 | `nasim status` reports `anthropic` after stop | TC09 |
-| SC-12 | Second `nasim start` replaces old tunnel without leaving orphans | TC10 |
+`ollama list` on black, cross-checked against `GET /v1/models` and `/health`:
 
-All 12 criteria must pass for the fix to be considered complete.
+| Ollama tag          | Size   | Bridge role        | Appears in /model picker |
+| ------------------- | ------ | ------------------ | ------------------------ |
+| `qwen2.5-coder:14b` | 9.0 GB | **default** (opus/sonnet/fable map here) | yes |
+| `qwen2.5-coder:7b`  | 4.7 GB | **fast** (haiku maps here) | yes |
+| `gemma4:latest`     | 9.6 GB | extra (selectable)  | yes |
+
+Bridge env (systemd unit): `DEFAULT_MODEL=qwen2.5-coder:14b`,
+`FAST_MODEL=qwen2.5-coder:7b`, `BRIDGE_NUM_CTX=32768`.
+
+Model name mapping (`translator.map_model`):
+
+- a name containing `:` is treated as a literal Ollama tag and passed through
+  (this is how `/model qwen2.5-coder:7b` hot-swaps inside the CLI);
+- a name containing `haiku` → fast model;
+- everything else (`opus`, `sonnet`, `fable`, unknown) → default model.
+
+Consequence: even a stale `model: "opus"` in settings still routes to a real
+Ollama model, so requests never fail for lack of a perfect model name.
+
+---
+
+## 3. Root Causes Fixed
+
+### RC-01 — Selected model was never rolled back (Critical, new)
+
+Claude Code stores the active `/model` selection in `~/.claude/settings.json`
+(`"model": "opus"`). The previous `nasim.sh` managed the tunnel, env vars, and
+the picker cache but **never touched the selected model**. So picking an Ollama
+model via `/model` (e.g. `gemma4:latest`) wrote a colon-tagged name into
+`settings.json` that survived `nasim stop` — leaving a dangling, Anthropic-invalid
+model after rollback.
+
+**Fix:** `nasim start` backs up the current `model` value to
+`~/.nasim_saved_model` (once per session) and selects the bridge default;
+`nasim stop` restores the exact saved value (or removes the key if it was
+absent) and deletes the backup.
+
+### RC-02 — Injected-model tracking lost on repeated start (High, new)
+
+The old eject tracked only models added by the *most recent* start. A second
+`nasim start` found everything already present, wrote an empty tracking file, and
+`nasim stop` then ejected nothing — Ollama entries leaked into the picker after
+rollback.
+
+**Fix:** every injected entry is stamped `{"_nasim": true}`. Eject removes all
+marked entries regardless of how many times start ran. Injection is idempotent.
+
+### RC-03 — Wrong endpoint / LAN-bound bridge (Critical, prior, confirmed fixed)
+
+Documented in the prior revision: Ollama's native `:11434` does not speak the
+Anthropic Messages API, and the bridge binds localhost-only. Both are correctly
+handled by routing through `ANTHROPIC_BASE_URL=http://localhost:18080` over the
+SSH tunnel. Confirmed still correct.
+
+---
+
+## 4. Rollback Contract (what `nasim stop` guarantees)
+
+| State touched on start            | Restored on stop                          |
+| --------------------------------- | ----------------------------------------- |
+| SSH tunnel (`-L 18080:…:8080`)    | killed by PID, with `pkill` fallback      |
+| `ANTHROPIC_BASE_URL` + auth token | `unset`                                   |
+| telemetry/traffic env vars        | `unset`                                   |
+| `settings.json` `model`           | restored to pre-start value (or removed)  |
+| `~/.claude.json` picker cache     | all `_nasim`-marked entries removed        |
+| `~/.nasim_state`                  | set to `anthropic`                        |
+| `~/.nasim_saved_model`            | deleted                                   |
+
+`~/.claude.json` is edited surgically (only the marked cache entries) — session
+history and project data are never rewritten.
+
+---
+
+## 5. Verification (run on salim-hp ↔ black, 2026-06-13)
+
+### 5.1 Test suite — `bash test/test_nasim.sh`
+
+**43 assertions, 43 passed, 0 failed.** Coverage:
+
+| Area | Tests |
+| --- | --- |
+| Bridge reachable over SSH; health/ok | TC01 |
+| `start` opens tunnel, sets all env vars, writes state + backup | TC02 |
+| Health + model list + message round-trip through the tunnel | TC03–TC05 |
+| Ollama models injected (marked) into the picker cache | TC06 |
+| `start` selects the bridge default model | TC07 |
+| `status` reports running state | TC08 |
+| Simulated `/model` pick of an Ollama tag | TC09 |
+| `stop` full rollback: env unset, tunnel dead, model healed + restored, zero injected left, state files cleared | TC10 |
+| Bridge unreachable after stop | TC11 |
+| `status` reports `anthropic` after stop | TC12 |
+| Double `start` idempotent (no orphan tunnel, no duplicate/lost tracking) | TC13 |
+| Double `stop` safe | TC14 |
+| Usage on unknown verb | TC15 |
+| Baseline `/model` selection intact after the whole run | FINAL |
+
+### 5.2 Real-binary end-to-end
+
+With `nasim start` active, the real `claude` 2.1.177 binary issued a request that
+the bridge served (journal on black):
+
+```
+messages: model=qwen2.5-coder:7b -> qwen2.5-coder:7b stream=True msgs=2 tools=0
+POST /v1/messages?beta=true HTTP/1.1 200 OK
+POST http://localhost:11434/api/chat HTTP/1.1 200 OK
+```
+
+A direct non-streaming round-trip returns a clean answer in <1s:
+
+```
+{"type":"message","content":[{"type":"text","text":"Pong!"}], ...}
+```
+
+After `nasim stop`: `ANTHROPIC_BASE_URL` unset and `settings.json` model restored
+to `opus`. Rollback verified.
 
 ---
 
 ## 6. Known Limitations
 
 | Limitation | Impact | Mitigation |
-|---|---|---|
-| Env vars are shell-session-scoped | New terminal windows after `nasim start` will NOT have `ANTHROPIC_BASE_URL` set | Source `~/.bashrc` or run `nasim start` in each new terminal (or use `direnv`) |
-| SSH must succeed without passphrase | `nasim start` fails if SSH key agent is not available | Ensure `ssh-agent` is loaded with the key for `black` |
-| Tunnel runs per-shell, not as a service | If the shell exits, tunnel dies | For persistent use, run `nasim-bridge-local.service` (future work) |
+| --- | --- | --- |
+| **Small-model agentic reliability** | `qwen2.5-coder:7b` in the full Claude Code agentic loop sometimes emits spurious tool calls (e.g. invoking a Skill) instead of answering, and can loop. Plain single-turn Q&A and direct requests are fine. | Use `qwen2.5-coder:14b` (default) for agentic work; raise VRAM / swap `DEFAULT_MODEL` to a stronger model on the bridge service. The bridge already salvages malformed tool calls. This is a model-capability bound, **not** a nasim plumbing fault. |
+| Env vars are shell-session-scoped | A `claude` launched in a *different* terminal than the one that ran `nasim start` will not be redirected | Run `nasim start` then `claude` in the same shell |
+| SSH must succeed without a passphrase | `nasim start` fails fast (and tears down) if `ssh black` needs interaction | Load `ssh-agent` with the key for `black` |
+| Tunnel is per-shell, not a service | Tunnel dies when the shell exits | Acceptable; `nasim start` re-establishes it |
 
 ---
 
-## 7. Removed Approach (Custom Model Entries)
+## 7. Success Criteria
 
-The "Add custom model" feature in Claude Code's `/model` UI stores a model entry with
-a fixed base URL in Claude Code's internal settings. This approach has two problems:
+| # | Criterion | Test |
+|---|-----------|------|
+| SC-01 | Bridge on black responds to health check via SSH | TC01 |
+| SC-02 | `nasim start` opens SSH tunnel on port 18080 | TC02 |
+| SC-03 | All routing/telemetry env vars set on start | TC02 |
+| SC-04 | Bridge health passes through the tunnel | TC03 |
+| SC-05 | Bridge returns Ollama model list through the tunnel | TC04 |
+| SC-06 | Non-streaming message round-trip completes | TC05 |
+| SC-07 | Ollama models injected into `/model` picker | TC06 |
+| SC-08 | Start selects the bridge default model | TC07 |
+| SC-09 | `status` correct while running | TC08 |
+| SC-10 | `stop` heals an Ollama `/model` pick and restores the original | TC09–TC10 |
+| SC-11 | `stop` unsets env, kills tunnel, clears state | TC10 |
+| SC-12 | Port 18080 closed after stop | TC11 |
+| SC-13 | `status` reports `anthropic` after stop | TC12 |
+| SC-14 | Double start leaves no orphans and no duplicate/lost tracking | TC13 |
+| SC-15 | Double stop is safe | TC14 |
+| SC-16 | Baseline `/model` selection intact after a full cycle | FINAL |
+| SC-17 | Real `claude` binary routes to Ollama through the bridge | §5.2 |
 
-1. The URL must be correct at all times (not just when nasim is active)
-2. The entry must be manually deleted when nasim is no longer needed
-
-The `ANTHROPIC_BASE_URL` redirect approach is simpler, more reliable, and fully
-reversible with `nasim stop`.
-
-If you manually added a qwen entry via `/model`, it will remain in Claude Code's
-settings but be harmless after `nasim stop` (the URL is unreachable). You can
-remove it by opening Claude Code settings and deleting the custom model entry.
+All criteria pass.
