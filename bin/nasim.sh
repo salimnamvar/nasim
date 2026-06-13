@@ -44,8 +44,86 @@ nasim() {
     return 0
   }
 
+  local _CLAUDE_JSON="$HOME/.claude.json"
+  local _INJECTED_FILE="$HOME/.nasim_injected_models"
+
   _nasim_health() {
     curl -sf --connect-timeout 3 "${_BASE_URL}/health" 2>/dev/null
+  }
+
+  # Inject Ollama models from the bridge into Claude Code's model picker cache.
+  _nasim_inject_models() {
+    local models_json
+    models_json=$(curl -sf --connect-timeout 3 "${_BASE_URL}/v1/models" 2>/dev/null)
+    [ -z "$models_json" ] && return
+
+    python3 - "$_CLAUDE_JSON" "$_INJECTED_FILE" "$models_json" << 'PYEOF'
+import sys, json
+
+claude_json_path, injected_path, models_json_str = sys.argv[1], sys.argv[2], sys.argv[3]
+
+try:
+    with open(claude_json_path) as f:
+        data = json.load(f)
+except Exception:
+    sys.exit(0)
+
+try:
+    bridge_models = json.loads(models_json_str).get("data", [])
+except Exception:
+    sys.exit(0)
+
+cache = data.get("additionalModelOptionsCache", [])
+existing_values = {e.get("value") for e in cache}
+injected = []
+
+for m in bridge_models:
+    mid = m.get("id", "")
+    if not mid or mid in existing_values:
+        continue
+    parts = mid.split(":", 1)
+    name  = parts[0].replace("-", " ").title()
+    tag   = parts[1] if len(parts) > 1 else ""
+    label = f"{name} {tag}".strip() if tag else name
+    desc  = f"{mid} · Local Ollama (black) · nasim"
+    cache.append({"value": mid, "label": label, "description": desc})
+    injected.append(mid)
+
+data["additionalModelOptionsCache"] = cache
+
+with open(claude_json_path, "w") as f:
+    json.dump(data, f, indent=2)
+
+with open(injected_path, "w") as f:
+    json.dump(injected, f)
+PYEOF
+  }
+
+  # Remove previously injected Ollama models from Claude Code's model picker cache.
+  _nasim_eject_models() {
+    [ ! -f "$_INJECTED_FILE" ] && return
+
+    python3 - "$_CLAUDE_JSON" "$_INJECTED_FILE" << 'PYEOF'
+import sys, json
+
+claude_json_path, injected_path = sys.argv[1], sys.argv[2]
+
+try:
+    with open(claude_json_path) as f:
+        data = json.load(f)
+    with open(injected_path) as f:
+        injected = set(json.load(f))
+except Exception:
+    sys.exit(0)
+
+cache = [e for e in data.get("additionalModelOptionsCache", [])
+         if e.get("value") not in injected]
+data["additionalModelOptionsCache"] = cache
+
+with open(claude_json_path, "w") as f:
+    json.dump(data, f, indent=2)
+PYEOF
+    rm -f "$_INJECTED_FILE"
   }
 
   case "$1" in
@@ -68,6 +146,7 @@ nasim() {
         models=$(echo "$health_json" | python3 -c \
           "import sys,json; d=json.load(sys.stdin); print(', '.join(d.get('available_models',[])))" \
           2>/dev/null || echo "unknown")
+        _nasim_inject_models
         echo "nasim STARTED — Claude Code → Ollama via bridge"
         echo "  Bridge : ${_BASE_URL}"
         echo "  Models : ${models}"
@@ -80,6 +159,7 @@ nasim() {
 
     stop)
       _nasim_kill_tunnel
+      _nasim_eject_models
       unset ANTHROPIC_BASE_URL
       unset ANTHROPIC_AUTH_TOKEN
       unset CLAUDE_CODE_MAX_OUTPUT_TOKENS
