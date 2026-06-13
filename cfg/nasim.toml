@@ -1,0 +1,34 @@
+# Nasim configuration — single source of truth.
+#
+# Precedence (lowest to highest):
+#   built-in defaults -> this file -> cfg/nasim.local.toml -> environment
+#
+# To point Nasim at a different Ollama server, change [server].host below (or
+# export NASIM_REMOTE_HOST). No code change is required. See
+# .claude/rules/config.md for the full env-override map.
+
+[server]
+# The machine running Ollama + the bridge. SSH host alias or hostname.
+host        = "black"
+# Port the bridge listens on (localhost, on the server side).
+bridge_port = 8080
+
+[client]
+# Local end of the SSH -L forward; the CLI points ANTHROPIC_BASE_URL here.
+local_port          = 18080
+ssh_connect_timeout = 8
+
+[bridge]
+ollama_url      = "http://localhost:11434"
+num_ctx         = 32768
+keep_alive      = "60m"
+request_timeout = 600
+log_level       = "INFO"
+
+[models]
+# opus / sonnet / fable / unknown names map to this tag.
+default     = "qwen2.5-coder:14b"
+# haiku maps to this tag.
+fast        = "qwen2.5-coder:7b"
+# Steered on start for agentic work; start warns if a weaker model is active.
+recommended = "qwen2.5-coder:14b"
