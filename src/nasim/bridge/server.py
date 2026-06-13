@@ -14,6 +14,8 @@ Endpoints:
 
 import json
 import logging
+import time
+from pathlib import Path
 from typing import Any, AsyncIterator, Dict
 
 import httpx
@@ -53,6 +55,18 @@ async def _ollama_chunks(a_response: httpx.Response) -> AsyncIterator[Dict[str, 
     async for line in a_response.aiter_lines():
         if line.strip():
             yield json.loads(line)
+
+
+def _dump(a_label: str, a_payload: Dict[str, Any]) -> None:
+    """Write a payload to the debug-dump dir when enabled (diagnostics only)."""
+    if _CONFIG.debug_dump:
+        try:
+            out_dir = Path(_CONFIG.debug_dump)
+            out_dir.mkdir(parents=True, exist_ok=True)
+            stamp = f"{time.time():.3f}_{a_label}"
+            (out_dir / f"{stamp}.json").write_text(json.dumps(a_payload, indent=2), encoding="utf-8")
+        except OSError as exc:  # never let diagnostics break the hot path
+            logger.warning("debug dump failed: %s", exc)
 
 
 @app.get("/health")
@@ -118,8 +132,14 @@ async def messages(a_request: Request) -> Any:
     requested_model = body.get("model", _CONFIG.default_model)
     schemas = _tool_schemas(body)
     ollama_body = translator.anthropic_to_ollama(
-        body, _CONFIG.default_model, _CONFIG.fast_model, _CONFIG.num_ctx, _CONFIG.keep_alive
+        body,
+        _CONFIG.default_model,
+        _CONFIG.fast_model,
+        _CONFIG.num_ctx,
+        _CONFIG.keep_alive,
+        _CONFIG.tool_temperature,
     )
+    _dump("request", {"anthropic": body, "ollama": ollama_body})
     logger.info(
         "messages: model=%s -> %s stream=%s msgs=%d tools=%d",
         requested_model,

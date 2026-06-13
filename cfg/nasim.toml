@@ -24,6 +24,9 @@ num_ctx         = 32768
 keep_alive      = "60m"
 request_timeout = 600
 log_level       = "INFO"
+# Temperature pinned for tool-bearing requests when the client sets none. Small
+# coder models emit far cleaner tool calls at 0; raise only if you need variety.
+tool_temperature = 0.0
 
 [models]
 # opus / sonnet / fable / unknown names map to this tag.

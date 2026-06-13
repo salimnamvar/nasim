@@ -28,11 +28,13 @@ _SCHEMA: Tuple[Tuple[str, str, str, str, Callable[[str], Any]], ...] = (
     ("ollama_url", "bridge", "ollama_url", "OLLAMA_URL", str),
     ("num_ctx", "bridge", "num_ctx", "BRIDGE_NUM_CTX", int),
     ("keep_alive", "bridge", "keep_alive", "BRIDGE_KEEP_ALIVE", str),
+    ("tool_temperature", "bridge", "tool_temperature", "BRIDGE_TOOL_TEMPERATURE", float),
     ("request_timeout", "bridge", "request_timeout", "BRIDGE_TIMEOUT", float),
     ("log_level", "bridge", "log_level", "BRIDGE_LOG_LEVEL", str),
     ("default_model", "models", "default", "DEFAULT_MODEL", str),
     ("fast_model", "models", "fast", "FAST_MODEL", str),
     ("recommended_model", "models", "recommended", "NASIM_RECOMMENDED_MODEL", str),
+    ("debug_dump", "bridge", "debug_dump", "BRIDGE_DEBUG_DUMP", str),
 )
 
 _DEFAULTS: Dict[str, Any] = {
@@ -43,11 +45,13 @@ _DEFAULTS: Dict[str, Any] = {
     "ollama_url": "http://localhost:11434",
     "num_ctx": 32768,
     "keep_alive": "60m",
+    "tool_temperature": 0.0,
     "request_timeout": 600.0,
     "log_level": "INFO",
     "default_model": "qwen2.5-coder:14b",
     "fast_model": "qwen2.5-coder:7b",
     "recommended_model": "qwen2.5-coder:14b",
+    "debug_dump": "",
 }
 
 
@@ -90,11 +94,16 @@ class Config:
         ollama_url (str): Ollama base URL as seen on the server.
         num_ctx (int): Ollama context window passed on every request.
         keep_alive (str): Ollama ``keep_alive`` duration.
+        tool_temperature (float): Temperature pinned for tool-bearing requests
+            when the client sets none — low values sharpen tool-call format
+            adherence on small coder models.
         request_timeout (float): Upstream request timeout in seconds.
         log_level (str): Bridge log level.
         default_model (str): Ollama tag for opus/sonnet/fable/unknown.
         fast_model (str): Ollama tag for haiku.
         recommended_model (str): Model steered on start for agentic work.
+        debug_dump (str): If non-empty, a directory the bridge dumps each
+            translated Ollama request/response to (diagnostics; off by default).
     """
 
     remote_host: str
@@ -104,11 +113,13 @@ class Config:
     ollama_url: str
     num_ctx: int
     keep_alive: str
+    tool_temperature: float
     request_timeout: float
     log_level: str
     default_model: str
     fast_model: str
     recommended_model: str
+    debug_dump: str
 
     @property
     def base_url(self) -> str:

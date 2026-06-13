@@ -21,6 +21,7 @@ def anthropic_to_ollama(
     a_fast_model: str,
     a_num_ctx: int,
     a_keep_alive: str,
+    a_tool_temperature: float = 0.0,
 ) -> Dict[str, Any]:
     """Translate an Anthropic Messages request body to an Ollama chat body.
 
@@ -30,6 +31,9 @@ def anthropic_to_ollama(
         a_fast_model (str): Ollama tag for haiku names.
         a_num_ctx (int): Ollama context window to request.
         a_keep_alive (str): Ollama ``keep_alive`` duration.
+        a_tool_temperature (float, optional): Temperature applied when the
+            request offers tools and the client set none — low values keep small
+            coder models on the tool-call format. Defaults to 0.0.
 
     Returns:
         Dict[str, Any]: Ollama ``/api/chat`` request body.
@@ -127,5 +131,9 @@ def anthropic_to_ollama(
             }
             for t in tools
         ]
+        # Small coder models emit far cleaner tool calls at low temperature; pin
+        # it for tool-bearing requests unless the client explicitly chose one.
+        if "temperature" not in options:
+            options["temperature"] = a_tool_temperature
 
     return result

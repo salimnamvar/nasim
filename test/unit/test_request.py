@@ -146,3 +146,31 @@ def test_stream_flag_and_model_mapping():
     out = _translate({"model": "haiku", "stream": True, "messages": [{"role": "user", "content": "x"}]})
     assert out["stream"] is True
     assert out["model"] == _FAST
+
+
+def test_tool_temperature_pinned_when_tools_offered_and_unset():
+    """Tool requests with no client temperature get the low tool temperature."""
+    body = {
+        "messages": [{"role": "user", "content": "go"}],
+        "tools": [{"name": "Write", "input_schema": {"type": "object"}}],
+    }
+    out = anthropic_to_ollama(body, _DEF, _FAST, 32768, "60m", 0.0)
+    assert out["options"]["temperature"] == 0.0
+
+
+def test_client_temperature_respected_over_tool_default():
+    """An explicit client temperature is never overridden by the tool default."""
+    body = {
+        "messages": [{"role": "user", "content": "go"}],
+        "temperature": 0.7,
+        "tools": [{"name": "Write", "input_schema": {"type": "object"}}],
+    }
+    out = anthropic_to_ollama(body, _DEF, _FAST, 32768, "60m", 0.0)
+    assert out["options"]["temperature"] == 0.7
+
+
+def test_no_tool_temperature_without_tools():
+    """A request with no tools is left at the model default (no temperature added)."""
+    body = {"messages": [{"role": "user", "content": "go"}]}
+    out = anthropic_to_ollama(body, _DEF, _FAST, 32768, "60m", 0.0)
+    assert "temperature" not in out["options"]
