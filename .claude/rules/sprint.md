@@ -76,3 +76,17 @@ Counts: 96 unit · 5 integration · 3 capability · 7 rollback · 8 surface · 5
 - Hardware ceiling: 11 GB GPU cannot run 14b + a 20k+ context fully on GPU. If
   agentic quality on `7b` proves marginal for real work, the lever is better
   hardware or a fully-GPU-resident mid model — not a bridge change.
+
+## Model compatibility findings (2026-06-15)
+
+`docs/ollama-models.md` added: full Ollama library survey + per-model GPU fit table.
+
+New model tested: `llama3.1:8b` (4.9 GB, installed on black).
+- Bridge protocol test: ✅ — `stop_reason: tool_use`, correct `Write` args on direct API call.
+- e2e with Claude Code: ❌ — under the full Claude Code system prompt the model emits
+  bash-style `/tool cat …` pseudo-calls in text instead of JSON tool_use. E01–E05 fail.
+  `tool_salvage` cannot recover this format. Not suitable for agentic use.
+
+Documentation test run with `qwen2.5-coder:7b` (proven): claude read `request.py` and
+wrote `translator-docs.md` with correct module overview, function signature, and
+translation rules — the full read→synthesize→write pipeline confirmed working.
