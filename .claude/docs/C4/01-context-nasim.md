@@ -37,4 +37,4 @@ C4Context
 - Responsibility split: nasim = glue + selection + verification. Agents = the frontier loop. Ollama = inference only.
 - Scale: single user, low QPS, long sessions.
 
-See UC for primary flows. SM for states if expanded. Implementation in `.grok/bin/nasim` + `.claude/bin/nasim`.
+See UC for primary flows. SM for states if expanded. Implementation in `bin/nasim`.

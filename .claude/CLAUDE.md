@@ -5,7 +5,7 @@ Nasim is the living, search-first knowledge base + minimal tooling for getting m
 This .claude/ tree is the Claude view; it is kept in exact mtime-driven peer parity with the sibling .grok/ tree in this project by `knowledge-sync.sh project-register` + `project-sync` (daemon watches). Sprint.md lives only here per global rules.
 
 ## Identity & Scope
-- Primary: both `.grok/` and `.claude/` (this tree) at project root are sources of truth. Recipes, research, bin/nasim, rules are shared surfaces.
+- Primary: both `.grok/` and `.claude/` (this tree) at project root are sources of truth for knowledge. The project code (`bin/nasim`, tests, etc.) lives at the visible project root, outside the dot-knowledge dirs.
 - New in this sprint (2026-06-16): full `nasim select` interactive + non-interactive support for **all** solutions (SSH tunnel, Tailscale, LiteLLM proxy) + all terminal frontends (claude native, aider, opencode, raw configured terminal). Every combo covered by CI matrix + live tests against black.
 - Goal: On laptop, run the best available agentic coding experiences powered by strong models on remote "black" (Ollama + GPU). Use current ecosystem. Thin glue only (the selector/launcher + tests + CI). Never reinvent.
 - Always search current solutions first. Update research on material ecosystem shifts.
@@ -82,3 +82,4 @@ Nasim is the living, search-first knowledge base + minimal tooling for getting m
 See also global `~/.grok/AGENTS.md` and project `.claude/` (if parity maintained via sync).
 
 This file + `.grok/` = the project brain. Keep high-signal.
+Last project .grok<->.claude sync: 2026-06-16T19:55:28+04:00

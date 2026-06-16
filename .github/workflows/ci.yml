@@ -16,15 +16,15 @@ jobs:
         run: |
           sudo apt-get update -qq || true
           sudo apt-get install -y -qq shellcheck 2>/dev/null || echo "shellcheck install failed or skipped"
-      - name: Syntax + shellcheck on nasim bins
+      - name: Syntax + shellcheck on nasim
         run: |
-          bash -n .grok/bin/nasim .claude/bin/nasim
+          bash -n bin/nasim
           if command -v shellcheck >/dev/null; then
-            shellcheck .grok/bin/nasim .claude/bin/nasim || true
+            shellcheck bin/nasim || true
           fi
       - name: Run harness lint target
         run: |
-          NASIM=.grok/bin/nasim ./tests/nasim-features.sh --lint
+          NASIM=bin/nasim ./tests/nasim-features.sh --lint
 
   test-features:
     runs-on: ubuntu-latest
@@ -70,13 +70,7 @@ jobs:
           NASIM_RUN_LIVE_PROBE: "0"   # GHA has no real black SSH; local runs set to 1
           NASIM_DEFAULT_MODEL: "${{ matrix.model }}"
         run: |
-          NASIM=.grok/bin/nasim ./tests/nasim-features.sh --test "${{ matrix.access }}" "${{ matrix.agent }}"
-      - name: Also exercise .claude/bin mirror
-        env:
-          NASIM_RUN_LIVE_PROBE: "0"
-          NASIM_DEFAULT_MODEL: "${{ matrix.model }}"
-        run: |
-          NASIM=.claude/bin/nasim ./tests/nasim-features.sh --test "${{ matrix.access }}" "${{ matrix.agent }}" || true
+          NASIM=bin/nasim ./tests/nasim-features.sh --test "${{ matrix.access }}" "${{ matrix.agent }}"
 
   # Future: when we have bats or more, add job. For now the harness + matrix above is the "per feature CI".
   # On salim-hp or black: locally run with live probe + real SSH to black to "test them all work".
