@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Thin Nasim convenience wrapper.
+# Sources the real power from existing tools + .grok/recipes.
+# Keep this minimal. Logic lives in the documented native commands.
+
+set -euo pipefail
+
+cmd="${1:-help}"
+shift || true
+
+case "$cmd" in
+  claude|code)
+    # Convenience: set common remote envs then exec claude (assumes tunnel/Tailscale is up)
+    # Override ports/models via env before calling: NASIM_REMOTE_URL, NASIM_MODEL
+    url="${NASIM_REMOTE_URL:-http://127.0.0.1:11435}"
+    model="${NASIM_MODEL:-qwen3-coder:14b}"
+    echo "Nasim: routing claude to ${url} model=${model}" >&2
+    ANTHROPIC_AUTH_TOKEN=ollama \
+    ANTHROPIC_BASE_URL="${url}" \
+    ANTHROPIC_API_KEY="" \
+    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 \
+    exec claude --model "${model}" "$@"
+    ;;
+
+  aider)
+    url="${NASIM_REMOTE_URL:-http://127.0.0.1:11435}"
+    model="${NASIM_MODEL:-ollama/qwen3-coder:14b}"
+    echo "Nasim: aider -> ${url} ${model}" >&2
+    export OLLAMA_API_BASE="${url}"
+    exec aider --model "${model}" "$@"
+    ;;
+
+  status)
+    echo "Nasim status (2026-06-16)"
+    echo "See: .grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md"
+    echo "Recipes: .grok/recipes/"
+    echo
+    echo "Quick checks (run on laptop with tunnel active):"
+    echo "  curl -s \$ANTHROPIC_BASE_URL/api/tags | head"
+    echo "  On black: ollama ps ; curl http://localhost:11434/api/ps"
+    ;;
+
+  help|*)
+    cat <<'EOF'
+nasim — thin wrapper + pointers for local/remote LLM agent setups
+
+Commands:
+  nasim claude [args]     Run real claude binary against remote Ollama (NASIM_REMOTE_URL / NASIM_MODEL override)
+  nasim aider  [args]     Run aider against remote (sets OLLAMA_API_BASE)
+  nasim status            Quick pointers + verification commands
+
+Core knowledge (always search-updated):
+  .grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md
+  .grok/recipes/          (remote-claude-code.md, tunnel-setup.md, models.md, aider-continue-opencode.md, ...)
+
+Philosophy: use existing (ollama native compat, Tailscale, Aider, Continue, OpenCode, LiteLLM). Add only tiny glue here.
+EOF
+    ;;
+esac

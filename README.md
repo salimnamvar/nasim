@@ -1,120 +1,80 @@
-Nasim routes the real Claude Code CLI to local Ollama models on a remote server
-instead of the Anthropic cloud, with a guaranteed one-command rollback.
+# Nasim
 
-It does **not** fork or patch the `claude` binary. It drives the real CLI through
-environment variables and surgical, fully-reverted edits to its config, fronted
-by a translating proxy (the *bridge*) that speaks the Anthropic Messages API on
-one side and Ollama's chat API on the other.
+**Nasim** is your practical, search-first setup for running frontier AI coding agents (Claude Code, OpenCode, Aider, Continue, Grok CLI-style, etc.) on your laptop while using powerful local models served by Ollama on a remote machine ("black").
 
-## What it does
+## Philosophy
+- **Search current solutions first.** We document what actually exists and works in 2026 (native Anthropic compat in Ollama, Tailscale for remote, LiteLLM when you need routing, mature open agents like Aider/Continue/OpenCode). We only add thin, high-value glue.
+- **.grok/ is the source of truth.** Living research, recipes, rules, and model guidance live here. Update it by re-searching before changes.
+- Real agentic coding (read/write/edit files, bash, multi-step, sub-agents) executes on the laptop where you run the agent. The remote model (on black) only decides *what* to do via tool calls.
+- Maximize local benefit: strong GPU-resident models on black + secure always-on access + the best agent frontends.
 
-- `nasim start` — opens an SSH tunnel to the bridge, points Claude Code at it
-  (`ANTHROPIC_BASE_URL`), injects the available Ollama models into the `/model`
-  picker, and selects the recommended model.
-- `nasim stop` — kills the tunnel, unsets the redirect, removes every injected
-  model from the picker, and restores the exact `/model` selection from before
-  start. Full, tested rollback to Claude Code defaults.
-- `nasim status` — backend, tunnel liveness, bridge health, active model.
-- `nasim models` — the Ollama models the bridge exposes, tagged default/fast.
+## Quick Start — Claude Code on Laptop + Ollama on black (Native Path)
+Ollama (v0.14+) speaks the Anthropic Messages API directly. The official Claude Code CLI just works.
 
-It does **not** modify the `claude` binary; every change is reverted on stop.
+1. On **black** (the server):
+   - Ollama installed and running (`ollama serve` or systemd).
+   - Pull a strong coding model that fits the GPU fully, e.g.:
+     ```bash
+     ollama pull qwen3-coder:14b   # or qwen3-coder, gemma4:xx, deepseek-coder-v2:16b, etc.
+     ```
+   - Verify it stays on GPU: `ollama ps` (or the API `/api/ps`).
 
-## Architecture
+2. Secure access from laptop to black:11434 (choose one):
+   - **Preferred (set-and-forget):** Tailscale on both machines. Access via MagicDNS (e.g. `http://black:11434`).
+   - **Simple persistent:** `autossh` or systemd user service doing `ssh -N -L 11435:localhost:11434 black`.
 
-```
-client                                  server (configurable)
-claude → localhost:18080 ──SSH -L──► 127.0.0.1:8080 (nasim-bridge) → Ollama
-```
+3. On **laptop** (in the shell where you will run the agent):
+   ```bash
+   # Point Claude Code at the forwarded/remote Ollama
+   export ANTHROPIC_AUTH_TOKEN=ollama
+   export ANTHROPIC_BASE_URL=http://127.0.0.1:11435   # or http://black:11434 via Tailscale
+   export ANTHROPIC_API_KEY=""
 
-The bridge binds to `127.0.0.1` on the server, so the SSH tunnel is the only
-access path. Point Nasim at any host by editing `cfg/nasim.toml` `[server].host`
-(or `NASIM_REMOTE_HOST`) — no code change. See [docs/architecture.md](docs/architecture.md).
+   # Run the real Claude Code binary against a model on black
+   claude --model qwen3-coder:14b
+   ```
+   Or if available on your setup:
+   ```bash
+   ollama launch claude --model qwen3-coder:14b
+   ```
 
-## Requirements
+Full details, persistent tunnel recipes, Tailscale setup, model selection, GPU-fit checks, and fallbacks: see `.grok/recipes/` and the research log.
 
-- Passphrase-less SSH to the server (`ssh <host>` works non-interactively).
-- The `nasim-bridge` service running on the server (`make deploy`).
-- `python3` (3.11+) and `ssh` on the client. The client toggle uses only the
-  standard library.
+## Other High-Value Agents (All Work With Remote Ollama)
+- **OpenCode (opencode)**: Excellent open-source Claude Code alternative. Native multi-provider + Ollama support.
+- **Aider**: `aider --model ollama/qwen3-coder:14b` (or configure remote base URL). Mature git-centric workflow.
+- **Continue.dev**: VS Code / JetBrains. Set `baseUrl` to your tunneled/remote Ollama in `config.json`.
+- **Cline / Roo Code / Kilo Code**: Agentic VS Code experiences with full local model support.
+- **grok-cli variants**: For xAI Grok API primarily; some accept Ollama as provider for local equivalent feel.
 
-## Install
+See `.grok/recipes/` for exact remote configs.
 
-```bash
-./install.sh        # sources bin/nasim.sh from your shell profile
-source ~/.bashrc    # or open a new shell
-```
+## Current Research Snapshot (as of 2026-06-16)
+See `.grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md` for:
+- Why the old custom bridge is obsolete (Ollama native compat).
+- Remote access patterns (Tailscale > SSH tunnel > LiteLLM).
+- "Grok Code" options (grok-code-fast-1 in supported IDE agents + grok-cli; local equivalents via strong open models in flexible agents).
+- Model recommendations (Qwen3-Coder series, GLM-5.1, DeepSeek V4, Gemma 4 — size to GPU, verify no CPU spill for agent loops).
+- Anti-patterns and security.
 
-`nasim` is a shell function, so it must be sourced — that is how `nasim start`
-exports the redirect into the shell you launch `claude` from. Run `nasim start`
-and `claude` in the **same** terminal.
+## Project Structure
+- `.grok/` — everything important (AGENTS.md, research logs, recipes, rules).
+- `README.md` — this file (points at .grok).
+- Thin optional `bin/` or scripts only for real convenience (documented in recipes).
 
-## Usage
+## Getting the Most Benefit
+- Reproduce real work: multi-file edits, bash execution, planning → write loops.
+- Keep models GPU-resident on black.
+- Use large context (64k+ where possible).
+- Hybrid: fast local model for exploration + heavy remote for synthesis.
+- Re-search the ecosystem before adding features or claiming superiority.
 
-```bash
-nasim start         # route Claude Code to Ollama; lists available models
-claude              # now backed by Ollama; /model lists the Ollama tags
-nasim status
-nasim stop          # back to the Anthropic cloud; picker + model restored
-```
+## Contributing / Updating Knowledge
+- Always start with fresh searches for "claude code ollama", "opencode ollama remote", "best ollama agentic coding models", Tailscale/WireGuard remote LLM patterns, etc.
+- Edit under `.grok/`.
+- Conventional commit.
+- Keep this practical and current.
 
-## Direct native Ollama access (recommended for daily reliable use)
+Start here: `.grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md` and `.grok/recipes/`.
 
-The bridge translation can have fidelity gaps with agentic tool use and local models. For robust access to Ollama on black from your laptop:
-
-```bash
-nasim direct-start     # opens SSH tunnel to native :11434 on black; exports OLLAMA_HOST + ANTHROPIC_BASE_URL
-# (same shell)
-aider --model ollama_chat/llama3.1:8b   # or qwen2.5-coder:14b etc (install: pipx install aider-install)
-# or
-claude                  # real claude binary, if it respects ANTHROPIC_BASE_URL (Ollama provides native compat since v0.14)
-# or any other tool: OLLAMA_HOST is set for the shell
-nasim direct-status
-nasim direct-stop
-```
-
-See also "Direct access" notes in docs/runbook.md and the cfg [direct] section. This path reuses the proven tunnel code but talks native Ollama — no custom translation.
-
-## Deploy the bridge to the server
-
-```bash
-make deploy         # rsync src/ + cfg/ to the server, restart the service
-```
-
-## Develop and test
-
-```bash
-make lint           # ruff + black --check + import smoke
-make test           # unit tests — fast, no network
-make integration    # live bridge endpoint tests (needs SSH + service)
-make capability     # Anthropic-API capability matrix (live)
-make loop           # full CI/CD loop: lint→unit→deploy→integration→capability→rollback
-make loop E2E=1     # also drive the real claude binary against Ollama (slow)
-```
-
-The test suite is exhaustive and mapped to a capability matrix — every green cell
-is backed by a runnable assertion. See [docs/capability-matrix.md](docs/capability-matrix.md).
-
-## Uninstall
-
-```bash
-./uninstall.sh
-```
-
-## Known limitation (model-bound, not a routing fault)
-
-The bridge faithfully relays tools and tool calls; whether a *local* model drives
-a multi-tool agentic task well depends on the model and the GPU. Small models
-degrade under a large system prompt + many tools, and a model too big for the GPU
-spills to CPU and slows sharply. Use a capable coder model that fits the GPU, and
-keep the injected context lean. Full analysis, measurements, and tuning live in
-[docs/model-guidance.md](docs/model-guidance.md).
-
-## Documentation
-
-| Doc | Contents |
-| --- | --- |
-| [docs/architecture.md](docs/architecture.md) | Topology, module decomposition, boundary rules |
-| [docs/methodology.md](docs/methodology.md) | The plan→…→monitor CI/CD loop |
-| [docs/capability-matrix.md](docs/capability-matrix.md) | Every tested capability and its status |
-| [docs/runbook.md](docs/runbook.md) | Deploy, operate, relocate the server, troubleshoot |
-| [docs/model-guidance.md](docs/model-guidance.md) | Model/hardware ceiling, the tool-call diagnosis, tuning |
+Zero cost. Maximum privacy. Frontier agent experience on your hardware + remote GPU.
