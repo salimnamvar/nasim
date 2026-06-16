@@ -3,26 +3,33 @@
 # Precedence: CLI args / explicit env > config file > built-in defaults
 # Simple zero-dep format: KEY=val lines (sourced safely after validation).
 # Supports comments (#) and blank lines.
+#
+# nasim_config_load():
+#   Called at source time. Establishes BLACK_HOST, DEFAULT_MODEL (now strong), ports, orders.
+#   The guard in _defaults uses explicit "is unset or empty" checks so that `export VAR=foo; nasim_config_load`
+#   (as done in tests) reliably wins over compiled defaults.
 
 NASIM_CONFIG_DIR="${NASIM_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/nasim}"
 NASIM_CONFIG_FILE="${NASIM_CONFIG_FILE:-$NASIM_CONFIG_DIR/nasim.conf}"
 
 _nasim_config_defaults() {
-    BLACK_HOST="${BLACK_HOST:-black}"
-    # Use a model proven to exist on black (from live /api/tags). qwen3-coder:14b does not; this was a major cause of "models not working".
-    DEFAULT_MODEL="${DEFAULT_MODEL:-qwen2.5-coder:14b}"
-    DEFAULT_LOCAL_PORT="${DEFAULT_LOCAL_PORT:-11435}"
-    LITELLM_PORT="${LITELLM_PORT:-4000}"
+    # Only default when truly unset (respect explicit env and prior exports reliably).
+    if [[ -z "${BLACK_HOST+x}" || -z "$BLACK_HOST" ]]; then BLACK_HOST="black"; fi
+    if [[ -z "${DEFAULT_MODEL+x}" || -z "$DEFAULT_MODEL" ]]; then
+        # Strong reasoner + coding model that exists on black and works well for agentic use over native compat.
+        # (Avoid qwen2.5* for claude-code style loops; see tip in launchers and research.)
+        DEFAULT_MODEL="deepseek-r1:14b"
+    fi
+    if [[ -z "${DEFAULT_LOCAL_PORT+x}" || -z "$DEFAULT_LOCAL_PORT" ]]; then DEFAULT_LOCAL_PORT=11435; fi
+    if [[ -z "${LITELLM_PORT+x}" || -z "$LITELLM_PORT" ]]; then LITELLM_PORT=4000; fi
 
-    # Order presented in interactive select (space separated)
-    ACCESS_ORDER="${ACCESS_ORDER:-ssh-tunnel tailscale litellm}"
-    AGENT_ORDER="${AGENT_ORDER:-claude aider opencode terminal}"
+    if [[ -z "${ACCESS_ORDER+x}" || -z "$ACCESS_ORDER" ]]; then ACCESS_ORDER="ssh-tunnel tailscale litellm"; fi
+    if [[ -z "${AGENT_ORDER+x}" || -z "$AGENT_ORDER" ]]; then AGENT_ORDER="claude aider opencode terminal"; fi
 
-    # Future scalable knobs
-    PROBE_TIMEOUT="${PROBE_TIMEOUT:-6}"
-    PROBE_CONNECT_TIMEOUT="${PROBE_CONNECT_TIMEOUT:-3}"
-    SSH_CONNECT_TIMEOUT="${SSH_CONNECT_TIMEOUT:-8}"
-    SSH_SERVER_ALIVE_INTERVAL="${SSH_SERVER_ALIVE_INTERVAL:-20}"
+    if [[ -z "${PROBE_TIMEOUT+x}" || -z "$PROBE_TIMEOUT" ]]; then PROBE_TIMEOUT=6; fi
+    if [[ -z "${PROBE_CONNECT_TIMEOUT+x}" || -z "$PROBE_CONNECT_TIMEOUT" ]]; then PROBE_CONNECT_TIMEOUT=3; fi
+    if [[ -z "${SSH_CONNECT_TIMEOUT+x}" || -z "$SSH_CONNECT_TIMEOUT" ]]; then SSH_CONNECT_TIMEOUT=8; fi
+    if [[ -z "${SSH_SERVER_ALIVE_INTERVAL+x}" || -z "$SSH_SERVER_ALIVE_INTERVAL" ]]; then SSH_SERVER_ALIVE_INTERVAL=20; fi
 }
 
 _nasim_config_load_file() {
@@ -58,7 +65,8 @@ _nasim_config_load_file() {
 nasim_config_load() {
     _nasim_config_defaults
     _nasim_config_load_file "$NASIM_CONFIG_FILE"
-    # Re-apply defaults for anything that was not set by file (in case file was partial)
+    # Re-apply defaults for anything that was not set by file (in case file was partial).
+    # With the if-unset guards this no longer stomps a live env export.
     _nasim_config_defaults
 }
 
@@ -88,8 +96,9 @@ nasim_config_edit() {
 # Precedence: environment variables and CLI flags override this file.
 
 BLACK_HOST=black
-# DEFAULT_MODEL must be an *exact* tag from `nasim models` on your black (qwen3-coder:14b does not exist on most installs; was a root cause of "nothing works").
-DEFAULT_MODEL=qwen2.5-coder:14b
+# Strong default (exists + good for agentic claude/opencode over native Ollama Anthropic/OpenAI compat).
+# Run `nasim models` to see all; prefer deepseek-r1:*, qwen3*, gemma4* large GPU-resident ones.
+DEFAULT_MODEL=deepseek-r1:14b
 # DEFAULT_LOCAL_PORT=11435
 # LITELLM_PORT=4000
 

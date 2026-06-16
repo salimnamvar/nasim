@@ -34,8 +34,8 @@ log() { echo -e "${YELLOW}[real-reason]${NC} $*"; }
 pass() { echo -e "${GREEN}[PASS]${NC} $*"; }
 fail() { echo -e "${RED}[FAIL]${NC} $*"; exit 1; }
 
-MODEL="${MODEL:-deepseek-r1:14b}"   # strong reasoner present on black (also try qwen2.5-coder:14b)
-ALT_MODEL="qwen2.5-coder:14b"
+MODEL="${MODEL:-deepseek-r1:14b}"   # strong reasoner present on black (also try qwen3:8b or gemma4:31b)
+ALT_MODEL="qwen3:8b"
 
 echo "=== test-inference-reasoning: LIVE black models do the thinking for nasim ==="
 log "Using primary model for reasoning: $MODEL (fallback capable: $ALT_MODEL)"

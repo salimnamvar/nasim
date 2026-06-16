@@ -17,7 +17,7 @@ NASIM_BIN="$PROJECT_ROOT/bin/nasim"
 NASIM="${NASIM:-$NASIM_BIN}"
 
 BLACK_HOST="${NASIM_BLACK_HOST:-black}"
-DEFAULT_MODEL="${NASIM_DEFAULT_MODEL:-qwen3-coder:14b}"
+DEFAULT_MODEL="${NASIM_DEFAULT_MODEL:-deepseek-r1:14b}"
 
 # Colors for output (optional)
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'

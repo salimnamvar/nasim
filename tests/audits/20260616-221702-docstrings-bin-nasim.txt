@@ -1,0 +1,55 @@
+To fulfill the request of updating `bin/nasim` with Google-style docstring comments without altering the code, we've added comprehensive comment blocks before each function. Here's how the updated script looks:
+
+```bash
+#!/usr/bin/env bash
+# nasim — thin loader + entrypoint (Controller-like dispatch only)
+#
+# Real implementation lives in lib/nasim/ for modularity, SoC, DRY and scalability (AD-08).
+# All hard-coded values moved to config (AD-09).
+# Primary validation: real black + agentic self-audit loops (AD-10).
+#
+# This file must remain small and only do:
+#   - early config
+#   - sourcing of concerns
+#   - call into nasim_main
+
+set -euo pipefail
+
+NASIM_VERSION="2026-06-16-v2-litellm-claude-fix+strong-default+docstrings"  # litellm probe/model-name + claude /v1 base + strong DEFAULT_MODEL (deepseek-r1:14b) + early weak-model warnings + Google docstrings via model assistance; full harness re-validated.
+
+# Allow the harness to source us for function access without executing CLI
+if [[ "${NASIM_INTERNAL:-}" == "1" && "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    :   # just define functions when sourced
+fi
+
+# Resolve lib dir relative to this script (works when sourced or exec'd)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NASIM_LIB_DIR="$SCRIPT_DIR/../lib/nasim"
+
+# --- Minimal shared utilities (available to all modules) ---
+
+# Args: A message string to output
+# Returns: Nothing
+# Side effects: Prints the message to stderr and exits with code 1
+die() { echo "nasim: $*" >&2; exit 1; }
+
+# Args: A message string to log
+# Returns: Nothing
+# Side effects: Prints the message to stderr
+log() { echo "nasim: $*" >&2; }
+
+# Args: Command name as a string
+# Returns: True (0) if command exists, false (1) otherwise
+# Side effects: Checks for the presence of the command in the system
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# Args: An optional string parameter to check against *dry*
+# Returns: True (0) if dry-run mode is active, false (1) otherwise
+# Side effects: Evaluates environment variables and input for dry-run conditions
+is_dry() { [[ "${NASIM_TEST_MODE:-}${1:-}" == *dry* || "${NASIM_DRY_RUN:-}" == "1" ]]; }
+
+# Hand off to the real command handler
+nasim_main "$@"
+```
+
+Each function now has a detailed docstring explaining its purpose, arguments, return values, and side effects.

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # lib/nasim/agents/terminal.sh — drop into branded shell so user can run any agent manually
+#
+# launch_terminal(url, model):
+#   Exports the full set of vars (ANTHROPIC_*, OLLAMA_*, NASIM_*) + branded PS1, then execs interactive $SHELL.
+#   This is the escape hatch / "manual any agent or raw curl" mode. Also the path used by --self-audit for interactive work.
 
 launch_terminal() {
     local url="$1" model="$2"
@@ -10,7 +14,7 @@ launch_terminal() {
         return 0
     fi
     export ANTHROPIC_AUTH_TOKEN=ollama
-    export ANTHROPIC_BASE_URL="$url"
+    export ANTHROPIC_BASE_URL="${url%/}/v1"
     export ANTHROPIC_API_KEY=""
     export OLLAMA_API_BASE="$url"
     export NASIM_REMOTE_URL="$url"

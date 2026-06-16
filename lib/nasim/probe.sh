@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 # lib/nasim/probe.sh — reachability and doctor (pure adapter concern)
+#
+# probe_url / probe_and_show / list_models_on_black / nasim_doctor / nasim_models / model_exists_on_black:
+#   The "models are shown + verify before launch" layer (P02 invariant).
+#   list_models_on_black + nasim_models use direct ssh to black (no tunnel) so discovery always works.
+#   probe_and_show used to swallow output with 2>/dev/null on the python print — fixed.
+#   doctor and pre-launch in orchestration always call the ssh list.
 
 probe_url() {
     local url="$1"
@@ -35,6 +41,11 @@ except Exception: print("  (could not parse model list)", file=sys.stderr)
     fi
 }
 
+# list_models_on_black():
+#   SSH to BLACK_HOST, run curl localhost:11434/api/tags, pretty print with sizes/quants.
+#   This is the single source of truth for "what tags actually exist" and is used by doctor, pre-launch warn, and nasim models (no --url).
+#   Never depends on a local tunnel.
+
 # List models directly from black via SSH (no tunnel required). Always works for discovery.
 list_models_on_black() {
     if ! have ssh; then
@@ -58,7 +69,10 @@ except Exception as e:
     ' 2>/dev/null || echo "    (ssh to black for /api/tags failed)"
 }
 
-# Enhanced doctor (uses config, always shows black side via ssh + effective url probe)
+# nasim_doctor([--url U]):
+#   Prints effective url, black host, probe result + models at that url (if ollama style),
+#   then always the full authoritative ssh black inventory + black `ollama ps`.
+#   The key "models not shown" fix surface.
 nasim_doctor() {
     local url="${NASIM_REMOTE_URL:-http://127.0.0.1:${DEFAULT_LOCAL_PORT}}"
     if [[ $# -gt 0 && "$1" == "--url" ]]; then url="$2"; fi
@@ -88,7 +102,9 @@ nasim_doctor() {
     fi
 }
 
-# First-class model listing (usable in select flows, CI, user discovery). No tunnel needed.
+# nasim_models([--url U]):
+#   First-class command (nasim models). When --url given uses that (for a forwarded endpoint);
+#   otherwise delegates to list_models_on_black (ssh, always works).
 nasim_models() {
     local url=""
     if [[ $# -gt 0 && "$1" == "--url" ]]; then
@@ -107,7 +123,10 @@ except: print("  (error)")
     fi
 }
 
-# Best-effort: is this exact tag present in black's inventory? (used to warn on bad defaults/selects)
+# model_exists_on_black(want):
+#   Fast ssh query to black for exact tag presence in /api/tags names.
+#   Used in choose_and_launch to emit pre-launch WARNING so user sees "that tag is not there".
+#   Returns 0 if present.
 model_exists_on_black() {
     local want="$1"
     # Fast path: ask black directly over ssh (no tunnel)

@@ -9,10 +9,18 @@
 #   - early config
 #   - sourcing of concerns
 #   - call into nasim_main
+#
+# nasim():
+#   Main entry. Resolves lib, sources modules in dependency order, hands off to nasim_main.
+#   Supports being sourced (NASIM_INTERNAL=1) for test harness access to internals without exec.
+#
+#   Globals set:
+#     NASIM_VERSION, SCRIPT_DIR, NASIM_LIB_DIR, plus everything from sourced config + modules.
+#   Side effects: may exec agent or die on error.
 
 set -euo pipefail
 
-NASIM_VERSION="2026-06-16-v2-fix-models-select-clis+real-tests"   # serious model visibility + cli breakage fixed; comprehensive real (non-mock) per-option per-model tests + model-powered self-audit added; never-done loop via tests/
+NASIM_VERSION="2026-06-16-v2-litellm-claude-fix+strong-default+docstrings"   # litellm probe/model-name + claude /v1 base + strong DEFAULT_MODEL (deepseek-r1:14b) + early weak-model warnings + Google docstrings via model assistance; full harness re-validated.
 
 # Allow the harness to source us for function access without executing CLI
 if [[ "${NASIM_INTERNAL:-}" == "1" && "${BASH_SOURCE[0]}" != "${0}" ]]; then
@@ -24,9 +32,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NASIM_LIB_DIR="$SCRIPT_DIR/../lib/nasim"
 
 # --- Minimal shared utilities (available to all modules) ---
+# die(msg):
+#   Print to stderr and exit 1. Used for fatal setup / transport / config errors.
 die() { echo "nasim: $*" >&2; exit 1; }
+
+# log(msg):
+#   Prefix + stderr. All user-facing progress (tunnels, probes, launches).
 log() { echo "nasim: $*" >&2; }
+
+# have(cmd):
+#   True if command is on PATH. Used for optional (fzf/gum/litellm/tailscale) and ssh/curl.
 have() { command -v "$1" >/dev/null 2>&1; }
+
+# is_dry():
+#   True under NASIM_DRY_RUN=1 or NASIM_TEST_MODE containing "dry".
+#   Prevents real ssh, real exec of agents, real litellm start. Used by all strategies.
 is_dry() { [[ "${NASIM_TEST_MODE:-}${1:-}" == *dry* || "${NASIM_DRY_RUN:-}" == "1" ]]; }
 
 # --- Load order (important for dependencies) ---

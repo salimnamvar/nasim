@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # lib/nasim/agents/aider.sh
+#
+# launch_aider(url, model):
+#   Sets OLLAMA_API_BASE (the transport url) and execs aider with the "ollama/<tag>" form it expects.
+#   Aider is quite robust with many local models; uses OpenAI compat under the covers for ollama backend.
 
 launch_aider() {
     local url="$1" model="$2"

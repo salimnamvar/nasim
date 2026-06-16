@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 # lib/nasim/orchestration.sh — core select/launch coordination (main "service" layer)
+#
+# choose_and_launch(access, agent, model, ...):
+#   The heart of a "select" or "launch --flags". Brings up the chosen transport (returns effective url),
+#   does final probe + model visibility (ssh authoritative list + existence warn), then delegates to launch_agent.
+#   Non-fatal warnings on final probe so that a working prior tunnel isn't a hard blocker.
+#   Always shows black inventory via nasim_models (fixes the original "models not shown" class of bugs).
 
 choose_and_launch() {
     local access="${1:-ssh-tunnel}"
@@ -11,27 +17,29 @@ choose_and_launch() {
         url="http://127.0.0.1:${DEFAULT_LOCAL_PORT}"
         log "(dry) would setup access=$access (no real tunnel)"
     else
-        url=$(setup_transport "$access")
+        url=$(setup_transport "$access" "$model")
     fi
 
     # Final sanity (defensive but non-fatal if setup already proved it)
     if ! is_dry && ! probe_url "$url"; then
-        log "WARNING: final probe failed for $url (proceeding anyway — setup had succeeded)"
+        log "WARNING: final probe failed for $url (proceeding anyway — the transport setup reported success; for litellm the /api/tags probe is expected to differ)"
     fi
 
     # Always surface the models at the chosen endpoint right before handing to the agent.
     # This is a major part of fixing "models are not shown" under select/launch.
     if ! is_dry; then
         log "models at $url (for $agent):"
-        curl -s --max-time 5 "$url/api/tags" | python3 -c '
+        if ! curl -s --max-time 4 "$url/api/tags" | python3 -c '
 import sys, json
 try:
     d=json.load(sys.stdin)
     names=[m.get("name","?") for m in d.get("models",[])][:5]
     print("  " + " ".join(names), file=sys.stderr)
-except: print("  (list failed)", file=sys.stderr)
-' 2>/dev/null || true
-        # Also the authoritative black list (no tunnel needed)
+except: print("  (list via endpoint failed; see ssh inventory)", file=sys.stderr)
+' 2>/dev/null ; then
+            echo "  (endpoint $url does not expose ollama /api/tags — common for litellm proxy; full list via ssh below)" >&2
+        fi
+        # Always the authoritative black list (ssh, no tunnel needed) — works for all access types.
         nasim_models 2>/dev/null || true
 
         # Warn (but do not hard fail) if the requested model is unknown on black.
@@ -45,6 +53,8 @@ except: print("  (list failed)", file=sys.stderr)
 }
 
 # Legacy thin paths (still supported)
+# legacy_claude(...):
+#   Back-compat for "nasim claude [args]". If no NASIM_REMOTE_URL, starts ad-hoc tunnel then calls launch_claude.
 legacy_claude() {
     local url="${NASIM_REMOTE_URL:-http://127.0.0.1:${DEFAULT_LOCAL_PORT}}"
     local model="${NASIM_MODEL:-$DEFAULT_MODEL}"
@@ -55,6 +65,8 @@ legacy_claude() {
     launch_claude "$url" "$model" "$@"
 }
 
+# legacy_aider(...):
+#   Same as legacy_claude but forces "ollama/" prefix in model name for aider and calls launch_aider.
 legacy_aider() {
     local url="${NASIM_REMOTE_URL:-http://127.0.0.1:${DEFAULT_LOCAL_PORT}}"
     local model="${NASIM_MODEL:-ollama/${DEFAULT_MODEL}}"

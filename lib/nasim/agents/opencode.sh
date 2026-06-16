@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # lib/nasim/agents/opencode.sh — OpenCode (prefers OpenAI compat base for broadest support)
+#
+# launch_opencode(url, model):
+#   Exports OPENAI_BASE_URL=.../v1 + OLLAMA_API_BASE and tries several exec forms (some opencode builds are picky).
+#   Does not invoke "ollama launch opencode" (that would use local ollama on the laptop, not our forwarded black).
 
 launch_opencode() {
     local url="$1" model="$2"

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # lib/nasim/cli.sh — command dispatch, help, tunnel mgmt (thin controller)
+#
+# cli():
+#   Thin dispatch only. All real work delegated to orchestration / agents / transports.
+#   Supports legacy nasim claude / nasim aider for backward compat (they auto-start tunnel if needed).
 
+# nasim_version():
+#   Returns effective version (overridable for tests).
 nasim_version() {
     echo "${NASIM_VERSION_OVERRIDE:-$NASIM_VERSION}"
 }
@@ -11,7 +17,7 @@ nasim $(nasim_version) — all solutions for remote Ollama on black + terminal f
 
 Primary (recommended):
   nasim select
-  nasim launch --access ssh-tunnel --agent claude --model qwen2.5-coder:14b
+  nasim launch --access ssh-tunnel --agent claude --model deepseek-r1:14b
                                    Access: ssh-tunnel | tailscale | litellm
                                    Agent:  claude | aider | opencode | terminal
 

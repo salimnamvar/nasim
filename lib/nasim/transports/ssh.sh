@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # lib/nasim/transports/ssh.sh — SSH tunnel transport adapter (strategy)
+#
+# setup_ssh_tunnel():
+#   Allocates free local port, does ssh -f -N -L to BLACK_HOST:11434, writes pidfile, probes, returns the local http url.
+#   This is the primary always-reliable transport (P01 private, P04 testable).
+#   The pidfile is *not* auto-cleaned on agent exit (user controls lifetime via pkill or nasim tunnel status).
 
 setup_ssh_tunnel() {
     if is_dry; then

@@ -23,7 +23,7 @@ echo "=== test-agents-clis: all select agent options + frontier CLIs with real m
 # 1. All dry launch paths (covers every agent option in matrix)
 for agent in claude aider opencode terminal; do
     log "dry launch --agent $agent (exercises launcher + env + orchestration)"
-    out=$(NASIM_TEST_MODE=1 NASIM_DRY_RUN=1 "$NASIM" launch --access ssh-tunnel --agent "$agent" --model qwen2.5-coder:14b 2>&1)
+    out=$(NASIM_TEST_MODE=1 NASIM_DRY_RUN=1 "$NASIM" launch --access ssh-tunnel --agent "$agent" --model deepseek-r1:14b 2>&1)
     if echo "$out" | grep -qiE "(ANTHROPIC_BASE_URL|OLLAMA_API_BASE|OPENAI_BASE_URL|NASIM_REMOTE_URL|claude|aider|opencode|terminal|qwen2.5-coder)"; then
         pass "dry $agent produced plausible launch artifacts"
     else
@@ -68,7 +68,7 @@ if command -v claude >/dev/null 2>&1; then
     log "claude binary present — validating it would receive correct remote envs (dry + a real small prompt if non-interactive flag works)"
     # We cannot easily stay interactive; use the terminal agent + note that full self-audit is the interactive gold path.
     # For this test we at least confirm the launcher produces the exact vars the searches say claude needs.
-    outc=$(NASIM_TEST_MODE=1 "$NASIM" launch --access ssh-tunnel --agent claude --model qwen2.5-coder:14b --dry-run 2>&1)
+    outc=$(NASIM_TEST_MODE=1 "$NASIM" launch --access ssh-tunnel --agent claude --model deepseek-r1:14b --dry-run 2>&1)
     if echo "$outc" | grep -q "ANTHROPIC_AUTH_TOKEN=ollama" && echo "$outc" | grep -q "ANTHROPIC_BASE_URL"; then
         pass "claude launcher emits the 2026-correct ANTHROPIC_* triple for native Ollama compat"
     else

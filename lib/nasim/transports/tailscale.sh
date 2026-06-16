@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # lib/nasim/transports/tailscale.sh — Tailscale transport adapter (graceful degrade strategy)
+#
+# setup_tailscale():
+#   If tailscale present and `tailscale status` ok, try MagicDNS "black:11434" then probe.
+#   If not, ssh to black to discover its tailscale IP and try that.
+#   Returns 1 on any failure so transport.sh falls back to ssh-tunnel.
 
 setup_tailscale() {
     if is_dry; then

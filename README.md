@@ -23,9 +23,9 @@ NASIM_RUN_SELF_AUDIT=1 ./tests/nasim-features.sh --self-audit
 # Inside the agent: "Read all of nasim (bin/ + lib/), sprint, research. Find errors, improve modularity, update docs."
 
 # Non-interactive (CI, scripts, or when you know the choice)
-nasim launch --access ssh-tunnel --agent claude --model gemma4:latest
-nasim launch --access litellm --agent aider --model qwen3-coder:14b
-nasim launch --access tailscale --agent opencode --model deepseek-r1:14b   # falls back gracefully if no ts
+nasim launch --access ssh-tunnel --agent claude --model deepseek-r1:14b
+nasim launch --access litellm --agent aider --model qwen3:8b
+nasim launch --access tailscale --agent opencode --model deepseek-r1:32b   # falls back gracefully if no ts
 
 # After setup you are dropped straight into the interactive frontier agent (or a branded terminal shell).
 ```

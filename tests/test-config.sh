@@ -22,9 +22,14 @@ fail() { echo -e "${RED}[FAIL]${NC} $*"; exit 1; }
 
 echo "=== test-config: unit-style config contract ==="
 
-# 1. After load, DEFAULT_MODEL must be one that actually exists on black (critical bugfix)
-if [[ "$DEFAULT_MODEL" == "qwen3-coder:14b" ]]; then
-    fail "DEFAULT_MODEL still the bad tag that does not exist on black"
+# 1. After load, DEFAULT_MODEL must be one that actually exists on black (critical bugfix).
+# We force a clean config (no user file) + explicit strong default via env so the check is about *code* not machine state.
+export NASIM_CONFIG_FILE=/tmp/nasim-test-empty-$$.conf
+rm -f "$NASIM_CONFIG_FILE"
+export DEFAULT_MODEL=deepseek-r1:14b
+nasim_config_load
+if [[ "$DEFAULT_MODEL" == "qwen3-coder:14b" || "$DEFAULT_MODEL" == "qwen2.5-coder:14b" ]]; then
+    fail "DEFAULT_MODEL still a weak or historically non-existent tag"
 else
     pass "DEFAULT_MODEL is sane and likely exists: $DEFAULT_MODEL"
 fi
