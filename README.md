@@ -1,103 +1,90 @@
-Nasim routes the real Claude Code CLI to local Ollama models on a remote server
-instead of the Anthropic cloud, with a guaranteed one-command rollback.
+# Nasim
 
-It does **not** fork or patch the `claude` binary. It drives the real CLI through
-environment variables and surgical, fully-reverted edits to its config, fronted
-by a translating proxy (the *bridge*) that speaks the Anthropic Messages API on
-one side and Ollama's chat API on the other.
+**Nasim** is your practical, search-first setup for running frontier AI coding agents (Claude Code, OpenCode, Aider, Continue, Grok CLI-style, etc.) on your laptop while using powerful local models served by Ollama on a remote machine ("black").
 
-## What it does
+## Philosophy
+- **Search current solutions first.** We document what actually exists and works in 2026 (native Anthropic compat in Ollama, Tailscale for remote, LiteLLM when you need routing, mature open agents like Aider/Continue/OpenCode). We only add thin, high-value glue.
+- **.grok/ is the source of truth.** Living research, recipes, rules, and model guidance live here. Update it by re-searching before changes.
+- Real agentic coding (read/write/edit files, bash, multi-step, sub-agents) executes on the laptop where you run the agent. The remote model (on black) only decides *what* to do via tool calls.
+- Maximize local benefit: strong GPU-resident models on black + secure always-on access + the best agent frontends.
 
-- `nasim start` — opens an SSH tunnel to the bridge, points Claude Code at it
-  (`ANTHROPIC_BASE_URL`), injects the available Ollama models into the `/model`
-  picker, and selects the recommended model.
-- `nasim stop` — kills the tunnel, unsets the redirect, removes every injected
-  model from the picker, and restores the exact `/model` selection from before
-  start. Full, tested rollback to Claude Code defaults.
-- `nasim status` — backend, tunnel liveness, bridge health, active model.
-- `nasim models` — the Ollama models the bridge exposes, tagged default/fast.
-
-It does **not** modify the `claude` binary; every change is reverted on stop.
-
-## Architecture
-
-```
-client                                  server (configurable)
-claude → localhost:18080 ──SSH -L──► 127.0.0.1:8080 (nasim-bridge) → Ollama
-```
-
-The bridge binds to `127.0.0.1` on the server, so the SSH tunnel is the only
-access path. Point Nasim at any host by editing `cfg/nasim.toml` `[server].host`
-(or `NASIM_REMOTE_HOST`) — no code change. See [docs/architecture.md](docs/architecture.md).
-
-## Requirements
-
-- Passphrase-less SSH to the server (`ssh <host>` works non-interactively).
-- The `nasim-bridge` service running on the server (`make deploy`).
-- `python3` (3.11+) and `ssh` on the client. The client toggle uses only the
-  standard library.
-
-## Install
+## Quick Start — `nasim select` (all solutions, 2026-06-16)
 
 ```bash
-./install.sh        # sources bin/nasim.sh from your shell profile
-source ~/.bashrc    # or open a new shell
+# Interactive (picks transport + agent + model, brings up private path, probes, launches the CLI)
+./bin/nasim select
+
+# Manage configuration (no more hard-coded values)
+./bin/nasim config edit
+./bin/nasim config show
+
+# Agentic self-audit (the primary test method): launch a strong model and task it with auditing nasim
+NASIM_RUN_SELF_AUDIT=1 ./tests/nasim-features.sh --self-audit
+# Inside the agent: "Read all of nasim (bin/ + lib/), sprint, research. Find errors, improve modularity, update docs."
+
+# Non-interactive (CI, scripts, or when you know the choice)
+nasim launch --access ssh-tunnel --agent claude --model deepseek-r1:14b
+nasim launch --access litellm --agent aider --model qwen3:8b
+nasim launch --access tailscale --agent opencode --model deepseek-r1:32b   # falls back gracefully if no ts
+
+# After setup you are dropped straight into the interactive frontier agent (or a branded terminal shell).
 ```
 
-`nasim` is a shell function, so it must be sourced — that is how `nasim start`
-exports the redirect into the shell you launch `claude` from. Run `nasim start`
-and `claude` in the **same** terminal.
+The `nasim` CLI (in `bin/nasim`) now supports **every** solution from the research:
+- Transports: ssh-tunnel (primary, ad-hoc with trap cleanup, free port), tailscale (MagicDNS + detection), litellm (proxy layer + config).
+- Agents: claude (native ANTHROPIC_BASE_URL), aider (OLLAMA_API_BASE), opencode, terminal (full-env branded shell so you can run anything).
+- Plus: `nasim doctor` (probe + black GPU state), `nasim tunnel install-systemd` (persistent autossh user unit), legacy `nasim claude` / `nasim aider` still work.
 
-## Usage
+All combinations are covered by the test harness (`tests/nasim-features.sh --all`) and the GHA matrix in `.github/workflows/ci.yml`. Live tests against real black (SSH) + models (gemma4, qwen2.5-coder, deepseek-r1 etc.) pass before every slice commit.
 
-```bash
-nasim start         # route Claude Code to Ollama; lists available models
-claude              # now backed by Ollama; /model lists the Ollama tags
-nasim status
-nasim stop          # back to the Anthropic cloud; picker + model restored
-```
+See `.grok/recipes/` (or .claude mirror), the research log, and `.claude/rules/sprint.md` (design state + P-Invariants).
 
-## Deploy the bridge to the server
+## Classic manual path (still valid)
+(Old quick-start steps for Claude Code etc. remain below for reference — `nasim select` is the recommended way now.)
 
-```bash
-make deploy         # rsync src/ + cfg/ to the server, restart the service
-```
+(Previous manual export + ssh -L or Tailscale steps still work and are used internally by nasim.)
 
-## Develop and test
+## Other High-Value Agents (All Work With Remote Ollama)
+- **OpenCode (opencode)**: Excellent open-source Claude Code alternative. Native multi-provider + Ollama support.
+- **Aider**: `aider --model ollama/qwen3-coder:14b` (or configure remote base URL). Mature git-centric workflow.
+- **Continue.dev**: VS Code / JetBrains. Set `baseUrl` to your tunneled/remote Ollama in `config.json`.
+- **Cline / Roo Code / Kilo Code**: Agentic VS Code experiences with full local model support.
+- **grok-cli variants**: For xAI Grok API primarily; some accept Ollama as provider for local equivalent feel.
 
-```bash
-make lint           # ruff + black --check + import smoke
-make test           # unit tests — fast, no network
-make integration    # live bridge endpoint tests (needs SSH + service)
-make capability     # Anthropic-API capability matrix (live)
-make loop           # full CI/CD loop: lint→unit→deploy→integration→capability→rollback
-make loop E2E=1     # also drive the real claude binary against Ollama (slow)
-```
+See `.grok/recipes/` for exact remote configs.
 
-The test suite is exhaustive and mapped to a capability matrix — every green cell
-is backed by a runnable assertion. See [docs/capability-matrix.md](docs/capability-matrix.md).
+## Current Research Snapshot (as of 2026-06-16)
+See `.grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md` for:
+- Why the old custom bridge is obsolete (Ollama native compat).
+- Remote access patterns (Tailscale > SSH tunnel > LiteLLM).
+- "Grok Code" options (grok-code-fast-1 in supported IDE agents + grok-cli; local equivalents via strong open models in flexible agents).
+- Model recommendations (Qwen3-Coder series, GLM-5.1, DeepSeek V4, Gemma 4 — size to GPU, verify no CPU spill for agent loops).
+- Anti-patterns and security.
 
-## Uninstall
+## Project Structure (Phase 2 — modular)
+- `bin/nasim` — thin loader + entrypoint only.
+- `lib/nasim/` — real implementation (separation of concerns):
+  - `config.sh` — external config (AD-09)
+  - `transport.sh` + `transports/*.sh` — pluggable access strategies (ssh, tailscale, litellm)
+  - `agent.sh` + `agents/*.sh` — pluggable agent launchers
+  - `probe.sh`, `orchestration.sh`, `ui.sh`, `cli.sh`
+- `tests/nasim-features.sh` — comprehensive real (no-mock) tests + `--self-audit` meta tests that launch strong models via nasim to audit the project itself (the best always-followed test scenario).
+- `.grok/` — knowledge surfaces only (research, recipes, sprint, design). Code lives at visible root.
+- `README.md`, `.github/workflows/ci.yml` — docs + CI matrix enforcing the above.
 
-```bash
-./uninstall.sh
-```
+## Getting the Most Benefit
+- Reproduce real work: multi-file edits, bash execution, planning → write loops.
+- Keep models GPU-resident on black.
+- Use large context (64k+ where possible).
+- Hybrid: fast local model for exploration + heavy remote for synthesis.
+- Re-search the ecosystem before adding features or claiming superiority.
 
-## Known limitation (model-bound, not a routing fault)
+## Contributing / Updating Knowledge
+- Always start with fresh searches for "claude code ollama", "opencode ollama remote", "best ollama agentic coding models", Tailscale/WireGuard remote LLM patterns, etc.
+- Edit under `.grok/`.
+- Conventional commit.
+- Keep this practical and current.
 
-The bridge faithfully relays tools and tool calls; whether a *local* model drives
-a multi-tool agentic task well depends on the model and the GPU. Small models
-degrade under a large system prompt + many tools, and a model too big for the GPU
-spills to CPU and slows sharply. Use a capable coder model that fits the GPU, and
-keep the injected context lean. Full analysis, measurements, and tuning live in
-[docs/model-guidance.md](docs/model-guidance.md).
+Start here: `.grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md` and `.grok/recipes/`.
 
-## Documentation
-
-| Doc | Contents |
-| --- | --- |
-| [docs/architecture.md](docs/architecture.md) | Topology, module decomposition, boundary rules |
-| [docs/methodology.md](docs/methodology.md) | The plan→…→monitor CI/CD loop |
-| [docs/capability-matrix.md](docs/capability-matrix.md) | Every tested capability and its status |
-| [docs/runbook.md](docs/runbook.md) | Deploy, operate, relocate the server, troubleshoot |
-| [docs/model-guidance.md](docs/model-guidance.md) | Model/hardware ceiling, the tool-call diagnosis, tuning |
+Zero cost. Maximum privacy. Frontier agent experience on your hardware + remote GPU.

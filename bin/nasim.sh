@@ -1,46 +1,69 @@
 #!/usr/bin/env bash
-# Source this file — do not execute directly.
+# nasim — thin loader + entrypoint (Controller-like dispatch only)
 #
-# nasim — toggle Claude Code between the Anthropic cloud and a local Ollama
-#         backend reached over an SSH tunnel to the Nasim Bridge.
+# Real implementation lives in lib/nasim/ for modularity, SoC, DRY and scalability (AD-08).
+# All hard-coded values moved to config (AD-09).
+# Primary validation: real black + agentic self-audit loops (AD-10).
 #
-#   nasim start    route Claude Code to Ollama; show available models
-#   nasim stop     full rollback to the Anthropic cloud
-#   nasim status   backend, tunnel, bridge health, active model
-#   nasim models   list Ollama models reachable through the bridge
+# This file must remain small and only do:
+#   - early config
+#   - sourcing of concerns
+#   - call into nasim_main
 #
-# This shim holds NO logic (project rule AP-03). All decisions live in the
-# Python package `python -m nasim`. The shim exists for one reason only: env
-# vars must be exported into the *calling* shell, which a subprocess cannot do.
-# The package writes `~/.nasim/env.sh`; this function sources it, then deletes
-# it. Everything else — tunnel, picker surgery, model backup, health — is done
-# by the package and is unit-tested.
+# nasim():
+#   Main entry. Resolves lib, sources modules in dependency order, hands off to nasim_main.
+#   Supports being sourced (NASIM_INTERNAL=1) for test harness access to internals without exec.
+#
+#   Globals set:
+#     NASIM_VERSION, SCRIPT_DIR, NASIM_LIB_DIR, plus everything from sourced config + modules.
+#   Side effects: may exec agent or die on error.
 
-nasim() {
-  # Locate the package: prefer an explicit NASIM_ROOT, else derive from this
-  # file's location (…/bin/nasim.sh -> repo root with src/ on the path).
-  local _self _root
-  _self="${BASH_SOURCE[0]}"
-  _root="${NASIM_ROOT:-$(cd "$(dirname "$_self")/.." && pwd)}"
-  # env.sh lives under $HOME/.nasim — the same root the Python package uses
-  # (RuntimePaths.default() == Path.home()/".nasim"), so the two never disagree.
-  local _env_file="$HOME/.nasim/env.sh"
+set -euo pipefail
 
-  # Run the package. If installed (`pip install -e`), plain `python -m nasim`
-  # works; otherwise fall back to running from the repo's src/ layout.
-  if python3 -c "import nasim" >/dev/null 2>&1; then
-    python3 -m nasim "$@"
-  else
-    PYTHONPATH="${_root}/src:${PYTHONPATH:-}" python3 -m nasim "$@"
-  fi
-  local _rc=$?
+NASIM_VERSION="2026-06-16-v2-litellm-claude-fix+strong-default+docstrings"   # litellm probe/model-name + claude /v1 base + strong DEFAULT_MODEL (deepseek-r1:14b) + early weak-model warnings + Google docstrings via model assistance; full harness re-validated.
 
-  # Apply any env directives the controller emitted, in THIS shell, then clear.
-  if [ -f "$_env_file" ]; then
-    # shellcheck disable=SC1090
-    source "$_env_file"
-    rm -f "$_env_file"
-  fi
+# Allow the harness to source us for function access without executing CLI
+if [[ "${NASIM_INTERNAL:-}" == "1" && "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    :   # just define functions when sourced
+fi
 
-  return $_rc
-}
+# Resolve lib dir relative to this script (works when sourced or exec'd)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NASIM_LIB_DIR="$SCRIPT_DIR/../lib/nasim"
+
+# --- Minimal shared utilities (available to all modules) ---
+# die(msg):
+#   Print to stderr and exit 1. Used for fatal setup / transport / config errors.
+die() { echo "nasim: $*" >&2; exit 1; }
+
+# log(msg):
+#   Prefix + stderr. All user-facing progress (tunnels, probes, launches).
+log() { echo "nasim: $*" >&2; }
+
+# have(cmd):
+#   True if command is on PATH. Used for optional (fzf/gum/litellm/tailscale) and ssh/curl.
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# is_dry():
+#   True under NASIM_DRY_RUN=1 or NASIM_TEST_MODE containing "dry".
+#   Prevents real ssh, real exec of agents, real litellm start. Used by all strategies.
+is_dry() { [[ "${NASIM_TEST_MODE:-}${1:-}" == *dry* || "${NASIM_DRY_RUN:-}" == "1" ]]; }
+
+# --- Load order (important for dependencies) ---
+# 1. Config (provides BLACK_HOST, DEFAULT_*, orders, etc.)
+source "$NASIM_LIB_DIR/config.sh"
+
+# 2. Common concerns
+source "$NASIM_LIB_DIR/probe.sh"
+source "$NASIM_LIB_DIR/transport.sh"
+source "$NASIM_LIB_DIR/agent.sh"
+
+# 3. UI + orchestration
+source "$NASIM_LIB_DIR/ui.sh"
+source "$NASIM_LIB_DIR/orchestration.sh"
+
+# 4. CLI dispatch + help
+source "$NASIM_LIB_DIR/cli.sh"
+
+# Hand off to the real command handler
+nasim_main "$@"

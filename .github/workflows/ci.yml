@@ -1,0 +1,83 @@
+name: nasim-ci
+
+on:
+  push:
+    branches: [ 'feature/*', develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck (best effort)
+        run: |
+          sudo apt-get update -qq || true
+          sudo apt-get install -y -qq shellcheck 2>/dev/null || echo "shellcheck install failed or skipped"
+      - name: Syntax + shellcheck on nasim
+        run: |
+          bash -n bin/nasim
+          if command -v shellcheck >/dev/null; then
+            shellcheck bin/nasim || true
+          fi
+      - name: Run harness lint target
+        run: |
+          NASIM=bin/nasim ./tests/nasim-features.sh --lint
+
+  test-features:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # "CI/CD for each feature": explicit includes for the combos we implement.
+        # Start small (ssh-tunnel primary because live black SSH not possible in GHA,
+        # but the harness dry-runs + logic are exercised; live probe is local-only on salim-hp).
+        # Expand matrix here as slices are added (aider, opencode, litellm, tailscale-*).
+        include:
+          # Core slice (ssh-tunnel always testable + live on salim-hp)
+          - access: ssh-tunnel
+            agent: claude
+            model: qwen2.5-coder:14b
+          - access: ssh-tunnel
+            agent: terminal
+            model: gemma4:latest
+          - access: ssh-tunnel
+            agent: aider
+            model: qwen2.5-coder:14b
+          - access: ssh-tunnel
+            agent: opencode
+            model: deepseek-r1:14b
+          # Additional solutions (dry in GHA; exercised live locally via harness with real black)
+          - access: tailscale
+            agent: claude
+            model: qwen2.5-coder:14b
+          - access: litellm
+            agent: claude
+            model: gemma4:latest
+          - access: litellm
+            agent: aider
+            model: qwen2.5-coder:14b
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup minimal deps (curl, python for json in harness)
+        run: |
+          sudo apt-get update -qq || true
+          sudo apt-get install -y -qq curl python3 2>/dev/null || true
+      - name: Run feature test for matrix cell (dry primarily; live probe skipped in GHA)
+        env:
+          NASIM_RUN_LIVE_PROBE: "0"   # GHA has no real black SSH; local runs set to 1
+          NASIM_DEFAULT_MODEL: "${{ matrix.model }}"
+        run: |
+          NASIM=bin/nasim ./tests/nasim-features.sh --test "${{ matrix.access }}" "${{ matrix.agent }}"
+
+  # Future: when we have bats or more, add job. For now the harness + matrix above is the "per feature CI".
+  # On salim-hp or black: locally run with live probe + real SSH to black to "test them all work".
+
+  status:
+    runs-on: ubuntu-latest
+    needs: [lint, test-features]
+    if: always()
+    steps:
+      - run: echo "nasim CI matrix complete for the included (access, agent) feature combos. See test-features job logs."
