@@ -8,37 +8,35 @@
 - Real agentic coding (read/write/edit files, bash, multi-step, sub-agents) executes on the laptop where you run the agent. The remote model (on black) only decides *what* to do via tool calls.
 - Maximize local benefit: strong GPU-resident models on black + secure always-on access + the best agent frontends.
 
-## Quick Start — Claude Code on Laptop + Ollama on black (Native Path)
-Ollama (v0.14+) speaks the Anthropic Messages API directly. The official Claude Code CLI just works.
+## Quick Start — `nasim select` (all solutions, 2026-06-16)
 
-1. On **black** (the server):
-   - Ollama installed and running (`ollama serve` or systemd).
-   - Pull a strong coding model that fits the GPU fully, e.g.:
-     ```bash
-     ollama pull qwen3-coder:14b   # or qwen3-coder, gemma4:xx, deepseek-coder-v2:16b, etc.
-     ```
-   - Verify it stays on GPU: `ollama ps` (or the API `/api/ps`).
+```bash
+# Interactive (picks transport + agent + model, brings up private path, probes, launches the CLI)
+./.grok/bin/nasim select
+# or the .claude mirror (same)
+./.claude/bin/nasim select
 
-2. Secure access from laptop to black:11434 (choose one):
-   - **Preferred (set-and-forget):** Tailscale on both machines. Access via MagicDNS (e.g. `http://black:11434`).
-   - **Simple persistent:** `autossh` or systemd user service doing `ssh -N -L 11435:localhost:11434 black`.
+# Non-interactive (CI, scripts, or when you know the choice)
+nasim launch --access ssh-tunnel --agent claude --model gemma4:latest
+nasim launch --access litellm --agent aider --model qwen2.5-coder:14b
+nasim launch --access tailscale --agent opencode --model deepseek-r1:14b   # falls back gracefully if no ts
 
-3. On **laptop** (in the shell where you will run the agent):
-   ```bash
-   # Point Claude Code at the forwarded/remote Ollama
-   export ANTHROPIC_AUTH_TOKEN=ollama
-   export ANTHROPIC_BASE_URL=http://127.0.0.1:11435   # or http://black:11434 via Tailscale
-   export ANTHROPIC_API_KEY=""
+# After setup you are dropped straight into the interactive frontier agent (or a branded terminal shell).
+```
 
-   # Run the real Claude Code binary against a model on black
-   claude --model qwen3-coder:14b
-   ```
-   Or if available on your setup:
-   ```bash
-   ollama launch claude --model qwen3-coder:14b
-   ```
+The single `nasim` (in .grok/bin or .claude/bin) now supports **every** solution from the research:
+- Transports: ssh-tunnel (primary, ad-hoc with trap cleanup, free port), tailscale (MagicDNS + detection), litellm (proxy layer + config).
+- Agents: claude (native ANTHROPIC_BASE_URL), aider (OLLAMA_API_BASE), opencode, terminal (full-env branded shell so you can run anything).
+- Plus: `nasim doctor` (probe + black GPU state), `nasim tunnel install-systemd` (persistent autossh user unit), legacy `nasim claude` / `nasim aider` still work.
 
-Full details, persistent tunnel recipes, Tailscale setup, model selection, GPU-fit checks, and fallbacks: see `.grok/recipes/` and the research log.
+All combinations are covered by the test harness (`tests/nasim-features.sh --all`) and the GHA matrix in `.github/workflows/ci.yml`. Live tests against real black (SSH) + models (gemma4, qwen2.5-coder, deepseek-r1 etc.) pass before every slice commit.
+
+See `.grok/recipes/` (or .claude mirror), the research log, and `.claude/rules/sprint.md` (design state + P-Invariants).
+
+## Classic manual path (still valid)
+(Old quick-start steps for Claude Code etc. remain below for reference — `nasim select` is the recommended way now.)
+
+(Previous manual export + ssh -L or Tailscale steps still work and are used internally by nasim.)
 
 ## Other High-Value Agents (All Work With Remote Ollama)
 - **OpenCode (opencode)**: Excellent open-source Claude Code alternative. Native multi-provider + Ollama support.

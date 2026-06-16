@@ -380,18 +380,44 @@ case "$cmd" in
     tunnel)
         sub="${1:-help}"; shift || true
         case "$sub" in
-            ssh|start)
+            ssh|start|adhoc)
                 setup_ssh_tunnel >/dev/null
-                log "tunnel running (cleanup on this shell exit)"
-                # Keep the shell alive so trap works if user wants
-                echo "Press Ctrl-C or exit shell to tear down."
+                log "ad-hoc tunnel running (cleanup on this shell exit via trap)"
+                echo "Press Ctrl-C or exit to tear down."
                 sleep 99999 || true
+                ;;
+            persistent|autossh)
+                log "One-liner for background autossh (reconnects):"
+                echo "autossh -M 0 -f -N -o 'ServerAliveInterval 30' -L ${DEFAULT_LOCAL_PORT}:localhost:11434 ${BLACK_HOST}"
+                echo "Kill: pkill -f 'ssh.*${DEFAULT_LOCAL_PORT}.*${BLACK_HOST}'"
+                ;;
+            install-systemd)
+                unit_dir="${HOME}/.config/systemd/user"
+                mkdir -p "$unit_dir"
+                unit="$unit_dir/nasim-black-tunnel.service"
+                cat > "$unit" <<UNIT
+[Unit]
+Description=Nasim persistent SSH tunnel to black Ollama (11434)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/autossh -M 0 -N -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L ${DEFAULT_LOCAL_PORT}:localhost:11434 ${BLACK_HOST}
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+UNIT
+                log "Wrote $unit"
+                echo "systemctl --user daemon-reload && systemctl --user enable --now nasim-black-tunnel"
+                echo "journalctl --user -u nasim-black-tunnel -f"
                 ;;
             status)
                 pgrep -af "ssh.*${BLACK_HOST}" | grep -E 'L .*1143' || echo "no obvious nasim ssh tunnel"
+                systemctl --user status nasim-black-tunnel 2>/dev/null || true
                 ;;
             *)
-                echo "nasim tunnel ssh|status"
+                echo "nasim tunnel {ssh|persistent|install-systemd|status}"
                 ;;
         esac
         ;;

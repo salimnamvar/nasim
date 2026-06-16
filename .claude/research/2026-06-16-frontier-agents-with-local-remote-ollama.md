@@ -184,3 +184,13 @@ Cloud fallbacks (when local hardware or model ceiling hit): OpenRouter (many of 
 **Next for Nasim:** Use this as source of truth. Create recipes (Tailscale + Claude Code, Aider remote, Continue remote, thin tunnel helper). Update on every meaningful ecosystem shift. Wipe old custom bridge implementation.
 
 Update date: 2026-06-16. Re-search before major changes.
+
+## Implementation note (2026-06-16, this sprint)
+- `nasim select` (and `nasim launch --access ... --agent ...`) now provides the single entry point for **all** solutions.
+- Transports: ssh-tunnel (primary, free port, trap cleanup, live verified), tailscale (detection + MagicDNS or ts-ip fallback), litellm (config gen + optional bg proxy on top of inner transport).
+- Agents: claude (full native ANTHROPIC_*), aider (OLLAMA_API_BASE), opencode (OpenAI compat base), terminal (branded shell with all envs).
+- CI/CD per feature: tests/nasim-features.sh with --all / --test matrix + live black SSH probe. .github/workflows/ci.yml strategy.matrix covers the combos (dry in GHA, full live locally). "Implement → add to harness/CI → run & pass → commit" enforced.
+- .claude/ full mirror of .grok/ (including new docs/C4 + UC + sprint.md per global design rules). project-register + project-sync for daemon parity and surfaces in ~/.grok + ~/.claude.
+- All tested end-to-end on salim-hp with real SSH to black + actual models (gemma4, qwen2.5-coder, deepseek etc.).
+- Persistent helpers: nasim tunnel persistent + install-systemd (autossh + user unit).
+- No new custom proxies; pure native paths + thin verified glue only.

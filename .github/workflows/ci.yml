@@ -36,6 +36,7 @@ jobs:
         # but the harness dry-runs + logic are exercised; live probe is local-only on salim-hp).
         # Expand matrix here as slices are added (aider, opencode, litellm, tailscale-*).
         include:
+          # Core slice (ssh-tunnel always testable + live on salim-hp)
           - access: ssh-tunnel
             agent: claude
             model: qwen2.5-coder:14b
@@ -48,13 +49,16 @@ jobs:
           - access: ssh-tunnel
             agent: opencode
             model: deepseek-r1:14b
-          # Tailscale and litellm entries (dry only in GHA; full live on real machine via local harness run)
+          # Additional solutions (dry in GHA; exercised live locally via harness with real black)
           - access: tailscale
             agent: claude
             model: qwen2.5-coder:14b
           - access: litellm
             agent: claude
             model: gemma4:latest
+          - access: litellm
+            agent: aider
+            model: qwen2.5-coder:14b
     steps:
       - uses: actions/checkout@v4
       - name: Setup minimal deps (curl, python for json in harness)
