@@ -1,0 +1,25 @@
+[Unit]
+Description=Nasim Bridge — Anthropic Messages API proxy to Ollama
+After=network.target ollama.service
+Requires=ollama.service
+
+# Template: @PLACEHOLDERS@ are substituted from cfg/nasim.toml by deploy.sh.
+[Service]
+Type=simple
+User=salim
+WorkingDirectory=@REMOTE_DIR@
+Environment=PYTHONPATH=@REMOTE_DIR@/src
+Environment=NASIM_CFG_DIR=@REMOTE_DIR@/cfg
+Environment=OLLAMA_URL=@OLLAMA@
+Environment=DEFAULT_MODEL=@DEF@
+Environment=FAST_MODEL=@FAST@
+Environment=BRIDGE_NUM_CTX=@NUMCTX@
+Environment=BRIDGE_KEEP_ALIVE=@KEEP@
+Environment=BRIDGE_TIMEOUT=@TIMEOUT@
+Environment=BRIDGE_LOG_LEVEL=@LOGLVL@
+ExecStart=@REMOTE_DIR@/.venv/bin/uvicorn nasim.bridge.server:app --host 127.0.0.1 --port @PORT@
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

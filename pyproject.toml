@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nasim"
+version = "1.0.0"
+description = "Route Claude Code to local Ollama models on a remote server, with one-command rollback."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Salim Namvar", email = "salim.namvar@gmail.com" }]
+dependencies = ["fastapi", "uvicorn", "httpx"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "black", "isort"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["test"]
+addopts = "-ra"
+markers = [
+    "integration: needs the live bridge (SSH + service up)",
+    "capability: Anthropic API capability matrix (live bridge)",
+    "rollback: nasim start/stop rollback contract",
+    "e2e: drives the real claude binary against Ollama",
+]
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.isort]
+profile = "google"
+line_length = 120
