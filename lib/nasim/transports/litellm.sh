@@ -17,9 +17,13 @@ model_list:
     litellm_params:
       model: ollama/${DEFAULT_MODEL}
       api_base: ${inner_url}
-  - model_name: black-fast
+  - model_name: black-reasoner
     litellm_params:
-      model: ollama/llama3.1:8b
+      model: ollama/deepseek-r1:14b
+      api_base: ${inner_url}
+  - model_name: black-coder-7b
+    litellm_params:
+      model: ollama/qwen2.5-coder:7b
       api_base: ${inner_url}
 EOF
 

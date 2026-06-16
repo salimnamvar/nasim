@@ -19,6 +19,28 @@ choose_and_launch() {
         log "WARNING: final probe failed for $url (proceeding anyway — setup had succeeded)"
     fi
 
+    # Always surface the models at the chosen endpoint right before handing to the agent.
+    # This is a major part of fixing "models are not shown" under select/launch.
+    if ! is_dry; then
+        log "models at $url (for $agent):"
+        curl -s --max-time 5 "$url/api/tags" | python3 -c '
+import sys, json
+try:
+    d=json.load(sys.stdin)
+    names=[m.get("name","?") for m in d.get("models",[])][:5]
+    print("  " + " ".join(names), file=sys.stderr)
+except: print("  (list failed)", file=sys.stderr)
+' 2>/dev/null || true
+        # Also the authoritative black list (no tunnel needed)
+        nasim_models 2>/dev/null || true
+
+        # Warn (but do not hard fail) if the requested model is unknown on black.
+        # Covers the original "qwen3-coder:14b does not exist" class of "models not working with the clis".
+        if ! model_exists_on_black "$model" 2>/dev/null; then
+            log "WARNING: '$model' not found in black inventory (nasim models). The agent may fail or trigger a slow pull. Choose an exact tag from the list above."
+        fi
+    fi
+
     launch_agent "$agent" "$url" "$model" "${@:4}"
 }
 

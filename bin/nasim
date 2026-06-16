@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-NASIM_VERSION="2026-06-17-v2-modular-config"   # bumped for Phase 2 architecture
+NASIM_VERSION="2026-06-16-v2-fix-models-select-clis+real-tests"   # serious model visibility + cli breakage fixed; comprehensive real (non-mock) per-option per-model tests + model-powered self-audit added; never-done loop via tests/
 
 # Allow the harness to source us for function access without executing CLI
 if [[ "${NASIM_INTERNAL:-}" == "1" && "${BASH_SOURCE[0]}" != "${0}" ]]; then

@@ -25,7 +25,7 @@ This is the project sprint file (per global rules/software-design/sprint.md). Si
 | ERD | N/A | Not Started | No persistent data model. |
 | Class Diagram | N/A (bash modules + strategies) | In Progress | lib/nasim/*.sh with clear concerns (config, transport adapters, agent launchers, probes, ui, cli dispatch). "OOP" via function namespaces + strategy registration for pluggable transports/agents. Thin loader in bin/nasim. |
 | API Spec | N/A | Not Started | None (CLI + env + subprocess). |
-| Implementation | `bin/nasim` (thin) + `lib/nasim/{config,probe,transport,agent,ui,cli}.sh` + `tests/nasim-features.sh` (incl. meta-audit) + `.github/workflows/ci.yml` + docs | Phase 2 in progress | Previous Phase 1 green. Refactor for modularity/SoC/DRY/scalability + config file (resolves OD-03) + comprehensive real black tests + agent-driven self-audit/docs as primary validation method. |
+| Implementation | `bin/nasim` (thin) + `lib/nasim/{config,probe,transport,agent,ui,cli}.sh` + `tests/nasim-features.sh` + tests/test-*.sh (config/unit, probe+models, ssh-real, agents-clis, all-options-matrix 72 combos, inference-reasoning with live black model outputs) + `.github/workflows/ci.yml` + docs | Phase 2 advanced | Previous Phase 1 green + major 2026-06-16 serious bugfix slice: "models not shown" + "none of the models / select options / clis working". Root causes (default tag mismatch qwen3 vs qwen2.5, probe_and_show 2>/dev/null swallowing lists, no first-class `nasim models`, no existence warning, stale doctor) fixed. Added nasim models + list in doctor/launch + pre-launch warn + robust call in tests. All access x agent x real models (qwen2.5-coder:14b, deepseek-r1:*, etc) now enumerated and live-probed in tests/. |
 | Sprint / Knowledge | `.claude/rules/sprint.md` + `.grok/AGENTS.md` + `.claude/CLAUDE.md` + research/ + recipes/ | In Progress | This file + parity sync via knowledge-sync project-register + daemon. |
 
 ## Versioning Policy
@@ -86,6 +86,14 @@ The best and always-followed test method for nasim is to use nasim itself to lau
 | ID | Decision | Resolution |
 | -- | -------- | ---------- |
 | (none yet in sprint; prior research ADs carried in 2026-06-16 research doc: native Ollama Anthropic compat obsoletes custom bridges; Tailscale > SSH > LiteLLM priority) | - | See research/2026-06-16... and recipes/ |
+| RD-01 (2026-06-16) | Serious user-reported breakage: no models shown under any select/doctor/launch, no models working with any clis (claude/aider/opencode), wrong defaults, probe output swallowed. | Fixed in one slice: corrected DEFAULT_MODEL everywhere (source + auto-created user conf), fixed probe_and_show output suppression, added first-class `nasim models` (ssh-direct, always works, no tunnel), emit full lists in doctor + before every launch, pre-launch existence warn on black inventory, expanded tests/ to 6+ dedicated real (no-mock) scripts exercising *every* access/agent/model combo + live inference. Real black models (via nasim transports) used to generate the root-cause analysis and code suggestions that informed/validated the fixes (see tests/audits/). Verified real claude binary reaches models over nasim url+envs. Full harness --all + --real-reasoning green repeatedly. |
+
+## Current Status Note (2026-06-16 serious fix)
+- `nasim models`, `nasim doctor`, launch flows now reliably surface the 13 models on black.
+- All 4 agents x 3 accesses x multiple real models (including the ones that matter for agentic coding) have dedicated real test coverage + live black inference "OK" responses.
+- AD-10 live: test-inference-reasoning.sh + --self-audit use qwen2.5-coder + deepseek-r1 etc. on black (launched via nasim ssh transport) to read symptoms, propose exact patches for probe/config/cli/ui/launchers, and generate helper code. Artifacts persisted. This is now the canonical way to evolve nasim.
+- The suite (tests/nasim-features.sh --all / --real-reasoning / --self-audit) + individual test-*.sh is the "never done" mechanism. Re-run after any edit; they use the tool (real ollama on black) to improve the tool.
+- P-invariants held (private ssh only, probe before launch, agent on laptop, testable slices).
 
 ## P-Invariants
 

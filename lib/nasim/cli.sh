@@ -11,25 +11,26 @@ nasim $(nasim_version) — all solutions for remote Ollama on black + terminal f
 
 Primary (recommended):
   nasim select
-  nasim launch --access ssh-tunnel --agent claude --model qwen3-coder:14b
+  nasim launch --access ssh-tunnel --agent claude --model qwen2.5-coder:14b
                                    Access: ssh-tunnel | tailscale | litellm
                                    Agent:  claude | aider | opencode | terminal
+
+Utility (model discovery is now first-class to fix "models not shown"):
+  nasim models [--url URL]         List models available on black (or at URL). No tunnel needed.
+  nasim doctor [--url URL]         Probe + full black model list + ps
+  nasim status                     Alias for doctor
+  nasim config [edit|show|path]    Manage external configuration
+  nasim tunnel {ssh|status|...}
 
 Legacy (still work):
   nasim claude [args...]
   nasim aider  [args...]
 
-Utility:
-  nasim doctor [--url URL]         Probe + black GPU/models state
-  nasim status                     Alias for doctor
-  nasim config [edit|show|path]    Manage external configuration
-  nasim tunnel {ssh|status|...}
-
 Env / Config:
   All values (BLACK_HOST, DEFAULT_MODEL, ports, orders) can come from
   $NASIM_CONFIG_FILE or environment. See 'nasim config show'.
 
-See research/ and recipes/ for details. Every combo is exercised by the harness.
+See research/ and recipes/ for details. Every combo + real model-powered tests in tests/.
 EOF
 }
 
@@ -115,6 +116,7 @@ nasim_main() {
         claude|code)     legacy_claude "$@" ;;
         aider)           legacy_aider "$@" ;;
         doctor|probe|status) nasim_doctor "$@" ;;
+        models|list-models) nasim_models "$@" ;;
         tunnel)          cmd_tunnel "$@" ;;
         config)          cmd_config "$@" ;;
         version)         echo "$(nasim_version)" ;;

@@ -13,15 +13,21 @@ probe_and_show() {
     log "probing $url ..."
     if probe_url "$url"; then
         log "OK: endpoint reachable"
-        # Best-effort model list to stderr (keeps stdout clean for url capture)
-        curl -s --max-time 5 "$url/api/tags" | python3 -c '
+        # Best-effort model list — do NOT swallow the print we want to show the user.
+        # 2>/dev/null only for python errors; the "  models:" goes to stderr on purpose.
+        if curl -sf --max-time 5 "$url/api/tags" -o /tmp/nasim-tags.$$.json 2>/dev/null; then
+            python3 -c '
 import sys, json
 try:
-    d=json.load(sys.stdin)
-    names=[m.get("name","?") for m in d.get("models",[])][:6]
+    with open("/tmp/nasim-tags.$$.json") as f: d=json.load(f)
+    names=[m.get("name","?") for m in d.get("models",[])][:8]
     print("  models:", " ".join(names), file=sys.stderr)
-except: print("  (could not parse model list)", file=sys.stderr)
-' 2>/dev/null || true
+except Exception: print("  (could not parse model list)", file=sys.stderr)
+' 2>/dev/null || echo "  (model list parse error)" >&2
+            rm -f /tmp/nasim-tags.$$.json
+        else
+            echo "  (could not fetch /api/tags for model list)" >&2
+        fi
         return 0
     else
         log "FAIL: $url not reachable"
@@ -29,7 +35,30 @@ except: print("  (could not parse model list)", file=sys.stderr)
     fi
 }
 
-# Enhanced doctor (uses config, always shows black side via ssh when possible)
+# List models directly from black via SSH (no tunnel required). Always works for discovery.
+list_models_on_black() {
+    if ! have ssh; then
+        echo "  (ssh not available; cannot list black models)"
+        return 1
+    fi
+    echo "  models available on black (via ssh to ${BLACK_HOST}:11434):"
+    ssh -o ConnectTimeout="${SSH_CONNECT_TIMEOUT:-5}" "$BLACK_HOST" '
+        curl -s --max-time 8 http://localhost:11434/api/tags 2>/dev/null | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    for m in d.get(\"models\", []):
+        name = m.get(\"name\", \"?\")
+        psize = m.get(\"details\", {}).get(\"parameter_size\", \"?\")
+        q = m.get(\"details\", {}).get(\"quantization_level\", \"?\")
+        print(\"    - \" + name + \" (\" + psize + \", \" + q + \")\")
+except Exception as e:
+    print(\"    (parse error: \" + str(e) + \")\")
+" 2>/dev/null || echo "    (failed to fetch/parse tags on black)"
+    ' 2>/dev/null || echo "    (ssh to black for /api/tags failed)"
+}
+
+# Enhanced doctor (uses config, always shows black side via ssh + effective url probe)
 nasim_doctor() {
     local url="${NASIM_REMOTE_URL:-http://127.0.0.1:${DEFAULT_LOCAL_PORT}}"
     if [[ $# -gt 0 && "$1" == "--url" ]]; then url="$2"; fi
@@ -39,7 +68,7 @@ nasim_doctor() {
     echo "  black host:    $BLACK_HOST"
 
     if probe_and_show "$url"; then
-        : # good for agents
+        : # good for agents (also printed models if reachable)
     else
         if [[ -z "${NASIM_REMOTE_URL:-}" ]]; then
             log "No active local tunnel (or NASIM_REMOTE_URL) on the default port."
@@ -47,11 +76,50 @@ nasim_doctor() {
         fi
     fi
 
-    # Always surface black-side reality (this is often the real signal)
+    # Always surface authoritative black model inventory (this solves "models are not shown")
+    list_models_on_black
+
+    # black-side runtime
     if have ssh; then
         echo "  black ollama ps (via ssh):"
         ssh -o ConnectTimeout="${SSH_CONNECT_TIMEOUT:-4}" "$BLACK_HOST" \
             'ollama ps 2>/dev/null || curl -s http://localhost:11434/api/ps | head -c 300' \
             2>/dev/null || echo "    (ssh to black for ps failed)"
     fi
+}
+
+# First-class model listing (usable in select flows, CI, user discovery). No tunnel needed.
+nasim_models() {
+    local url=""
+    if [[ $# -gt 0 && "$1" == "--url" ]]; then
+        url="$2"
+        echo "Models via provided url $url :"
+        curl -s --max-time 6 "$url/api/tags" | python3 -c '
+import sys, json
+try:
+    d=json.load(sys.stdin)
+    for m in d.get("models",[]):
+        print("  - " + m.get("name","?"))
+except: print("  (error)")
+' 2>/dev/null || echo "  (failed)"
+    else
+        list_models_on_black
+    fi
+}
+
+# Best-effort: is this exact tag present in black's inventory? (used to warn on bad defaults/selects)
+model_exists_on_black() {
+    local want="$1"
+    # Fast path: ask black directly over ssh (no tunnel)
+    if have ssh; then
+        ssh -o ConnectTimeout=4 "$BLACK_HOST" "
+            curl -s --max-time 5 http://localhost:11434/api/tags 2>/dev/null | python3 -c '
+import sys, json
+d=json.load(sys.stdin)
+names=[m.get(\"name\",\"\") for m in d.get(\"models\",[])]
+print(\"yes\" if \"${want}\" in names else \"no\")
+' 2>/dev/null
+        " 2>/dev/null | grep -q yes && return 0
+    fi
+    return 1
 }

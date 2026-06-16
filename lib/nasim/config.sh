@@ -9,7 +9,8 @@ NASIM_CONFIG_FILE="${NASIM_CONFIG_FILE:-$NASIM_CONFIG_DIR/nasim.conf}"
 
 _nasim_config_defaults() {
     BLACK_HOST="${BLACK_HOST:-black}"
-    DEFAULT_MODEL="${DEFAULT_MODEL:-qwen3-coder:14b}"
+    # Use a model proven to exist on black (from live /api/tags). qwen3-coder:14b does not; this was a major cause of "models not working".
+    DEFAULT_MODEL="${DEFAULT_MODEL:-qwen2.5-coder:14b}"
     DEFAULT_LOCAL_PORT="${DEFAULT_LOCAL_PORT:-11435}"
     LITELLM_PORT="${LITELLM_PORT:-4000}"
 
@@ -87,7 +88,8 @@ nasim_config_edit() {
 # Precedence: environment variables and CLI flags override this file.
 
 BLACK_HOST=black
-DEFAULT_MODEL=qwen3-coder:14b
+# DEFAULT_MODEL must be an *exact* tag from `nasim models` on your black (qwen3-coder:14b does not exist on most installs; was a root cause of "nothing works").
+DEFAULT_MODEL=qwen2.5-coder:14b
 # DEFAULT_LOCAL_PORT=11435
 # LITELLM_PORT=4000
 

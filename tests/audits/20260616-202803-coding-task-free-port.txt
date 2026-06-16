@@ -1,0 +1,14 @@
+```bash
+# Function to find the next free TCP port >= a given base
+# It checks ports in use by ss/netstat and echoes the first available one
+# Ensures that SSH tunnels do not collide with other services
+# Critical for avoiding port conflicts and maintaining tunnel integrity
+
+nasim_free_port() {
+    local base=$1
+    while ss -tuln | awk '{print $4}' | grep ":$base" > /dev/null; do
+        ((base++))
+    done
+    echo $base
+}
+```
