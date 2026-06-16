@@ -2,12 +2,17 @@
 # Source this file — do not execute directly.
 #
 # nasim — toggle Claude Code between the Anthropic cloud and a local Ollama
-#         backend reached over an SSH tunnel to the Nasim Bridge.
+#         backend (via bridge or direct native). Direct mode recommended for
+#         reliable agentic use with local models (Aider, OpenCode, claude via
+#         Ollama's native Anthropic compat, etc.).
 #
-#   nasim start    route Claude Code to Ollama; show available models
-#   nasim stop     full rollback to the Anthropic cloud
-#   nasim status   backend, tunnel, bridge health, active model
-#   nasim models   list Ollama models reachable through the bridge
+#   nasim start          route Claude Code to Ollama via bridge + picker injection
+#   nasim stop           full rollback (bridge mode)
+#   nasim status         backend, tunnel, health
+#   nasim models         list via bridge
+#   nasim direct-start   native Ollama forward (11434); sets OLLAMA_* + ANTHROPIC_* for claude/aider
+#   nasim direct-stop    close direct tunnel + clear env
+#   nasim direct-status  report direct tunnel liveness
 #
 # This shim holds NO logic (project rule AP-03). All decisions live in the
 # Python package `python -m nasim`. The shim exists for one reason only: env

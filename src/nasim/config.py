@@ -35,6 +35,8 @@ _SCHEMA: Tuple[Tuple[str, str, str, str, Callable[[str], Any]], ...] = (
     ("fast_model", "models", "fast", "FAST_MODEL", str),
     ("recommended_model", "models", "recommended", "NASIM_RECOMMENDED_MODEL", str),
     ("debug_dump", "bridge", "debug_dump", "BRIDGE_DEBUG_DUMP", str),
+    ("direct_local_port", "direct", "local_port", "NASIM_DIRECT_LOCAL_PORT", int),
+    ("direct_remote_port", "direct", "remote_port", "NASIM_DIRECT_REMOTE_PORT", int),
 )
 
 _DEFAULTS: Dict[str, Any] = {
@@ -52,6 +54,8 @@ _DEFAULTS: Dict[str, Any] = {
     "fast_model": "qwen2.5-coder:7b",
     "recommended_model": "qwen2.5-coder:14b",
     "debug_dump": "",
+    "direct_local_port": 11434,
+    "direct_remote_port": 11434,
 }
 
 
@@ -104,6 +108,8 @@ class Config:
         recommended_model (str): Model steered on start for agentic work.
         debug_dump (str): If non-empty, a directory the bridge dumps each
             translated Ollama request/response to (diagnostics; off by default).
+        direct_local_port (int): Local port for native Ollama forward (direct mode).
+        direct_remote_port (int): Remote Ollama port on server (usually 11434).
     """
 
     remote_host: str
@@ -120,11 +126,18 @@ class Config:
     fast_model: str
     recommended_model: str
     debug_dump: str
+    direct_local_port: int
+    direct_remote_port: int
 
     @property
     def base_url(self) -> str:
         """Anthropic base URL the CLI is pointed at (the tunnel entrance)."""
         return f"http://localhost:{self.local_port}"
+
+    @property
+    def direct_base_url(self) -> str:
+        """Base URL for native Ollama (direct mode, after tunnel)."""
+        return f"http://localhost:{self.direct_local_port}"
 
     @classmethod
     def load(cls, a_cfg_dir: Optional[Path] = None) -> "Config":

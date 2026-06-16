@@ -57,6 +57,23 @@ nasim status
 nasim stop          # back to the Anthropic cloud; picker + model restored
 ```
 
+## Direct native Ollama access (recommended for daily reliable use)
+
+The bridge translation can have fidelity gaps with agentic tool use and local models. For robust access to Ollama on black from your laptop:
+
+```bash
+nasim direct-start     # opens SSH tunnel to native :11434 on black; exports OLLAMA_HOST + ANTHROPIC_BASE_URL
+# (same shell)
+aider --model ollama_chat/llama3.1:8b   # or qwen2.5-coder:14b etc (install: pipx install aider-install)
+# or
+claude                  # real claude binary, if it respects ANTHROPIC_BASE_URL (Ollama provides native compat since v0.14)
+# or any other tool: OLLAMA_HOST is set for the shell
+nasim direct-status
+nasim direct-stop
+```
+
+See also "Direct access" notes in docs/runbook.md and the cfg [direct] section. This path reuses the proven tunnel code but talks native Ollama — no custom translation.
+
 ## Deploy the bridge to the server
 
 ```bash

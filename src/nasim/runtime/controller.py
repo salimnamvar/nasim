@@ -66,6 +66,13 @@ class NasimController:
             a_pid_file=self._paths.pid_file,
             a_connect_timeout=a_config.ssh_connect_timeout,
         )
+        self._direct_tunnel = SSHTunnel(
+            a_local_port=a_config.direct_local_port,
+            a_remote_host=a_config.remote_host,
+            a_remote_port=a_config.direct_remote_port,
+            a_pid_file=self._paths.direct_pid_file,
+            a_connect_timeout=a_config.ssh_connect_timeout,
+        )
         self._picker = ModelPicker(self._paths.claude_json)
         self._settings = ClaudeSettings(self._paths.settings_json, self._paths.saved_model_file)
         self._state = StateStore(self._paths.state_file, self._paths.env_file)
@@ -210,3 +217,51 @@ class NasimController:
                 size_gb = model_sizes.get(name)
                 result.append({"name": name, "tags": tags, "size_gb": size_gb})
         return (success, result)
+
+    # --- Direct native Ollama access (recommended for reliable agentic use) ---
+
+    def _direct_exports(self) -> Dict[str, str]:
+        """Env for native Ollama + Anthropic compat (Ollama v0.14+)."""
+        base = self._config.direct_base_url
+        return {
+            "OLLAMA_HOST": base,
+            "OLLAMA_API_BASE": base,
+            "ANTHROPIC_BASE_URL": base,
+            "ANTHROPIC_AUTH_TOKEN": "ollama",
+        }
+
+    def direct_start(self) -> Tuple[bool, Dict[str, Any]]:
+        """Open direct tunnel to native Ollama (11434), verify reachability, emit env."""
+        result: Dict[str, Any] = {}
+        self._paths.ensure()
+        ok, _ = self._direct_tunnel.start(a_raise_on_error=False)
+        if not ok:
+            return False, {"error": f"direct tunnel to {self._config.remote_host} failed"}
+        # Verify native Ollama
+        try:
+            import urllib.request, json
+            with urllib.request.urlopen(f"{self._config.direct_base_url}/api/tags", timeout=5) as r:
+                data = json.loads(r.read())
+                models = [m.get("name") for m in data.get("models", [])]
+        except Exception as exc:
+            self._direct_tunnel.stop(a_raise_on_error=False)
+            return False, {"error": f"direct ollama unreachable: {exc}"}
+        self._state.set_backend("direct")
+        self._state.write_exports(self._direct_exports())
+        return True, {"base_url": self._config.direct_base_url, "models": models[:5]}
+
+    def direct_stop(self) -> Tuple[bool, Dict[str, Any]]:
+        self._paths.ensure()
+        self._direct_tunnel.stop(a_raise_on_error=False)
+        self._state.set_backend("none")
+        self._state.write_unsets(["OLLAMA_HOST", "OLLAMA_API_BASE", "ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN"])
+        return True, {}
+
+    def direct_status(self) -> Tuple[bool, Dict[str, Any]]:
+        alive = self._direct_tunnel.is_alive()
+        backend = self._state.get_backend()
+        return True, {
+            "backend": backend,
+            "direct_tunnel_alive": alive,
+            "base_url": self._config.direct_base_url,
+        }

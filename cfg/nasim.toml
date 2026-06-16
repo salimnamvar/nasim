@@ -35,3 +35,10 @@ default     = "qwen2.5-coder:14b"
 fast        = "qwen2.5-coder:7b"
 # Steered on start for agentic work; start warns if a weaker model is active.
 recommended = "qwen2.5-coder:14b"
+
+[direct]
+# Native Ollama port forward (no bridge/translation). Recommended for reliable
+# agentic use with Aider, OpenCode, real claude (via Ollama's Anthropic compat),
+# or any OLLAMA_HOST tool. Change local if you also run Ollama on the laptop.
+local_port  = 11434
+remote_port = 11434

@@ -68,9 +68,9 @@ def main(a_argv: Optional[List[str]] = None) -> int:
         int: Process exit code — 0 on success, non-zero on failure.
     """
     parser = argparse.ArgumentParser(
-        prog="nasim", description="Toggle Claude Code between Anthropic cloud and local Ollama."
+        prog="nasim", description="Toggle Claude Code between Anthropic cloud and local Ollama. Also provides direct native Ollama access (recommended for reliable agentic work)."
     )
-    parser.add_argument("command", choices=["start", "stop", "status", "models"], help="action to perform")
+    parser.add_argument("command", choices=["start", "stop", "status", "models", "direct-start", "direct-stop", "direct-status"], help="action to perform (direct-* for native Ollama without bridge)")
     args = parser.parse_args(a_argv)
 
     controller = NasimController(Config.load())
@@ -89,6 +89,25 @@ def main(a_argv: Optional[List[str]] = None) -> int:
     elif args.command == "status":
         _, report = controller.status()
         _print_status(report)
+    elif args.command == "direct-start":
+        ok, report = controller.direct_start()
+        if ok:
+            print("nasim DIRECT STARTED — native Ollama on black (no bridge translation)")
+            print(f"  Base   : {report.get('base_url')}")
+            print(f"  Models : {', '.join(report.get('models', [])) or '(none)'} ...")
+            print("  Tip    : in THIS shell: claude (if using base_url) or aider --model ollama_chat/<tag> or any OLLAMA_HOST tool")
+            print("           Use nasim direct-status / direct-stop when done")
+        else:
+            print(f"nasim direct-start FAILED — {report.get('error', 'unknown')}")
+            code = 1
+    elif args.command == "direct-stop":
+        controller.direct_stop()
+        print("nasim DIRECT STOPPED — native Ollama tunnel closed, env cleared")
+    elif args.command == "direct-status":
+        _, report = controller.direct_status()
+        print(f"Backend          : {report.get('backend')}")
+        print(f"Direct tunnel    : {'alive' if report.get('direct_tunnel_alive') else 'down'}")
+        print(f"Direct base      : {report.get('base_url')}")
     else:  # models
         ok, entries = controller.models()
         if ok:

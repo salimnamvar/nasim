@@ -17,11 +17,15 @@ upgrades `fastapi uvicorn httpx` in that venv.
 ## Operate
 
 ```bash
-nasim status                                   # client view
-ssh <host> 'curl -s 127.0.0.1:8080/health'     # server view
+nasim status                                   # client view (bridge or direct)
+nasim direct-status                            # direct native tunnel
+ssh <host> 'curl -s 127.0.0.1:8080/health'     # server view (bridge)
+ssh <host> 'curl -s http://localhost:11434/api/tags | head -c 200'  # native ollama
 ssh <host> 'systemctl is-active nasim-bridge'  # service state
 ssh <host> 'journalctl -u nasim-bridge -f'     # live logs
 ```
+
+For daily reliable agentic work (Aider, OpenCode, claude via compat), prefer `nasim direct-start` (native, no translation). Bridge mode is for exact Claude picker injection.
 
 `/health` reports Ollama connectivity, the default/fast/recommended models, the
 context window, and the available model inventory.

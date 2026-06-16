@@ -29,6 +29,18 @@ rollback: ## nasim start/stop rollback contract
 	$(PYTEST) -m rollback test/rollback
 
 e2e: ## real claude binary writes/edits files via Ollama
+	# Direct mode (native) tested manually or via integration that only needs ssh+ollama (no bridge service)
+
+test-direct: ## quick direct native reachability (requires ssh black + ollama on black)
+	python -m nasim direct-start || true
+	python -c "
+import urllib.request, json, os
+base = 'http://localhost:11434'
+print('direct base:', base)
+data = json.loads(urllib.request.urlopen(base + '/api/tags', timeout=6).read())
+print('models on black via direct:', [m['name'] for m in data.get('models', [])][:3])
+" 
+	python -m nasim direct-stop || true
 	$(PYTEST) -m e2e test/e2e
 
 deploy: ## push the bridge to the server and restart the service

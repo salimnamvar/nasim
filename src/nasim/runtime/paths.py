@@ -39,8 +39,13 @@ class RuntimePaths:
 
     @property
     def pid_file(self) -> Path:
-        """SSH tunnel PID file."""
+        """SSH tunnel PID file (bridge mode)."""
         return self.nasim_dir / "tunnel.pid"
+
+    @property
+    def direct_pid_file(self) -> Path:
+        """SSH tunnel PID file for native direct Ollama forward (11434)."""
+        return self.nasim_dir / "direct-tunnel.pid"
 
     @property
     def saved_model_file(self) -> Path:
