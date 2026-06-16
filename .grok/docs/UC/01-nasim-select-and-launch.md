@@ -9,10 +9,10 @@
 - SSH key auth to "black" works (or Tailscale up for that option).
 - Ollama running on black with at least one model pulled (GPU preferred).
 - Desired agent binary installed on laptop (claude, aider, opencode) or user chooses "terminal" fallback.
-- nasim script available in PATH or ./ .grok/bin/nasim (or .claude equivalent).
+- nasim script available in PATH or ./bin/nasim.
 
 ## Main Success Scenario (SSH tunnel + claude example)
-1. User runs `nasim select` (or `nasim select --access ssh-tunnel --agent claude --model qwen2.5-coder:14b` for non-interactive).
+1. User runs `nasim select` (or `nasim select --access ssh-tunnel --agent claude --model qwen3-coder:14b` for non-interactive).
 2. nasim presents menu (or uses flags): Access methods (ssh-tunnel [default, always available], tailscale, litellm), Agents (claude, aider, opencode, terminal/shell).
 3. User selects "ssh-tunnel" + "claude" + a model known on black (e.g. gemma4 or qwen2.5-coder:14b from `ssh black 'curl .../api/tags'`).
 4. nasim:

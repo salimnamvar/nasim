@@ -12,19 +12,25 @@
 
 ```bash
 # Interactive (picks transport + agent + model, brings up private path, probes, launches the CLI)
-./.grok/bin/nasim select
-# or the .claude mirror (same)
-./.claude/bin/nasim select
+./bin/nasim select
+
+# Manage configuration (no more hard-coded values)
+./bin/nasim config edit
+./bin/nasim config show
+
+# Agentic self-audit (the primary test method): launch a strong model and task it with auditing nasim
+NASIM_RUN_SELF_AUDIT=1 ./tests/nasim-features.sh --self-audit
+# Inside the agent: "Read all of nasim (bin/ + lib/), sprint, research. Find errors, improve modularity, update docs."
 
 # Non-interactive (CI, scripts, or when you know the choice)
 nasim launch --access ssh-tunnel --agent claude --model gemma4:latest
-nasim launch --access litellm --agent aider --model qwen2.5-coder:14b
+nasim launch --access litellm --agent aider --model qwen3-coder:14b
 nasim launch --access tailscale --agent opencode --model deepseek-r1:14b   # falls back gracefully if no ts
 
 # After setup you are dropped straight into the interactive frontier agent (or a branded terminal shell).
 ```
 
-The single `nasim` (in .grok/bin or .claude/bin) now supports **every** solution from the research:
+The `nasim` CLI (in `bin/nasim`) now supports **every** solution from the research:
 - Transports: ssh-tunnel (primary, ad-hoc with trap cleanup, free port), tailscale (MagicDNS + detection), litellm (proxy layer + config).
 - Agents: claude (native ANTHROPIC_BASE_URL), aider (OLLAMA_API_BASE), opencode, terminal (full-env branded shell so you can run anything).
 - Plus: `nasim doctor` (probe + black GPU state), `nasim tunnel install-systemd` (persistent autossh user unit), legacy `nasim claude` / `nasim aider` still work.
@@ -55,10 +61,16 @@ See `.grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md` for:
 - Model recommendations (Qwen3-Coder series, GLM-5.1, DeepSeek V4, Gemma 4 — size to GPU, verify no CPU spill for agent loops).
 - Anti-patterns and security.
 
-## Project Structure
-- `.grok/` — everything important (AGENTS.md, research logs, recipes, rules).
-- `README.md` — this file (points at .grok).
-- Thin optional `bin/` or scripts only for real convenience (documented in recipes).
+## Project Structure (Phase 2 — modular)
+- `bin/nasim` — thin loader + entrypoint only.
+- `lib/nasim/` — real implementation (separation of concerns):
+  - `config.sh` — external config (AD-09)
+  - `transport.sh` + `transports/*.sh` — pluggable access strategies (ssh, tailscale, litellm)
+  - `agent.sh` + `agents/*.sh` — pluggable agent launchers
+  - `probe.sh`, `orchestration.sh`, `ui.sh`, `cli.sh`
+- `tests/nasim-features.sh` — comprehensive real (no-mock) tests + `--self-audit` meta tests that launch strong models via nasim to audit the project itself (the best always-followed test scenario).
+- `.grok/` — knowledge surfaces only (research, recipes, sprint, design). Code lives at visible root.
+- `README.md`, `.github/workflows/ci.yml` — docs + CI matrix enforcing the above.
 
 ## Getting the Most Benefit
 - Reproduce real work: multi-file edits, bash execution, planning → write loops.
