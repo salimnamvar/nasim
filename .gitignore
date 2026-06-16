@@ -28,3 +28,16 @@ docs/*-local-command-caveat*.txt
 # Editor / OS
 *.swp
 .DS_Store
+
+# Project .claude/ (Claude brain for this project) — gitignored on BB origin per global rules.
+# Enriched only to personal gh-private via post-commit hook. .grok/ is the primary committed knowledge here.
+.claude/
+
+# Per-run test artifacts, temp tunnels, litellm sessions, etc.
+*.tmp
+nasim-*.log
+/tmp/nasim-*
+/tmp/litellm-nasim-*
+
+# CI caches if any
+.github/workflows/_tmp/
