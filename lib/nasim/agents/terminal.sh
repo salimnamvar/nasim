@@ -15,6 +15,11 @@ launch_terminal() {
     export OLLAMA_API_BASE="$url"
     export NASIM_REMOTE_URL="$url"
     export NASIM_MODEL="$model"
+    export NASIM_ACTIVE=1
     export PS1="nasim[black:${model}] \$ "
+
+    echo "nasim: remote env active in this shell (branded prompt)."
+    echo "  Running 'claude', 'aider', etc. here will use Ollama models on black."
+    echo "  Type 'exit' to leave and return to normal shells (default real APIs)."
     exec "${SHELL:-/bin/bash}" -i
 }
