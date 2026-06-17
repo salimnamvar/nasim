@@ -1,8 +1,0 @@
-The analysis of the nasim tool reveals six primary issues causing models not to show up and function properly. Each issue is tied to a specific file and line pattern, with suggested fixes:
-
-1. **Doctor Command Misreporting**  
-   File: `lib/nasim/probe.sh`  
-   - **Issue**: The doctor script incorrectly reports "OK" despite stale connections.  
-   - **Fix**: Update the probe logic to check for active connections instead of just existing ones.
-
-2. **Probe_and_Show Redirection**

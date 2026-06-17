@@ -19,6 +19,7 @@ launch_agent() {
 
     case "$agent" in
         claude|code)      launch_claude "$url" "$model" "$@" ;;
+        grok)             launch_grok "$url" "$model" "$@" ;;
         aider)            launch_aider  "$url" "$model" "$@" ;;
         opencode|open)    launch_opencode "$url" "$model" "$@" ;;
         terminal|shell)   launch_terminal "$url" "$model" ;;

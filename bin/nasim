@@ -5,9 +5,19 @@
 # All hard-coded values moved to config (AD-09).
 # Primary validation: real black + agentic self-audit loops (AD-10).
 #
+# NEW in v3:
+#   - daemon.sh: persistent tunnel lifecycle (Option A)
+#   - rollback.sh: env isolation + restore (CRITICAL for cloud agent safety)
+#   - context.sh: project context detection + injection (Option A)
+#   - kb.sh: knowledge base indexing + RAG (Option B)
+#   - vram.sh: GPU VRAM fit calculator (Option A/B)
+#   - session.sh: session history + resume (Option A/C)
+#   - code.sh: unified "nasim code" entrypoint (Option C)
+#   - agents/grok.sh: Grok Code launcher
+#
 # This file must remain small and only do:
 #   - early config
-#   - sourcing of concerns
+#   - sourcing of concerns in dependency order
 #   - call into nasim_main
 #
 # nasim():
@@ -20,7 +30,7 @@
 
 set -euo pipefail
 
-NASIM_VERSION="2026-06-16-v2-litellm-claude-fix+strong-default+docstrings"   # litellm probe/model-name + claude /v1 base + strong DEFAULT_MODEL (deepseek-r1:14b) + early weak-model warnings + Google docstrings via model assistance; full harness re-validated.
+NASIM_VERSION="2026-06-17-v3-daemon+context+kb+vram+session+code+grok+rollback-safe"
 
 # Allow the harness to source us for function access without executing CLI
 if [[ "${NASIM_INTERNAL:-}" == "1" && "${BASH_SOURCE[0]}" != "${0}" ]]; then
@@ -49,21 +59,35 @@ have() { command -v "$1" >/dev/null 2>&1; }
 #   Prevents real ssh, real exec of agents, real litellm start. Used by all strategies.
 is_dry() { [[ "${NASIM_TEST_MODE:-}${1:-}" == *dry* || "${NASIM_DRY_RUN:-}" == "1" ]]; }
 
-# --- Load order (important for dependencies) ---
+# --- Load order (CRITICAL for dependencies) ---
 # 1. Config (provides BLACK_HOST, DEFAULT_*, orders, etc.)
 source "$NASIM_LIB_DIR/config.sh"
 
-# 2. Common concerns
+# 2. Rollback (MUST load before anything that modifies env)
+source "$NASIM_LIB_DIR/rollback.sh"
+
+# 3. Common concerns
 source "$NASIM_LIB_DIR/probe.sh"
 source "$NASIM_LIB_DIR/transport.sh"
 source "$NASIM_LIB_DIR/agent.sh"
 
-# 3. UI + orchestration
+# 4. New v3 modules
+source "$NASIM_LIB_DIR/vram.sh"
+source "$NASIM_LIB_DIR/context.sh"
+source "$NASIM_LIB_DIR/kb.sh"
+source "$NASIM_LIB_DIR/session.sh"
+source "$NASIM_LIB_DIR/daemon.sh"
+source "$NASIM_LIB_DIR/code.sh"
+
+# 5. UI + orchestration
 source "$NASIM_LIB_DIR/ui.sh"
 source "$NASIM_LIB_DIR/orchestration.sh"
 
-# 4. CLI dispatch + help
+# 6. CLI dispatch + help (depends on all above)
 source "$NASIM_LIB_DIR/cli.sh"
+
+# Mark top-level for rollback trap registration
+export NASIM_TOP_LEVEL=1
 
 # Hand off to the real command handler
 nasim_main "$@"
