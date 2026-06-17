@@ -54,12 +54,17 @@ except: print("  (list via endpoint failed; see ssh inventory)", file=sys.stderr
 
 # Legacy thin paths (still supported)
 # legacy_claude(...):
-#   Back-compat for "nasim claude [args]". If no NASIM_REMOTE_URL, starts ad-hoc tunnel then calls launch_claude.
+#   Back-compat for "nasim claude [args]". Prefers active daemon url (from state file) so `nasim start` + `nasim claude` in new shells works without ad-hoc.
 legacy_claude() {
-    local url="${NASIM_REMOTE_URL:-http://127.0.0.1:${DEFAULT_LOCAL_PORT}}"
+    local url="${NASIM_REMOTE_URL:-}"
     local model="${NASIM_MODEL:-$DEFAULT_MODEL}"
-    if [[ -z "${NASIM_REMOTE_URL:-}" ]]; then
-        log "no NASIM_REMOTE_URL; starting ad-hoc ssh tunnel for legacy claude..."
+    if [[ -z "$url" ]]; then
+        if type daemon_is_running >/dev/null 2>&1 && daemon_is_running; then
+            url=$(daemon_url)
+        fi
+    fi
+    if [[ -z "$url" ]]; then
+        log "no active tunnel; starting ad-hoc ssh tunnel for legacy claude..."
         url=$(setup_ssh_tunnel)
     fi
     launch_claude "$url" "$model" "$@"

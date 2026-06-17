@@ -30,7 +30,7 @@
 
 set -euo pipefail
 
-NASIM_VERSION="2026-06-17-v3-daemon+context+kb+vram+session+code+grok+rollback-safe"
+NASIM_VERSION="2026-06-17-v3-legacy-daemon-url+clean-direct-claude+cfg-task"
 
 # Allow the harness to source us for function access without executing CLI
 if [[ "${NASIM_INTERNAL:-}" == "1" && "${BASH_SOURCE[0]}" != "${0}" ]]; then
@@ -40,20 +40,6 @@ fi
 # Resolve lib dir relative to this script (works when sourced or exec'd)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NASIM_LIB_DIR="$SCRIPT_DIR/../lib/nasim"
-
-# Auto-detect free-claude-code clone (placed by user per instructions, sibling to nasim checkout)
-# Used for high-fidelity ollama<->claude-code via proper gateway proxy (model ids "anthropic/ollama/...", tool streaming, thinking normalization for deepseek-r1 etc.)
-NASIM_FCC_SRC_DIR=""
-for cand in \
-  "$SCRIPT_DIR/../../free-claude-code" \
-  "$SCRIPT_DIR/../free-claude-code" \
-  "${HOME}/prj/salim/nasim/code/free-claude-code" ; do
-  if [[ -d "$cand/api" && -f "$cand/api/app.py" ]]; then
-    NASIM_FCC_SRC_DIR="$(cd "$cand" && pwd)"
-    break
-  fi
-done
-export NASIM_FCC_SRC_DIR
 
 # --- Minimal shared utilities (available to all modules) ---
 # die(msg):
@@ -92,9 +78,6 @@ source "$NASIM_LIB_DIR/kb.sh"
 source "$NASIM_LIB_DIR/session.sh"
 source "$NASIM_LIB_DIR/daemon.sh"
 source "$NASIM_LIB_DIR/code.sh"
-
-# 4b. FCC proxy support (for claude-code + ollama tool-use fidelity, based on free-claude-code)
-[[ -f "$NASIM_LIB_DIR/fcc.sh" ]] && source "$NASIM_LIB_DIR/fcc.sh" || true
 
 # 5. UI + orchestration
 source "$NASIM_LIB_DIR/ui.sh"

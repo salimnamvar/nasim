@@ -343,9 +343,14 @@ nasim_main() {
             legacy_aider "$@" ;;
         opencode|open)
             # Legacy opencode launch
-            local url="${NASIM_REMOTE_URL:-http://127.0.0.1:${DEFAULT_LOCAL_PORT}}"
+            local url="${NASIM_REMOTE_URL:-}"
             local model="${NASIM_MODEL:-$DEFAULT_MODEL}"
-            if [[ -z "${NASIM_REMOTE_URL:-}" ]]; then
+            if [[ -z "$url" ]]; then
+                if type daemon_is_running >/dev/null 2>&1 && daemon_is_running; then
+                    url=$(daemon_url)
+                fi
+            fi
+            if [[ -z "$url" ]]; then
                 url=$(setup_ssh_tunnel)
             fi
             launch_opencode "$url" "$model" "$@"

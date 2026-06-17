@@ -251,9 +251,7 @@ $prompt"
 
     case "$agent" in
         claude|code)
-            # Claude Code one-shot: -m "message" (NOT --prompt)
-            # Must map all 4 tiers or Claude falls back to Anthropic model names
-            # NOTE: Do NOT append /v1 — Ollama adds it internally for Anthropic compat
+            # Claude Code one-shot: -m "message"
             ANTHROPIC_AUTH_TOKEN=ollama \
             ANTHROPIC_BASE_URL="${url%/}" \
             ANTHROPIC_API_KEY="" \
@@ -261,6 +259,10 @@ $prompt"
             ANTHROPIC_DEFAULT_SONNET_MODEL="$model" \
             ANTHROPIC_DEFAULT_OPUS_MODEL="$model" \
             CLAUDE_CODE_SUBAGENT_MODEL="$model" \
+            CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1 \
+            CLAUDE_CODE_AUTO_COMPACT_WINDOW=190000 \
+            TERM=dumb \
+            PYTHONIOENCODING=utf-8 \
             DISABLE_TELEMETRY=1 \
             claude --model "$model" -m "$full_prompt" "$@"
             ;;

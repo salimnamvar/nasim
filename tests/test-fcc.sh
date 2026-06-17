@@ -26,20 +26,14 @@ else
   echo "SKIP: fcc functions not loaded"
 fi
 
-echo "=== test-fcc: claude launch dry produces gateway model when fcc present ==="
-# Force the fcc path in dry (mock fcc_start_proxy)
-fcc_start_proxy() { echo "http://127.0.0.1:18081"; }
-
+echo "=== test-fcc (now optional): claude launch dry has full discovery envs ==="
 NASIM_DRY_RUN=1 \
   launch_claude "http://127.0.0.1:11435" "deepseek-r1:14b" 2>&1 | \
-  grep -q 'claude --model anthropic/ollama/deepseek-r1:14b' || {
-    echo "FAIL: expected gateway model id in dry claude cmd"
+  grep -q 'CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1' || {
+    echo "FAIL: expected discovery flag"
     exit 1
   }
-echo "PASS: launch_claude uses anthropic/ollama/... gateway id + fcc base in dry"
-
-# cleanup mock
-unset -f fcc_start_proxy
+echo "PASS: launch has gateway discovery + compact even in direct path"
 
 echo "=== test-fcc: rollback cleans fcc artifacts (if any) ==="
 # Touch fake pid to simulate

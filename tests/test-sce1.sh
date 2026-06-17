@@ -16,18 +16,12 @@ echo "PASS: setup.sh syntax ok"
 echo "=== test-sce1: claude launch for deepseek-r1 sets discovery + compact (fcc or direct) ==="
 NASIM_INTERNAL=1 source bin/nasim
 
-# mock fcc so we exercise the happy path
-fcc_start_proxy() { echo "http://127.0.0.1:18182"; }
-
 out=$(NASIM_DRY_RUN=1 launch_claude "http://127.0.0.1:11435" "deepseek-r1:14b" -p "find claude vars" 2>&1 || true)
 
 echo "$out" | grep -q 'CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1' || { echo "FAIL: missing gateway discovery"; exit 1; }
 echo "$out" | grep -q 'CLAUDE_CODE_AUTO_COMPACT_WINDOW=190000' || { echo "FAIL: missing compact"; exit 1; }
-echo "$out" | grep -q 'anthropic/ollama/deepseek-r1:14b' || { echo "FAIL: missing gateway model for sce1 deepseek"; exit 1; }
 
-echo "PASS: sce1 model launch has full fcc-derived flags + wrapped model"
-
-unset -f fcc_start_proxy
+echo "PASS: sce1 model launch has full discovery flags"
 
 echo "=== test-sce1: direct fallback still has tier + discovery (no fcc) ==="
 out2=$(NASIM_DRY_RUN=1 launch_claude "http://127.0.0.1:11435" "deepseek-r1:14b" 2>&1 || true)
