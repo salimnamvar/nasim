@@ -110,16 +110,26 @@ fcc_start_proxy() {
     local fcc_dir="$NASIM_FCC_SRC_DIR"
     # Launch uvicorn bound to the temp env (settings read FCC_ENV_FILE + dotenv)
     # Use --factory because create_app is a factory in some paths
-    FCC_ENV_FILE="$envf" \
-    PYTHONPATH="$fcc_dir" \
-    python3 -m uvicorn \
-        --app-dir "$fcc_dir" \
-        --factory api.app:create_app \
-        --host 127.0.0.1 \
-        --port "$port" \
-        --log-level error \
-        --timeout-graceful-shutdown 3 \
-        >/dev/null 2>&1 &
+    # Prefer uv (the way fcc itself is developed/installed) so we pull the exact
+    # locked deps without polluting user python.
+    if have uv; then
+        FCC_ENV_FILE="$envf" PYTHONPATH="$fcc_dir" \
+        uv --directory "$fcc_dir" --project . run --with uvicorn -- \
+            python -m uvicorn \
+            --app-dir "$fcc_dir" \
+            --factory api.app:create_app \
+            --host 127.0.0.1 --port "$port" --log-level error \
+            --timeout-graceful-shutdown 3 \
+            >/dev/null 2>&1 &
+    else
+        FCC_ENV_FILE="$envf" PYTHONPATH="$fcc_dir" \
+        python3 -m uvicorn \
+            --app-dir "$fcc_dir" \
+            --factory api.app:create_app \
+            --host 127.0.0.1 --port "$port" --log-level error \
+            --timeout-graceful-shutdown 3 \
+            >/dev/null 2>&1 &
+    fi
     local pid=$!
     echo "$pid" > "$NASIM_FCC_PID_FILE"
     echo "$port" > "$NASIM_FCC_PORT_FILE"
