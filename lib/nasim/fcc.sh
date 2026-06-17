@@ -39,12 +39,14 @@ _fcc_autodetect() {
         candidates+=("$(cd "$NASIM_LIB_DIR/../../../free-claude-code" 2>/dev/null && pwd || true)")
         candidates+=("$(cd "$NASIM_LIB_DIR/../../free-claude-code" 2>/dev/null && pwd || true)")
     fi
-    # common locations
+    # common locations for this user / project layout
     candidates+=(
         "$HOME/prj/salim/nasim/code/free-claude-code"
+        "$HOME/prj/salim/nasim/code/nasim/../free-claude-code"
         "$HOME/prj/nasim/code/free-claude-code"
         "$PWD/../free-claude-code"
         "$PWD/../../free-claude-code"
+        "$HOME/prj/salim/nasim/code/free-claude-code"
     )
     for c in "${candidates[@]}"; do
         if [[ -n "$c" && -f "$c/api/app.py" ]]; then
@@ -58,11 +60,12 @@ fcc_available() {
     _fcc_autodetect
     [[ -n "${NASIM_FCC_SRC_DIR:-}" && -f "$NASIM_FCC_SRC_DIR/api/app.py" ]] || return 1
     have python3 || return 1
-    # uvicorn is the hard runtime dep for the proxy; full stack (fastapi etc) will cause
-    # start to fallback cleanly if missing transitive packages. Users with `uv` or the
-    # fcc install will get the full gateway experience for claude+ollama tools.
-    python3 -c 'import uvicorn' 2>/dev/null || return 1
-    return 0
+    # uvicorn can be provided on the fly by `uv run --with uvicorn` (preferred for fcc).
+    # Only require importable uvicorn if we have no `uv`.
+    if python3 -c 'import uvicorn' 2>/dev/null || have uv; then
+        return 0
+    fi
+    return 1
 }
 
 _fcc_find_free_port() {

@@ -49,7 +49,8 @@ _nasim_config_load_file() {
         case "$key" in
             BLACK_HOST|DEFAULT_MODEL|DEFAULT_LOCAL_PORT|LITELLM_PORT| \
             ACCESS_ORDER|AGENT_ORDER|PROBE_TIMEOUT|PROBE_CONNECT_TIMEOUT| \
-            SSH_CONNECT_TIMEOUT|SSH_SERVER_ALIVE_INTERVAL|NASIM_VERSION_OVERRIDE)
+            SSH_CONNECT_TIMEOUT|SSH_SERVER_ALIVE_INTERVAL|NASIM_VERSION_OVERRIDE| \
+            NASIM_FCC_SRC_DIR)
                 # Strip surrounding quotes if present
                 val="${val#\"}"; val="${val%\"}"
                 val="${val#\'}"; val="${val%\'}"
@@ -105,6 +106,9 @@ DEFAULT_MODEL=deepseek-r1:14b
 # Interactive select presentation order
 # ACCESS_ORDER="ssh-tunnel tailscale litellm"
 # AGENT_ORDER="claude aider opencode terminal"
+
+# If you have the free-claude-code sibling checkout (for better claude + ollama tool use):
+# NASIM_FCC_SRC_DIR=/home/salim/prj/salim/nasim/code/free-claude-code
 EOF
         echo "Created default config at $NASIM_CONFIG_FILE"
     fi

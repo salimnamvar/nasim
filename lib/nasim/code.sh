@@ -73,6 +73,16 @@ EOF
         log "auto-detected agent: $agent"
     fi
 
+    # For claude (which is sensitive to tool-calling quality), prefer strong models.
+    # qwen2.5* often underperforms in agent loops vs deepseek-r1 / qwen3.
+    if [[ "$agent" == "claude" || "$agent" == "code" ]]; then
+        if [[ "$model" == *"qwen2.5"* || "$model" == *"qwen2"* ]]; then
+            log "Note: $model is not recommended for claude-code tool use. Prefer deepseek-r1:* or qwen3:*."
+            log "Switching model to deepseek-r1:14b for this claude session."
+            model="deepseek-r1:14b"
+        fi
+    fi
+
     # VRAM check before launch
     vram_check "$model" || {
         read -r -p "Model may not fit GPU. Continue anyway? (y/N): " yn
@@ -112,8 +122,8 @@ $kb_results"
         fi
     fi
 
-    # Prepare launch
-    log "launching $agent -> $url model=$model"
+    # Prepare launch. Specific agent launcher will emit detailed "launching ..." line.
+    # (Avoids duplicate messages.)
 
     # One-shot mode: prepend context to prompt, run once, exit
     if [[ -n "$one_shot" ]]; then
@@ -251,12 +261,21 @@ $prompt"
 
     case "$agent" in
         claude|code)
-            # Claude Code one-shot: -m "message"
-            # Use full var set (matches launch_claude + free-claude-code adapter expectations)
+            # Claude Code one-shot using full env surface + fcc proxy if available (for reliable tools)
             local ws="${CLAUDE_WORKSPACE:-$HOME/.fcc/agent_workspace}"
             mkdir -p "$ws" 2>/dev/null || true
             local ob="${url%/}"
-            ANTHROPIC_API_URL="${ob}/v1" \
+            local using_fcc=0
+            if type fcc_available >/dev/null 2>&1 && type fcc_start_proxy >/dev/null 2>&1 && [[ "${NASIM_USE_FCC:-1}" != "0" ]]; then
+                if fcc_available 2>/dev/null; then
+                    local purl
+                    if purl=$(fcc_start_proxy "$ob" "$model" 2>/dev/null); then
+                        ob="$purl"
+                        using_fcc=1
+                    fi
+                fi
+            fi
+            ANTHROPIC_API_URL="${ob%/}/v1" \
             ANTHROPIC_BASE_URL="$ob" \
             ANTHROPIC_AUTH_TOKEN=ollama \
             ANTHROPIC_API_KEY="" \
@@ -272,7 +291,7 @@ $prompt"
             TERM=dumb \
             PYTHONIOENCODING=utf-8 \
             DISABLE_TELEMETRY=1 \
-            claude --model "$model" -m "$full_prompt" "$@"
+            claude -p "$full_prompt" --model "$model" --output-format text --allow-dangerously-skip-permissions "$@"
             ;;
         aider)
             export OLLAMA_API_BASE="$url"
