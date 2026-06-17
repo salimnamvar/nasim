@@ -28,8 +28,10 @@ _fcc_ensure_dirs() {
 
 fcc_available() {
     [[ -n "${NASIM_FCC_SRC_DIR:-}" && -f "$NASIM_FCC_SRC_DIR/api/app.py" ]] || return 1
-    # Need at least python3 + uvicorn (or full fcc installed)
     have python3 || return 1
+    # uvicorn is the hard runtime dep for the proxy; full stack (fastapi etc) will cause
+    # start to fallback cleanly if missing transitive packages. Users with `uv` or the
+    # fcc install will get the full gateway experience for claude+ollama tools.
     python3 -c 'import uvicorn' 2>/dev/null || return 1
     return 0
 }
