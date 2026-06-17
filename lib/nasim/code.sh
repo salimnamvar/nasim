@@ -252,15 +252,23 @@ $prompt"
     case "$agent" in
         claude|code)
             # Claude Code one-shot: -m "message"
+            # Use full var set (matches launch_claude + free-claude-code adapter expectations)
+            local ws="${CLAUDE_WORKSPACE:-$HOME/.fcc/agent_workspace}"
+            mkdir -p "$ws" 2>/dev/null || true
+            local ob="${url%/}"
+            ANTHROPIC_API_URL="${ob}/v1" \
+            ANTHROPIC_BASE_URL="$ob" \
             ANTHROPIC_AUTH_TOKEN=ollama \
-            ANTHROPIC_BASE_URL="${url%/}" \
             ANTHROPIC_API_KEY="" \
+            ANTHROPIC_DEFAULT_MAX_OUTPUT_TOKENS=81920 \
             ANTHROPIC_DEFAULT_HAIKU_MODEL="$model" \
             ANTHROPIC_DEFAULT_SONNET_MODEL="$model" \
             ANTHROPIC_DEFAULT_OPUS_MODEL="$model" \
             CLAUDE_CODE_SUBAGENT_MODEL="$model" \
             CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1 \
             CLAUDE_CODE_AUTO_COMPACT_WINDOW=190000 \
+            CLAUDE_CLI_BIN="${CLAUDE_CLI_BIN:-claude}" \
+            CLAUDE_WORKSPACE="$ws" \
             TERM=dumb \
             PYTHONIOENCODING=utf-8 \
             DISABLE_TELEMETRY=1 \

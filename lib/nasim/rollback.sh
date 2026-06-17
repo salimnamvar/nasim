@@ -44,10 +44,11 @@ save_env_state() {
         echo ""
         # Save values (even if empty — empty means "was unset or was empty")
         for var in ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY \
+                   ANTHROPIC_API_URL ANTHROPIC_DEFAULT_MAX_OUTPUT_TOKENS \
                    ANTHROPIC_DEFAULT_HAIKU_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL \
                    CLAUDE_CODE_SUBAGENT_MODEL \
                    CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY CLAUDE_CODE_AUTO_COMPACT_WINDOW \
-                   ANTHROPIC_API_URL \
+                   CLAUDE_CLI_BIN CLAUDE_WORKSPACE \
                    OPENAI_BASE_URL OPENAI_API_KEY \
                    OLLAMA_API_BASE OLLAMA_HOST \
                    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC \
@@ -99,10 +100,11 @@ restore_env_state() {
     # This guarantees: after `nasim stop`, plain `claude` only ever talks to official Anthropic
     # and shows only anthropic models (no ollama leakage from previous nasim session).
     for var in ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY \
+               ANTHROPIC_API_URL ANTHROPIC_DEFAULT_MAX_OUTPUT_TOKENS \
                ANTHROPIC_DEFAULT_HAIKU_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL \
                CLAUDE_CODE_SUBAGENT_MODEL \
                CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY CLAUDE_CODE_AUTO_COMPACT_WINDOW \
-               ANTHROPIC_API_URL ; do
+               CLAUDE_CLI_BIN CLAUDE_WORKSPACE ; do
         if [[ -z "${!var:-}" ]]; then
             unset "$var" 2>/dev/null || true
         fi
@@ -145,10 +147,11 @@ show_env_diff() {
     echo "# Current env diffs from nasim backup:"
     local var
     for var in ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY \
+               ANTHROPIC_API_URL ANTHROPIC_DEFAULT_MAX_OUTPUT_TOKENS \
                ANTHROPIC_DEFAULT_HAIKU_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL \
                CLAUDE_CODE_SUBAGENT_MODEL \
                CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY CLAUDE_CODE_AUTO_COMPACT_WINDOW \
-               ANTHROPIC_API_URL \
+               CLAUDE_CLI_BIN CLAUDE_WORKSPACE \
                OPENAI_BASE_URL OPENAI_API_KEY \
                OLLAMA_API_BASE OLLAMA_HOST \
                CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC \

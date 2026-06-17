@@ -30,7 +30,7 @@
 
 set -euo pipefail
 
-NASIM_VERSION="2026-06-17-v3-legacy-daemon-url+clean-direct-claude+cfg-task"
+NASIM_VERSION="2026-06-17-v3-fcc-all-vars+full-anthropic-surface+claude-env-test"
 
 # Allow the harness to source us for function access without executing CLI
 if [[ "${NASIM_INTERNAL:-}" == "1" && "${BASH_SOURCE[0]}" != "${0}" ]]; then
@@ -65,6 +65,9 @@ source "$NASIM_LIB_DIR/config.sh"
 
 # 2. Rollback (MUST load before anything that modifies env)
 source "$NASIM_LIB_DIR/rollback.sh"
+
+# 3. Free Claude Code integration (for full gateway proxy + all claude env vars when available)
+source "$NASIM_LIB_DIR/fcc.sh" 2>/dev/null || true
 
 # 3. Common concerns
 source "$NASIM_LIB_DIR/probe.sh"

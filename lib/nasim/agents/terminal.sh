@@ -13,10 +13,11 @@ launch_terminal() {
         echo "DRY: PS1=\"nasim[black:${model}] $ \" ; exec \$SHELL -i"
         return 0
     fi
-    export ANTHROPIC_AUTH_TOKEN=ollama
-    # Raw base (no /v1) for claude-code anthropic compat (ollama auto-routes); see claude.sh
+    export ANTHROPIC_API_URL="${url%/}/v1"
     export ANTHROPIC_BASE_URL="${url%/}"
+    export ANTHROPIC_AUTH_TOKEN=ollama
     export ANTHROPIC_API_KEY=""
+    export ANTHROPIC_DEFAULT_MAX_OUTPUT_TOKENS=81920
     # Full tier mapping + FCC-derived discovery flags so that manual `claude` (or claude --model)
     # inside this shell gets correct tool-calling sync with the remote ollama model.
     export ANTHROPIC_DEFAULT_HAIKU_MODEL="$model"
@@ -25,6 +26,8 @@ launch_terminal() {
     export CLAUDE_CODE_SUBAGENT_MODEL="$model"
     export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1
     export CLAUDE_CODE_AUTO_COMPACT_WINDOW=190000
+    export CLAUDE_CLI_BIN="${CLAUDE_CLI_BIN:-claude}"
+    export CLAUDE_WORKSPACE="${CLAUDE_WORKSPACE:-$HOME/.fcc/agent_workspace}"
     export DISABLE_TELEMETRY=1
     export OLLAMA_API_BASE="$url"
     export NASIM_REMOTE_URL="$url"

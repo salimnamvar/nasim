@@ -26,7 +26,36 @@ _fcc_ensure_dirs() {
     mkdir -p "$NASIM_FCC_STATE_DIR"
 }
 
+# _fcc_autodetect():
+#   If NASIM_FCC_SRC_DIR not explicitly set, try to find a sibling or common
+#   free-claude-code checkout (dev layout: nasim/ next to free-claude-code/).
+_fcc_autodetect() {
+    if [[ -n "${NASIM_FCC_SRC_DIR:-}" ]]; then
+        return 0
+    fi
+    local candidates=()
+    # sibling to the nasim source tree (when running from checkout)
+    if [[ -n "${NASIM_LIB_DIR:-}" ]]; then
+        candidates+=("$(cd "$NASIM_LIB_DIR/../../../free-claude-code" 2>/dev/null && pwd || true)")
+        candidates+=("$(cd "$NASIM_LIB_DIR/../../free-claude-code" 2>/dev/null && pwd || true)")
+    fi
+    # common locations
+    candidates+=(
+        "$HOME/prj/salim/nasim/code/free-claude-code"
+        "$HOME/prj/nasim/code/free-claude-code"
+        "$PWD/../free-claude-code"
+        "$PWD/../../free-claude-code"
+    )
+    for c in "${candidates[@]}"; do
+        if [[ -n "$c" && -f "$c/api/app.py" ]]; then
+            NASIM_FCC_SRC_DIR="$c"
+            return 0
+        fi
+    done
+}
+
 fcc_available() {
+    _fcc_autodetect
     [[ -n "${NASIM_FCC_SRC_DIR:-}" && -f "$NASIM_FCC_SRC_DIR/api/app.py" ]] || return 1
     have python3 || return 1
     # uvicorn is the hard runtime dep for the proxy; full stack (fastapi etc) will cause

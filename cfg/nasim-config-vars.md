@@ -14,17 +14,23 @@ Generated as the result of exercising the prompts from sce1.txt and sce2.txt via
 - NASIM_CONFIG_DIR / NASIM_CONFIG_FILE
 - NASIM_VERSION_OVERRIDE
 
-## Claude Code specific (for ollama via ANTHROPIC compat)
-- ANTHROPIC_BASE_URL (set to tunnel url)
+## Claude Code specific (for ollama via ANTHROPIC compat or fcc gateway)
+- ANTHROPIC_BASE_URL
+- ANTHROPIC_API_URL
 - ANTHROPIC_AUTH_TOKEN (ollama)
 - ANTHROPIC_API_KEY (empty)
+- ANTHROPIC_DEFAULT_MAX_OUTPUT_TOKENS (81920)
 - ANTHROPIC_DEFAULT_HAIKU_MODEL / _SONNET_MODEL / _OPUS_MODEL
 - CLAUDE_CODE_SUBAGENT_MODEL
 - CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY (1)
 - CLAUDE_CODE_AUTO_COMPACT_WINDOW (190000)
+- CLAUDE_CLI_BIN
+- CLAUDE_WORKSPACE (defaults to ~/.fcc/agent_workspace)
 - TERM=dumb
 - PYTHONIOENCODING=utf-8
 - DISABLE_TELEMETRY (1)
+
+All of the above (plus more) are also used inside free-claude-code; nasim now injects the complete relevant set for both direct native-compat and fcc-proxy paths. See lib/nasim/agents/claude.sh and fcc.sh.
 
 ## Daemon / State / Rollback
 - NASIM_STATE_DIR (~/.local/share/nasim)
