@@ -21,8 +21,8 @@ launch_claude() {
     local target_api_url="${base%/}/v1"
     local using_fcc=0
 
-    if ! is_dry && fcc_available 2>/dev/null; then
-        log "fcc proxy available — starting isolated free-claude-code gateway for claude"
+    if ! is_dry && fcc_available 2>/dev/null && [[ "${NASIM_USE_FCC:-1}" != "0" ]]; then
+        log "fcc proxy available — starting isolated free-claude-code gateway for claude (set NASIM_USE_FCC=0 to force direct)"
         local proxy_url
         # fcc_start_proxy returns the url on success (stdout) or falls back
         if proxy_url=$(fcc_start_proxy "$base" "$model"); then
