@@ -41,6 +41,20 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NASIM_LIB_DIR="$SCRIPT_DIR/../lib/nasim"
 
+# Auto-detect free-claude-code clone (placed by user per instructions, sibling to nasim checkout)
+# Used for high-fidelity ollama<->claude-code via proper gateway proxy (model ids "anthropic/ollama/...", tool streaming, thinking normalization for deepseek-r1 etc.)
+NASIM_FCC_SRC_DIR=""
+for cand in \
+  "$SCRIPT_DIR/../../free-claude-code" \
+  "$SCRIPT_DIR/../free-claude-code" \
+  "${HOME}/prj/salim/nasim/code/free-claude-code" ; do
+  if [[ -d "$cand/api" && -f "$cand/api/app.py" ]]; then
+    NASIM_FCC_SRC_DIR="$(cd "$cand" && pwd)"
+    break
+  fi
+done
+export NASIM_FCC_SRC_DIR
+
 # --- Minimal shared utilities (available to all modules) ---
 # die(msg):
 #   Print to stderr and exit 1. Used for fatal setup / transport / config errors.
@@ -79,6 +93,9 @@ source "$NASIM_LIB_DIR/session.sh"
 source "$NASIM_LIB_DIR/daemon.sh"
 source "$NASIM_LIB_DIR/code.sh"
 
+# 4b. FCC proxy support (for claude-code + ollama tool-use fidelity, based on free-claude-code)
+[[ -f "$NASIM_LIB_DIR/fcc.sh" ]] && source "$NASIM_LIB_DIR/fcc.sh" || true
+
 # 5. UI + orchestration
 source "$NASIM_LIB_DIR/ui.sh"
 source "$NASIM_LIB_DIR/orchestration.sh"
@@ -89,5 +106,7 @@ source "$NASIM_LIB_DIR/cli.sh"
 # Mark top-level for rollback trap registration
 export NASIM_TOP_LEVEL=1
 
-# Hand off to the real command handler
-nasim_main "$@"
+# Hand off to the real command handler (skip when tests do NASIM_INTERNAL=1 source to inspect functions)
+if [[ "${NASIM_INTERNAL:-}" != "1" ]]; then
+    nasim_main "$@"
+fi

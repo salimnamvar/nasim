@@ -111,6 +111,11 @@ restore_env_state() {
     # Unset nasim-specific markers
     unset NASIM_ACTIVE NASIM_REMOTE_URL NASIM_MODEL NASIM_ENV_BACKUP_VALID
 
+    # Also stop any fcc sidecar we started for this session (if the function exists)
+    if type fcc_cleanup_on_stop >/dev/null 2>&1; then
+        fcc_cleanup_on_stop || true
+    fi
+
     log "env state restored — cloud agents (claude, grok, aider) back to defaults"
 }
 

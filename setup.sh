@@ -43,6 +43,7 @@ cp -v "$SCRIPT_DIR/lib/nasim/vram.sh"       "$LIB_DIR/vram.sh"
 cp -v "$SCRIPT_DIR/lib/nasim/session.sh"     "$LIB_DIR/session.sh"
 cp -v "$SCRIPT_DIR/lib/nasim/code.sh"        "$LIB_DIR/code.sh"
 cp -v "$SCRIPT_DIR/lib/nasim/config.sh"      "$LIB_DIR/config.sh"
+cp -v "$SCRIPT_DIR/lib/nasim/fcc.sh"         "$LIB_DIR/fcc.sh" 2>/dev/null || true
 cp -v "$SCRIPT_DIR/lib/nasim/probe.sh"       "$LIB_DIR/probe.sh"
 cp -v "$SCRIPT_DIR/lib/nasim/transport.sh"     "$LIB_DIR/transport.sh"
 cp -v "$SCRIPT_DIR/lib/nasim/agent.sh"       "$LIB_DIR/agent.sh"
@@ -64,8 +65,13 @@ cp -v "$SCRIPT_DIR/lib/nasim/transports/litellm.sh"   "$LIB_DIR/transports/litel
 
 echo ""
 echo "[2/5] Installing entrypoint to $BIN_DIR ..."
-cp -v "$SCRIPT_DIR/bin/nasim.sh" "$BIN_DIR/nasim"
-chmod +x "$BIN_DIR/nasim"
+if [[ -f "$SCRIPT_DIR/bin/nasim" ]]; then
+    cp -v "$SCRIPT_DIR/bin/nasim" "$BIN_DIR/nasim"
+else
+    # legacy fallback
+    cp -v "$SCRIPT_DIR/bin/nasim.sh" "$BIN_DIR/nasim" 2>/dev/null || echo "WARNING: no bin/nasim or bin/nasim.sh found"
+fi
+chmod +x "$BIN_DIR/nasim" 2>/dev/null || true
 
 echo ""
 echo "[3/5] Creating default config (if missing) ..."
