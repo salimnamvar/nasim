@@ -9,13 +9,23 @@ launch_terminal() {
     local url="$1" model="$2"
     log "dropping into configured shell (all envs set). Run your agents manually."
     if is_dry; then
-        echo "DRY: export ANTHROPIC_BASE_URL=$url OLLAMA_API_BASE=$url NASIM_REMOTE_URL=$url"
+        echo "DRY: export ANTHROPIC_BASE_URL=$url ANTHROPIC_DEFAULT_*=$model CLAUDE_CODE_*=... OLLAMA_API_BASE=$url NASIM_REMOTE_URL=$url"
         echo "DRY: PS1=\"nasim[black:${model}] $ \" ; exec \$SHELL -i"
         return 0
     fi
     export ANTHROPIC_AUTH_TOKEN=ollama
-    export ANTHROPIC_BASE_URL="${url%/}/v1"
+    # Raw base (no /v1) for claude-code anthropic compat (ollama auto-routes); see claude.sh
+    export ANTHROPIC_BASE_URL="${url%/}"
     export ANTHROPIC_API_KEY=""
+    # Full tier mapping + FCC-derived discovery flags so that manual `claude` (or claude --model)
+    # inside this shell gets correct tool-calling sync with the remote ollama model.
+    export ANTHROPIC_DEFAULT_HAIKU_MODEL="$model"
+    export ANTHROPIC_DEFAULT_SONNET_MODEL="$model"
+    export ANTHROPIC_DEFAULT_OPUS_MODEL="$model"
+    export CLAUDE_CODE_SUBAGENT_MODEL="$model"
+    export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1
+    export CLAUDE_CODE_AUTO_COMPACT_WINDOW=190000
+    export DISABLE_TELEMETRY=1
     export OLLAMA_API_BASE="$url"
     export NASIM_REMOTE_URL="$url"
     export NASIM_MODEL="$model"
