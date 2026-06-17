@@ -18,9 +18,8 @@
 ./bin/nasim config edit
 ./bin/nasim config show
 
-# Agentic self-audit (the primary test method): launch a strong model and task it with auditing nasim
-NASIM_RUN_SELF_AUDIT=1 ./tests/nasim-features.sh --self-audit
-# Inside the agent: "Read all of nasim (bin/ + lib/), sprint, research. Find errors, improve modularity, update docs."
+# Smart launch (auto-detect agent, reuse tunnel, inject project context)
+nasim start && nasim code        # ... work ... then:  nasim stop
 
 # Non-interactive (CI, scripts, or when you know the choice)
 nasim launch --access ssh-tunnel --agent claude --model deepseek-r1:14b
@@ -30,12 +29,12 @@ nasim launch --access tailscale --agent opencode --model deepseek-r1:32b   # fal
 # After setup you are dropped straight into the interactive frontier agent (or a branded terminal shell).
 ```
 
-The `nasim` CLI (in `bin/nasim`) now supports **every** solution from the research:
+The `nasim` CLI (Python package `src/nasim`, launched by `bin/nasim`) supports **every** solution from the research:
 - Transports: ssh-tunnel (primary, ad-hoc with trap cleanup, free port), tailscale (MagicDNS + detection), litellm (proxy layer + config).
 - Agents: claude (native ANTHROPIC_BASE_URL), aider (OLLAMA_API_BASE), opencode, terminal (full-env branded shell so you can run anything).
 - Plus: `nasim doctor` (probe + black GPU state), `nasim tunnel install-systemd` (persistent autossh user unit), legacy `nasim claude` / `nasim aider` still work.
 
-All combinations are covered by the test harness (`tests/nasim-features.sh --all`) and the GHA matrix in `.github/workflows/ci.yml`. Live tests against real black (SSH) + models (gemma4, qwen2.5-coder, deepseek-r1 etc.) pass before every slice commit.
+All combinations are covered by `python -m pytest test/` (including the gating clean-toggle safety tests) and the GHA matrix in `.github/workflows/ci.yml` (pytest + dry-run access×agent matrix). Live checks against real black (SSH) + models (gemma4, qwen3, deepseek-r1, etc.) run locally via `nasim doctor` / `nasim models`.
 
 See `.grok/recipes/` (or .claude mirror), the research log, and `.claude/rules/sprint.md` (design state + P-Invariants).
 
@@ -61,16 +60,39 @@ See `.grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md` for:
 - Model recommendations (Qwen3-Coder series, GLM-5.1, DeepSeek V4, Gemma 4 — size to GPU, verify no CPU spill for agent loops).
 - Anti-patterns and security.
 
-## Project Structure (Phase 2 — modular)
-- `bin/nasim` — thin loader + entrypoint only.
-- `lib/nasim/` — real implementation (separation of concerns):
-  - `config.sh` — external config (AD-09)
-  - `transport.sh` + `transports/*.sh` — pluggable access strategies (ssh, tailscale, litellm)
-  - `agent.sh` + `agents/*.sh` — pluggable agent launchers
-  - `probe.sh`, `orchestration.sh`, `ui.sh`, `cli.sh`
-- `tests/nasim-features.sh` — comprehensive real (no-mock) tests + `--self-audit` meta tests that launch strong models via nasim to audit the project itself (the best always-followed test scenario).
-- `.grok/` — knowledge surfaces only (research, recipes, sprint, design). Code lives at visible root.
-- `README.md`, `.github/workflows/ci.yml` — docs + CI matrix enforcing the above.
+## Environment safety — the clean toggle
+
+When nasim closes — cleanly, via Ctrl-C, or on a crash — Claude Code returns to
+**100% defaults**: no leftover Ollama models in the `/model` picker and your original
+active model restored. This is enforced two ways:
+
+- **Scoped env.** Agents launch as child processes whose `ANTHROPIC_*` environment is
+  passed only to that child, so your shell is never modified.
+- **Reversible Claude config.** The chosen Ollama model is injected into Claude's
+  `/model` picker (`~/.claude.json`, stamped `{"_nasim": true}`) and the active model
+  in `~/.claude/settings.json` is backed up. On exit, every marked entry is removed and
+  the original model restored — a full inject→eject round-trip is byte-for-byte
+  identical. The same cleanup runs from `atexit`/signal handlers and on the next nasim
+  run, so a crash never strands an Ollama selection in plain `claude`.
+
+Verify with `nasim env diff`.
+
+## Project Structure (Python)
+- `bin/nasim` — thin launcher; resolves the package and hands off argv.
+- `src/nasim/` — the implementation (layered: controller → service → adapters):
+  - `config.py` — external config (defaults < file < env < CLI)
+  - `claude_settings.py` + `rollback.py` — the clean-toggle safety core
+  - `transport/` — pluggable access strategies (`ssh`, `tailscale`, `litellm`)
+  - `agents/` — pluggable agent launchers (`claude`, `aider`, `opencode`, `grok`, `terminal`)
+  - `probe.py`, `fcc.py`, `daemon.py`, `code.py`, `select.py`, `orchestration.py`, `cli.py`
+  - `vram.py`, `context.py`, `kb.py`, `session.py` — feature modules
+- `test/` — pytest suite, including the gating clean-toggle safety tests.
+- `pyproject.toml` — package metadata + the `nasim` console script.
+- `.grok/` / `.claude/` — knowledge surfaces only. Code lives at the visible root.
+- `.github/workflows/ci.yml` — pytest + shim + dry-run access×agent matrix.
+
+Install: `./setup.sh` (or `./setup.sh --dev` for an editable install). Run the suite
+with `python -m pytest test/`.
 
 ## Getting the Most Benefit
 - Reproduce real work: multi-file edits, bash execution, planning → write loops.

@@ -25,7 +25,7 @@ This is the project sprint file (per global rules/software-design/sprint.md). Si
 | ERD | N/A | Not Started | No persistent data model. |
 | Class Diagram | N/A (bash modules + strategies) | In Progress | lib/nasim/*.sh with clear concerns (config, transport adapters, agent launchers, probes, ui, cli dispatch). "OOP" via function namespaces + strategy registration for pluggable transports/agents. Thin loader in bin/nasim. |
 | API Spec | N/A | Not Started | None (CLI + env + subprocess). |
-| Implementation | `bin/nasim` (thin) + `lib/nasim/{config,probe,transport,agent,ui,cli}.sh` + `tests/nasim-features.sh` + tests/test-*.sh (config/unit, probe+models, ssh-real, agents-clis, all-options-matrix 72 combos, inference-reasoning with live black model outputs) + `.github/workflows/ci.yml` + docs | Phase 2 advanced | Previous Phase 1 green + major 2026-06-16 serious bugfix slice: "models not shown" + "none of the models / select options / clis working". Root causes (default tag mismatch qwen3 vs qwen2.5, probe_and_show 2>/dev/null swallowing lists, no first-class `nasim models`, no existence warning, stale doctor) fixed. Added nasim models + list in doctor/launch + pre-launch warn + robust call in tests. All access x agent x real models (qwen2.5-coder:14b, deepseek-r1:*, etc) now enumerated and live-probed in tests/. |
+| Implementation | `bin/nasim` (Python launcher) + `src/nasim/` package (config, claude_settings, rollback, probe, fcc, transport/*, agents/*, daemon, code, select, orchestration, cli, vram, context, kb, session) + `pyproject.toml` + `test/` pytest + `.github/workflows/ci.yml` | Python rewrite (AD-11) | Full 1:1 parity translation from `lib/nasim/*.sh` to Python, plus the verifiable clean Claude Code toggle (byte-identical inject→eject on the real `~/.claude.json`; crash-safe via atexit/signals). 14 pytest pass (6 gating safety + 8 parity); dry-run access×agent matrix green; live `nasim models` lists black inventory. Bash `lib/nasim/*.sh` retained as legacy reference. |
 | Sprint / Knowledge | `.claude/rules/sprint.md` + `.grok/AGENTS.md` + `.claude/CLAUDE.md` + research/ + recipes/ | In Progress | This file + parity sync via knowledge-sync project-register + daemon. |
 
 ## Versioning Policy
@@ -71,6 +71,33 @@ All previously hardcoded values (BLACK_HOST, ports, default model, litellm port,
 
 ### AD-10: Agentic self-audit as the primary "all options" test scenario (meta-testing with real black + models)
 The best and always-followed test method for nasim is to use nasim itself to launch frontier agents (claude, opencode, etc.) against strong models on black, then task those agents with auditing the nasim source, tests, sprint, research, recipes; finding feature errors/bugs; suggesting refactors for modularity; generating docs, additional test cases, and sprint updates. The test harness gains a `--self-audit` / meta target that exercises full launch paths (real probe + tunnel) + captures the agent's output as artifacts. "Test your all options" means every transport + every agent must be usable in such an agentic audit loop. No mocks for core paths; live black SSH + real model inference required for full green. This also serves as continuous documentation and forces the tool to be good enough for real heavy agent work on its own codebase.
+
+### AD-11: Python rewrite (`src/nasim/`) + verifiable clean Claude Code toggle (2026-06-17)
+The whole tool was translated from bash (`lib/nasim/*.sh`) to a layered Python package
+`src/nasim/` (controller→service→adapters), following the global Python standards
+(`a_` params, dataclasses, type hints, Google docstrings). `bin/nasim` became a thin
+launcher that prefers the installed package and falls back to the in-repo `src/`.
+Drivers: testability (pytest replaces the bash harness), maintainability, and a
+**provable clean toggle**.
+
+Clean toggle (resolves the user requirement "when I close nasim, Claude Code returns
+to default and I don't see Ollama models in original Claude Code"):
+- New `claude_settings.py` injects the chosen Ollama tag into Claude's `/model` picker
+  (`~/.claude.json` `additionalModelOptionsCache`, each entry stamped `{"_nasim": true}`)
+  and snapshots `~/.claude/settings.json` `"model"`. On stop/exit it ejects **all**
+  marked entries (marker-based, idempotent) and restores the original model exactly
+  (removing the key if it was originally absent). `sanitize()` runs on start AND stop to
+  heal stray entries from a crashed/old session. Atomic writes preserve each file's
+  newline style + UTF-8, so a full inject→eject is **byte-for-byte identical** (verified
+  against a copy of the real 60KB `~/.claude.json`).
+- Agents launch as child processes with a **scoped** `ANTHROPIC_*` env (parent shell
+  never modified), via `subprocess.run`+wait (not `exec`) so a `try/finally` ejects after
+  the agent exits. `rollback.EnvGuard` wires the same cleanup into `atexit` + SIGINT/
+  SIGTERM/SIGHUP for crash safety.
+- Gating pytest (`test/test_claude_settings.py`) asserts inject→eject removes all marked
+  entries, restores/removes the model, is idempotent, and heals a stray entry without a
+  backup. CI runs pytest + a dry-run access×agent matrix. Bash `lib/nasim/*.sh` retained
+  as legacy reference (no longer the entrypoint); removal deferred to a follow-up.
 
 ## Open Decisions
 
