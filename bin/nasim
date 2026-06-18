@@ -15,13 +15,26 @@ PY="${NASIM_PYTHON:-python3}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_SRC="$SCRIPT_DIR/../src"
 
-if "$PY" -c 'import nasim' >/dev/null 2>&1; then
-    # Installed (pip) or already importable.
-    exec "$PY" -m nasim "$@"
-elif [[ -d "$REPO_SRC/nasim" ]]; then
-    # Run from the checkout without installation.
-    exec env PYTHONPATH="$REPO_SRC${PYTHONPATH:+:$PYTHONPATH}" "$PY" -m nasim "$@"
-else
-    echo "nasim: cannot locate the nasim Python package (install with 'pip install -e .' or run from the repo)" >&2
-    exit 1
+# Prefer the current checkout's src/ implementation (so fixes in this repo are used)
+# unless the user explicitly opts into the installed package.
+if [[ "${NASIM_PREFER_INSTALLED:-0}" == "1" ]]; then
+    if "$PY" -c 'import nasim' >/dev/null 2>&1; then
+        echo "nasim: using installed package (NASIM_PREFER_INSTALLED=1)"
+        exec "$PY" -m nasim "$@"
+    else
+        echo "nasim: NASIM_PREFER_INSTALLED=1 but installed package import failed; falling back to repo src/" >&2
+    fi
 fi
+
+if [[ -d "$REPO_SRC/nasim" ]]; then
+    echo "nasim: using repo checkout (src/) for nasim"
+    exec env PYTHONPATH="$REPO_SRC${PYTHONPATH:+:$PYTHONPATH}" "$PY" -m nasim "$@"
+fi
+
+if "$PY" -c 'import nasim' >/dev/null 2>&1; then
+    echo "nasim: using installed package"
+    exec "$PY" -m nasim "$@"
+fi
+
+echo "nasim: cannot locate the nasim Python package (install with 'pip install -e .' or run from the repo)" >&2
+exit 1

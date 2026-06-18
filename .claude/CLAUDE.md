@@ -82,4 +82,4 @@ Nasim is the living, search-first knowledge base + minimal tooling for getting m
 See also global `~/.grok/AGENTS.md` and project `.claude/` (if parity maintained via sync).
 
 This file + `.grok/` = the project brain. Keep high-signal.
-Last project .grok<->.claude sync: 2026-06-17T21:44:31+04:00
+Last project .grok<->.claude sync: 2026-06-17T23:36:37+04:00
