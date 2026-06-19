@@ -153,17 +153,25 @@ def extract_detail_metadata(html_bytes: bytes) -> dict[str, str]:
     features: dict[str, str] = {}
 
     # Strategy 1 — two-span containers for metadata key-value pairs
-    # Structure: <div><span>label</span><span>value</span></div>
-    # Label is a pure lowercase word or short phrase (no digits).
+    # Structure: <div><span class="hidden sm:block">label</span><span>value</span></div>
+    # Ollama hides metadata labels on mobile with Tailwind 'hidden sm:block'.
+    # Capability badges (tools, vision) share the same 2-span pattern when paired
+    # with a single version-size badge, but their label span has 'bg-indigo-50'
+    # (not 'hidden') — requiring 'hidden' in the label class excludes them.
     for container in soup.find_all(["div", "li", "tr"]):
         spans = container.find_all("span", recursive=False)
         if len(spans) != 2:
             continue
-        label = spans[0].get_text(strip=True)
-        value = spans[1].get_text(strip=True)
+        label_span, value_span = spans
+        label = label_span.get_text(strip=True)
+        value = value_span.get_text(strip=True)
         if not label or not value or label == value:
             continue
-        # Label must be lowercase alphabetic (the HTML label convention on Ollama)
+        # Label span must carry 'hidden' (Tailwind 'hidden sm:block') — this is
+        # the structural marker Ollama uses for all metadata column labels.
+        if "hidden" not in " ".join(label_span.get("class", [])):
+            continue
+        # Label must be lowercase alphabetic
         if not re.match(r"^[a-z][a-z\s\-]{0,29}$", label):
             continue
         features[label.title()] = value
