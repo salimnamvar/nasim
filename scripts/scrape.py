@@ -26,8 +26,8 @@ from tqdm.asyncio import tqdm_asyncio
 # ==========================================
 # 0. LOGGING
 # ==========================================
-os.makedirs("log", exist_ok=True)
-_LOG_FILE = f"log/ollama_scraper_{time.strftime('%Y%m%d_%H%M%S')}.log"
+os.makedirs("logs", exist_ok=True)
+_LOG_FILE = f"logs/ollama_scraper_{time.strftime('%Y%m%d_%H%M%S')}.log"
 
 logger = logging.getLogger("OllamaScraper")
 logger.setLevel(logging.DEBUG)
@@ -38,6 +38,7 @@ logger.addHandler(_fh)
 
 try:
     import uvloop
+
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     logger.info("uvloop enabled.")
 except ImportError:
@@ -47,6 +48,7 @@ except ImportError:
 # ==========================================
 # 1. TAGS PAGE PARSING (CPU-BOUND)
 # ==========================================
+
 
 def _classify_blob_segment(segment: str) -> tuple[str, str] | None:
     """Return (field_name, value) for a bullet-separated blob segment, or None to skip.
@@ -84,7 +86,9 @@ def _classify_blob_segment(segment: str) -> tuple[str, str] | None:
     return None
 
 
-def parse_tags_page(html_bytes: bytes, model_href: str) -> tuple[list[str], dict[str, dict]]:
+def parse_tags_page(
+    html_bytes: bytes, model_href: str
+) -> tuple[list[str], dict[str, dict]]:
     """Parse a /tags page.
 
     Returns:
@@ -108,7 +112,9 @@ def parse_tags_page(html_bytes: bytes, model_href: str) -> tuple[list[str], dict
         blob_text = ""
         for span in a.find_all("span"):
             text = span.get_text(separator=" ", strip=True)
-            if "•" in text and re.search(r"\d+\.?\d*\s*(?:GB|MB|KB)", text, re.IGNORECASE):
+            if "•" in text and re.search(
+                r"\d+\.?\d*\s*(?:GB|MB|KB)", text, re.IGNORECASE
+            ):
                 blob_text = text
                 break
         if not blob_text:
@@ -122,15 +128,16 @@ def parse_tags_page(html_bytes: bytes, model_href: str) -> tuple[list[str], dict
                 fields.setdefault(key, val)
         version_data[href] = fields
 
-    ordered_hrefs = list(dict.fromkeys(
-        a["href"] for a in soup.find_all("a", href=v_pattern)
-    ))
+    ordered_hrefs = list(
+        dict.fromkeys(a["href"] for a in soup.find_all("a", href=v_pattern))
+    )
     return ordered_hrefs, version_data
 
 
 # ==========================================
 # 2. DETAIL PAGE PARSING (CPU-BOUND)
 # ==========================================
+
 
 def extract_detail_metadata(html_bytes: bytes) -> dict[str, str]:
     """Dynamically extract all metadata from a version detail page.
@@ -199,13 +206,16 @@ def extract_detail_metadata(html_bytes: bytes) -> dict[str, str]:
     if "Downloads" not in features:
         m = re.search(
             r"([\d,.]+\s*[KMBTkmbt]?)\s+(?:Downloads|Pulls)",
-            page_text, re.IGNORECASE,
+            page_text,
+            re.IGNORECASE,
         )
         if m:
             features["Downloads"] = m.group(1).strip().replace(",", "").upper()
 
     if "Updated" not in features:
-        m = re.search(r"Updated\s+(\d+\s+\w+\s+ago|\w+\s+ago)", page_text, re.IGNORECASE)
+        m = re.search(
+            r"Updated\s+(\d+\s+\w+\s+ago|\w+\s+ago)", page_text, re.IGNORECASE
+        )
         if m:
             features["Updated"] = m.group(1)
 
@@ -215,6 +225,7 @@ def extract_detail_metadata(html_bytes: bytes) -> dict[str, str]:
 # ==========================================
 # 3. ADAPTIVE NETWORK FETCHER
 # ==========================================
+
 
 class AdaptiveNetworkFetcher:
     """Throttles concurrency and backs off on 429 / 5xx responses."""
@@ -259,14 +270,20 @@ class AdaptiveNetworkFetcher:
                 async with self.lock:
                     self.active_requests -= 1
                     if status == 200:
-                        self.concurrency = min(self.max_concurrency, self.concurrency + 2)
+                        self.concurrency = min(
+                            self.max_concurrency, self.concurrency + 2
+                        )
                     elif status == 429:
                         self.concurrency = max(5, self.concurrency // 2)
-                        logger.warning("Rate limited (429) on %s. concurrency → %d", url, self.concurrency)
+                        logger.warning(
+                            "Rate limited (429) on %s. concurrency → %d",
+                            url,
+                            self.concurrency,
+                        )
             if content:
                 return content
             if status == 429 or status >= 500:
-                await asyncio.sleep(1.5 ** attempt)
+                await asyncio.sleep(1.5**attempt)
             else:
                 break
         logger.error("Failed to fetch %s after %d attempts.", url, retries)
@@ -277,12 +294,15 @@ class AdaptiveNetworkFetcher:
 # 4. ORCHESTRATION
 # ==========================================
 
+
 async def get_model_links(
     fetcher: AdaptiveNetworkFetcher,
     session: aiohttp.ClientSession,
     page: int,
 ) -> list[str]:
-    content = await fetcher.fetch(session, "https://ollama.com/library", params={"page": page})
+    content = await fetcher.fetch(
+        session, "https://ollama.com/library", params={"page": page}
+    )
     if not content:
         return []
     soup = BeautifulSoup(content.decode("utf-8", errors="replace"), "lxml")
@@ -323,7 +343,9 @@ async def scrape_version(
     version = v_href.split(":")[-1] if ":" in v_href else "latest"
     loop = asyncio.get_running_loop()
     try:
-        detail = await loop.run_in_executor(process_pool, extract_detail_metadata, content)
+        detail = await loop.run_in_executor(
+            process_pool, extract_detail_metadata, content
+        )
         row: dict[str, str] = {"Model Name": model_name, "Version": version, "URL": url}
         # Tags page blob data first; detail page data overwrites on collision
         # (detail page is more authoritative for version-specific fields).
@@ -343,6 +365,7 @@ async def scrape_version(
 # 5. MAIN
 # ==========================================
 
+
 async def main() -> None:
     start_time = time.time()
     all_rows: list[dict] = []
@@ -358,23 +381,30 @@ async def main() -> None:
         connector = aiohttp.TCPConnector(limit=150)
         async with aiohttp.ClientSession(
             connector=connector,
-            headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"},
+            headers={
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+            },
         ) as session:
 
             # Phase 1 — discover base model hrefs
             logger.info("Phase 1: Discovering Base Models...")
             # Ollama currently has ~30 pages; 60 is a safe upper bound
             page_tasks = [get_model_links(fetcher, session, p) for p in range(1, 61)]
-            page_results = await tqdm_asyncio.gather(*page_tasks, desc="Scanning Pages", leave=True)
+            page_results = await tqdm_asyncio.gather(
+                *page_tasks, desc="Scanning Pages", leave=True
+            )
             # dict.fromkeys: ordered deduplication
-            model_href_list = list(dict.fromkeys(
-                href for sublist in page_results for href in sublist
-            ))
+            model_href_list = list(
+                dict.fromkeys(href for sublist in page_results for href in sublist)
+            )
             logger.info("Discovered %d Base Models.", len(model_href_list))
 
             # Phase 2 — expand version tags AND collect tags-page blob metadata
             logger.info("Phase 2: Expanding Version Tags...")
-            tag_tasks = [get_tags_and_metadata(fetcher, session, href) for href in model_href_list]
+            tag_tasks = [
+                get_tags_and_metadata(fetcher, session, href)
+                for href in model_href_list
+            ]
             tags_results: list[tuple[list[str], dict]] = await tqdm_asyncio.gather(
                 *tag_tasks, desc="Fetching Tags", leave=True
             )
@@ -386,8 +416,14 @@ async def main() -> None:
                 for v_href in versions:
                     version_tasks.append(
                         scrape_version(
-                            fetcher, session, process_pool,
-                            v_href, model_name, tags_meta, global_features, all_rows,
+                            fetcher,
+                            session,
+                            process_pool,
+                            v_href,
+                            model_name,
+                            tags_meta,
+                            global_features,
+                            all_rows,
                         )
                     )
 
@@ -402,10 +438,15 @@ async def main() -> None:
 
     # Priority columns appear first; all dynamically discovered columns follow.
     priority_cols = [
-        "Model Name", "Version",
-        "Parameters", "Context", "Quantization",
-        "Size", "Input",
-        "Downloads", "Updated",
+        "Model Name",
+        "Version",
+        "Parameters",
+        "Context",
+        "Quantization",
+        "Size",
+        "Input",
+        "Downloads",
+        "Updated",
         "Capabilities",
         "Arch",
         "URL",
