@@ -65,10 +65,12 @@ def _classify_blob_segment(segment: str) -> tuple[str, str] | None:
     # Version identifier model:tag — skip
     if re.match(r"^[\w.-]+:[\w.-]+$", s):
         return None
-    # File size: 2.0GB, 581MB, 1.3GB
-    m = re.match(r"^([\d.]+\s*(?:GB|MB|KB|TB))$", s, re.IGNORECASE)
+    # File size: 2.0GB, 581MB, 1.3GB → normalise to "X.XX GB"
+    m = re.match(r"^([\d.]+)\s*(GB|MB|KB|TB)$", s, re.IGNORECASE)
     if m:
-        return ("Size", m.group(1).upper().replace(" ", ""))
+        val, unit = float(m.group(1)), m.group(2).upper()
+        gb = {"GB": val, "MB": val / 1024, "KB": val / 1024**2, "TB": val * 1024}[unit]
+        return ("Size", f"{gb:.2f} GB")
     # Context window: "128K context window", "128K", "32k"
     m = re.match(r"^([\d.]+\s*[KMGkmg])\s*(?:context\s+window)?$", s, re.IGNORECASE)
     if m:
