@@ -1,35 +1,67 @@
 @startuml uc_config
+
 ' ============================================================
-' Title:     nasim — UC: Configuration
-' Boundary:  nasim code agent CLI
+' Title:     nasim — UC: Config Group
+' Group:     CFG (Configuration)
+' Boundary:  nasim code agent
 ' Purpose:   Config loading, validation, and layered overrides
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Config Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "Developer" as user
-actor "ArgParser" as parser
-
-rectangle "Configuration" {
-    usecase "Load Config" as UC_CFG_01
-    usecase "Validate Config" as UC_CFG_02
-    usecase "Merge Layered Config" as UC_CFG_03
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-System_Ext(global_yaml, "Global YAML", "~/.nasim/config.yaml")
-System_Ext(project_yaml, "Project YAML", ".nasim/config.yaml")
-System_Ext(env_vars, "Env Vars", "NASIM_*")
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
 
-parser --> UC_CFG_01
-UC_CFG_01 ..> UC_CFG_03 : <<include>>
-UC_CFG_03 ..> UC_CFG_02 : <<include>>
-UC_CFG_01 ..> global_yaml
-UC_CFG_01 ..> project_yaml
-UC_CFG_01 ..> env_vars
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Developer" as Developer
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Config Group (CFG)" {
+    usecase "**CFG-01 LOAD Config**\n--\nLoad global YAML, project YAML, env vars, CLI flags" as CFG01
+    usecase "**CFG-02 VALIDATE Config**\n--\nValidate config schema at load time" as CFG02
+    usecase "**CFG-03 APPLY Layered Config**\n--\nMerge layered config with precedence rules" as CFG03
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Developer --> CFG01
+
+' ============================================================
+' Relationships
+' ============================================================
+
+CFG01 ..> CFG03 : <<include>>
+CFG03 ..> CFG02 : <<include>>
 
 @enduml

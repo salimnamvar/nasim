@@ -1,10 +1,10 @@
-@startuml uc_plugins
+@startuml uc_git
 
 ' ============================================================
-' Title:     nasim — UC: Plugins Group
-' Group:     PLG (Plugins)
+' Title:     nasim — UC: Git Group
+' Group:     VCS (Git Integration)
 ' Boundary:  nasim code agent
-' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
+' Purpose:   Version control awareness: status, diff, commit
 ' Milestone: v1.0
 ' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
@@ -13,7 +13,7 @@
 
 left to right direction
 
-title nasim — Plugins Use Cases
+title nasim — Git Use Cases
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -44,13 +44,11 @@ actor "Developer" as Developer
 ' ============================================================
 
 rectangle "nasim" {
-  package "Plugins Group (PLG)" {
-    usecase "**PLG-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" as PLG01
-    usecase "**PLG-02 LOAD Manifest**\n--\nParse plugin manifest metadata" as PLG02
-    usecase "**PLG-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" as PLG03
-    usecase "**PLG-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" as PLG04
-    usecase "**PLG-05 ENABLE Plugin**\n--\nEnable a plugin" as PLG05
-    usecase "**PLG-06 DISABLE Plugin**\n--\nDisable a plugin" as PLG06
+  package "Git Group (VCS)" {
+    usecase "**VCS-01 READ Git Status**\n--\nRead working tree status and staged changes" as VCS01
+    usecase "**VCS-02 INSERT Commit**\n--\nCreate commits with conventional messages" as VCS02
+    usecase "**VCS-03 READ Diff**\n--\nRead diff between working tree and HEAD" as VCS03
+    usecase "**VCS-04 AUTO-COMMIT**\n--\nAuto-commit after file edits" as VCS04
   }
 }
 
@@ -58,16 +56,13 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> PLG01
-Developer --> PLG05
-Developer --> PLG06
+Developer --> VCS01
+Developer --> VCS03
 
 ' ============================================================
 ' Relationships
 ' ============================================================
 
-PLG01 ..> PLG02 : <<include>>
-PLG02 ..> PLG03 : <<include>>
-PLG02 ..> PLG04 : <<include>>
+VCS04 ..> VCS02 : <<include>>
 
 @enduml

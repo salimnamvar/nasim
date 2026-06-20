@@ -1,10 +1,10 @@
-@startuml uc_plugins
+@startuml uc_memory
 
 ' ============================================================
-' Title:     nasim — UC: Plugins Group
-' Group:     PLG (Plugins)
+' Title:     nasim — UC: Memory Group
+' Group:     MEM (Memory)
 ' Boundary:  nasim code agent
-' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
+' Purpose:   Cross-session knowledge persistence, retrieval, and RAG adapters
 ' Milestone: v1.0
 ' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
@@ -13,7 +13,7 @@
 
 left to right direction
 
-title nasim — Plugins Use Cases
+title nasim — Memory Use Cases
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -33,6 +33,12 @@ skinparam actor {
   FontSize 12
 }
 
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
 ' ============================================================
 ' Actors
 ' ============================================================
@@ -44,13 +50,11 @@ actor "Developer" as Developer
 ' ============================================================
 
 rectangle "nasim" {
-  package "Plugins Group (PLG)" {
-    usecase "**PLG-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" as PLG01
-    usecase "**PLG-02 LOAD Manifest**\n--\nParse plugin manifest metadata" as PLG02
-    usecase "**PLG-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" as PLG03
-    usecase "**PLG-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" as PLG04
-    usecase "**PLG-05 ENABLE Plugin**\n--\nEnable a plugin" as PLG05
-    usecase "**PLG-06 DISABLE Plugin**\n--\nDisable a plugin" as PLG06
+  package "Memory Group (MEM)" {
+    usecase "**MEM-01 PERSIST Knowledge**\n--\nStore knowledge entries with scope, key, content" as MEM01
+    usecase "**MEM-02 RECALL Knowledge**\n--\nRetrieve knowledge from memory stores" as MEM02
+    usecase "**MEM-03 SEARCH Knowledge**\n--\nFTS5 search across stored knowledge" as MEM03
+    usecase "**MEM-04 SCOPE Knowledge**\n--\nIsolate knowledge by global, project, session scope" as MEM04
   }
 }
 
@@ -58,16 +62,14 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> PLG01
-Developer --> PLG05
-Developer --> PLG06
+Developer --> MEM02
+Developer --> MEM03
 
 ' ============================================================
 ' Relationships
 ' ============================================================
 
-PLG01 ..> PLG02 : <<include>>
-PLG02 ..> PLG03 : <<include>>
-PLG02 ..> PLG04 : <<include>>
+MEM01 ..> MEM04 : <<include>>
+MEM02 ..> MEM03 : <<include>>
 
 @enduml

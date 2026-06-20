@@ -1,42 +1,70 @@
 @startuml uc_wire_log
+
 ' ============================================================
-' Title:     nasim — UC: Wire Log
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   Event logging, turn indexing, session forking and replay
+' Title:     nasim — UC: Wire Log Group
+' Group:     WRL (Wire Log)
+' Boundary:  nasim code agent
+' Purpose:   Append-only event log, replay, session fork from wire
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Wire Log Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "AgentOrchestrator" as agent
-actor "Developer" as user
-
-rectangle "Wire Log" {
-    usecase "APPEND Event" as UC_WRL_01
-    usecase "READ Log" as UC_WRL_02
-    usecase "SEEK Turn" as UC_WRL_03
-    usecase "FORK Session" as UC_WRL_04
-    usecase "CHECKPOINT" as UC_WRL_05
-    usecase "REPLAY Session" as UC_WRL_06
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "External" {
-    component "Session Directory" as sdir
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-agent --> UC_WRL_01
-agent --> UC_WRL_05
-user --> UC_WRL_06
-user --> UC_WRL_04
-UC_WRL_01 ..> sdir : <<include>>
-UC_WRL_02 ..> sdir : <<include>>
-UC_WRL_03 ..> UC_WRL_02 : <<include>>
-UC_WRL_04 ..> UC_WRL_03 : <<include>>
-UC_WRL_06 ..> UC_WRL_02 : <<include>>
-UC_WRL_05 ..> sdir : <<include>>
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Developer" as Developer
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Wire Log Group (WRL)" {
+    usecase "**WRL-01 APPEND Event**\n--\nAppend event to append-only log" as WRL01
+    usecase "**WRL-02 READ Log**\n--\nRead and parse wire log entries" as WRL02
+    usecase "**WRL-03 SEEK Turn**\n--\nRandom access via TurnIndex" as WRL03
+    usecase "**WRL-04 FORK Session**\n--\nFork session from wire log replay" as WRL04
+    usecase "**WRL-05 CHECKPOINT Turn**\n--\nIndex wire log entries by turn number" as WRL05
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Developer --> WRL02
+Developer --> WRL04
+
+' ============================================================
+' Relationships
+' ============================================================
+
+WRL02 ..> WRL03 : <<include>>
+WRL04 ..> WRL02 : <<include>>
 
 @enduml

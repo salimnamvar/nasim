@@ -1,0 +1,170 @@
+@startuml uc_overview
+
+' ============================================================
+' Title:     nasim — UC: Overview
+' Group:     ALL (All Groups)
+' Boundary:  nasim code agent
+' Purpose:   Cross-cutting view of all UC groups and actor interactions
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' ============================================================
+
+left to right direction
+
+title nasim — UC Overview
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Developer" as Developer
+actor "HTTP Client" as HTTPClient <<system>>
+actor "MCP Client" as MCPClient <<system>>
+actor "Observability Platform" as Platform <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "CLI (CLI)" {
+    usecase "**CLI-01 PROCESS User Input**\n--\nREPL, slash commands, rich rendering" as CLI01
+  }
+
+  package "Agent Core (AGT)" {
+    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop: provider call, tool dispatch" as AGT01
+  }
+
+  package "Provider (PRV)" {
+    usecase "**PRV-01 REQUEST Chat**\n--\nLLM provider abstraction via litellm" as PRV01
+  }
+
+  package "Tools (TL)" {
+    usecase "**TL-01 READ File**\n--\nFile operations: read, write, edit" as TL01
+  }
+
+  package "MCP (MCP)" {
+    usecase "**MCP-01 CONNECT MCP Server**\n--\nMCP protocol: client, server, adapter, discovery" as MCP01
+  }
+
+  package "Config (CFG)" {
+    usecase "**CFG-01 LOAD Config**\n--\nLayered config: global, project, env, CLI" as CFG01
+  }
+
+  package "Session (SSN)" {
+    usecase "**SSN-01 PERSIST Session**\n--\nSession store, versioning, search, fork" as SSN01
+  }
+
+  package "Server (SRV)" {
+    usecase "**SRV-01 SERVE HTTP API**\n--\nRESTful API + SSE streaming" as SRV01
+  }
+
+  package "Hooks (HK)" {
+    usecase "**HK-01 DISPATCH Hook**\n--\nPre/post hooks for tool use and LLM calls" as HK01
+  }
+
+  package "Plugins (PLG)" {
+    usecase "**PLG-01 DISCOVER Plugins**\n--\nPlugin discovery, loading, registration" as PLG01
+  }
+
+  package "Safety (SAF)" {
+    usecase "**SAF-01 CHECK Permission**\n--\nPermission gates, approval, safety modes" as SAF01
+  }
+
+  package "Router (RTG)" {
+    usecase "**RTG-01 SELECT Model**\n--\nModel selection, fallback, task classification" as RTG01
+  }
+
+  package "Observability (OBS)" {
+    usecase "**OBS-01 STREAM Structured Log**\n--\nEmit-only structured logs and metrics" as OBS01
+  }
+
+  package "Memory (MEM)" {
+    usecase "**MEM-01 PERSIST Knowledge**\n--\nCross-session knowledge persistence and RAG" as MEM01
+  }
+
+  package "Git (VCS)" {
+    usecase "**VCS-01 READ Git Status**\n--\nVersion control: status, diff, commit" as VCS01
+  }
+
+  package "Sandbox (SBX)" {
+    usecase "**SBX-01 ISOLATE Command**\n--\nOS-level process isolation" as SBX01
+  }
+
+  package "Repo Intelligence (RIM)" {
+    usecase "**RIM-01 INDEX Codebase**\n--\nAST, symbol graph, semantic search, repo-map" as RIM01
+  }
+
+  package "Edit Strategy (EDT)" {
+    usecase "**EDT-01 SELECT Strategy**\n--\nPolymorphic edit strategies with sandbox" as EDT01
+  }
+
+  package "Evaluation (EVL)" {
+    usecase "**EVL-01 EVALUATE Task**\n--\nSuccess checks, LLM review, retry coordination" as EVL01
+  }
+
+  package "Wire Log (WRL)" {
+    usecase "**WRL-01 APPEND Event**\n--\nAppend-only event log, replay, fork" as WRL01
+  }
+
+  package "Context Graph (CTX)" {
+    usecase "**CTX-01 PROCESS Context**\n--\nGraph pipeline: truncation, distillation, injection" as CTX01
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Developer --> CLI01
+Developer --> TL01
+Developer --> SSN01
+Developer --> VCS01
+Developer --> MEM02
+HTTPClient --> SRV01
+MCPClient --> MCP01
+Platform --> OBS01
+
+' ============================================================
+' Key Relationships
+' ============================================================
+
+CLI01 ..> AGT01 : <<include>>
+AGT01 ..> PRV01 : <<include>>
+AGT01 ..> TL01 : <<include>>
+AGT01 ..> SAF01 : <<include>>
+AGT01 ..> RTG01 : <<include>>
+AGT01 ..> WRL01 : <<include>>
+AGT01 ..> CTX01 : <<include>>
+AGT01 ..> EDT01 : <<include>>
+AGT01 ..> EVL01 : <<extend>>
+SRV01 ..> AGT01 : <<include>>
+OBS01 ..> WRL01 : <<extend>>
+
+@enduml

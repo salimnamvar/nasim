@@ -51,6 +51,7 @@ System_Ext(plugin_dir, "Plugin Directory", "Community extensions")
 System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code")
 System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API)")
 System_Ext(vector_store, "Vector Store", "Persistent vector storage for similarity search")
+System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace/metric export")
 
 ' ============================================================
 ' Observability Platform (tenas pattern)
@@ -84,6 +85,7 @@ Rel(core, plugin_dir, "plugin discovery")
 Rel(core, tree_sitter, "parses AST")
 Rel(core, embedding_model, "generates embeddings")
 Rel(core, vector_store, "vector CRUD")
+Rel(core, otel_collector, "exports traces/metrics (optional)", "OTLP/gRPC")
 
 ' ============================================================
 ' Observability Pipeline (tenas pattern: emit-only app, platform-owned collection)

@@ -47,6 +47,7 @@ System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
 System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code")
 System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API)")
 System_Ext(vector_store, "Vector Store", "Persistent vector storage for similarity search")
+System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace/metric export")
 
 ' ============================================================
 ' Observability Platform (tenas pattern: emit-only app, platform-owned collection)
@@ -75,5 +76,6 @@ Rel(nasim, embedding_model, "generates code embeddings", "HTTP/local")
 Rel(nasim, vector_store, "stores/retrieves embeddings", "SQLite + vector")
 
 Rel(nasim, obs_platform, "emits structured logs to stdout; exposes /metrics (collected via agents + scrape)", "stdout + HTTP scrape")
+Rel(nasim, otel_collector, "exports traces/metrics (optional)", "OTLP/gRPC")
 
 @enduml

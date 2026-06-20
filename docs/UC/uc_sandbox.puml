@@ -1,10 +1,10 @@
-@startuml uc_plugins
+@startuml uc_sandbox
 
 ' ============================================================
-' Title:     nasim — UC: Plugins Group
-' Group:     PLG (Plugins)
+' Title:     nasim — UC: Sandbox Group
+' Group:     SBX (Sandbox)
 ' Boundary:  nasim code agent
-' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
+' Purpose:   OS-level process isolation for shell and edit operations
 ' Milestone: v1.0
 ' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
@@ -13,7 +13,7 @@
 
 left to right direction
 
-title nasim — Plugins Use Cases
+title nasim — Sandbox Use Cases
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -44,13 +44,11 @@ actor "Developer" as Developer
 ' ============================================================
 
 rectangle "nasim" {
-  package "Plugins Group (PLG)" {
-    usecase "**PLG-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" as PLG01
-    usecase "**PLG-02 LOAD Manifest**\n--\nParse plugin manifest metadata" as PLG02
-    usecase "**PLG-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" as PLG03
-    usecase "**PLG-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" as PLG04
-    usecase "**PLG-05 ENABLE Plugin**\n--\nEnable a plugin" as PLG05
-    usecase "**PLG-06 DISABLE Plugin**\n--\nDisable a plugin" as PLG06
+  package "Sandbox Group (SBX)" {
+    usecase "**SBX-01 ISOLATE Command**\n--\nExecute command in isolated OS environment" as SBX01
+    usecase "**SBX-02 APPLY Sandbox Policy**\n--\nEnforce network, filesystem, exec restrictions" as SBX02
+    usecase "**SBX-03 MONITOR Process**\n--\nMonitor process, enforce timeout and resource limits" as SBX03
+    usecase "**SBX-04 LIMIT Resources**\n--\nEnforce CPU, memory, and disk quotas" as SBX04
   }
 }
 
@@ -58,16 +56,14 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> PLG01
-Developer --> PLG05
-Developer --> PLG06
+Developer --> SBX01
 
 ' ============================================================
 ' Relationships
 ' ============================================================
 
-PLG01 ..> PLG02 : <<include>>
-PLG02 ..> PLG03 : <<include>>
-PLG02 ..> PLG04 : <<include>>
+SBX01 ..> SBX02 : <<include>>
+SBX01 ..> SBX03 : <<include>>
+SBX01 ..> SBX04 : <<include>>
 
 @enduml

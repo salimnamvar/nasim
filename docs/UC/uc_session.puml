@@ -1,41 +1,76 @@
 @startuml uc_session
+
 ' ============================================================
-' Title:     nasim — UC: Session Persistence
-' Boundary:  nasim code agent CLI
-' Purpose:   Save, load, and list conversation sessions
+' Title:     nasim — UC: Session Group
+' Group:     SSN (Session)
+' Boundary:  nasim code agent
+' Purpose:   Session persistence, versioning, search, fork
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Session Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "Developer" as user
-actor "AgentOrchestrator" as agent
-
-rectangle "Session Layer" {
-    usecase "Save Session" as UC_SSN_01
-    usecase "Load Session" as UC_SSN_02
-    usecase "List Sessions" as UC_SSN_03
-    usecase "Resume Session" as UC_SSN_04
-    usecase "FORK Session" as UC_SSN_05
-    usecase "UNDO Turn" as UC_SSN_06
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-System_Ext(session_dir, "Session Dir", "~/.nasim/sessions/")
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
 
-user --> UC_SSN_03
-agent --> UC_SSN_01
-agent --> UC_SSN_02
-user --> UC_SSN_05
-agent --> UC_SSN_06
-UC_SSN_02 ..> UC_SSN_04 : <<include>>
-UC_SSN_05 ..> UC_SSN_01 : <<include>>
-UC_SSN_06 ..> UC_SSN_02 : <<include>>
-UC_SSN_01 ..> session_dir
-UC_SSN_02 ..> session_dir
-UC_SSN_03 ..> session_dir
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Developer" as Developer
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Session Group (SSN)" {
+    usecase "**SSN-01 PERSIST Session**\n--\nSave session to storage" as SSN01
+    usecase "**SSN-02 READ Session**\n--\nLoad session from storage" as SSN02
+    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
+    usecase "**SSN-04 RESTORE Session**\n--\nResume a previously saved session" as SSN04
+    usecase "**SSN-05 SNAPSHOT Session**\n--\nCreate session state snapshot" as SSN05
+    usecase "**SSN-06 REVERT Turn**\n--\nUndo last turn in session" as SSN06
+    usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" as SSN07
+    usecase "**SSN-08 BRANCH Session**\n--\nFork conversation from any point" as SSN08
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Developer --> SSN03
+Developer --> SSN07
+Developer --> SSN08
+
+' ============================================================
+' Relationships
+' ============================================================
+
+SSN04 ..> SSN02 : <<include>>
+SSN05 ..> SSN01 : <<include>>
+SSN06 ..> SSN02 : <<include>>
+SSN08 ..> SSN01 : <<include>>
 
 @enduml
