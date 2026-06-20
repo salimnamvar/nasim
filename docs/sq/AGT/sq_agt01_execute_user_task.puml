@@ -16,6 +16,7 @@ box "CLI Layer" #E8F5E9
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
+  participant "ConversationHistory" as history
 end box
 box "Provider Layer" #FFF3E0
   participant "Provider" as provider
@@ -23,53 +24,113 @@ end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as tool
 end box
+box "Safety Layer" #FFF9C4
+  participant "PermissionGate" as gate
+end box
 
-note over user, tool
-  Scope:          Single user task execution
-  Preconditions:  Agent initialized, Provider reachable
-  Contexts:       Called by CLI-01 (PROCESS User Input)
-  Excludes:       Slash commands, streaming display
-  Rollback:       Error state -> IDLE
-  Design:         Max iterations configurable; emits AgentEvents
+note over user, gate
+  Scope:
+    - agt01 PROCESS User Task — single complete task execution cycle
+
+  Preconditions:
+    - Agent initialized with Provider, ToolRegistry, ConversationHistory
+    - Provider is reachable (network available)
+    - Config loaded with valid provider + model settings
+
+  Contexts:
+    - Called by CLI-01 (PROCESS User Input) after REPL input parsed
+    - Entry point for the entire agentic loop
+
+  Excludes:
+    - Slash command handling (CLI-02 handles those)
+    - Streaming display rendering (CLI-03 handles those)
+    - Session save/load (SSN-01/02 handles those)
+
+  Rollback:
+    - LLM call failure → append error message → ERROR state → IDLE
+    - Tool execution failure → append error message → ERROR state → IDLE
+    - Max iterations exceeded → force Done event
+
+  Design:
+    - AgentOrchestrator yields AgentEvent objects (no print())
+    - Max iterations configurable via Config.max_iterations
+    - ConversationHistory tracks token count for compaction trigger
+    - PermissionGate consulted before every tool execution
+    - Recursive: after tool dispatch, re-calls Provider for next response
+
+  Returns:
+    - Success: Done event with final text response
+    - Failure: Error event with error description
 end note
 
-== AGT-01 PROCESS User Task ==
+== agt01 PROCESS User Task ==
 
 user -> repl : types input
 repl -> agent : PROCESS(user_input)
+activate agent
 
-agent -> agent : append user message to messages
+agent -> history : append user message to messages
+activate history
+history --> agent : messages updated
+deactivate history
+
 ref over agent, provider
-  PRV-02: Call Provider Chat (or PRV-03: STREAM)
+  prv02: Call Provider Chat (or prv03: STREAM)
 end ref
 
 alt LLM returns text only
-    agent -> agent : append assistant message to messages
+    agent -> history : append assistant message to messages
+    activate history
+    history --> agent : messages updated
+    deactivate history
     agent --> repl : AgentEvent(Done)
 else LLM returns tool calls
-    agent -> agent : append assistant message with tool_calls
+    agent -> history : append assistant message with tool_calls
+    activate history
+    history --> agent : messages updated
+    deactivate history
     loop for each tool_call
         ref over agent, tool
-          AGT-02: DISPATCH Tool Call
+          agt02: DISPATCH Tool Call
         end ref
     end
     ref over agent, provider
-      PRV-02: Call Provider Chat [recurse]
+      prv02: Call Provider Chat [recurse — agt01 loops]
     end ref
-    agent -> agent : append assistant message to messages
+    agent -> history : append assistant message to messages
+    activate history
+    history --> agent : messages updated
+    deactivate history
     agent --> repl : AgentEvent(Done)
 end
 
 break LLM call fails or tool execution errors
-    agent -> agent : append error message
+    agent -> history : append error message
+    activate history
+    history --> agent : messages updated
+    deactivate history
     agent --> repl : AgentEvent(Error)
 end
 
-note over user, tool
-  Flow:    User -> REPLSession -> AgentOrchestrator -> Provider -> (tool loop) -> Done
-  State:   IDLE -> LISTENING -> THINKING -> [TOOL_EXEC]* -> RESPONDING -> IDLE
-  Failure: LLM error or tool error -> ERROR -> IDLE
-  Success: Done event with final text
+deactivate agent
+
+note over user, gate
+  Flow:
+    - User → REPLSession → AgentOrchestrator → Provider → (tool loop) → Done
+
+  State:
+    - IDLE → LISTENING → THINKING → [TOOL_EXEC]* → RESPONDING → IDLE
+
+  Failure:
+    - LLM error or tool error → ERROR → IDLE
+
+  Success:
+    - Done event with final text response
+
+  Key invariants:
+    - AgentOrchestrator never prints directly
+    - Every tool call goes through PermissionGate
+    - ConversationHistory owns message list integrity
 end note
 
 @enduml

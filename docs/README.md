@@ -1,14 +1,33 @@
-# nasim — Design Documentation
+# docs — Design Artifacts
 
-## Design Chain
+Design chain artifacts for the nasim CLI code agent. All layers are frozen through SQ.
+Implementation roadmap (RDM) is active.
+
+Back to [project root](../README.md).
+
+## Design chain
 
 ```
-C4  →  UC  →  SM  →  SQ  →  ERD  →  CL  →  Code
+C4 → UC → SM → SQ → ERD → CL → Code
 ```
 
-nasim uses JSON file sessions (no relational database). The ERD layer is present
-but minimal — one ERD for the session JSON store. No CT/DATA or CT/API layers
-are needed (nasim exposes no HTTP APIs). LLM providers are external dependencies.
+nasim uses JSON file sessions (no relational database). No CT/DATA or CT/API layers
+are needed — nasim exposes no HTTP APIs. LLM providers are external dependencies.
+
+Each layer must be authored in order. No layer may be authored before the one above it.
+
+## Layer index
+
+| Directory | Layer | Status | Contents |
+| --------- | ----- | ------ | -------- |
+| [C4/](c4/README.md) | C4 Architecture | Frozen | Context, container, 8 component diagrams (6 containers) |
+| [UC/](uc/README.md) | Use Cases | Frozen | 42 UCs — 9 groups (CLI/AGT/PRV/CFG/SSN/SAF/CTX/LLM/TL) |
+| [SM/](sm/README.md) | State Machine | Frozen | Agent lifecycle — 9 states (process FSM, not entity lifecycle) |
+| [SQ/](sq/README.md) | Sequence Diagrams | Frozen | 42 diagrams — one per UC, by group |
+| [ER/](er/README.md) | ERD | Frozen | Session JSON Lines schema — logical store |
+| [CL/](cl/README.md) | Class Diagram | Frozen | Runtime class model — providers, tools, orchestrator, config, session |
+| [RDM/](rdm/README.md) | Implementation Roadmap | Active | Milestone docs for coding |
+| [MM/](mm/README.md) | Design Chain Maps | Frozen | Summary and detail chain overview diagrams |
 
 ## Quick Navigation
 
@@ -48,6 +67,12 @@ are needed (nasim exposes no HTTP APIs). LLM providers are external dependencies
 
 ### Entity Registry
 - [entities.md](entities.md) — Canonical names for all components, UCs, actors
+
+### Implementation Roadmap
+- [RDM Overview](rdm/README.md) — Principles, stack, milestones, CI gates
+
+### Design Chain Maps
+- [MM Overview](mm/README.md) — Meta-level navigation diagrams
 
 ## Architecture Decisions
 

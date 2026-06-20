@@ -1,3 +1,4 @@
+@startuml c4_nasim_component_overview
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 skinparam linetype polyline
@@ -15,44 +16,118 @@ skinparam linetype polyline
 
 title nasim — Component Overview (cross-container)
 
+' ============================================================
+' Tags & Styling
+' ============================================================
+
+AddElementTag("future", $bgColor="#F0F0F0", $fontColor="#666666", $borderColor="#999999", $borderStyle=DashedLine(), $legendText="Future scope (inactive)")
+AddRelTag("future_rel", $textColor="#666666", $lineColor="#999999", $lineStyle=DashedLine(), $legendText="Future relationship")
+
+' ============================================================
+' CLI Layer
+' ============================================================
+
 Container_Boundary(cli_boundary, "CLI Layer") {
-    Component(arg_parser, "ArgParser", "", "")
-    Component(repl_session, "REPLSession", "", "")
-    Component(renderer, "Renderer", "", "")
+    Component(arg_parser, "ArgParser", "click", "CLI argument parsing with layered overrides. Delegates to ConfigLoader for config merging.")
+    Component(repl_session, "REPLSession", "click + rich", "Interactive REPL loop. Reads user input, dispatches to AgentOrchestrator, renders AgentEvents.")
+    Component(renderer, "Renderer", "rich", "All terminal output: streaming tokens, tool calls/results, diffs, colors. Subscribes to AgentEvent stream.")
+    Component(slash_handler, "SlashCommandHandler", "click", "Maps /cmd strings to actions: /help, /quit, /plan, /approve, /continue, /session")
 }
+
+' ============================================================
+' Agent Layer
+' ============================================================
 
 Container_Boundary(agent_boundary, "Agent Layer") {
-    Component(agent_orch, "AgentOrchestrator", "", "")
-    Component(conv_history, "ConversationHistory", "", "")
-    Component(compactor, "ContextCompactor", "", "")
-    Component(perm_gate, "PermissionGate", "", "")
+    Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call → tool dispatch → repeat. Yields AgentEvent objects. No print().")
+    Component(conv_history, "ConversationHistory", "", "Owns message list + token count. Triggers ContextCompactor when budget exceeded.")
+    Component(compactor, "ContextCompactor", "", "Summarizes oldest exchanges via secondary LLM call when token_count > context_budget.")
+    Component(perm_gate, "PermissionGate", "", "Per-tool safety check: ask (prompt user), auto (allow all), off (block unsafe).")
+    Component(plan_session, "PlanSession", "", "Holds queued tool calls in plan mode. /approve drains the queue.")
 }
+
+' ============================================================
+' Provider Layer
+' ============================================================
 
 Container_Boundary(provider_boundary, "Provider Layer") {
-    Component(provider, "Provider", "", "")
+    Component(provider, "Provider", "Protocol", "LLM provider interface: chat(), chat_stream(), model_name. Implemented by Ollama/OpenAI/Anthropic.")
+    Component(provider_factory, "ProviderFactory", "", "Reads config, instantiates correct provider backend.")
 }
+
+' ============================================================
+' Tool Layer
+' ============================================================
 
 Container_Boundary(tool_boundary, "Tool Layer") {
-    Component(tool_registry, "ToolRegistry", "", "")
-    Component(search_tools, "SearchTools", "", "")
-    Component(web_tools, "WebTools", "", "")
+    Component(tool_registry, "ToolRegistry", "", "Instance-based tool registry. find(name) → Tool. Supports dynamic registration for MCP.")
+    Component(file_tools, "FileTools", "ABC", "ReadFileTool, WriteFileTool, EditFileTool — file I/O operations.")
+    Component(search_tools, "SearchTools", "ABC", "GrepTool, GlobTool, FindFileTool — code search operations.")
+    Component(shell_tool, "ShellTool", "ABC", "Shell command execution with timeout. Unsafe tool.")
+    Component(web_tools, "WebTools", "ABC", "WebFetchTool, WebSearchTool — external HTTP operations.")
+    Component(git_tool, "GitTool", "ABC", "Git status, diff, commit operations.")
+    Component(mcp_adapter, "MCPToolAdapter", "", "Wraps MCP server tools into nasim Tool format. Dynamic registration.")
 }
+
+' ============================================================
+' Config Layer
+' ============================================================
 
 Container_Boundary(config_boundary, "Config Layer") {
-    Component(config_loader, "ConfigLoader", "", "")
+    Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML → project YAML → env vars → CLI flags. Returns typed Config.")
 }
+
+' ============================================================
+' Session Layer
+' ============================================================
 
 Container_Boundary(session_boundary, "Session Layer") {
-    Component(session_store, "SessionStore", "", "")
+    Component(session_store, "SessionStore", "pathlib + json", "Persists/loads message history to ~/.nasim/sessions/<id>/. Atomic writes.")
 }
 
-Rel(repl_session, agent_orch, "user input -> events")
+' ============================================================
+' Relationships
+' ============================================================
+
+Rel(repl_session, agent_orch, "user input → AgentEvents")
+Rel(repl_session, renderer, "AgentEvents → terminal output")
+Rel(repl_session, slash_handler, "/cmd → action")
+
 Rel(agent_orch, provider, "chat / stream")
 Rel(agent_orch, tool_registry, "execute tools")
-Rel(agent_orch, conv_history, "messages")
-Rel(agent_orch, perm_gate, "permission check")
-Rel(conv_history, compactor, "compact")
-Rel(agent_orch, session_store, "save/load")
+Rel(agent_orch, conv_history, "messages + token tracking")
+Rel(agent_orch, perm_gate, "permission check before tool exec")
+Rel(agent_orch, plan_session, "queue/drain in plan mode")
+Rel(conv_history, compactor, "compact when budget exceeded")
+
 Rel(config_loader, agent_orch, "settings")
+Rel(session_store, agent_orch, "save/load sessions")
+
+Rel(provider_factory, provider, "instantiates")
+
+' ============================================================
+' Notes
+' ============================================================
+
+note right of agent_orch
+  Central orchestrator.
+  Yields AgentEvent objects.
+  Never prints directly.
+  Max iterations configurable.
+end note
+
+note right of perm_gate
+  ask: prompt user [y/N]
+  auto: allow all tools
+  off: block unsafe tools
+end note
+
+note right of compactor
+  Triggered when token_count > context_budget.
+  Summarizes oldest exchanges.
+  Secondary LLM call.
+end note
 
 SHOW_LEGEND()
+
+@enduml

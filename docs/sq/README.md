@@ -1,5 +1,26 @@
 # nasim — SQ Inventory
 
+Sequence diagrams organised by UC group. 42 diagrams across 9 groups.
+Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
+
+Back to [docs/](../README.md).
+
+## Groups
+
+| Group | Boundary | Diagrams | Subdirectory |
+| ----- | -------- | :------: | ------------ |
+| CLI | CLI Layer — REPL, parsing, rendering | 6 | `CLI/` |
+| AGT | Agent Core — orchestrator, history, permissions, plans | 8 | `AGT/` |
+| PRV | Provider Layer — provider abstraction, chat, streaming | 4 | `PRV/` |
+| CFG | Configuration — config loading and validation | 3 | `CFG/` |
+| SSN | Session — persistence and resumption | 4 | `SSN/` |
+| SAF | Safety — permission checks and user approval | 3 | `SAF/` |
+| CTX | Context Management — token counting and compaction | 3 | `CTX/` |
+| LLM | Provider Backend — Ollama-specific chat/stream | 2 | `LLM/` |
+| TL | Tool Layer — all tool implementations | 9 | `TL/` |
+
+## Diagram Index
+
 | SQ Diagram | UC ID | Group | Description |
 |-----------|-------|-------|-------------|
 | sq_cli01_process_user_input | CLI-01 | CLI | REPL input loop with event rendering |
@@ -47,3 +68,13 @@
 | sq_tl12_invoke_mcp_extension | TL-12 | TL | MCP server extension tools |
 
 **Total: 42 SQ diagrams (1:1 with UCs)**
+
+## SQ Diagram Convention
+
+Each SQ diagram follows this structure:
+
+1. **Header** — Title, boundary, purpose, version, source, review status
+2. **Lifelines** — Actors, participants grouped by layer (colored boxes)
+3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Design, Returns
+4. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks
+5. **Summary Note** — Flow summary, state transitions, success/failure paths, key invariants

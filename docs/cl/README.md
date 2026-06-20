@@ -1,50 +1,93 @@
 # nasim — CL Inventory
 
-| Diagram | Scope | Description |
-|---------|-------|-------------|
-| cl_runtime_model | Runtime | Core runtime classes: Provider, Tool, AgentOrchestrator, Config, Session, AgentEvent hierarchy |
+Class diagram covering the runtime class model for the nasim CLI code agent.
+No business domain entities — CL diagrams document the runtime structure.
+
+Back to [docs/](../README.md).
+
+## Diagrams
+
+| File | Scope | Description |
+| ---- | ----- | ----------- |
+| `cl_runtime_model.puml` | Runtime | Core runtime classes: Provider, Tool, AgentOrchestrator, Config, Session, AgentEvent hierarchy |
 
 ## Class List
 
-| Class | Module | Type | Description |
-|-------|--------|------|-------------|
-| Provider | `nasim/provider/base.py` | Protocol | LLM provider interface: chat(), chat_stream() |
-| OllamaProvider | `nasim/provider/ollama.py` | class | Ollama /api/chat implementation |
-| OpenAIProvider | `nasim/provider/openai.py` | class | OpenAI API implementation (Phase 2) |
-| AnthropicProvider | `nasim/provider/anthropic.py` | class | Anthropic API implementation (Phase 2) |
-| ProviderFactory | `nasim/provider/base.py` | class | Provider instantiation from config |
-| LLMResponse | `nasim/provider/base.py` | dataclass | Parsed LLM response |
-| ToolCall | `nasim/provider/base.py` | dataclass | Parsed tool call |
-| AgentOrchestrator | `nasim/agent/orchestrator.py` | class | Core agentic orchestrator |
-| ConversationHistory | `nasim/agent/history.py` | class | Message list + token tracking |
-| ContextCompactor | `nasim/agent/compactor.py` | class | Context summarization |
-| PermissionGate | `nasim/agent/permission.py` | class | Tool permission checks |
-| PlanSession | `nasim/agent/plan.py` | class | Plan mode tool queuing |
-| AgentEvent | `nasim/agent/events.py` | ABC | Base event type |
-| TextChunk | `nasim/agent/events.py` | class | Streaming text token |
-| ToolStart | `nasim/agent/events.py` | class | Tool execution start |
-| ToolResult | `nasim/agent/events.py` | class | Tool execution result |
-| Error | `nasim/agent/events.py` | class | Error event |
-| Done | `nasim/agent/events.py` | class | Task completion event |
-| Tool | `nasim/tools/base.py` | ABC | Base tool with execute() |
-| ToolRegistry | `nasim/tools/base.py` | class | Instance-based tool registry |
-| ReadFileTool | `nasim/tools/file.py` | class | Read file contents |
-| WriteFileTool | `nasim/tools/file.py` | class | Write/overwrite files |
-| EditFileTool | `nasim/tools/file.py` | class | Find-and-replace in files |
-| GrepTool | `nasim/tools/search.py` | class | Regex search in files |
-| GlobTool | `nasim/tools/search.py` | class | Glob pattern file search |
-| FindFileTool | `nasim/tools/search.py` | class | Name pattern file search |
-| ShellTool | `nasim/tools/shell.py` | class | Shell command execution |
-| DirTool | `nasim/tools/directory.py` | class | Directory listing |
-| WebFetchTool | `nasim/tools/web.py` | class | URL content fetch |
-| WebSearchTool | `nasim/tools/web.py` | class | Web search |
-| GitTool | `nasim/tools/git.py` | class | Git operations |
-| MCPToolAdapter | `nasim/tools/mcp.py` | class | MCP server tool wrapper |
-| Config | `nasim/config/schema.py` | dataclass | Typed configuration |
-| ConfigLoader | `nasim/config/loader.py` | class | Layered config loading |
-| Session | `nasim/session/model.py` | dataclass | Session data |
-| SessionStore | `nasim/session/store.py` | class | Session persistence |
+| Class | Module | Type | C4 Component | Description |
+|-------|--------|------|-------------|-------------|
+| Provider | `nasim/provider/base.py` | Protocol | Provider | LLM provider interface: chat(), chat_stream(), model_name |
+| OllamaProvider | `nasim/provider/ollama.py` | class | Provider | Ollama /api/chat implementation |
+| OpenAIProvider | `nasim/provider/openai.py` | class | Provider | OpenAI API implementation (Phase 2) |
+| AnthropicProvider | `nasim/provider/anthropic.py` | class | Provider | Anthropic API implementation (Phase 2) |
+| ProviderFactory | `nasim/provider/base.py` | class | Provider | Provider instantiation from config |
+| LLMResponse | `nasim/provider/base.py` | dataclass | — | Parsed LLM response: text, tool_calls, usage |
+| ToolCall | `nasim/provider/base.py` | dataclass | — | Parsed tool call: name, arguments, id |
+| AgentOrchestrator | `nasim/agent/orchestrator.py` | class | AgentOrchestrator | Core agentic orchestrator — drives LLM/tool loop |
+| ConversationHistory | `nasim/agent/history.py` | class | ConversationHistory | Message list + token tracking + compaction trigger |
+| ContextCompactor | `nasim/agent/compactor.py` | class | ContextCompactor | Context summarization via secondary LLM call |
+| PermissionGate | `nasim/agent/permission.py` | class | PermissionGate | Tool permission checks: ask/auto/off modes |
+| PlanSession | `nasim/agent/plan.py` | class | PlanSession | Plan mode tool queuing and execution |
+| AgentEvent | `nasim/agent/events.py` | ABC | AgentEvent | Base event type — abstract |
+| TextChunk | `nasim/agent/events.py` | class | AgentEvent | Streaming text token event |
+| ToolStart | `nasim/agent/events.py` | class | AgentEvent | Tool execution start event |
+| ToolResult | `nasim/agent/events.py` | class | AgentEvent | Tool execution result event |
+| Error | `nasim/agent/events.py` | class | AgentEvent | Error event |
+| Done | `nasim/agent/events.py` | class | AgentEvent | Task completion event |
+| Tool | `nasim/tools/base.py` | ABC | Tool | Base tool: name, description, parameters, safe, execute() |
+| ToolRegistry | `nasim/tools/base.py` | class | ToolRegistry | Instance-based tool registry; dynamic registration |
+| ToolResult | `nasim/tools/base.py` | dataclass | ToolResult | Structured result: success, content, error |
+| ReadFileTool | `nasim/tools/file.py` | class | Tool | Read file contents with offset/limit |
+| WriteFileTool | `nasim/tools/file.py` | class | Tool | Create or overwrite files |
+| EditFileTool | `nasim/tools/file.py` | class | Tool | Replace exact strings in files |
+| GrepTool | `nasim/tools/search.py` | class | Tool | Search file contents by regex pattern |
+| GlobTool | `nasim/tools/search.py` | class | Tool | Find files by glob pattern |
+| FindFileTool | `nasim/tools/search.py` | class | Tool | Find files by name pattern with depth |
+| ShellTool | `nasim/tools/shell.py` | class | Tool | Shell command execution with timeout |
+| DirTool | `nasim/tools/directory.py` | class | Tool | List directory contents |
+| WebFetchTool | `nasim/tools/web.py` | class | Tool | Fetch URL content as markdown |
+| WebSearchTool | `nasim/tools/web.py` | class | Tool | Search the web for information |
+| GitTool | `nasim/tools/git.py` | class | Tool | Git status, diff, commit operations |
+| MCPToolAdapter | `nasim/tools/mcp.py` | class | Tool | Wraps MCP server tools into nasim Tool format |
+| Config | `nasim/config/schema.py` | dataclass | Config | Typed configuration: provider, model, safety, budget, mcp |
+| ConfigLoader | `nasim/config/loader.py` | class | ConfigLoader | Loads global YAML + project YAML + env + CLI flags |
+| Session | `nasim/session/model.py` | dataclass | Session | Session data: id, created_at, messages |
+| SessionStore | `nasim/session/store.py` | class | SessionStore | Persists/loads message history to ~/.nasim/sessions/ |
 
-Note: nasim is a CLI agent tool. The CL diagram covers runtime structure
-rather than a pure domain model (no business entities). This is a deliberate
-deviation from the OVMS-style domain CL — documented in entities.md.
+## Relationships
+
+| From | To | Relationship | Notes |
+| ---- | --- | ------------ | ----- |
+| AgentOrchestrator | Provider | uses | Calls chat()/chat_stream() |
+| AgentOrchestrator | ToolRegistry | uses | Dispatches tool calls |
+| AgentOrchestrator | ConversationHistory | owns | Manages message list |
+| AgentOrchestrator | PermissionGate | uses | Checks before tool exec |
+| AgentOrchestrator | PlanSession | uses | Queues in plan mode |
+| ConversationHistory | ContextCompactor | delegates | Triggers compaction |
+| ProviderFactory | Provider | creates | Instantiates from config |
+| ConfigLoader | Config | produces | Returns typed config |
+| SessionStore | Session | persists | JSON Lines files |
+
+## Notes
+
+- nasim is a CLI agent tool. The CL diagram covers runtime structure
+  rather than a pure domain model (no business entities). This is a deliberate
+  deviation from the OVMS-style domain CL — documented in entities.md.
+- AgentEvent hierarchy uses ABC base with concrete subtypes (TextChunk, ToolStart, ToolResult, Error, Done).
+- Tool ABC defines the contract; ToolRegistry manages instances.
+- Provider Protocol defines the interface; concrete implementations per backend.
+
+## Design Chain Position
+
+```
+... → SQ → ERD → CL → Code
+```
+
+## Related Layers
+
+| Layer | Path |
+| ----- | ---- |
+| C4 components (source) | `docs/c4/` |
+| UC inventory | `docs/uc/` |
+| SQ diagrams | `docs/sq/` |
+| ERD — session store | `docs/er/er_session_store.puml` |
+| Entity registry | `docs/entities.md` |
