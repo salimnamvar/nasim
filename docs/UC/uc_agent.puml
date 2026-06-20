@@ -24,6 +24,8 @@ rectangle "Agent Core" {
     usecase "COMPACT Context" as UC_AGT_06
     usecase "Queue Plan" as UC_AGT_07
     usecase "APPROVE Plan" as UC_AGT_08
+    usecase "EVALUATE Task" as UC_AGT_09
+    usecase "INJECT Turn Budget" as UC_AGT_10
     usecase "Execute Pre-Tool Hook" as UC_HK_02
     usecase "Execute Post-Tool Hook" as UC_HK_03
 }
@@ -42,5 +44,7 @@ UC_AGT_02 ..> UC_HK_03 : <<include>>
 UC_AGT_01 ..> UC_AGT_06 : <<extend>>
 UC_AGT_07 ..> UC_AGT_08 : <<extend>>
 UC_AGT_01 ..> UC_RTG_01 : <<include>>
+UC_AGT_01 ..> UC_AGT_09 : <<extend>>
+UC_AGT_01 ..> UC_AGT_10 : <<include>>
 
 @enduml

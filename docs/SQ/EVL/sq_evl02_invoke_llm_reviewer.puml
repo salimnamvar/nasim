@@ -1,0 +1,107 @@
+@startuml sq_evl02_invoke_llm_reviewer
+' ============================================================
+' Title:     EVL-02 — INVOKE LLM Reviewer
+' Boundary:  nasim code agent CLI
+' Purpose:   LLM-as-judge scoring for edit quality
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Layer" #FFF3E0
+  participant "LLMReviewer" as reviewer
+end box
+box "Provider Layer" #E3F2FD
+  participant "Provider" as provider
+end box
+box "Edit Layer" #FFF3E0
+  participant "FileSystem" as fs
+end box
+
+note over user, fs
+  Scope:
+    - evl02 INVOKE LLM Reviewer — LLM-as-judge scoring for edit quality
+
+  Preconditions:
+    - Edit applied to file system
+    - Provider available for LLM calls
+    - Review prompt template configured
+
+  Contexts:
+    - Called after EVL-01 (Run Success Checks) as complementary evaluation
+    - Provides semantic quality assessment beyond exit codes
+
+  Excludes:
+    - Shell-based checks (handled by EVL-01)
+    - Retry coordination (handled by EVL-03)
+
+  Rollback:
+    - LLM call failure → skip review, proceed with exit code results only
+
+  Design:
+    - LLMReviewer sends original + edited file to Provider
+    - Prompt asks for quality score (1-10) and feedback
+    - Score below threshold triggers retry via EVL-03
+    - Review is non-blocking (failure doesn't block flow)
+
+  Returns:
+    - Success: ReviewResult with score and feedback
+    - Failure: ReviewResult with skip flag
+end note
+
+== evl02 INVOKE LLM Reviewer ==
+
+agent -> reviewer : REVIEW_EDIT(original_file, edited_file)
+activate reviewer
+
+reviewer -> fs : read_file(original_file)
+activate fs
+fs --> reviewer : original_content
+deactivate fs
+
+reviewer -> fs : read_file(edited_file)
+activate fs
+fs --> reviewer : edited_content
+deactivate fs
+
+reviewer -> reviewer : format_review_prompt(original_content, edited_content)
+
+reviewer -> provider : chat(review_prompt)
+activate provider
+provider --> reviewer : review_response
+deactivate provider
+
+reviewer -> reviewer : parse_score_and_feedback(review_response)
+
+reviewer -> reviewer : validate_score(score, min=1, max=10)
+
+reviewer --> agent : ReviewResult(score, feedback, passed)
+deactivate reviewer
+
+note over user, fs
+  Flow:
+    - AgentOrchestrator → LLMReviewer → FileSystem + Provider → ReviewResult
+
+  State:
+    - IDLE → READING → PROMPTING → SCORING → DONE
+
+  Failure:
+    - LLM call failure → skip review
+    - Parse failure → skip review
+
+  Success:
+    - ReviewResult with score and feedback
+
+  Key invariants:
+    - Review is non-blocking (failure doesn't stop flow)
+    - Score always in range 1-10
+    - Feedback always provided regardless of score
+end note
+
+@enduml

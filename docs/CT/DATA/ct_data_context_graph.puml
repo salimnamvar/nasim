@@ -1,0 +1,76 @@
+@startuml ct_data_context_graph
+' ============================================================
+' Title:     nasim — Context Graph Data Structures
+' Boundary:  nasim code agent CLI
+' Purpose:   Data models for context graph nodes, edges, and pipeline
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Context Graph Data Structures
+
+skinparam classAttributeIconSize 0
+
+package "Context Graph Data" #F3E5F5 {
+
+    class ContextNode <<dataclass>> {
+        + id : str
+        + node_type : NodeType
+        + content : str
+        + token_count : int
+        + metadata : dict
+    }
+
+    class ContextEdge <<dataclass>> {
+        + id : str
+        + edge_type : EdgeType
+        + source_id : str
+        + target_id : str
+    }
+
+    enum NodeType {
+        SYSTEM_PROMPT
+        USER_MESSAGE
+        ASSISTANT_MESSAGE
+        TOOL_CALL
+        TOOL_RESULT
+        MEMORY
+        REPO_MAP
+        WORKING_CONTEXT
+    }
+
+    enum EdgeType {
+        FOLLOWS
+        CALLS
+        RETURNS
+        SUMMARIZES
+        INJECTS
+    }
+
+    class PipelineResult <<dataclass>> {
+        + graph : ContextGraph
+        + tokens_used : int
+        + nodes_compacted : int
+        + nodes_injected : int
+    }
+
+    ContextNode --> NodeType
+    ContextEdge --> EdgeType
+}
+
+note bottom of ContextNode
+  Each node represents a unit of context.
+  token_count is estimated, not exact.
+  metadata holds node-type-specific fields
+  (e.g., tool name for TOOL_CALL, source for INJECTS).
+end note
+
+note bottom of PipelineResult
+  Returned by pipeline orchestrator after processing.
+  tokens_used tracks total against budget.
+  nodes_compacted/injected provide observability.
+end note
+
+@enduml

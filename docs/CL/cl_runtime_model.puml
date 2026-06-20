@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI + HTTP API
 ' Purpose:   Core runtime classes and their relationships
 ' Milestone: v1.0
-' Version:   3.0.0
+' Version:   4.0.0
 ' Source:    docs/audit/nasim-car-improvement-plan.md
 ' Review:    —
 ' Note:      Runtime structure diagram. nasim has no business domain
@@ -66,6 +66,30 @@ package "Provider Layer" #FFF3E0 {
         + name : str
         + arguments : dict
         + id : str
+    }
+
+    abstract class RoutingStrategy {
+        + {abstract} route(task, providers) : str
+    }
+
+    class TaskClassifierStrategy {
+        + route(task, providers) : str
+    }
+
+    class CapabilityMatchStrategy {
+        + route(task, providers) : str
+    }
+
+    class CostOptimizationStrategy {
+        + route(task, providers) : str
+    }
+
+    class RoleStrategy {
+        + route(role, providers) : str
+    }
+
+    class ModelRoleRegistry {
+        + get_preferred_model(role) : str
     }
 }
 
@@ -304,6 +328,239 @@ package "Plugin Layer" #FFF3E0 {
     }
 }
 
+package "Repo Intelligence Layer" #FBE9E7 {
+    class RepoIntelligenceManager {
+        + index_repository()
+        + rank_symbols(chat_files)
+        + search_semantic(query)
+        + inject_repomap(budget) : str
+    }
+
+    class ASTIndexAdapter {
+        + extract_tags(file_path) : list[ASTTag]
+        + build_index(root_dir)
+    }
+
+    class SymbolGraph {
+        + add_node(symbol)
+        + add_edge(source, target, type)
+        + pagerank(personalization) : dict
+    }
+
+    class RankingService {
+        + rank(graph, chat_files, budget) : list[RankedSymbol]
+    }
+
+    class EmbeddingAdapter {
+        + embed(text) : list[float]
+        + embed_batch(texts) : list[list[float]]
+    }
+
+    class SemanticSearchService {
+        + search(query_embedding, top_k) : list[SearchResult]
+    }
+
+    class RepoMapBuilder {
+        + build(ranked_symbols, token_budget) : str
+    }
+}
+
+package "Edit Strategy Layer" #FFF8E1 {
+    abstract class EditStrategyManager {
+        + {abstract} select(model_caps) : EditStrategy
+        + {abstract} apply(strategy, original, instructions) : EditResult
+    }
+
+    class SearchReplaceCoder {
+        + apply(original, instructions) : EditResult
+    }
+
+    class WholeFileCoder {
+        + apply(original, instructions) : EditResult
+    }
+
+    class UnifiedDiffCoder {
+        + apply(original, instructions) : EditResult
+    }
+
+    class FencedBlockCoder {
+        + apply(original, instructions) : EditResult
+    }
+
+    class FunctionLevelCoder {
+        + apply(original, instructions) : EditResult
+    }
+
+    class DiffSandboxCoder {
+        + apply(original, instructions) : EditResult
+    }
+
+    class ArchitectCoder {
+        + apply(original, instructions) : EditResult
+    }
+
+    class InlinePatchCoder {
+        + apply(original, instructions) : EditResult
+    }
+
+    class StrategySelector {
+        + select(caps) : EditStrategy
+    }
+}
+
+package "Evaluation Layer" #E8F5E9 {
+    class EvaluationEngine {
+        + evaluate(task_result) : QualitySignal
+        + should_retry(signal) : bool
+    }
+
+    class SuccessCheckRunner {
+        + run(checks) : bool
+    }
+
+    class LLMReviewer {
+        + review(submission) : QualitySignal
+    }
+
+    class RetryCoordinator {
+        + retry(task, feedback)
+        + on_failure(task)
+    }
+
+    class RepetitionDetector {
+        + detect(tool_calls) : bool
+    }
+
+    class TurnBudgetInjector {
+        + inject(turn_num, max_turns) : str
+    }
+}
+
+package "Wire Log Layer" #E3F2FD {
+    class WireLog {
+        + append(event)
+        + read() : Iterator[WireEvent]
+        + seek(turn) : WireEvent
+    }
+
+    class WireAppender {
+        + write(event)
+    }
+
+    class WireReader {
+        + scan() : Iterator[WireEvent]
+        + seek(turn_number) : WireEvent
+    }
+
+    class TurnIndex {
+        + get_offset(turn) : int
+        + add_turn(turn, offset)
+    }
+
+    class SessionForkManager {
+        + fork(session_id, turn) : Session
+        + undo(session_id, turns) : Session
+    }
+}
+
+package "Context Graph Layer" #F3E5F5 {
+    class ContextGraph {
+        + add_node(node)
+        + add_edge(source, target, type)
+        + get_messages() : list[dict]
+    }
+
+    class ContextNode {
+        + type : NodeType
+        + content : str
+        + token_count : int
+    }
+
+    class ContextEdge {
+        + type : EdgeType
+        + source : ContextNode
+        + target : ContextNode
+    }
+
+    class PipelineOrchestrator {
+        + process(graph) : ContextGraph
+    }
+
+    class TruncationProcessor {
+        + process(graph) : ContextGraph
+    }
+
+    class DistillationProcessor {
+        + process(graph) : ContextGraph
+    }
+
+    class InjectionProcessor {
+        + process(graph) : ContextGraph
+    }
+
+    class CompactionProcessor {
+        + process(graph) : ContextGraph
+    }
+
+    class TokenBudgetTracker {
+        + count(graph) : int
+        + check_budget(graph) : bool
+    }
+}
+
+package "Memory Layer" #F1F8E9 {
+    class EpisodicMemoryAdapter {
+        + store(session_summary, embedding)
+        + retrieve(query_embedding, top_k) : list
+    }
+
+    class SemanticMemoryAdapter {
+        + store(fact, embedding, metadata)
+        + retrieve(query_embedding, top_k) : list
+    }
+
+    class WorkingMemoryAdapter {
+        + get(key)
+        + set(key, value)
+        + clear()
+    }
+
+    class MemoryRetriever {
+        + retrieve(query, scope) : list
+        + hybrid_search(query) : list
+    }
+
+    class MemoryIndexer {
+        + index(entry)
+        + reindex()
+    }
+}
+
+package "Sandbox Layer" #FFF8E1 {
+    class DiffSandboxManager {
+        + stage_edit(file, change)
+        + get_diff() : str
+        + apply_all()
+    }
+
+    class EditStagingArea {
+        + stage(file_path, content)
+        + get_original(file_path) : str
+    }
+
+    class DiffComputer {
+        + compute(original, staged) : str
+    }
+
+    class DiffPresenter {
+        + render(diff) : str
+    }
+
+    class StagedApplicator {
+        + apply_all(staging_area)
+    }
+}
+
 ' Relationships
 Provider <|.. OllamaProvider
 Provider <|.. OpenAIProvider
@@ -312,6 +569,10 @@ ProviderFactory --> Provider : creates
 Provider --> LLMResponse : returns
 LLMResponse --> ToolCall : contains
 ModelRouter --> Provider : selects
+RoutingStrategy <|.. TaskClassifierStrategy
+RoutingStrategy <|.. CapabilityMatchStrategy
+RoutingStrategy <|.. CostOptimizationStrategy
+RoleStrategy --> ModelRoleRegistry : uses
 
 AgentOrchestrator --> Provider : uses
 AgentOrchestrator --> ToolRegistry : dispatches to
@@ -322,6 +583,11 @@ AgentOrchestrator --> AgentEvent : yields
 AgentOrchestrator --> SessionStore : loads/saves
 AgentOrchestrator --> HookManager : triggers hooks
 AgentOrchestrator --> ModelRouter : routes models
+AgentOrchestrator --> EditStrategyManager : selects strategy
+AgentOrchestrator --> EvaluationEngine : evaluates tasks
+AgentOrchestrator --> WireLog : appends events
+AgentOrchestrator --> ContextGraph : processes context
+AgentOrchestrator --> RepoIntelligenceManager : indexes, ranks
 
 ConversationHistory --> ContextCompactor : triggers
 ContextCompactor --> Provider : secondary call
@@ -363,5 +629,58 @@ HookManager --> PluginLoader : loads plugin hooks
 PluginLoader --> PluginManifest : reads
 PluginLoader --> Plugin : creates
 Plugin --> PluginManifest : references
+
+RepoIntelligenceManager --> ASTIndexAdapter : indexes via
+RepoIntelligenceManager --> SymbolGraph : builds graph
+RepoIntelligenceManager --> RankingService : ranks via
+RepoIntelligenceManager --> SemanticSearchService : searches via
+RepoIntelligenceManager --> RepoMapBuilder : builds map
+ASTIndexAdapter --> SymbolGraph : populates
+RankingService --> SymbolGraph : ranks
+EmbeddingAdapter --> SemanticSearchService : provides embeddings
+SymbolGraph --> RepoMapBuilder : ranked symbols
+
+EditStrategyManager <|.. SearchReplaceCoder
+EditStrategyManager <|.. WholeFileCoder
+EditStrategyManager <|.. UnifiedDiffCoder
+EditStrategyManager <|.. FencedBlockCoder
+EditStrategyManager <|.. FunctionLevelCoder
+EditStrategyManager <|.. DiffSandboxCoder
+EditStrategyManager <|.. ArchitectCoder
+EditStrategyManager <|.. InlinePatchCoder
+StrategySelector --> EditStrategyManager : selects
+
+EvaluationEngine --> SuccessCheckRunner : uses
+EvaluationEngine --> LLMReviewer : uses
+RetryCoordinator --> EvaluationEngine : triggers
+RepetitionDetector --> RetryCoordinator : alerts
+TurnBudgetInjector --> RetryCoordinator : injects budget
+
+WireLog --> WireAppender : appends via
+WireLog --> WireReader : reads via
+WireReader --> TurnIndex : uses
+WireLog --> SessionForkManager : forks via
+
+ContextGraph --> ContextNode : contains
+ContextGraph --> ContextEdge : contains
+PipelineOrchestrator --> ContextGraph : processes
+TruncationProcessor --> ContextGraph : truncates
+DistillationProcessor --> ContextGraph : distills
+InjectionProcessor --> ContextGraph : injects
+CompactionProcessor --> ContextGraph : compacts
+TokenBudgetTracker --> ContextGraph : tracks
+ContextGraph --> RepoIntelligenceManager : injects repo-map
+ContextGraph --> MemoryRetriever : injects memory
+
+MemoryRetriever --> EpisodicMemoryAdapter : searches episodic
+MemoryRetriever --> SemanticMemoryAdapter : searches semantic
+MemoryRetriever --> WorkingMemoryAdapter : searches working
+MemoryIndexer --> EpisodicMemoryAdapter : indexes episodic
+MemoryIndexer --> SemanticMemoryAdapter : indexes semantic
+
+DiffSandboxManager --> EditStagingArea : stages via
+DiffSandboxManager --> DiffComputer : computes diff
+DiffSandboxManager --> DiffPresenter : renders diff
+DiffSandboxManager --> StagedApplicator : applies
 
 @enduml

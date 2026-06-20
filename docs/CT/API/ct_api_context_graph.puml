@@ -1,0 +1,63 @@
+@startuml ct_api_context_graph
+' ============================================================
+' Title:     nasim — Context Graph API
+' Boundary:  nasim code agent CLI
+' Purpose:   Public interfaces for context graph construction and processing
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Context Graph API
+
+skinparam classAttributeIconSize 0
+
+package "Context Graph API" #F3E5F5 {
+
+    interface "ContextGraph" <<interface>> {
+        + add_node(node : ContextNode) : None
+        + add_edge(edge : ContextEdge) : None
+        + get_messages() : list[dict]
+        + node_count() : int
+    }
+
+    interface "ContextProcessor" <<interface>> {
+        + process(graph : ContextGraph) : ContextGraph
+    }
+
+    interface "PipelineOrchestrator" <<interface>> {
+        + process(graph : ContextGraph) : ContextGraph
+    }
+
+    interface "TokenBudgetTracker" <<interface>> {
+        + count(graph : ContextGraph) : int
+        + check_budget(graph : ContextGraph) : bool
+    }
+}
+
+note bottom of ContextGraph
+  Directed graph of context nodes and edges.
+  get_messages serializes graph to LLM-ready message list.
+  Nodes ordered by EdgeType.FOLLOWS for message sequence.
+end note
+
+note bottom of ContextProcessor
+  Single-stage processor interface.
+  Implementations: TruncationProcessor, DistillationProcessor,
+  InjectionProcessor, CompactionProcessor.
+end note
+
+note bottom of PipelineOrchestrator
+  Chains multiple ContextProcessors in sequence.
+  Order: Inject → Compact → Truncate → Distill.
+  Returns PipelineResult with observability counts.
+end note
+
+note right of TokenBudgetTracker
+  Estimates token count across all nodes.
+  check_budget returns False if over limit.
+  Triggers compaction pipeline when exceeded.
+end note
+
+@enduml

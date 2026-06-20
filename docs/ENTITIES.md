@@ -17,15 +17,19 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | CFG | Configuration | Config loading, validation, layered merge |
 | SSN | Session | Session persistence, resumption, listing, versioning, search, fork |
 | SAF | Safety | Permission checks, user approval, safety modes, sandbox |
-| CTX | Context Management | Token counting, context compaction |
+| CTX | Context Management | Token counting, context compaction, graph pipeline |
 | SRV | HTTP Server | REST API, SSE streaming, session management via API |
 | HK | Hooks | Pre/post hooks for tool use and LLM calls |
 | PLG | Plugins | Plugin discovery, loading, registration |
 | RTG | Model Router | Model selection, fallback, routing strategies |
 | OBS | Observability | Structured logging, metrics, trace correlation |
-| MEM | Memory | Cross-session knowledge persistence and retrieval |
+| MEM | Memory | Cross-session knowledge persistence and retrieval, RAG |
 | VCS | Git Integration | Auto-commit, branch awareness, diff tracking |
 | SBX | Sandbox | OS-level process isolation for shell execution |
+| RIM | Repo Intelligence | AST indexing, symbol graph, PageRank, semantic search, repo-map |
+| EDT | Edit Strategy | Strategy polymorphism, diff sandbox, staged edits, revert |
+| EVL | Evaluation | Success checks, LLM reviewer, retry coordination, turn budget |
+| WRL | Wire Log | Append-only event log, replay, session fork from wire |
 
 ---
 
@@ -58,6 +62,10 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | Sandbox Runtime | OS primitives | OS-level process isolation: landlock, seccomp |
 | Memory Backend | read/write | Long-term knowledge persistence |
 | LSP Server | LSP protocol | Language server for code intelligence |
+| Tree-sitter | tree-sitter CLI/lib | AST extraction for code intelligence |
+| Embedding Model | HTTP/local | Vector embedding generation for semantic search |
+| Vector Store | SQLite + vector | Embedding storage and similarity search |
+| OTel Collector | OTLP/gRPC | OpenTelemetry trace and metric export |
 
 ---
 
@@ -120,6 +128,9 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | TodoTool | `nasim/tools/todo.py` | Task tracking within session |
 | MemoryTool | `nasim/tools/memory.py` | Persist and retrieve cross-session knowledge |
 | PlanTool | `nasim/tools/plan.py` | Plan creation and management |
+| RepoMapTool | `nasim/tools/repo_map.py` | Inject token-budgeted repo-map into context |
+| SemanticSearchTool | `nasim/tools/semantic_search.py` | Embedding-based semantic code search |
+| ReviewTool | `nasim/tools/review.py` | Trigger LLM-as-judge evaluation of completed task |
 
 ### MCP Group
 
@@ -194,6 +205,11 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | MemoryStore | `nasim/memory/store.py` | Cross-session knowledge persistence and retrieval |
 | MemoryIndex | `nasim/memory/index.py` | FTS5 index for semantic search across stored knowledge |
 | MemoryScope | `nasim/memory/scope.py` | Scope isolation: global, project, session-level knowledge |
+| EpisodicMemoryAdapter | `nasim/memory/episodic.py` | Session summaries + embeddings for episodic retrieval |
+| SemanticMemoryAdapter | `nasim/memory/semantic.py` | Facts + embeddings + metadata for semantic retrieval |
+| WorkingMemoryAdapter | `nasim/memory/working.py` | In-session scratch pad, no persistence |
+| MemoryRetriever | `nasim/memory/retriever.py` | Hybrid retrieval: BM25 + embedding + RRF fusion |
+| MemoryIndexer | `nasim/memory/indexer.py` | Indexes new facts after each session |
 
 ### Git Group (cross-cutting)
 
@@ -202,6 +218,83 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | GitIntegration | `nasim/git/integration.py` | Auto-commit after file edits, branch awareness, diff tracking |
 | GitStatus | `nasim/git/status.py` | Read working tree status, staged changes, branch info |
 | GitCommit | `nasim/git/commit.py` | Create commits with conventional commit messages |
+
+### Repo Intelligence Group (E-01)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| RepoIntelligenceManager | `nasim/repo_intelligence/manager.py` | Owns all code intelligence: AST, graph, ranking, semantic search, repo-map |
+| ASTIndexAdapter | `nasim/repo_intelligence/ast_index.py` | tree-sitter extraction per language, per-file tag store |
+| SymbolGraph | `nasim/repo_intelligence/symbol_graph.py` | Directed graph of symbols and references (NetworkX-like) |
+| RankingService | `nasim/repo_intelligence/ranking.py` | PageRank with chat-personalization vectors for repo-map |
+| EmbeddingAdapter | `nasim/repo_intelligence/embedding.py` | Embedding model adapter (local or API) for code vectors |
+| SemanticSearchService | `nasim/repo_intelligence/semantic_search.py` | Cosine similarity search over code embeddings |
+| RepoMapBuilder | `nasim/repo_intelligence/repo_map.py` | Token-budgeted repo-map injection into context |
+
+### Edit Strategy Group (E-02)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| EditStrategyManager | `nasim/edit_strategy/manager.py` | Selects best edit strategy per model capability |
+| EditStrategy | `nasim/edit_strategy/base.py` | ABC: apply(original, instructions) → result |
+| SearchReplaceCoder | `nasim/edit_strategy/search_replace.py` | SEARCH/REPLACE block format |
+| WholeFileCoder | `nasim/edit_strategy/whole_file.py` | Rewrite entire file |
+| UnifiedDiffCoder | `nasim/edit_strategy/unified_diff.py` | Unified diff format |
+| FencedBlockCoder | `nasim/edit_strategy/fenced_block.py` | Fenced code block format |
+| FunctionLevelCoder | `nasim/edit_strategy/function_level.py` | AST-targeted function replacement |
+| DiffSandboxCoder | `nasim/edit_strategy/diff_sandbox.py` | Stage edits, show diff, apply on approval |
+| ArchitectCoder | `nasim/edit_strategy/architect.py` | Plan-then-implement two-phase edit |
+| InlinePatchCoder | `nasim/edit_strategy/inline_patch.py` | apply-patch format |
+| StrategySelector | `nasim/edit_strategy/selector.py` | Uses ProviderCapabilities to pick optimal strategy |
+
+### Evaluation Group (E-03)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| EvaluationEngine | `nasim/evaluation/engine.py` | Orchestrates post-task quality evaluation |
+| TaskEvaluator | `nasim/evaluation/evaluator.py` | Evaluates whether task is complete |
+| SuccessCheckRunner | `nasim/evaluation/success_check.py` | Shell exit code checks (sparse reward signal) |
+| LLMReviewer | `nasim/evaluation/llm_reviewer.py` | LLM-as-judge scoring (dense process reward) |
+| TestRunner | `nasim/evaluation/test_runner.py` | Run test suite, check pass/fail |
+| RetryCoordinator | `nasim/evaluation/retry.py` | max_retries, retry_strategy, on_failure rollback |
+| QualitySignal | `nasim/evaluation/quality.py` | accept: bool \| float, feedback: str |
+| RepetitionDetector | `nasim/evaluation/repetition.py` | Detect tool-call loops, prevent policy divergence |
+| TurnBudgetInjector | `nasim/evaluation/turn_budget.py` | Inject turn budget per-turn (exploration constraint) |
+
+### Wire Log Group (E-04)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| WireLog | `nasim/wire_log/log.py` | Append-only per-session event stream (JSONL) |
+| WireAppender | `nasim/wire_log/appender.py` | Write-only interface (enforces append-only semantics) |
+| WireReader | `nasim/wire_log/reader.py` | Read-only with random seek via TurnIndex |
+| TurnIndex | `nasim/wire_log/turn_index.py` | Maps turn_number → byte_offset for O(1) seek |
+| SessionForkManager | `nasim/wire_log/fork.py` | `/fork` and `/undo` via turn enumeration from WireReader |
+
+### Context Graph Group (E-06)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| ContextGraph | `nasim/context/graph.py` | Typed graph replacing ConversationHistory as runtime model |
+| ContextNode | `nasim/context/node.py` | Typed nodes: SystemPrompt, UserMessage, ToolCall, ToolResult, Memory, RepoMap |
+| ContextEdge | `nasim/context/edge.py` | Typed edges: follows, calls, returns, summarizes, injects |
+| ContextProcessor | `nasim/context/processor.py` | ABC for pipeline processors |
+| TruncationProcessor | `nasim/context/truncation.py` | Removes old nodes respecting protection budget |
+| DistillationProcessor | `nasim/context/distillation.py` | Secondary LLM call for massive tool outputs |
+| InjectionProcessor | `nasim/context/injection.py` | Injects RepoMap, Memory nodes at turn start |
+| CompactionProcessor | `nasim/context/compaction.py` | Replaces batch of nodes with summary node |
+| PipelineOrchestrator | `nasim/context/pipeline.py` | Runs processors sequentially per turn |
+| TokenBudgetTracker | `nasim/context/budget.py` | Counts tokens per node, sums for window budget |
+
+### Diff Sandbox Group (E-09)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| DiffSandboxManager | `nasim/sandbox/diff_sandbox.py` | Manages edit staging and review cycle |
+| EditStagingArea | `nasim/sandbox/staging.py` | In-memory file tree copy for staging edits |
+| DiffComputer | `nasim/sandbox/diff_computer.py` | Computes diff between original and staged files |
+| DiffPresenter | `nasim/sandbox/diff_presenter.py` | Renders diff to Renderer for user review |
+| StagedApplicator | `nasim/sandbox/staged_applicator.py` | Applies staged changes to actual files on approval |
 
 ---
 
@@ -247,6 +340,9 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/tools/todo.py` | tools | TodoTool |
 | `nasim/tools/memory.py` | tools | MemoryTool |
 | `nasim/tools/plan.py` | tools | PlanTool |
+| `nasim/tools/repo_map.py` | tools | RepoMapTool |
+| `nasim/tools/semantic_search.py` | tools | SemanticSearchTool |
+| `nasim/tools/review.py` | tools | ReviewTool |
 | `nasim/mcp/__init__.py` | mcp | MCP package |
 | `nasim/mcp/client.py` | mcp | MCPClientRuntime |
 | `nasim/mcp/server.py` | mcp | MCPServerRuntime |
@@ -276,6 +372,11 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/sandbox/executor.py` | sandbox | SandboxExecutor |
 | `nasim/sandbox/policy.py` | sandbox | SandboxPolicy |
 | `nasim/sandbox/monitor.py` | sandbox | SandboxMonitor |
+| `nasim/sandbox/diff_sandbox.py` | sandbox | DiffSandboxManager |
+| `nasim/sandbox/staging.py` | sandbox | EditStagingArea |
+| `nasim/sandbox/diff_computer.py` | sandbox | DiffComputer |
+| `nasim/sandbox/diff_presenter.py` | sandbox | DiffPresenter |
+| `nasim/sandbox/staged_applicator.py` | sandbox | StagedApplicator |
 | `nasim/observability/__init__.py` | observability | Observability package |
 | `nasim/observability/logger.py` | observability | StructuredLogger |
 | `nasim/observability/metrics.py` | observability | MetricsCollector |
@@ -284,10 +385,62 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/memory/store.py` | memory | MemoryStore |
 | `nasim/memory/index.py` | memory | MemoryIndex |
 | `nasim/memory/scope.py` | memory | MemoryScope |
+| `nasim/memory/episodic.py` | memory | EpisodicMemoryAdapter |
+| `nasim/memory/semantic.py` | memory | SemanticMemoryAdapter |
+| `nasim/memory/working.py` | memory | WorkingMemoryAdapter |
+| `nasim/memory/retriever.py` | memory | MemoryRetriever (BM25 + Embedding + RRF) |
+| `nasim/memory/indexer.py` | memory | MemoryIndexer |
 | `nasim/git/__init__.py` | git | Git package |
 | `nasim/git/integration.py` | git | GitIntegration |
 | `nasim/git/status.py` | git | GitStatus |
 | `nasim/git/commit.py` | git | GitCommit |
+| `nasim/repo_intelligence/__init__.py` | repo_intelligence | Repo Intelligence package |
+| `nasim/repo_intelligence/manager.py` | repo_intelligence | RepoIntelligenceManager |
+| `nasim/repo_intelligence/ast_index.py` | repo_intelligence | ASTIndexAdapter |
+| `nasim/repo_intelligence/symbol_graph.py` | repo_intelligence | SymbolGraph |
+| `nasim/repo_intelligence/ranking.py` | repo_intelligence | RankingService |
+| `nasim/repo_intelligence/embedding.py` | repo_intelligence | EmbeddingAdapter |
+| `nasim/repo_intelligence/semantic_search.py` | repo_intelligence | SemanticSearchService |
+| `nasim/repo_intelligence/repo_map.py` | repo_intelligence | RepoMapBuilder |
+| `nasim/edit_strategy/__init__.py` | edit_strategy | Edit Strategy package |
+| `nasim/edit_strategy/manager.py` | edit_strategy | EditStrategyManager |
+| `nasim/edit_strategy/base.py` | edit_strategy | EditStrategy ABC |
+| `nasim/edit_strategy/search_replace.py` | edit_strategy | SearchReplaceCoder |
+| `nasim/edit_strategy/whole_file.py` | edit_strategy | WholeFileCoder |
+| `nasim/edit_strategy/unified_diff.py` | edit_strategy | UnifiedDiffCoder |
+| `nasim/edit_strategy/fenced_block.py` | edit_strategy | FencedBlockCoder |
+| `nasim/edit_strategy/function_level.py` | edit_strategy | FunctionLevelCoder |
+| `nasim/edit_strategy/diff_sandbox.py` | edit_strategy | DiffSandboxCoder |
+| `nasim/edit_strategy/architect.py` | edit_strategy | ArchitectCoder |
+| `nasim/edit_strategy/inline_patch.py` | edit_strategy | InlinePatchCoder |
+| `nasim/edit_strategy/selector.py` | edit_strategy | StrategySelector |
+| `nasim/evaluation/__init__.py` | evaluation | Evaluation package |
+| `nasim/evaluation/engine.py` | evaluation | EvaluationEngine |
+| `nasim/evaluation/evaluator.py` | evaluation | TaskEvaluator |
+| `nasim/evaluation/success_check.py` | evaluation | SuccessCheckRunner |
+| `nasim/evaluation/llm_reviewer.py` | evaluation | LLMReviewer |
+| `nasim/evaluation/test_runner.py` | evaluation | TestRunner |
+| `nasim/evaluation/retry.py` | evaluation | RetryCoordinator |
+| `nasim/evaluation/quality.py` | evaluation | QualitySignal |
+| `nasim/evaluation/repetition.py` | evaluation | RepetitionDetector |
+| `nasim/evaluation/turn_budget.py` | evaluation | TurnBudgetInjector |
+| `nasim/wire_log/__init__.py` | wire_log | Wire Log package |
+| `nasim/wire_log/log.py` | wire_log | WireLog |
+| `nasim/wire_log/appender.py` | wire_log | WireAppender |
+| `nasim/wire_log/reader.py` | wire_log | WireReader |
+| `nasim/wire_log/turn_index.py` | wire_log | TurnIndex |
+| `nasim/wire_log/fork.py` | wire_log | SessionForkManager |
+| `nasim/context/__init__.py` | context | Context Graph package |
+| `nasim/context/graph.py` | context | ContextGraph |
+| `nasim/context/node.py` | context | ContextNode |
+| `nasim/context/edge.py` | context | ContextEdge |
+| `nasim/context/processor.py` | context | ContextProcessor ABC |
+| `nasim/context/truncation.py` | context | TruncationProcessor |
+| `nasim/context/distillation.py` | context | DistillationProcessor |
+| `nasim/context/injection.py` | context | InjectionProcessor |
+| `nasim/context/compaction.py` | context | CompactionProcessor |
+| `nasim/context/pipeline.py` | context | PipelineOrchestrator |
+| `nasim/context/budget.py` | context | TokenBudgetTracker |
 
 ---
 
@@ -318,5 +471,18 @@ additional verbs for its CLI agent domain:
 | PERSIST | Memory write | Store knowledge across sessions |
 | RECALL | Memory read | Retrieve knowledge from memory store |
 | TRACE | Observability | Correlate events across request scope |
+| INDEX | Repo intelligence | Build AST index and symbol graph |
+| RANK | Repo intelligence | PageRank ranking of code symbols |
+| EMBED | Semantic search | Generate vector embeddings for code |
+| INJECT | Context pipeline | Inject repo-map or memory into context |
+| DISTILL | Context pipeline | Compress large tool outputs via LLM |
+| SELECT | Edit strategy | Choose optimal edit format for model |
+| STAGE | Diff sandbox | Stage edits for review before apply |
+| EVALUATE | Post-task evaluation | Run success checks and LLM review |
+| RETRY | Evaluation retry | Re-attempt failed task with feedback |
+| APPEND | Wire log | Append event to append-only log |
+| REPLAY | Wire log | Replay session from wire log |
+| FORK | Wire log/wire_log | Fork session at any turn |
+| CLASSIFY | Model routing | Classify task type for model selection |
 
 These extensions are documented here per `uc.md` — not silently diverging.

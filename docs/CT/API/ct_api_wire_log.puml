@@ -1,0 +1,65 @@
+@startuml ct_api_wire_log
+' ============================================================
+' Title:     nasim — Wire Log API
+' Boundary:  nasim code agent CLI
+' Purpose:   Public interfaces for append-only wire event logging
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' Note:      Append-only — events are never updated or deleted.
+' ============================================================
+
+title nasim — Wire Log API
+
+skinparam classAttributeIconSize 0
+
+package "Wire Log API" #E3F2FD {
+
+    interface "WireLog" <<interface>> {
+        + append(event : WireEvent) : None
+        + read() : Iterator[WireEvent]
+        + seek(turn : int) : WireEvent
+        + metadata() : WireMetadata
+    }
+
+    interface "WireAppender" <<interface>> {
+        + write(event : WireEvent) : None
+    }
+
+    interface "WireReader" <<interface>> {
+        + scan() : Iterator[WireEvent]
+        + seek(turn_number : int) : WireEvent
+    }
+
+    interface "SessionForkManager" <<interface>> {
+        + fork(session_id : str, turn : int) : Session
+        + undo(session_id : str, turns : int) : Session
+    }
+}
+
+note bottom of WireLog
+  Facade over appender and reader.
+  append serializes event to JSON and writes to wire.jsonl.
+  seek uses turn index for O(1) byte-offset lookup.
+end note
+
+note bottom of WireAppender
+  Writes events as JSON lines.
+  Appends byte_offset for efficient seeking.
+  Updates turn index on new turn boundaries.
+end note
+
+note bottom of WireReader
+  scan yields events in sequence order.
+  seek jumps to specific turn via TurnIndexEntry.
+  Both methods read from wire.jsonl on disk.
+end note
+
+note right of SessionForkManager
+  fork creates a new session from a turn's state.
+  undo rewinds N turns and creates new session.
+  Both operate on wire.jsonl replay.
+end note
+
+@enduml

@@ -20,6 +20,8 @@ rectangle "Session Layer" {
     usecase "Load Session" as UC_SSN_02
     usecase "List Sessions" as UC_SSN_03
     usecase "Resume Session" as UC_SSN_04
+    usecase "FORK Session" as UC_SSN_05
+    usecase "UNDO Turn" as UC_SSN_06
 }
 
 System_Ext(session_dir, "Session Dir", "~/.nasim/sessions/")
@@ -27,7 +29,11 @@ System_Ext(session_dir, "Session Dir", "~/.nasim/sessions/")
 user --> UC_SSN_03
 agent --> UC_SSN_01
 agent --> UC_SSN_02
+user --> UC_SSN_05
+agent --> UC_SSN_06
 UC_SSN_02 ..> UC_SSN_04 : <<include>>
+UC_SSN_05 ..> UC_SSN_01 : <<include>>
+UC_SSN_06 ..> UC_SSN_02 : <<include>>
 UC_SSN_01 ..> session_dir
 UC_SSN_02 ..> session_dir
 UC_SSN_03 ..> session_dir

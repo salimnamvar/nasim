@@ -1,0 +1,98 @@
+@startuml sq_evl01_run_success_checks
+' ============================================================
+' Title:     EVL-01 — RUN Success Checks
+' Boundary:  nasim code agent CLI
+' Purpose:   Shell exit code verification for edit success
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Layer" #FFF3E0
+  participant "SuccessChecker" as checker
+  participant "ShellRunner" as shell
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as tool
+end box
+
+note over user, tool
+  Scope:
+    - evl01 RUN Success Checks — shell exit code verification
+
+  Preconditions:
+    - EDT-05 completed (edit applied and user-approved)
+    - Shell environment available
+    - Test/lint commands configured in project
+
+  Contexts:
+    - Called after edit application to verify correctness
+    - Feeds into EVL-03 (Coordinate Retry) on failure
+
+  Excludes:
+    - LLM-based review (handled by EVL-02)
+    - Repetition detection (handled by EVL-04)
+
+  Rollback:
+    - Check failure → report to EVL-03 for retry coordination
+
+  Design:
+    - SuccessChecker runs configured check commands
+    - Captures exit codes, stdout, stderr
+    - Aggregate pass/fail across all checks
+    - Timeout per check (default 30s)
+
+  Returns:
+    - Success: CheckResult with pass/fail and output
+    - Failure: CheckResult with failure details
+end note
+
+== evl01 RUN Success Checks ==
+
+agent -> checker : RUN_CHECKS(file_path, check_commands[])
+activate checker
+
+loop for each check_command
+    checker -> shell : execute(check_command, timeout=30s)
+    activate shell
+    alt exit_code == 0
+        shell --> checker : CheckOutput(exit_code=0, stdout, stderr="")
+    else exit_code != 0
+        shell --> checker : CheckOutput(exit_code, stdout, stderr)
+    end
+    deactivate shell
+
+    checker -> checker : record_result(check_command, output)
+end
+
+checker -> checker : aggregate_results()
+
+checker --> agent : CheckResult(passed, results[])
+deactivate checker
+
+note over user, tool
+  Flow:
+    - AgentOrchestrator → SuccessChecker → [ShellRunner]* → CheckResult
+
+  State:
+    - IDLE → RUNNING → AGGREGATING → DONE
+
+  Failure:
+    - Any check fails → CheckResult(passed=false)
+
+  Success:
+    - All checks pass → CheckResult(passed=true)
+
+  Key invariants:
+    - Each check runs with timeout protection
+    - Exit code 0 = success, non-zero = failure
+    - Results aggregated across all checks
+end note
+
+@enduml

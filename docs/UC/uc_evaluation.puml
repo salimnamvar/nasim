@@ -1,0 +1,46 @@
+@startuml uc_evaluation
+' ============================================================
+' Title:     nasim — UC: Evaluation
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Quality verification, LLM review, test execution, retry coordination
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "AgentOrchestrator" as agent
+actor "Developer" as user
+
+rectangle "Evaluation" {
+    usecase "RUN Success Checks" as UC_EVL_01
+    usecase "INVOKE LLM Reviewer" as UC_EVL_02
+    usecase "RUN Test Suite" as UC_EVL_03
+    usecase "RECORD Result" as UC_EVL_04
+    usecase "COORDINATE Retry" as UC_EVL_05
+    usecase "DETECT Repetition" as UC_EVL_06
+    usecase "INJECT Turn Budget" as UC_EVL_07
+    usecase "RESET On Failure" as UC_EVL_08
+}
+
+rectangle "External" {
+    component "Host Shell" as shell
+}
+
+agent --> UC_EVL_01
+agent --> UC_EVL_02
+agent --> UC_EVL_03
+agent --> UC_EVL_06
+agent --> UC_EVL_07
+user --> UC_EVL_03
+UC_EVL_01 ..> UC_EVL_04 : <<include>>
+UC_EVL_02 ..> UC_EVL_04 : <<include>>
+UC_EVL_03 ..> shell : <<include>>
+UC_EVL_05 ..> UC_EVL_06 : <<include>>
+UC_EVL_05 ..> UC_EVL_02 : <<include>>
+UC_EVL_08 ..> UC_EVL_04 : <<include>>
+
+@enduml

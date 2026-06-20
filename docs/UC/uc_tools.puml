@@ -47,6 +47,15 @@ rectangle "MCP Tools" {
     usecase "Invoke MCP Extension" as UC_TL_12
 }
 
+rectangle "Repo Intelligence Tools" {
+    usecase "INJECT RepoMap" as UC_TL_13
+    usecase "SEARCH Semantic" as UC_TL_14
+}
+
+rectangle "Evaluation Tools" {
+    usecase "REVIEW Task" as UC_TL_15
+}
+
 agent --> UC_TL_01
 agent --> UC_TL_02
 agent --> UC_TL_03
@@ -59,5 +68,8 @@ agent --> UC_TL_09
 agent --> UC_TL_10
 agent --> UC_TL_11
 agent --> UC_TL_12
+agent --> UC_TL_13
+agent --> UC_TL_14
+agent --> UC_TL_15
 
 @enduml

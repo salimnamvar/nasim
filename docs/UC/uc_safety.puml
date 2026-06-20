@@ -19,6 +19,7 @@ rectangle "Safety Layer" {
     usecase "CHECK Tool Permission" as UC_SAF_01
     usecase "Prompt User Approval" as UC_SAF_02
     usecase "Apply Safety Mode" as UC_SAF_03
+    usecase "CHECK Diff Sandbox" as UC_SAF_04
 }
 
 rectangle "Config Layer" {
@@ -26,9 +27,10 @@ rectangle "Config Layer" {
 }
 
 agent --> UC_SAF_01
+agent --> UC_SAF_04
 UC_SAF_01 ..> UC_SAF_03 : <<include>>
 UC_SAF_01 ..> UC_SAF_02 : <<extend>>
 UC_SAF_03 ..> UC_CFG_01 : <<include>>
-UC_SAF_02 --> user : prompt [y/N]
+UC_SAF_04 --> user : prompt [y/N]
 
 @enduml

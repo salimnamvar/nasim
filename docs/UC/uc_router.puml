@@ -19,6 +19,9 @@ rectangle "Model Router" {
     usecase "Apply Fallback" as UC_RTG_02
     usecase "Classify Task" as UC_RTG_03
     usecase "Switch Model Mid-Session" as UC_RTG_04
+    usecase "CLASSIFY Task Type" as UC_RTG_05
+    usecase "MATCH Capabilities" as UC_RTG_06
+    usecase "OPTIMIZE Cost" as UC_RTG_07
 }
 
 rectangle "Provider Layer" {
@@ -31,9 +34,14 @@ rectangle "Config Layer" {
 
 agent --> UC_RTG_01
 agent --> UC_RTG_04
+agent --> UC_RTG_05
+agent --> UC_RTG_06
+agent --> UC_RTG_07
 UC_RTG_01 ..> UC_RTG_03 : <<include>>
 UC_RTG_01 ..> UC_PRV_04 : <<include>>
 UC_RTG_02 ..> UC_PRV_04 : <<include>>
 UC_RTG_01 ..> UC_CFG_01 : <<include>>
+UC_RTG_05 ..> UC_RTG_06 : <<include>>
+UC_RTG_06 ..> UC_RTG_07 : <<include>>
 
 @enduml

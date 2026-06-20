@@ -1,0 +1,54 @@
+@startuml ct_api_edit_strategy
+' ============================================================
+' Title:     nasim — Edit Strategy API
+' Boundary:  nasim code agent CLI
+' Purpose:   Public interfaces for edit strategy selection and application
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Edit Strategy API
+
+skinparam classAttributeIconSize 0
+
+package "Edit Strategy API" #FFF8E1 {
+
+    interface "EditStrategy" <<interface>> {
+        + name : str
+        + apply(original_file : str, instructions : str) : EditResult
+    }
+
+    interface "EditStrategyManager" <<interface>> {
+        + select(provider_caps : dict) : EditStrategy
+        + apply(strategy : EditStrategy, file_content : str, instructions : str) : EditResult
+    }
+
+    class EditResult <<dataclass>> {
+        + success : bool
+        + new_content : str
+        + diff : str
+        + strategy_used : str
+    }
+}
+
+note bottom of EditStrategy
+  Concrete implementations: SearchReplaceCoder, WholeFileCoder,
+  UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder,
+  DiffSandboxCoder, ArchitectCoder, InlinePatchCoder.
+end note
+
+note bottom of EditStrategyManager
+  StrategySelector picks the best strategy based on
+  provider capabilities, file size, and edit complexity.
+  Falls back to WholeFileCoder if no strategy applies.
+end note
+
+note right of EditResult
+  success=False triggers retry with feedback.
+  diff is unified diff format for presentation.
+  strategy_used records which strategy was selected.
+end note
+
+@enduml

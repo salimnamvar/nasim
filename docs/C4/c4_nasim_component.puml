@@ -8,9 +8,9 @@
 ' Boundary:  nasim core library
 ' Purpose:   Cross-container view of all component groups and their interactions
 ' Milestone: v1.0
-' Version:   5.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   6.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
 ' ============================================================
 
 title nasim — Component Overview
@@ -30,7 +30,7 @@ System_Boundary(agent_group, "Agent Group") {
 System_Boundary(provider_group, "Provider Group") {
     Component(provider, "Provider", "Protocol", "LLM provider interface: chat, chat_stream, model_name")
     Component(provider_factory, "ProviderFactory", "", "Reads config, instantiates correct provider backend")
-    Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification")
+    Component(model_router, "ModelRouter", "enhanced", "Model selection, fallback chains, task classification, routing strategies")
     Component(provider_caps, "ProviderCapabilities", "", "Capability declaration: streaming, tools, max_tokens")
     Component(fallback_chain, "FallbackChain", "", "Circuit breaker + retry + provider failover")
 }
@@ -47,6 +47,9 @@ System_Boundary(tool_group, "Tool Group") {
     Component(todo_tool, "TodoTool", "ABC", "Task tracking within session")
     Component(memory_tool, "MemoryTool", "ABC", "Persist and retrieve cross-session knowledge")
     Component(plan_tool, "PlanTool", "ABC", "Plan creation and management")
+    Component(repo_map_tool, "RepoMapTool", "ABC", "Generates and queries repository map summaries")
+    Component(semantic_search_tool, "SemanticSearchTool", "ABC", "Embedding-based semantic code search")
+    Component(review_tool, "ReviewTool", "ABC", "LLM-driven code review and quality assessment")
 }
 
 System_Boundary(mcp_group, "MCP Group") {
@@ -83,6 +86,11 @@ System_Boundary(sandbox_group, "Sandbox Group") {
     Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
     Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules")
     Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement")
+    Component(diff_sandbox_mgr, "DiffSandboxManager", "", "Manages sandboxed diff staging and application")
+    Component(edit_staging_area, "EditStagingArea", "", "Stages file edits before sandbox-validated application")
+    Component(diff_computer, "DiffComputer", "", "Computes diffs between original and staged content")
+    Component(diff_presenter, "DiffPresenter", "", "Formats diffs for human review and approval")
+    Component(staged_applicator, "StagedApplicator", "", "Applies approved staged diffs to filesystem")
 }
 
 System_Boundary(observability_group, "Observability Group") {
@@ -94,12 +102,69 @@ System_Boundary(memory_group, "Memory Group") {
     Component(memory_store, "MemoryStore", "", "Cross-session knowledge persistence and retrieval")
     Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search")
     Component(memory_scope, "MemoryScope", "", "Scope isolation: global, project, session")
+    Component(episodic_mem_adapter, "EpisodicMemoryAdapter", "", "Stores and retrieves episodic memory: past actions, outcomes, lessons")
+    Component(semantic_mem_adapter, "SemanticMemoryAdapter", "", "Stores and retrieves semantic memory: facts, rules, preferences")
+    Component(working_mem_adapter, "WorkingMemoryAdapter", "", "Short-term working memory for current session context")
+    Component(memory_retriever, "MemoryRetriever", "", "RAG retrieval: query memory stores, rank by relevance")
+    Component(memory_indexer, "MemoryIndexer", "", "Indexes new memory entries into FTS5 and embedding stores")
 }
 
 System_Boundary(git_group, "Git Group") {
     Component(git_integration, "GitIntegration", "", "Auto-commit, branch awareness, diff tracking")
     Component(git_status, "GitStatus", "", "Read working tree status, staged changes")
     Component(git_commit, "GitCommit", "", "Create commits with conventional messages")
+}
+
+System_Boundary(repo_intelligence_group, "Repo Intelligence Group") {
+    Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Orchestrates codebase intelligence: indexing, search, ranking, repo mapping")
+    Component(ast_index_adapter, "ASTIndexAdapter", "", "Tree-sitter based AST indexing for symbol extraction")
+    Component(symbol_graph, "SymbolGraph", "", "Cross-file symbol reference graph: definitions, usages, imports")
+    Component(ranking_service, "RankingService", "", "Ranks code search results by relevance, recency, usage frequency")
+    Component(embedding_adapter, "EmbeddingAdapter", "", "Wraps embedding model API for vector generation")
+    Component(semantic_search_svc, "SemanticSearchService", "", "Vector similarity search over code embeddings")
+    Component(repo_map_builder, "RepoMapBuilder", "", "Generates hierarchical repo map summaries for context injection")
+}
+
+System_Boundary(edit_strategy_group, "Edit Strategy Group") {
+    Component(edit_strategy_mgr, "EditStrategyManager", "", "Manages and selects edit strategy based on edit type and context")
+    Component(edit_strategy, "EditStrategy", "ABC", "Base strategy interface: plan_edit, apply_edit, validate_edit")
+    Component(search_replace_coder, "SearchReplaceCoder", "", "Search-and-replace based edit with fuzzy matching")
+    Component(whole_file_coder, "WholeFileCoder", "", "Whole file rewrite strategy")
+    Component(unified_diff_coder, "UnifiedDiffCoder", "", "Unified diff format edit application")
+    Component(diff_sandbox_coder, "DiffSandboxCoder", "", "Sandboxed diff-based edit with validation")
+    Component(architect_coder, "ArchitectCoder", "", "Multi-file architectural edit strategy with planning")
+    Component(strategy_selector, "StrategySelector", "", "Selects optimal strategy: edit size, risk, file type heuristics")
+}
+
+System_Boundary(evaluation_group, "Evaluation Group") {
+    Component(eval_engine, "EvaluationEngine", "", "Orchestrates task evaluation: runs checks, scores, retries")
+    Component(task_evaluator, "TaskEvaluator", "", "Evaluates task completion against success criteria")
+    Component(success_check_runner, "SuccessCheckRunner", "", "Runs user-defined success checks and assertions")
+    Component(llm_reviewer, "LLMReviewer", "", "LLM-based code review and quality assessment")
+    Component(test_runner, "TestRunner", "", "Runs project test suites to validate changes")
+    Component(retry_coordinator, "RetryCoordinator", "", "Coordinates retry attempts with backoff and escalation")
+    Component(repetition_detector, "RepetitionDetector", "", "Detects repeated failures or loops, triggers escalation")
+    Component(turn_budget_injector, "TurnBudgetInjector", "", "Injects turn budget limits and progress signals into context")
+}
+
+System_Boundary(wire_log_group, "Wire Log Group") {
+    Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
+    Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")
+    Component(wire_reader, "WireReader", "", "Reads and parses wire log entries for replay and analysis")
+    Component(turn_index, "TurnIndex", "", "Indexes wire log entries by turn number for fast random access")
+    Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
+}
+
+System_Boundary(context_graph_group, "Context Graph Group") {
+    Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
+    Component(context_node, "ContextNode", "", "Context unit: code block, memory entry, file section with token cost")
+    Component(context_edge, "ContextEdge", "", "Typed edge between nodes: depends, references, includes, follows")
+    Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
+    Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget")
+    Component(distillation_processor, "DistillationProcessor", "", "Summarizes and distills long context nodes")
+    Component(injection_processor, "InjectionProcessor", "", "Injects retrieved context (memory, repo map) into context graph")
+    Component(compaction_processor, "CompactionProcessor", "", "Merges redundant or overlapping context nodes")
+    Component(token_budget_tracker, "TokenBudgetTracker", "", "Tracks cumulative token usage across context pipeline stages")
 }
 
 Rel(agent_orch, provider, "chat, stream")
@@ -115,6 +180,16 @@ Rel(agent_orch, metrics_collector, "record metrics")
 Rel(agent_orch, memory_store, "persist, retrieve")
 Rel(agent_orch, session_store, "save, load")
 Rel(agent_orch, agent_events, "yield events")
+Rel(agent_orch, repo_intel_mgr, "INDEX, RANK, INJECT")
+Rel(agent_orch, edit_strategy_mgr, "SELECT, APPLY")
+Rel(agent_orch, eval_engine, "EVALUATE, RETRY")
+Rel(agent_orch, wire_log, "APPEND, REPLAY")
+Rel(agent_orch, context_graph, "PROCESS")
+Rel(context_graph, repo_intel_mgr, "INJECT RepoMap")
+Rel(context_graph, memory_store, "INJECT Memory")
+Rel(edit_strategy_mgr, sandbox_executor, "STAGE edits")
+Rel(eval_engine, provider, "LLM review call")
+Rel(wire_log, session_store, "session metadata")
 Rel(conv_history, compactor, "compact when exceeded")
 Rel(compactor, provider, "secondary LLM call")
 Rel(model_router, provider, "route to provider")
@@ -135,10 +210,44 @@ Rel(session_search, session_store, "searches")
 Rel(session_fork, session_store, "forks")
 Rel(memory_store, memory_index, "indexes")
 Rel(memory_store, memory_scope, "filters")
+Rel(episodic_mem_adapter, memory_store, "persist episodic entries")
+Rel(semantic_mem_adapter, memory_store, "persist semantic entries")
+Rel(working_mem_adapter, memory_store, "persist working entries")
+Rel(memory_retriever, memory_index, "query index")
+Rel(memory_indexer, memory_index, "index entries")
+Rel(repo_intel_mgr, ast_index_adapter, "AST parsing")
+Rel(repo_intel_mgr, symbol_graph, "build reference graph")
+Rel(repo_intel_mgr, ranking_service, "rank results")
+Rel(repo_intel_mgr, embedding_adapter, "generate embeddings")
+Rel(repo_intel_mgr, semantic_search_svc, "vector search")
+Rel(repo_intel_mgr, repo_map_builder, "build repo map")
+Rel(edit_strategy_mgr, strategy_selector, "select strategy")
+Rel(edit_strategy, search_replace_coder, "extends")
+Rel(edit_strategy, whole_file_coder, "extends")
+Rel(edit_strategy, unified_diff_coder, "extends")
+Rel(edit_strategy, diff_sandbox_coder, "extends")
+Rel(edit_strategy, architect_coder, "extends")
+Rel(diff_sandbox_coder, diff_sandbox_mgr, "sandboxed diff apply")
+Rel(eval_engine, task_evaluator, "evaluate task")
+Rel(eval_engine, success_check_runner, "run checks")
+Rel(eval_engine, llm_reviewer, "LLM review")
+Rel(eval_engine, test_runner, "run tests")
+Rel(eval_engine, retry_coordinator, "coordinate retry")
+Rel(eval_engine, repetition_detector, "detect loops")
+Rel(eval_engine, turn_budget_injector, "inject budget")
+Rel(wire_log, wire_appender, "append entries")
+Rel(wire_log, wire_reader, "read entries")
+Rel(wire_log, turn_index, "index by turn")
+Rel(wire_log, session_fork_mgr, "fork from turn")
+Rel(context_graph, context_node, "contains nodes")
+Rel(context_graph, context_edge, "contains edges")
+Rel(pipeline_orchestrator, truncation_processor, "truncation stage")
+Rel(pipeline_orchestrator, distillation_processor, "distillation stage")
+Rel(pipeline_orchestrator, injection_processor, "injection stage")
+Rel(pipeline_orchestrator, compaction_processor, "compaction stage")
+Rel(pipeline_orchestrator, token_budget_tracker, "track budget")
 Rel(git_integration, git_status, "reads state")
 Rel(git_integration, git_commit, "creates commits")
 Rel(config_loader, config_schema, "produces config")
-
-@enduml
 
 @enduml
