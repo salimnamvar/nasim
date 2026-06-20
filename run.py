@@ -4,7 +4,7 @@ import sys
 from interpreter import interpreter
 
 # --- Configuration ---
-OLLAMA_MODEL = "ollama/nemotron-3-nano:4b-bf16"
+OLLAMA_MODEL = "ollama/mistral-nemo:12b-instruct-2407-q6_K"
 OLLAMA_API_BASE = "http://192.168.70.125:11434"
 
 
