@@ -4,19 +4,19 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Config Component Diagram
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim core library — Config group
 ' Purpose:   Config layer internal components
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Config Component Diagram
 
-Container_Boundary(config_boundary, "Config Layer") {
-    Component(config_loader, "ConfigLoader", "nasim/config/loader.py", "Loads global YAML + project YAML + env vars + CLI flags; validates at load")
-    Component(config_schema, "Config", "nasim/config/schema.py", "Typed dataclass: provider, model, safety_mode, context_budget, mcp_servers")
+Container_Boundary(config_boundary, "Config Group") {
+    Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags; validates at load")
+    Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety_mode, context_budget, mcp_servers")
 }
 
 System_Ext(global_config, "Global Config", "~/.nasim/config.yaml")

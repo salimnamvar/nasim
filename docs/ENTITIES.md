@@ -63,7 +63,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 
 ## C4 Components
 
-### CLI Layer
+### CLI Group
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -72,23 +72,21 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | Renderer | `nasim/cli/renderer.py` | All terminal output: colors, diffs, streaming, tool display |
 | SlashCommandHandler | `nasim/cli/commands.py` | Maps `/cmd` strings to actions |
 
-### Agent Layer
+### Agent Group
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
-| AgentOrchestrator | `nasim/agent/orchestrator.py` | Drives LLM/tool loop; emits events; stateless |
+| AgentOrchestrator | `nasim/agent/orchestrator.py` | Core agentic loop: Provider call, tool dispatch, repeat. Yields AgentEvent objects |
 | ConversationHistory | `nasim/agent/history.py` | Owns messages + token count + compaction trigger |
 | ContextCompactor | `nasim/agent/compactor.py` | Summarizes old exchanges via secondary LLM call |
-| PermissionGate | `nasim/agent/permission.py` | Per-tool safety check; ask/auto/off modes |
+| SafetyCoordinator | `nasim/agent/safety.py` | Composes PermissionGate, injection scanner, egress inspector into pipeline |
 | PlanSession | `nasim/agent/plan.py` | Holds queued tool calls in plan mode |
 | AgentEvent | `nasim/agent/events.py` | Event types: TextChunk, ToolStart, ToolResult, Error, Done |
-| SubagentManager | `nasim/agent/subagent.py` | Parent-child agent orchestration with nesting limit 5 |
-| TaskDispatcher | `nasim/agent/dispatcher.py` | Role-based task delegation: planner, architect, coder, reviewer |
+| SubagentCoordinator | `nasim/agent/subagent.py` | Parent-child orchestration, nesting limit 5, result aggregation |
 | ErrorBoundary | `nasim/agent/errors.py` | Structured error handling with recovery actions |
-| SafetyPipeline | `nasim/agent/safety.py` | Multi-stage safety: permission gate, injection scanner, egress inspector |
-| PersonaLoader | `nasim/agent/persona.py` | Runtime persona switching for specialized agent roles |
+| PersonaManager | `nasim/agent/persona.py` | Runtime persona switching for specialized agent roles |
 
-### Provider Layer
+### Provider Group
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -101,7 +99,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | OpenAIProvider | `nasim/provider/openai.py` | OpenAI Chat Completions API |
 | AnthropicProvider | `nasim/provider/anthropic.py` | Anthropic Messages API |
 
-### Tool Layer
+### Tool Group
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -119,21 +117,29 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | WebFetchTool | `nasim/tools/web.py` | Fetch URL content as markdown |
 | WebSearchTool | `nasim/tools/web.py` | Search the web for information |
 | GitTool | `nasim/tools/git.py` | Git status, diff, commit operations |
-| MCPToolAdapter | `nasim/tools/mcp.py` | Wraps MCP server tools into nasim Tool format |
 | LspTool | `nasim/tools/lsp.py` | LSP operations: hover, definition, references, symbols |
-| SubagentTool | `nasim/tools/subagent.py` | Spawns child agents as tool calls |
+| SubagentTool | `nasim/tools/subagent.py` | Spawns child agents via SubagentCoordinator |
 | TodoTool | `nasim/tools/todo.py` | Task tracking within session |
 | MemoryTool | `nasim/tools/memory.py` | Persist and retrieve cross-session knowledge |
 | PlanTool | `nasim/tools/plan.py` | Plan creation and management |
 
-### Config Layer (cross-cutting)
+### MCP Group
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| MCPClientRuntime | `nasim/mcp/client.py` | Connects to external MCP servers via stdio/SSE transport |
+| MCPServerRuntime | `nasim/mcp/server.py` | Exposes nasim tools to external MCP clients via stdio/SSE |
+| MCPToolAdapter | `nasim/mcp/adapter.py` | Wraps MCP server tools into nasim Tool ABC format |
+| MCPDiscovery | `nasim/mcp/discovery.py` | Discovers and registers MCP server tools at startup from config |
+
+### Config Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
 | ConfigLoader | `nasim/config/loader.py` | Loads global YAML + project YAML + env + CLI flags |
 | Config | `nasim/config/schema.py` | Typed dataclass: provider, model, safety, budget, mcp |
 
-### Session Layer (cross-cutting)
+### Session Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -143,7 +149,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | SessionSearch | `nasim/session/search.py` | Cross-session search via FTS5 index |
 | SessionFork | `nasim/session/fork.py` | Branch conversations from any point |
 
-### Server Layer (cross-cutting)
+### Server Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -152,7 +158,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | SSEHandler | `nasim/server/sse.py` | Server-Sent Events streaming for agent responses |
 | APISchema | `nasim/server/schema.py` | OpenAPI 3.1 schema, request/response models |
 
-### Hook Layer (cross-cutting)
+### Hooks Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -160,14 +166,14 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | Hook | `nasim/hooks/types.py` | Hook types: PreToolUse, PostToolUse, PreLLMCall, PostLLMCall |
 | HookResult | `nasim/hooks/types.py` | Hook execution result: allow, deny, modify |
 
-### Plugin Layer (cross-cutting)
+### Plugins Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
 | PluginLoader | `nasim/plugins/loader.py` | Discovers and loads plugins from ~/.nasim/plugins/ |
 | PluginManifest | `nasim/plugins/manifest.py` | Plugin metadata: name, version, tools, hooks |
 
-### Sandbox Layer (cross-cutting)
+### Sandbox Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -175,7 +181,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | SandboxPolicy | `nasim/sandbox/policy.py` | Network domain allowlists, filesystem mount rules, exec restrictions |
 | SandboxMonitor | `nasim/sandbox/monitor.py` | Process monitoring, timeout enforcement, resource limits |
 
-### Observability Layer (cross-cutting)
+### Observability Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -183,7 +189,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | MetricsCollector | `nasim/observability/metrics.py` | Token usage, latency, tool call counts, error rates |
 | TraceCorrelator | `nasim/observability/trace.py` | Request-scoped trace IDs linking LLM calls, tool calls, events |
 
-### Memory Layer (cross-cutting)
+### Memory Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -191,7 +197,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | MemoryIndex | `nasim/memory/index.py` | FTS5 index for semantic search across stored knowledge |
 | MemoryScope | `nasim/memory/scope.py` | Scope isolation: global, project, session-level knowledge |
 
-### Git Layer (cross-cutting)
+### Git Group (cross-cutting)
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
@@ -219,11 +225,10 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/agent/events.py` | agent | AgentEvent hierarchy |
 | `nasim/agent/permission.py` | agent | PermissionGate |
 | `nasim/agent/plan.py` | agent | PlanSession |
-| `nasim/agent/subagent.py` | agent | SubagentManager |
-| `nasim/agent/dispatcher.py` | agent | TaskDispatcher |
+| `nasim/agent/subagent.py` | agent | SubagentCoordinator |
+| `nasim/agent/safety.py` | agent | SafetyCoordinator |
 | `nasim/agent/errors.py` | agent | ErrorBoundary |
-| `nasim/agent/safety.py` | agent | SafetyPipeline |
-| `nasim/agent/persona.py` | agent | PersonaLoader |
+| `nasim/agent/persona.py` | agent | PersonaManager |
 | `nasim/provider/__init__.py` | provider | Provider package |
 | `nasim/provider/base.py` | provider | Provider Protocol + factory |
 | `nasim/provider/router.py` | provider | ModelRouter |
@@ -240,12 +245,16 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/tools/directory.py` | tools | DirTool |
 | `nasim/tools/web.py` | tools | Web tools |
 | `nasim/tools/git.py` | tools | GitTool |
-| `nasim/tools/mcp.py` | tools | MCPToolAdapter |
 | `nasim/tools/lsp.py` | tools | LspTool |
 | `nasim/tools/subagent.py` | tools | SubagentTool |
 | `nasim/tools/todo.py` | tools | TodoTool |
 | `nasim/tools/memory.py` | tools | MemoryTool |
 | `nasim/tools/plan.py` | tools | PlanTool |
+| `nasim/mcp/__init__.py` | mcp | MCP package |
+| `nasim/mcp/client.py` | mcp | MCPClientRuntime |
+| `nasim/mcp/server.py` | mcp | MCPServerRuntime |
+| `nasim/mcp/adapter.py` | mcp | MCPToolAdapter |
+| `nasim/mcp/discovery.py` | mcp | MCPDiscovery |
 | `nasim/config/__init__.py` | config | Config package |
 | `nasim/config/loader.py` | config | ConfigLoader |
 | `nasim/config/schema.py` | config | Config dataclass |

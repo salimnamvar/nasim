@@ -4,20 +4,20 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Observability Component Diagram
-' Boundary:  nasim code agent observability layer
+' Boundary:  nasim core library — Observability group
 ' Purpose:   Structured logging, trace correlation, metrics collection
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Observability Component Diagram
 
-Container_Boundary(observability_boundary, "Observability Layer") {
-    Component(structured_logger, "StructuredLogger", "nasim/observability/logger.py", "Structured logging with trace correlation and log levels")
-    Component(metrics_collector, "MetricsCollector", "nasim/observability/metrics.py", "Token usage, latency, tool call counts, error rates")
-    Component(trace_correlator, "TraceCorrelator", "nasim/observability/trace.py", "Request-scoped trace IDs linking LLM calls, tool calls, events")
+Container_Boundary(observability_boundary, "Observability Group") {
+    Component(structured_logger, "StructuredLogger", "structlog", "Structured logging with trace correlation and log levels")
+    Component(metrics_collector, "MetricsCollector", "", "Token usage, latency, tool call counts, error rates")
+    Component(trace_correlator, "TraceCorrelator", "", "Request-scoped trace IDs linking LLM calls, tool calls, events")
 }
 
 Rel(structured_logger, trace_correlator, "attaches trace ID to log entries")

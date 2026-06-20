@@ -4,62 +4,56 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Tools Component Diagram
-' Boundary:  nasim code agent
+' Boundary:  nasim core library — Tool group
 ' Purpose:   Tool layer internal components
 ' Milestone: v1.0
-' Version:   4.0.0
-' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Tools Component Diagram
 
-Container_Boundary(tool_boundary, "Tool Layer") {
-    Component(tool_abc, "Tool", "nasim/tools/base.py", "ABC: name, description, parameters, safe, execute")
-    Component(tool_registry, "ToolRegistry", "nasim/tools/base.py", "Instance-based registry, dynamic registration for MCP")
-    Component(tool_result, "ToolResult", "nasim/tools/base.py", "Structured result: success, content, error")
-
-    Component(file_tools, "FileTools", "nasim/tools/file.py", "ReadFileTool, WriteFileTool, EditFileTool")
-    Component(search_tools, "SearchTools", "nasim/tools/search.py", "GrepTool, GlobTool, FindFileTool")
-    Component(shell_tool, "ShellTool", "nasim/tools/shell.py", "Execute shell commands via sandbox with timeout")
-    Component(dir_tool, "DirTool", "nasim/tools/directory.py", "List directory contents")
-    Component(web_tools, "WebTools", "nasim/tools/web.py", "WebFetchTool, WebSearchTool")
-    Component(git_tool, "GitTool", "nasim/tools/git.py", "Git status, diff, commit operations")
-    Component(mcp_adapter, "MCPToolAdapter", "nasim/tools/mcp.py", "Wraps MCP server tools into nasim Tool format")
-    Component(lsp_tool, "LspTool", "nasim/tools/lsp.py", "LSP operations: hover, definition, references, symbols")
-    Component(subagent_tool, "SubagentTool", "nasim/tools/subagent.py", "Spawns child agents as tool calls")
-    Component(todo_tool, "TodoTool", "nasim/tools/todo.py", "Task tracking within session")
-    Component(memory_tool, "MemoryTool", "nasim/tools/memory.py", "Persist and retrieve cross-session knowledge")
-    Component(plan_tool, "PlanTool", "nasim/tools/plan.py", "Plan creation and management")
+Container_Boundary(tool_boundary, "Tool Group") {
+    Component(tool_abc, "Tool", "ABC", "Base tool: name, description, parameters, safe, execute")
+    Component(tool_registry, "ToolRegistry", "", "Instance-based registry, dynamic registration for MCP")
+    Component(file_tools, "FileTools", "", "ReadFileTool, WriteFileTool, EditFileTool")
+    Component(search_tools, "SearchTools", "", "GrepTool, GlobTool, FindFileTool")
+    Component(shell_tool, "ShellTool", "", "Shell command execution via sandbox with timeout")
+    Component(dir_tool, "DirTool", "", "List directory contents")
+    Component(web_tools, "WebTools", "", "WebFetchTool, WebSearchTool")
+    Component(git_tool, "GitTool", "", "Git status, diff, commit operations")
+    Component(lsp_tool, "LspTool", "", "LSP operations: hover, definition, references, symbols")
+    Component(subagent_tool, "SubagentTool", "", "Spawns child agents via SubagentCoordinator")
+    Component(todo_tool, "TodoTool", "", "Task tracking within session")
+    Component(memory_tool, "MemoryTool", "", "Persist and retrieve cross-session knowledge")
+    Component(plan_tool, "PlanTool", "", "Plan creation and management")
 }
 
+Container_Ext(sandbox_group, "Sandbox Group")
 System_Ext(host_fs, "Host Filesystem")
-System_Ext(host_shell, "Host Shell")
 System_Ext(web, "Web")
 System_Ext(mcp_server, "MCP Server")
 System_Ext(git_repo, "Git Repository")
 System_Ext(lsp_server, "LSP Server")
 
 Rel(tool_registry, tool_abc, "manages instances")
-Rel(tool_registry, tool_result, "returns results")
 Rel(file_tools, tool_abc, "extends")
 Rel(search_tools, tool_abc, "extends")
 Rel(shell_tool, tool_abc, "extends")
 Rel(dir_tool, tool_abc, "extends")
 Rel(web_tools, tool_abc, "extends")
 Rel(git_tool, tool_abc, "extends")
-Rel(mcp_adapter, tool_abc, "extends")
 Rel(lsp_tool, tool_abc, "extends")
 Rel(subagent_tool, tool_abc, "extends")
 Rel(todo_tool, tool_abc, "extends")
 Rel(memory_tool, tool_abc, "extends")
 Rel(plan_tool, tool_abc, "extends")
+Rel(shell_tool, sandbox_group, "executes via sandbox")
 Rel(file_tools, host_fs, "path I/O")
 Rel(search_tools, host_fs, "search files")
-Rel(shell_tool, host_shell, "subprocess via sandbox")
 Rel(dir_tool, host_fs, "directory listing")
 Rel(web_tools, web, "HTTP")
-Rel(mcp_adapter, mcp_server, "stdio/SSE")
 Rel(git_tool, git_repo, "git CLI")
 Rel(lsp_tool, lsp_server, "LSP protocol")
 

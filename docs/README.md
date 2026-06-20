@@ -20,12 +20,12 @@ Each layer must be authored in order. No layer may be authored before the one ab
 
 | Directory | Layer | Status | Contents |
 | --------- | ----- | ------ | -------- |
-| [C4/](c4/README.md) | C4 Architecture | Frozen | Context, container, 15 component diagrams (15 containers) |
+| [C4/](c4/README.md) | C4 Architecture | Frozen | Context, container, 18 component diagrams (3 containers, 12 groups) |
 | [UC/](uc/README.md) | Use Cases | Frozen | 109 UCs — 17 groups (CLI/AGT/PRV/CFG/SSN/SAF/CTX/LLM/TL/SRV/HK/PLG/RTG/OBS/MEM/VCS/SBX) |
 | [SM/](sm/README.md) | State Machine | Frozen | Agent lifecycle — 20 states (process FSM, not entity lifecycle) |
 | [SQ/](sq/README.md) | Sequence Diagrams | Frozen | 55 diagrams — one per UC, by group |
 | [ER/](er/README.md) | ERD | Frozen | Session, memory, todo JSON Lines schemas — logical stores |
-| [CL/](cl/README.md) | Class Diagram | Frozen | Runtime class model — 90+ classes, providers, tools, orchestrator, config, session, server, hooks, plugins, sandbox, observability, memory, git |
+| [CL/](cl/README.md) | Class Diagram | Frozen | Runtime class model — 90+ classes across 12 groups |
 | [CT/DATA/](CT/DATA/README.md) | Data Contracts | Frozen | ODCS v3.1.0 — session, memory, todo store data contracts |
 | [CT/API/](CT/API/README.md) | HTTP API Surface | Frozen | OAS 3.1.0 + ROD — 23 endpoints, 8 resources |
 | [RDM/](rdm/README.md) | Implementation Roadmap | Active | Milestone docs for coding |

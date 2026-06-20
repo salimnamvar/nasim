@@ -4,20 +4,20 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Git Component Diagram
-' Boundary:  nasim code agent git integration layer
+' Boundary:  nasim core library — Git group
 ' Purpose:   Version control awareness: status, diff, commit
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Git Component Diagram
 
-Container_Boundary(git_boundary, "Git Layer") {
-    Component(git_integration, "GitIntegration", "nasim/git/integration.py", "Auto-commit after file edits, branch awareness, diff tracking")
-    Component(git_status, "GitStatus", "nasim/git/status.py", "Read working tree status, staged changes, branch info")
-    Component(git_commit, "GitCommit", "nasim/git/commit.py", "Create commits with conventional commit messages")
+Container_Boundary(git_boundary, "Git Group") {
+    Component(git_integration, "GitIntegration", "", "Auto-commit after file edits, branch awareness, diff tracking")
+    Component(git_status, "GitStatus", "", "Read working tree status, staged changes, branch info")
+    Component(git_commit, "GitCommit", "", "Create commits with conventional commit messages")
 }
 
 System_Ext(git_repo, "Git Repository", "Version control for project files")

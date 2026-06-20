@@ -1,0 +1,30 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Subagent Component Diagram
+' Boundary:  nasim core library — Subagent orchestration
+' Purpose:   Parent-child agent orchestration with nesting limits
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' ============================================================
+
+title nasim — Subagent Component Diagram
+
+Container_Boundary(agent_boundary, "Agent Group") {
+    Component(subagent_coord, "SubagentCoordinator", "nasim/agent/subagent.py", "Parent-child orchestration, nesting limit 5, result aggregation")
+    Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop — inherited by child agents")
+}
+
+Container_Ext(tool_boundary, "Tool Group")
+Container_Ext(provider_boundary, "Provider Group")
+
+Rel(subagent_coord, agent_orch, "creates child AgentOrchestrator instance")
+Rel(subagent_coord, tool_boundary, "child uses restricted tool set")
+Rel(subagent_coord, provider_boundary, "child shares provider")
+Rel(agent_orch, subagent_coord, "parent spawns via SubagentTool")
+
+SHOW_LEGEND()

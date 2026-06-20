@@ -4,53 +4,48 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Agent Component Diagram
-' Boundary:  nasim code agent
+' Boundary:  nasim core library — Agent group
 ' Purpose:   Agent layer internal components
 ' Milestone: v1.0
-' Version:   4.0.0
-' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Agent Component Diagram
 
-Container_Boundary(agent_boundary, "Agent Layer") {
-    Component(agent_orch, "AgentOrchestrator", "nasim/agent/orchestrator.py", "Drives LLM/tool loop, emits AgentEvents, stateless per turn")
-    Component(conv_history, "ConversationHistory", "nasim/agent/history.py", "Owns messages list + token_count, triggers compaction")
-    Component(compactor, "ContextCompactor", "nasim/agent/compactor.py", "Summarizes old exchanges via secondary LLM call when budget exceeded")
-    Component(perm_gate, "PermissionGate", "nasim/agent/permission.py", "Per-tool safety check, blocks or prompts in ask mode")
-    Component(plan_session, "PlanSession", "nasim/agent/plan.py", "Holds queued tool calls in plan mode")
-    Component(agent_events, "AgentEvent", "nasim/agent/events.py", "Event types: TextChunk, ToolStart, ToolResult, Error, Done")
-    Component(subagent_mgr, "SubagentManager", "nasim/agent/subagent.py", "Parent-child orchestration, nesting limit 5, result aggregation")
-    Component(task_dispatcher, "TaskDispatcher", "nasim/agent/dispatcher.py", "Role-based delegation: planner, architect, coder, reviewer")
-    Component(error_boundary, "ErrorBoundary", "nasim/agent/errors.py", "Structured error handling with recovery actions and error hierarchy")
-    Component(safety_pipeline, "SafetyPipeline", "nasim/agent/safety.py", "Multi-stage safety: permission gate, injection scanner, egress inspector")
-    Component(persona_loader, "PersonaLoader", "nasim/agent/persona.py", "Runtime persona switching for specialized agent roles")
+Container_Boundary(agent_boundary, "Agent Group") {
+    Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields AgentEvent objects")
+    Component(conv_history, "ConversationHistory", "", "Owns messages list and token count. Triggers compaction when budget exceeded")
+    Component(compactor, "ContextCompactor", "", "Summarizes old exchanges via secondary LLM call when budget exceeded")
+    Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
+    Component(plan_session, "PlanSession", "", "Holds queued tool calls in plan mode. /approve drains the queue")
+    Component(agent_events, "AgentEvent", "", "Event types: TextChunk, ToolStart, ToolResult, Error, Done")
+    Component(subagent_coord, "SubagentCoordinator", "", "Parent-child orchestration, nesting limit 5, result aggregation")
+    Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions and error hierarchy")
+    Component(persona_mgr, "PersonaManager", "", "Runtime persona switching for specialized agent roles")
 }
 
-System_Ext(provider, "Provider Layer", "LLM provider abstraction")
-System_Ext(tool_registry, "Tool Registry", "Instance-based tool registry")
-System_Ext(session_store, "Session Store", "Message history persistence")
-System_Ext(memory_store, "Memory Store", "Cross-session knowledge")
-System_Ext(model_router, "Model Router", "Model selection and fallback")
+Container_Ext(provider_boundary, "Provider Group")
+Container_Ext(tool_boundary, "Tool Group")
+Container_Ext(session_boundary, "Session Group")
+Container_Ext(memory_boundary, "Memory Group")
+Container_Ext(observability_group, "Observability Group")
 
-Rel(agent_orch, provider, "chat, chat_stream")
-Rel(agent_orch, tool_registry, "execute tool calls")
+Rel(agent_orch, provider_boundary, "chat, chat_stream")
+Rel(agent_orch, tool_boundary, "execute tool calls")
 Rel(agent_orch, conv_history, "reads/writes messages")
-Rel(agent_orch, perm_gate, "checks tool permissions")
+Rel(agent_orch, safety_coord, "safety validation before tool exec")
 Rel(agent_orch, agent_events, "yields events")
-Rel(agent_orch, subagent_mgr, "spawn, collect child agents")
-Rel(agent_orch, task_dispatcher, "delegate by role")
-Rel(agent_orch, error_boundary, "handle errors")
-Rel(agent_orch, safety_pipeline, "safety validation")
-Rel(agent_orch, persona_loader, "load, switch persona")
-Rel(agent_orch, memory_store, "persist, retrieve knowledge")
-Rel(agent_orch, model_router, "select model for task")
-Rel(conv_history, compactor, "triggers compaction")
-Rel(compactor, provider, "secondary LLM call for summarization")
-Rel(agent_orch, session_store, "save, load session")
+Rel(agent_orch, subagent_coord, "spawn, collect child agents")
+Rel(agent_orch, error_boundary, "handle structured errors")
+Rel(agent_orch, persona_mgr, "load, switch persona")
+Rel(agent_orch, memory_boundary, "persist, retrieve knowledge")
+Rel(agent_orch, session_boundary, "save, load session")
+Rel(agent_orch, observability_group, "emit structured logs, metrics")
 Rel(agent_orch, plan_session, "queue, approve plan")
-Rel(subagent_mgr, agent_orch, "child agent inherits core")
-Rel(task_dispatcher, subagent_mgr, "dispatch via subagent")
+Rel(conv_history, compactor, "triggers compaction")
+Rel(compactor, provider_boundary, "secondary LLM call for summarization")
+Rel(subagent_coord, agent_orch, "child agent inherits core")
 
 SHOW_LEGEND()

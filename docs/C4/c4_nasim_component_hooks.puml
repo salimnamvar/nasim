@@ -1,0 +1,32 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Hooks Component Diagram
+' Boundary:  nasim core library — Hooks group
+' Purpose:   Pre/post hooks for tool use and LLM calls
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' ============================================================
+
+title nasim — Hooks Component Diagram
+
+Container_Boundary(hooks_boundary, "Hooks Group") {
+    Component(hook_manager, "HookManager", "nasim/hooks/manager.py", "Registers, discovers, and executes hooks in priority order")
+    Component(hook_types, "Hook", "nasim/hooks/types.py", "Hook definition: name, event type, handler function, priority")
+    Component(hook_result, "HookResult", "nasim/hooks/types.py", "Hook execution result: allow, deny, or modify payload")
+}
+
+System_Ext(agent_orch, "Agent Orchestrator", "Core agentic loop")
+System_Ext(tool_registry, "Tool Registry", "Tool instances")
+System_Ext(plugin_loader, "Plugin Loader", "Plugin discovery")
+
+Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall")
+Rel(hook_manager, hook_types, "manages registered hooks")
+Rel(hook_manager, hook_result, "returns execution result")
+Rel(plugin_loader, hook_manager, "registers plugin hooks")
+
+SHOW_LEGEND()

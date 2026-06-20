@@ -4,20 +4,20 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Memory Component Diagram
-' Boundary:  nasim code agent memory layer
+' Boundary:  nasim core library — Memory group
 ' Purpose:   Cross-session knowledge persistence and retrieval
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Memory Component Diagram
 
-Container_Boundary(memory_boundary, "Memory Layer") {
-    Component(memory_store, "MemoryStore", "nasim/memory/store.py", "Persists knowledge entries with scope, key, content, timestamps")
-    Component(memory_index, "MemoryIndex", "nasim/memory/index.py", "FTS5 index for semantic search across stored knowledge")
-    Component(memory_scope, "MemoryScope", "nasim/memory/scope.py", "Scope isolation: global, project, session-level knowledge")
+Container_Boundary(memory_boundary, "Memory Group") {
+    Component(memory_store, "MemoryStore", "", "Persists knowledge entries with scope, key, content, timestamps")
+    Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search across stored knowledge")
+    Component(memory_scope, "MemoryScope", "", "Scope isolation: global, project, session-level knowledge")
 }
 
 System_Ext(memory_backend, "Memory Backend", "Persistent storage for knowledge entries")

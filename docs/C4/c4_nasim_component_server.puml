@@ -5,33 +5,29 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Server Component Diagram
-' Boundary:  nasim code agent HTTP API
+' Boundary:  nasim HTTP API Server process
 ' Purpose:   Server Layer components for HTTP interface
 ' Milestone: v1.0
-' Version:   4.0.0
-' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Server Component Diagram
 
-Container_Boundary(server_boundary, "Server Layer") {
+Container_Boundary(server_boundary, "HTTP API Server Process") {
     Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
-    Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints mapped to AgentOrchestrator")
+    Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints mapped to agent orchestrator")
     Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for HTTP clients")
-    Component(api_schema, "APISchema", "Pydantic", "Request/response models: SessionCreate, MessageCreate, responses")
+    Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
 }
 
-System_Ext(agent_orch, "Agent Orchestrator", "Core agentic loop")
-System_Ext(session_store, "Session Store", "Message history persistence")
-System_Ext(tool_registry, "Tool Registry", "Instance-based tool registry")
+Container_Ext(core_library, "Core Library")
 
 Rel(server_app, server_router, "mounts routes")
-Rel(server_router, agent_orch, "delegates to")
-Rel(server_router, session_store, "manages sessions")
-Rel(server_router, tool_registry, "lists tools")
+Rel(server_router, core_library, "delegates to agent orchestrator")
 Rel(server_router, sse_handler, "streams via")
-Rel(sse_handler, agent_orch, "consumes AgentEvents")
+Rel(sse_handler, core_library, "consumes AgentEvents")
 
 SHOW_LEGEND()
 

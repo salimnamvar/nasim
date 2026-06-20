@@ -4,136 +4,140 @@
 skinparam linetype polyline
 
 ' ============================================================
-' Title:     nasim — Component Overview (cross-container)
-' Boundary:  nasim code agent
-' Purpose:   High-level view of all containers and their primary interactions
+' Title:     nasim — Component Overview
+' Boundary:  nasim core library
+' Purpose:   Cross-container view of all component groups and their interactions
 ' Milestone: v1.0
-' Version:   4.0.0
-' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
-title nasim — Component Overview (cross-container)
+title nasim — Component Overview
 
-Container_Boundary(cli_boundary, "CLI Layer") {
-    Component(arg_parser, "ArgParser", "click", "CLI argument parsing with layered overrides")
-    Component(repl_session, "REPLSession", "click + rich", "Interactive REPL loop, input handling, slash command dispatch")
-    Component(renderer, "Renderer", "rich", "Terminal output: streaming tokens, diffs, colors, tool display")
-    Component(slash_handler, "SlashCommandHandler", "click", "Maps /cmd strings to actions")
-}
-
-Container_Boundary(agent_boundary, "Agent Layer") {
+System_Boundary(agent_group, "Agent Group") {
     Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields AgentEvent objects")
-    Component(conv_history, "ConversationHistory", "", "Owns message list + token count. Triggers compaction when budget exceeded")
+    Component(conv_history, "ConversationHistory", "", "Owns message list and token count. Triggers compaction when budget exceeded")
     Component(compactor, "ContextCompactor", "", "Summarizes oldest exchanges via secondary LLM call")
-    Component(perm_gate, "PermissionGate", "", "Per-tool safety check: ask, auto, off modes")
+    Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector")
     Component(plan_session, "PlanSession", "", "Holds queued tool calls in plan mode. /approve drains the queue")
     Component(agent_events, "AgentEvent", "", "Event types: TextChunk, ToolStart, ToolResult, Error, Done")
-    Component(subagent_mgr, "SubagentManager", "", "Parent-child agent orchestration with nesting limit of 5")
-    Component(task_dispatcher, "TaskDispatcher", "", "Role-based task delegation: planner, architect, coder, reviewer")
+    Component(subagent_coord, "SubagentCoordinator", "", "Parent-child agent orchestration with nesting limit 5")
     Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions")
-    Component(safety_pipeline, "SafetyPipeline", "", "Multi-stage safety: permission gate, injection scanner, egress inspector")
-    Component(persona_loader, "PersonaLoader", "", "Runtime persona switching for specialized agent roles")
+    Component(persona_mgr, "PersonaManager", "", "Runtime persona switching for specialized agent roles")
 }
 
-Container_Boundary(provider_boundary, "Provider Layer") {
+System_Boundary(provider_group, "Provider Group") {
     Component(provider, "Provider", "Protocol", "LLM provider interface: chat, chat_stream, model_name")
     Component(provider_factory, "ProviderFactory", "", "Reads config, instantiates correct provider backend")
     Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification")
-    Component(provider_caps, "ProviderCapabilities", "", "Capability declaration per provider: streaming, tools, max tokens")
+    Component(provider_caps, "ProviderCapabilities", "", "Capability declaration: streaming, tools, max_tokens")
     Component(fallback_chain, "FallbackChain", "", "Circuit breaker + retry + provider failover")
 }
 
-Container_Boundary(tool_boundary, "Tool Layer") {
-    Component(tool_registry, "ToolRegistry", "", "Instance-based tool registry. find(name) returns Tool. Dynamic registration for MCP")
+System_Boundary(tool_group, "Tool Group") {
+    Component(tool_registry, "ToolRegistry", "", "Instance-based tool registry. find(name) returns Tool")
     Component(file_tools, "FileTools", "ABC", "ReadFileTool, WriteFileTool, EditFileTool")
     Component(search_tools, "SearchTools", "ABC", "GrepTool, GlobTool, FindFileTool")
-    Component(shell_tool, "ShellTool", "ABC", "Shell command execution via sandbox with timeout")
+    Component(shell_tool, "ShellTool", "ABC", "Shell command execution via sandbox")
     Component(web_tools, "WebTools", "ABC", "WebFetchTool, WebSearchTool")
     Component(git_tool, "GitTool", "ABC", "Git status, diff, commit operations")
-    Component(mcp_adapter, "MCPToolAdapter", "", "Wraps MCP server tools into nasim Tool format")
-    Component(lsp_tool, "LspTool", "ABC", "LSP operations: hover, definition, references, symbols")
-    Component(subagent_tool, "SubagentTool", "ABC", "Spawns child agents as tool calls")
+    Component(lsp_tool, "LspTool", "ABC", "LSP operations: hover, definition, references")
+    Component(subagent_tool, "SubagentTool", "ABC", "Spawns child agents via SubagentCoordinator")
     Component(todo_tool, "TodoTool", "ABC", "Task tracking within session")
     Component(memory_tool, "MemoryTool", "ABC", "Persist and retrieve cross-session knowledge")
     Component(plan_tool, "PlanTool", "ABC", "Plan creation and management")
 }
 
-Container_Boundary(config_boundary, "Config Layer") {
-    Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags. Returns typed Config")
+System_Boundary(mcp_group, "MCP Group") {
+    Component(mcp_client_rt, "MCPClientRuntime", "", "Connects to external MCP servers via stdio/SSE")
+    Component(mcp_server_rt, "MCPServerRuntime", "", "Exposes nasim tools to external MCP clients")
+    Component(mcp_tool_adapter, "MCPToolAdapter", "", "Wraps MCP server tools into nasim Tool format")
+    Component(mcp_discovery, "MCPDiscovery", "", "Discovers and registers MCP server tools at startup")
 }
 
-Container_Boundary(session_boundary, "Session Layer") {
-    Component(session_store, "SessionStore", "pathlib + json", "Persists/loads message history to ~/.nasim/sessions/<id>/")
+System_Boundary(config_group, "Config Group") {
+    Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags")
+    Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety, budget, mcp")
+}
+
+System_Boundary(session_group, "Session Group") {
+    Component(session_store, "SessionStore", "", "Persists/loads message history to ~/.nasim/sessions/")
     Component(session_versioning, "SessionVersioning", "", "Snapshots and undo for session state")
-    Component(session_search, "SessionSearch", "", "Cross-session search via FTS5")
+    Component(session_search, "SessionSearch", "", "Cross-session search via FTS5 index")
     Component(session_fork, "SessionFork", "", "Branch conversations from any point")
 }
 
-Container_Boundary(server_boundary, "Server Layer") {
-    Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with middleware and route mounts")
-    Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints for sessions, messages, tools, config")
-    Component(sse_handler, "SSEHandler", "SSE", "Server-Sent Events streaming for agent responses")
-    Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
+System_Boundary(hooks_group, "Hooks Group") {
+    Component(hook_manager, "HookManager", "", "Registers, discovers, and executes hooks")
+    Component(hook_types, "Hook", "", "Hook types: PreToolUse, PostToolUse, PreLLMCall, PostLLMCall")
+    Component(hook_result, "HookResult", "", "Hook execution result: allow, deny, modify")
 }
 
-Container_Boundary(sandbox_boundary, "Sandbox Layer") {
+System_Boundary(plugins_group, "Plugins Group") {
+    Component(plugin_loader, "PluginLoader", "", "Discovers and loads plugins from ~/.nasim/plugins/")
+    Component(plugin_manifest, "PluginManifest", "", "Plugin metadata: name, version, tools, hooks")
+}
+
+System_Boundary(sandbox_group, "Sandbox Group") {
     Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
+    Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules")
+    Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement")
 }
 
-Container_Boundary(observability_boundary, "Observability Layer") {
+System_Boundary(observability_group, "Observability Group") {
     Component(structured_logger, "StructuredLogger", "structlog", "Structured logging with trace correlation")
     Component(metrics_collector, "MetricsCollector", "", "Token usage, latency, tool call metrics")
 }
 
-Container_Boundary(memory_boundary, "Memory Layer") {
+System_Boundary(memory_group, "Memory Group") {
     Component(memory_store, "MemoryStore", "", "Cross-session knowledge persistence and retrieval")
+    Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search")
+    Component(memory_scope, "MemoryScope", "", "Scope isolation: global, project, session")
 }
 
-Container_Boundary(git_boundary, "Git Layer") {
+System_Boundary(git_group, "Git Group") {
     Component(git_integration, "GitIntegration", "", "Auto-commit, branch awareness, diff tracking")
+    Component(git_status, "GitStatus", "", "Read working tree status, staged changes")
+    Component(git_commit, "GitCommit", "", "Create commits with conventional messages")
 }
-
-Rel(repl_session, agent_orch, "user input, AgentEvents")
-Rel(repl_session, renderer, "AgentEvents, terminal output")
-Rel(repl_session, slash_handler, "/cmd, action")
 
 Rel(agent_orch, provider, "chat, stream")
 Rel(agent_orch, tool_registry, "execute tools")
 Rel(agent_orch, conv_history, "messages, token tracking")
-Rel(agent_orch, perm_gate, "permission check before tool exec")
-Rel(agent_orch, plan_session, "queue, drain in plan mode")
-Rel(agent_orch, subagent_mgr, "spawn child agents")
-Rel(agent_orch, task_dispatcher, "delegate role-based tasks")
-Rel(agent_orch, error_boundary, "handle structured errors")
-Rel(agent_orch, safety_pipeline, "multi-stage safety checks")
-Rel(agent_orch, persona_loader, "switch agent persona")
-Rel(conv_history, compactor, "compact when budget exceeded")
-
-Rel(model_router, provider, "route to selected provider")
-Rel(model_router, provider_caps, "query provider capabilities")
-Rel(model_router, fallback_chain, "failover on provider error")
-Rel(provider_factory, provider, "instantiates")
-
-Rel(tool_registry, sandbox_executor, "sandboxed shell execution")
-Rel(sandbox_executor, shell_tool, "wraps shell commands")
-
-Rel(agent_orch, structured_logger, "emit structured logs")
+Rel(agent_orch, safety_coord, "safety validation")
+Rel(agent_orch, plan_session, "queue, drain plan")
+Rel(agent_orch, subagent_coord, "spawn, collect")
+Rel(agent_orch, error_boundary, "handle errors")
+Rel(agent_orch, persona_mgr, "load persona")
+Rel(agent_orch, structured_logger, "emit logs")
 Rel(agent_orch, metrics_collector, "record metrics")
-
-Rel(agent_orch, memory_store, "persist, retrieve knowledge")
-
-Rel(git_tool, git_integration, "git operations")
-
-Rel(session_store, agent_orch, "save, load sessions")
-Rel(session_versioning, session_store, "snapshots, undo")
-Rel(session_search, session_store, "cross-session search")
-Rel(session_fork, session_store, "branch conversations")
-
-Rel(config_loader, agent_orch, "settings")
-Rel(config_loader, provider, "provider config")
-Rel(config_loader, tool_registry, "tool config")
-Rel(config_loader, model_router, "routing config")
+Rel(agent_orch, memory_store, "persist, retrieve")
+Rel(agent_orch, session_store, "save, load")
+Rel(agent_orch, agent_events, "yield events")
+Rel(conv_history, compactor, "compact when exceeded")
+Rel(compactor, provider, "secondary LLM call")
+Rel(model_router, provider, "route to provider")
+Rel(model_router, provider_caps, "query capabilities")
+Rel(model_router, fallback_chain, "trigger failover")
+Rel(provider_factory, provider, "instantiates")
+Rel(tool_registry, sandbox_executor, "sandboxed execution")
+Rel(tool_registry, mcp_tool_adapter, "MCP tools")
+Rel(mcp_client_rt, mcp_discovery, "discover tools")
+Rel(mcp_discovery, mcp_tool_adapter, "register tools")
+Rel(mcp_server_rt, tool_registry, "expose tools")
+Rel(hook_manager, hook_types, "manages hooks")
+Rel(plugin_loader, plugin_manifest, "loads manifest")
+Rel(plugin_loader, hook_manager, "registers hooks")
+Rel(plugin_loader, tool_registry, "registers tools")
+Rel(session_versioning, session_store, "snapshots")
+Rel(session_search, session_store, "searches")
+Rel(session_fork, session_store, "forks")
+Rel(memory_store, memory_index, "indexes")
+Rel(memory_store, memory_scope, "filters")
+Rel(git_integration, git_status, "reads state")
+Rel(git_integration, git_commit, "creates commits")
+Rel(config_loader, config_schema, "produces config")
 
 SHOW_LEGEND()
 

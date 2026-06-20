@@ -9,6 +9,7 @@
 
 | Document | Scope | Purpose |
 |----------|-------|---------|
+| [audit.2026.06.20.p1.corrective.review.md](audit.2026.06.20.p1.corrective.review.md) | p1.md directive | **CORRECTIVE** — C4 architecture normalization to 10/10 standard |
 | [audit.2026.06.20.comprehensive.reference.audit.md](audit.2026.06.20.comprehensive.reference.audit.md) | All 28 agents + C4 audit | **MASTER AUDIT** — CAR framework, comparison tables, C4 gap analysis, enhancement roadmap |
 | [reference-agents-deep-dive.md](reference-agents-deep-dive.md) | All 27 reference agents | Architectural analysis of every reference agent |
 | [nasim-gap-analysis.md](nasim-gap-analysis.md) | nasim vs references | Design principles compliance + capability gaps |
@@ -23,8 +24,9 @@
 
 ## Reading Order
 
-1. **audit.2026.06.20.comprehensive.reference.audit.md** — start here (master audit with all analysis)
-2. **reference-agents-deep-dive.md** — understand what all 27 agents do
+1. **audit.2026.06.20.p1.corrective.review.md** — start here (p1.md directive, architecture normalization)
+2. **audit.2026.06.20.comprehensive.reference.audit.md** — master audit with all analysis
+3. **reference-agents-deep-dive.md** — understand what all 27 agents do
 3. **nasim-gap-analysis.md** — see where nasim falls short
 4. **nasim-car-improvement-plan.md** — the improvement plan (18 items, 3 phases)
 5. **design-principles-comparison.md** — how nasim's design compares and what to add

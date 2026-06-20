@@ -4,20 +4,20 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Sandbox Component Diagram
-' Boundary:  nasim code agent sandbox layer
+' Boundary:  nasim core library — Sandbox group
 ' Purpose:   OS-level process isolation for shell command execution
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   5.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Sandbox Component Diagram
 
-Container_Boundary(sandbox_boundary, "Sandbox Layer") {
-    Component(sandbox_executor, "SandboxExecutor", "nasim/sandbox/executor.py", "OS-level process isolation: landlock, seccomp, bubblewrap")
-    Component(sandbox_policy, "SandboxPolicy", "nasim/sandbox/policy.py", "Network domain allowlists, filesystem mount rules, exec restrictions")
-    Component(sandbox_monitor, "SandboxMonitor", "nasim/sandbox/monitor.py", "Process monitoring, timeout enforcement, resource limits")
+Container_Boundary(sandbox_boundary, "Sandbox Group") {
+    Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
+    Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")
+    Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement, resource limits")
 }
 
 System_Ext(host_shell, "Host Shell", "subprocess execution")
