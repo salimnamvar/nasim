@@ -9,21 +9,22 @@
 ' Review:    —
 ' ============================================================
 
-participant "AgentOrchestrator" as agent
-participant "ConversationHistory" as history
-participant "ContextCompactor" as compactor
-
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "ConversationHistory" as history
+  participant "ContextCompactor" as compactor
 end box
 
-note over compactor
+note over agent, compactor
   Scope:          Context compaction when token budget exceeded
   Preconditions:  token_count > context_budget
-  Excludes:       Token tracking (CTX-01)
   Contexts:       Called by AGT-03 (Manage Conversation)
+  Excludes:       Token tracking (CTX-01)
   Rollback:       Truncate oldest messages as fallback
   Design:         Secondary LLM call to summarize old exchanges
 end note
+
+== AGT-06 COMPACT Context ==
 
 agent -> history : check token_count > budget
 history --> agent : COMPACT_NEEDED
@@ -34,7 +35,7 @@ end ref
 compactor --> agent : shortened messages
 agent -> history : replace messages with shortened list
 
-note over compactor
+note over agent, compactor
   Flow:    budget check -> select old -> summarize -> replace
   State:   THINKING -> COMPACTING -> THINKING
   Failure: LLM fails -> truncate fallback

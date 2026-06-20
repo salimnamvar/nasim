@@ -9,23 +9,24 @@
 ' Review:    —
 ' ============================================================
 
-participant "AgentOrchestrator" as agent
-participant "PermissionGate" as gate
-participant "ToolRegistry" as registry
-
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "PermissionGate" as gate
 end box
 box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
 end box
 
-note over agent
+note over agent, registry
   Scope:          Single tool call dispatch with safety check
   Preconditions:  LLM returned tool_calls
-  Excludes:       LLM call, conversation management
   Contexts:       Called by AGT-01 (PROCESS User Task)
+  Excludes:       LLM call, conversation management
   Rollback:       Tool error -> error ToolResult
   Design:         Permission gate before every tool execution
 end note
+
+== AGT-02 DISPATCH Tool Call ==
 
 agent -> gate : check(tool_name, config.safety_mode)
 ref over gate
@@ -40,17 +41,17 @@ else permission approved
     agent -> registry : execute(tool_name, args)
     registry -> registry : lookup tool handler
     registry -> registry : handler(**args)
-    
+
     break Tool execution fails
         registry --> agent : ToolResult(success=False, error="...")
     end
-    
+
     registry --> agent : ToolResult(success=True, content="...")
 end
 
 agent -> agent : append tool result to messages
 
-note over agent
+note over agent, registry
   Flow:    tool call -> permission check -> execute -> ToolResult
   State:   THINKING -> TOOL_EXEC -> THINKING (or AWAITING_APPROVAL)
   Failure: Permission denied or tool error -> error ToolResult

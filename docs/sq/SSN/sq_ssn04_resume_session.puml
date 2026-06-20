@@ -10,25 +10,27 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "REPLSession" as repl
-participant "SessionStore" as store
-participant "AgentOrchestrator" as agent
 
 box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
 end box
 box "Session Layer" #F1F8E9
+  participant "SessionStore" as store
 end box
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 
-note over store
+note over user, agent
   Scope:          Resume session from --continue or --session flag
   Preconditions:  CLI invoked with --continue or --session <id>
-  Excludes:       New session creation
   Contexts:       Called by CLI-04 (Parse CLI Arguments)
+  Excludes:       New session creation
   Rollback:       No session found -> start fresh
   Design:         --continue loads latest; --session loads by ID
 end note
+
+== SSN-04 Resume Session ==
 
 user -> repl : nasim --continue (or --session <id>)
 repl -> store : load_latest() or load(session_id)
@@ -47,7 +49,7 @@ else Session not found
     repl --> user : "No session found, starting fresh"
 end
 
-note over store
+note over user, agent
   Flow:    --continue -> load_latest -> restore messages -> continue
   State:   No state change
   Failure: No session -> start fresh

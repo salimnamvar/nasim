@@ -9,21 +9,22 @@
 ' Review:    —
 ' ============================================================
 
-participant "ToolRegistry" as registry
-participant "GrepTool" as grep
-participant "ShellTool" as shell
-
 box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "GrepTool" as grep
+  participant "ShellTool" as shell
 end box
 
-note over grep
+note over registry, shell
   Scope:          Search file contents by regex pattern
   Preconditions:  Pattern and path provided by LLM
-  Excludes:       File globbing, file reading
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Excludes:       File globbing, file reading
   Rollback:       Error string returned to LLM
   Design:         Prefers ripgrep; falls back to Python re
 end note
+
+== TL-06 GREP Search ==
 
 registry -> grep : execute(pattern, path, case_sensitive, include_glob)
 
@@ -45,7 +46,7 @@ end
 
 grep --> registry : formatted matches string
 
-note over grep
+note over registry, shell
   Flow:    pattern -> ripgrep/Python -> matches -> formatted string
   State:   No state change
   Failure: No matches, permission error -> error string

@@ -10,22 +10,24 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "ArgParser" as parser
-participant "ConfigLoader" as cfg
 
 box "CLI Layer" #E8F5E9
+  participant "ArgParser" as parser
 end box
 box "Config Layer" #E0F7FA
+  participant "ConfigLoader" as cfg
 end box
 
-note over parser
+note over user, cfg
   Scope:          CLI argument parsing and config initialization
   Preconditions:  Developer invokes nasim command
-  Excludes:       Runtime input processing (CLI-01)
   Contexts:       Entry point for all CLI invocations
+  Excludes:       Runtime input processing (CLI-01)
   Rollback:       Invalid args -> print usage -> exit(1)
   Design:         Args override config; layered resolution
 end note
+
+== CLI-04 Parse CLI Arguments ==
 
 user -> parser : nasim [args]
 parser -> parser : argparse.ArgumentParser.parse_args()
@@ -50,7 +52,7 @@ end
 
 parser --> user : Config ready, start REPL or single-shot
 
-note over parser
+note over user, cfg
   Flow:    argv -> ArgParser -> ConfigLoader -> layered merge -> Config
   State:   No state change
   Failure: Invalid args or config -> error + exit

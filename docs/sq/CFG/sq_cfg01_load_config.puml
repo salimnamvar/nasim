@@ -9,25 +9,26 @@
 ' Review:    —
 ' ============================================================
 
-participant "ArgParser" as parser
-participant "ConfigLoader" as cfg
+box "CLI Layer" #E8F5E9
+  participant "ArgParser" as parser
+end box
+box "Config Layer" #E0F7FA
+  participant "ConfigLoader" as cfg
+end box
 database "Global YAML" as global_yaml
 database "Project YAML" as project_yaml
 database "Env Vars" as env_vars
 
-box "CLI Layer" #E8F5E9
-end box
-box "Config Layer" #E0F7FA
-end box
-
-note over cfg
+note over parser, cfg
   Scope:          Load config from all sources and merge
   Preconditions:  CLI invoked
-  Excludes:       Runtime config changes
   Contexts:       Called by CLI-04 (Parse CLI Arguments)
+  Excludes:       Runtime config changes
   Rollback:       Invalid YAML -> ConfigError
   Design:         4-layer merge: global < project < env < CLI
 end note
+
+== CFG-01 Load Config ==
 
 parser -> cfg : load(cli_args=argv)
 cfg -> global_yaml : read ~/.nasim/config.yaml
@@ -46,7 +47,7 @@ end
 
 cfg --> parser : Config object
 
-note over cfg
+note over parser, cfg
   Flow:    4 sources -> merge -> validate -> Config
   State:   No state change
   Failure: Invalid YAML or validation error -> ConfigError

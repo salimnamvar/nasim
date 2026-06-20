@@ -9,21 +9,24 @@
 ' Review:    —
 ' ============================================================
 
-participant "AgentOrchestrator" as agent
-participant "PermissionGate" as gate
-participant "ToolRegistry" as registry
-
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "PermissionGate" as gate
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
 end box
 
-note over gate
+note over agent, registry
   Scope:          Check tool permission before execution
   Preconditions:  Tool call received from LLM
-  Excludes:       User approval prompt (SAF-02)
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Excludes:       User approval prompt (SAF-02)
   Rollback:       Rejected -> skip tool execution
   Design:         tool.safe flag determines check behavior
 end note
+
+== SAF-01 CHECK Tool Permission ==
 
 agent -> gate : check(tool_name, safety_mode)
 gate -> registry : get_tool(tool_name)
@@ -41,7 +44,7 @@ else safety_mode = "off"
     gate --> agent : approved (no checks)
 end
 
-note over gate
+note over agent, registry
   Flow:    tool_name -> check safe flag -> check mode -> approve/reject
   State:   No state change (or AWAITING_APPROVAL if ask mode)
   Failure: User rejects (N) -> tool skipped

@@ -9,22 +9,23 @@
 ' Review:    —
 ' ============================================================
 
-participant "ConfigLoader" as cfg
-participant "ProviderFactory" as factory
-
 box "Config Layer" #E0F7FA
+  participant "ConfigLoader" as cfg
 end box
 box "Provider Layer" #FFF3E0
+  participant "ProviderFactory" as factory
 end box
 
-note over factory
+note over cfg, factory
   Scope:          Provider backend selection from config
   Preconditions:  Config loaded with provider field
-  Excludes:       Provider instantiation (PRV-01)
   Contexts:       Called by PRV-01 (Initialize Provider)
+  Excludes:       Provider instantiation (PRV-01)
   Rollback:       Unknown provider -> ConfigError
   Design:         Registry mapping: str -> class
 end note
+
+== PRV-04 Select Provider Backend ==
 
 cfg -> factory : select_backend(config.provider)
 factory -> factory : PROV_REGISTRY lookup
@@ -36,7 +37,7 @@ end
 
 factory --> cfg : provider_class
 
-note over factory
+note over cfg, factory
   Flow:    config.provider string -> registry lookup -> class
   State:   No state change
   Failure: Unknown provider name -> ConfigError

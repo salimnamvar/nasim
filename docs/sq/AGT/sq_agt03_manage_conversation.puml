@@ -9,20 +9,21 @@
 ' Review:    —
 ' ============================================================
 
-participant "AgentOrchestrator" as agent
-participant "ConversationHistory" as history
-
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "ConversationHistory" as history
 end box
 
-note over history
+note over agent, history
   Scope:          Message list management and token tracking
   Preconditions:  ConversationHistory initialized
-  Excludes:       Context compaction (CTX-02)
   Contexts:       Called by AGT-01 (PROCESS User Task)
+  Excludes:       Context compaction (CTX-02)
   Rollback:       N/A
   Design:         Owns messages + token_count; triggers compaction
 end note
+
+== AGT-03 Manage Conversation ==
 
 agent -> history : add_message(msg)
 history -> history : self.messages.append(msg)
@@ -40,7 +41,7 @@ end
 agent -> history : get_messages()
 history --> agent : messages list
 
-note over history
+note over agent, history
   Flow:    add message -> track tokens -> check budget -> compact if needed
   State:   No state change (or COMPACTING if budget exceeded)
   Failure: N/A

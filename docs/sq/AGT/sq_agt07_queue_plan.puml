@@ -9,20 +9,21 @@
 ' Review:    —
 ' ============================================================
 
-participant "AgentOrchestrator" as agent
-participant "PlanSession" as plan
-
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "PlanSession" as plan
 end box
 
-note over plan
+note over agent, plan
   Scope:          Queue tool calls in plan mode
   Preconditions:  Plan mode active (/plan toggled)
-  Excludes:       Tool execution, permission checks
   Contexts:       Called by AGT-01 (PROCESS User Task) in plan mode
+  Excludes:       Tool execution, permission checks
   Rollback:       N/A — queued calls are never executed until approved
   Design:         Tool calls displayed as plan, not executed
 end note
+
+== AGT-07 Queue Plan ==
 
 agent -> plan : queue_tool_call(tool_name, args)
 plan -> plan : append to pending_calls list
@@ -31,7 +32,7 @@ plan --> agent : queued
 agent -> plan : display_plan()
 plan --> agent : formatted plan text
 
-note over plan
+note over agent, plan
   Flow:    tool call -> queue -> display as plan
   State:   THINKING -> PLANNING
   Failure: N/A

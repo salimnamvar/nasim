@@ -10,23 +10,25 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "REPLSession" as repl
-participant "AgentOrchestrator" as agent
-participant "Renderer" as renderer
 
 box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+  participant "Renderer" as renderer
 end box
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 
-note over repl
+note over user, agent
   Scope:          Single user input processing cycle
   Preconditions:  REPL initialized, AgentOrchestrator ready
-  Excludes:       Slash commands (CLI-02), session persistence
   Contexts:       Called by main REPL loop
+  Excludes:       Slash commands (CLI-02), session persistence
   Rollback:       Error -> display error -> return to IDLE
   Design:         Events emitted by agent, rendered by Renderer
 end note
+
+== CLI-01 PROCESS User Input ==
 
 user -> repl : types input
 repl -> repl : check for slash command
@@ -56,7 +58,7 @@ break Agent throws exception
     renderer --> user : red error display
 end
 
-note over repl
+note over user, agent
   Flow:    User -> REPLSession -> AgentOrchestrator -> Provider -> events -> Renderer -> User
   State:   IDLE -> LISTENING -> THINKING -> [TOOL_EXEC]* -> RESPONDING -> IDLE
   Failure: Agent exception -> Error event -> IDLE

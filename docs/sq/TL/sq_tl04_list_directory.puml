@@ -10,23 +10,29 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "REPLSession" as repl
-participant "AgentOrchestrator" as agent
-participant "ToolRegistry" as registry
-participant "DirTool" as dt
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "DirTool" as dt
+end box
 participant "Host Filesystem" as fs
 
-box "Tool Layer" #F3E5F5
-end box
-
-note over dt
+note over user, fs
   Scope:          List directory entries sorted by type then name
   Preconditions:  Path provided (default: current directory)
-  Excludes:       File read/write
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Excludes:       File read/write
   Rollback:       Error string returned to LLM
   Design:         Directories first, then files, alphabetical
 end note
+
+== TL-04 LIST Directory ==
 
 user -> repl : (entry via AGT-01)
 repl -> agent : (entry via AGT-01)
@@ -51,7 +57,7 @@ dt -> dt : format with d/ prefix for dirs
 dt --> registry : ToolResult(success=True, content=formatted_listing)
 registry --> agent : ToolResult
 
-note over dt
+note over user, fs
   Flow:    resolve -> iterdir -> sort -> format -> ToolResult
   State:   No state change
   Failure: Not found or not directory -> ToolResult(success=False)

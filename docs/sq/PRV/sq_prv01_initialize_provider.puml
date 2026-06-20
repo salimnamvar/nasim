@@ -10,23 +10,25 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "ArgParser" as parser
-participant "ProviderFactory" as factory
-participant "Provider" as proto
 
-box "Config Layer" #E0F7FA
+box "CLI Layer" #E8F5E9
+  participant "ArgParser" as parser
 end box
 box "Provider Layer" #FFF3E0
+  participant "ProviderFactory" as factory
+  participant "Provider" as proto
 end box
 
-note over factory
+note over user, proto
   Scope:          Provider instantiation from configuration
   Preconditions:  Config loaded with valid provider name
-  Excludes:       Provider chat/stream (PRV-02/03)
   Contexts:       Called by main() during startup
+  Excludes:       Provider chat/stream (PRV-02/03)
   Rollback:       Unknown provider -> ConfigError
   Design:         Factory pattern; one class per backend
 end note
+
+== PRV-01 Initialize Provider ==
 
 user -> parser : nasim --provider ollama
 parser -> parser : parse args -> Config
@@ -50,7 +52,7 @@ end
 factory --> parser : Provider instance
 parser --> user : Provider ready
 
-note over factory
+note over user, proto
   Flow:    Config -> Factory -> provider class lookup -> instance
   State:   No state change
   Failure: Unknown provider type -> ConfigError

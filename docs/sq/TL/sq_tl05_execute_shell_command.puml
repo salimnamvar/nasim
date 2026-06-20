@@ -10,24 +10,30 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "REPLSession" as repl
-participant "AgentOrchestrator" as agent
-participant "ToolRegistry" as registry
-participant "ShellTool" as st
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "ShellTool" as st
+end box
 participant "Host Shell" as shell
 
-box "Tool Layer" #F3E5F5
-end box
-
-note over st
+note over user, shell
   Scope:          Execute shell command with timeout
   Preconditions:  Command string provided by LLM
-  Excludes:       File operations
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Excludes:       File operations
   Rollback:       Error string returned to LLM
   Design:         subprocess.run with shell=True, configurable timeout
   Safety:         Unsafe tool — requires permission check (SAF-01)
 end note
+
+== TL-05 EXECUTE Shell Command ==
 
 user -> repl : (entry via AGT-01)
 repl -> agent : (entry via AGT-01)
@@ -52,7 +58,7 @@ st -> st : format output (stdout + stderr + exit code)
 st --> registry : ToolResult(success=True, content=command_output)
 registry --> agent : ToolResult
 
-note over st
+note over user, shell
   Flow:    command -> subprocess.run -> format output -> ToolResult
   State:   No state change
   Failure: Timeout, execution error -> ToolResult(success=False)

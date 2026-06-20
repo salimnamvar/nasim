@@ -10,23 +10,25 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "REPLSession" as repl
-participant "SessionStore" as store
-database "Session Directory" as dir
 
 box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
 end box
 box "Session Layer" #F1F8E9
+  participant "SessionStore" as store
 end box
+database "Session Directory" as dir
 
-note over store
+note over user, dir
   Scope:          List all saved sessions with metadata
   Preconditions:  /sessions command entered
-  Excludes:       Session save/load
   Contexts:       Called by CLI-02 (Execute Slash Command)
+  Excludes:       Session save/load
   Rollback:       No sessions -> empty list
   Design:         Scans ~/.nasim/sessions/ for session dirs
 end note
+
+== SSN-03 List Sessions ==
 
 repl -> store : list_sessions()
 store -> dir : scan ~/.nasim/sessions/
@@ -41,7 +43,7 @@ store --> repl : [(id, created_at, message_count), ...]
 repl -> repl : format session table
 repl --> user : session list display
 
-note over store
+note over user, dir
   Flow:    scan directory -> read metadata -> list
   State:   No state change
   Failure: No directory -> empty list

@@ -9,20 +9,21 @@
 ' Review:    —
 ' ============================================================
 
-participant "AgentOrchestrator" as agent
-participant "ConversationHistory" as history
-
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "ConversationHistory" as history
 end box
 
-note over history
+note over agent, history
   Scope:          Clear conversation history keeping system prompt
   Preconditions:  Agent initialized with system prompt
-  Excludes:       Session persistence
   Contexts:       Called by CLI-02 (/reset slash command)
+  Excludes:       Session persistence
   Rollback:       N/A
   Design:         Keeps system prompt, clears all other messages
 end note
+
+== AGT-04 Reset History ==
 
 agent -> history : reset()
 history -> history : self.messages = [system_prompt]
@@ -30,7 +31,7 @@ history -> history : self.token_count = estimate_tokens(system_prompt)
 
 history --> agent : history cleared
 
-note over history
+note over agent, history
   Flow:    reset -> keep system prompt -> clear rest
   State:   No state change
   Failure: N/A

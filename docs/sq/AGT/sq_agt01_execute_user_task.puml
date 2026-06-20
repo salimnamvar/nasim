@@ -10,28 +10,30 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "REPLSession" as repl
-participant "AgentOrchestrator" as agent
-participant "Provider" as provider
-participant "ToolRegistry" as tool
 
 box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
 end box
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 box "Provider Layer" #FFF3E0
+  participant "Provider" as provider
 end box
 box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as tool
 end box
 
-note over agent
+note over user, tool
   Scope:          Single user task execution
   Preconditions:  Agent initialized, Provider reachable
-  Excludes:       Slash commands, streaming display
   Contexts:       Called by CLI-01 (PROCESS User Input)
+  Excludes:       Slash commands, streaming display
   Rollback:       Error state -> IDLE
   Design:         Max iterations configurable; emits AgentEvents
 end note
+
+== AGT-01 PROCESS User Task ==
 
 user -> repl : types input
 repl -> agent : PROCESS(user_input)
@@ -63,7 +65,7 @@ break LLM call fails or tool execution errors
     agent --> repl : AgentEvent(Error)
 end
 
-note over agent
+note over user, tool
   Flow:    User -> REPLSession -> AgentOrchestrator -> Provider -> (tool loop) -> Done
   State:   IDLE -> LISTENING -> THINKING -> [TOOL_EXEC]* -> RESPONDING -> IDLE
   Failure: LLM error or tool error -> ERROR -> IDLE

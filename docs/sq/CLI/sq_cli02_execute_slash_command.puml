@@ -10,24 +10,26 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "REPLSession" as repl
-participant "SlashCommandHandler" as cmd
-participant "Renderer" as renderer
-participant "AgentOrchestrator" as agent
 
 box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+  participant "SlashCommandHandler" as cmd
+  participant "Renderer" as renderer
 end box
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 
-note over cmd
+note over user, agent
   Scope:          Slash command parsing and dispatch
   Preconditions:  REPL running, input starts with /
-  Excludes:       Normal user input (CLI-01)
   Contexts:       Called by CLI-01 (PROCESS User Input)
+  Excludes:       Normal user input (CLI-01)
   Rollback:       Unknown command -> error message
   Design:         Commands: /help, /reset, /model, /quit, /plan, /sessions
 end note
+
+== CLI-02 Execute Slash Command ==
 
 user -> repl : /command
 repl -> cmd : dispatch("/command")
@@ -60,7 +62,7 @@ else unknown command
     renderer --> user : error display
 end
 
-note over cmd
+note over user, agent
   Flow:    /cmd -> SlashCommandHandler -> action -> Renderer -> User
   State:   No state change (except /plan toggles PLANNING, /reset clears history)
   Failure: Unknown command -> error message

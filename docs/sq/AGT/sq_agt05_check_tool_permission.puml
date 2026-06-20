@@ -9,21 +9,24 @@
 ' Review:    —
 ' ============================================================
 
-participant "AgentOrchestrator" as agent
-participant "PermissionGate" as gate
-participant "ToolRegistry" as registry
-
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "PermissionGate" as gate
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
 end box
 
-note over gate
+note over agent, registry
   Scope:          Per-tool safety gate
   Preconditions:  Tool call received from LLM
-  Excludes:       Tool execution, user approval
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Excludes:       Tool execution, user approval
   Rollback:       Rejected -> skip tool
   Design:         Checks tool.safe flag + safety_mode config
 end note
+
+== AGT-05 CHECK Tool Permission ==
 
 agent -> gate : check(tool_name, safety_mode)
 gate -> registry : get_tool(tool_name)
@@ -35,7 +38,7 @@ end ref
 
 gate --> agent : approved / rejected
 
-note over gate
+note over agent, registry
   Flow:    tool call -> check safe flag + mode -> approve/reject
   State:   THINKING -> AWAITING_APPROVAL (if ask mode) -> TOOL_EXEC
   Failure: Rejected -> tool skipped

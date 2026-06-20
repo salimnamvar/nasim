@@ -9,19 +9,20 @@
 ' Review:    —
 ' ============================================================
 
-participant "ConfigLoader" as cfg
-
 box "Config Layer" #E0F7FA
+  participant "ConfigLoader" as cfg
 end box
 
 note over cfg
   Scope:          Merge 4 config layers with precedence
   Preconditions:  All sources loaded
-  Excludes:       Validation (CFG-02)
   Contexts:       Called by CFG-01 (Load Config)
+  Excludes:       Validation (CFG-02)
   Rollback:       N/A — merge always produces a result
   Design:         Precedence: CLI > env > project > global
 end note
+
+== CFG-03 Merge Layered Config ==
 
 cfg -> cfg : start with global_defaults
 cfg -> cfg : overlay project_overrides (skip None values)

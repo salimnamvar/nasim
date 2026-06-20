@@ -9,23 +9,24 @@
 ' Review:    —
 ' ============================================================
 
-participant "AgentOrchestrator" as agent
-participant "SessionStore" as store
-database "Session Directory" as dir
-
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 box "Session Layer" #F1F8E9
+  participant "SessionStore" as store
 end box
+database "Session Directory" as dir
 
-note over store
+note over agent, dir
   Scope:          Save session messages to JSON Lines file
   Preconditions:  AgentOrchestrator has messages to save
-  Excludes:       Session loading (SSN-02)
   Contexts:       Called by AGT-01 after each task turn
+  Excludes:       Session loading (SSN-02)
   Rollback:       Write error -> log warning, session lost
   Design:         One file per session: ~/.nasim/sessions/<id>/session.jsonl
 end note
+
+== SSN-01 Save Session ==
 
 agent -> store : save(session_id, messages)
 store -> store : serialize messages to JSON Lines
@@ -38,7 +39,7 @@ end
 
 store --> agent : save complete
 
-note over store
+note over agent, dir
   Flow:    messages -> serialize -> write JSON Lines
   State:   No state change
   Failure: Disk error -> log warning, continue

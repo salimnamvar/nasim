@@ -10,20 +10,22 @@
 ' ============================================================
 
 actor "Developer" as user
-participant "REPLSession" as repl
-participant "Renderer" as renderer
 
 box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+  participant "Renderer" as renderer
 end box
 
-note over renderer
+note over user, renderer
   Scope:          Rendering AgentEvents to terminal
   Preconditions:  Agent event stream active
-  Excludes:       Agent loop logic, tool execution
   Contexts:       Called by CLI-01 (PROCESS User Input)
+  Excludes:       Agent loop logic, tool execution
   Rollback:       N/A — renderer is passive consumer
   Design:         Uses Rich library for colors, diffs, formatting
 end note
+
+== CLI-03 STREAM Output ==
 
 repl -> renderer : subscribe to AgentEvent stream
 
@@ -50,7 +52,7 @@ loop for each event
     end
 end
 
-note over renderer
+note over user, renderer
   Flow:    Event stream -> Renderer -> formatted terminal output
   State:   No state change
   Failure: N/A — renderer is passive
