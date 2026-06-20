@@ -30,6 +30,7 @@ Container_Boundary(core_library, "Core Library") {
 
     Container_Boundary(provider_group, "Provider Group") {
         Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name")
+        Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix")
         Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
         Component(provider_caps, "ProviderCapabilities", "", "Capability declaration + static metadata: streaming, tools, vision, reasoning, context limits, pricing")
         Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
@@ -199,6 +200,7 @@ Container_Ext(server_container, "HTTP API Server")
 ' ============================================================
 
 Rel(agent_orch, provider, "chat, stream")
+Rel(provider, litellm_proxy, "delegates all LLM calls")
 Rel(agent_orch, model_router, "route model selection")
 Rel(agent_orch, tool_registry, "execute tools")
 Rel(agent_orch, conv_history, "messages, token tracking")
