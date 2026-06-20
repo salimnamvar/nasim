@@ -8,12 +8,11 @@ Back to [project root](../README.md).
 ## Design chain
 
 ```
-C4 → UC → SM → SQ → ERD → CL → Code
+C4 → UC → SM → SQ → ERD → CL → CT/DATA → CT/API → Code
 ```
 
-nasim uses JSON file sessions (no relational database). No CT/DATA or CT/API layers
-are needed for the core agent — nasim exposes no HTTP APIs in the CLI-only mode.
-The HTTP API server mode adds a server layer with OpenAPI 3.1 spec.
+nasim uses JSON file sessions (no relational database). CT/DATA covers the session
+store data contract. CT/API covers the HTTP API server surface (OAS 3.1.0).
 LLM providers are external dependencies.
 
 Each layer must be authored in order. No layer may be authored before the one above it.
@@ -28,6 +27,8 @@ Each layer must be authored in order. No layer may be authored before the one ab
 | [SQ/](sq/README.md) | Sequence Diagrams | Frozen | 55 diagrams — one per UC, by group |
 | [ER/](er/README.md) | ERD | Frozen | Session JSON Lines schema — logical store |
 | [CL/](cl/README.md) | Class Diagram | Frozen | Runtime class model — providers, tools, orchestrator, config, session, server, hooks, plugins |
+| [CT/DATA/](CT/DATA/README.md) | Data Contracts | Frozen | ODCS v3.1.0 — session store data contract |
+| [CT/API/](CT/API/README.md) | HTTP API Surface | Frozen | OAS 3.1.0 + ROD — 7 endpoints, 4 resources |
 | [RDM/](rdm/README.md) | Implementation Roadmap | Active | Milestone docs for coding |
 | [MM/](mm/README.md) | Design Chain Maps | Frozen | Summary and detail chain overview diagrams |
 | [audit/](audit/README.md) | Audit Reports | Active | Reference agent audits, gap analysis, CAR improvement plan |
@@ -71,6 +72,15 @@ Each layer must be authored in order. No layer may be authored before the one ab
 ### Class Diagram
 - [Runtime Model](cl/cl_runtime_model.puml) — All runtime classes and relationships
 - [CL Inventory](cl/README.md)
+
+### Data Contracts (CT/DATA)
+- [Session Store Contract](CT/DATA/nasim_session_store.datacontract.yaml) — ODCS v3.1.0 data contract
+- [CT/DATA Inventory](CT/DATA/README.md)
+
+### HTTP API Surface (CT/API)
+- [OpenAPI Spec](CT/API/openapi.yaml) — OAS 3.1.0 — 7 endpoints, 4 resources
+- [ROD Decisions](CT/API/rod_decisions.md) — Resource model, methods, field behavior, errors
+- [CT/API Inventory](CT/API/README.md)
 
 ### Entity Registry
 - [entities.md](entities.md) — Canonical names for all components, UCs, actors

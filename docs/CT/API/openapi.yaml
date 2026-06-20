@@ -1,0 +1,527 @@
+openapi: "3.1.0"
+# Latest stable OAS is 3.2.0 (Sep 2025). Targeting 3.1.0 until tooling adoption catches up.
+# Upgrade to 3.2.0 once swagger-ui and openapi-generator confirm support.
+info:
+  title: nasim Agent API
+  version: "1.0.0"
+  description: |
+    REST API for the nasim code agent. Exposes session management, message
+    exchange (with SSE streaming), tool listing, and configuration retrieval.
+
+    ## API Groups
+
+    | Group | Scope | UC Range |
+    | ----- | ----- | -------- |
+    | SRV | HTTP Server — session/message management, SSE streaming | SRV-01..SRV-07 |
+    | SSN | Session — persistence and resumption | SSN-01..SSN-04 |
+    | TL | Tool Layer — registered tool definitions | TL-14 |
+
+    ## Error Format
+
+    All error responses follow AIP-193 canonical model:
+    `{error: {code, message, status, details}}`
+
+    ## Authentication
+
+    Phase 1: no authentication (localhost-only deployment).
+    Phase 2: API key or bearer token.
+
+servers:
+  - url: "http://localhost:8080"
+    description: Local single-instance (default Phase 1 deployment)
+
+tags:
+  - name: SRV
+    description: "HTTP Server — session/message management, SSE streaming (SRV-01..SRV-07)"
+  - name: SSN
+    description: "Session — persistence and resumption (SSN-01..SSN-04)"
+  - name: TL
+    description: "Tool Layer — registered tool definitions (TL-14)"
+
+paths:
+  /v1/sessions:
+    get:
+      operationId: ssn03ListSessions
+      tags: [SSN]
+      summary: "SSN-03 — List available sessions"
+      description: |
+        Returns a paginated list of sessions ordered by creation time (newest first).
+        Supports AIP-158 pagination.
+      parameters:
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/PageToken"
+      responses:
+        "200":
+          description: Paginated list of sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListSessionsResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    post:
+      operationId: srv02CreateSession
+      tags: [SRV]
+      summary: "SRV-02 — Create a new session"
+      description: |
+        Creates a new agent session with a server-assigned UUID. Returns the
+        session metadata. The session starts with an empty message history.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /v1/sessions/{session_id}:
+    parameters:
+      - $ref: "#/components/parameters/SessionId"
+
+    get:
+      operationId: srv08GetSession
+      tags: [SRV]
+      summary: "Get session metadata"
+      description: Returns full metadata for a single session.
+      responses:
+        "200":
+          description: Session metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /v1/sessions/{session_id}/messages:
+    parameters:
+      - $ref: "#/components/parameters/SessionId"
+
+    get:
+      operationId: srv05GetMessageHistory
+      tags: [SRV]
+      summary: "SRV-05 — Get message history"
+      description: |
+        Returns the message history for a session, ordered by sequence number.
+        Supports AIP-158 pagination.
+      parameters:
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/PageToken"
+      responses:
+        "200":
+          description: Paginated message list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListMessagesResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    post:
+      operationId: srv03SendMessage
+      tags: [SRV]
+      summary: "SRV-03 — Send message (SSE stream)"
+      description: |
+        Sends a user message to the agent and returns the response as a
+        Server-Sent Events (SSE) stream. The stream contains TextChunk,
+        ToolStart, ToolResultEvent, Error, and Done events.
+
+        The message is appended to the session history. The agent processes
+        the message through the full agentic loop (LLM calls, tool execution)
+        and streams results back.
+
+        SSE event format:
+        ```
+        event: text_chunk
+        data: {"text": "..."}
+
+        event: tool_start
+        data: {"name": "read_file", "args": {...}}
+
+        event: tool_result
+        data: {"name": "read_file", "success": true, "content": "..."}
+
+        event: done
+        data: {"final_text": "..."}
+        ```
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "200":
+          description: SSE stream of agent events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE event stream
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/FailedPrecondition"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+
+  /v1/tools:
+    get:
+      operationId: srv06ListTools
+      tags: [SRV, TL]
+      summary: "SRV-06 — List registered tools"
+      description: |
+        Returns the list of all registered tools with their names,
+        descriptions, parameter schemas, and safety annotations.
+      responses:
+        "200":
+          description: List of tool definitions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListToolsResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /v1/config:
+    get:
+      operationId: srv07GetConfig
+      tags: [SRV]
+      summary: "SRV-07 — Get agent configuration"
+      description: |
+        Returns the current agent configuration (provider, model, safety
+        mode, context budget, timeout, max iterations). Read-only — config
+        is loaded at startup and cannot be changed via API.
+      responses:
+        "200":
+          description: Agent configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Config"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  parameters:
+    SessionId:
+      name: session_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Session UUID
+
+    PageSize:
+      name: page_size
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+      description: Maximum number of items to return
+
+    PageToken:
+      name: page_token
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Opaque cursor from previous response
+
+  schemas:
+    Session:
+      type: object
+      required: [session_id, created_at, model, provider]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Server-assigned session UUID (OUTPUT_ONLY)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: ISO 8601 creation timestamp (OUTPUT_ONLY, IMMUTABLE)
+        model:
+          type: string
+          readOnly: true
+          description: "Model identifier snapshot from Config (OUTPUT_ONLY, IMMUTABLE)"
+        provider:
+          type: string
+          readOnly: true
+          description: "Provider backend name (OUTPUT_ONLY, IMMUTABLE)"
+        message_count:
+          type: integer
+          readOnly: true
+          description: Running count of messages (OUTPUT_ONLY)
+        total_tokens:
+          type: integer
+          readOnly: true
+          description: Cumulative token count (OUTPUT_ONLY)
+
+    CreateSessionRequest:
+      type: object
+      properties:
+        model:
+          type: string
+          description: "Override model for this session (optional, defaults to config)"
+        provider:
+          type: string
+          description: "Override provider for this session (optional, defaults to config)"
+
+    Message:
+      type: object
+      required: [session_id, sequence, role, timestamp]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Parent session reference (OUTPUT_ONLY)
+        sequence:
+          type: integer
+          readOnly: true
+          description: Monotonically increasing sequence number (OUTPUT_ONLY)
+        role:
+          type: string
+          enum: [system, user, assistant, tool]
+          readOnly: true
+          description: "Message role (OUTPUT_ONLY)"
+        content:
+          type: ["string", "null"]
+          readOnly: true
+          description: Text content — null for assistant messages with only tool calls (OUTPUT_ONLY)
+        tool_calls:
+          type: ["array", "null"]
+          readOnly: true
+          description: "Tool call objects — present on assistant messages with tool use (OUTPUT_ONLY)"
+          items:
+            $ref: "#/components/schemas/ToolCall"
+        tool_call_id:
+          type: ["string", "null"]
+          readOnly: true
+          description: "Links tool result to the call it responds to (OUTPUT_ONLY)"
+        tokens:
+          type: ["integer", "null"]
+          readOnly: true
+          description: Token count for this message (OUTPUT_ONLY)
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+          description: ISO 8601 creation timestamp (OUTPUT_ONLY)
+
+    ToolCall:
+      type: object
+      required: [name, arguments, id]
+      properties:
+        name:
+          type: string
+          description: Tool identifier
+        arguments:
+          type: object
+          description: Tool call arguments as key-value pairs
+        id:
+          type: string
+          description: Unique tool call identifier
+
+    SendMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          description: User message text content
+        role:
+          type: string
+          enum: [user]
+          default: user
+          description: "Message role — must be 'user' on Create (default: user)"
+
+    ListSessionsResponse:
+      type: object
+      required: [sessions, next_page_token]
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Session"
+          description: List of sessions (newest first)
+        next_page_token:
+          type: string
+          description: "Opaque cursor for next page (empty string when no more pages)"
+
+    ListMessagesResponse:
+      type: object
+      required: [messages, next_page_token]
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+          description: List of messages (ordered by sequence)
+        next_page_token:
+          type: string
+          description: "Opaque cursor for next page (empty string when no more pages)"
+
+    Tool:
+      type: object
+      required: [name, description, parameters, safe]
+      properties:
+        name:
+          type: string
+          description: Tool identifier
+        description:
+          type: string
+          description: Human-readable description
+        parameters:
+          type: object
+          description: JSON Schema for tool parameters
+        safe:
+          type: boolean
+          description: "Whether tool requires permission gating (true = safe, no prompt)"
+
+    ListToolsResponse:
+      type: object
+      required: [tools]
+      properties:
+        tools:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tool"
+          description: List of registered tools
+
+    Config:
+      type: object
+      required: [provider, model, safety_mode, context_budget, timeout, max_iterations]
+      properties:
+        provider:
+          type: string
+          description: Default provider backend name
+        model:
+          type: string
+          description: Default model identifier
+        safety_mode:
+          type: string
+          enum: [ask, auto, off]
+          description: "Permission gate mode: ask (prompt user), auto (allow all), off (disable)"
+        context_budget:
+          type: integer
+          description: Maximum token budget for context window
+        timeout:
+          type: integer
+          description: Request timeout in seconds
+        max_iterations:
+          type: integer
+          description: Maximum agentic loop iterations per turn
+        mcp_servers:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              command:
+                type: string
+              args:
+                type: array
+                items:
+                  type: string
+          description: Configured MCP server extensions
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, status]
+          properties:
+            code:
+              type: integer
+              description: HTTP status code
+            message:
+              type: string
+              description: Actionable, developer-facing description
+            status:
+              type: string
+              description: "google.rpc.Code enum name (e.g. NOT_FOUND, FAILED_PRECONDITION)"
+              enum:
+                - INVALID_ARGUMENT
+                - FAILED_PRECONDITION
+                - OUT_OF_RANGE
+                - UNAUTHENTICATED
+                - PERMISSION_DENIED
+                - NOT_FOUND
+                - ABORTED
+                - ALREADY_EXISTS
+                - RESOURCE_EXHAUSTED
+                - CANCELLED
+                - DATA_LOSS
+                - UNKNOWN
+                - INTERNAL
+                - UNAVAILABLE
+                - DEADLINE_EXCEEDED
+            details:
+              type: array
+              description: "Typed detail objects (ErrorInfo, PreconditionFailure, ...)"
+              items:
+                type: object
+
+  responses:
+    BadRequest:
+      description: Malformed request (syntax error, missing required fields)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    FailedPrecondition:
+      description: Resource in wrong state for the operation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    InternalError:
+      description: Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Unavailable:
+      description: Agent core or LLM provider unreachable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

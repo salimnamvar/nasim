@@ -1,0 +1,209 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/main/schema/odcs-json-schema-latest.json
+version: "1.0.0"
+apiVersion: "v3.1.0"
+kind: DataContract
+id: urn:datacontract:nasim:session-store
+name: "nasim Session Store"
+status: draft
+domain: "nasim"
+tags:
+  - session
+  - persistence
+  - json-lines
+description:
+  purpose: >-
+    Persistent session storage for the nasim code agent. Stores conversation
+    history, metadata, and configuration snapshots as JSON Lines files. One
+    directory per session containing a single session.jsonl file.
+  usage: >-
+    Written by SessionStore during agent execution (after each LLM round-trip)
+    and HTTP API session management. Read by SessionStore for session resume
+    and history retrieval. No direct external access — all access through
+    the SessionStore component.
+  limitations: >-
+    JSON Lines format — no query engine, no indexing, no concurrent write
+    support. Designed for single-agent-per-session access patterns.
+
+servers:
+  - server: session_store
+    id: session_store
+    type: local
+    description: >-
+      Session directory. One subdirectory per session ID containing
+      a single session.jsonl file with all session data.
+    path: "~/.nasim/sessions/{session_id}/session.jsonl"
+    format: jsonl
+
+schema:
+  - id: session
+    name: Session
+    logicalType: object
+    physicalType: directory
+    description: >-
+      Top-level session entity. Each session has a unique UUID, creation
+      timestamp, model/provider configuration snapshot, and message count.
+      Physical representation: one directory under ~/.nasim/sessions/.
+    properties:
+      - name: id
+        logicalType: string
+        required: true
+        description: >-
+          Session UUID (v4). Assigned by SessionStore on creation. Used as
+          the directory name under ~/.nasim/sessions/. Unique across all
+          sessions.
+      - name: created_at
+        logicalType: timestamp
+        required: true
+        description: >-
+          ISO 8601 timestamp of session creation. Set once on create,
+          never modified.
+      - name: model
+        logicalType: string
+        required: true
+        description: >-
+          Model identifier used for this session (e.g. "qwen2.5-coder:14b").
+          Snapshot from Config at session creation time.
+      - name: provider
+        logicalType: string
+        required: true
+        description: >-
+          Provider backend name (e.g. "ollama", "openai", "anthropic").
+          Snapshot from Config at session creation time.
+      - name: config_snapshot
+        logicalType: object
+        required: true
+        description: >-
+          JSON-encoded snapshot of the Config dataclass at session creation.
+          Preserves safety_mode, context_budget, timeout, max_iterations,
+          and mcp_servers settings for the session.
+      - name: message_count
+        logicalType: integer
+        required: false
+        description: >-
+          Running count of messages in the session. Updated after each
+          message append. Used for quick listing without parsing the full
+          JSONL file.
+      - name: total_tokens
+        logicalType: integer
+        required: false
+        description: >-
+          Cumulative token count across all messages. Updated after each
+          LLM round-trip. Used for context budget tracking.
+
+  - id: message
+    name: Message
+    logicalType: object
+    description: >-
+      Individual message within a session. Represents one turn in the
+      conversation: user input, assistant response (text or tool calls),
+      or tool result. Ordered by sequence number.
+    properties:
+      - name: session_id
+        logicalType: string
+        required: true
+        description: >-
+          Foreign key referencing the parent session.id. Present on every
+          message line for cross-reference, though physically embedded in
+          the same JSONL file.
+      - name: sequence
+        logicalType: integer
+        required: true
+        description: >-
+          Monotonically increasing sequence number within the session.
+          Starts at 0 for the first message. Determines display order.
+      - name: role
+        logicalType: string
+        required: true
+        description: >-
+          Message role. Allowed values: system | user | assistant | tool.
+          Determines how the message is processed by the LLM and renderer.
+        constraints:
+          enum:
+            - system
+            - user
+            - assistant
+            - tool
+      - name: content
+        logicalType: string
+        required: false
+        description: >-
+          Text content of the message. Present for user, assistant (text
+          responses), and tool (result content) messages. Absent for
+          assistant messages that contain only tool calls.
+      - name: tool_calls
+        logicalType: object
+        required: false
+        description: >-
+          JSON-encoded list of tool call objects. Present only on assistant
+          messages that invoke tools. Each entry has: name (string),
+          arguments (object), id (string). Absent when the assistant
+          responds with text only.
+      - name: tool_call_id
+        logicalType: string
+        required: false
+        description: >-
+          Links a tool result message back to the specific tool call it
+          responds to. Present only on role=tool messages. Matches the id
+          field from the corresponding tool_calls entry.
+      - name: tokens
+        logicalType: integer
+        required: false
+        description: >-
+          Token count for this individual message. Used for context budget
+          tracking and compaction decisions.
+      - name: timestamp
+        logicalType: timestamp
+        required: true
+        description: >-
+          ISO 8601 timestamp of when the message was created. Set by the
+          agent or API layer at message creation time.
+
+  - id: session_file
+    name: SessionFile
+    logicalType: object
+    physicalType: file
+    description: >-
+      Metadata about the physical JSONL file for a session. Used for
+      quick listing and diagnostics without parsing the full file.
+    properties:
+      - name: session_id
+        logicalType: string
+        required: true
+        description: >-
+          Foreign key referencing the parent session.id. One file per
+          session.
+      - name: path
+        logicalType: string
+        required: true
+        description: >-
+          Absolute filesystem path to the JSONL file.
+          Pattern: ~/.nasim/sessions/{session_id}/session.jsonl
+      - name: format
+        logicalType: string
+        required: true
+        description: >-
+          File format identifier. Always "jsonl" for nasim sessions.
+        constraints:
+          enum:
+            - jsonl
+      - name: size_bytes
+        logicalType: integer
+        required: false
+        description: >-
+          File size in bytes. Updated after each write. Used for storage
+          monitoring and quick change detection.
+
+customProperties:
+  - id: governance
+    property: governance
+    value:
+      write_authority: "SessionStore component only — no other component writes to this store"
+      no_direct_coupling: "SessionStore has no knowledge of other store paths or external systems"
+      uniqueness:
+        - "session.id is unique across all sessions"
+        - "message.session_id + message.sequence is unique within a session"
+      timestamp_format: "ISO 8601: YYYY-MM-DDTHH:MM:SSZ"
+      file_format: "JSON Lines — one JSON object per line, no trailing commas"
+      access_pattern: "Single-agent-per-session — no concurrent write support"
+
+contractCreatedTs: "2026-06-20T00:00:00Z"
