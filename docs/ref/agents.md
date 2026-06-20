@@ -28,5 +28,7 @@ Code agents studied during nasim research and design.
 | plandex | https://github.com/plandex-ai/plandex |
 | qwen-code | https://github.com/QwenLM/Qwen-Agent |
 | Roo-Code | https://github.com/RooVetGit/Roo-Code |
+| ruflo | https://github.com/ruvnet/ruflo |
+| SkeletonAgent | https://github.com/firework8/SkeletonAgent |
 | SWE-agent | https://github.com/SWE-agent/SWE-agent |
 | warp | https://github.com/warpdotdev/Warp |
