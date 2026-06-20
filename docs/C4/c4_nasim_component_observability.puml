@@ -4,7 +4,9 @@
 ' Title: nasim — Observability Component Diagram
 ' Boundary: nasim core library — Observability group
 ' Purpose: Application-side logging and metrics emission (tenas pattern: emit only)
-' Version: 6.0.0
+' Version: 6.1.0
+' Source: docs/audit/audit.2026.06.20.logging.observability.car.md
+' Review: —
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
@@ -20,6 +22,7 @@ title nasim — Observability Components
 
 Container_Ext(ContainerRuntime, "Container Runtime", "Docker / Kubernetes CRI", "Passive infrastructure. Captures stdout/stderr from the process. Does not tail, transform, or ship logs.")
 Container_Ext(Prometheus, "Prometheus", "Metrics Store", "Pull-scrapes /metrics endpoint. Application never pushes metrics.")
+Container_Ext(OTelCollector, "OTel Collector", "OTLP/gRPC", "Optional. Receives traces/metrics via OTLP when otel feature is enabled. nasim never pulls from or configures the collector.")
 
 ' ============================================================
 ' nasim Core Library — Observability Group
@@ -29,14 +32,21 @@ Container_Boundary(nasim_core, "nasim Core Library") {
 
     Boundary(observability_group, "Observability Group") {
 
-        Component(structured_logger, "Structured Logger", "structlog + JSON formatter", "Writes structured JSON records to stdout only. Includes trace_id, span_id, request context. Never ships, buffers, enriches for storage, or forwards to Loki or log agent.")
+        Component(structured_logger, "StructuredLogger", "structlog + JSON formatter", "Writes structured JSON records to stdout only. Includes trace_id, span_id, session_id, turn_number. Never ships, buffers, enriches for storage, or forwards to Loki or log agent.")
 
-        Component(metrics_exporter, "Metrics Exporter", "prometheus-client", "Owns application metrics: token usage, latency histograms, tool call counters, error rates. Exposes /metrics HTTP endpoint for pull-based scrape only — never pushes metrics.")
+        Component(metrics_collector, "MetricsCollector", "prometheus-client", "Owns application metrics: token usage, latency histograms, tool call counters, error rates. Exposes /metrics HTTP endpoint for pull-based scrape only — never pushes metrics.")
 
-        Component(trace_correlator, "Trace Correlator", "contextvars", "Request-scoped trace IDs linking LLM calls, tool calls, and events. Binds trace_id and span_id to context for structured logger injection.")
+        Component(trace_correlator, "TraceCorrelator", "contextvars", "Generates root trace/span per top-level task (CLI turn or HTTP req). Binds trace_id, span_id, parent_span_id to context for structured logger and wire event injection.")
 
-        Component(instrumentation_mw, "Instrumentation Middleware", "ASGI middleware", "Outermost request handler for HTTP mode. Extracts/generates request_id; binds to contextvars for correlation.")
+        Component(context_propagator, "ContextPropagator", "contextvars + threading", "Propagates trace context across: Provider calls, tool dispatch, hook execution, subagent spawn, MCP tool calls. Ensures every WireEvent and structured record carries correlation ids.")
 
+        Component(log_redactor, "LogRedactor", "regex patterns", "Strips secrets (env vars, keys, .env content, passwords in commands) before any emission to structured logs or wire events. Always on. Configurable redaction rules (global + per-project).")
+
+        Component(dual_output_adapter, "DualOutputAdapter", "tty detection", "CLI entry adapter: writes JSON to stdout (machine) + delegates to Renderer when isatty (human). Never conditional logic that changes semantics. HTTP/MCP bypass adapter (direct structured emission).")
+
+        Component(instrumentation_mw, "InstrumentationMiddleware", "ASGI middleware", "Outermost request handler for HTTP mode. Extracts/generates request_id; binds to contextvars for correlation via ContextPropagator.")
+
+        Component(otel_exporter, "OTelExporter", "opentelemetry-sdk (optional)", "Behind otel feature flag. Bridges TraceCorrelator spans to OTel SDK; logs bridge via OTel log bridge. Exports via OTLP/gRPC or stdout. Zero dep when disabled.")
     }
 
     Boundary(agent_group, "Agent Group") {
@@ -50,28 +60,64 @@ Container_Boundary(nasim_core, "nasim Core Library") {
     Boundary(tool_group, "Tool Group") {
         Component(tool_registry, "ToolRegistry", "", "Tool execution")
     }
+
+    Boundary(wire_log_group, "Wire Log Group") {
+        Component(wire_log, "WireLog", "", "Domain event store: append-only per-session JSONL")
+    }
+
+    Boundary(config_group, "Config Group") {
+        Component(config, "Config", "dataclass", "Layered config: log.level, log.format, wire.enabled, observability.redact, metrics.enabled")
+    }
 }
 
 ' ============================================================
 ' Internal Relationships
 ' ============================================================
 
-Rel(agent_orch, structured_logger, "logs agent lifecycle events (tool calls, LLM requests, errors)")
-Rel(agent_orch, metrics_exporter, "records token usage, latency, tool call counts")
+Rel(agent_orch, structured_logger, "logs agent lifecycle events (turn start/end, errors)")
+Rel(agent_orch, metrics_collector, "records token usage, latency, tool call counts")
+Rel(agent_orch, context_propagator, "obtains trace context for events")
 Rel(provider, structured_logger, "logs LLM request/response metadata")
-Rel(provider, metrics_exporter, "records LLM latency and token consumption")
+Rel(provider, metrics_collector, "records LLM latency and token consumption")
+Rel(provider, context_propagator, "propagates trace across LLM calls")
 Rel(tool_registry, structured_logger, "logs tool execution events")
-Rel(tool_registry, metrics_exporter, "records tool call counts and duration")
-Rel(trace_correlator, structured_logger, "injects trace_id, span_id into log records")
-Rel(instrumentation_mw, trace_correlator, "generates and binds request_id to contextvars")
-Rel(instrumentation_mw, metrics_exporter, "records HTTP request duration and status")
+Rel(tool_registry, metrics_collector, "records tool call counts and duration")
+Rel(tool_registry, context_propagator, "propagates trace across tool dispatch")
+Rel(trace_correlator, context_propagator, "provides root trace/span context")
+Rel(context_propagator, structured_logger, "injects trace_id, span_id, parent_span_id into log records")
+Rel(context_propagator, wire_log, "injects correlation ids into wire events")
+Rel(log_redactor, structured_logger, "sanitizes log records before emission")
+Rel(log_redactor, wire_log, "sanitizes wire events before append")
+Rel(dual_output_adapter, structured_logger, "delegates structured JSON emission to stdout")
+Rel(dual_output_adapter, ContainerRuntime, "writes human-readable output when isatty")
+Rel(instrumentation_mw, context_propagator, "generates and binds request_id to contextvars")
+Rel(instrumentation_mw, metrics_collector, "records HTTP request duration and status")
 Rel(instrumentation_mw, structured_logger, "logs HTTP request lifecycle")
+Rel(config, structured_logger, "configures log level and format")
+Rel(config, metrics_collector, "enables/disables metrics emission")
+Rel(config, log_redactor, "configures redaction rules")
+Rel(config, otel_exporter, "enables/disables OTel feature")
+
+' ============================================================
+' Optional OTel path (behind feature flag)
+' ============================================================
+
+Rel(otel_exporter, OTelCollector, "exports traces/metrics via OTLP", "OTLP/gRPC — only when otel feature enabled")
+Rel(trace_correlator, otel_exporter, "bridges spans to OTel SDK (optional)")
+Rel(metrics_collector, otel_exporter, "bridges metrics to OTel SDK (optional)")
 
 ' ============================================================
 ' Emit Path (tenas pattern: emit ends at stdout)
 ' ============================================================
 
 Rel(structured_logger, ContainerRuntime, "writes structured JSON logs to stdout", "stdout only — emit path ends here")
-Rel(metrics_exporter, Prometheus, "exposes /metrics for pull scrape", "HTTP GET — pull model only — never pushes")
+Rel(metrics_collector, Prometheus, "exposes /metrics for pull scrape", "HTTP GET — pull model only — never pushes")
+
+' ============================================================
+' Cross-cutting: Wire Log relationship
+' ============================================================
+
+Rel(agent_orch, wire_log, "APPEND domain events")
+Rel(wire_log, structured_logger, "optional: project domain events as structured (configurable)")
 
 @enduml

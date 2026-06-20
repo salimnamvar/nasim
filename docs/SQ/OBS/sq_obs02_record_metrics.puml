@@ -1,0 +1,112 @@
+@startuml sq_obs02_record_metrics
+' ============================================================
+' Title:     OBS-02 — RECORD Metrics
+' Boundary:  nasim code agent CLI
+' Purpose:   Record metric points for token usage, latency, tool calls
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Review:    —
+' ============================================================
+
+actor "AgentOrchestrator" as agent
+actor "Provider" as provider
+actor "ToolRegistry" as tools
+
+box "Observability Layer" #E3F2FD
+  participant "MetricsCollector" as metrics
+  participant "TraceCorrelator" as trace
+end box
+
+box "External" #F3E5F5
+  participant "Prometheus" as prom
+end box
+
+note over agent, prom
+  Scope:
+    - obs02 RECORD Metrics — increment counters, observe histograms
+
+  Preconditions:
+    - MetricsCollector configured (enabled)
+    - Prometheus scrape endpoint available (HTTP mode)
+
+  Contexts:
+    - Called on every LLM request, tool call, error, session event
+    - Enables dashboards (Grafana on top of Prometheus)
+
+  Excludes:
+    - Structured logging (OBS-01)
+    - Trace correlation (OBS-03)
+    - Metrics export to OTel (optional, behind flag)
+
+  Design:
+    - MetricsCollector provides counter/gauge/histogram handles
+    - Convenience methods instrument key nasim events
+    - Labels are low-cardinality (model, provider, tool, success)
+    - /metrics endpoint served by ServerApp (HTTP mode)
+    - Pull-based only — never pushes to Prometheus
+
+  Returns:
+    - Convenience methods: None (fire-and-forget)
+    - Handle methods: Counter/Gauge/Histogram for further use
+
+  Invariants:
+    - /metrics pull only
+    - No high-cardinality labels (no request_id in labels)
+    - Metric names follow nasim_<metric>[_<unit>] convention
+end note
+
+== obs02 RECORD Metrics ==
+
+agent -> metrics : record_llm_request(model, provider, latency_ms, tokens)
+activate metrics
+
+metrics -> metrics : llm_latency_ms.labels(model, provider).observe(latency_ms)
+metrics -> metrics : llm_tokens_total.labels(model, provider).inc(tokens)
+metrics -> metrics : llm_requests_total.labels(model, provider).inc()
+
+metrics --> agent : None
+deactivate metrics
+
+== obs02 RECORD Tool Call ==
+
+tools -> metrics : record_tool_call(tool, success, duration_ms)
+activate metrics
+
+metrics -> metrics : tool_duration_ms.labels(tool).observe(duration_ms)
+metrics -> metrics : tool_calls_total.labels(tool, success).inc()
+
+metrics --> tools : None
+deactivate metrics
+
+== obs02 RECORD Error ==
+
+agent -> metrics : record_error(error_type)
+activate metrics
+
+metrics -> metrics : errors_total.labels(type=error_type).inc()
+
+metrics --> agent : None
+deactivate metrics
+
+note over agent, prom
+  Flow:
+    - AgentOrchestrator/Provider/ToolRegistry → MetricsCollector → in-memory metrics → /metrics scrape
+
+  State:
+    - IDLE → RECORDING → DONE
+
+  Failure:
+    - Record failure → silently ignored (never blocks agent)
+
+  Success:
+    - Metric point recorded in memory
+
+  Key invariants:
+    - Pull-based only (/metrics endpoint)
+    - Low-cardinality labels
+    - nasim_<metric>[_<unit>] naming convention
+    - Fire-and-forget (never raises to caller)
+end note
+
+@enduml

@@ -1,6 +1,6 @@
 # nasim — SQ Inventory
 
-Sequence diagrams organised by UC group. 55 diagrams across 13 groups.
+Sequence diagrams organised by UC group. 60 diagrams across 14 groups.
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
 Back to [docs/](../README.md).
@@ -22,6 +22,7 @@ Back to [docs/](../README.md).
 | HK | Hooks — pre/post hooks for tool and LLM lifecycle | 6 | `HK/` |
 | PLG | Plugins — plugin discovery, loading, registration | 5 | `PLG/` |
 | RTG | Model Router — model selection, fallback, routing | 4 | `RTG/` |
+| OBS | Observability — structured logging, metrics, trace correlation | 5 | `OBS/` |
 
 ## Diagram Index
 
@@ -77,8 +78,13 @@ Back to [docs/](../README.md).
 | sq_hk02_pre_tool_hook | HK-02 | HK | Execute hooks before tool use |
 | sq_hk03_post_tool_hook | HK-03 | HK | Execute hooks after tool use |
 | sq_rtg01_select_model | RTG-01 | RTG | Model selection and fallback |
+| sq_obs01_stream_log | OBS-01 | OBS | Structured JSON log emission to stdout |
+| sq_obs02_record_metrics | OBS-02 | OBS | Record metric points for latency, tokens, tool calls |
+| sq_obs03_correlate_trace | OBS-03 | OBS | Generate and propagate trace context |
+| sq_obs04_redact_sensitive | OBS-04 | OBS | Strip secrets before emission |
+| sq_obs05_expose_metrics | OBS-05 | OBS | Serve /metrics endpoint for Prometheus |
 
-**Total: 55 SQ diagrams (1:1 with UCs)**
+**Total: 60 SQ diagrams (1:1 with UCs)**
 
 ## SQ Diagram Convention
 

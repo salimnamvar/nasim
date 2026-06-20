@@ -1,0 +1,122 @@
+@startuml ct_data_observability
+' ============================================================
+' Title:     nasim — Observability Data Structures
+' Boundary:  nasim code agent CLI
+' Purpose:   Data models for structured logging, metrics, and trace correlation
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Review:    —
+' Note:      Emit-only per tenas pattern. Structured records go to stdout.
+'            Metrics exposed via /metrics pull endpoint.
+'            OTel export is optional (behind feature flag).
+' ============================================================
+
+title nasim — Observability Data Structures
+
+skinparam classAttributeIconSize 0
+
+package "Observability Data" #E3F2FD {
+
+    class LogRecord <<dataclass>> {
+        + timestamp : str
+        + level : LogLevel
+        + logger_name : str
+        + message : str
+        + trace_id : str
+        + span_id : str
+        + parent_span_id : str
+        + session_id : str
+        + turn_number : int
+        + extra : dict
+    }
+
+    class LogLevel <<enumeration>> {
+        TRACE
+        DEBUG
+        INFO
+        WARNING
+        ERROR
+        CRITICAL
+    }
+
+    class MetricPoint <<dataclass>> {
+        + name : str
+        + type : MetricType
+        + value : float
+        + labels : dict
+        + timestamp : float
+    }
+
+    class MetricType <<enumeration>> {
+        COUNTER
+        GAUGE
+        HISTOGRAM
+        SUMMARY
+    }
+
+    class TraceContext <<dataclass>> {
+        + trace_id : str
+        + span_id : str
+        + parent_span_id : str
+        + session_id : str
+        + turn_number : int
+        + operation_name : str
+        + start_time : float
+    }
+
+    class ObservabilityConfig <<dataclass>> {
+        + log_level : LogLevel
+        + log_format : str
+        + structured_enabled : bool
+        + wire_enabled : bool
+        + redact_enabled : bool
+        + redact_patterns : list[str]
+        + metrics_enabled : bool
+        + otel_enabled : bool
+        + otel_endpoint : str
+        + sampling_rate : float
+    }
+
+    class RedactionRule <<dataclass>> {
+        + pattern : str
+        + replacement : str
+        + scope : str
+        + enabled : bool
+    }
+}
+
+note bottom of LogRecord
+  Every structured log record carries correlation ids.
+  trace_id links to TraceContext for end-to-end correlation.
+  session_id and turn_number enable wire<->structured cross-ref.
+  extra holds domain-specific key-value pairs (model, tokens, etc).
+end note
+
+note bottom of MetricPoint
+  Prometheus-compatible metric points.
+  name follows convention: nasim_<metric>[_<unit>]
+  labels are low-cardinality (model, provider, tool, success).
+  HISTOGRAM includes _bucket, _sum, _count suffixes.
+end note
+
+note bottom of TraceContext
+  Request-scoped trace context bound via contextvars.
+  trace_id is root (per CLI turn or HTTP request).
+  span_id is current operation; parent_span_id is caller.
+  Shared with OTel when otel feature enabled.
+end note
+
+note right of ObservabilityConfig
+  Loaded from layered config (global → project → env → CLI).
+  Controls emission behavior: what, how much, how safe.
+  Wire log has separate enabled flag (domain artifact).
+end note
+
+note right of RedactionRule
+  Regex-based secret stripping before any emission.
+  Global rules (env vars, keys) + per-project rules.
+  Applied by LogRedactor to both structured and wire events.
+end note
+
+@enduml

@@ -99,6 +99,8 @@
 | OBS-01 | OBS | STREAM Structured Log | StructuredLogger |
 | OBS-02 | OBS | Record Metrics | MetricsCollector |
 | OBS-03 | OBS | Correlate Trace | TraceCorrelator |
+| OBS-04 | OBS | REDACT Sensitive | LogRedactor |
+| OBS-05 | OBS | EXPOSE /metrics | MetricsCollector |
 | MEM-01 | MEM | PERSIST Knowledge | MemoryStore |
 | MEM-02 | MEM | RECALL Knowledge | MemoryStore |
 | MEM-03 | MEM | SEARCH Knowledge | MemoryIndex |

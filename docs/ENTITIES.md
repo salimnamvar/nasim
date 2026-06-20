@@ -194,9 +194,13 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
-| StructuredLogger | `nasim/observability/logger.py` | Structured logging with trace correlation and log levels |
-| MetricsCollector | `nasim/observability/metrics.py` | Token usage, latency, tool call counts, error rates |
-| TraceCorrelator | `nasim/observability/trace.py` | Request-scoped trace IDs linking LLM calls, tool calls, events |
+| StructuredLogger | `nasim/observability/logger.py` | Structured JSON logging to stdout with trace correlation, log levels. Emit-only (tenas pattern). |
+| MetricsCollector | `nasim/observability/metrics.py` | Token usage, latency histograms, tool call counters, error rates. Exposes /metrics pull endpoint. |
+| TraceCorrelator | `nasim/observability/trace.py` | Generates root trace/span per CLI turn or HTTP request. Binds trace_id, span_id to contextvars. |
+| ContextPropagator | `nasim/observability/propagator.py` | Propagates trace context across: Provider calls, tool dispatch, hook execution, subagent spawn, MCP calls. |
+| LogRedactor | `nasim/observability/redactor.py` | Regex-based secret stripping before any emission. Always on. Configurable rules (global + per-project). |
+| DualOutputAdapter | `nasim/observability/adapter.py` | CLI entry adapter: JSON to stdout (machine) + rich Renderer when isatty (human). HTTP/MCP bypass. |
+| OTelExporter | `nasim/observability/otel.py` | Optional (feature flag). Bridges TraceCorrelator spans to OTel SDK. Exports via OTLP/gRPC or stdout. |
 
 ### Memory Group (cross-cutting)
 
@@ -381,6 +385,10 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/observability/logger.py` | observability | StructuredLogger |
 | `nasim/observability/metrics.py` | observability | MetricsCollector |
 | `nasim/observability/trace.py` | observability | TraceCorrelator |
+| `nasim/observability/propagator.py` | observability | ContextPropagator |
+| `nasim/observability/redactor.py` | observability | LogRedactor |
+| `nasim/observability/adapter.py` | observability | DualOutputAdapter |
+| `nasim/observability/otel.py` | observability | OTelExporter (optional) |
 | `nasim/memory/__init__.py` | memory | Memory package |
 | `nasim/memory/store.py` | memory | MemoryStore |
 | `nasim/memory/index.py` | memory | MemoryIndex |

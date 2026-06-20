@@ -11,6 +11,8 @@ Back to [docs/](../README.md).
 | `nasim_session_store.datacontract.yaml` | Session Store | 3 | Session metadata, messages, file metadata |
 | `nasim_memory_store.datacontract.yaml` | Memory Store | 3 | Knowledge entries, index, scope |
 | `nasim_todo_store.datacontract.yaml` | Todo Store | 2 | Todo items, session association |
+| `ct_data_wire_log.puml` | Wire Log | 3 | WireEvent, TurnIndexEntry, WireMetadata |
+| `ct_data_observability.puml` | Observability | 6 | LogRecord, MetricPoint, TraceContext, ObservabilityConfig, RedactionRule, LogLevel |
 
 ## Store Summary
 

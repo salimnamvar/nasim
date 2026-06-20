@@ -21,7 +21,7 @@
 | c4_nasim_component_hooks.puml | Hooks | HookManager, Hook, HookResult |
 | c4_nasim_component_plugins.puml | Plugins | PluginLoader, PluginManifest |
 | c4_nasim_component_sandbox.puml | Sandbox | SandboxExecutor, SandboxPolicy, SandboxMonitor |
-| c4_nasim_component_observability.puml | Observability | StructuredLogger, MetricsCollector, TraceCorrelator |
+| c4_nasim_component_observability.puml | Observability | StructuredLogger, MetricsCollector, TraceCorrelator, ContextPropagator, LogRedactor, DualOutputAdapter, OTelExporter |
 | c4_nasim_component_memory.puml | Memory | MemoryStore, MemoryIndex, MemoryScope |
 | c4_nasim_component_git.puml | Git | GitIntegration, GitStatus, GitCommit |
 | c4_nasim_component_subagent.puml | Subagent | SubagentCoordinator, AgentOrchestrator (child) |

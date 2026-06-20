@@ -21,6 +21,7 @@
 | [audit.2026.06.20.corrective.architecture.review.md](audit.2026.06.20.corrective.architecture.review.md) | Corrective review | Evidence-based re-audit per p1.md directive |
 | [audit.2026.06.20.car-framework-csr-rod.md](audit.2026.06.20.car-framework-csr-rod.md) | CSR + ROD audit | CAR framework audit for Controller-Service-Repository and Resource-Oriented Design |
 | [audit.2026.06.20.deep.domain.audit.md](audit.2026.06.20.deep.domain.audit.md) | ML / RL / NLP domain audit | **DOMAIN AUDIT** — Per-agent deep-dive with 20-dimension scoring (ML, RL, NLP, SWE); enhancement roadmap E-01–E-09; 9.1/10 target |
+| [audit.2026.06.20.logging.observability.car.md](audit.2026.06.20.logging.observability.car.md) | Logging & Observability (CAR) | **FOCUSED AUDIT** — nasim vs tenas LOG draft + 28 refs; wire vs structured; C4 gaps + enhancement to 9.5+ design |
 
 ---
 
@@ -37,6 +38,7 @@
 8. **audit.2026.06.20.corrective.architecture.review.md** — corrective re-audit (latest)
 9. **audit.2026.06.20.car-framework-csr-rod.md** — CSR + ROD pattern audit
 10. **audit.2026.06.20.deep.domain.audit.md** — ML/RL/NLP deep domain audit with per-agent 20-dim scoring and E-01–E-09 enhancement roadmap (latest)
+11. **audit.2026.06.20.logging.observability.car.md** — dedicated logging/observability + wire log vs tenas + references (CAR)
 
 ---
 

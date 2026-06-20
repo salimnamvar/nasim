@@ -12,6 +12,8 @@ Back to [docs/](../README.md).
 | `er_memory_store.puml` | Memory Store | JSON Lines | Cross-session knowledge entries with FTS5 index |
 | `er_todo_store.puml` | Todo Store | JSON Lines | Task tracking within sessions |
 | `er_git_state.puml` | Git State | JSON Lines | Git branch and commit tracking per session |
+| `er_wire_log.puml` | Wire Log | JSON Lines | Append-only per-session event store with turn index |
+| `er_observability.puml` | Observability | In-memory / stdout | Structured logs, metrics, trace context, redaction rules |
 
 ## Notation
 

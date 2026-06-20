@@ -94,8 +94,13 @@ System_Boundary(sandbox_group, "Sandbox Group") {
 }
 
 System_Boundary(observability_group, "Observability Group") {
-    Component(structured_logger, "StructuredLogger", "structlog", "Structured logging with trace correlation")
-    Component(metrics_collector, "MetricsCollector", "", "Token usage, latency, tool call metrics")
+    Component(structured_logger, "StructuredLogger", "structlog + JSON", "Structured JSON logs to stdout only (trace_id, span_id, context). Emit-only (tenas pattern).")
+    Component(metrics_collector, "MetricsCollector", "prometheus-client", "Token usage, latency histograms, tool counts, errors. /metrics pull only.")
+    Component(trace_correlator, "TraceCorrelator", "contextvars", "Generates root trace/span per CLI turn or HTTP request. Binds trace/span ids to contextvars.")
+    Component(context_propagator, "ContextPropagator", "contextvars + threading", "Propagates trace context across Provider, Tool, Hook, Subagent, MCP boundaries.")
+    Component(log_redactor, "LogRedactor", "regex patterns", "Strips secrets before any emission. Always on. Configurable rules (global + per-project).")
+    Component(dual_output_adapter, "DualOutputAdapter", "tty detection", "CLI: JSON to stdout (machine) + rich Renderer when isatty (human). HTTP/MCP bypass.")
+    Component(otel_exporter, "OTelExporter", "opentelemetry-sdk (optional)", "Behind otel feature flag. Bridges spans to OTel SDK. Exports via OTLP/gRPC or stdout.")
 }
 
 System_Boundary(memory_group, "Memory Group") {
@@ -177,6 +182,7 @@ Rel(agent_orch, error_boundary, "handle errors")
 Rel(agent_orch, persona_mgr, "load persona")
 Rel(agent_orch, structured_logger, "emit logs")
 Rel(agent_orch, metrics_collector, "record metrics")
+Rel(agent_orch, context_propagator, "obtain trace context")
 Rel(agent_orch, memory_store, "persist, retrieve")
 Rel(agent_orch, session_store, "save, load")
 Rel(agent_orch, agent_events, "yield events")
@@ -249,5 +255,19 @@ Rel(pipeline_orchestrator, token_budget_tracker, "track budget")
 Rel(git_integration, git_status, "reads state")
 Rel(git_integration, git_commit, "creates commits")
 Rel(config_loader, config_schema, "produces config")
+
+' Observability internal relationships
+Rel(trace_correlator, context_propagator, "provides root trace/span")
+Rel(context_propagator, structured_logger, "injects trace context into records")
+Rel(context_propagator, wire_log, "injects correlation ids into wire events")
+Rel(log_redactor, structured_logger, "sanitizes records before emission")
+Rel(log_redactor, wire_log, "sanitizes wire events before append")
+Rel(dual_output_adapter, structured_logger, "delegates JSON emission to stdout")
+Rel(config_loader, structured_logger, "configures log level and format")
+Rel(config_loader, metrics_collector, "enables/disables metrics")
+Rel(config_loader, log_redactor, "configures redaction rules")
+Rel(config_loader, otel_exporter, "enables/disables OTel feature")
+Rel(trace_correlator, otel_exporter, "bridges spans to OTel SDK (optional)")
+Rel(metrics_collector, otel_exporter, "bridges metrics to OTel SDK (optional)")
 
 @enduml
