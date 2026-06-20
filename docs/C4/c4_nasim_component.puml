@@ -30,7 +30,7 @@ Container_Boundary(core_library, "Core Library") {
     Container_Boundary(provider_group, "Provider Group") {
         Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name")
         Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
-        Component(provider_caps, "ProviderCapabilities", "", "Capability declaration: streaming, tools, vision, reasoning, context window")
+        Component(provider_caps, "ProviderCapabilities", "", "Capability declaration + static metadata: streaming, tools, vision, reasoning, context limits, pricing")
         Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
     }
 
@@ -92,6 +92,7 @@ Container_Boundary(core_library, "Core Library") {
         Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
         Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules")
         Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement")
+        Component(resource_limiter, "ResourceLimiter", "", "Enforces CPU, memory, and disk quotas per sandbox instance")
         Component(diff_sandbox_mgr, "DiffSandboxManager", "", "Manages sandboxed diff staging and application")
         Component(edit_staging_area, "EditStagingArea", "", "Stages file edits before sandbox-validated application")
         Component(diff_computer, "DiffComputer", "", "Computes diffs between original and staged content")

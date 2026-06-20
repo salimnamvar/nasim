@@ -55,6 +55,9 @@ System_Ext(git_repo, "Git Repository", "Version control")
 System_Ext(sandbox_rt, "Sandbox Runtime", "OS-level isolation")
 System_Ext(lsp_server, "LSP Server", "Code intelligence")
 System_Ext(plugin_dir, "Plugin Directory", "Community extensions")
+System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code")
+System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API)")
+System_Ext(vector_store, "Vector Store", "Persistent vector storage for similarity search")
 
 ' ============================================================
 ' Observability Platform (tenas pattern)
@@ -85,6 +88,9 @@ Rel(core, git_repo, "git operations")
 Rel(core, sandbox_rt, "isolated execution")
 Rel(core, lsp_server, "code intelligence")
 Rel(core, plugin_dir, "plugin discovery")
+Rel(core, tree_sitter, "parses AST")
+Rel(core, embedding_model, "generates embeddings")
+Rel(core, vector_store, "vector CRUD")
 
 ' ============================================================
 ' Observability Pipeline (tenas pattern: emit-only app, platform-owned collection)

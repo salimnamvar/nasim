@@ -24,6 +24,7 @@ title nasim — Observability Components
 Container_Ext(ContainerRuntime, "Container Runtime", "Docker / Kubernetes CRI", "Passive infrastructure. Captures stdout/stderr from the process. Does not tail, transform, or ship logs.")
 Container_Ext(Prometheus, "Prometheus", "Metrics Store", "Pull-scrapes /metrics endpoint. Application never pushes metrics.")
 Container_Ext(OTelCollector, "OTel Collector", "OTLP/gRPC", "Optional. Receives traces/metrics via OTLP when otel feature is enabled. nasim never pulls from or configures the collector.")
+Container_Ext(cli_renderer, "CLI Renderer", "Rich terminal output engine", "Renders human-readable terminal output for CLI mode.")
 
 ' ============================================================
 ' nasim Core Library — Observability Group
@@ -91,6 +92,7 @@ Rel(log_redactor, structured_logger, "sanitizes log records before emission")
 Rel(log_redactor, wire_log, "sanitizes wire events before append")
 Rel(dual_output_adapter, structured_logger, "delegates structured JSON emission to stdout")
 Rel(dual_output_adapter, ContainerRuntime, "writes human-readable output when isatty")
+Rel(dual_output_adapter, cli_renderer, "delegates human-readable output when isatty")
 Rel(instrumentation_mw, context_propagator, "generates and binds request_id to contextvars")
 Rel(instrumentation_mw, metrics_collector, "records HTTP request duration and status")
 Rel(instrumentation_mw, structured_logger, "logs HTTP request lifecycle")

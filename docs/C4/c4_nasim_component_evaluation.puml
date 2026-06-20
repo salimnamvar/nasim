@@ -24,6 +24,7 @@ Container_Boundary(evaluation_boundary, "Evaluation Group") {
     Component(retry_coordinator, "RetryCoordinator", "", "Coordinates retry attempts with backoff and escalation")
     Component(repetition_detector, "RepetitionDetector", "", "Detects repeated failures or loops, triggers escalation")
     Component(turn_budget_injector, "TurnBudgetInjector", "", "Injects turn budget limits and progress signals into context")
+    Component(quality_signal, "QualitySignal", "", "Result: accept (bool | float), feedback (str)")
 }
 
 Container_Ext(provider_group, "Provider Group")
@@ -40,5 +41,7 @@ Rel(llm_reviewer, provider_group, "LLM review call")
 Rel(test_runner, tool_group, "executes test commands")
 Rel(retry_coordinator, eval_engine, "triggers re-evaluation")
 Rel(repetition_detector, eval_engine, "signals escalation")
+Rel(eval_engine, quality_signal, "produces")
+Rel(llm_reviewer, quality_signal, "consumes")
 
 @enduml
