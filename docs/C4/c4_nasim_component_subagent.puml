@@ -1,3 +1,4 @@
+@startuml c4_nasim_component_subagent
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 
@@ -14,10 +15,11 @@
 
 title nasim — Subagent Component Diagram
 
-Container_Boundary(agent_boundary, "Agent Group") {
+Container_Boundary(agent_boundary, "Subagent Group") {
     Component(subagent_coord, "SubagentCoordinator", "nasim/agent/subagent.py", "Parent-child orchestration, nesting limit 5, result aggregation")
-    Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop — inherited by child agents")
 }
+
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 
 Container_Ext(tool_boundary, "Tool Group")
 Container_Ext(provider_boundary, "Provider Group")

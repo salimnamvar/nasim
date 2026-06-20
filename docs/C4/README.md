@@ -12,24 +12,26 @@
 
 | Diagram | Group | Components |
 |---------|-------|------------|
-| c4_nasim_component_agent.puml | Agent | AgentOrchestrator, ConversationHistory, ContextCompactor, SafetyCoordinator, PlanSession, AgentEvent, SubagentCoordinator, ErrorBoundary, PersonaManager, CompactionPolicy |
-| c4_nasim_component_provider.puml | Provider | Provider (Protocol), LiteLLMProxy, ModelRouter, FallbackChain, ProviderCapabilities |
+| c4_nasim_component_agent.puml | Agent | AgentOrchestrator, ConversationHistory, ContextCompactor, SubagentCoordinator, ErrorBoundary, PersonaManager |
+| c4_nasim_component_provider.puml | Provider | Provider (Protocol), LiteLLMProxy |
 | c4_nasim_component_tools.puml | Tools | Tool (ABC), ToolRegistry, FileTools, SearchTools, ShellTool, DirTool, WebTools, GitTool, LspTool, SubagentTool, TodoTool, MemoryTool, PlanTool, RepoMapTool, SemanticSearchTool, ReviewTool |
 | c4_nasim_component_mcp.puml | MCP | MCPClientRuntime, MCPServerRuntime, MCPToolAdapter, MCPDiscovery |
-| c4_nasim_component_config.puml | Config | ConfigLoader, Config |
-| c4_nasim_component_session.puml | Session | SessionStore, Session, SessionVersioning, SessionSearch, SessionFork |
+| c4_nasim_component_config.puml | Config | ConfigLoader |
+| c4_nasim_component_session.puml | Session | SessionStore, SessionVersioning, SessionSearch, SessionFork |
 | c4_nasim_component_server.puml | Server | ServerApp, ServerRouter, SSEHandler, APISchema |
-| c4_nasim_component_hooks.puml | Hooks | HookManager, Hook, HookResult |
-| c4_nasim_component_plugins.puml | Plugins | PluginLoader, PluginManifest |
+| c4_nasim_component_hooks.puml | Hooks | HookManager |
+| c4_nasim_component_plugins.puml | Plugins | PluginLoader |
+| c4_nasim_component_safety.puml | Safety | SafetyCoordinator, PermissionGate, InjectionScanner, EgressInspector |
+| c4_nasim_component_router.puml | Router | ModelRouter, FallbackChain, ProviderCapabilities |
 | c4_nasim_component_sandbox.puml | Sandbox | SandboxExecutor, SandboxPolicy, SandboxMonitor, ResourceLimiter, DiffSandboxManager, EditStagingArea, DiffComputer, DiffPresenter, StagedApplicator |
 | c4_nasim_component_observability.puml | Observability | StructuredLogger, MetricsCollector, TraceCorrelator, ContextPropagator, LogRedactor, DualOutputAdapter, InstrumentationMiddleware, OTelExporter |
 | c4_nasim_component_memory.puml | Memory | MemoryStore, MemoryIndex, MemoryScope, EpisodicMemoryAdapter, SemanticMemoryAdapter, WorkingMemoryAdapter, MemoryRetriever, MemoryIndexer |
 | c4_nasim_component_git.puml | Git | GitIntegration, GitStatus, GitCommit |
 | c4_nasim_component_repo_intelligence.puml | Repo Intelligence | RepoIntelligenceManager, ASTIndexAdapter, SymbolGraph, RankingService, EmbeddingAdapter, SemanticSearchService, RepoMapBuilder |
 | c4_nasim_component_edit_strategy.puml | Edit Strategy | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector, StrategyHeuristics |
-| c4_nasim_component_evaluation.puml | Evaluation | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, QualitySignal, RepetitionDetector, TurnBudgetInjector |
+| c4_nasim_component_evaluation.puml | Evaluation | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector |
 | c4_nasim_component_wire_log.puml | Wire Log | WireLog, WireAppender, WireReader, TurnIndex, SessionForkManager |
-| c4_nasim_component_context_graph.puml | Context Graph | ContextGraph, ContextNode, ContextEdge, PipelineOrchestrator, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
+| c4_nasim_component_context_graph.puml | Context Graph | ContextGraph, ContextProcessor (ABC), PipelineOrchestrator, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
 | c4_nasim_component_subagent.puml | Subagent | SubagentCoordinator, AgentOrchestrator (child) |
 
 ## Actors

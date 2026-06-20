@@ -72,8 +72,8 @@
   rules from `sm.md` do not apply (documented deviation).
 - Session, Plan, and Plugin SMs are **entity lifecycles** with persisted state.
   SMT ownership rules apply: one lifecycle-write UC per target state.
-- All hex colors are canonical — SQ diagrams must use `<back:#HEX>STATE</back>`
-  syntax matching these values.
+- All hex colors are canonical — state-machine diagrams use `state "STATE" as STATE #HEX`
+  syntax per PlantUML standard.
 
 ## Lifecycle-Write UC Mapping (SMT Ownership)
 
@@ -88,7 +88,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | SAVED | SSN-01 PERSIST Session | Session persisted to disk |
 | RESTORED | SSN-04 RESTORE Session | Session loaded from disk |
 | BRANCHED | WRL-04 FORK Session | Session forked from parent |
-| CLOSED | AGT-14 HANDLE Error | Session terminated (quit or error) |
+| CLOSED | SSN-01 PERSIST Session | Session terminated (quit or error) |
 
 ### Plan Lifecycle
 
@@ -98,7 +98,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
 | APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
 | EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
-| COMPLETED | AGT-01 PROCESS User Task | Implicit: agent loop finishes all steps |
+| COMPLETED | AGT-08 APPROVE Plan | Implicit: agent loop finishes all steps |
 | REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
 
 ### Plugin Lifecycle

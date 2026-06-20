@@ -1,3 +1,4 @@
+@startuml c4_nasim_component_agent
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 
@@ -20,7 +21,6 @@ Container_Boundary(agent_boundary, "Agent Group") {
     Component(compactor, "ContextCompactor", "", "Summarizes old exchanges via secondary LLM call when budget exceeded")
     Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
     Component(plan_session, "PlanSession", "", "Holds queued tool calls in plan mode. /approve drains the queue")
-    Component(agent_events, "AgentEvent", "", "Event types: TextChunk, ToolStart, ToolResult, Error, Done")
     Component(subagent_coord, "SubagentCoordinator", "", "Parent-child orchestration, nesting limit 5, result aggregation")
     Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions and error hierarchy")
     Component(persona_mgr, "PersonaManager", "", "Runtime persona switching for specialized agent roles")
@@ -37,7 +37,6 @@ Rel(agent_orch, provider_boundary, "chat, chat_stream")
 Rel(agent_orch, tool_boundary, "execute tool calls")
 Rel(agent_orch, conv_history, "reads/writes messages")
 Rel(agent_orch, safety_coord, "safety validation before tool exec")
-Rel(agent_orch, agent_events, "yields events")
 Rel(agent_orch, subagent_coord, "spawn, collect child agents")
 Rel(agent_orch, error_boundary, "handle structured errors")
 Rel(agent_orch, persona_mgr, "load, switch persona")

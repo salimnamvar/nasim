@@ -46,6 +46,7 @@ Rel(diff_computer, host_fs, "reads original files")
 Rel(staged_applicator, edit_staging_area, "reads approved edits")
 Rel(staged_applicator, sandbox_executor, "applies in sandbox")
 Rel(staged_applicator, host_fs, "writes final files")
-Rel(diff_presenter, staged_applicator, "triggers apply after approval")
+Rel(diff_presenter, diff_sandbox_mgr, "notifies approval")
+Rel(diff_sandbox_mgr, staged_applicator, "applies approved diffs")
 
 @enduml

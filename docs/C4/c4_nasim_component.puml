@@ -18,22 +18,17 @@ Container_Boundary(core_library, "Core Library") {
 
     Container_Boundary(agent_group, "Agent Group") {
         Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields AgentEvent objects")
-        Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector")
         Component(subagent_coord, "SubagentCoordinator", "", "Parent-child orchestration, nesting limit 5, result aggregation")
         Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions")
         Component(persona_mgr, "PersonaManager", "", "Runtime persona switching for specialized agent roles")
         Component(plan_session, "PlanSession", "", "Holds queued tool calls in plan mode. /approve drains the queue")
         Component(conv_history, "ConversationHistory", "", "Owns messages and token count. Triggers compaction when budget exceeded")
         Component(compactor, "ContextCompactor", "", "Summarizes old exchanges via secondary LLM call")
-        Component(compaction_policy, "CompactionPolicy", "", "Compaction rules: token threshold, message age, importance scoring")
     }
 
     Container_Boundary(provider_group, "Provider Group") {
         Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name")
         Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix")
-        Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
-        Component(provider_caps, "ProviderCapabilities", "", "Capability declaration + static metadata: streaming, tools, vision, reasoning, context limits, pricing")
-        Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
     }
 
     Container_Boundary(tool_group, "Tool Group") {
@@ -62,7 +57,6 @@ Container_Boundary(core_library, "Core Library") {
 
     Container_Boundary(config_group, "Config Group") {
         Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags")
-        Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety, budget, mcp")
     }
 
     Container_Boundary(session_group, "Session Group") {
@@ -81,13 +75,10 @@ Container_Boundary(core_library, "Core Library") {
 
     Container_Boundary(hooks_group, "Hooks Group") {
         Component(hook_manager, "HookManager", "", "Registers, discovers, and executes hooks in priority order")
-        Component(hook_types, "Hook", "", "Hook types: PreToolUse, PostToolUse, PreLLMCall, PostLLMCall")
-        Component(hook_result, "HookResult", "", "Hook execution result: allow, deny, modify")
     }
 
     Container_Boundary(plugins_group, "Plugins Group") {
         Component(plugin_loader, "PluginLoader", "", "Discovers and loads plugins from ~/.nasim/plugins/")
-        Component(plugin_manifest, "PluginManifest", "", "Plugin metadata: name, version, tools, hooks")
     }
 
     Container_Boundary(sandbox_group, "Sandbox Group") {
@@ -161,7 +152,6 @@ Container_Boundary(core_library, "Core Library") {
         Component(llm_reviewer, "LLMReviewer", "", "LLM-based code review and quality assessment")
         Component(test_runner, "TestRunner", "", "Runs project test suites to validate changes")
         Component(retry_coordinator, "RetryCoordinator", "", "Coordinates retry attempts with backoff and escalation")
-        Component(quality_signal, "QualitySignal", "", "accept: bool | float, feedback: str")
         Component(repetition_detector, "RepetitionDetector", "", "Detects repeated failures or loops, triggers escalation")
         Component(turn_budget_injector, "TurnBudgetInjector", "", "Injects turn budget limits and progress signals into context")
     }
@@ -176,8 +166,6 @@ Container_Boundary(core_library, "Core Library") {
 
     Container_Boundary(context_graph_group, "Context Graph Group") {
         Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
-        Component(context_node, "ContextNode", "", "Context unit: code block, memory entry, file section with token cost")
-        Component(context_edge, "ContextEdge", "", "Typed edge between nodes: depends, references, includes, follows")
         Component(context_processor, "ContextProcessor", "ABC", "Base interface for pipeline processors")
         Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
         Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget")
@@ -201,10 +189,8 @@ Container_Ext(server_container, "HTTP API Server")
 
 Rel(agent_orch, provider, "chat, stream")
 Rel(provider, litellm_proxy, "delegates all LLM calls")
-Rel(agent_orch, model_router, "route model selection")
 Rel(agent_orch, tool_registry, "execute tools")
 Rel(agent_orch, conv_history, "messages, token tracking")
-Rel(agent_orch, safety_coord, "safety validation")
 Rel(agent_orch, plan_session, "queue, drain plan")
 Rel(agent_orch, subagent_coord, "spawn, collect")
 Rel(agent_orch, error_boundary, "handle errors")
@@ -219,15 +205,11 @@ Rel(agent_orch, edit_strategy_mgr, "SELECT, APPLY")
 Rel(agent_orch, eval_engine, "EVALUATE, RETRY")
 Rel(agent_orch, wire_log, "APPEND, REPLAY")
 Rel(agent_orch, context_graph, "PROCESS")
-Rel(agent_orch, cli_container, "delegates to CLI")
-Rel(agent_orch, server_container, "delegates to Server")
+' Rel(agent_orch, cli_container) and Rel(agent_orch, server_container) REMOVED
+' Core must never depend on its callers — dependency inversion violation fixed (p1.md #1)
 
 Rel(conv_history, compactor, "compact when exceeded")
-Rel(conv_history, compaction_policy, "evaluates compaction conditions")
 Rel(compactor, provider, "secondary LLM call")
-Rel(model_router, provider, "route to provider")
-Rel(model_router, provider_caps, "query capabilities")
-Rel(model_router, fallback_chain, "trigger failover")
 
 Rel(tool_registry, sandbox_executor, "sandboxed execution")
 Rel(tool_registry, mcp_tool_adapter, "MCP tools")
@@ -236,8 +218,6 @@ Rel(mcp_client_rt, mcp_discovery, "discover tools")
 Rel(mcp_discovery, mcp_tool_adapter, "register tools")
 Rel(mcp_server_rt, tool_registry, "expose tools")
 
-Rel(hook_manager, hook_types, "manages hooks")
-Rel(plugin_loader, plugin_manifest, "loads manifest")
 Rel(plugin_loader, hook_manager, "registers hooks")
 Rel(plugin_loader, tool_registry, "registers tools")
 
@@ -246,7 +226,7 @@ Rel(session_search, session_store, "searches")
 Rel(session_fork, session_store, "forks")
 
 Rel(memory_store, memory_index, "indexes")
-Rel(memory_store, memory_scope, "filters")
+Rel(memory_scope, memory_store, "filters by scope")
 Rel(episodic_mem_adapter, memory_store, "persist episodic entries")
 Rel(semantic_mem_adapter, memory_store, "persist semantic entries")
 Rel(working_mem_adapter, memory_store, "persist working entries")
@@ -265,14 +245,14 @@ Rel(repo_intel_mgr, repo_map_builder, "build repo map")
 
 Rel(edit_strategy_mgr, strategy_selector, "select strategy")
 Rel(strategy_selector, strategy_heuristics, "applies rules")
-Rel(edit_strategy, search_replace_coder, "extends")
-Rel(edit_strategy, whole_file_coder, "extends")
-Rel(edit_strategy, unified_diff_coder, "extends")
-Rel(edit_strategy, fenced_block_coder, "extends")
-Rel(edit_strategy, function_level_coder, "extends")
-Rel(edit_strategy, diff_sandbox_coder, "extends")
-Rel(edit_strategy, architect_coder, "extends")
-Rel(edit_strategy, inline_patch_coder, "extends")
+Rel(search_replace_coder, edit_strategy, "extends")
+Rel(whole_file_coder, edit_strategy, "extends")
+Rel(unified_diff_coder, edit_strategy, "extends")
+Rel(fenced_block_coder, edit_strategy, "extends")
+Rel(function_level_coder, edit_strategy, "extends")
+Rel(diff_sandbox_coder, edit_strategy, "extends")
+Rel(architect_coder, edit_strategy, "extends")
+Rel(inline_patch_coder, edit_strategy, "extends")
 Rel(diff_sandbox_coder, diff_sandbox_mgr, "sandboxed diff apply")
 
 Rel(eval_engine, task_evaluator, "evaluate task")
@@ -288,8 +268,6 @@ Rel(wire_log, wire_reader, "read entries")
 Rel(wire_log, turn_index, "index by turn")
 Rel(wire_log, session_fork_mgr, "fork from turn")
 
-Rel(context_graph, context_node, "contains nodes")
-Rel(context_graph, context_edge, "contains edges")
 Rel(pipeline_orchestrator, truncation_processor, "truncation stage")
 Rel(pipeline_orchestrator, distillation_processor, "distillation stage")
 Rel(pipeline_orchestrator, injection_processor, "injection stage")

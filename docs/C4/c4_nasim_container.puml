@@ -54,15 +54,10 @@ System_Ext(vector_store, "Vector Store", "Persistent vector storage for similari
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace/metric export")
 
 ' ============================================================
-' Observability Platform (tenas pattern)
+' Observability Platform (tenas pattern — external system, not expanded)
 ' ============================================================
 
-System_Boundary(obs_platform, "Observability Platform") {
-    Container(log_agent, "Log Agent", "Fluent Bit / Vector", "Tails stdout/stderr from Core/CLI/Server processes, parses, enriches with labels, buffers, retries, pushes to Loki")
-    Container(loki, "Loki", "Log storage", "Log ingestion, storage, LogQL queries. Low-cardinality label indexing")
-    Container(prometheus, "Prometheus", "Metrics store", "Pull-scrapes /metrics endpoint. Time-series store, PromQL")
-    Container(grafana, "Grafana", "Dashboard UI", "Read-only visualization + alerting. LogQL and PromQL dashboards")
-}
+System_Ext(obs_platform, "Observability Platform", "Agent-based collection, Loki logs, Prometheus metrics, Grafana dashboards. nasim emits only.")
 
 ' ============================================================
 ' Relationships
@@ -91,10 +86,7 @@ Rel(core, otel_collector, "exports traces/metrics (optional)", "OTLP/gRPC")
 ' Observability Pipeline (tenas pattern: emit-only app, platform-owned collection)
 ' ============================================================
 
-Rel(core, log_agent, "writes structured logs to stdout", "stdout only — emit path ends here")
-Rel(log_agent, loki, "pushes parsed and enriched logs", "POST /loki/api/v1/push")
-Rel(prometheus, core, "pull-scrapes /metrics endpoint", "HTTP GET — pull model only")
-Rel(grafana, loki, "queries logs", "LogQL")
-Rel(grafana, prometheus, "queries metrics", "PromQL")
+Rel(core, obs_platform, "writes structured logs to stdout", "stdout")
+Rel(obs_platform, core, "pull-scrapes /metrics endpoint", "HTTP GET")
 
 @enduml

@@ -86,6 +86,5 @@ EVL01 ..> EVL03 : <<include>>
 EVL01 ..> EVL04 : <<include>>
 EVL01 ..> EVL05 : <<include>>
 EVL01 ..> EVL06 : <<include>>
-EVL06 ..> EVL01 : <<extend>>
 
 @enduml

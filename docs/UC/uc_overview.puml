@@ -186,15 +186,10 @@ Agent --> UC_CTX
 ' ============================================================
 
 UC_CLI ..> UC_AGT : <<include>>
-UC_AGT ..> UC_PRV : <<include>>
-UC_AGT ..> UC_TL : <<include>>
-UC_AGT ..> UC_SAF : <<include>>
 UC_AGT ..> UC_RTG : <<include>>
-UC_AGT ..> UC_WRL : <<include>>
 UC_AGT ..> UC_CTX : <<include>>
-UC_AGT ..> UC_EDT : <<include>>
+UC_AGT ..> UC_EDT : <<extend>>
 UC_AGT ..> UC_EVL : <<extend>>
-UC_SRV ..> UC_AGT : <<include>>
 UC_OBS ..> UC_WRL : <<extend>>
 
 @enduml

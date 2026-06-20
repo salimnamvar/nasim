@@ -59,7 +59,7 @@ actor "HTTP Client" as HTTPClient <<system>>
 usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
 usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
 usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
-usecase "SSN-07\nSEARCH Sessions\n[uc_session]" as SSN07_ext <<extref>>
+usecase "SSN-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
 
 usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
 
@@ -72,11 +72,11 @@ usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
 rectangle "nasim" {
   package "Server Group (SRV)" {
     usecase "**SRV-01 LIST Sessions**\n--\nList all sessions with pagination" as SRV01
-    usecase "**SRV-02 INSERT Session**\n--\nCreate a new session" as SRV02
+    usecase "**SRV-02 CREATE Session**\n--\nCreate a new session" as SRV02
     usecase "**SRV-03 READ Session**\n--\nGet session details by ID" as SRV03
     usecase "**SRV-04 UPDATE Session**\n--\nUpdate session metadata" as SRV04
-    usecase "**SRV-05 RETIRE Session**\n--\nDelete a session" as SRV05
-    usecase "**SRV-06 DISPATCH Message**\n--\nSend message and receive SSE stream" as SRV06
+    usecase "**SRV-05 DELETE Session**\n--\nDelete a session" as SRV05
+    usecase "**SRV-06 SEND Message**\n--\nSend message and receive SSE stream" as SRV06
     usecase "**SRV-07 LIST Messages**\n--\nList messages in a session" as SRV07
     usecase "**SRV-08 LIST Tools**\n--\nList registered tools" as SRV08
     usecase "**SRV-09 READ Tool**\n--\nGet tool details" as SRV09
@@ -109,9 +109,9 @@ SRV01 ..> SSN03_ext : <<include>>
 SRV02 ..> SSN01_ext : <<include>>
 SRV03 ..> SSN02_ext : <<include>>
 SRV04 ..> SSN01_ext : <<include>>
-SRV05 ..> SSN01_ext : <<include>>
+SRV05 ..> SSN09_ext : <<include>>
 SRV06 ..> AGT01_ext : <<include>>
-SRV07 ..> SSN07_ext : <<include>>
+SRV07 ..> SSN02_ext : <<include>>
 SRV10 ..> CFG01_ext : <<include>>
 
 @enduml

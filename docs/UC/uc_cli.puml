@@ -88,7 +88,7 @@ Agent --> CLI06
 ' ============================================================
 
 CLI01 ..> CLI03 : <<include>>
-CLI04 ..> CLI01 : <<include>>
+CLI01 ..> CLI04 : <<include>>
 CLI01 ..> CLI06 : <<extend>>
 CLI08 ..> SSN03_ext : <<include>>
 

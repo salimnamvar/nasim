@@ -46,13 +46,13 @@ CLOSED : Terminal state.
 CREATED --> ACTIVE : SSN-01 session initialized
 ACTIVE --> SAVED : SSN-01 explicit save
 ACTIVE --> BRANCHED : WRL-04 fork session
-ACTIVE --> CLOSED : AGT-14 /quit or explicit close
+ACTIVE --> CLOSED : SSN-01 /quit or explicit close
 SAVED --> RESTORED : SSN-04 restore session
 RESTORED --> ACTIVE : SSN-04 session resumed
 RESTORED --> SAVED : SSN-01 save after restore
 BRANCHED --> ACTIVE : SSN-01 child session starts
-BRANCHED --> CLOSED : AGT-14 child session closed
-SAVED --> CLOSED : AGT-14 explicit close after save
+BRANCHED --> CLOSED : SSN-01 child session closed
+SAVED --> CLOSED : SSN-01 explicit close after save
 
 CLOSED --> [*]
 
