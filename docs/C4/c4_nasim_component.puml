@@ -1,0 +1,58 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+
+' ============================================================
+' Title:     nasim — Component Diagram
+' Boundary:  nasim code agent CLI
+' Purpose:   Show internal components, their responsibilities, and data flow
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    —
+' ============================================================
+
+title nasim — Component Diagram
+
+Container_Boundary(cli_boundary, "CLI Layer") {
+    Component(repl, "REPL", "cli.py", "Input loop, slash commands (/help, /reset, /quit), streaming display")
+    Component(arg_parser, "ArgParser", "cli.py", "CLI argument parsing (--model, --server, -c)")
+}
+
+Container_Boundary(agent_boundary, "Agent Core") {
+    Component(agent_loop, "AgentLoop", "agent.py", "Orchestrates LLM calls and tool execution, enforces max iterations")
+    Component(ctx_mgr, "ContextManager", "agent.py", "Maintains message list, system prompt, history reset")
+}
+
+Container_Boundary(llm_boundary, "LLM Layer") {
+    Component(ollama_client, "OllamaClient", "llm.py", "HTTP client for Ollama /api/chat, supports streaming and tool calls")
+    Component(response_parser, "ResponseParser", "llm.py", "Parses Ollama response into LLMResponse with ToolCall objects")
+}
+
+Container_Boundary(tool_boundary, "Tool Layer") {
+    Component(tool_registry, "ToolRegistry", "tools.py", "Decorator-based registration, OpenAI-compatible tool definitions")
+    Component(tool_executor, "ToolExecutor", "tools.py", "Dispatches tool calls, handles errors, returns string results")
+    Component(file_tools, "FileTools", "tools.py", "read_file, write_file, edit_file implementations")
+    Component(shell_tool, "ShellTool", "tools.py", "shell_exec with timeout support")
+    Component(dir_tool, "DirTool", "tools.py", "list_dir implementation")
+}
+
+System_Ext(ollama, "Ollama Server", "HTTP API")
+System_Ext(host_fs, "Host Filesystem")
+System_Ext(host_shell, "Host Shell")
+
+Rel(repl, agent_loop, "user input -> final response")
+Rel(repl, arg_parser, "parses args")
+Rel(agent_loop, ctx_mgr, "get/build message list")
+Rel(agent_loop, ollama_client, "chat(messages, tools)")
+Rel(agent_loop, tool_executor, "execute_tool(name, args)")
+Rel(ollama_client, response_parser, "raw JSON -> LLMResponse")
+Rel(ollama_client, ollama, "HTTP POST", "JSON")
+Rel(tool_executor, tool_registry, "lookup handler by name")
+Rel(tool_executor, file_tools, "read/write/edit")
+Rel(tool_executor, shell_tool, "subprocess.run")
+Rel(tool_executor, dir_tool, "pathlib iteration")
+Rel(file_tools, host_fs, "path I/O")
+Rel(shell_tool, host_shell, "subprocess")
+Rel(dir_tool, host_fs, "directory listing")
+
+SHOW_LEGEND()

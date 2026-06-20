@@ -1,0 +1,41 @@
+@startuml sm_agent_lifecycle
+' ============================================================
+' Title:     nasim — Agent Lifecycle State Machine
+' Boundary:  nasim code agent CLI
+' Purpose:   Define agent states and transitions during task execution
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    —
+' ============================================================
+
+skinparam state {
+    BackgroundColor<<idle>> #E8F5E9
+    BackgroundColor<<listening>> #E3F2FD
+    BackgroundColor<<thinking>> #FFF3E0
+    BackgroundColor<<tool_exec>> #F3E5F5
+    BackgroundColor<<responding>> #FCE4EC
+    BackgroundColor<<error>> #FFEBEE
+}
+
+state "IDLE" as idle <<idle>> : Waiting for user input
+state "LISTENING" as listening <<listening>> : Receiving and parsing user input
+state "THINKING" as thinking <<thinking>> : LLM processing, generating response or tool calls
+state "TOOL_EXEC" as tool_exec <<tool_exec>> : Executing a tool call from LLM
+state "RESPONDING" as responding <<responding>> : Streaming final text response to user
+state "ERROR" as error <<error>> : Error occurred, displaying error message
+
+[*] --> idle
+idle --> listening : user input received
+listening --> thinking : input parsed, messages built
+thinking --> responding : LLM returns text (no tool calls)
+thinking --> tool_exec : LLM returns tool calls
+tool_exec --> thinking : tool result appended to messages
+responding --> idle : response complete
+thinking --> error : LLM call fails
+tool_exec --> error : tool execution fails
+error --> idle : error displayed
+
+idle --> [*] : /quit or EOF
+
+@enduml

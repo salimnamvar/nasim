@@ -1,0 +1,30 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
+!theme plain
+LAYOUT_LEFT_RIGHT()
+
+' ============================================================
+' Title:     nasim — System Context
+' Boundary:  nasim code agent CLI
+' Purpose:   Show nasim as a system and its external dependencies
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    —
+' ============================================================
+
+title nasim — System Context
+
+Person(user, "Developer", "Uses terminal to interact with nasim")
+
+System(nasim, "nasim", "CLI code agent that reads, writes, and edits code using an LLM")
+
+System_Ext(ollama, "Ollama Server", "LLM inference API on remote host (black)")
+System_Ext(host_fs, "Host Filesystem", "Project files and directories")
+System_Ext(host_shell, "Host Shell", "Shell for executing commands")
+
+Rel(user, nasim, "types commands and reads output", "terminal")
+Rel(nasim, ollama, "sends chat requests, receives responses", "HTTP/JSON")
+Rel(nasim, host_fs, "reads and writes files", "path operations")
+Rel(nasim, host_shell, "executes shell commands", "subprocess")
+
+SHOW_LEGEND()

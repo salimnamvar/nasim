@@ -1,0 +1,29 @@
+@startuml uc_cli
+' ============================================================
+' Title:     nasim — UC: CLI Interaction
+' Boundary:  nasim code agent CLI
+' Purpose:   User interactions with the CLI layer
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Developer" as user
+
+rectangle "CLI Interaction" {
+    usecase "Process User Input" as UC_CLI_01
+    usecase "Execute Slash Command" as UC_CLI_02
+    usecase "Display Streaming Output" as UC_CLI_03
+    usecase "Parse CLI Arguments" as UC_CLI_04
+}
+
+user --> UC_CLI_01
+user --> UC_CLI_02
+UC_CLI_01 ..> UC_CLI_03 : <<include>>
+UC_CLI_04 ..> UC_CLI_01 : <<include>>
+
+@enduml

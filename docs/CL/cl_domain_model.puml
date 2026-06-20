@@ -1,0 +1,72 @@
+@startuml cl_domain_model
+' ============================================================
+' Title:     nasim — Domain Model
+' Boundary:  nasim code agent CLI
+' Purpose:   Core domain classes and their relationships
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    —
+' ============================================================
+
+skinparam classAttributeIconSize 0
+
+package "LLM Layer" {
+    class OllamaClient {
+        + base_url : str
+        + model : str
+        + timeout : int
+        + chat(messages, tools) : LLMResponse
+        + chat_stream(messages, tools) : Iterator
+    }
+
+    class LLMResponse {
+        + content : str
+        + tool_calls : list[ToolCall]
+        + done : bool
+        + total_duration_ms : float
+        + eval_count : int
+    }
+
+    class ToolCall {
+        + name : str
+        + arguments : dict
+        + id : str
+    }
+}
+
+package "Agent Core" {
+    class Agent {
+        - client : OllamaClient
+        - messages : list[dict]
+        - tools : list[dict]
+        - max_iterations : int
+        + run(user_input) : str
+        + run_streaming(user_input) : str
+        + reset()
+    }
+}
+
+package "Tool Layer" {
+    class ToolDef {
+        + name : str
+        + description : str
+        + parameters : dict
+        + handler : Callable
+    }
+
+    class ToolRegistry {
+        + TOOL_REGISTRY : dict
+        + register(tool_def)
+        + get_definitions() : list[dict]
+        + execute(name, args) : str
+    }
+}
+
+OllamaClient --> LLMResponse : returns
+LLMResponse --> ToolCall : contains
+Agent --> OllamaClient : uses
+Agent --> ToolRegistry : dispatches to
+ToolRegistry --> ToolDef : manages
+
+@enduml

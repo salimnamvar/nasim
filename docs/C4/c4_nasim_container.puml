@@ -1,0 +1,39 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
+!theme plain
+
+' ============================================================
+' Title:     nasim — Container Diagram
+' Boundary:  nasim code agent CLI
+' Purpose:   Show the deployable units and their technology choices
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    —
+' ============================================================
+
+title nasim — Container Diagram
+
+Person(user, "Developer", "Terminal user")
+
+System_Boundary(nasim, "nasim") {
+    Container(cli, "CLI", "Python REPL", "Interactive terminal interface, command parsing, slash commands")
+    Container(agent, "Agent", "Python", "Core agentic loop: LLM call -> tool dispatch -> result loop")
+    Container(llm_client, "LLM Client", "Python requests", "Ollama API client with streaming and tool call parsing")
+    Container(tool_manager, "Tool Manager", "Python", "Tool registry, dispatch, and execution")
+    Container(ctx_manager, "Context Manager", "Python", "Conversation history and system prompt management")
+}
+
+System_Ext(ollama, "Ollama Server", "LLM inference on black (qwen2.5-coder:14b)")
+System_Ext(host_fs, "Host Filesystem", "Project code files")
+System_Ext(host_shell, "Host Shell", "subprocess execution")
+
+Rel(user, cli, "types input, reads output")
+Rel(cli, agent, "sends user input, receives final response")
+Rel(agent, ctx_manager, "manages conversation messages")
+Rel(agent, llm_client, "calls LLM with messages + tools")
+Rel(agent, tool_manager, "dispatches tool calls")
+Rel(llm_client, ollama, "HTTP POST /api/chat", "JSON streaming")
+Rel(tool_manager, host_fs, "read/write/edit files")
+Rel(tool_manager, host_shell, "execute commands")
+
+SHOW_LEGEND()
