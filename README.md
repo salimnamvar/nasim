@@ -2,7 +2,7 @@
 
 **nasim** — a research code agent.
 
-Built through systematic investigation and original synthesis of patterns from 25+ reference agents (aider, cline, SWE-agent, goose, opencode, codex, plandex, OpenHands and others listed in `docs/ref/agents.md`). **Not a copy or fork of any existing agent.**
+Built through systematic investigation and original synthesis of usage patterns.
 
 Current status: early functional proof-of-concept with a clean design chain already in place for the target architecture.
 
@@ -90,12 +90,8 @@ Copyright 2026 Salim Namvar.
 
 ## Status & philosophy
 
-nasim exists to explore what a high-quality, understandable, and extensible code agent looks like when you start from first principles and real usage patterns across many existing tools — without cloning any of them.
+nasim exists to explore what a high-quality, understandable, and extensible code agent looks like when you start from first principles and real usage patterns.
 
 The heavy design work (C4 → Code) has already been done. Implementation will follow the documented architecture.
 
 Contributions that respect the design chain and the "original synthesis" goal are welcome once the project stabilizes.
-
----
-
-**Future home (planned):** Will move under the WAF Tech (Wadi Al Faiha Technologies) organization on GitHub once the company GitHub presence is established. The license and contribution model are chosen to make that transition clean.
