@@ -45,6 +45,7 @@ skinparam actor<<system>> {
 
 actor "Developer" as Developer
 actor "HTTP Client" as HTTPClient <<system>>
+actor "Agent" as Agent <<system>>
 
 ' ============================================================
 ' System Boundary
@@ -79,6 +80,13 @@ rectangle "nasim" {
 
 Developer --> AGT01
 HTTPClient --> AGT01
+Agent --> AGT04
+Agent --> AGT07
+Agent --> AGT11
+Agent --> AGT12
+Agent --> AGT13
+Agent --> AGT15
+Agent --> SAF01
 
 ' ============================================================
 ' Relationships

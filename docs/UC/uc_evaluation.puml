@@ -68,6 +68,14 @@ rectangle "nasim" {
 ' ============================================================
 
 Agent --> EVL01
+Agent --> EVL02
+Agent --> EVL03
+Agent --> EVL04
+Agent --> EVL05
+Agent --> EVL06
+Agent --> EVL07
+Agent --> EVL08
+Agent --> EVL09
 
 ' ============================================================
 ' Relationships

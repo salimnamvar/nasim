@@ -62,8 +62,10 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
+Agent --> PRV01
 Agent --> PRV02
 Agent --> PRV03
+Agent --> PRV04
 
 ' ============================================================
 ' Relationships

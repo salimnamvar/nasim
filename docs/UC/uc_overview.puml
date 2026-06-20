@@ -47,6 +47,7 @@ actor "Developer" as Developer
 actor "HTTP Client" as HTTPClient <<system>>
 actor "MCP Client" as MCPClient <<system>>
 actor "Observability Platform" as Platform <<system>>
+actor "Agent" as Agent <<system>>
 
 ' ============================================================
 ' System Boundary

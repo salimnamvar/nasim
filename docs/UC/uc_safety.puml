@@ -38,6 +38,7 @@ skinparam actor {
 ' ============================================================
 
 actor "Developer" as Developer
+actor "Agent" as Agent <<system>>
 
 ' ============================================================
 ' System Boundary
@@ -56,6 +57,8 @@ rectangle "nasim" {
 ' ============================================================
 
 Developer --> SAF02
+Agent --> SAF01
+Agent --> SAF03
 
 ' ============================================================
 ' Relationships

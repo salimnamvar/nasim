@@ -38,6 +38,7 @@ skinparam actor {
 ' ============================================================
 
 actor "Developer" as Developer
+actor "Agent" as Agent <<system>>
 
 ' ============================================================
 ' System Boundary
@@ -65,6 +66,9 @@ Developer --> CLI02
 Developer --> CLI05
 Developer --> CLI07
 Developer --> CLI08
+Agent --> CLI03
+Agent --> CLI04
+Agent --> CLI06
 
 ' ============================================================
 ' Relationships

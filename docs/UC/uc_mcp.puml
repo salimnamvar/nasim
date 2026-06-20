@@ -45,6 +45,7 @@ skinparam actor<<system>> {
 
 actor "Developer" as Developer
 actor "MCP Client" as MCPClient <<system>>
+actor "Agent" as Agent <<system>>
 
 ' ============================================================
 ' System Boundary
@@ -65,6 +66,8 @@ rectangle "nasim" {
 
 Developer --> MCP02
 MCPClient --> MCP04
+Agent --> MCP01
+Agent --> MCP03
 
 ' ============================================================
 ' Relationships

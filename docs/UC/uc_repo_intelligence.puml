@@ -64,6 +64,11 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
+Agent --> RIM01
+Agent --> RIM02
+Agent --> RIM03
+Agent --> RIM04
+Agent --> RIM05
 Agent --> RIM06
 
 ' ============================================================

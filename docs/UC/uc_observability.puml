@@ -45,6 +45,7 @@ skinparam actor<<system>> {
 
 actor "HTTP Client" as HTTPClient <<system>>
 actor "Observability Platform" as Platform <<system>>
+actor "Agent" as Agent <<system>>
 
 ' ============================================================
 ' System Boundary
@@ -67,6 +68,11 @@ rectangle "nasim" {
 
 HTTPClient --> OBS05
 Platform --> OBS05
+Agent --> OBS01
+Agent --> OBS02
+Agent --> OBS03
+Agent --> OBS04
+Agent --> OBS06
 
 ' ============================================================
 ' Relationships
