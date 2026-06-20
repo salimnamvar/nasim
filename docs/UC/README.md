@@ -24,10 +24,10 @@
 | AGT-13 | AGT | SWITCH Persona | PersonaManager |
 | AGT-14 | AGT | HANDLE Error | ErrorBoundary |
 | AGT-15 | AGT | DISPATCH Safety Pipeline | SafetyCoordinator |
-| PRV-01 | PRV | REGISTER Provider | ProviderFactory |
+| PRV-01 | PRV | REGISTER Provider | LiteLLMProxy |
 | PRV-02 | PRV | REQUEST Chat | Provider |
 | PRV-03 | PRV | STREAM Chat | Provider |
-| PRV-04 | PRV | SELECT Provider Backend | ProviderFactory |
+| PRV-04 | PRV | SELECT Provider Backend | LiteLLMProxy |
 | CFG-01 | CFG | LOAD Config | ConfigLoader |
 | CFG-02 | CFG | VALIDATE Config | ConfigLoader |
 | CFG-03 | CFG | APPLY Layered Config | ConfigLoader |
@@ -39,9 +39,9 @@
 | SSN-06 | SSN | REVERT Turn | SessionVersioning |
 | SSN-07 | SSN | SEARCH Sessions | SessionSearch |
 | SSN-08 | SSN | BRANCH Session | SessionFork |
-| SAF-01 | SAF | CHECK Permission | PermissionGate |
-| SAF-02 | SAF | REQUEST Approval | PermissionGate |
-| SAF-03 | SAF | APPLY Safety Mode | PermissionGate |
+| SAF-01 | SAF | CHECK Permission | SafetyCoordinator |
+| SAF-02 | SAF | REQUEST Approval | SafetyCoordinator |
+| SAF-03 | SAF | APPLY Safety Mode | SafetyCoordinator |
 | CTX-01 | CTX | PROCESS Context | PipelineOrchestrator |
 | CTX-02 | CTX | TRUNCATE Nodes | TruncationProcessor |
 | CTX-03 | CTX | DISTILL Nodes | DistillationProcessor |

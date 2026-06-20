@@ -82,7 +82,7 @@ rectangle "nasim" {
   }
 
   package "Server (SRV)" {
-    usecase "**SRV-01 LIST Sessions**\n--\nRESTful API + SSE streaming" as SRV01
+    usecase "**SRV-01 LIST Sessions**\n--\nList all sessions with pagination" as SRV01
   }
 
   package "Hooks (HK)" {
