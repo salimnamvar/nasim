@@ -3,7 +3,7 @@
 **Date:** 2026-06-20
 **Scope:** Full capability gap analysis against 25 reference code agents; architecture
 quality audit of `nasim/` source; design chain readiness for the target architecture.
-**Method:** Deep code inspection of all reference repos under `/home/salim/prj/salim/nasim/code/`;
+**Method:** Deep code inspection of all 25+ reference agent repositories (listed in `docs/ref/agents.md`);
 traceability check against current `nasim/` source; application of all global
 software-design rules.
 **Companion audit:** `audit_2026-06-20_design-chain.md` (design chain consistency only).
