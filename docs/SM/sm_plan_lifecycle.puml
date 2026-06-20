@@ -53,7 +53,7 @@ BUILDING --> EMPTY : AGT-07 /plan off
 QUEUED --> APPROVED : AGT-08 /approve
 QUEUED --> REJECTED : AGT-08 user rejects
 APPROVED --> EXECUTING : AGT-08 execution starts
-EXECUTING --> COMPLETED : AGT-08 all steps done
+EXECUTING --> COMPLETED : AGT-01 all steps executed
 EXECUTING --> EMPTY : Execution error, plan discarded
 COMPLETED --> [*]
 REJECTED --> [*]

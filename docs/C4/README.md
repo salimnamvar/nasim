@@ -12,11 +12,11 @@
 
 | Diagram | Group | Components |
 |---------|-------|------------|
-| c4_nasim_component_agent.puml | Agent | AgentOrchestrator, ConversationHistory, ContextCompactor, SubagentCoordinator, ErrorBoundary, PersonaManager |
+| c4_nasim_component_agent.puml | Agent | AgentOrchestrator, ConversationHistory, ContextCompactor, PlanSession, SubagentCoordinator, ErrorBoundary, PersonaManager, CompactionPolicy |
 | c4_nasim_component_provider.puml | Provider | Provider (Protocol), LiteLLMProxy |
 | c4_nasim_component_tools.puml | Tools | Tool (ABC), ToolRegistry, FileTools, SearchTools, ShellTool, DirTool, WebTools, GitTool, LspTool, SubagentTool, TodoTool, MemoryTool, PlanTool, RepoMapTool, SemanticSearchTool, ReviewTool |
 | c4_nasim_component_mcp.puml | MCP | MCPClientRuntime, MCPServerRuntime, MCPToolAdapter, MCPDiscovery |
-| c4_nasim_component_config.puml | Config | ConfigLoader |
+| c4_nasim_component_config.puml | Config | ConfigLoader, Config (dataclass) |
 | c4_nasim_component_session.puml | Session | SessionStore, SessionVersioning, SessionSearch, SessionFork |
 | c4_nasim_component_server.puml | Server | ServerApp, ServerRouter, SSEHandler, APISchema |
 | c4_nasim_component_hooks.puml | Hooks | HookManager |
@@ -29,10 +29,9 @@
 | c4_nasim_component_git.puml | Git | GitIntegration, GitStatus, GitCommit |
 | c4_nasim_component_repo_intelligence.puml | Repo Intelligence | RepoIntelligenceManager, ASTIndexAdapter, SymbolGraph, RankingService, EmbeddingAdapter, SemanticSearchService, RepoMapBuilder |
 | c4_nasim_component_edit_strategy.puml | Edit Strategy | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector, StrategyHeuristics |
-| c4_nasim_component_evaluation.puml | Evaluation | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector |
+| c4_nasim_component_evaluation.puml | Evaluation | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector, QualitySignal |
 | c4_nasim_component_wire_log.puml | Wire Log | WireLog, WireAppender, WireReader, TurnIndex, SessionForkManager |
 | c4_nasim_component_context_graph.puml | Context Graph | ContextGraph, ContextProcessor (ABC), PipelineOrchestrator, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
-| c4_nasim_component_subagent.puml | Subagent | SubagentCoordinator, AgentOrchestrator (child) |
 
 ## Actors
 
@@ -64,8 +63,8 @@
 ## Architecture Principles (p1.md Compliance)
 
 - **3 deployable units only:** CLI process, HTTP Server process, Core Library
-- **Single Responsibility per group:** Agent=orchestration, Provider=inference, Tool=execution, MCP=protocol, Config=configuration, Session=persistence, Server=HTTP API, Hooks=extensibility, Plugins=discovery, Sandbox=isolation, Observability=logging, Memory=knowledge, Git=version control, RepoIntelligence=codebase indexing, EditStrategy=edit polymorphism, Evaluation=quality, WireLog=event log, ContextGraph=pipeline
-- **No God Objects:** AgentOrchestrator delegates to SafetyCoordinator, SubagentCoordinator, PersonaManager, ErrorBoundary
+- **Single Responsibility per group:** Agent=orchestration, Provider=inference, Router=model selection, Tool=execution, MCP=protocol, Config=configuration, Session=persistence, Server=HTTP API, Hooks=extensibility, Plugins=discovery, Sandbox=isolation, Safety=permission scanning, Observability=logging, Memory=knowledge, Git=version control, RepoIntelligence=codebase indexing, EditStrategy=edit polymorphism, Evaluation=quality, WireLog=event log, ContextGraph=pipeline
+- **No God Objects:** AgentOrchestrator delegates to SafetyCoordinator (Safety group), SubagentCoordinator, PersonaManager, ErrorBoundary
 - **MCP first-class:** ClientRuntime, ServerRuntime, ToolAdapter, Discovery as separate components
 - **No System_Ext abuse:** Internal containers referenced via Container_Ext only
 - **No orphan components:** Every component in detail diagrams appears in the cross-container overview

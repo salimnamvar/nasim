@@ -26,12 +26,6 @@ Container_Boundary(provider_boundary, "Provider Group") {
     Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name. All providers route through litellm.")
 
     Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")
-
-    Component(model_router, "ModelRouter", "", "Model selection: task classification, provider preference, context window matching")
-
-    Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
-
-    Component(provider_caps, "ProviderCapabilities", "", "Capability declaration + static metadata: streaming, tools, vision, reasoning, context limits, pricing")
 }
 
 ' ============================================================
@@ -44,9 +38,6 @@ System_Ext(all_llm_backends, "100+ LLM Backends", "Unified via litellm. Includes
 ' Provider Relationships
 ' ============================================================
 
-Rel(model_router, provider, "selects provider for task")
-Rel(model_router, provider_caps, "queries capabilities & metadata")
-Rel(model_router, fallback_chain, "triggers failover on error")
 Rel(provider, litellm_proxy, "delegates all LLM calls")
 Rel(litellm_proxy, all_llm_backends, "routes via model string prefix", "HTTP/JSON")
 

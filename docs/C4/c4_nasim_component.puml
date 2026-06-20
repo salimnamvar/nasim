@@ -24,11 +24,18 @@ Container_Boundary(core_library, "Core Library") {
         Component(plan_session, "PlanSession", "", "Holds queued tool calls in plan mode. /approve drains the queue")
         Component(conv_history, "ConversationHistory", "", "Owns messages and token count. Triggers compaction when budget exceeded")
         Component(compactor, "ContextCompactor", "", "Summarizes old exchanges via secondary LLM call")
+        Component(compaction_policy, "CompactionPolicy", "", "Compaction rules: token threshold, message age, importance scoring")
     }
 
     Container_Boundary(provider_group, "Provider Group") {
         Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name")
         Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix")
+    }
+
+    Container_Boundary(router_group, "Router Group") {
+        Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
+        Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
+        Component(provider_caps, "ProviderCapabilities", "", "Capability declaration + static metadata: streaming, tools, vision, reasoning, context limits, pricing")
     }
 
     Container_Boundary(tool_group, "Tool Group") {
@@ -57,6 +64,7 @@ Container_Boundary(core_library, "Core Library") {
 
     Container_Boundary(config_group, "Config Group") {
         Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags")
+        Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety_mode, context_budget, mcp_servers")
     }
 
     Container_Boundary(session_group, "Session Group") {
@@ -91,6 +99,13 @@ Container_Boundary(core_library, "Core Library") {
         Component(diff_computer, "DiffComputer", "", "Computes diffs between original and staged content")
         Component(diff_presenter, "DiffPresenter", "", "Formats diffs for human review and approval")
         Component(staged_applicator, "StagedApplicator", "", "Applies approved staged diffs to filesystem")
+    }
+
+    Container_Boundary(safety_group, "Safety Group") {
+        Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
+        Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")
+        Component(injection_scanner, "InjectionScanner", "", "Detects prompt injection patterns in tool outputs")
+        Component(egress_inspector, "EgressInspector", "", "Inspects outbound data for policy violations")
     }
 
     Container_Boundary(observability_group, "Observability Group") {
@@ -154,6 +169,7 @@ Container_Boundary(core_library, "Core Library") {
         Component(retry_coordinator, "RetryCoordinator", "", "Coordinates retry attempts with backoff and escalation")
         Component(repetition_detector, "RepetitionDetector", "", "Detects repeated failures or loops, triggers escalation")
         Component(turn_budget_injector, "TurnBudgetInjector", "", "Injects turn budget limits and progress signals into context")
+        Component(quality_signal, "QualitySignal", "", "Records quality metrics: task success, retry counts, token usage, latency")
     }
 
     Container_Boundary(wire_log_group, "Wire Log Group") {

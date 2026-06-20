@@ -24,6 +24,7 @@ Container_Boundary(evaluation_boundary, "Evaluation Group") {
     Component(retry_coordinator, "RetryCoordinator", "", "Coordinates retry attempts with backoff and escalation")
     Component(repetition_detector, "RepetitionDetector", "", "Detects repeated failures or loops, triggers escalation")
     Component(turn_budget_injector, "TurnBudgetInjector", "", "Injects turn budget limits and progress signals into context")
+    Component(quality_signal, "QualitySignal", "", "Records quality metrics: task success, retry counts, token usage, latency")
 }
 
 Container_Ext(provider_group, "Provider Group")
