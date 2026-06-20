@@ -1,11 +1,11 @@
 @startuml uc_agent
 ' ============================================================
 ' Title:     nasim — UC: Agent Core
-' Boundary:  nasim code agent CLI
-' Purpose:   Core agentic loop operations and new capabilities
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Core agentic loop, permissions, context, plans, hooks
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md
 ' Review:    —
 ' ============================================================
 
@@ -13,6 +13,7 @@ left to right direction
 skinparam packageStyle rectangle
 
 actor "Developer" as user
+actor "HTTP Client" as client
 
 rectangle "Agent Core" {
     usecase "PROCESS User Task" as UC_AGT_01
@@ -23,13 +24,23 @@ rectangle "Agent Core" {
     usecase "COMPACT Context" as UC_AGT_06
     usecase "Queue Plan" as UC_AGT_07
     usecase "APPROVE Plan" as UC_AGT_08
+    usecase "Execute Pre-Tool Hook" as UC_HK_02
+    usecase "Execute Post-Tool Hook" as UC_HK_03
+}
+
+rectangle "Provider Layer" {
+    usecase "Select Model" as UC_RTG_01
 }
 
 user --> UC_AGT_01
+client --> UC_AGT_01
 UC_AGT_01 ..> UC_AGT_02 : <<include>>
 UC_AGT_01 ..> UC_AGT_03 : <<include>>
 UC_AGT_02 ..> UC_AGT_05 : <<include>>
+UC_AGT_02 ..> UC_HK_02 : <<include>>
+UC_AGT_02 ..> UC_HK_03 : <<include>>
 UC_AGT_01 ..> UC_AGT_06 : <<extend>>
 UC_AGT_07 ..> UC_AGT_08 : <<extend>>
+UC_AGT_01 ..> UC_RTG_01 : <<include>>
 
 @enduml

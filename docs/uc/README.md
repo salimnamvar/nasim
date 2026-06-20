@@ -8,6 +8,8 @@
 | CLI-04 | CLI | Parse CLI Arguments | ArgParser |
 | CLI-05 | CLI | Toggle Plan Mode | SlashCommandHandler |
 | CLI-06 | CLI | Prompt Safety Approval | Renderer |
+| CLI-07 | CLI | Switch Model | SlashCommandHandler |
+| CLI-08 | CLI | List Sessions | SlashCommandHandler |
 | AGT-01 | AGT | PROCESS User Task | AgentOrchestrator |
 | AGT-02 | AGT | DISPATCH Tool Call | AgentOrchestrator |
 | AGT-03 | AGT | Manage Conversation | ConversationHistory |
@@ -47,3 +49,27 @@
 | TL-10 | TL | SEARCH Web | WebSearchTool |
 | TL-11 | TL | Git Status Diff Commit | GitTool |
 | TL-12 | TL | Invoke MCP Extension | MCPToolAdapter |
+| TL-13 | TL | LSP Operations | LspTool |
+| TL-14 | TL | List Registered Tools | ToolRegistry |
+| SRV-01 | SRV | Start Server | ServerApp |
+| SRV-02 | SRV | Create Session | ServerRouter |
+| SRV-03 | SRV | Send Message | ServerRouter |
+| SRV-04 | SRV | Stream Response | SSEHandler |
+| SRV-05 | SRV | Get Message History | ServerRouter |
+| SRV-06 | SRV | List Tools | ServerRouter |
+| SRV-07 | SRV | Get Config | ServerRouter |
+| HK-01 | HK | Register Hook | HookManager |
+| HK-02 | HK | Execute Pre-Tool Hook | HookManager |
+| HK-03 | HK | Execute Post-Tool Hook | HookManager |
+| HK-04 | HK | Execute Pre-LLM Hook | HookManager |
+| HK-05 | HK | Execute Post-LLM Hook | HookManager |
+| HK-06 | HK | Evaluate Hook Result | HookManager |
+| PLG-01 | PLG | Discover Plugins | PluginLoader |
+| PLG-02 | PLG | Load Plugin Manifest | PluginLoader |
+| PLG-03 | PLG | Register Plugin Tools | PluginLoader |
+| PLG-04 | PLG | Register Plugin Hooks | PluginLoader |
+| PLG-05 | PLG | Enable/Disable Plugin | PluginLoader |
+| RTG-01 | RTG | Select Model | ModelRouter |
+| RTG-02 | RTG | Apply Fallback | ModelRouter |
+| RTG-03 | RTG | Classify Task | ModelRouter |
+| RTG-04 | RTG | Switch Model Mid-Session | ModelRouter |

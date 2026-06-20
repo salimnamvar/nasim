@@ -1,0 +1,30 @@
+@startuml sq_srv02_create_session
+' ============================================================
+' Title:     nasim — SQ: Create Session (API)
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Create a new session via HTTP API
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-11
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Create Session via API (SRV-02)
+
+participant "HTTP Client" as client
+participant "ServerRouter" as router
+participant "SessionStore" as store
+
+== Create Session ==
+
+client -> router : POST /v1/sessions
+activate router
+router -> store : save(session_id, [])
+activate store
+store --> router : Session created
+deactivate store
+
+router --> client : 201 {session_id, created_at}
+deactivate router
+
+@enduml

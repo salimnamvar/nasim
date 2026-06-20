@@ -4,31 +4,35 @@ LAYOUT_LEFT_RIGHT()
 
 ' ============================================================
 ' Title:     nasim — System Context
-' Boundary:  nasim code agent CLI
-' Purpose:   Show nasim as a system and all external dependencies
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Show nasim as a system with all interfaces and external dependencies
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md
 ' Review:    —
 ' ============================================================
 
 title nasim — System Context
 
-Person(user, "Developer", "Uses terminal to interact with nasim")
+Person(dev, "Developer", "Uses terminal or web UI to interact with nasim")
+Person(http_client, "HTTP Client", "Web-app, mobile-app, desktop-app connecting via HTTP/SSE")
 
-System(nasim, "nasim", "CLI code agent that reads, writes, searches, and edits code using LLM providers")
+System(nasim, "nasim", "Multi-interface code agent: CLI REPL + HTTP API + MCP server")
 
 System_Ext(llm_provider, "LLM Provider", "Inference API: Ollama, OpenAI, Anthropic, or compatible backend")
 System_Ext(host_fs, "Host Filesystem", "Project files and directories")
 System_Ext(host_shell, "Host Shell", "Shell for executing commands")
 System_Ext(web, "Web", "Documentation, package APIs, search engines")
 System_Ext(mcp_server, "MCP Server", "Extension tools via Model Context Protocol")
+System_Ext(mcp_client, "MCP Client", "External tools connecting to nasim MCP server")
 
-Rel(user, nasim, "types commands and reads output", "terminal")
+Rel(dev, nasim, "types commands and reads output", "terminal")
+Rel(http_client, nasim, "sends requests, receives SSE streams", "HTTP/JSON")
 Rel(nasim, llm_provider, "sends chat requests, receives responses", "HTTP/JSON")
 Rel(nasim, host_fs, "reads, writes, searches files", "path operations")
 Rel(nasim, host_shell, "executes shell commands", "subprocess")
 Rel(nasim, web, "fetches documentation, searches", "HTTP")
 Rel(nasim, mcp_server, "discovers and invokes extension tools", "stdio/SSE")
+Rel(mcp_client, nasim, "invokes nasim tools via MCP protocol", "stdio/SSE")
 
 SHOW_LEGEND()

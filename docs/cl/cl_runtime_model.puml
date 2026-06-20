@@ -1,16 +1,15 @@
 @startuml cl_runtime_model
 ' ============================================================
 ' Title:     nasim — Runtime Model
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent CLI + HTTP API
 ' Purpose:   Core runtime classes and their relationships
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md
 ' Review:    —
-' Note:      This is a runtime structure diagram, not a pure domain
-'            model. nasim has no business domain entities — these are
-'            the classes that comprise the agent system. Documented
-'            deviation from cl.md domain-only policy.
+' Note:      Runtime structure diagram. nasim has no business domain
+'            entities — these are the classes that comprise the agent
+'            system. Documented deviation from cl.md domain-only policy.
 ' ============================================================
 
 skinparam classAttributeIconSize 0
@@ -49,6 +48,12 @@ package "Provider Layer" #FFF3E0 {
         + select_backend(name) : type
     }
 
+    class ModelRouter {
+        + select_model(task_type) : str
+        + apply_fallback(model) : str
+        + classify_task(input) : str
+    }
+
     class LLMResponse {
         + content : str
         + tool_calls : list[ToolCall]
@@ -71,6 +76,8 @@ package "Agent Layer" #E3F2FD {
         - history : ConversationHistory
         - perm_gate : PermissionGate
         - plan : PlanSession
+        - hooks : HookManager
+        - router : ModelRouter
         + PROCESS(user_input) : Iterator[AgentEvent]
         + reset()
     }
@@ -113,7 +120,7 @@ package "Agent Layer" #E3F2FD {
         + name : str
         + args : dict
     }
-    class ToolResult {
+    class ToolResultEvent {
         + name : str
         + success : bool
         + content : str
@@ -177,6 +184,9 @@ package "Tool Layer" #F3E5F5 {
     class GitTool {
         + execute(action, args) : ToolResult
     }
+    class LspTool {
+        + execute(operation, file, position) : ToolResult
+    }
     class MCPToolAdapter {
         + execute(tool_name, args) : ToolResult
     }
@@ -192,6 +202,8 @@ package "Config Layer" #E0F7FA {
         + timeout : int
         + max_iterations : int
         + mcp_servers : list[dict]
+        + server_port : int
+        + hooks : list[dict]
     }
 
     class ConfigLoader {
@@ -219,6 +231,79 @@ package "Session Layer" #F1F8E9 {
     }
 }
 
+package "Server Layer" #E0F2F1 {
+    class ServerApp {
+        + create_app(config, agent) : ASGIApp
+        + add_routes(router)
+    }
+
+    class ServerRouter {
+        + create_session(request) : Response
+        + send_message(session_id, message) : Response
+        + stream_response(session_id) : EventSource
+        + get_messages(session_id) : Response
+        + list_tools() : Response
+        + get_config() : Response
+    }
+
+    class SSEHandler {
+        + stream_events(events) : EventSourceResponse
+    }
+
+    class APISchema {
+        + SessionCreate : BaseModel
+        + MessageCreate : BaseModel
+        + SessionResponse : BaseModel
+        + MessageResponse : BaseModel
+    }
+}
+
+package "Hook Layer" #E8EAF6 {
+    class HookManager {
+        - hooks : dict[str, list[Hook]]
+        + register(event, hook)
+        + execute_pre_tool(tool_name, args) : HookResult
+        + execute_post_tool(tool_name, result) : HookResult
+        + execute_pre_llm(messages) : HookResult
+        + execute_post_llm(response) : HookResult
+    }
+
+    class Hook {
+        + name : str
+        + event : str
+        + handler : Callable
+    }
+
+    class HookResult {
+        + allow : bool
+        + modified_input : dict | None
+        + message : str | None
+    }
+}
+
+package "Plugin Layer" #FFF3E0 {
+    class PluginLoader {
+        + discover(plugin_dir) : list[PluginManifest]
+        + load(manifest) : Plugin
+        + register_tools(plugin, registry)
+        + register_hooks(plugin, hook_manager)
+    }
+
+    class PluginManifest {
+        + name : str
+        + version : str
+        + description : str
+        + tools : list[str]
+        + hooks : list[str]
+    }
+
+    class Plugin {
+        + manifest : PluginManifest
+        + get_tools() : list[Tool]
+        + get_hooks() : list[Hook]
+    }
+}
+
 ' Relationships
 Provider <|.. OllamaProvider
 Provider <|.. OpenAIProvider
@@ -226,6 +311,7 @@ Provider <|.. AnthropicProvider
 ProviderFactory --> Provider : creates
 Provider --> LLMResponse : returns
 LLMResponse --> ToolCall : contains
+ModelRouter --> Provider : selects
 
 AgentOrchestrator --> Provider : uses
 AgentOrchestrator --> ToolRegistry : dispatches to
@@ -234,13 +320,15 @@ AgentOrchestrator --> PermissionGate : checks
 AgentOrchestrator --> PlanSession : uses (Phase 2)
 AgentOrchestrator --> AgentEvent : yields
 AgentOrchestrator --> SessionStore : loads/saves
+AgentOrchestrator --> HookManager : triggers hooks
+AgentOrchestrator --> ModelRouter : routes models
 
 ConversationHistory --> ContextCompactor : triggers
 ContextCompactor --> Provider : secondary call
 
 AgentEvent <|-- TextChunk
 AgentEvent <|-- ToolStart
-AgentEvent <|-- ToolResult
+AgentEvent <|-- ToolResultEvent
 AgentEvent <|-- Error
 AgentEvent <|-- Done
 
@@ -256,9 +344,24 @@ Tool <|.. DirTool
 Tool <|.. WebFetchTool
 Tool <|.. WebSearchTool
 Tool <|.. GitTool
+Tool <|.. LspTool
 Tool <|.. MCPToolAdapter
 
 ConfigLoader --> Config : produces
 SessionStore --> Session : manages
+
+ServerApp --> ServerRouter : uses
+ServerRouter --> SSEHandler : streams via
+ServerRouter --> AgentOrchestrator : delegates to
+ServerRouter --> SessionStore : manages sessions
+ServerRouter --> ToolRegistry : lists tools
+
+HookManager --> Hook : manages
+HookManager --> HookResult : returns
+HookManager --> PluginLoader : loads plugin hooks
+
+PluginLoader --> PluginManifest : reads
+PluginLoader --> Plugin : creates
+Plugin --> PluginManifest : references
 
 @enduml

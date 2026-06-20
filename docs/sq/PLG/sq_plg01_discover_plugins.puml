@@ -1,0 +1,34 @@
+@startuml sq_plg01_discover_plugins
+' ============================================================
+' Title:     nasim — SQ: Discover Plugins
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Discover plugins from plugin directory
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Discover Plugins (PLG-01)
+
+participant "AgentOrchestrator" as agent
+participant "PluginLoader" as loader
+participant "PluginManifest" as manifest
+
+== Discover Plugins ==
+
+agent -> loader : discover(plugin_dir)
+activate loader
+
+loader -> loader : scan ~/.nasim/plugins/
+loop for each plugin directory
+    loader -> manifest : load manifest.json
+    activate manifest
+    manifest --> loader : PluginManifest(name, version, tools, hooks)
+    deactivate manifest
+end
+
+loader --> agent : list[PluginManifest]
+deactivate loader
+
+@enduml

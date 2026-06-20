@@ -1,0 +1,49 @@
+@startuml sq_srv01_start_server
+' ============================================================
+' Title:     nasim — SQ: Start HTTP Server
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Initialize and start the HTTP API server
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-11
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Start HTTP Server (SRV-01)
+
+actor "Developer" as dev
+participant "ArgParser" as args
+participant "ConfigLoader" as cfg
+participant "ServerApp" as app
+participant "ServerRouter" as router
+participant "AgentOrchestrator" as agent
+
+== Startup ==
+
+dev -> args : nasim serve --port 8080
+activate args
+args -> cfg : load config
+activate cfg
+cfg --> args : Config
+deactivate cfg
+
+args -> app : create_app(config)
+activate app
+app -> agent : AgentOrchestrator(provider, tools, config)
+activate agent
+agent --> app : orchestrator
+deactivate agent
+
+app -> router : ServerRouter(orchestrator)
+activate router
+router --> app : router
+deactivate router
+
+app --> args : ASGIApp
+deactivate app
+
+args -> app : uvicorn.run(app, port=config.server_port)
+note right : Server starts listening
+deactivate args
+
+@enduml

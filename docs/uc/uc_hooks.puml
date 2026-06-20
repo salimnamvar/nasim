@@ -1,0 +1,45 @@
+@startuml uc_hooks
+' ============================================================
+' Title:     nasim — UC: Hook System
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Pre/post hooks for tool use and LLM calls
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "AgentOrchestrator" as agent
+
+rectangle "Hook System" {
+    usecase "Register Hook" as UC_HK_01
+    usecase "Execute Pre-Tool Hook" as UC_HK_02
+    usecase "Execute Post-Tool Hook" as UC_HK_03
+    usecase "Execute Pre-LLM Hook" as UC_HK_04
+    usecase "Execute Post-LLM Hook" as UC_HK_05
+    usecase "Evaluate Hook Result" as UC_HK_06
+}
+
+rectangle "Tool Layer" {
+    usecase "Execute Tool" as UC_TL_EXEC
+}
+
+rectangle "Provider Layer" {
+    usecase "Call Provider Chat" as UC_PRV_02
+}
+
+agent --> UC_HK_02
+agent --> UC_HK_03
+agent --> UC_HK_04
+agent --> UC_HK_05
+UC_HK_02 ..> UC_HK_06 : <<include>>
+UC_HK_03 ..> UC_HK_06 : <<include>>
+UC_HK_04 ..> UC_HK_06 : <<include>>
+UC_HK_05 ..> UC_HK_06 : <<include>>
+UC_HK_06 ..> UC_TL_EXEC : <<extend>>
+UC_HK_06 ..> UC_PRV_02 : <<extend>>
+
+@enduml

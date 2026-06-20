@@ -1,0 +1,39 @@
+@startuml sq_srv04_stream_response
+' ============================================================
+' Title:     nasim — SQ: Stream Response (SSE)
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Stream agent response as Server-Sent Events
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-11
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Stream Response via SSE (SRV-04)
+
+participant "HTTP Client" as client
+participant "SSEHandler" as sse
+participant "AgentOrchestrator" as agent
+
+== Stream Events ==
+
+client -> sse : GET /v1/sessions/{id}/stream
+activate sse
+
+loop AgentEvent stream
+    agent -> sse : TextChunk(text="...")
+    sse --> client : event: text_chunk\ndata: {"text": "..."}
+end
+
+agent -> sse : ToolStart(name="read_file", args={...})
+sse --> client : event: tool_start\ndata: {"name": "read_file", "args": {...}}
+
+agent -> sse : ToolResultEvent(name="read_file", success=true, content="...")
+sse --> client : event: tool_result\ndata: {"name": "read_file", "success": true, ...}
+
+agent -> sse : Done(final_text="...")
+sse --> client : event: done\ndata: {"final_text": "..."}
+
+deactivate sse
+
+@enduml

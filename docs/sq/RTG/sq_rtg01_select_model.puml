@@ -1,0 +1,43 @@
+@startuml sq_rtg01_select_model
+' ============================================================
+' Title:     nasim — SQ: Select Model
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Model selection and fallback routing
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md IMP-04
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Select Model (RTG-01)
+
+participant "AgentOrchestrator" as agent
+participant "ModelRouter" as router
+participant "ConfigLoader" as cfg
+participant "ProviderFactory" as factory
+
+== Model Selection ==
+
+agent -> router : select_model(task_type)
+activate router
+
+router -> cfg : load config
+activate cfg
+cfg --> router : Config
+deactivate cfg
+
+router -> router : classify_task(input)
+note right : Classify: code, chat, reasoning
+
+router -> router : apply_fallback(primary_model)
+note right : Fallback chain: primary → secondary → default
+
+router --> agent : selected_model
+deactivate router
+
+agent -> factory : create_provider(selected_model)
+activate factory
+factory --> agent : Provider
+deactivate factory
+
+@enduml

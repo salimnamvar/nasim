@@ -1,6 +1,6 @@
 # nasim — SQ Inventory
 
-Sequence diagrams organised by UC group. 42 diagrams across 9 groups.
+Sequence diagrams organised by UC group. 55 diagrams across 13 groups.
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
 Back to [docs/](../README.md).
@@ -9,7 +9,7 @@ Back to [docs/](../README.md).
 
 | Group | Boundary | Diagrams | Subdirectory |
 | ----- | -------- | :------: | ------------ |
-| CLI | CLI Layer — REPL, parsing, rendering | 6 | `CLI/` |
+| CLI | CLI Layer — REPL, parsing, rendering | 8 | `CLI/` |
 | AGT | Agent Core — orchestrator, history, permissions, plans | 8 | `AGT/` |
 | PRV | Provider Layer — provider abstraction, chat, streaming | 4 | `PRV/` |
 | CFG | Configuration — config loading and validation | 3 | `CFG/` |
@@ -17,7 +17,11 @@ Back to [docs/](../README.md).
 | SAF | Safety — permission checks and user approval | 3 | `SAF/` |
 | CTX | Context Management — token counting and compaction | 3 | `CTX/` |
 | LLM | Provider Backend — Ollama-specific chat/stream | 2 | `LLM/` |
-| TL | Tool Layer — all tool implementations | 9 | `TL/` |
+| TL | Tool Layer — all tool implementations | 14 | `TL/` |
+| SRV | HTTP Server — REST API, SSE streaming | 7 | `SRV/` |
+| HK | Hooks — pre/post hooks for tool and LLM lifecycle | 6 | `HK/` |
+| PLG | Plugins — plugin discovery, loading, registration | 5 | `PLG/` |
+| RTG | Model Router — model selection, fallback, routing | 4 | `RTG/` |
 
 ## Diagram Index
 
@@ -66,8 +70,15 @@ Back to [docs/](../README.md).
 | sq_tl10_search_web | TL-10 | TL | Web search with ranked results |
 | sq_tl11_git_status_diff_commit | TL-11 | TL | Git status/diff/commit |
 | sq_tl12_invoke_mcp_extension | TL-12 | TL | MCP server extension tools |
+| sq_srv01_start_server | SRV-01 | SRV | Initialize and start HTTP server |
+| sq_srv02_create_session | SRV-02 | SRV | Create session via API |
+| sq_srv03_send_message | SRV-03 | SRV | Send message, receive SSE stream |
+| sq_srv04_stream_response | SRV-04 | SRV | Stream agent response as SSE |
+| sq_hk02_pre_tool_hook | HK-02 | HK | Execute hooks before tool use |
+| sq_hk03_post_tool_hook | HK-03 | HK | Execute hooks after tool use |
+| sq_rtg01_select_model | RTG-01 | RTG | Model selection and fallback |
 
-**Total: 42 SQ diagrams (1:1 with UCs)**
+**Total: 55 SQ diagrams (1:1 with UCs)**
 
 ## SQ Diagram Convention
 

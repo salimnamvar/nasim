@@ -13,27 +13,13 @@
 | COMPACTING | Summarizing old exchanges | token_count > context_budget | #E0F7FA |
 | AWAITING_APPROVAL | Waiting for user permission | safety_mode=ask AND unsafe tool | #FFF9C4 |
 | PLANNING | Plan mode, tool calls queued | /plan command entered | #F1F8E9 |
+| HOOK_RUNNING | Pre/post hook executing | tool or LLM call with hooks | #E8EAF6 |
+| ROUTING | Model selection in progress | ModelRouter resolving model | #FBE9E7 |
+| SERVING | HTTP server handling request | HTTP client sends request | #E0F2F1 |
 
-## Transitions
+## Diagram
 
-| Source | Target | Trigger |
-|--------|--------|---------|
-| [*] | IDLE | Startup |
-| IDLE | LISTENING | User input received |
-| LISTENING | THINKING | Input parsed, messages built |
-| THINKING | RESPONDING | LLM returns text (no tool calls) |
-| THINKING | TOOL_EXEC | LLM returns tool calls |
-| THINKING | COMPACTING | token_count > context_budget |
-| TOOL_EXEC | THINKING | Tool result appended to messages |
-| TOOL_EXEC | AWAITING_APPROVAL | safety_mode=ask AND tool.unsafe |
-| AWAITING_APPROVAL | TOOL_EXEC | User approves (y) |
-| AWAITING_APPROVAL | IDLE | User rejects (N) |
-| COMPACTING | THINKING | Compaction complete, messages shortened |
-| RESPONDING | IDLE | Response complete |
-| THINKING | ERROR | LLM call fails |
-| TOOL_EXEC | ERROR | Tool execution fails |
-| ERROR | IDLE | Error displayed |
-| IDLE | [*] | /quit or EOF |
+See `sm_agent_lifecycle.puml` for the PlantUML state machine diagram.
 
 ## Notes
 
@@ -46,3 +32,7 @@
   the configured context budget.
 - AWAITING_APPROVAL is triggered by PermissionGate (CAP-07) when safety_mode
   is `ask` and the tool is marked unsafe.
+- HOOK_RUNNING is triggered when hooks are registered for a tool or LLM call.
+  Hooks can allow, deny, or modify the execution.
+- ROUTING is triggered when ModelRouter resolves which model/provider to use.
+- SERVING is triggered in HTTP server mode when a client request is processed.

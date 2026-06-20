@@ -1,0 +1,39 @@
+@startuml uc_router
+' ============================================================
+' Title:     nasim — UC: Model Router
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Model selection, fallback, and routing strategies
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md IMP-04
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "AgentOrchestrator" as agent
+
+rectangle "Model Router" {
+    usecase "Select Model" as UC_RTG_01
+    usecase "Apply Fallback" as UC_RTG_02
+    usecase "Classify Task" as UC_RTG_03
+    usecase "Switch Model Mid-Session" as UC_RTG_04
+}
+
+rectangle "Provider Layer" {
+    usecase "Select Provider Backend" as UC_PRV_04
+}
+
+rectangle "Config Layer" {
+    usecase "Load Config" as UC_CFG_01
+}
+
+agent --> UC_RTG_01
+agent --> UC_RTG_04
+UC_RTG_01 ..> UC_RTG_03 : <<include>>
+UC_RTG_01 ..> UC_PRV_04 : <<include>>
+UC_RTG_02 ..> UC_PRV_04 : <<include>>
+UC_RTG_01 ..> UC_CFG_01 : <<include>>
+
+@enduml
