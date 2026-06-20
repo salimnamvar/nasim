@@ -18,13 +18,6 @@ LAYOUT_WITH_LEGEND()
 title nasim — Provider Components
 
 ' ============================================================
-' Tags & Styling
-' ============================================================
-
-AddElementTag("future", $bgColor="#F0F0F0", $fontColor="#666666", $borderColor="#999999", $borderStyle=DashedLine(), $legendText="Future scope (inactive)")
-AddRelTag("future_rel", $textColor="#666666", $lineColor="#999999", $lineStyle=DashedLine(), $legendText="Future relationship")
-
-' ============================================================
 ' Provider Group
 ' ============================================================
 

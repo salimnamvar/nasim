@@ -81,6 +81,6 @@ Rel(nasim, tree_sitter, "parses source code AST", "tree-sitter CLI/lib")
 Rel(nasim, embedding_model, "generates code embeddings", "HTTP/local")
 Rel(nasim, vector_store, "stores/retrieves embeddings", "SQLite + vector")
 
-Rel(nasim, obs_platform, "emits structured logs to stdout; exposes /metrics (collected via agents + scrape)", "stdout + HTTP scrape", $tags="future_rel")
+Rel(nasim, obs_platform, "emits structured logs to stdout; exposes /metrics (collected via agents + scrape)", "stdout + HTTP scrape")
 
 @enduml

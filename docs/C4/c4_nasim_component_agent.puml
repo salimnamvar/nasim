@@ -24,6 +24,7 @@ Container_Boundary(agent_boundary, "Agent Group") {
     Component(subagent_coord, "SubagentCoordinator", "", "Parent-child orchestration, nesting limit 5, result aggregation")
     Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions and error hierarchy")
     Component(persona_mgr, "PersonaManager", "", "Runtime persona switching for specialized agent roles")
+    Component(compaction_policy, "CompactionPolicy", "", "Compaction rules: token threshold, message age, importance scoring")
 }
 
 Container_Ext(provider_boundary, "Provider Group")
@@ -45,6 +46,7 @@ Rel(agent_orch, session_boundary, "save, load session")
 Rel(agent_orch, observability_group, "emit structured logs, metrics")
 Rel(agent_orch, plan_session, "queue, approve plan")
 Rel(conv_history, compactor, "triggers compaction")
+Rel(conv_history, compaction_policy, "evaluates compaction conditions")
 Rel(compactor, provider_boundary, "secondary LLM call for summarization")
 Rel(subagent_coord, agent_orch, "child agent inherits core")
 
