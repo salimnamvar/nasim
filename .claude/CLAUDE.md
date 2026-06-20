@@ -13,57 +13,71 @@ Activate before running any script: `conda activate nasim`
 ## Commands
 
 ```bash
-# Run the Ollama scraper (writes data/ollama_master_db.csv + logs/)
+# Launch the interactive REPL (default model: qwen2.5-coder:14b)
+python -m nasim.cli
+
+# Override model or server
+python -m nasim.cli --model qwen2.5-coder:7b --server http://localhost:11434
+
+# Run a single command and exit (non-interactive)
+python -m nasim.cli -c "list files in the current directory"
+
+# Disable streaming (blocking mode)
+python -m nasim.cli --no-stream
+
+# Run the Ollama model catalogue scraper (writes data/ollama.csv + logs/)
 cd scripts && python scrape.py
 
-# Run the open-interpreter chat session against a local Ollama instance
-python run.py
+# Rank models for this machine (SSH-probes host for VRAM/RAM)
+python scripts/analyze.py data/ollama.csv
 
-# Run the chatbot API probe script
-python chats.py
+# Rank for a specific server; override specs manually if SSH not available
+python scripts/analyze.py data/ollama.csv myserver --output data/ranked.csv
+python scripts/analyze.py data/ollama.csv --vram 11 --ram 32 --output data/ranked.csv --top 50
 ```
 
 ## Architecture
 
-This repo contains three independent scripts — no shared package, no framework:
+The repo has two independent concerns:
 
-### `scripts/scrape.py` — Ollama model catalogue scraper
+### 1. `nasim/` — Code agent CLI package
 
-Async + multiprocessing pipeline that scrapes `ollama.com/library` and writes a CSV
-of every model version with all metadata fields discovered dynamically (no hardcoded
-column list). Three pipeline phases:
+A minimal agentic loop running on a local Ollama instance. Entry point: `python -m nasim.cli`.
 
-1. **Phase 1** — paginate `/library` to collect base model hrefs.
-2. **Phase 2** — fetch `/tags` pages; `parse_tags_page()` extracts version hrefs and blob
-   metadata (Size, Context, Input, Updated) using `_classify_blob_segment()` purely by
-   value pattern — no CSS class dependency.
-3. **Phase 3** — fetch every version detail page concurrently; `extract_detail_metadata()`
-   uses three discovery strategies (two-span Tailwind containers, indigo badge spans,
-   page-text regex) to capture arbitrary new metadata fields automatically.
+**Layer stack** (top → bottom):
 
-`AdaptiveNetworkFetcher` adjusts concurrency between 15 and 80 based on 429/5xx
-responses. HTML parsing (CPU-bound) runs in a `ProcessPoolExecutor`. Output is
-`ollama_master_db.csv` with priority columns first, then sorted dynamic columns.
-Per-run logs go to `logs/ollama_scraper_<timestamp>.log`.
+| Module | Role |
+|--------|------|
+| `nasim/cli.py` | `argparse` entry, REPL, slash commands (`/help /reset /model /quit`) |
+| `nasim/agent.py` | `Agent` class — agentic loop up to `max_iterations=20`; holds conversation history in `self.messages`; dispatches tool calls |
+| `nasim/llm.py` | `OllamaClient` — `POST /api/chat` (blocking) and streaming via `chat_stream()` yielding `str | ToolCall` chunks |
+| `nasim/tools.py` | `@tool` decorator registers to `TOOL_REGISTRY`; `execute_tool()` dispatches by name |
 
-### `run.py` — open-interpreter chat runner
+**Tool set** (registered in `tools.py`): `read_file`, `write_file`, `edit_file`, `list_dir`, `shell_exec`.
 
-Connects `open-interpreter` to a local Ollama instance
-(`ollama/qwen3.5:9b-q8_0` at `http://192.168.70.125:11434`) with `auto_run=True`
-and starts an interactive CLI session.
+**Agentic loop**: `Agent.run()` / `Agent.run_streaming()` loop until the LLM returns no tool calls or `max_iterations` is hit. Tool results are appended as `role: tool` messages. The system prompt is `messages[0]`; `Agent.reset()` truncates back to it.
 
-### `chats.py` — chatbot API probe
+**Streaming**: `OllamaClient.chat_stream()` buffers `tool_calls` deltas by index into `tool_calls_buf` and yields them after the stream ends, interleaved with text `str` chunks.
 
-Reads a CSV of chatbot URLs, hits `{url}/api/message`, and saves all responses to
-`responses.md`. Standalone script; CSV path is hardcoded.
+### 2. `scripts/` — Standalone Ollama utilities
+
+`scripts/scrape.py` — async + multiprocessing scraper for `ollama.com/library`. Three phases: paginate library → fetch `/tags` pages → fetch version detail pages concurrently. `AdaptiveNetworkFetcher` scales concurrency 15–80 based on 429/5xx rates. Output: `data/ollama.csv`.
+
+`scripts/analyze.py` — SSH-probes a host for GPU VRAM, RAM, CPU; scores and ranks models. Fit tiers: `GPU` (≤ VRAM × 0.85) → `CPU` (≤ RAM × 0.80) → `SKIP`. Score is a weighted sum (quantization × 30, params × 20, context × 10, downloads × 5) plus tier bonus.
+
+### 3. Root scripts
+
+`run.py` — `open-interpreter` session wired to Ollama (`qwen3.5:9b-q8_0` at `192.168.70.125:11434`), `auto_run=True`.
+
+`chats.py` — reads a CSV of chatbot URLs, hits `{url}/api/message`, writes responses to `responses.md`.
 
 ## Key Dependencies
 
-| Package | Purpose |
-| --- | --- |
-| `aiohttp` | Async HTTP fetching in scraper |
-| `beautifulsoup4` + `lxml` | HTML parsing |
-| `tqdm` | Progress bars (`tqdm_asyncio`) |
-| `open-interpreter` | LLM chat runtime (`run.py`) |
-| `uvloop` | Optional faster event loop for scraper |
-| `pandas` + `requests` | Used in `chats.py` |
+| Package | Used by |
+|---------|---------|
+| `requests` | `nasim/llm.py`, `chats.py` |
+| `aiohttp` | `scripts/scrape.py` |
+| `beautifulsoup4` + `lxml` | `scripts/scrape.py` |
+| `tqdm` | `scripts/scrape.py` |
+| `open-interpreter` | `run.py` |
+| `pandas` | `chats.py` |
