@@ -10,6 +10,7 @@
 /home/salim/prj/salim/nasim/code/free-claude-code
 /home/salim/prj/salim/nasim/code/gemini-cli
 /home/salim/prj/salim/nasim/code/goose
+/home/salim/prj/salim/nasim/code/grok-cli
 /home/salim/prj/salim/nasim/code/hermes-agent
 /home/salim/prj/salim/nasim/code/kilocode
 /home/salim/prj/salim/nasim/code/kimi-cli
@@ -24,3 +25,4 @@
 /home/salim/prj/salim/nasim/code/Roo-Code
 /home/salim/prj/salim/nasim/code/SWE-agent
 /home/salim/prj/salim/nasim/code/warp
+
