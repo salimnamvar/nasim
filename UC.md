@@ -154,6 +154,15 @@
 | WRL-04 | WRL | FORK Session | SessionForkManager |
 | WRL-05 | WRL | CHECKPOINT Turn | TurnIndex |
 
+## Passive Policies (no behavioral UC)
+
+These C4 components are configuration/rule objects with no standalone behavioral use cases. They are invoked internally by their owning domain logic.
+
+| C4 Component | Owner Group | Role |
+|--------------|-------------|------|
+| CompactionPolicy | AGT (Agent) | Compaction rules: token threshold, message age, importance scoring |
+| StrategyHeuristics | EDT (Edit Strategy) | Rules: edit_size, risk_level, file_type, complexity |
+
 
 
 --- SOURCE: /home/salim/prj/salim/nasim/code/nasim/docs/UC/uc_session.puml ---
@@ -197,7 +206,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -221,13 +229,13 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> SSN03
-Developer --> SSN07
-Developer --> SSN08
 Agent --> SSN01
 Agent --> SSN02
+Agent --> SSN03
 Agent --> SSN05
 Agent --> SSN06
+Agent --> SSN07
+Agent --> SSN08
 
 ' ============================================================
 ' Relationships
@@ -309,6 +317,22 @@ rectangle "nasim" {
     usecase "**SRV-10 READ Config**\n--\nGet current configuration" as SRV10
     usecase "**SRV-11 UPDATE Config**\n--\nUpdate configuration" as SRV11
   }
+
+  package "Session (SSN)" {
+    usecase "**SSN-01 PERSIST Session**\n--\nSave session to storage" as SSN01
+    usecase "**SSN-02 READ Session**\n--\nLoad session from storage" as SSN02
+    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
+    usecase "**SSN-04 RESTORE Session**\n--\nResume a previously saved session" as SSN04
+    usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" as SSN07
+  }
+
+  package "Agent Core (AGT)" {
+    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop: provider call, tool dispatch" as AGT01
+  }
+
+  package "Config (CFG)" {
+    usecase "**CFG-01 LOAD Config**\n--\nLayered config: global, project, env, CLI" as CFG01
+  }
 }
 
 ' ============================================================
@@ -326,6 +350,19 @@ HTTPClient --> SRV08
 HTTPClient --> SRV09
 HTTPClient --> SRV10
 HTTPClient --> SRV11
+
+' ============================================================
+' Relationships (Boundary -> Internal UC traceability)
+' ============================================================
+
+SRV01 ..> SSN03 : <<include>>
+SRV02 ..> SSN01 : <<include>>
+SRV03 ..> SSN02 : <<include>>
+SRV04 ..> SSN01 : <<include>>
+SRV05 ..> SSN01 : <<include>>
+SRV06 ..> AGT01 : <<include>>
+SRV07 ..> SSN07 : <<include>>
+SRV10 ..> CFG01 : <<include>>
 
 @enduml
 
@@ -378,7 +415,6 @@ skinparam actor<<system>> {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -398,9 +434,9 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> MEM02
-Developer --> MEM03
 Agent --> MEM01
+Agent --> MEM02
+Agent --> MEM03
 Agent --> MEM04
 
 ' ============================================================
@@ -462,7 +498,6 @@ skinparam actor<<system>> {
 ' ============================================================
 
 actor "Agent" as Agent <<system>>
-actor "Developer" as Developer
 
 ' ============================================================
 ' System Boundary
@@ -484,7 +519,7 @@ rectangle "nasim" {
 Agent --> RTG01
 Agent --> RTG02
 Agent --> RTG03
-Developer --> RTG04
+Agent --> RTG04
 
 ' ============================================================
 ' Relationships
@@ -795,7 +830,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -816,10 +850,10 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> WRL02
-Developer --> WRL04
 Agent --> WRL01
+Agent --> WRL02
 Agent --> WRL03
+Agent --> WRL04
 Agent --> WRL05
 
 ' ============================================================
@@ -874,7 +908,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -894,7 +927,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> SBX01
+Agent --> SBX01
 Agent --> SBX02
 Agent --> SBX03
 Agent --> SBX04
@@ -970,6 +1003,10 @@ rectangle "nasim" {
     usecase "**CLI-07 SWITCH Model**\n--\nSwitch model at runtime" as CLI07
     usecase "**CLI-08 LIST Sessions**\n--\nList saved sessions" as CLI08
   }
+
+  package "Session (SSN)" {
+    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
+  }
 }
 
 ' ============================================================
@@ -992,6 +1029,7 @@ Agent --> CLI06
 CLI01 ..> CLI03 : <<include>>
 CLI04 ..> CLI01 : <<include>>
 CLI01 ..> CLI06 : <<extend>>
+CLI08 ..> SSN03 : <<include>>
 
 @enduml
 
@@ -1044,8 +1082,6 @@ skinparam actor<<system>> {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
-actor "HTTP Client" as HTTPClient <<system>>
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -1079,8 +1115,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> AGT01
-HTTPClient --> AGT01
+Agent --> AGT01
 Agent --> AGT04
 Agent --> AGT07
 Agent --> AGT11
@@ -1235,7 +1270,6 @@ skinparam actor<<system>> {
 ' ============================================================
 
 actor "Agent" as Agent <<system>>
-actor "Developer" as Developer
 
 ' ============================================================
 ' System Boundary
@@ -1272,10 +1306,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> TL01
-Developer --> TL06
-Developer --> TL07
-Developer --> TL08
+Agent --> TL01
 Agent --> TL02
 Agent --> TL03
 Agent --> TL04
@@ -1340,7 +1371,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -1360,9 +1390,9 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> VCS01
-Developer --> VCS03
+Agent --> VCS01
 Agent --> VCS02
+Agent --> VCS03
 Agent --> VCS04
 
 ' ============================================================
@@ -1523,10 +1553,6 @@ rectangle "nasim" {
 ' ============================================================
 
 Developer --> CLI01
-Developer --> TL01
-Developer --> SSN01
-Developer --> VCS01
-Developer --> MEM02
 HTTPClient --> SRV01
 MCPClient --> MCP01
 Platform --> OBS01
@@ -1592,7 +1618,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -1614,7 +1639,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> HK01
+Agent --> HK01
 Agent --> HK02
 Agent --> HK03
 Agent --> HK04
@@ -1675,7 +1700,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -1694,7 +1718,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> CFG01
+Agent --> CFG01
 Agent --> CFG02
 Agent --> CFG03
 
@@ -1932,7 +1956,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -1954,12 +1977,12 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> PLG01
-Developer --> PLG05
-Developer --> PLG06
+Agent --> PLG01
 Agent --> PLG02
 Agent --> PLG03
 Agent --> PLG04
+Agent --> PLG05
+Agent --> PLG06
 
 ' ============================================================
 ' Relationships
@@ -2104,7 +2127,6 @@ skinparam actor<<system>> {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "MCP Client" as MCPClient <<system>>
 actor "Agent" as Agent <<system>>
 
@@ -2125,9 +2147,9 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> MCP02
 MCPClient --> MCP04
 Agent --> MCP01
+Agent --> MCP02
 Agent --> MCP03
 
 ' ============================================================

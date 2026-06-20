@@ -85,6 +85,9 @@ Agent --> TL02
 Agent --> TL03
 Agent --> TL04
 Agent --> TL05
+Agent --> TL06
+Agent --> TL07
+Agent --> TL08
 Agent --> TL09
 Agent --> TL10
 Agent --> TL11

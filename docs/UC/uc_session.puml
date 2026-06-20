@@ -63,6 +63,7 @@ rectangle "nasim" {
 Agent --> SSN01
 Agent --> SSN02
 Agent --> SSN03
+Agent --> SSN04
 Agent --> SSN05
 Agent --> SSN06
 Agent --> SSN07

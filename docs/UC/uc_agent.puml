@@ -6,7 +6,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Core agentic loop, permissions, context, plans, subagents
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   7.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -39,11 +39,24 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
 ' ============================================================
 ' Actors
 ' ============================================================
 
 actor "Agent" as Agent <<system>>
+
+' ============================================================
+' Cross-Group External References
+' ============================================================
+
+usecase "SAF-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
@@ -66,10 +79,6 @@ rectangle "nasim" {
     usecase "**AGT-14 HANDLE Error**\n--\nStructured error handling with recovery" as AGT14
     usecase "**AGT-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection, egress checks" as AGT15
   }
-
-  package "Safety Group (SAF)" {
-    usecase "**SAF-01 CHECK Permission**\n--\nValidate tool permission via PermissionGate" as SAF01
-  }
 }
 
 ' ============================================================
@@ -83,7 +92,7 @@ Agent --> AGT11
 Agent --> AGT12
 Agent --> AGT13
 Agent --> AGT15
-Agent --> SAF01
+Agent --> SAF01_ext
 
 ' ============================================================
 ' Relationships
@@ -91,7 +100,8 @@ Agent --> SAF01
 
 AGT01 ..> AGT02 : <<include>>
 AGT01 ..> AGT03 : <<include>>
-AGT02 ..> SAF01 : <<include>>
+AGT02 ..> SAF01_ext : <<include>>
+AGT15 ..> SAF01_ext : <<include>>
 AGT01 ..> AGT06 : <<extend>>
 AGT07 ..> AGT08 : <<extend>>
 AGT01 ..> AGT09 : <<extend>>

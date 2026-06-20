@@ -6,7 +6,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   RESTful API + SSE streaming for web/mobile/desktop clients
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   7.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -39,11 +39,31 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
 ' ============================================================
 ' Actors
 ' ============================================================
 
 actor "HTTP Client" as HTTPClient <<system>>
+
+' ============================================================
+' Cross-Group External References
+' ============================================================
+
+usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
+usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
+usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
+usecase "SSN-07\nSEARCH Sessions\n[uc_session]" as SSN07_ext <<extref>>
+
+usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
+
+usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
@@ -62,22 +82,6 @@ rectangle "nasim" {
     usecase "**SRV-09 READ Tool**\n--\nGet tool details" as SRV09
     usecase "**SRV-10 READ Config**\n--\nGet current configuration" as SRV10
     usecase "**SRV-11 UPDATE Config**\n--\nUpdate configuration" as SRV11
-  }
-
-  package "Session (SSN)" {
-    usecase "**SSN-01 PERSIST Session**\n--\nSave session to storage" as SSN01
-    usecase "**SSN-02 READ Session**\n--\nLoad session from storage" as SSN02
-    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
-    usecase "**SSN-04 RESTORE Session**\n--\nResume a previously saved session" as SSN04
-    usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" as SSN07
-  }
-
-  package "Agent Core (AGT)" {
-    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop: provider call, tool dispatch" as AGT01
-  }
-
-  package "Config (CFG)" {
-    usecase "**CFG-01 LOAD Config**\n--\nLayered config: global, project, env, CLI" as CFG01
   }
 }
 
@@ -98,16 +102,16 @@ HTTPClient --> SRV10
 HTTPClient --> SRV11
 
 ' ============================================================
-' Relationships (Boundary -> Internal UC traceability)
+' Relationships (Boundary -> External UC traceability)
 ' ============================================================
 
-SRV01 ..> SSN03 : <<include>>
-SRV02 ..> SSN01 : <<include>>
-SRV03 ..> SSN02 : <<include>>
-SRV04 ..> SSN01 : <<include>>
-SRV05 ..> SSN01 : <<include>>
-SRV06 ..> AGT01 : <<include>>
-SRV07 ..> SSN07 : <<include>>
-SRV10 ..> CFG01 : <<include>>
+SRV01 ..> SSN03_ext : <<include>>
+SRV02 ..> SSN01_ext : <<include>>
+SRV03 ..> SSN02_ext : <<include>>
+SRV04 ..> SSN01_ext : <<include>>
+SRV05 ..> SSN01_ext : <<include>>
+SRV06 ..> AGT01_ext : <<include>>
+SRV07 ..> SSN07_ext : <<include>>
+SRV10 ..> CFG01_ext : <<include>>
 
 @enduml

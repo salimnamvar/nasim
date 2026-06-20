@@ -79,6 +79,43 @@
 - All hex colors are canonical — SQ diagrams must use `<back:#HEX>STATE</back>`
   syntax matching these values.
 
+## Lifecycle-Write UC Mapping (SMT Ownership)
+
+One lifecycle-write UC per target state. This table is the authoritative reference.
+
+### Session Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| CREATED | SSN-01 PERSIST Session | Session record initialized |
+| ACTIVE | SSN-01 PERSIST Session | Session accepting messages (after init/resume) |
+| SAVED | SSN-01 PERSIST Session | Session persisted to disk |
+| RESTORED | SSN-04 RESTORE Session | Session loaded from disk |
+| BRANCHED | WRL-04 FORK Session | Session forked from parent |
+| CLOSED | AGT-14 HANDLE Error | Session terminated (quit or error) |
+
+### Plan Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| BUILDING | AGT-07 QUEUE Plan | Plan being constructed |
+| QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
+| APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
+| EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
+| COMPLETED | AGT-01 PROCESS User Task | Implicit: agent loop finishes all steps |
+| REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
+
+### Plugin Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| DISCOVERED | PLG-01 DISCOVER Plugins | Plugin found on filesystem |
+| LOADING | PLG-02 LOAD Manifest | Plugin manifest being parsed |
+| LOADED | PLG-03 REGISTER Plugin Tools | Manifest parsed, tools registered |
+| ENABLED | PLG-05 ENABLE Plugin | Plugin active and available |
+| DISABLED | PLG-06 DISABLE Plugin | Plugin deactivated |
+| ERROR | PLG-01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |
+
 
 
 --- SOURCE: /home/salim/prj/salim/nasim/code/nasim/docs/SM/sm_session_lifecycle.puml ---
@@ -131,13 +168,13 @@ CLOSED : Terminal state.
 CREATED --> ACTIVE : SSN-01 session initialized
 ACTIVE --> SAVED : SSN-01 explicit save
 ACTIVE --> BRANCHED : WRL-04 fork session
-ACTIVE --> CLOSED : /quit or explicit close
+ACTIVE --> CLOSED : AGT-14 /quit or explicit close
 SAVED --> RESTORED : SSN-04 restore session
 RESTORED --> ACTIVE : SSN-04 session resumed
 RESTORED --> SAVED : SSN-01 save after restore
-BRANCHED --> ACTIVE : child session starts
-BRANCHED --> CLOSED : child session closed
-SAVED --> CLOSED : explicit close after save
+BRANCHED --> ACTIVE : SSN-01 child session starts
+BRANCHED --> CLOSED : AGT-14 child session closed
+SAVED --> CLOSED : AGT-14 explicit close after save
 
 CLOSED --> [*]
 
@@ -158,6 +195,8 @@ CLOSED --> [*]
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
 '            do not apply (documented deviation).
+' Convention: All transitions are triggered by the corresponding UC ID
+'            (e.g., EVL-01, EDT-10, AGT-07) as listed in docs/UC/README.md.
 ' ============================================================
 
 title nasim — Agent Lifecycle
@@ -275,8 +314,8 @@ ERROR --> IDLE : AGT-14 Error displayed
 SERVING --> THINKING : SRV-06 Request processed
 SERVING --> IDLE : SRV-06 Response complete
 
-IDLE --> PLANNING : /plan command
-PLANNING --> IDLE : /plan off
+IDLE --> PLANNING : AGT-07 /plan command
+PLANNING --> IDLE : AGT-07 /plan off
 
 EVALUATING --> REVIEWING : EVL-01 success checks passed
 EVALUATING --> RETRYING : EVL-01 success checks failed
@@ -345,15 +384,15 @@ ERROR : Plugin failed to load or crashed.
 ERROR : Load error or runtime exception.
 
 DISCOVERED --> LOADING : PLG-02 load manifest
-DISCOVERED --> ERROR : manifest not found
+DISCOVERED --> ERROR : PLG-01 manifest not found
 LOADING --> LOADED : PLG-03 tools registered
-LOADING --> ERROR : parse error
+LOADING --> ERROR : PLG-02 parse error
 LOADED --> ENABLED : PLG-05 enable
 LOADED --> DISABLED : PLG-06 disable
 ENABLED --> DISABLED : PLG-06 disable
 DISABLED --> ENABLED : PLG-05 re-enable
-ENABLED --> ERROR : runtime error
-LOADED --> ERROR : registration error
+ENABLED --> ERROR : PLG-01 runtime error
+LOADED --> ERROR : PLG-03 registration error
 
 ERROR --> DISCOVERED : PLG-01 re-discover
 
@@ -416,7 +455,7 @@ EMPTY --> BUILDING : AGT-07 /plan command
 BUILDING --> QUEUED : AGT-07 plan queued
 BUILDING --> EMPTY : AGT-07 /plan off
 QUEUED --> APPROVED : AGT-08 /approve
-QUEUED --> REJECTED : User rejects
+QUEUED --> REJECTED : AGT-08 user rejects
 APPROVED --> EXECUTING : AGT-08 execution starts
 EXECUTING --> COMPLETED : All steps done
 EXECUTING --> EMPTY : Execution error, plan discarded
