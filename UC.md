@@ -232,6 +232,7 @@ rectangle "nasim" {
 Agent --> SSN01
 Agent --> SSN02
 Agent --> SSN03
+Agent --> SSN04
 Agent --> SSN05
 Agent --> SSN06
 Agent --> SSN07
@@ -260,7 +261,7 @@ SSN08 ..> SSN01 : <<include>>
 ' Boundary:  nasim code agent
 ' Purpose:   RESTful API + SSE streaming for web/mobile/desktop clients
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   7.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -293,11 +294,31 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
 ' ============================================================
 ' Actors
 ' ============================================================
 
 actor "HTTP Client" as HTTPClient <<system>>
+
+' ============================================================
+' Cross-Group External References
+' ============================================================
+
+usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
+usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
+usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
+usecase "SSN-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
+
+usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
+
+usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
@@ -306,32 +327,16 @@ actor "HTTP Client" as HTTPClient <<system>>
 rectangle "nasim" {
   package "Server Group (SRV)" {
     usecase "**SRV-01 LIST Sessions**\n--\nList all sessions with pagination" as SRV01
-    usecase "**SRV-02 INSERT Session**\n--\nCreate a new session" as SRV02
+    usecase "**SRV-02 CREATE Session**\n--\nCreate a new session" as SRV02
     usecase "**SRV-03 READ Session**\n--\nGet session details by ID" as SRV03
     usecase "**SRV-04 UPDATE Session**\n--\nUpdate session metadata" as SRV04
-    usecase "**SRV-05 RETIRE Session**\n--\nDelete a session" as SRV05
-    usecase "**SRV-06 DISPATCH Message**\n--\nSend message and receive SSE stream" as SRV06
+    usecase "**SRV-05 DELETE Session**\n--\nDelete a session" as SRV05
+    usecase "**SRV-06 SEND Message**\n--\nSend message and receive SSE stream" as SRV06
     usecase "**SRV-07 LIST Messages**\n--\nList messages in a session" as SRV07
     usecase "**SRV-08 LIST Tools**\n--\nList registered tools" as SRV08
     usecase "**SRV-09 READ Tool**\n--\nGet tool details" as SRV09
     usecase "**SRV-10 READ Config**\n--\nGet current configuration" as SRV10
     usecase "**SRV-11 UPDATE Config**\n--\nUpdate configuration" as SRV11
-  }
-
-  package "Session (SSN)" {
-    usecase "**SSN-01 PERSIST Session**\n--\nSave session to storage" as SSN01
-    usecase "**SSN-02 READ Session**\n--\nLoad session from storage" as SSN02
-    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
-    usecase "**SSN-04 RESTORE Session**\n--\nResume a previously saved session" as SSN04
-    usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" as SSN07
-  }
-
-  package "Agent Core (AGT)" {
-    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop: provider call, tool dispatch" as AGT01
-  }
-
-  package "Config (CFG)" {
-    usecase "**CFG-01 LOAD Config**\n--\nLayered config: global, project, env, CLI" as CFG01
   }
 }
 
@@ -352,17 +357,17 @@ HTTPClient --> SRV10
 HTTPClient --> SRV11
 
 ' ============================================================
-' Relationships (Boundary -> Internal UC traceability)
+' Relationships (Boundary -> External UC traceability)
 ' ============================================================
 
-SRV01 ..> SSN03 : <<include>>
-SRV02 ..> SSN01 : <<include>>
-SRV03 ..> SSN02 : <<include>>
-SRV04 ..> SSN01 : <<include>>
-SRV05 ..> SSN01 : <<include>>
-SRV06 ..> AGT01 : <<include>>
-SRV07 ..> SSN07 : <<include>>
-SRV10 ..> CFG01 : <<include>>
+SRV01 ..> SSN03_ext : <<include>>
+SRV02 ..> SSN01_ext : <<include>>
+SRV03 ..> SSN02_ext : <<include>>
+SRV04 ..> SSN01_ext : <<include>>
+SRV05 ..> SSN09_ext : <<include>>
+SRV06 ..> AGT01_ext : <<include>>
+SRV07 ..> SSN02_ext : <<include>>
+SRV10 ..> CFG01_ext : <<include>>
 
 @enduml
 
@@ -783,7 +788,6 @@ EVL01 ..> EVL03 : <<include>>
 EVL01 ..> EVL04 : <<include>>
 EVL01 ..> EVL05 : <<include>>
 EVL01 ..> EVL06 : <<include>>
-EVL06 ..> EVL01 : <<extend>>
 
 @enduml
 
@@ -954,7 +958,7 @@ SBX01 ..> SBX04 : <<include>>
 ' Boundary:  nasim code agent
 ' Purpose:   REPL, argument parsing, slash commands, rich rendering
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   7.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -981,12 +985,25 @@ skinparam actor {
   FontSize 12
 }
 
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
 ' ============================================================
 ' Actors
 ' ============================================================
 
 actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
+
+' ============================================================
+' Cross-Group External References
+' ============================================================
+
+usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
@@ -1002,10 +1019,6 @@ rectangle "nasim" {
     usecase "**CLI-06 REQUEST Approval**\n--\nPrompt user for safety approval" as CLI06
     usecase "**CLI-07 SWITCH Model**\n--\nSwitch model at runtime" as CLI07
     usecase "**CLI-08 LIST Sessions**\n--\nList saved sessions" as CLI08
-  }
-
-  package "Session (SSN)" {
-    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
   }
 }
 
@@ -1027,9 +1040,9 @@ Agent --> CLI06
 ' ============================================================
 
 CLI01 ..> CLI03 : <<include>>
-CLI04 ..> CLI01 : <<include>>
+CLI01 ..> CLI04 : <<include>>
 CLI01 ..> CLI06 : <<extend>>
-CLI08 ..> SSN03 : <<include>>
+CLI08 ..> SSN03_ext : <<include>>
 
 @enduml
 
@@ -1045,7 +1058,7 @@ CLI08 ..> SSN03 : <<include>>
 ' Boundary:  nasim code agent
 ' Purpose:   Core agentic loop, permissions, context, plans, subagents
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   7.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -1078,11 +1091,24 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
 ' ============================================================
 ' Actors
 ' ============================================================
 
 actor "Agent" as Agent <<system>>
+
+' ============================================================
+' Cross-Group External References
+' ============================================================
+
+usecase "SAF-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
@@ -1105,10 +1131,6 @@ rectangle "nasim" {
     usecase "**AGT-14 HANDLE Error**\n--\nStructured error handling with recovery" as AGT14
     usecase "**AGT-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection, egress checks" as AGT15
   }
-
-  package "Safety Group (SAF)" {
-    usecase "**SAF-01 CHECK Permission**\n--\nValidate tool permission via PermissionGate" as SAF01
-  }
 }
 
 ' ============================================================
@@ -1122,7 +1144,7 @@ Agent --> AGT11
 Agent --> AGT12
 Agent --> AGT13
 Agent --> AGT15
-Agent --> SAF01
+Agent --> SAF01_ext
 
 ' ============================================================
 ' Relationships
@@ -1130,7 +1152,8 @@ Agent --> SAF01
 
 AGT01 ..> AGT02 : <<include>>
 AGT01 ..> AGT03 : <<include>>
-AGT02 ..> SAF01 : <<include>>
+AGT02 ..> SAF01_ext : <<include>>
+AGT15 ..> SAF01_ext : <<include>>
 AGT01 ..> AGT06 : <<extend>>
 AGT07 ..> AGT08 : <<extend>>
 AGT01 ..> AGT09 : <<extend>>
@@ -1311,6 +1334,9 @@ Agent --> TL02
 Agent --> TL03
 Agent --> TL04
 Agent --> TL05
+Agent --> TL06
+Agent --> TL07
+Agent --> TL08
 Agent --> TL09
 Agent --> TL10
 Agent --> TL11
@@ -1415,7 +1441,7 @@ VCS04 ..> VCS02 : <<include>>
 ' Boundary:  nasim code agent
 ' Purpose:   Cross-cutting view of all UC groups and actor interactions
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   7.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -1448,6 +1474,13 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
 ' ============================================================
 ' Actors
 ' ============================================================
@@ -1463,88 +1496,89 @@ actor "Agent" as Agent <<system>>
 ' ============================================================
 
 rectangle "nasim" {
+
   package "CLI (CLI)" {
-    usecase "**CLI-01 PROCESS User Input**\n--\nREPL, slash commands, rich rendering" as CLI01
+    usecase "CLI-01\nPROCESS User Input\n[uc_cli]" as UC_CLI <<extref>>
   }
 
   package "Agent Core (AGT)" {
-    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop: provider call, tool dispatch" as AGT01
+    usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as UC_AGT <<extref>>
   }
 
   package "Provider (PRV)" {
-    usecase "**PRV-01 REGISTER Provider**\n--\nLLM provider abstraction via litellm" as PRV01
+    usecase "PRV-01\nREGISTER Provider\n[uc_provider]" as UC_PRV <<extref>>
   }
 
   package "Tools (TL)" {
-    usecase "**TL-01 READ File**\n--\nFile operations: read, write, edit" as TL01
+    usecase "TL-01\nREAD File\n[uc_tools]" as UC_TL <<extref>>
   }
 
   package "MCP (MCP)" {
-    usecase "**MCP-01 CONNECT MCP Server**\n--\nMCP protocol: client, server, adapter, discovery" as MCP01
+    usecase "MCP-01\nCONNECT MCP Server\n[uc_mcp]" as UC_MCP <<extref>>
   }
 
   package "Config (CFG)" {
-    usecase "**CFG-01 LOAD Config**\n--\nLayered config: global, project, env, CLI" as CFG01
+    usecase "CFG-01\nLOAD Config\n[uc_config]" as UC_CFG <<extref>>
   }
 
   package "Session (SSN)" {
-    usecase "**SSN-01 PERSIST Session**\n--\nSession store, versioning, search, fork" as SSN01
+    usecase "SSN-01\nPERSIST Session\n[uc_session]" as UC_SSN <<extref>>
   }
 
   package "Server (SRV)" {
-    usecase "**SRV-01 LIST Sessions**\n--\nList all sessions with pagination" as SRV01
+    usecase "SRV-01\nLIST Sessions\n[uc_server]" as UC_SRV <<extref>>
   }
 
   package "Hooks (HK)" {
-    usecase "**HK-01 REGISTER Hook**\n--\nPre/post hooks for tool use and LLM calls" as HK01
+    usecase "HK-01\nREGISTER Hook\n[uc_hooks]" as UC_HK <<extref>>
   }
 
   package "Plugins (PLG)" {
-    usecase "**PLG-01 DISCOVER Plugins**\n--\nPlugin discovery, loading, registration" as PLG01
+    usecase "PLG-01\nDISCOVER Plugins\n[uc_plugins]" as UC_PLG <<extref>>
   }
 
   package "Safety (SAF)" {
-    usecase "**SAF-01 CHECK Permission**\n--\nPermission gates, approval, safety modes" as SAF01
+    usecase "SAF-01\nCHECK Permission\n[uc_safety]" as UC_SAF <<extref>>
   }
 
   package "Router (RTG)" {
-    usecase "**RTG-01 SELECT Model**\n--\nModel selection, fallback, task classification" as RTG01
+    usecase "RTG-01\nSELECT Model\n[uc_router]" as UC_RTG <<extref>>
   }
 
   package "Observability (OBS)" {
-    usecase "**OBS-01 STREAM Structured Log**\n--\nEmit-only structured logs and metrics" as OBS01
+    usecase "OBS-01\nSTREAM Structured Log\n[uc_observability]" as UC_OBS <<extref>>
   }
 
   package "Memory (MEM)" {
-    usecase "**MEM-01 PERSIST Knowledge**\n--\nCross-session knowledge persistence and RAG" as MEM01
+    usecase "MEM-01\nPERSIST Knowledge\n[uc_memory]" as UC_MEM <<extref>>
   }
 
   package "Git (VCS)" {
-    usecase "**VCS-01 READ Git Status**\n--\nVersion control: status, diff, commit" as VCS01
+    usecase "VCS-01\nREAD Git Status\n[uc_git]" as UC_VCS <<extref>>
   }
 
   package "Sandbox (SBX)" {
-    usecase "**SBX-01 ISOLATE Command**\n--\nOS-level process isolation" as SBX01
+    usecase "SBX-01\nISOLATE Command\n[uc_sandbox]" as UC_SBX <<extref>>
   }
 
   package "Repo Intelligence (RIM)" {
-    usecase "**RIM-01 INDEX Codebase**\n--\nAST, symbol graph, semantic search, repo-map" as RIM01
+    usecase "RIM-01\nINDEX Codebase\n[uc_repo_intelligence]" as UC_RIM <<extref>>
   }
 
   package "Edit Strategy (EDT)" {
-    usecase "**EDT-01 SELECT Strategy**\n--\nPolymorphic edit strategies with sandbox" as EDT01
+    usecase "EDT-01\nSELECT Strategy\n[uc_edit_strategy]" as UC_EDT <<extref>>
   }
 
   package "Evaluation (EVL)" {
-    usecase "**EVL-01 EVALUATE Task**\n--\nSuccess checks, LLM review, retry coordination" as EVL01
+    usecase "EVL-01\nEVALUATE Task\n[uc_evaluation]" as UC_EVL <<extref>>
   }
 
   package "Wire Log (WRL)" {
-    usecase "**WRL-01 APPEND Event**\n--\nAppend-only event log, replay, fork" as WRL01
+    usecase "WRL-01\nAPPEND Event\n[uc_wire_log]" as UC_WRL <<extref>>
   }
 
   package "Context Graph (CTX)" {
-    usecase "**CTX-01 PROCESS Context**\n--\nGraph pipeline: truncation, distillation, injection" as CTX01
+    usecase "CTX-01\nPROCESS Context\n[uc_context]" as UC_CTX <<extref>>
   }
 }
 
@@ -1552,26 +1586,46 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> CLI01
-HTTPClient --> SRV01
-MCPClient --> MCP01
-Platform --> OBS01
+Developer --> UC_CLI
+Developer --> UC_SAF
+
+HTTPClient --> UC_SRV
+HTTPClient --> UC_OBS
+
+MCPClient --> UC_MCP
+
+Platform --> UC_OBS
+
+Agent --> UC_AGT
+Agent --> UC_PRV
+Agent --> UC_TL
+Agent --> UC_MCP
+Agent --> UC_CFG
+Agent --> UC_SSN
+Agent --> UC_HK
+Agent --> UC_PLG
+Agent --> UC_SAF
+Agent --> UC_RTG
+Agent --> UC_OBS
+Agent --> UC_MEM
+Agent --> UC_VCS
+Agent --> UC_SBX
+Agent --> UC_RIM
+Agent --> UC_EDT
+Agent --> UC_EVL
+Agent --> UC_WRL
+Agent --> UC_CTX
 
 ' ============================================================
 ' Key Relationships
 ' ============================================================
 
-CLI01 ..> AGT01 : <<include>>
-AGT01 ..> PRV01 : <<include>>
-AGT01 ..> TL01 : <<include>>
-AGT01 ..> SAF01 : <<include>>
-AGT01 ..> RTG01 : <<include>>
-AGT01 ..> WRL01 : <<include>>
-AGT01 ..> CTX01 : <<include>>
-AGT01 ..> EDT01 : <<include>>
-AGT01 ..> EVL01 : <<extend>>
-SRV01 ..> AGT01 : <<include>>
-OBS01 ..> WRL01 : <<extend>>
+UC_CLI ..> UC_AGT : <<include>>
+UC_AGT ..> UC_RTG : <<include>>
+UC_AGT ..> UC_CTX : <<include>>
+UC_AGT ..> UC_EDT : <<extend>>
+UC_AGT ..> UC_EVL : <<extend>>
+UC_OBS ..> UC_WRL : <<extend>>
 
 @enduml
 

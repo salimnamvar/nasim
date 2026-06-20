@@ -52,6 +52,8 @@ actor "Agent" as Agent <<system>>
 ' ============================================================
 
 usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
+usecase "RTG-04\nSWITCH Model\n[uc_router]" as RTG04_ext <<extref>>
+usecase "AGT-07\nQUEUE Plan\n[uc_agent]" as AGT07_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
@@ -90,6 +92,8 @@ Agent --> CLI06
 CLI01 ..> CLI03 : <<include>>
 CLI01 ..> CLI04 : <<include>>
 CLI01 ..> CLI06 : <<extend>>
+CLI07 ..> RTG04_ext : <<include>>
+CLI05 ..> AGT07_ext : <<include>>
 CLI08 ..> SSN03_ext : <<include>>
 
 @enduml

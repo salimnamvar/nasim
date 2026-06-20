@@ -92,7 +92,7 @@ AWAITING_DIFF_APPROVAL : Presenting diff to user.
 AWAITING_DIFF_APPROVAL : SAF-02 REQUEST Approval.
 
 IDLE --> LISTENING : CLI-01 PROCESS User Input
-IDLE --> SERVING : HTTP request received (server mode)
+IDLE --> SERVING : SRV-06 HTTP request received
 IDLE --> [*] : /quit or EOF
 
 LISTENING --> THINKING : CLI-01 input parsed

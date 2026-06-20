@@ -76,8 +76,8 @@
   rules from `sm.md` do not apply (documented deviation).
 - Session, Plan, and Plugin SMs are **entity lifecycles** with persisted state.
   SMT ownership rules apply: one lifecycle-write UC per target state.
-- All hex colors are canonical — SQ diagrams must use `<back:#HEX>STATE</back>`
-  syntax matching these values.
+- All hex colors are canonical — state-machine diagrams use `state "STATE" as STATE #HEX`
+  syntax per PlantUML standard.
 
 ## Lifecycle-Write UC Mapping (SMT Ownership)
 
@@ -92,7 +92,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | SAVED | SSN-01 PERSIST Session | Session persisted to disk |
 | RESTORED | SSN-04 RESTORE Session | Session loaded from disk |
 | BRANCHED | WRL-04 FORK Session | Session forked from parent |
-| CLOSED | AGT-14 HANDLE Error | Session terminated (quit or error) |
+| CLOSED | SSN-01 PERSIST Session | Session terminated (quit or error) |
 
 ### Plan Lifecycle
 
@@ -102,7 +102,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
 | APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
 | EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
-| COMPLETED | AGT-01 PROCESS User Task | Implicit: agent loop finishes all steps |
+| COMPLETED | AGT-08 APPROVE Plan | Implicit: agent loop finishes all steps |
 | REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
 
 ### Plugin Lifecycle
@@ -168,13 +168,13 @@ CLOSED : Terminal state.
 CREATED --> ACTIVE : SSN-01 session initialized
 ACTIVE --> SAVED : SSN-01 explicit save
 ACTIVE --> BRANCHED : WRL-04 fork session
-ACTIVE --> CLOSED : AGT-14 /quit or explicit close
+ACTIVE --> CLOSED : SSN-01 /quit or explicit close
 SAVED --> RESTORED : SSN-04 restore session
 RESTORED --> ACTIVE : SSN-04 session resumed
 RESTORED --> SAVED : SSN-01 save after restore
 BRANCHED --> ACTIVE : SSN-01 child session starts
-BRANCHED --> CLOSED : AGT-14 child session closed
-SAVED --> CLOSED : AGT-14 explicit close after save
+BRANCHED --> CLOSED : SSN-01 child session closed
+SAVED --> CLOSED : SSN-01 explicit close after save
 
 CLOSED --> [*]
 
@@ -278,7 +278,7 @@ AWAITING_DIFF_APPROVAL : Presenting diff to user.
 AWAITING_DIFF_APPROVAL : SAF-02 REQUEST Approval.
 
 IDLE --> LISTENING : CLI-01 PROCESS User Input
-IDLE --> SERVING : HTTP request received (server mode)
+IDLE --> SERVING : SRV-06 HTTP request received
 IDLE --> [*] : /quit or EOF
 
 LISTENING --> THINKING : CLI-01 input parsed
@@ -457,7 +457,7 @@ BUILDING --> EMPTY : AGT-07 /plan off
 QUEUED --> APPROVED : AGT-08 /approve
 QUEUED --> REJECTED : AGT-08 user rejects
 APPROVED --> EXECUTING : AGT-08 execution starts
-EXECUTING --> COMPLETED : All steps done
+EXECUTING --> COMPLETED : AGT-08 all steps done
 EXECUTING --> EMPTY : Execution error, plan discarded
 COMPLETED --> [*]
 REJECTED --> [*]
