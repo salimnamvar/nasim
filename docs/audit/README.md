@@ -16,6 +16,7 @@
 | [audit_2026-06-20_capability-and-architecture.md](audit_2026-06-20_capability-and-architecture.md) | Capability audit | Original capability gap analysis (21 capabilities) |
 | [audit_2026-06-20_design-chain.md](audit_2026-06-20_design-chain.md) | Design chain audit | Design chain consistency check |
 | [audit.2026.06.20.corrective.architecture.review.md](audit.2026.06.20.corrective.architecture.review.md) | Corrective review | Evidence-based re-audit per p1.md directive |
+| [audit.2026.06.20.car-framework-csr-rod.md](audit.2026.06.20.car-framework-csr-rod.md) | CSR + ROD audit | CAR framework audit for Controller-Service-Repository and Resource-Oriented Design |
 
 ---
 
@@ -28,6 +29,7 @@
 5. **audit_2026-06-20_capability-and-architecture.md** — original detailed audit
 6. **audit_2026-06-20_design-chain.md** — design chain consistency
 7. **audit.2026.06.20.corrective.architecture.review.md** — corrective re-audit (latest)
+8. **audit.2026.06.20.car-framework-csr-rod.md** — CSR + ROD pattern audit (latest)
 
 ---
 
@@ -54,3 +56,9 @@
 - Multi-provider, multi-interface
 - Better designed than all references (complete design chain)
 - More scalable than all references (CLI + HTTP + MCP from one core)
+
+### CSR + ROD audit reveals 0% compliance
+- CSR: No Controller/Service/Repository layers exist
+- ROD: No HTTP API exists yet; design docs must be ROD-compliant for Phase 3
+- 18 CAR items identified for CSR + ROD resolution
+- Project-level rules created: `csr-project.md`, `rod-project.md`, `entities.md`

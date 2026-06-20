@@ -1,0 +1,101 @@
+@startuml c4_nasim_component_server
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Server Layer Components
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Server Layer components for HTTP interface
+'            ROD-compliant resource model
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.car-framework-csr-rod.md
+' Review:    —
+' ============================================================
+
+title nasim — Server Layer Components
+
+' ============================================================
+' Server Layer
+' ============================================================
+
+Container_Boundary(server_boundary, "Server Layer") {
+    Component(server_app, "ServerApp", "FastAPI", "ASGI application factory. Creates FastAPI app with lifespan, middleware, and route mounts.")
+    Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Maps HTTP requests to AgentOrchestrator. Returns AIP-193 errors.")
+    Component(sse_handler, "SSEHandler", "SSE", "Server-Sent Events streaming. Converts AgentEvent stream to SSE format for HTTP clients.")
+    Component(api_schema, "APISchema", "Pydantic", "Request/response models. SessionCreate, MessageCreate, SessionResponse, MessageResponse.")
+}
+
+' ============================================================
+' Agent Layer (referenced)
+' ============================================================
+
+Container_Boundary(agent_boundary, "Agent Layer") {
+    Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop. Yields AgentEvent objects.")
+}
+
+' ============================================================
+' Session Layer (referenced)
+' ============================================================
+
+Container_Boundary(session_boundary, "Session Layer") {
+    Component(session_store, "SessionStore", "", "Persists/loads message history.")
+}
+
+' ============================================================
+' Tool Layer (referenced)
+' ============================================================
+
+Container_Boundary(tool_boundary, "Tool Layer") {
+    Component(tool_registry, "ToolRegistry", "", "Instance-based tool registry.")
+}
+
+' ============================================================
+' Relationships
+' ============================================================
+
+Rel(server_app, server_router, "mounts routes")
+Rel(server_router, agent_orch, "delegates to")
+Rel(server_router, session_store, "manages sessions")
+Rel(server_router, tool_registry, "lists tools")
+Rel(server_router, sse_handler, "streams via")
+Rel(sse_handler, agent_orch, "consumes AgentEvents")
+
+' ============================================================
+' Notes
+' ============================================================
+
+note right of server_router
+  ROD-compliant endpoints:
+  GET /sessions — List sessions
+  POST /sessions — Create session
+  GET /sessions/{session} — Get session
+  PATCH /sessions/{session} — Update session
+  DELETE /sessions/{session} — Delete session
+  POST /sessions/{session}:send — Send message
+  GET /sessions/{session}/messages — List messages
+  GET /tools — List tools
+  GET /config — Get config
+  PATCH /config — Update config
+end note
+
+note right of sse_handler
+  Converts AgentEvent stream
+  to SSE format:
+  - TextChunk → data: {"type": "text", "text": "..."}
+  - ToolStart → data: {"type": "tool_start", "name": "..."}
+  - ToolResultEvent → data: {"type": "tool_result", ...}
+  - Error → data: {"type": "error", "message": "..."}
+  - Done → data: {"type": "done"}
+end note
+
+note right of api_schema
+  Pydantic models for
+  request/response validation.
+  Follows AIP-193 error format.
+end note
+
+SHOW_LEGEND()
+
+@enduml

@@ -1,0 +1,50 @@
+@startuml sq_srv01_list_sessions
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Sequence.puml
+!theme plain
+
+' ============================================================
+' Title:     nasim — SQ: List Sessions
+' UC:        SRV-01
+' Purpose:   ROD-compliant List operation for sessions
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.car-framework-csr-rod.md
+' Review:    —
+' ============================================================
+
+title nasim — SQ: List Sessions (SRV-01)
+
+actor "HTTP Client" as client
+participant "ServerRouter" as router
+participant "SessionStore" as store
+
+== Request ==
+
+client -> router : GET /sessions?page_size=10&page_token=abc
+activate router
+
+router -> router : Parse query params (page_size, page_token)
+router -> store : list_sessions(limit=10, cursor="abc")
+activate store
+
+alt Session exists
+    store --> router : sessions, next_page_token
+    deactivate store
+    
+    router --> client : 200 OK
+    note right of client
+        {
+            "sessions": [...],
+            "next_page_token": "def"
+        }
+    end note
+else No sessions
+    store --> router : empty list, no token
+    deactivate store
+    
+    router --> client : 200 OK (empty list)
+end
+
+deactivate router
+
+@enduml

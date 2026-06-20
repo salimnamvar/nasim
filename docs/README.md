@@ -21,8 +21,8 @@ Each layer must be authored in order. No layer may be authored before the one ab
 
 | Directory | Layer | Status | Contents |
 | --------- | ----- | ------ | -------- |
-| [C4/](c4/README.md) | C4 Architecture | Frozen | Context, container, 9 component diagrams (7 containers) |
-| [UC/](uc/README.md) | Use Cases | Frozen | 55 UCs — 13 groups (CLI/AGT/PRV/CFG/SSN/SAF/CTX/LLM/TL/SRV/HK/PLG/RTG) |
+| [C4/](c4/README.md) | C4 Architecture | Frozen | Context, container, 10 component diagrams (8 containers) |
+| [UC/](uc/README.md) | Use Cases | Frozen | 66 UCs — 13 groups (CLI/AGT/PRV/CFG/SSN/SAF/CTX/LLM/TL/SRV/HK/PLG/RTG) |
 | [SM/](sm/README.md) | State Machine | Frozen | Agent lifecycle — 12 states (process FSM, not entity lifecycle) |
 | [SQ/](sq/README.md) | Sequence Diagrams | Frozen | 55 diagrams — one per UC, by group |
 | [ER/](er/README.md) | ERD | Frozen | Session JSON Lines schema — logical store |
@@ -45,6 +45,7 @@ Each layer must be authored in order. No layer may be authored before the one ab
 - [Component: Tools](c4/c4_nasim_component_tools.puml) — Tool layer components
 - [Component: Config](c4/c4_nasim_component_config.puml) — Config layer components
 - [Component: Session](c4/c4_nasim_component_session.puml) — Session layer components
+- [Component: Server](c4/c4_nasim_component_server.puml) — Server layer components (ROD-compliant)
 - [Component Inventory](c4/README.md)
 
 ### Use Cases
@@ -97,6 +98,7 @@ Each layer must be authored in order. No layer may be authored before the one ab
 - [Gap Analysis](audit/nasim-gap-analysis.md) — Design principles compliance + gaps
 - [CAR Improvement Plan](audit/nasim-car-improvement-plan.md) — 18 improvement items
 - [Design Principles Comparison](audit/design-principles-comparison.md) — Design comparison
+- [CSR + ROD Audit](audit/audit.2026.06.20.car-framework-csr-rod.md) — Controller-Service-Repository + Resource-Oriented Design audit
 
 ## Architecture Decisions
 
@@ -114,3 +116,5 @@ Each layer must be authored in order. No layer may be authored before the one ab
 12. **Hook system** — Pre/post hooks for tool use and LLM calls. Command (bash) and prompt (LLM-driven) hook types.
 13. **Plugin system** — Plugin manifests, dynamic tool/hook registration. Extension without core changes.
 14. **Multi-interface** — One agent core serves CLI, HTTP API, and MCP server simultaneously.
+15. **CSR compliance** — Controller (CLI/HTTP) → Service (Agent/Provider) → Repository (Tools/Config/Session) layered architecture.
+16. **ROD compliance** — HTTP API follows Resource-Oriented Design: resources (Session, Message, Tool, Config), standard methods, custom methods (:send), AIP-193 errors.

@@ -51,13 +51,17 @@
 | TL-12 | TL | Invoke MCP Extension | MCPToolAdapter |
 | TL-13 | TL | LSP Operations | LspTool |
 | TL-14 | TL | List Registered Tools | ToolRegistry |
-| SRV-01 | SRV | Start Server | ServerApp |
+| SRV-01 | SRV | List Sessions | ServerRouter |
 | SRV-02 | SRV | Create Session | ServerRouter |
-| SRV-03 | SRV | Send Message | ServerRouter |
-| SRV-04 | SRV | Stream Response | SSEHandler |
-| SRV-05 | SRV | Get Message History | ServerRouter |
-| SRV-06 | SRV | List Tools | ServerRouter |
-| SRV-07 | SRV | Get Config | ServerRouter |
+| SRV-03 | SRV | Get Session | ServerRouter |
+| SRV-04 | SRV | Update Session | ServerRouter |
+| SRV-05 | SRV | Delete Session | ServerRouter |
+| SRV-06 | SRV | Send Message | ServerRouter |
+| SRV-07 | SRV | List Messages | ServerRouter |
+| SRV-08 | SRV | List Tools | ServerRouter |
+| SRV-09 | SRV | Get Tool | ServerRouter |
+| SRV-10 | SRV | Get Config | ServerRouter |
+| SRV-11 | SRV | Update Config | ServerRouter |
 | HK-01 | HK | Register Hook | HookManager |
 | HK-02 | HK | Execute Pre-Tool Hook | HookManager |
 | HK-03 | HK | Execute Post-Tool Hook | HookManager |

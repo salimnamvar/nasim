@@ -10,6 +10,7 @@
 | c4_nasim_component_tools.puml | Tools | Tool (ABC), ToolRegistry, ToolResult, FileTools, SearchTools, ShellTool, DirTool, WebTools, GitTool, MCPToolAdapter |
 | c4_nasim_component_config.puml | Config | ConfigLoader, Config |
 | c4_nasim_component_session.puml | Session | SessionStore, Session |
+| c4_nasim_component_server.puml | Server | ServerApp, ServerRouter, SSEHandler, APISchema |
 
 ## Actors
 
