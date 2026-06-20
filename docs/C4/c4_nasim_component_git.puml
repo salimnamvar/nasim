@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Git Component Diagram
@@ -27,4 +27,4 @@ Rel(git_integration, git_commit, "creates commits")
 Rel(git_status, git_repo, "git status, git diff")
 Rel(git_commit, git_repo, "git commit, git add")
 
-SHOW_LEGEND()
+@enduml

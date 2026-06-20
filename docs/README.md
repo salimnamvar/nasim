@@ -20,7 +20,7 @@ Each layer must be authored in order. No layer may be authored before the one ab
 
 | Directory | Layer | Status | Contents |
 | --------- | ----- | ------ | -------- |
-| [C4/](c4/README.md) | C4 Architecture | Frozen | Context, container, 18 component diagrams (3 containers, 12 groups) |
+| [C4/](c4/README.md) | C4 Architecture | Frozen | Context, container, 18 component diagrams (3 containers, 12 groups, tenas style) |
 | [UC/](uc/README.md) | Use Cases | Frozen | 109 UCs — 17 groups (CLI/AGT/PRV/CFG/SSN/SAF/CTX/LLM/TL/SRV/HK/PLG/RTG/OBS/MEM/VCS/SBX) |
 | [SM/](sm/README.md) | State Machine | Frozen | Agent lifecycle — 20 states (process FSM, not entity lifecycle) |
 | [SQ/](sq/README.md) | Sequence Diagrams | Frozen | 55 diagrams — one per UC, by group |

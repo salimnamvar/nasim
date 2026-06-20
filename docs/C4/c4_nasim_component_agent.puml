@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Agent Component Diagram
@@ -48,4 +48,4 @@ Rel(conv_history, compactor, "triggers compaction")
 Rel(compactor, provider_boundary, "secondary LLM call for summarization")
 Rel(subagent_coord, agent_orch, "child agent inherits core")
 
-SHOW_LEGEND()
+@enduml

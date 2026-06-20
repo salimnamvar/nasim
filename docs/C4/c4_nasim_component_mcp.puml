@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — MCP Component Diagram
@@ -32,4 +32,4 @@ Rel(mcp_tool_adapter, tool_registry, "registers as nasim tools")
 Rel(mcp_server_rt, tool_registry, "exposes nasim tools to external clients")
 Rel(mcp_server_rt, mcp_client, "serves MCP protocol via stdio/SSE")
 
-SHOW_LEGEND()
+@enduml

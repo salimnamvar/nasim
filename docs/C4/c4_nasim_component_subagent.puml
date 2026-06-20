@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Subagent Component Diagram
@@ -27,4 +27,4 @@ Rel(subagent_coord, tool_boundary, "child uses restricted tool set")
 Rel(subagent_coord, provider_boundary, "child shares provider")
 Rel(agent_orch, subagent_coord, "parent spawns via SubagentTool")
 
-SHOW_LEGEND()
+@enduml

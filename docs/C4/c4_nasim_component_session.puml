@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Session Component Diagram
@@ -30,4 +30,4 @@ Rel(session_versioning, session_store, "creates snapshots, restores state")
 Rel(session_search, session_store, "indexes and queries session content")
 Rel(session_fork, session_store, "copies session state for branching")
 
-SHOW_LEGEND()
+@enduml

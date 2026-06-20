@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Sandbox Component Diagram
@@ -28,4 +28,4 @@ Rel(sandbox_executor, sandbox_monitor, "monitors running process")
 Rel(sandbox_executor, host_shell, "runs isolated subprocess")
 Rel(sandbox_executor, host_fs, "restricted file access")
 
-SHOW_LEGEND()
+@enduml

@@ -15,18 +15,16 @@ Back to [docs/](../README.md).
 
 | Class | Module | Type | C4 Component | Description |
 |-------|--------|------|-------------|-------------|
-| Provider | `nasim/provider/base.py` | Protocol | Provider | LLM provider interface: chat(), chat_stream(), model_name |
-| OllamaProvider | `nasim/provider/ollama.py` | class | Provider | Ollama /api/chat implementation |
-| OpenAIProvider | `nasim/provider/openai.py` | class | Provider | OpenAI API implementation |
-| AnthropicProvider | `nasim/provider/anthropic.py` | class | Provider | Anthropic API implementation |
-| ProviderFactory | `nasim/provider/base.py` | class | Provider | Provider instantiation from config |
-| ModelRouter | `nasim/provider/router.py` | class | Provider | Model selection, fallback, routing strategies |
+| Provider | `nasim/provider/base.py` | Protocol | Provider | Unified LLM interface: chat, chat_stream, model_name via litellm |
+| LiteLLMProxy | `nasim/provider/litellm.py` | class | Provider | Universal LLM proxy: 100+ providers via model string prefix |
+| ModelRouter | `nasim/provider/router.py` | class | Provider | Model selection, fallback, task classification |
 | LLMResponse | `nasim/provider/base.py` | dataclass | — | Parsed LLM response: text, tool_calls, usage |
 | ToolCall | `nasim/provider/base.py` | dataclass | — | Parsed tool call: name, arguments, id |
 | AgentOrchestrator | `nasim/agent/orchestrator.py` | class | AgentOrchestrator | Core agentic orchestrator — drives LLM/tool loop |
 | ConversationHistory | `nasim/agent/history.py` | class | ConversationHistory | Message list + token tracking + compaction trigger |
 | ContextCompactor | `nasim/agent/compactor.py` | class | ContextCompactor | Context summarization via secondary LLM call |
-| PermissionGate | `nasim/agent/permission.py` | class | PermissionGate | Tool permission checks: ask/auto/off modes |
+| SafetyCoordinator | `nasim/agent/safety.py` | class | SafetyCoordinator | Composes PermissionGate, injection scanner, egress inspector |
+| SubagentCoordinator | `nasim/agent/subagent.py` | class | SubagentCoordinator | Parent-child orchestration, nesting limit 5, result aggregation |
 | PlanSession | `nasim/agent/plan.py` | class | PlanSession | Plan mode tool queuing and execution |
 | AgentEvent | `nasim/agent/events.py` | ABC | AgentEvent | Base event type — abstract |
 | TextChunk | `nasim/agent/events.py` | class | AgentEvent | Streaming text token event |

@@ -90,14 +90,12 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
-| Provider | `nasim/provider/base.py` | Protocol: chat(), chat_stream(), model_name |
-| ProviderFactory | `nasim/provider/base.py` | Reads config, instantiates correct provider |
-| ModelRouter | `nasim/provider/router.py` | Model selection, fallback, routing strategies |
-| ProviderCapabilities | `nasim/provider/caps.py` | Capability declaration: streaming, tools, max_tokens, vision |
-| FallbackChain | `nasim/provider/fallback.py` | Circuit breaker + retry + provider failover |
-| OllamaProvider | `nasim/provider/ollama.py` | Ollama /api/chat implementation |
-| OpenAIProvider | `nasim/provider/openai.py` | OpenAI Chat Completions API |
-| AnthropicProvider | `nasim/provider/anthropic.py` | Anthropic Messages API |
+| Provider | `nasim/provider/base.py` | Unified Protocol: chat(), chat_stream(), model_name. All providers route through litellm |
+| LiteLLMProxy | `nasim/provider/litellm.py` | Universal LLM proxy: 100+ providers via model string prefix |
+| ModelRouter | `nasim/provider/router.py` | Model selection: task classification, provider preference, context window matching |
+| FallbackChain | `nasim/provider/fallback.py` | Ordered provider failover chain with retry and exponential backoff |
+| ProviderCapabilities | `nasim/provider/caps.py` | Capability declaration: streaming, tools, vision, reasoning, context window per model |
+| ModelCatalog | `nasim/provider/catalog.py` | Model metadata: context limits, pricing, capabilities from litellm database |
 
 ### Tool Group
 
@@ -230,13 +228,12 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/agent/errors.py` | agent | ErrorBoundary |
 | `nasim/agent/persona.py` | agent | PersonaManager |
 | `nasim/provider/__init__.py` | provider | Provider package |
-| `nasim/provider/base.py` | provider | Provider Protocol + factory |
+| `nasim/provider/base.py` | provider | Provider Protocol (unified interface) |
+| `nasim/provider/litellm.py` | provider | LiteLLMProxy (universal LLM proxy) |
 | `nasim/provider/router.py` | provider | ModelRouter |
-| `nasim/provider/ollama.py` | provider | OllamaProvider |
-| `nasim/provider/openai.py` | provider | OpenAIProvider |
-| `nasim/provider/anthropic.py` | provider | AnthropicProvider |
-| `nasim/provider/caps.py` | provider | ProviderCapabilities |
+| `nasim/provider/catalog.py` | provider | ModelCatalog |
 | `nasim/provider/fallback.py` | provider | FallbackChain |
+| `nasim/provider/caps.py` | provider | ProviderCapabilities |
 | `nasim/tools/__init__.py` | tools | Tools package |
 | `nasim/tools/base.py` | tools | Tool ABC, ToolRegistry, ToolResult |
 | `nasim/tools/file.py` | tools | File tools |

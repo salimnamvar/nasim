@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Tools Component Diagram
@@ -57,4 +57,4 @@ Rel(web_tools, web, "HTTP")
 Rel(git_tool, git_repo, "git CLI")
 Rel(lsp_tool, lsp_server, "LSP protocol")
 
-SHOW_LEGEND()
+@enduml

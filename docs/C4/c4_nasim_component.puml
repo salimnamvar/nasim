@@ -1,7 +1,7 @@
 @startuml c4_nasim_component_overview
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Component Overview
@@ -139,6 +139,6 @@ Rel(git_integration, git_status, "reads state")
 Rel(git_integration, git_commit, "creates commits")
 Rel(config_loader, config_schema, "produces config")
 
-SHOW_LEGEND()
+@enduml
 
 @enduml

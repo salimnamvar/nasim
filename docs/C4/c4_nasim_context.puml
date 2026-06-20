@@ -1,25 +1,44 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
-!theme plain
-LAYOUT_LEFT_RIGHT()
+@startuml nasim_context
 
 ' ============================================================
-' Title:     nasim — System Context
-' Boundary:  nasim code agent
-' Purpose:   Show nasim as a system with all interfaces and external dependencies
-' Milestone: v1.0
-' Version:   5.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Title: nasim — System Context
+' Boundary: nasim code agent
+' Purpose: Show nasim as a system with all interfaces and external dependencies
+' Version: 6.0.0
 ' ============================================================
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_LEFT_RIGHT()
+LAYOUT_WITH_LEGEND()
 
 title nasim — System Context
+
+' ============================================================
+' Tags & Styling
+' ============================================================
+
+AddElementTag("future", $bgColor="#F0F0F0", $fontColor="#666666", $borderColor="#999999", $borderStyle=DashedLine(), $legendText="Future scope (inactive)")
+AddRelTag("future_rel", $textColor="#666666", $lineColor="#999999", $lineStyle=DashedLine(), $legendText="Future relationship")
+
+' ============================================================
+' Actors
+' ============================================================
 
 Person(dev, "Developer", "Uses terminal to interact with nasim")
 Person(http_client, "HTTP Client", "Web-app, mobile-app, desktop-app via HTTP/SSE")
 
-System(nasim, "nasim", "Multi-interface code agent: CLI + HTTP API + MCP")
+' ============================================================
+' nasim System
+' ============================================================
 
-System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic")
+System(nasim, "nasim", "Multi-interface code agent: CLI + HTTP API + MCP server")
+
+' ============================================================
+' External Systems
+' ============================================================
+
+System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ via litellm")
 System_Ext(host_fs, "Host Filesystem", "Project files and directories")
 System_Ext(host_shell, "Host Shell", "Shell for executing commands")
 System_Ext(web, "Web", "Documentation, package APIs, search engines")
@@ -27,9 +46,18 @@ System_Ext(mcp_server, "MCP Server", "Extension tools via Model Context Protocol
 System_Ext(mcp_client, "MCP Client", "External tools connecting to nasim MCP server")
 System_Ext(git_repo, "Git Repository", "Version control for project files")
 System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation")
-System_Ext(memory_backend, "Memory Backend", "Long-term knowledge persistence")
 System_Ext(lsp_server, "LSP Server", "Language server for code intelligence")
 System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
+
+' ============================================================
+' Observability Platform (tenas pattern: emit-only app, platform-owned collection)
+' ============================================================
+
+System_Ext(obs_platform, "Observability Platform", "Agent-based collection, Loki logs, Prometheus metrics, Grafana dashboards. nasim emits only — platform owns collection, storage, visualization.")
+
+' ============================================================
+' Relationships
+' ============================================================
 
 Rel(dev, nasim, "types commands and reads output", "terminal")
 Rel(http_client, nasim, "sends requests, receives SSE streams", "HTTP/JSON")
@@ -41,8 +69,9 @@ Rel(nasim, mcp_server, "discovers and invokes extension tools", "stdio/SSE")
 Rel(mcp_client, nasim, "invokes nasim tools via MCP protocol", "stdio/SSE")
 Rel(nasim, git_repo, "reads status, creates commits", "git CLI")
 Rel(nasim, sandbox, "executes commands in isolated environment", "OS primitives")
-Rel(nasim, memory_backend, "persists and retrieves knowledge", "read/write")
 Rel(nasim, lsp_server, "code intelligence queries", "LSP protocol")
 Rel(nasim, plugin_dir, "discovers and loads plugins", "filesystem")
 
-SHOW_LEGEND()
+Rel(nasim, obs_platform, "emits structured logs to stdout; exposes /metrics (collected via agents + scrape)", "stdout + HTTP scrape", $tags="future_rel")
+
+@enduml

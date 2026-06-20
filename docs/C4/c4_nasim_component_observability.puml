@@ -1,26 +1,77 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
-!theme plain
-skinparam linetype polyline
+@startuml nasim_component_observability
 
 ' ============================================================
-' Title:     nasim — Observability Component Diagram
-' Boundary:  nasim core library — Observability group
-' Purpose:   Structured logging, trace correlation, metrics collection
-' Milestone: v1.0
-' Version:   5.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Title: nasim — Observability Component Diagram
+' Boundary: nasim core library — Observability group
+' Purpose: Application-side logging and metrics emission (tenas pattern: emit only)
+' Version: 6.0.0
 ' ============================================================
 
-title nasim — Observability Component Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
-Container_Boundary(observability_boundary, "Observability Group") {
-    Component(structured_logger, "StructuredLogger", "structlog", "Structured logging with trace correlation and log levels")
-    Component(metrics_collector, "MetricsCollector", "", "Token usage, latency, tool call counts, error rates")
-    Component(trace_correlator, "TraceCorrelator", "", "Request-scoped trace IDs linking LLM calls, tool calls, events")
+LAYOUT_LEFT_RIGHT()
+LAYOUT_WITH_LEGEND()
+
+title nasim — Observability Components
+
+' ============================================================
+' External: Platform-owned collection (emit path ends at stdout)
+' ============================================================
+
+Container_Ext(ContainerRuntime, "Container Runtime", "Docker / Kubernetes CRI", "Passive infrastructure. Captures stdout/stderr from the process. Does not tail, transform, or ship logs.")
+Container_Ext(Prometheus, "Prometheus", "Metrics Store", "Pull-scrapes /metrics endpoint. Application never pushes metrics.")
+
+' ============================================================
+' nasim Core Library — Observability Group
+' ============================================================
+
+Container_Boundary(nasim_core, "nasim Core Library") {
+
+    Boundary(observability_group, "Observability Group") {
+
+        Component(structured_logger, "Structured Logger", "structlog + JSON formatter", "Writes structured JSON records to stdout only. Includes trace_id, span_id, request context. Never ships, buffers, enriches for storage, or forwards to Loki or log agent.")
+
+        Component(metrics_exporter, "Metrics Exporter", "prometheus-client", "Owns application metrics: token usage, latency histograms, tool call counters, error rates. Exposes /metrics HTTP endpoint for pull-based scrape only — never pushes metrics.")
+
+        Component(trace_correlator, "Trace Correlator", "contextvars", "Request-scoped trace IDs linking LLM calls, tool calls, and events. Binds trace_id and span_id to context for structured logger injection.")
+
+        Component(instrumentation_mw, "Instrumentation Middleware", "ASGI middleware", "Outermost request handler for HTTP mode. Extracts/generates request_id; binds to contextvars for correlation.")
+
+    }
+
+    Boundary(agent_group, "Agent Group") {
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop")
+    }
+
+    Boundary(provider_group, "Provider Group") {
+        Component(provider, "Provider", "Protocol", "LLM provider interface")
+    }
+
+    Boundary(tool_group, "Tool Group") {
+        Component(tool_registry, "ToolRegistry", "", "Tool execution")
+    }
 }
 
-Rel(structured_logger, trace_correlator, "attaches trace ID to log entries")
-Rel(metrics_collector, trace_correlator, "records metrics per trace")
+' ============================================================
+' Internal Relationships
+' ============================================================
 
-SHOW_LEGEND()
+Rel(agent_orch, structured_logger, "logs agent lifecycle events (tool calls, LLM requests, errors)")
+Rel(agent_orch, metrics_exporter, "records token usage, latency, tool call counts")
+Rel(provider, structured_logger, "logs LLM request/response metadata")
+Rel(provider, metrics_exporter, "records LLM latency and token consumption")
+Rel(tool_registry, structured_logger, "logs tool execution events")
+Rel(tool_registry, metrics_exporter, "records tool call counts and duration")
+Rel(trace_correlator, structured_logger, "injects trace_id, span_id into log records")
+Rel(instrumentation_mw, trace_correlator, "generates and binds request_id to contextvars")
+Rel(instrumentation_mw, metrics_exporter, "records HTTP request duration and status")
+Rel(instrumentation_mw, structured_logger, "logs HTTP request lifecycle")
+
+' ============================================================
+' Emit Path (tenas pattern: emit ends at stdout)
+' ============================================================
+
+Rel(structured_logger, ContainerRuntime, "writes structured JSON logs to stdout", "stdout only — emit path ends here")
+Rel(metrics_exporter, Prometheus, "exposes /metrics for pull scrape", "HTTP GET — pull model only — never pushes")
+
+@enduml

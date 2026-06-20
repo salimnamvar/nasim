@@ -10,6 +10,7 @@
 | Document | Scope | Purpose |
 |----------|-------|---------|
 | [audit.2026.06.20.p1.corrective.review.md](audit.2026.06.20.p1.corrective.review.md) | p1.md directive | **CORRECTIVE** — C4 architecture normalization to 10/10 standard |
+| [audit.2026.06.20.pairwise.reference.audit.md](audit.2026.06.20.pairwise.reference.audit.md) | Pairwise audit | nasim vs 28 reference agents — pros/cons/scorecard |
 | [audit.2026.06.20.comprehensive.reference.audit.md](audit.2026.06.20.comprehensive.reference.audit.md) | All 28 agents + C4 audit | **MASTER AUDIT** — CAR framework, comparison tables, C4 gap analysis, enhancement roadmap |
 | [reference-agents-deep-dive.md](reference-agents-deep-dive.md) | All 27 reference agents | Architectural analysis of every reference agent |
 | [nasim-gap-analysis.md](nasim-gap-analysis.md) | nasim vs references | Design principles compliance + capability gaps |

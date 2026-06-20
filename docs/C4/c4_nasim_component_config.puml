@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Config Component Diagram
@@ -28,4 +28,4 @@ Rel(config_loader, project_config, "reads project overrides")
 Rel(config_loader, env_vars, "reads env overrides")
 Rel(config_loader, config_schema, "produces validated Config")
 
-SHOW_LEGEND()
+@enduml

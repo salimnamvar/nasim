@@ -1,6 +1,6 @@
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !theme plain
-skinparam linetype polyline
+
 
 ' ============================================================
 ' Title:     nasim — Hooks Component Diagram
@@ -29,4 +29,4 @@ Rel(hook_manager, hook_types, "manages registered hooks")
 Rel(hook_manager, hook_result, "returns execution result")
 Rel(plugin_loader, hook_manager, "registers plugin hooks")
 
-SHOW_LEGEND()
+@enduml
