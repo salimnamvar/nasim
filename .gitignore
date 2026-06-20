@@ -42,3 +42,4 @@ nasim-*.log
 # CI caches if any
 .github/workflows/_tmp/
 .aider*
+.*/
