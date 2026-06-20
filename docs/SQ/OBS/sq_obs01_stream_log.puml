@@ -1,0 +1,114 @@
+@startuml sq_obs01_stream_log
+' ============================================================
+' Title:     OBS-01 — STREAM Structured Log
+' Boundary:  nasim code agent CLI
+' Purpose:   Emit structured JSON log record to stdout
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Review:    —
+' ============================================================
+
+actor "AgentOrchestrator" as agent
+actor "Provider" as provider
+actor "ToolRegistry" as tools
+
+box "Observability Layer" #E3F2FD
+  participant "StructuredLogger" as logger
+  participant "LogRedactor" as redactor
+  participant "TraceCorrelator" as trace
+  participant "DualOutputAdapter" as adapter
+end box
+
+box "External" #F3E5F5
+  participant "Stdout" as stdout
+end box
+
+note over agent, stdout
+  Scope:
+    - obs01 STREAM Structured Log — emit JSON record to stdout
+
+  Preconditions:
+    - StructuredLogger configured (level, format)
+    - LogRedactor available for secret stripping
+
+  Contexts:
+    - Called on every significant agent event (turn, LLM call, tool exec, error)
+    - Prerequisite for platform log collection (tenas pattern)
+
+  Excludes:
+    - Wire log append (WRL group, domain artifact)
+    - Metrics recording (OBS-02)
+    - Log shipping / collection (platform: log agent, Loki)
+
+  Design:
+    - StructuredLogger constructs LogRecord with trace context
+    - LogRedactor strips secrets before emission
+    - DualOutputAdapter writes JSON to stdout (always)
+    - Human-readable output delegated to Renderer when isatty
+    - Never conditional logic that changes semantics
+
+  Returns:
+    - Success: None (fire-and-forget emission)
+    - Failure: stderr warning (never raises to caller)
+
+  Invariants:
+    - stdout only for logs
+    - No secrets in emissions (redaction mandatory)
+    - JSON format always (text is for human layer only)
+end note
+
+== obs01 STREAM Structured Log ==
+
+agent -> logger : emit(msg, level, **extra)
+activate logger
+
+logger -> trace : current_span()
+activate trace
+trace --> logger : TraceContext(trace_id, span_id, parent_span_id)
+deactivate trace
+
+logger -> logger : build_record(msg, level, trace_ctx, extra)
+
+logger -> redactor : redact(record)
+activate redactor
+redactor --> logger : sanitized_record
+deactivate redactor
+
+logger -> adapter : emit(sanitized_record)
+activate adapter
+
+adapter -> adapter : serialize_json(record)
+
+alt is_tty()
+    adapter -> stdout : write_json(record)
+else not tty (server mode)
+    adapter -> stdout : write_json(record)
+end
+
+adapter --> logger : None
+deactivate adapter
+
+deactivate logger
+
+note over agent, stdout
+  Flow:
+    - AgentOrchestrator → StructuredLogger → TraceCorrelator + LogRedactor → DualOutputAdapter → Stdout
+
+  State:
+    - IDLE → BUILDING → REDACTING → EMITTING → DONE
+
+  Failure:
+    - Write failure → stderr warning, never raises
+
+  Success:
+    - JSON line written to stdout
+
+  Key invariants:
+    - Always JSON to stdout
+    - Redaction always applied
+    - Trace context always injected
+    - Fire-and-forget (no return to caller)
+end note
+
+@enduml

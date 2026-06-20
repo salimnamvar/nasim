@@ -1,0 +1,96 @@
+@startuml er_memory_store
+' ============================================================
+' Title:     nasim — Memory Store ERD
+' Boundary:  nasim code agent CLI
+' Purpose:   Enhanced memory schema with RAG support
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' Note:      RAG-enhanced memory with vector embeddings and
+'            TF-IDF keyword index for hybrid retrieval.
+'            Physical storage: ~/.nasim/memory/
+' ============================================================
+
+title nasim — Memory Store ERD
+
+entity "memory_entry" as me {
+    * id : TEXT (UUID) <<PK>>
+    --
+    * scope : TEXT {global|project|session}
+    * key : TEXT
+    * content : TEXT
+    embedding : BLOB
+    metadata : TEXT (JSON)
+    * created_at : TEXT (ISO 8601)
+    * updated_at : TEXT (ISO 8601)
+}
+
+entity "episodic_entry" as ee {
+    * id : TEXT (UUID) <<PK>>
+    * session_id : TEXT <<FK>>
+    --
+    * summary : TEXT
+    embedding : BLOB
+    * turn_range_start : INTEGER
+    * turn_range_end : INTEGER
+    * created_at : TEXT (ISO 8601)
+}
+
+entity "semantic_entry" as se {
+    * id : TEXT (UUID) <<PK>>
+    * fact : TEXT
+    embedding : BLOB
+    * source_session : TEXT <<FK>>
+    * confidence : REAL
+    tags : TEXT (JSON)
+    * created_at : TEXT (ISO 8601)
+}
+
+entity "memory_index" as mi {
+    * entry_id : TEXT <<FK>>
+    * token : TEXT
+    --
+    tfidf_weight : REAL
+}
+
+me ||--o{ mi : "indexed by"
+ee }o--|| me : "belongs to"
+se }o--|| me : "references"
+
+note bottom of me
+  Physical storage: ~/.nasim/memory/
+  Core memory entries with optional vector embeddings.
+  Scope determines visibility and persistence level.
+  TF-IDF keyword index enables hybrid retrieval
+  (semantic similarity + keyword matching).
+
+  Notation:
+    * prefix = Mandatory (NOT NULL)
+    <<PK>> = Primary key
+    <<FK>> = Foreign key
+    {A|B|C} = Enum constraint
+    TEXT (JSON) = JSON blob stored as TEXT
+    BLOB = Binary vector embedding data
+    REAL = Floating point value
+end note
+
+note bottom of ee
+  Episodic memory: summaries of conversation turns.
+  Embedding enables semantic search over past sessions.
+  Turn range enables partial session replay.
+end note
+
+note bottom of se
+  Semantic memory: extracted facts with confidence scores.
+  Source session provides provenance.
+  Tags enable faceted filtering.
+end note
+
+note right of mi
+  Inverted index for keyword search.
+  Each entry is decomposed into tokens
+  with TF-IDF weights for ranking.
+end note
+
+@enduml

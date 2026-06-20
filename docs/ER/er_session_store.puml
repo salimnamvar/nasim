@@ -1,0 +1,76 @@
+@startuml er_session_store
+' ============================================================
+' Title:     nasim — Session Store ERD
+' Boundary:  nasim code agent CLI
+' Purpose:   Physical schema for session JSON Lines store
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' Note:      Minimal ERD — nasim uses JSON Lines files, not a
+'            relational database. This documents the logical schema.
+' ============================================================
+
+title nasim — Session Store ERD
+
+entity "session" as sess {
+    * id : TEXT (UUID) <<PK>>
+    --
+    * created_at : TEXT (ISO 8601)
+    * model : TEXT
+    * provider : TEXT
+    * config_snapshot : TEXT (JSON)
+    message_count : INTEGER
+    total_tokens : INTEGER
+}
+
+entity "message" as msg {
+    * session_id : TEXT <<FK>>
+    * sequence : INTEGER
+    --
+    * role : TEXT {system|user|assistant|tool}
+    content : TEXT
+    tool_calls : TEXT (JSON)
+    tool_call_id : TEXT
+    tokens : INTEGER
+    timestamp : TEXT (ISO 8601)
+}
+
+entity "session_file" as sf {
+    * session_id : TEXT <<FK>>
+    --
+    * path : TEXT (path)
+    * format : TEXT {jsonl}
+    * size_bytes : INTEGER
+}
+
+sess ||--o{ msg : "contains"
+sess ||--o| sf : "stored as"
+
+note bottom of sess
+  Physical storage: ~/.nasim/sessions/<id>/session.jsonl
+  Each line is a JSON object: session metadata or a message.
+  One file per session ID.
+
+  Notation:
+    * prefix = Mandatory (NOT NULL)
+    <<PK>> = Primary key
+    <<FK>> = Foreign key
+    {A|B|C} = Enum constraint
+    TEXT (JSON) = JSON blob stored as TEXT
+    TEXT (ISO 8601) = Timestamp as ISO 8601 text
+end note
+
+note bottom of msg
+  Messages are ordered by sequence number.
+  tool_calls present only for assistant messages with tool use.
+  tool_call_id links tool results back to the call.
+end note
+
+note right of sf
+  Session file metadata for
+  quick listing without parsing
+  the full JSONL file.
+end note
+
+@enduml

@@ -1,0 +1,129 @@
+@startuml ct_api_observability
+' ============================================================
+' Title:     nasim — Observability API
+' Boundary:  nasim code agent CLI
+' Purpose:   Public interfaces for structured logging, metrics, trace, and redaction
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Review:    —
+' Note:      Emit-only per tenas pattern. nasim never pulls/queries logs.
+' ============================================================
+
+title nasim — Observability API
+
+skinparam classAttributeIconSize 0
+
+package "Observability API" #E3F2FD {
+
+    interface "StructuredLogger" <<interface>> {
+        + emit(record : LogRecord) : None
+        + debug(msg : str, **extra) : None
+        + info(msg : str, **extra) : None
+        + warning(msg : str, **extra) : None
+        + error(msg : str, **extra) : None
+        + exception(msg : str, exc : Exception) : None
+    }
+
+    interface "MetricsCollector" <<interface>> {
+        + counter(name : str, labels : dict) : Counter
+        + gauge(name : str, labels : dict) : Gauge
+        + histogram(name : str, labels : dict) : Histogram
+        + record_llm_request(model : str, provider : str, latency_ms : float, tokens : int) : None
+        + record_tool_call(tool : str, success : bool, duration_ms : float) : None
+        + record_error(error_type : str) : None
+    }
+
+    interface "TraceCorrelator" <<interface>> {
+        + new_trace(operation : str) : TraceContext
+        + current_span() : TraceContext
+        + child_span(operation : str) : TraceContext
+        + span_id() : str
+        + trace_id() : str
+    }
+
+    interface "ContextPropagator" <<interface>> {
+        + propagate() : dict
+        + inject(headers : dict) : dict
+        + extract(headers : dict) : TraceContext
+    }
+
+    interface "LogRedactor" <<interface>> {
+        + redact(record : LogRecord) : LogRecord
+        + redact_payload(payload : dict) : dict
+        + add_rule(rule : RedactionRule) : None
+        + remove_rule(pattern : str) : None
+    }
+
+    interface "DualOutputAdapter" <<interface>> {
+        + emit(record : LogRecord) : None
+        + is_tty() : bool
+    }
+
+    interface "OTelExporter" <<interface>> {
+        + start_span(operation : str) : Span
+        + record_metric(point : MetricPoint) : None
+        + flush() : None
+        + shutdown() : None
+    }
+}
+
+note bottom of StructuredLogger
+  Facade over structlog + JSON formatter.
+  emit writes one JSON line to stdout per record.
+  Convenience methods (debug/info/warning/error)
+  construct LogRecord with trace context from TraceCorrelator.
+  Never ships, buffers, or forwards — emit only.
+end note
+
+note bottom of MetricsCollector
+  Facade over prometheus-client.
+  counter/gauge/histogram return metric handles.
+  Convenience methods instrument key nasim events:
+  LLM requests, tool calls, errors.
+  /metrics endpoint served by ServerApp (HTTP mode)
+  or printed on demand (CLI mode).
+end note
+
+note bottom of TraceCorrelator
+  Generates and binds trace context via contextvars.
+  new_trace creates root span for CLI turn or HTTP request.
+  child_span creates nested spans for provider calls, tool exec.
+  All spans carry trace_id + span_id for correlation.
+end note
+
+note right of ContextPropagator
+  Propagates trace context across boundaries:
+  - Provider calls (headers)
+  - Tool dispatch (explicit passing)
+  - Subagent spawn (spawn message)
+  - MCP tool calls (standard headers if SSE)
+  ensure every log record and wire event
+  carries correlation ids.
+end note
+
+note right of LogRedactor
+  Regex-based secret stripping.
+  Always on — cannot be disabled.
+  Applied before emission to both structured and wire.
+  Configurable rules: global + per-project.
+  Patterns: env vars, API keys, .env content, passwords.
+end note
+
+note bottom of DualOutputAdapter
+  CLI entry adapter for dual output.
+  JSON always written to stdout (machine).
+  Rich human output delegated to Renderer when isatty.
+  HTTP/MCP bypass this adapter (direct structured emission).
+  Semantics never change based on output mode.
+end note
+
+note bottom of OTelExporter
+  Optional — behind otel feature flag.
+  Bridges TraceCorrelator spans to OTel SDK.
+  Exports via OTLP/gRPC or stdout.
+  Zero dependency cost when feature disabled.
+  Enables distributed tracing in production deployments.
+end note
+
+@enduml

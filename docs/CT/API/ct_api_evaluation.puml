@@ -1,0 +1,61 @@
+@startuml ct_api_evaluation
+' ============================================================
+' Title:     nasim — Evaluation API
+' Boundary:  nasim code agent CLI
+' Purpose:   Public interfaces for task evaluation and retry coordination
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Evaluation API
+
+skinparam classAttributeIconSize 0
+
+package "Evaluation API" #E8F5E9 {
+
+    interface "EvaluationEngine" <<interface>> {
+        + evaluate(task_context : dict) : QualitySignal
+        + should_retry(signal : QualitySignal) : bool
+    }
+
+    interface "SuccessCheckRunner" <<interface>> {
+        + run(checks : list[SuccessCheck]) : bool
+    }
+
+    interface "LLMReviewer" <<interface>> {
+        + review(submission : dict) : QualitySignal
+    }
+
+    interface "RetryCoordinator" <<interface>> {
+        + retry(task : dict, signal : QualitySignal) : None
+        + on_failure(task : dict) : None
+    }
+}
+
+note bottom of EvaluationEngine
+  Orchestrates success checks + LLM review.
+  should_retry checks signal against RetryConfig limits.
+  Returns composite QualitySignal with accept/reject decision.
+end note
+
+note bottom of SuccessCheckRunner
+  Executes shell commands and validates exit codes.
+  Runs checks in parallel with timeout enforcement.
+  Returns True only if ALL checks pass.
+end note
+
+note bottom of LLMReviewer
+  Sends submission to LLM for qualitative review.
+  Returns QualitySignal with accept (float score)
+  and human-readable feedback for retry guidance.
+end note
+
+note right of RetryCoordinator
+  Manages retry loop with exponential backoff.
+  on_failure triggers fallback model or human escalation.
+  Respects RetryConfig.max_retries limit.
+end note
+
+@enduml

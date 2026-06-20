@@ -1,0 +1,42 @@
+@startuml uc_wire_log
+' ============================================================
+' Title:     nasim — UC: Wire Log
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Event logging, turn indexing, session forking and replay
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "AgentOrchestrator" as agent
+actor "Developer" as user
+
+rectangle "Wire Log" {
+    usecase "APPEND Event" as UC_WRL_01
+    usecase "READ Log" as UC_WRL_02
+    usecase "SEEK Turn" as UC_WRL_03
+    usecase "FORK Session" as UC_WRL_04
+    usecase "CHECKPOINT" as UC_WRL_05
+    usecase "REPLAY Session" as UC_WRL_06
+}
+
+rectangle "External" {
+    component "Session Directory" as sdir
+}
+
+agent --> UC_WRL_01
+agent --> UC_WRL_05
+user --> UC_WRL_06
+user --> UC_WRL_04
+UC_WRL_01 ..> sdir : <<include>>
+UC_WRL_02 ..> sdir : <<include>>
+UC_WRL_03 ..> UC_WRL_02 : <<include>>
+UC_WRL_04 ..> UC_WRL_03 : <<include>>
+UC_WRL_06 ..> UC_WRL_02 : <<include>>
+UC_WRL_05 ..> sdir : <<include>>
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml uc_context
+' ============================================================
+' Title:     nasim — UC: Context Management
+' Boundary:  nasim code agent CLI
+' Purpose:   Token counting and context window compaction
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "AgentOrchestrator" as agent
+
+rectangle "Context Management" {
+    usecase "Track Token Count" as UC_CTX_01
+    usecase "COMPACT Context" as UC_CTX_02
+    usecase "Summarize Old Exchanges" as UC_CTX_03
+    usecase "BUILD Context Graph" as UC_CTX_04
+    usecase "PROCESS Pipeline" as UC_CTX_05
+    usecase "DISTILL Tool Output" as UC_CTX_06
+    usecase "INJECT Memory/RepoMap" as UC_CTX_07
+}
+
+rectangle "Provider Layer" {
+    usecase "Call Provider Chat" as UC_PRV_01
+}
+
+agent --> UC_CTX_01
+agent --> UC_CTX_02
+agent --> UC_CTX_04
+agent --> UC_CTX_05
+agent --> UC_CTX_06
+agent --> UC_CTX_07
+UC_CTX_02 ..> UC_CTX_03 : <<include>>
+UC_CTX_03 ..> UC_PRV_01 : <<include>>
+UC_CTX_05 ..> UC_CTX_06 : <<include>>
+UC_CTX_07 ..> UC_CTX_05 : <<include>>
+
+@enduml

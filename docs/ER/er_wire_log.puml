@@ -1,0 +1,74 @@
+@startuml er_wire_log
+' ============================================================
+' Title:     nasim — Wire Log ERD
+' Boundary:  nasim code agent CLI
+' Purpose:   Physical schema for append-only wire event store
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' Note:      Append-only — events are never updated or deleted.
+'            Physical storage: ~/.nasim/sessions/<id>/wire.jsonl
+' ============================================================
+
+title nasim — Wire Log ERD
+
+entity "wire_metadata" as wm {
+    * session_id : TEXT (UUID) <<PK>>
+    --
+    * total_events : INTEGER
+    * total_turns : INTEGER
+    * created_at : TEXT (ISO 8601)
+    * file_path : TEXT (path)
+}
+
+entity "wire_event" as we {
+    * session_id : TEXT <<FK>>
+    * sequence : INTEGER
+    --
+    * event_type : TEXT
+    * turn_number : INTEGER
+    * timestamp : TEXT (ISO 8601)
+    * payload : TEXT (JSON)
+    * byte_offset : INTEGER
+}
+
+entity "turn_index" as ti {
+    * session_id : TEXT <<FK>>
+    * turn_number : INTEGER
+    --
+    * byte_offset : INTEGER
+    * timestamp : TEXT (ISO 8601)
+}
+
+wm ||--o{ we : "contains"
+ti ||--o{ we : "maps to"
+
+note bottom of wm
+  Physical storage: ~/.nasim/sessions/<id>/wire.jsonl
+  Append-only event store. Each line is a JSON object
+  representing a wire event. Metadata written as first line.
+  One file per session ID.
+
+  Notation:
+    * prefix = Mandatory (NOT NULL)
+    <<PK>> = Primary key
+    <<FK>> = Foreign key
+    {A|B|C} = Enum constraint
+    TEXT (JSON) = JSON blob stored as TEXT
+    TEXT (ISO 8601) = Timestamp as ISO 8601 text
+end note
+
+note bottom of we
+  Events are appended in sequence order.
+  Never updated or deleted — immutable event log.
+  byte_offset enables efficient seeking into the file.
+end note
+
+note right of ti
+  Turn index provides O(1) jump to
+  a specific turn's byte position.
+  Enables fast partial replay.
+end note
+
+@enduml

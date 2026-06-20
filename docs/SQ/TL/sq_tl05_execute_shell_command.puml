@@ -1,0 +1,68 @@
+@startuml sq_tl05_execute_shell_command
+' ============================================================
+' Title:     TL-05 — Execute Shell Command
+' Boundary:  nasim code agent CLI
+' Purpose:   Shell command execution with timeout
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "ShellTool" as st
+end box
+participant "Host Shell" as shell
+
+note over user, shell
+  Scope:          Execute shell command with timeout
+  Preconditions:  Command string provided by LLM
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Excludes:       File operations
+  Rollback:       Error string returned to LLM
+  Design:         subprocess.run with shell=True, configurable timeout
+  Safety:         Unsafe tool — requires permission check (SAF-01)
+end note
+
+== TL-05 EXECUTE Shell Command ==
+
+user -> repl : (entry via AGT-01)
+repl -> agent : (entry via AGT-01)
+agent -> registry : execute("shell_exec", {command, timeout})
+registry -> st : execute(command, timeout)
+st -> shell : subprocess.run(command, shell=True, timeout=timeout)
+
+break Timeout
+    shell --> st : TimeoutExpired
+    st --> registry : ToolResult(success=False, error="command timed out after Ns")
+    registry --> agent : ToolResult
+end
+
+break Execution error
+    shell --> st : Exception
+    st --> registry : ToolResult(success=False, error="Error executing command")
+    registry --> agent : ToolResult
+end
+
+shell --> st : CompletedProcess(stdout, stderr, returncode)
+st -> st : format output (stdout + stderr + exit code)
+st --> registry : ToolResult(success=True, content=command_output)
+registry --> agent : ToolResult
+
+note over user, shell
+  Flow:    command -> subprocess.run -> format output -> ToolResult
+  State:   No state change
+  Failure: Timeout, execution error -> ToolResult(success=False)
+  Success: Command output (stdout + stderr)
+end note
+
+@enduml

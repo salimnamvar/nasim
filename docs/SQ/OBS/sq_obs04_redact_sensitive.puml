@@ -1,0 +1,114 @@
+@startuml sq_obs04_redact_sensitive
+' ============================================================
+' Title:     OBS-04 — REDACT Sensitive Data
+' Boundary:  nasim code agent CLI
+' Purpose:   Strip secrets before emission to structured logs or wire
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Review:    —
+' ============================================================
+
+actor "StructuredLogger" as logger
+actor "WireAppender" as wire
+
+box "Observability Layer" #E3F2FD
+  participant "LogRedactor" as redactor
+end box
+
+box "Config Layer" #E8F5E9
+  participant "Config" as config
+end box
+
+note over logger, config
+  Scope:
+    - obs04 REDACT Sensitive — strip secrets before any emission
+
+  Preconditions:
+    - LogRedactor initialized with redaction rules
+    - Config loaded (redact_enabled, redact_patterns)
+
+  Contexts:
+    - Called before every emission to structured logs (OBS-01)
+    - Called before every wire event append (WRL-01)
+    - Always on — cannot be disabled
+
+  Excludes:
+    - Log emission (OBS-01)
+    - Wire append (WRL-01)
+
+  Design:
+    - LogRedactor applies regex patterns to record fields
+    - Global rules: env vars, API keys, .env content, passwords
+    - Per-project rules: custom patterns from config
+    - redacted=true flag on sanitized records
+    - Patterns: API_KEY=xxx → API_KEY=[REDACTED]
+
+  Returns:
+    - redact(LogRecord) → LogRecord (sanitized)
+    - redact_payload(dict) → dict (sanitized)
+
+  Invariants:
+    - Always on — cannot be disabled
+    - Applied before emission to both structured and wire
+    - Original data never reaches stdout or wire file
+    - Redaction is lossy (cannot recover originals)
+end note
+
+== obs04 REDACT Sensitive (structured log) ==
+
+logger -> redactor : redact(record)
+activate redactor
+
+redactor -> config : load_redaction_rules()
+activate config
+config --> redactor : rules[]
+deactivate config
+
+loop for each rule in rules
+    redactor -> redactor : apply_pattern(record, rule.pattern, rule.replacement)
+end
+
+redactor -> redactor : set_redacted_flag(record)
+
+redactor --> logger : sanitized_record
+deactivate redactor
+
+== obs04 REDACT Sensitive (wire event) ==
+
+wire -> redactor : redact_payload(payload)
+activate redactor
+
+redactor -> config : load_redaction_rules()
+activate config
+config --> redactor : rules[]
+deactivate config
+
+loop for each rule in rules
+    redactor -> redactor : apply_pattern(payload, rule.pattern, rule.replacement)
+end
+
+redactor --> wire : sanitized_payload
+deactivate redactor
+
+note over logger, config
+  Flow:
+    - Emitter → LogRedactor → Config (rules) → sanitized record/payload
+
+  State:
+    - IDLE → LOADING RULES → APPLYING → DONE
+
+  Failure:
+    - Rule load failure → default rules only
+
+  Success:
+    - Sanitized record with redacted=true flag
+
+  Key invariants:
+    - Always applied (never skipped)
+    - Applied to both structured and wire emissions
+    - Original secrets never reach output
+    - Configurable rules (global + per-project)
+end note
+
+@enduml

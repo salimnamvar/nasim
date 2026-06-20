@@ -1,0 +1,552 @@
+openapi: 3.1.0
+info:
+  title: nasim Agent API
+  description: |
+    ROD-compliant HTTP API for nasim code agent.
+    Follows Google AIP standards for resource-oriented design.
+  version: 1.0.0
+  contact:
+    name: Salim Namvar
+    email: salim.namvar@gmail.com
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /sessions:
+    get:
+      operationId: listSessions
+      summary: List sessions
+      description: Returns a paginated list of agent sessions.
+      tags: [Sessions]
+      parameters:
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/pageToken'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSessionsResponse'
+    post:
+      operationId: createSession
+      summary: Create session
+      description: Creates a new agent session.
+      tags: [Sessions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionCreate'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /sessions/{session}:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      operationId: getSession
+      summary: Get session
+      description: Returns the specified session.
+      tags: [Sessions]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateSession
+      summary: Update session
+      description: Updates the specified session.
+      tags: [Sessions]
+      parameters:
+        - $ref: '#/components/parameters/updateMask'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionUpdate'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    delete:
+      operationId: deleteSession
+      summary: Delete session
+      description: Deletes the specified session.
+      tags: [Sessions]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /sessions/{session}:send:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    post:
+      operationId: sendMessage
+      summary: Send message
+      description: |
+        Custom method (AIP-136) for submitting a user message and receiving
+        an agent response as an SSE stream of AgentEvents.
+      tags: [Sessions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageCreate'
+      responses:
+        '200':
+          description: SSE stream of AgentEvents
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/AgentEvent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /sessions/{session}/messages:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      operationId: listMessages
+      summary: List messages
+      description: Returns a paginated list of messages in the session.
+      tags: [Messages]
+      parameters:
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/pageToken'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMessagesResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools:
+    get:
+      operationId: listTools
+      summary: List tools
+      description: Returns a list of registered tools.
+      tags: [Tools]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListToolsResponse'
+
+  /tools/{tool}:
+    parameters:
+      - name: tool
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Tool name
+    get:
+      operationId: getTool
+      summary: Get tool
+      description: Returns the specified tool.
+      tags: [Tools]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tool'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /config:
+    get:
+      operationId: getConfig
+      summary: Get config
+      description: Returns the agent configuration.
+      tags: [Config]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
+    patch:
+      operationId: updateConfig
+      summary: Update config
+      description: Updates the agent configuration.
+      tags: [Config]
+      parameters:
+        - $ref: '#/components/parameters/updateMask'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigUpdate'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+components:
+  parameters:
+    sessionId:
+      name: session
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Session UUID
+    pageSize:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+      description: Maximum number of items to return
+    pageToken:
+      name: page_token
+      in: query
+      schema:
+        type: string
+      description: Opaque cursor from previous response
+    updateMask:
+      name: update_mask
+      in: query
+      schema:
+        type: string
+      description: Comma-separated list of fields to update
+
+  schemas:
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Session UUID (OUTPUT_ONLY)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation timestamp (OUTPUT_ONLY)
+        model:
+          type: string
+          description: LLM model name (REQUIRED)
+        provider:
+          type: string
+          description: LLM provider name
+        state:
+          type: string
+          enum: [IDLE, THINKING, TOOL_EXECUTING, COMPACTING, AWAITING_APPROVAL, ERROR]
+          readOnly: true
+          description: Session state (OUTPUT_ONLY)
+        message_count:
+          type: integer
+          readOnly: true
+          description: Number of messages (OUTPUT_ONLY)
+        total_tokens:
+          type: integer
+          readOnly: true
+          description: Total token count (OUTPUT_ONLY)
+      required:
+        - model
+
+    SessionCreate:
+      type: object
+      properties:
+        model:
+          type: string
+          description: LLM model name
+        provider:
+          type: string
+          description: LLM provider name
+      required:
+        - model
+
+    SessionUpdate:
+      type: object
+      properties:
+        model:
+          type: string
+          description: LLM model name
+
+    Message:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [system, user, assistant, tool]
+          description: Message role (REQUIRED)
+        content:
+          type: string
+          description: Message content (REQUIRED)
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolCall'
+          readOnly: true
+          description: Tool calls (OUTPUT_ONLY)
+        tool_call_id:
+          type: string
+          description: Tool call ID for tool responses
+        tokens:
+          type: integer
+          readOnly: true
+          description: Token count (OUTPUT_ONLY)
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Message timestamp (OUTPUT_ONLY)
+      required:
+        - role
+        - content
+
+    MessageCreate:
+      type: object
+      properties:
+        content:
+          type: string
+          description: User message content
+      required:
+        - content
+
+    ToolCall:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Tool call ID
+        name:
+          type: string
+          description: Tool name
+        arguments:
+          type: object
+          description: Tool arguments
+
+    Tool:
+      type: object
+      properties:
+        name:
+          type: string
+          readOnly: true
+          description: Tool name (OUTPUT_ONLY)
+        description:
+          type: string
+          readOnly: true
+          description: Tool description (OUTPUT_ONLY)
+        parameters:
+          type: object
+          readOnly: true
+          description: Tool parameters schema (OUTPUT_ONLY)
+        safe:
+          type: boolean
+          readOnly: true
+          description: Whether tool is safe (OUTPUT_ONLY)
+
+    Config:
+      type: object
+      properties:
+        provider:
+          type: string
+          description: Default LLM provider
+        model:
+          type: string
+          description: Default LLM model
+        server_url:
+          type: string
+          description: Provider server URL
+        safety_mode:
+          type: string
+          enum: [ask, auto, off]
+          description: Safety mode
+        context_budget:
+          type: integer
+          description: Context window budget
+        timeout:
+          type: integer
+          description: Request timeout in seconds
+        max_iterations:
+          type: integer
+          description: Maximum tool iterations
+
+    ConfigUpdate:
+      type: object
+      properties:
+        provider:
+          type: string
+        model:
+          type: string
+        server_url:
+          type: string
+        safety_mode:
+          type: string
+          enum: [ask, auto, off]
+        context_budget:
+          type: integer
+        timeout:
+          type: integer
+        max_iterations:
+          type: integer
+
+    AgentEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [text, tool_start, tool_result, error, done]
+        text:
+          type: string
+          description: Text content (for type=text)
+        name:
+          type: string
+          description: Tool name (for type=tool_start, tool_result)
+        success:
+          type: boolean
+          description: Tool success (for type=tool_result)
+        content:
+          type: string
+          description: Tool result content (for type=tool_result)
+        error:
+          type: string
+          description: Error message (for type=error)
+        final_text:
+          type: string
+          description: Final response (for type=done)
+
+    ListSessionsResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Session'
+        next_page_token:
+          type: string
+          description: Opaque cursor for next page
+
+    ListMessagesResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        next_page_token:
+          type: string
+          description: Opaque cursor for next page
+
+    ListToolsResponse:
+      type: object
+      properties:
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tool'
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: HTTP status code
+            message:
+              type: string
+              description: Human-readable error message
+            status:
+              type: string
+              description: Canonical error status (AIP-193)
+            details:
+              type: array
+              items:
+                type: object
+              description: Additional error details
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: 400
+              message: "Invalid request: missing required field 'model'"
+              status: "INVALID_ARGUMENT"
+              details: []
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: 404
+              message: "Session not found"
+              status: "NOT_FOUND"
+              details: []
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: 500
+              message: "Internal server error"
+              status: "INTERNAL"
+              details: []

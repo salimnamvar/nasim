@@ -1,0 +1,105 @@
+@startuml sq_obs05_expose_metrics
+' ============================================================
+' Title:     OBS-05 — EXPOSE /metrics
+' Boundary:  nasim code agent CLI
+' Purpose:   Serve /metrics endpoint for Prometheus pull scrape
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Review:    —
+' ============================================================
+
+actor "Prometheus" as prom
+actor "Developer" as dev
+
+box "Server Layer" #E3F2FD
+  participant "ServerApp" as server
+end box
+
+box "Observability Layer" #FFF3E0
+  participant "MetricsCollector" as metrics
+end box
+
+note over prom, metrics
+  Scope:
+    - obs05 EXPOSE /metrics — serve metrics for pull scrape
+
+  Preconditions:
+    - MetricsCollector configured (metrics_enabled)
+    - ServerApp running (HTTP mode)
+
+  Contexts:
+    - HTTP mode: /metrics served by ServerApp
+    - CLI mode: metrics printed on demand or exported to file
+    - Prometheus pull-scrapes this endpoint periodically
+
+  Excludes:
+    - Metrics recording (OBS-02)
+    - Structured logging (OBS-01)
+    - OTel export (optional, behind flag)
+
+  Design:
+    - MetricsCollector exposes prometheus-client generate_latest()
+    - ServerApp adds /metrics route (GET only)
+    - Content-Type: text/plain; version=0.0.4
+    - No authentication required (internal network)
+    - CLI mode: `nasim metrics` command prints current metrics
+
+  Returns:
+    - HTTP 200 with metrics text (Prometheus format)
+    - HTTP 503 if metrics disabled
+
+  Invariants:
+    - Pull-based only (never pushes to Prometheus)
+    - No high-cardinality labels
+    - Metric names follow nasim_<metric>[_<unit>]
+end note
+
+== obs05 EXPOSE /metrics (HTTP mode) ==
+
+prom -> server : GET /metrics
+activate server
+
+server -> metrics : generate_latest()
+activate metrics
+metrics -> metrics : collect all metric families
+metrics --> server : metrics_text (Prometheus format)
+deactivate metrics
+
+server --> prom : 200 OK, Content-Type: text/plain
+deactivate server
+
+== obs05 EXPOSE /metrics (CLI mode) ==
+
+dev -> server : nasim metrics
+activate server
+
+server -> metrics : generate_latest()
+activate metrics
+metrics --> server : metrics_text
+deactivate metrics
+
+server --> dev : formatted metrics output
+deactivate server
+
+note over prom, metrics
+  Flow:
+    - Prometheus → GET /metrics → ServerApp → MetricsCollector → metrics text
+
+  State:
+    - IDLE → COLLECTING → SERVING → DONE
+
+  Failure:
+    - Metrics disabled → 503 or empty output
+
+  Success:
+    - Prometheus-compatible metrics text
+
+  Key invariants:
+    - Pull-based only
+    - No authentication required
+    - Content-Type: text/plain; version=0.0.4
+    - Low-cardinality labels only
+end note
+
+@enduml

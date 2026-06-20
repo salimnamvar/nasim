@@ -1,90 +1,97 @@
-# Nasim
+# nasim
 
-**Nasim** is your practical, search-first setup for running frontier AI coding agents (Claude Code, OpenCode, Aider, Continue, Grok CLI-style, etc.) on your laptop while using powerful local models served by Ollama on a remote machine ("black").
+**nasim** — a research code agent.
 
-## Philosophy
-- **Search current solutions first.** We document what actually exists and works in 2026 (native Anthropic compat in Ollama, Tailscale for remote, LiteLLM when you need routing, mature open agents like Aider/Continue/OpenCode). We only add thin, high-value glue.
-- **.grok/ is the source of truth.** Living research, recipes, rules, and model guidance live here. Update it by re-searching before changes.
-- Real agentic coding (read/write/edit files, bash, multi-step, sub-agents) executes on the laptop where you run the agent. The remote model (on black) only decides *what* to do via tool calls.
-- Maximize local benefit: strong GPU-resident models on black + secure always-on access + the best agent frontends.
+Built through systematic investigation and original synthesis of usage patterns.
 
-## Quick Start — `nasim select` (all solutions, 2026-06-16)
+Current status: early functional proof-of-concept with a clean design chain already in place for the target architecture.
+
+## What nasim does (today)
+
+- Interactive REPL + one-shot command mode
+- Basic file and shell tools (`read_file`, `write_file`, `edit_file`, `list_dir`, `shell_exec`)
+- Ollama-backed LLM with streaming support
+- Minimal agent loop with tool calling
+
+## What it is designed to become
+
+Full design chain exists under `docs/`:
+
+- C4 context/container/component diagrams
+- 42 Use Cases (UC)
+- State Machine (agent lifecycle)
+- 1:1 Sequence Diagrams (SQ)
+- Entity definitions, runtime Class Diagram (CL)
+- Session persistence (JSON), provider abstraction, safety/permission gates, context compaction, layered config, MCP tool extension points
+
+See [docs/README.md](docs/README.md) and the audit notes in `docs/audit/`.
+
+## Quick start
 
 ```bash
-# Interactive (picks transport + agent + model, brings up private path, probes, launches the CLI)
-./bin/nasim select
+# From repo root (after cloning)
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
 
-# Manage configuration (no more hard-coded values)
-./bin/nasim config edit
-./bin/nasim config show
+# Run
+python run.py --model qwen2.5-coder:14b --server http://localhost:11434
 
-# Agentic self-audit (the primary test method): launch a strong model and task it with auditing nasim
-NASIM_RUN_SELF_AUDIT=1 ./tests/nasim-features.sh --self-audit
-# Inside the agent: "Read all of nasim (bin/ + lib/), sprint, research. Find errors, improve modularity, update docs."
-
-# Non-interactive (CI, scripts, or when you know the choice)
-nasim launch --access ssh-tunnel --agent claude --model deepseek-r1:14b
-nasim launch --access litellm --agent aider --model qwen3:8b
-nasim launch --access tailscale --agent opencode --model deepseek-r1:32b   # falls back gracefully if no ts
-
-# After setup you are dropped straight into the interactive frontier agent (or a branded terminal shell).
+# Or one command
+python run.py -c "explain the project structure"
 ```
 
-The `nasim` CLI (in `bin/nasim`) now supports **every** solution from the research:
-- Transports: ssh-tunnel (primary, ad-hoc with trap cleanup, free port), tailscale (MagicDNS + detection), litellm (proxy layer + config).
-- Agents: claude (native ANTHROPIC_BASE_URL), aider (OLLAMA_API_BASE), opencode, terminal (full-env branded shell so you can run anything).
-- Plus: `nasim doctor` (probe + black GPU state), `nasim tunnel install-systemd` (persistent autossh user unit), legacy `nasim claude` / `nasim aider` still work.
+Requires a running Ollama instance with a capable coding model.
 
-All combinations are covered by the test harness (`tests/nasim-features.sh --all`) and the GHA matrix in `.github/workflows/ci.yml`. Live tests against real black (SSH) + models (gemma4, qwen2.5-coder, deepseek-r1 etc.) pass before every slice commit.
+## Development
 
-See `.grok/recipes/` (or .claude mirror), the research log, and `.claude/rules/sprint.md` (design state + P-Invariants).
+```bash
+# Lint + format + types (uses black, isort, ruff, pyright)
+bash scripts/lint.sh
 
-## Classic manual path (still valid)
-(Old quick-start steps for Claude Code etc. remain below for reference — `nasim select` is the recommended way now.)
+# Clean build / cache artifacts
+bash scripts/clean.sh
 
-(Previous manual export + ssh -L or Tailscale steps still work and are used internally by nasim.)
+# Full environment provisioning (recommended on new machine)
+bash scripts/setup/setup_env.sh
+```
 
-## Other High-Value Agents (All Work With Remote Ollama)
-- **OpenCode (opencode)**: Excellent open-source Claude Code alternative. Native multi-provider + Ollama support.
-- **Aider**: `aider --model ollama/qwen3-coder:14b` (or configure remote base URL). Mature git-centric workflow.
-- **Continue.dev**: VS Code / JetBrains. Set `baseUrl` to your tunneled/remote Ollama in `config.json`.
-- **Cline / Roo Code / Kilo Code**: Agentic VS Code experiences with full local model support.
-- **grok-cli variants**: For xAI Grok API primarily; some accept Ollama as provider for local equivalent feel.
+See [scripts/README.md](scripts/README.md) and [scripts/setup/README.md](scripts/setup/README.md).
 
-See `.grok/recipes/` for exact remote configs.
+## Project layout (current)
 
-## Current Research Snapshot (as of 2026-06-16)
-See `.grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md` for:
-- Why the old custom bridge is obsolete (Ollama native compat).
-- Remote access patterns (Tailscale > SSH tunnel > LiteLLM).
-- "Grok Code" options (grok-code-fast-1 in supported IDE agents + grok-cli; local equivalents via strong open models in flexible agents).
-- Model recommendations (Qwen3-Coder series, GLM-5.1, DeepSeek V4, Gemma 4 — size to GPU, verify no CPU spill for agent loops).
-- Anti-patterns and security.
+```
+nasim/
+├── nasim/
+│   ├── agent.py      # core agent loop + tool orchestration
+│   ├── cli.py        # REPL + arg parsing + streaming UX
+│   ├── llm.py        # Ollama client (streaming + tool calls)
+│   └── tools.py      # tool registry + implementations
+├── docs/             # full design chain (C4, UC, SM, SQ, CL, entities)
+├── scripts/          # lint, clean, setup
+├── data/             # research data (reference agent analysis)
+├── run.py            # convenience entry
+└── pyproject.toml
+```
 
-## Project Structure (Phase 2 — modular)
-- `bin/nasim` — thin loader + entrypoint only.
-- `lib/nasim/` — real implementation (separation of concerns):
-  - `config.sh` — external config (AD-09)
-  - `transport.sh` + `transports/*.sh` — pluggable access strategies (ssh, tailscale, litellm)
-  - `agent.sh` + `agents/*.sh` — pluggable agent launchers
-  - `probe.sh`, `orchestration.sh`, `ui.sh`, `cli.sh`
-- `tests/nasim-features.sh` — comprehensive real (no-mock) tests + `--self-audit` meta tests that launch strong models via nasim to audit the project itself (the best always-followed test scenario).
-- `.grok/` — knowledge surfaces only (research, recipes, sprint, design). Code lives at visible root.
-- `README.md`, `.github/workflows/ci.yml` — docs + CI matrix enforcing the above.
+## Configuration (planned)
 
-## Getting the Most Benefit
-- Reproduce real work: multi-file edits, bash execution, planning → write loops.
-- Keep models GPU-resident on black.
-- Use large context (64k+ where possible).
-- Hybrid: fast local model for exploration + heavy remote for synthesis.
-- Re-search the ecosystem before adding features or claiming superiority.
+Layered config (global → project → env → CLI) is designed but not fully implemented in v0.1.
 
-## Contributing / Updating Knowledge
-- Always start with fresh searches for "claude code ollama", "opencode ollama remote", "best ollama agentic coding models", Tailscale/WireGuard remote LLM patterns, etc.
-- Edit under `.grok/`.
-- Conventional commit.
-- Keep this practical and current.
+See `docs/uc/uc_config.puml` and `docs/c4/c4_nasim_component_config.puml`.
 
-Start here: `.grok/research/2026-06-16-frontier-agents-with-local-remote-ollama.md` and `.grok/recipes/`.
+## License
 
-Zero cost. Maximum privacy. Frontier agent experience on your hardware + remote GPU.
+Licensed under the Apache License, Version 2.0.
+
+See [LICENSE](LICENSE).
+
+Copyright 2026 Salim Namvar.
+
+## Status & philosophy
+
+nasim exists to explore what a high-quality, understandable, and extensible code agent looks like when you start from first principles and real usage patterns.
+
+The heavy design work (C4 → Code) has already been done. Implementation will follow the documented architecture.
+
+Contributions that respect the design chain and the "original synthesis" goal are welcome once the project stabilizes.

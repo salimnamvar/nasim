@@ -1,0 +1,60 @@
+@startuml ct_data_wire_log
+' ============================================================
+' Title:     nasim — Wire Log Data Structures
+' Boundary:  nasim code agent CLI
+' Purpose:   Data models for append-only wire event store
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' Note:      Append-only — events are never updated or deleted.
+'            Physical storage: ~/.nasim/sessions/<id>/wire.jsonl
+' ============================================================
+
+title nasim — Wire Log Data Structures
+
+skinparam classAttributeIconSize 0
+
+package "Wire Log Data" #E3F2FD {
+
+    class WireEvent <<dataclass>> {
+        + session_id : str
+        + sequence : int
+        + event_type : str
+        + turn_number : int
+        + timestamp : str
+        + payload : dict
+        + byte_offset : int
+    }
+
+    class TurnIndexEntry <<dataclass>> {
+        + turn_number : int
+        + byte_offset : int
+        + timestamp : str
+    }
+
+    class WireMetadata <<dataclass>> {
+        + session_id : str
+        + total_events : int
+        + total_turns : int
+        + created_at : str
+    }
+}
+
+note bottom of WireEvent
+  Each event is a single JSON line in wire.jsonl.
+  byte_offset enables efficient seeking for replay.
+  sequence is monotonically increasing within session.
+end note
+
+note bottom of TurnIndexEntry
+  Provides O(1) jump to a specific turn's byte position.
+  Enables fast partial replay and session forking.
+end note
+
+note right of WireMetadata
+  Written as first line of wire.jsonl.
+  Updated on session close with final counts.
+end note
+
+@enduml

@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel>=0.41"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nasim"
+version = "0.1.0"
+description = "nasim — research code agent."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Salim Namvar", email = "salim.namvar@gmail.com" }
+]
+keywords = [
+  "code-agent",
+  "cli",
+  "llm",
+  "ollama",
+  "agent",
+  "software-engineering",
+  "developer-tools",
+  "ai-engineering"
+]
+dependencies = [
+  "requests>=2.34.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=9.1.1",
+  "pytest-cov>=7.1.0",
+  "black>=26.5.1",
+  "ruff>=0.15.18",
+  "isort>=8.0.1",
+  "pyright>=1.1.410",
+  "pre-commit>=4.6.0",
+]
+
+[project.scripts]
+nasim = "nasim.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/salimnamvar/nasim"
+Repository = "https://github.com/salimnamvar/nasim"
+Issues = "https://github.com/salimnamvar/nasim/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nasim*"]
+exclude = ["tests*", "scripts*", "data*", "logs*"]
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312", "py313"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+ignore = ["E501", "B008"]
+
+[tool.isort]
+profile = "google"
+line_length = 120
+known_first_party = ["nasim"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-q --tb=short"
+
+[tool.pyright]
+typeCheckingMode = "strict"
+pythonVersion = "3.10"
+pythonPlatform = "Linux"
+include = ["nasim"]
+exclude = ["**/__pycache__", "build", "dist"]

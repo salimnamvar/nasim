@@ -1,0 +1,54 @@
+@startuml sq_llm02_stream_ollama_chat
+' ============================================================
+' Title:     LLM-02 — STREAM Provider Chat
+' Boundary:  nasim code agent CLI
+' Purpose:   Streaming LLM chat completion via provider abstraction
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+box "Provider Layer" #FFF3E0
+  participant "Provider" as provider
+end box
+participant "LLM Provider API" as api
+
+note over provider, api
+  Scope:          Streaming chat completion yielding chunks
+  Preconditions:  Provider initialized and reachable
+  Contexts:       Called by AGT-01 (PROCESS User Task)
+  Excludes:       Sync chat (LLM-01), tool execution
+  Rollback:       Connection drop -> ProviderError
+  Design:         Yields str | ToolCall chunks from HTTP stream
+end note
+
+== LLM-02 STREAM Provider Chat ==
+
+provider -> api : HTTP POST {model, messages, tools, stream:true}
+
+break Connection drops mid-stream
+    api --> provider : broken pipe / timeout
+    provider --> provider : raise ProviderError("Stream interrupted")
+end
+
+loop for each chunk
+    api --> provider : JSON chunk
+    provider -> provider : parse chunk
+    alt text content
+        provider --> provider : yield str(token)
+    else tool_call
+        provider -> provider : accumulate ToolCall by index
+    end
+end
+
+provider -> provider : yield accumulated ToolCalls
+
+note over provider, api
+  Flow:    Messages -> HTTP stream -> parse chunks -> yield str | ToolCall
+  State:   THINKING -> THINKING (no state change)
+  Failure: Connection drop -> ProviderError
+  Success: Stream of text tokens and ToolCall objects
+end note
+
+@enduml

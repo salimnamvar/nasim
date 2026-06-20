@@ -1,0 +1,73 @@
+@startuml sm_agent_lifecycle
+' ============================================================
+' Title:     nasim — Agent Lifecycle State Machine
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Process FSM showing all agent states and transitions
+' Milestone: v1.0
+' Version:   4.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
+'            do not apply (documented deviation).
+' ============================================================
+
+title nasim — Agent Lifecycle
+
+[*] --> IDLE : Startup
+
+IDLE --> LISTENING : User input received
+IDLE --> SERVING : HTTP request received (server mode)
+IDLE --> [*] : /quit or EOF
+
+LISTENING --> THINKING : Input parsed
+
+THINKING --> RESPONDING : LLM returns text
+THINKING --> TOOL_EXEC : LLM returns tool_calls
+THINKING --> COMPACTING : token_count > budget
+THINKING --> ROUTING : ModelRouter resolving
+THINKING --> ERROR : LLM call fails
+THINKING --> SERVING : Response to HTTP client
+THINKING --> EVALUATING : task_complete AND evaluation_enabled
+
+ROUTING --> THINKING : Model selected
+
+TOOL_EXEC --> THINKING : Tool result appended
+TOOL_EXEC --> AWAITING_APPROVAL : safety_mode=ask AND unsafe
+TOOL_EXEC --> HOOK_RUNNING : Hook registered
+TOOL_EXEC --> ERROR : Tool execution fails
+TOOL_EXEC --> STAGING : diff_sandbox mode
+
+HOOK_RUNNING --> TOOL_EXEC : Hook allows
+HOOK_RUNNING --> IDLE : Hook denies
+
+AWAITING_APPROVAL --> TOOL_EXEC : User approves (y)
+AWAITING_APPROVAL --> IDLE : User rejects (N)
+
+COMPACTING --> THINKING : Compaction complete
+
+RESPONDING --> IDLE : Response complete
+
+ERROR --> IDLE : Error displayed
+
+SERVING --> THINKING : Request processed
+SERVING --> IDLE : Response complete
+
+IDLE --> PLANNING : /plan command
+PLANNING --> IDLE : /plan off
+
+EVALUATING --> REVIEWING : success checks passed, optional review
+EVALUATING --> RETRYING : success checks failed
+EVALUATING --> THINKING : evaluation passed, continue
+
+REVIEWING --> THINKING : review approved
+REVIEWING --> RETRYING : review rejected
+
+RETRYING --> THINKING : retry with feedback
+RETRYING --> ERROR : max retries exceeded
+
+STAGING --> AWAITING_DIFF_APPROVAL : present diff to user
+
+AWAITING_DIFF_APPROVAL --> TOOL_EXEC : user approves
+AWAITING_DIFF_APPROVAL --> IDLE : user rejects
+
+@enduml

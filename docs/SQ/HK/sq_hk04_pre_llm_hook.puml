@@ -1,0 +1,43 @@
+@startuml sq_hk04_pre_llm_hook
+' ============================================================
+' Title:     nasim — SQ: Execute Pre-LLM Hook
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Execute hooks before LLM call
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Pre-LLM Hook (HK-04)
+
+participant "AgentOrchestrator" as agent
+participant "HookManager" as hooks
+participant "Hook" as hook
+participant "Provider" as provider
+
+== Pre-LLM Hook ==
+
+agent -> hooks : execute_pre_llm(messages)
+activate hooks
+
+loop for each registered hook
+    hooks -> hook : handler(messages)
+    activate hook
+    hook --> hooks : HookResult(allow=true/false, modified_messages=...)
+    deactivate hook
+end
+
+alt any hook denies
+    hooks --> agent : HookResult(allow=false, message="blocked")
+else all hooks allow
+    hooks --> agent : HookResult(allow=true)
+    deactivate hooks
+
+    agent -> provider : chat(messages, tools)
+    activate provider
+    provider --> agent : LLMResponse
+    deactivate provider
+end
+
+@enduml

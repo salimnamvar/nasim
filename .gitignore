@@ -1,43 +1,153 @@
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-.eggs/
+*.pyo
+*.pyd
+*.pyc
+*$py.class
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Build & Distribution
 build/
 dist/
+out/
+output/
+outputs/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
 
-# Test / lint caches
-.pytest_cache/
-.ruff_cache/
-.coverage
-htmlcov/
-
-# Virtualenvs
+# Virtual Environments
 .venv/
 venv/
+env/
+ENV/
+.python-version
 
-# Per-machine config override (never committed)
-cfg/nasim.local.toml
+# Testing & Coverage
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.cover
+.hypothesis/
+nosetests.xml
+TEST*.xml
 
-# E2E scratch workspace
-test/e2e/_workspace/
+# Linters & Caches
+.ruff_cache/
+.cache/
+.eslintcache
 
-# Exported Claude Code session transcripts (working artifacts, not docs)
-docs/*-local-command-caveat*.txt
+# Hidden directories
+.*/
 
-# Editor / OS
+# IDE non-hidden artifacts
+*.iml
+*.ipr
+*.iws
 *.swp
+*.swo
+
+# OS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*~
+.nfs*
 
-# Project .claude/ (Claude brain for this project) — gitignored on BB origin per global rules.
-# Enriched only to personal gh-private via post-commit hook. .grok/ is the primary committed knowledge here.
-.claude/
 
-# Per-run test artifacts, temp tunnels, litellm sessions, etc.
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.npm
+
+# ML & Data
+*.onnx
+*.pt
+*.pth
+*.pkl
+*.pickle
+*.bin
+*.so
+*.so.*
+data/
+models/
+checkpoints/
+experiments/
+results/
+predictions/
+static/
+
+# Secrets & Environment
+.env
+.env.*
+*.env
+!.env.example
+secrets*
+*.jwt
+*.pem
+*.key
+
+# Logs & Temp
+*.log
 *.tmp
-nasim-*.log
-/tmp/nasim-*
-/tmp/litellm-nasim-*
+*.temp
+nohup.out
+logs/
+
+# Docs Generated
+docs/_build/
+site/
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.iso
+*.dmg
+
+# Media
+*.pdf
+*.mp4
+*.avi
+*.flv
+*.mov
+*.wmv
+*.tiff
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.svg
+*.psd
+*.ico
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.wma
+*.m4a
+
+# Data Files
+*.csv
 
 # CI caches if any
 .github/workflows/_tmp/

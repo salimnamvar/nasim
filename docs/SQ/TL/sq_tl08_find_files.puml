@@ -1,0 +1,44 @@
+@startuml sq_tl08_find_files
+' ============================================================
+' Title:     TL-08 — Find Files
+' Boundary:  nasim code agent CLI
+' Purpose:   Find files by name pattern with depth limit
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "ToolRegistry" as registry
+participant "FindFileTool" as find
+
+box "Tool Layer" #F3E5F5
+end box
+
+note over find
+  Scope:          Find files by name pattern with max depth
+  Preconditions:  Name pattern and path provided by LLM
+  Excludes:       Content search, glob patterns
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Rollback:       Error string returned to LLM
+  Design:         Uses os.walk with depth limit
+end note
+
+registry -> find : execute(name_pattern, path, max_depth)
+find -> find : os.walk(path) with depth tracking
+find -> find : fnmatch.fnmatch(filename, pattern)
+
+break Path not found
+    find --> registry : "Error: path not found: path"
+end
+
+find --> registry : matching file paths
+
+note over find
+  Flow:    pattern -> os.walk(depth-limited) -> fnmatch -> paths
+  State:   No state change
+  Failure: Path not found -> error string
+  Success: List of matching file paths
+end note
+
+@enduml

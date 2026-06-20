@@ -1,0 +1,50 @@
+@startuml c4_nasim_component_repo_intelligence
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+
+
+' ============================================================
+' Title:     nasim — Repo Intelligence Component Diagram
+' Boundary:  nasim core library — Repo Intelligence group
+' Purpose:   Codebase intelligence: AST indexing, symbol graph, semantic search, repo mapping
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+title nasim — Repo Intelligence Component Diagram
+
+Container_Boundary(repo_intel_boundary, "Repo Intelligence Group") {
+    Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Orchestrates codebase intelligence: indexing, search, ranking, repo mapping")
+    Component(ast_index_adapter, "ASTIndexAdapter", "", "Tree-sitter based AST indexing for symbol extraction")
+    Component(symbol_graph, "SymbolGraph", "", "Cross-file symbol reference graph: definitions, usages, imports")
+    Component(ranking_service, "RankingService", "", "Ranks code search results by relevance, recency, usage frequency")
+    Component(embedding_adapter, "EmbeddingAdapter", "", "Wraps embedding model API for vector generation")
+    Component(semantic_search_svc, "SemanticSearchService", "", "Vector similarity search over code embeddings")
+    Component(repo_map_builder, "RepoMapBuilder", "", "Generates hierarchical repo map summaries for context injection")
+}
+
+System_Ext(tree_sitter, "Tree-sitter", "Incremental parser for source code AST")
+System_Ext(embedding_model, "Embedding Model", "Code embedding model (local or API)")
+System_Ext(vector_store, "Vector Store", "Persistent vector storage for code embeddings")
+System_Ext(host_fs, "Host Filesystem", "Source code files to index")
+
+Rel(repo_intel_mgr, ast_index_adapter, "indexes source files")
+Rel(repo_intel_mgr, symbol_graph, "builds reference graph")
+Rel(repo_intel_mgr, ranking_service, "ranks search results")
+Rel(repo_intel_mgr, embedding_adapter, "generates embeddings")
+Rel(repo_intel_mgr, semantic_search_svc, "performs vector search")
+Rel(repo_intel_mgr, repo_map_builder, "builds repo map")
+Rel(ast_index_adapter, tree_sitter, "parses AST")
+Rel(ast_index_adapter, symbol_graph, "feeds symbol data")
+Rel(ast_index_adapter, host_fs, "reads source files")
+Rel(embedding_adapter, embedding_model, "API call for vectors")
+Rel(embedding_adapter, vector_store, "stores vectors")
+Rel(semantic_search_svc, vector_store, "query vectors")
+Rel(ranking_service, symbol_graph, "reads reference data")
+Rel(ranking_service, semantic_search_svc, "combines with vector scores")
+Rel(repo_map_builder, symbol_graph, "reads structure")
+Rel(repo_map_builder, host_fs, "traverses directories")
+
+@enduml

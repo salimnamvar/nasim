@@ -1,0 +1,53 @@
+@startuml sq_ssn03_list_sessions
+' ============================================================
+' Title:     SSN-03 — List Sessions
+' Boundary:  nasim code agent CLI
+' Purpose:   List available saved sessions
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Session Layer" #F1F8E9
+  participant "SessionStore" as store
+end box
+database "Session Directory" as dir
+
+note over user, dir
+  Scope:          List all saved sessions with metadata
+  Preconditions:  /sessions command entered
+  Contexts:       Called by CLI-02 (Execute Slash Command)
+  Excludes:       Session save/load
+  Rollback:       No sessions -> empty list
+  Design:         Scans ~/.nasim/sessions/ for session dirs
+end note
+
+== SSN-03 List Sessions ==
+
+repl -> store : list_sessions()
+store -> dir : scan ~/.nasim/sessions/
+
+break No sessions directory
+    dir --> store : FileNotFoundError
+    store --> repl : [] (empty list)
+end
+
+store -> store : read metadata from each session
+store --> repl : [(id, created_at, message_count), ...]
+repl -> repl : format session table
+repl --> user : session list display
+
+note over user, dir
+  Flow:    scan directory -> read metadata -> list
+  State:   No state change
+  Failure: No directory -> empty list
+  Success: Formatted list of sessions
+end note
+
+@enduml

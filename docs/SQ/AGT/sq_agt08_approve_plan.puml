@@ -1,0 +1,50 @@
+@startuml sq_agt08_approve_plan
+' ============================================================
+' Title:     AGT-08 — APPROVE Plan
+' Boundary:  nasim code agent CLI
+' Purpose:   Execute queued tool calls from plan mode
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "PlanSession" as plan
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+end box
+
+note over agent, registry
+  Scope:          Execute queued tool calls after plan approval
+  Preconditions:  Plan mode active with queued calls
+  Contexts:       Called by CLI-02 (/approve command)
+  Excludes:       Plan queuing (AGT-07)
+  Rollback:       Partial execution on failure
+  Design:         Drains pending_calls queue sequentially
+end note
+
+== AGT-08 APPROVE Plan ==
+
+agent -> plan : approve_plan()
+plan -> plan : get pending_calls
+plan -> plan : clear pending_calls
+
+loop for each queued call
+    plan -> registry : execute(tool_name, args)
+    registry --> plan : ToolResult
+    plan -> plan : collect results
+end
+
+plan --> agent : all results
+
+note over agent, registry
+  Flow:    approve -> drain queue -> execute sequentially -> results
+  State:   PLANNING -> TOOL_EXEC -> THINKING
+  Failure: Partial execution on tool failure
+  Success: All queued calls executed
+end note
+
+@enduml
