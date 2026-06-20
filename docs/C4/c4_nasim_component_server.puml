@@ -1,5 +1,5 @@
 @startuml c4_nasim_component_server
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 
 
@@ -8,7 +8,7 @@
 ' Boundary:  nasim HTTP API Server process
 ' Purpose:   Server Layer components for HTTP interface
 ' Milestone: v1.0
-' Version:   5.0.0
+' Version:   6.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
@@ -28,7 +28,5 @@ Rel(server_app, server_router, "mounts routes")
 Rel(server_router, core_library, "delegates to agent orchestrator")
 Rel(server_router, sse_handler, "streams via")
 Rel(sse_handler, core_library, "consumes AgentEvents")
-
-@enduml
 
 @enduml

@@ -1,15 +1,16 @@
 @startuml nasim_component_observability
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
 
 ' ============================================================
 ' Title: nasim — Observability Component Diagram
 ' Boundary: nasim core library — Observability group
 ' Purpose: Application-side logging and metrics emission (tenas pattern: emit only)
-' Version: 6.1.0
+' Milestone: v1.0
+' Version: 6.0.0
 ' Source: docs/audit/audit.2026.06.20.logging.observability.car.md
 ' Review: —
 ' ============================================================
-
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()

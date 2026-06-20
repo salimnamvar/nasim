@@ -1,13 +1,16 @@
 @startuml nasim_context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
+!theme plain
 
 ' ============================================================
 ' Title: nasim — System Context
 ' Boundary: nasim code agent
 ' Purpose: Show nasim as a system with all interfaces and external dependencies
+' Milestone: v1.0
 ' Version: 6.0.0
+' Source: docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review: —
 ' ============================================================
-
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()

@@ -22,6 +22,7 @@
 | [audit.2026.06.20.car-framework-csr-rod.md](audit.2026.06.20.car-framework-csr-rod.md) | CSR + ROD audit | CAR framework audit for Controller-Service-Repository and Resource-Oriented Design |
 | [audit.2026.06.20.deep.domain.audit.md](audit.2026.06.20.deep.domain.audit.md) | ML / RL / NLP domain audit | **DOMAIN AUDIT** — Per-agent deep-dive with 20-dimension scoring (ML, RL, NLP, SWE); enhancement roadmap E-01–E-09; 9.1/10 target |
 | [audit.2026.06.20.logging.observability.car.md](audit.2026.06.20.logging.observability.car.md) | Logging & Observability (CAR) | **FOCUSED AUDIT** — nasim vs tenas LOG draft + 28 refs; wire vs structured; C4 gaps + enhancement to 9.5+ design |
+| [audit.2026.06.20.c4-design-layer.car.md](audit.2026.06.20.c4-design-layer.car.md) | C4 Layer Deep Audit (CAR) | **DEEP C4 AUDIT** — Strict audit of Context→Container→Component vs c4.md + design-chain + cicd + anti-patterns + 2026 agentic best practices; 213 linter findings analyzed; full principle checklist + CAR items |
 
 ---
 
@@ -39,6 +40,7 @@
 9. **audit.2026.06.20.car-framework-csr-rod.md** — CSR + ROD pattern audit
 10. **audit.2026.06.20.deep.domain.audit.md** — ML/RL/NLP deep domain audit with per-agent 20-dim scoring and E-01–E-09 enhancement roadmap (latest)
 11. **audit.2026.06.20.logging.observability.car.md** — dedicated logging/observability + wire log vs tenas + references (CAR)
+12. **audit.2026.06.20.c4-design-layer.car.md** — strict C4 Context/Container/Component deep audit (linter + all principles + CAR items)
 
 ---
 
@@ -55,7 +57,7 @@
 - ODCS v3.1.0 data contract + OAS 3.1.0 OpenAPI spec
 - No reference agent has this level of design documentation
 
-### Comprehensive audit reveals 6 C4 gaps vs 28 reference agents
+### Comprehensive audit reveals 6 C4 gaps vs 28 reference agents; dedicated C4 layer audit (2026-06-20.c4-design-layer.car.md) confirms detailed per-group diagrams are 9.5/10 but overview diagram fails strict C4 rules (212 linter violations) + mechanical issues (unpinned includes, version skew). After fixes: 10/10.
 - **Covered (14/20):** Provider abstraction, tool system, event-driven core, config layering, session persistence, safety, context compaction, MCP, HTTP API, hooks, plugins, LSP, rich UI, plan mode
 - **Missing (6/20):** Subagent spawning, structured logging, OS-level sandbox, graph-based context, plan branching, multi-role orchestration
 

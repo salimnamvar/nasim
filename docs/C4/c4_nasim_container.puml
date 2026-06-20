@@ -1,13 +1,16 @@
 @startuml nasim_container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
+!theme plain
 
 ' ============================================================
 ' Title: nasim — Container Diagram
 ' Boundary: nasim code agent
 ' Purpose: Show deployable units, technology choices, and observability pipeline
+' Milestone: v1.0
 ' Version: 6.0.0
+' Source: docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review: —
 ' ============================================================
-
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
@@ -58,7 +61,7 @@ System_Ext(plugin_dir, "Plugin Directory", "Community extensions")
 ' ============================================================
 
 System_Boundary(obs_platform, "Observability Platform") {
-    Container(log_agent, "Log Agent", "Fluent Bit / Vector", "Tails stdout/stderr, parses, enriches with labels, buffers, retries, pushes to Loki")
+    Container(log_agent, "Log Agent", "Fluent Bit / Vector", "Tails stdout/stderr from Core/CLI/Server processes, parses, enriches with labels, buffers, retries, pushes to Loki")
     Container(loki, "Loki", "Log storage", "Log ingestion, storage, LogQL queries. Low-cardinality label indexing")
     Container(prometheus, "Prometheus", "Metrics store", "Pull-scrapes /metrics endpoint. Time-series store, PromQL")
     Container(grafana, "Grafana", "Dashboard UI", "Read-only visualization + alerting. LogQL and PromQL dashboards")
