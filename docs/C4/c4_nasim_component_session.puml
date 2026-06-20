@@ -4,12 +4,12 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Session Component Diagram
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Session layer internal components
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   4.0.0
+' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Session Component Diagram
@@ -17,11 +17,17 @@ title nasim — Session Component Diagram
 Container_Boundary(session_boundary, "Session Layer") {
     Component(session_store, "SessionStore", "nasim/session/store.py", "Persists/loads message history to ~/.nasim/sessions/ as JSON Lines")
     Component(session_model, "Session", "nasim/session/model.py", "Session dataclass: id, created_at, messages snapshot")
+    Component(session_versioning, "SessionVersioning", "nasim/session/versioning.py", "Snapshots and undo for session state")
+    Component(session_search, "SessionSearch", "nasim/session/search.py", "Cross-session search via FTS5 index")
+    Component(session_fork, "SessionFork", "nasim/session/fork.py", "Branch conversations from any point")
 }
 
 System_Ext(session_dir, "Session Directory", "~/.nasim/sessions/<session-id>/")
 
 Rel(session_store, session_model, "creates/loads Session objects")
 Rel(session_store, session_dir, "reads/writes JSON Lines files")
+Rel(session_versioning, session_store, "creates snapshots, restores state")
+Rel(session_search, session_store, "indexes and queries session content")
+Rel(session_fork, session_store, "copies session state for branching")
 
 SHOW_LEGEND()

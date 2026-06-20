@@ -64,6 +64,32 @@ Back to [docs/](../README.md).
 | PluginLoader | `nasim/plugins/loader.py` | class | Plugin | Discovers and loads plugins |
 | PluginManifest | `nasim/plugins/manifest.py` | dataclass | Plugin | Plugin metadata |
 | Plugin | `nasim/plugins/loader.py` | class | Plugin | Loaded plugin instance |
+| SubagentManager | `nasim/agent/subagent.py` | class | SubagentManager | Parent-child agent orchestration |
+| TaskDispatcher | `nasim/agent/dispatcher.py` | class | TaskDispatcher | Role-based task delegation |
+| ErrorBoundary | `nasim/agent/errors.py` | class | ErrorBoundary | Structured error handling |
+| SafetyPipeline | `nasim/agent/safety.py` | class | SafetyPipeline | Multi-stage safety checks |
+| PersonaLoader | `nasim/agent/persona.py` | class | PersonaLoader | Runtime persona switching |
+| ProviderCapabilities | `nasim/provider/caps.py` | dataclass | ProviderCapabilities | Provider capability declaration |
+| FallbackChain | `nasim/provider/fallback.py` | class | FallbackChain | Circuit breaker + retry |
+| SandboxExecutor | `nasim/sandbox/executor.py` | class | SandboxExecutor | OS-level process isolation |
+| SandboxPolicy | `nasim/sandbox/policy.py` | class | SandboxPolicy | Execution policy rules |
+| SandboxMonitor | `nasim/sandbox/monitor.py` | class | SandboxMonitor | Process monitoring |
+| StructuredLogger | `nasim/observability/logger.py` | class | StructuredLogger | Structured logging |
+| MetricsCollector | `nasim/observability/metrics.py` | class | MetricsCollector | Metrics collection |
+| TraceCorrelator | `nasim/observability/trace.py` | class | TraceCorrelator | Trace correlation |
+| MemoryStore | `nasim/memory/store.py` | class | MemoryStore | Knowledge persistence |
+| MemoryIndex | `nasim/memory/index.py` | class | MemoryIndex | FTS5 search index |
+| MemoryScope | `nasim/memory/scope.py` | class | MemoryScope | Scope isolation |
+| GitIntegration | `nasim/git/integration.py` | class | GitIntegration | Auto-commit, branch awareness |
+| GitStatus | `nasim/git/status.py` | class | GitStatus | Working tree status |
+| GitCommit | `nasim/git/commit.py` | class | GitCommit | Commit creation |
+| SessionVersioning | `nasim/session/versioning.py` | class | SessionVersioning | Snapshots and undo |
+| SessionSearch | `nasim/session/search.py` | class | SessionSearch | Cross-session search |
+| SessionFork | `nasim/session/fork.py` | class | SessionFork | Conversation branching |
+| SubagentTool | `nasim/tools/subagent.py` | class | Tool | Spawns child agents |
+| TodoTool | `nasim/tools/todo.py` | class | Tool | Task tracking |
+| MemoryTool | `nasim/tools/memory.py` | class | Tool | Knowledge persist/retrieve |
+| PlanTool | `nasim/tools/plan.py` | class | Tool | Plan creation |
 
 ## Relationships
 
@@ -88,6 +114,25 @@ Back to [docs/](../README.md).
 | PluginLoader | Plugin | creates | Discovers and loads |
 | Plugin | Tool | provides | Registers plugin tools |
 | Plugin | Hook | provides | Registers plugin hooks |
+| AgentOrchestrator | SubagentManager | uses | Spawns child agents |
+| AgentOrchestrator | TaskDispatcher | uses | Delegates by role |
+| AgentOrchestrator | ErrorBoundary | uses | Handles errors |
+| AgentOrchestrator | SafetyPipeline | uses | Safety validation |
+| AgentOrchestrator | PersonaLoader | uses | Loads persona |
+| AgentOrchestrator | MemoryStore | uses | Persists knowledge |
+| SubagentManager | AgentOrchestrator | creates | Child agent |
+| TaskDispatcher | SubagentManager | uses | Dispatches via subagent |
+| ModelRouter | ProviderCapabilities | queries | Checks capabilities |
+| ModelRouter | FallbackChain | triggers | Failover |
+| SandboxExecutor | SandboxPolicy | applies | Enforces policy |
+| SandboxExecutor | SandboxMonitor | uses | Monitors process |
+| MemoryStore | MemoryIndex | uses | Indexes entries |
+| MemoryStore | MemoryScope | uses | Filters by scope |
+| GitIntegration | GitStatus | uses | Reads state |
+| GitIntegration | GitCommit | uses | Creates commits |
+| SessionVersioning | SessionStore | uses | Snapshots |
+| SessionSearch | SessionStore | uses | Searches |
+| SessionFork | SessionStore | uses | Forks |
 
 ## Notes
 

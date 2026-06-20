@@ -3,12 +3,12 @@
 
 ' ============================================================
 ' Title:     nasim — Container Diagram
-' Boundary:  nasim code agent CLI + HTTP API
+' Boundary:  nasim code agent CLI + HTTP API + MCP server
 ' Purpose:   Show all deployable units, interfaces, and technology choices
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md
-' Review:    —
+' Version:   4.0.0
+' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Container Diagram
@@ -19,40 +19,60 @@ Person(http_client, "HTTP Client", "Web/mobile/desktop apps")
 System_Boundary(nasim, "nasim") {
     Container(cli, "CLI", "Python click + rich", "Interactive terminal: REPL, slash commands, rich rendering")
     Container(agent, "Agent Core", "Python", "Orchestrator, conversation history, context compaction, permissions, plan mode")
-    Container(provider, "Provider Layer", "Python httpx", "Provider abstraction: Ollama, OpenAI, Anthropic + model routing")
+    Container(provider, "Provider Layer", "Python httpx", "Provider abstraction: Ollama, OpenAI, Anthropic")
+    Container(router, "Model Router", "Python", "Model selection, fallback chains, task classification")
     Container(tools, "Tool Layer", "Python", "Tool registry: file, search, shell, web, git, MCP, LSP tools")
     Container(config, "Config", "Python pydantic", "Layered config: global YAML + project YAML + env + CLI flags")
     Container(session, "Session Store", "Python JSON", "Persists conversation history to ~/.nasim/sessions/")
     Container(server, "HTTP API Server", "Python starlette", "RESTful API + SSE streaming for web/mobile/desktop clients")
     Container(hooks, "Hook System", "Python", "Pre/post hooks for tool use and LLM calls")
     Container(plugins, "Plugin System", "Python", "Plugin discovery, loading, dynamic tool/hook registration")
+    Container(subagent, "Subagent Spawner", "Python", "Parent-child agent orchestration with nesting limits")
+    Container(sandbox, "Sandbox", "Python", "OS-level process isolation for shell command execution")
+    Container(observability, "Observability", "Python structlog", "Structured logging, trace correlation, metrics")
+    Container(memory, "Memory Store", "Python", "Cross-session knowledge persistence and retrieval")
+    Container(git, "Git Integration", "Python", "Auto-commit, branch awareness, diff tracking")
 }
 
-System_Ext(llm_provider, "LLM Provider", "Ollama / OpenAI / Anthropic API")
+System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic")
 System_Ext(host_fs, "Host Filesystem", "Project code files")
 System_Ext(host_shell, "Host Shell", "subprocess execution")
 System_Ext(web_ext, "Web", "Documentation and search")
 System_Ext(mcp_server, "MCP Server", "Extension tools")
 System_Ext(mcp_client, "MCP Client", "External tool consumers")
+System_Ext(git_repo, "Git Repository", "Version control")
+System_Ext(sandbox_rt, "Sandbox Runtime", "OS-level isolation: landlock, seccomp")
+System_Ext(memory_ext, "Memory Backend", "Long-term knowledge store")
 
 Rel(dev, cli, "types input, reads output")
 Rel(http_client, server, "sends requests, receives SSE", "HTTP/JSON")
 Rel(cli, agent, "sends user input, receives events")
 Rel(server, agent, "sends user input, receives events")
+Rel(agent, router, "selects model for task")
 Rel(agent, provider, "calls provider chat/stream")
 Rel(agent, tools, "dispatches tool calls")
 Rel(agent, session, "loads/saves conversation history")
 Rel(agent, hooks, "triggers pre/post hooks")
+Rel(agent, subagent, "spawns child agents")
+Rel(agent, observability, "emits structured logs")
+Rel(agent, memory, "persists/retrieves knowledge")
 Rel(hooks, plugins, "loads plugin hooks")
 Rel(plugins, tools, "registers plugin tools")
-Rel(provider, llm_provider, "HTTP POST", "JSON streaming")
+Rel(router, provider, "routes to selected provider")
+Rel(provider, llm_backend, "HTTP POST", "JSON streaming")
 Rel(tools, host_fs, "read/write/search files")
-Rel(tools, host_shell, "execute commands")
+Rel(tools, sandbox, "executes commands via sandbox")
+Rel(sandbox, host_shell, "runs isolated subprocess")
 Rel(tools, web_ext, "fetch/search")
 Rel(tools, mcp_server, "invoke extension tools")
+Rel(tools, git, "git operations")
+Rel(git, git_repo, "git CLI")
 Rel(server, mcp_client, "serves MCP protocol", "stdio/SSE")
 Rel(config, agent, "provides settings")
 Rel(config, provider, "provides provider config")
 Rel(config, tools, "provides tool config")
+Rel(config, router, "provides routing config")
+Rel(memory, memory_ext, "read/write")
+Rel(subagent, agent, "child agent inherits core")
 
 SHOW_LEGEND()

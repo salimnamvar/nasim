@@ -1,0 +1,29 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Memory Component Diagram
+' Boundary:  nasim code agent memory layer
+' Purpose:   Cross-session knowledge persistence and retrieval
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' ============================================================
+
+title nasim — Memory Component Diagram
+
+Container_Boundary(memory_boundary, "Memory Layer") {
+    Component(memory_store, "MemoryStore", "nasim/memory/store.py", "Persists knowledge entries with scope, key, content, timestamps")
+    Component(memory_index, "MemoryIndex", "nasim/memory/index.py", "FTS5 index for semantic search across stored knowledge")
+    Component(memory_scope, "MemoryScope", "nasim/memory/scope.py", "Scope isolation: global, project, session-level knowledge")
+}
+
+System_Ext(memory_backend, "Memory Backend", "Persistent storage for knowledge entries")
+
+Rel(memory_store, memory_index, "indexes new entries")
+Rel(memory_store, memory_backend, "read/write persistence")
+Rel(memory_scope, memory_store, "filters by scope")
+
+SHOW_LEGEND()

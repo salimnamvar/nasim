@@ -4,12 +4,12 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — CLI Component Diagram
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   CLI layer internal components
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   4.0.0
+' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — CLI Component Diagram
@@ -21,17 +21,12 @@ Container_Boundary(cli_boundary, "CLI Layer") {
     Component(slash_handler, "SlashCommandHandler", "nasim/cli/commands.py", "Maps /cmd strings to agent actions")
 }
 
-System_Boundary(agent_boundary, "Agent Layer") {
-    Component(agent_orch, "AgentOrchestrator", "nasim/agent/orchestrator.py", "Drives LLM/tool loop, emits AgentEvents")
-}
+System_Ext(agent_orch, "Agent Orchestrator", "Core agentic loop")
+System_Ext(config_loader, "Config Loader", "Layered YAML + env + CLI config")
 
-System_Boundary(config_boundary, "Config Layer") {
-    Component(config_loader, "ConfigLoader", "nasim/config/loader.py", "Loads layered YAML + env + CLI config")
-}
-
-Rel(repl_session, agent_orch, "user input -> AgentEvents")
-Rel(repl_session, renderer, "renders events")
-Rel(repl_session, slash_handler, "dispatches /commands")
+Rel(repl_session, agent_orch, "user input, AgentEvents")
+Rel(repl_session, renderer, "AgentEvents, terminal output")
+Rel(repl_session, slash_handler, "/cmd, action")
 Rel(slash_handler, agent_orch, "delegates to agent")
 Rel(arg_parser, config_loader, "CLI flags override config")
 Rel(repl_session, config_loader, "reads session config")

@@ -9,12 +9,16 @@ Back to [docs/](../README.md).
 | File | Store Boundary | Entity Count | Description |
 | ---- | -------------- | :----------: | ----------- |
 | `nasim_session_store.datacontract.yaml` | Session Store | 3 | Session metadata, messages, file metadata |
+| `nasim_memory_store.datacontract.yaml` | Memory Store | 3 | Knowledge entries, index, scope |
+| `nasim_todo_store.datacontract.yaml` | Todo Store | 2 | Todo items, session association |
 
 ## Store Summary
 
 | Store | Type | Path Pattern | Description |
 | ----- | ---- | ------------ | ----------- |
 | Session Store | JSON Lines | `~/.nasim/sessions/{id}/session.jsonl` | Agent conversation history |
+| Memory Store | JSON Lines | `~/.nasim/memory/{scope}/{key}.json` | Cross-session knowledge |
+| Todo Store | JSON Lines | `~/.nasim/sessions/{id}/todos.jsonl` | Task tracking within sessions |
 
 ## Design Chain Position
 

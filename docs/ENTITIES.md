@@ -10,18 +10,22 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | Code | Group | Scope |
 |------|-------|-------|
 | CLI | CLI Layer | REPL, argument parsing, slash commands, rendering |
-| AGT | Agent Core | Orchestrator, conversation, context, permissions, plans |
+| AGT | Agent Core | Orchestrator, conversation, context, permissions, plans, subagents, dispatch |
 | LLM | Provider Backend | LLM provider-specific chat and streaming |
 | TL | Tool Layer | All tool implementations |
-| PRV | Provider Abstraction | Provider lifecycle, factory, backend selection |
+| PRV | Provider Abstraction | Provider lifecycle, factory, backend selection, routing |
 | CFG | Configuration | Config loading, validation, layered merge |
-| SSN | Session | Session persistence, resumption, listing |
-| SAF | Safety | Permission checks, user approval, safety modes |
+| SSN | Session | Session persistence, resumption, listing, versioning, search, fork |
+| SAF | Safety | Permission checks, user approval, safety modes, sandbox |
 | CTX | Context Management | Token counting, context compaction |
 | SRV | HTTP Server | REST API, SSE streaming, session management via API |
 | HK | Hooks | Pre/post hooks for tool use and LLM calls |
 | PLG | Plugins | Plugin discovery, loading, registration |
 | RTG | Model Router | Model selection, fallback, routing strategies |
+| OBS | Observability | Structured logging, metrics, trace correlation |
+| MEM | Memory | Cross-session knowledge persistence and retrieval |
+| VCS | Git Integration | Auto-commit, branch awareness, diff tracking |
+| SBX | Sandbox | OS-level process isolation for shell execution |
 
 ---
 
@@ -39,16 +43,21 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 
 | System | Protocol | Purpose |
 |--------|----------|---------|
-| LLM Provider | HTTP/JSON | Inference backend (Ollama, OpenAI, Anthropic, etc.) |
+| LLM Backend | HTTP/JSON | Multi-provider inference (Ollama, OpenAI, Anthropic) |
 | Host Filesystem | path I/O | Read/write/search project files |
-| Host Shell | subprocess | Execute shell commands |
+| Host Shell | subprocess | Execute shell commands (via sandbox) |
 | Web | HTTP | Fetch documentation, search results |
 | MCP Server | stdio/SSE | Extension tools via Model Context Protocol |
+| MCP Client | stdio/SSE | External tools connecting to nasim MCP server |
 | Global Config | YAML | ~/.nasim/config.yaml |
 | Project Config | YAML | .nasim/config.yaml |
 | Env Variables | env | NASIM_* environment variables |
 | Session Directory | JSON Lines | ~/.nasim/sessions/<id>/ |
-| Plugin Directory | JSON manifest | ~/.nasim/plugins/ |
+| Plugin Directory | filesystem | ~/.nasim/plugins/ — community extensions |
+| Git Repository | git CLI | Version control for project files |
+| Sandbox Runtime | OS primitives | OS-level process isolation: landlock, seccomp |
+| Memory Backend | read/write | Long-term knowledge persistence |
+| LSP Server | LSP protocol | Language server for code intelligence |
 
 ---
 
@@ -73,6 +82,11 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | PermissionGate | `nasim/agent/permission.py` | Per-tool safety check; ask/auto/off modes |
 | PlanSession | `nasim/agent/plan.py` | Holds queued tool calls in plan mode |
 | AgentEvent | `nasim/agent/events.py` | Event types: TextChunk, ToolStart, ToolResult, Error, Done |
+| SubagentManager | `nasim/agent/subagent.py` | Parent-child agent orchestration with nesting limit 5 |
+| TaskDispatcher | `nasim/agent/dispatcher.py` | Role-based task delegation: planner, architect, coder, reviewer |
+| ErrorBoundary | `nasim/agent/errors.py` | Structured error handling with recovery actions |
+| SafetyPipeline | `nasim/agent/safety.py` | Multi-stage safety: permission gate, injection scanner, egress inspector |
+| PersonaLoader | `nasim/agent/persona.py` | Runtime persona switching for specialized agent roles |
 
 ### Provider Layer
 
@@ -81,6 +95,8 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | Provider | `nasim/provider/base.py` | Protocol: chat(), chat_stream(), model_name |
 | ProviderFactory | `nasim/provider/base.py` | Reads config, instantiates correct provider |
 | ModelRouter | `nasim/provider/router.py` | Model selection, fallback, routing strategies |
+| ProviderCapabilities | `nasim/provider/caps.py` | Capability declaration: streaming, tools, max_tokens, vision |
+| FallbackChain | `nasim/provider/fallback.py` | Circuit breaker + retry + provider failover |
 | OllamaProvider | `nasim/provider/ollama.py` | Ollama /api/chat implementation |
 | OpenAIProvider | `nasim/provider/openai.py` | OpenAI Chat Completions API |
 | AnthropicProvider | `nasim/provider/anthropic.py` | Anthropic Messages API |
@@ -105,6 +121,10 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | GitTool | `nasim/tools/git.py` | Git status, diff, commit operations |
 | MCPToolAdapter | `nasim/tools/mcp.py` | Wraps MCP server tools into nasim Tool format |
 | LspTool | `nasim/tools/lsp.py` | LSP operations: hover, definition, references, symbols |
+| SubagentTool | `nasim/tools/subagent.py` | Spawns child agents as tool calls |
+| TodoTool | `nasim/tools/todo.py` | Task tracking within session |
+| MemoryTool | `nasim/tools/memory.py` | Persist and retrieve cross-session knowledge |
+| PlanTool | `nasim/tools/plan.py` | Plan creation and management |
 
 ### Config Layer (cross-cutting)
 
@@ -119,6 +139,9 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 |-----------|--------|---------------|
 | SessionStore | `nasim/session/store.py` | Persists/loads message history to ~/.nasim/sessions/ |
 | Session | `nasim/session/model.py` | Session dataclass: id, created_at, messages |
+| SessionVersioning | `nasim/session/versioning.py` | Snapshots and undo for session state |
+| SessionSearch | `nasim/session/search.py` | Cross-session search via FTS5 index |
+| SessionFork | `nasim/session/fork.py` | Branch conversations from any point |
 
 ### Server Layer (cross-cutting)
 
@@ -144,6 +167,38 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | PluginLoader | `nasim/plugins/loader.py` | Discovers and loads plugins from ~/.nasim/plugins/ |
 | PluginManifest | `nasim/plugins/manifest.py` | Plugin metadata: name, version, tools, hooks |
 
+### Sandbox Layer (cross-cutting)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| SandboxExecutor | `nasim/sandbox/executor.py` | OS-level process isolation: landlock, seccomp, bubblewrap |
+| SandboxPolicy | `nasim/sandbox/policy.py` | Network domain allowlists, filesystem mount rules, exec restrictions |
+| SandboxMonitor | `nasim/sandbox/monitor.py` | Process monitoring, timeout enforcement, resource limits |
+
+### Observability Layer (cross-cutting)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| StructuredLogger | `nasim/observability/logger.py` | Structured logging with trace correlation and log levels |
+| MetricsCollector | `nasim/observability/metrics.py` | Token usage, latency, tool call counts, error rates |
+| TraceCorrelator | `nasim/observability/trace.py` | Request-scoped trace IDs linking LLM calls, tool calls, events |
+
+### Memory Layer (cross-cutting)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| MemoryStore | `nasim/memory/store.py` | Cross-session knowledge persistence and retrieval |
+| MemoryIndex | `nasim/memory/index.py` | FTS5 index for semantic search across stored knowledge |
+| MemoryScope | `nasim/memory/scope.py` | Scope isolation: global, project, session-level knowledge |
+
+### Git Layer (cross-cutting)
+
+| Component | Module | Responsibility |
+|-----------|--------|---------------|
+| GitIntegration | `nasim/git/integration.py` | Auto-commit after file edits, branch awareness, diff tracking |
+| GitStatus | `nasim/git/status.py` | Read working tree status, staged changes, branch info |
+| GitCommit | `nasim/git/commit.py` | Create commits with conventional commit messages |
+
 ---
 
 ## Python Modules
@@ -164,12 +219,19 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/agent/events.py` | agent | AgentEvent hierarchy |
 | `nasim/agent/permission.py` | agent | PermissionGate |
 | `nasim/agent/plan.py` | agent | PlanSession |
+| `nasim/agent/subagent.py` | agent | SubagentManager |
+| `nasim/agent/dispatcher.py` | agent | TaskDispatcher |
+| `nasim/agent/errors.py` | agent | ErrorBoundary |
+| `nasim/agent/safety.py` | agent | SafetyPipeline |
+| `nasim/agent/persona.py` | agent | PersonaLoader |
 | `nasim/provider/__init__.py` | provider | Provider package |
 | `nasim/provider/base.py` | provider | Provider Protocol + factory |
 | `nasim/provider/router.py` | provider | ModelRouter |
 | `nasim/provider/ollama.py` | provider | OllamaProvider |
 | `nasim/provider/openai.py` | provider | OpenAIProvider |
 | `nasim/provider/anthropic.py` | provider | AnthropicProvider |
+| `nasim/provider/caps.py` | provider | ProviderCapabilities |
+| `nasim/provider/fallback.py` | provider | FallbackChain |
 | `nasim/tools/__init__.py` | tools | Tools package |
 | `nasim/tools/base.py` | tools | Tool ABC, ToolRegistry, ToolResult |
 | `nasim/tools/file.py` | tools | File tools |
@@ -180,12 +242,19 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/tools/git.py` | tools | GitTool |
 | `nasim/tools/mcp.py` | tools | MCPToolAdapter |
 | `nasim/tools/lsp.py` | tools | LspTool |
+| `nasim/tools/subagent.py` | tools | SubagentTool |
+| `nasim/tools/todo.py` | tools | TodoTool |
+| `nasim/tools/memory.py` | tools | MemoryTool |
+| `nasim/tools/plan.py` | tools | PlanTool |
 | `nasim/config/__init__.py` | config | Config package |
 | `nasim/config/loader.py` | config | ConfigLoader |
 | `nasim/config/schema.py` | config | Config dataclass |
 | `nasim/session/__init__.py` | session | Session package |
 | `nasim/session/store.py` | session | SessionStore |
 | `nasim/session/model.py` | session | Session model |
+| `nasim/session/versioning.py` | session | SessionVersioning |
+| `nasim/session/search.py` | session | SessionSearch |
+| `nasim/session/fork.py` | session | SessionFork |
 | `nasim/server/__init__.py` | server | Server package |
 | `nasim/server/app.py` | server | ASGI application factory |
 | `nasim/server/routes.py` | server | RESTful route handlers |
@@ -197,6 +266,22 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/plugins/__init__.py` | plugins | Plugins package |
 | `nasim/plugins/loader.py` | plugins | PluginLoader |
 | `nasim/plugins/manifest.py` | plugins | PluginManifest |
+| `nasim/sandbox/__init__.py` | sandbox | Sandbox package |
+| `nasim/sandbox/executor.py` | sandbox | SandboxExecutor |
+| `nasim/sandbox/policy.py` | sandbox | SandboxPolicy |
+| `nasim/sandbox/monitor.py` | sandbox | SandboxMonitor |
+| `nasim/observability/__init__.py` | observability | Observability package |
+| `nasim/observability/logger.py` | observability | StructuredLogger |
+| `nasim/observability/metrics.py` | observability | MetricsCollector |
+| `nasim/observability/trace.py` | observability | TraceCorrelator |
+| `nasim/memory/__init__.py` | memory | Memory package |
+| `nasim/memory/store.py` | memory | MemoryStore |
+| `nasim/memory/index.py` | memory | MemoryIndex |
+| `nasim/memory/scope.py` | memory | MemoryScope |
+| `nasim/git/__init__.py` | git | Git package |
+| `nasim/git/integration.py` | git | GitIntegration |
+| `nasim/git/status.py` | git | GitStatus |
+| `nasim/git/commit.py` | git | GitCommit |
 
 ---
 
@@ -217,5 +302,15 @@ additional verbs for its CLI agent domain:
 | ROUTE | Model selection | Unique routing semantics for model selection |
 | HOOK | Pre/post processing | Extension point for tool and LLM lifecycle |
 | DISCOVER | Plugin/tool discovery | Runtime discovery of plugins and MCP tools |
+| SPAWN | Subagent creation | Create child agent with restricted tools |
+| COLLECT | Subagent result | Gather results from completed child agents |
+| DELEGATE | Task delegation | Assign tasks to specialized roles |
+| SNAPSHOT | Session snapshot | Create session state snapshot |
+| RESTORE | Session restore | Restore session from snapshot |
+| BRANCH | Session fork | Branch conversation from any point |
+| ISOLATE | Sandbox execution | Execute command in isolated environment |
+| PERSIST | Memory write | Store knowledge across sessions |
+| RECALL | Memory read | Retrieve knowledge from memory store |
+| TRACE | Observability | Correlate events across request scope |
 
 These extensions are documented here per `uc.md` — not silently diverging.

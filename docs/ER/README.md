@@ -1,7 +1,6 @@
 # nasim — ERD Inventory
 
-Physical store schema diagrams for the session JSON store. Derived from the session
-model in `docs/cl/`. One detail file for the session store.
+Physical store schema diagrams for all persistent stores.
 
 Back to [docs/](../README.md).
 
@@ -10,6 +9,9 @@ Back to [docs/](../README.md).
 | File | Store Boundary | Type | Description |
 | ---- | -------------- | ---- | ----------- |
 | `er_session_store.puml` | Session Store | JSON Lines | Session metadata + messages + file metadata |
+| `er_memory_store.puml` | Memory Store | JSON Lines | Cross-session knowledge entries with FTS5 index |
+| `er_todo_store.puml` | Todo Store | JSON Lines | Task tracking within sessions |
+| `er_git_state.puml` | Git State | JSON Lines | Git branch and commit tracking per session |
 
 ## Notation
 

@@ -77,3 +77,36 @@
 | RTG-02 | RTG | Apply Fallback | ModelRouter |
 | RTG-03 | RTG | Classify Task | ModelRouter |
 | RTG-04 | RTG | Switch Model Mid-Session | ModelRouter |
+| AGT-09 | AGT | SPAWN Subagent | SubagentManager |
+| AGT-10 | AGT | COLLECT Subagent Result | SubagentManager |
+| AGT-11 | AGT | DELEGATE Task to Role | TaskDispatcher |
+| AGT-12 | AGT | Load Persona | PersonaLoader |
+| AGT-13 | AGT | Switch Persona | PersonaLoader |
+| AGT-14 | AGT | Handle Agent Error | ErrorBoundary |
+| AGT-15 | AGT | Execute Safety Pipeline | SafetyPipeline |
+| SSN-05 | SSN | SNAPSHOT Session | SessionVersioning |
+| SSN-06 | SSN | RESTORE Session | SessionVersioning |
+| SSN-07 | SSN | SEARCH Sessions | SessionSearch |
+| SSN-08 | SSN | BRANCH Session | SessionFork |
+| TL-15 | TL | SPAWN Subagent Tool | SubagentTool |
+| TL-16 | TL | INSERT Todo | TodoTool |
+| TL-17 | TL | UPDATE Todo | TodoTool |
+| TL-18 | TL | READ Todos | TodoTool |
+| TL-19 | TL | PERSIST Memory | MemoryTool |
+| TL-20 | TL | RECALL Memory | MemoryTool |
+| TL-21 | TL | INSERT Plan | PlanTool |
+| TL-22 | TL | UPDATE Plan | PlanTool |
+| OBS-01 | OBS | STREAM Structured Log | StructuredLogger |
+| OBS-02 | OBS | Record Metrics | MetricsCollector |
+| OBS-03 | OBS | Correlate Trace | TraceCorrelator |
+| MEM-01 | MEM | PERSIST Knowledge | MemoryStore |
+| MEM-02 | MEM | RECALL Knowledge | MemoryStore |
+| MEM-03 | MEM | SEARCH Knowledge | MemoryIndex |
+| MEM-04 | MEM | Scope Knowledge | MemoryScope |
+| VCS-01 | VCS | READ Git Status | GitStatus |
+| VCS-02 | VCS | INSERT Commit | GitCommit |
+| VCS-03 | VCS | READ Diff | GitStatus |
+| VCS-04 | VCS | Auto-Commit | GitIntegration |
+| SBX-01 | SBX | ISOLATE Command | SandboxExecutor |
+| SBX-02 | SBX | Apply Sandbox Policy | SandboxPolicy |
+| SBX-03 | SBX | Monitor Process | SandboxMonitor |

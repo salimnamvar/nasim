@@ -16,6 +16,14 @@
 | HOOK_RUNNING | Pre/post hook executing | tool or LLM call with hooks | #E8EAF6 |
 | ROUTING | Model selection in progress | ModelRouter resolving model | #FBE9E7 |
 | SERVING | HTTP server handling request | HTTP client sends request | #E0F2F1 |
+| SUBAGENT_SPAWNED | Child agent created | SubagentTool dispatched | #DCEDC8 |
+| SUBAGENT_RUNNING | Child agent executing | Child agent started | #C8E6C9 |
+| SUBAGENT_COLLECTED | Child agent result gathered | Child agent completed | #A5D6A7 |
+| SANDBOXED | Command running in sandbox | ShellTool via SandboxExecutor | #B3E5FC |
+| SANDBOX_BLOCKED | Command blocked by policy | SandboxPolicy deny | #FFCDD2 |
+| MEMORY_READ | Retrieving knowledge | MemoryTool RECALL invoked | #D1C4E9 |
+| MEMORY_WRITE | Storing knowledge | MemoryTool PERSIST invoked | #B39DDB |
+| GIT_OP | Git operation in progress | GitTool invoked | #FFE0B2 |
 
 ## Diagram
 

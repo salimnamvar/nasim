@@ -4,12 +4,12 @@ LAYOUT_LEFT_RIGHT()
 
 ' ============================================================
 ' Title:     nasim — System Context
-' Boundary:  nasim code agent CLI + HTTP API
+' Boundary:  nasim code agent CLI + HTTP API + MCP server
 ' Purpose:   Show nasim as a system with all interfaces and external dependencies
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md
-' Review:    —
+' Version:   4.0.0
+' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — System Context
@@ -19,20 +19,28 @@ Person(http_client, "HTTP Client", "Web-app, mobile-app, desktop-app connecting 
 
 System(nasim, "nasim", "Multi-interface code agent: CLI REPL + HTTP API + MCP server")
 
-System_Ext(llm_provider, "LLM Provider", "Inference API: Ollama, OpenAI, Anthropic, or compatible backend")
+System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, or compatible")
 System_Ext(host_fs, "Host Filesystem", "Project files and directories")
 System_Ext(host_shell, "Host Shell", "Shell for executing commands")
 System_Ext(web, "Web", "Documentation, package APIs, search engines")
 System_Ext(mcp_server, "MCP Server", "Extension tools via Model Context Protocol")
 System_Ext(mcp_client, "MCP Client", "External tools connecting to nasim MCP server")
+System_Ext(git_repo, "Git Repository", "Version control for project files")
+System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/ — community extensions")
+System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation: landlock, seccomp, bubblewrap")
+System_Ext(memory_store, "Memory Store", "Long-term knowledge persistence across sessions")
 
 Rel(dev, nasim, "types commands and reads output", "terminal")
 Rel(http_client, nasim, "sends requests, receives SSE streams", "HTTP/JSON")
-Rel(nasim, llm_provider, "sends chat requests, receives responses", "HTTP/JSON")
+Rel(nasim, llm_backend, "sends chat requests, receives responses", "HTTP/JSON")
 Rel(nasim, host_fs, "reads, writes, searches files", "path operations")
-Rel(nasim, host_shell, "executes shell commands", "subprocess")
+Rel(nasim, host_shell, "executes shell commands via sandbox", "subprocess")
 Rel(nasim, web, "fetches documentation, searches", "HTTP")
 Rel(nasim, mcp_server, "discovers and invokes extension tools", "stdio/SSE")
 Rel(mcp_client, nasim, "invokes nasim tools via MCP protocol", "stdio/SSE")
+Rel(nasim, git_repo, "reads status, creates commits", "git CLI")
+Rel(nasim, plugin_dir, "discovers and loads plugins", "filesystem")
+Rel(nasim, sandbox, "executes commands in isolated environment", "OS primitives")
+Rel(nasim, memory_store, "persists and retrieves knowledge", "read/write")
 
 SHOW_LEGEND()

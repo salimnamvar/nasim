@@ -1,0 +1,26 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Observability Component Diagram
+' Boundary:  nasim code agent observability layer
+' Purpose:   Structured logging, trace correlation, metrics collection
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' ============================================================
+
+title nasim — Observability Component Diagram
+
+Container_Boundary(observability_boundary, "Observability Layer") {
+    Component(structured_logger, "StructuredLogger", "nasim/observability/logger.py", "Structured logging with trace correlation and log levels")
+    Component(metrics_collector, "MetricsCollector", "nasim/observability/metrics.py", "Token usage, latency, tool call counts, error rates")
+    Component(trace_correlator, "TraceCorrelator", "nasim/observability/trace.py", "Request-scoped trace IDs linking LLM calls, tool calls, events")
+}
+
+Rel(structured_logger, trace_correlator, "attaches trace ID to log entries")
+Rel(metrics_collector, trace_correlator, "records metrics per trace")
+
+SHOW_LEGEND()

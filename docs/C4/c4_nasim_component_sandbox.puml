@@ -1,0 +1,31 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Sandbox Component Diagram
+' Boundary:  nasim code agent sandbox layer
+' Purpose:   OS-level process isolation for shell command execution
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' ============================================================
+
+title nasim — Sandbox Component Diagram
+
+Container_Boundary(sandbox_boundary, "Sandbox Layer") {
+    Component(sandbox_executor, "SandboxExecutor", "nasim/sandbox/executor.py", "OS-level process isolation: landlock, seccomp, bubblewrap")
+    Component(sandbox_policy, "SandboxPolicy", "nasim/sandbox/policy.py", "Network domain allowlists, filesystem mount rules, exec restrictions")
+    Component(sandbox_monitor, "SandboxMonitor", "nasim/sandbox/monitor.py", "Process monitoring, timeout enforcement, resource limits")
+}
+
+System_Ext(host_shell, "Host Shell", "subprocess execution")
+System_Ext(host_fs, "Host Filesystem", "restricted mount points")
+
+Rel(sandbox_executor, sandbox_policy, "applies policy before exec")
+Rel(sandbox_executor, sandbox_monitor, "monitors running process")
+Rel(sandbox_executor, host_shell, "runs isolated subprocess")
+Rel(sandbox_executor, host_fs, "restricted file access")
+
+SHOW_LEGEND()

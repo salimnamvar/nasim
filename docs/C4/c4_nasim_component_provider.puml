@@ -4,22 +4,25 @@ skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Provider Component Diagram
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Provider layer internal components
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   4.0.0
+' Source:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
 title nasim — Provider Component Diagram
 
 Container_Boundary(provider_boundary, "Provider Layer") {
-    Component(provider_proto, "Provider", "nasim/provider/base.py", "Protocol: chat(), chat_stream(), model_name")
+    Component(provider_proto, "Provider", "nasim/provider/base.py", "Protocol: chat, chat_stream, model_name")
     Component(provider_factory, "ProviderFactory", "nasim/provider/base.py", "Reads config, instantiates correct provider class")
+    Component(model_router, "ModelRouter", "nasim/provider/router.py", "Model selection, fallback chains, task classification")
+    Component(provider_caps, "ProviderCapabilities", "nasim/provider/caps.py", "Capability declaration: streaming, tools, max_tokens, vision")
+    Component(fallback_chain, "FallbackChain", "nasim/provider/fallback.py", "Circuit breaker + retry + provider failover")
     Component(ollama_provider, "OllamaProvider", "nasim/provider/ollama.py", "Ollama /api/chat: sync + streaming")
-    Component(openai_provider, "OpenAIProvider", "nasim/provider/openai.py", "OpenAI Chat Completions API (Phase 2)")
-    Component(anthropic_provider, "AnthropicProvider", "nasim/provider/anthropic.py", "Anthropic Messages API (Phase 2)")
+    Component(openai_provider, "OpenAIProvider", "nasim/provider/openai.py", "OpenAI Chat Completions API")
+    Component(anthropic_provider, "AnthropicProvider", "nasim/provider/anthropic.py", "Anthropic Messages API")
 }
 
 System_Ext(ollama_api, "Ollama Server", "HTTP/JSON")
@@ -27,6 +30,9 @@ System_Ext(openai_api, "OpenAI API", "HTTP/JSON")
 System_Ext(anthropic_api, "Anthropic API", "HTTP/JSON")
 
 Rel(provider_factory, provider_proto, "creates instance")
+Rel(model_router, provider_proto, "routes to provider")
+Rel(model_router, provider_caps, "queries capabilities")
+Rel(model_router, fallback_chain, "triggers failover")
 Rel(ollama_provider, provider_proto, "implements")
 Rel(openai_provider, provider_proto, "implements")
 Rel(anthropic_provider, provider_proto, "implements")
