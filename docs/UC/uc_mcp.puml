@@ -43,7 +43,6 @@ skinparam actor<<system>> {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "MCP Client" as MCPClient <<system>>
 actor "Agent" as Agent <<system>>
 
@@ -64,9 +63,9 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> MCP02
 MCPClient --> MCP04
 Agent --> MCP01
+Agent --> MCP02
 Agent --> MCP03
 
 ' ============================================================

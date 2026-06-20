@@ -144,10 +144,6 @@ rectangle "nasim" {
 ' ============================================================
 
 Developer --> CLI01
-Developer --> TL01
-Developer --> SSN01
-Developer --> VCS01
-Developer --> MEM02
 HTTPClient --> SRV01
 MCPClient --> MCP01
 Platform --> OBS01

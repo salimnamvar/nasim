@@ -9,6 +9,8 @@
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
 '            do not apply (documented deviation).
+' Convention: All transitions are triggered by the corresponding UC ID
+'            (e.g., EVL-01, EDT-10, AGT-07) as listed in docs/UC/README.md.
 ' ============================================================
 
 title nasim — Agent Lifecycle
@@ -126,8 +128,8 @@ ERROR --> IDLE : AGT-14 Error displayed
 SERVING --> THINKING : SRV-06 Request processed
 SERVING --> IDLE : SRV-06 Response complete
 
-IDLE --> PLANNING : /plan command
-PLANNING --> IDLE : /plan off
+IDLE --> PLANNING : AGT-07 /plan command
+PLANNING --> IDLE : AGT-07 /plan off
 
 EVALUATING --> REVIEWING : EVL-01 success checks passed
 EVALUATING --> RETRYING : EVL-01 success checks failed

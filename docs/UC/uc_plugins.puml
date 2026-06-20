@@ -37,7 +37,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -59,12 +58,12 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> PLG01
-Developer --> PLG05
-Developer --> PLG06
+Agent --> PLG01
 Agent --> PLG02
 Agent --> PLG03
 Agent --> PLG04
+Agent --> PLG05
+Agent --> PLG06
 
 ' ============================================================
 ' Relationships

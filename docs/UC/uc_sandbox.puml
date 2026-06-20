@@ -37,7 +37,6 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -57,7 +56,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> SBX01
+Agent --> SBX01
 Agent --> SBX02
 Agent --> SBX03
 Agent --> SBX04

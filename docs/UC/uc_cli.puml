@@ -55,6 +55,10 @@ rectangle "nasim" {
     usecase "**CLI-07 SWITCH Model**\n--\nSwitch model at runtime" as CLI07
     usecase "**CLI-08 LIST Sessions**\n--\nList saved sessions" as CLI08
   }
+
+  package "Session (SSN)" {
+    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
+  }
 }
 
 ' ============================================================
@@ -77,5 +81,6 @@ Agent --> CLI06
 CLI01 ..> CLI03 : <<include>>
 CLI04 ..> CLI01 : <<include>>
 CLI01 ..> CLI06 : <<extend>>
+CLI08 ..> SSN03 : <<include>>
 
 @enduml

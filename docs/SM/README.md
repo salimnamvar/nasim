@@ -74,3 +74,40 @@
   SMT ownership rules apply: one lifecycle-write UC per target state.
 - All hex colors are canonical — SQ diagrams must use `<back:#HEX>STATE</back>`
   syntax matching these values.
+
+## Lifecycle-Write UC Mapping (SMT Ownership)
+
+One lifecycle-write UC per target state. This table is the authoritative reference.
+
+### Session Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| CREATED | SSN-01 PERSIST Session | Session record initialized |
+| ACTIVE | SSN-01 PERSIST Session | Session accepting messages (after init/resume) |
+| SAVED | SSN-01 PERSIST Session | Session persisted to disk |
+| RESTORED | SSN-04 RESTORE Session | Session loaded from disk |
+| BRANCHED | WRL-04 FORK Session | Session forked from parent |
+| CLOSED | AGT-14 HANDLE Error | Session terminated (quit or error) |
+
+### Plan Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| BUILDING | AGT-07 QUEUE Plan | Plan being constructed |
+| QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
+| APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
+| EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
+| COMPLETED | AGT-01 PROCESS User Task | Implicit: agent loop finishes all steps |
+| REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
+
+### Plugin Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| DISCOVERED | PLG-01 DISCOVER Plugins | Plugin found on filesystem |
+| LOADING | PLG-02 LOAD Manifest | Plugin manifest being parsed |
+| LOADED | PLG-03 REGISTER Plugin Tools | Manifest parsed, tools registered |
+| ENABLED | PLG-05 ENABLE Plugin | Plugin active and available |
+| DISABLED | PLG-06 DISABLE Plugin | Plugin deactivated |
+| ERROR | PLG-01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |

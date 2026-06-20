@@ -44,7 +44,6 @@ skinparam actor<<system>> {
 ' ============================================================
 
 actor "Agent" as Agent <<system>>
-actor "Developer" as Developer
 
 ' ============================================================
 ' System Boundary
@@ -81,10 +80,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> TL01
-Developer --> TL06
-Developer --> TL07
-Developer --> TL08
+Agent --> TL01
 Agent --> TL02
 Agent --> TL03
 Agent --> TL04

@@ -63,6 +63,22 @@ rectangle "nasim" {
     usecase "**SRV-10 READ Config**\n--\nGet current configuration" as SRV10
     usecase "**SRV-11 UPDATE Config**\n--\nUpdate configuration" as SRV11
   }
+
+  package "Session (SSN)" {
+    usecase "**SSN-01 PERSIST Session**\n--\nSave session to storage" as SSN01
+    usecase "**SSN-02 READ Session**\n--\nLoad session from storage" as SSN02
+    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
+    usecase "**SSN-04 RESTORE Session**\n--\nResume a previously saved session" as SSN04
+    usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" as SSN07
+  }
+
+  package "Agent Core (AGT)" {
+    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop: provider call, tool dispatch" as AGT01
+  }
+
+  package "Config (CFG)" {
+    usecase "**CFG-01 LOAD Config**\n--\nLayered config: global, project, env, CLI" as CFG01
+  }
 }
 
 ' ============================================================
@@ -80,5 +96,18 @@ HTTPClient --> SRV08
 HTTPClient --> SRV09
 HTTPClient --> SRV10
 HTTPClient --> SRV11
+
+' ============================================================
+' Relationships (Boundary -> Internal UC traceability)
+' ============================================================
+
+SRV01 ..> SSN03 : <<include>>
+SRV02 ..> SSN01 : <<include>>
+SRV03 ..> SSN02 : <<include>>
+SRV04 ..> SSN01 : <<include>>
+SRV05 ..> SSN01 : <<include>>
+SRV06 ..> AGT01 : <<include>>
+SRV07 ..> SSN07 : <<include>>
+SRV10 ..> CFG01 : <<include>>
 
 @enduml

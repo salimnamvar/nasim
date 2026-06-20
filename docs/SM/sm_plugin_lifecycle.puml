@@ -44,15 +44,15 @@ ERROR : Plugin failed to load or crashed.
 ERROR : Load error or runtime exception.
 
 DISCOVERED --> LOADING : PLG-02 load manifest
-DISCOVERED --> ERROR : manifest not found
+DISCOVERED --> ERROR : PLG-01 manifest not found
 LOADING --> LOADED : PLG-03 tools registered
-LOADING --> ERROR : parse error
+LOADING --> ERROR : PLG-02 parse error
 LOADED --> ENABLED : PLG-05 enable
 LOADED --> DISABLED : PLG-06 disable
 ENABLED --> DISABLED : PLG-06 disable
 DISABLED --> ENABLED : PLG-05 re-enable
-ENABLED --> ERROR : runtime error
-LOADED --> ERROR : registration error
+ENABLED --> ERROR : PLG-01 runtime error
+LOADED --> ERROR : PLG-03 registration error
 
 ERROR --> DISCOVERED : PLG-01 re-discover
 
