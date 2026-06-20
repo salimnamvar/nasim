@@ -1,0 +1,35 @@
+@startuml uc_provider
+' ============================================================
+' Title:     nasim — UC: Provider Layer
+' Boundary:  nasim code agent CLI
+' Purpose:   Provider abstraction and LLM interaction
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Developer" as user
+actor "AgentOrchestrator" as agent
+
+rectangle "Provider Layer" {
+    usecase "Initialize Provider" as UC_PRV_01
+    usecase "Call Provider Chat" as UC_PRV_02
+    usecase "STREAM Provider Chat" as UC_PRV_03
+    usecase "Select Provider Backend" as UC_PRV_04
+}
+
+rectangle "Config Layer" {
+    usecase "Load Config" as UC_CFG_01
+}
+
+agent --> UC_PRV_02
+agent --> UC_PRV_03
+UC_PRV_01 ..> UC_CFG_01 : <<include>>
+UC_PRV_02 ..> UC_PRV_01 : <<include>>
+UC_PRV_03 ..> UC_PRV_01 : <<include>>
+
+@enduml

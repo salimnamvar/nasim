@@ -1,0 +1,107 @@
+@startuml sq_rim02_rank_symbols
+' ============================================================
+' Title:     RIM-02 — RANK Symbols (PageRank + Chat Personalization)
+' Boundary:  nasim code agent CLI
+' Purpose:   PageRank ranking with chat-personalization for symbol importance
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Repo Index Layer" #FFF3E0
+  participant "RepoIndexer" as indexer
+  participant "SymbolRanker" as ranker
+  participant "SymbolGraph" as graph
+end box
+box "Chat Layer" #E8F5E9
+  participant "ConversationHistory" as history
+end box
+
+note over user, history
+  Scope:
+    - rim02 RANK Symbols — PageRank ranking with chat-personalization
+
+  Preconditions:
+    - RIM-01 completed successfully (SymbolGraph populated)
+    - ConversationHistory has chat context for personalization
+
+  Contexts:
+    - Called after RIM-01 or when user context shifts
+    - Output feeds into RIM-04 (Inject RepoMap)
+
+  Excludes:
+    - Embedding-based ranking (handled by RIM-03)
+    - File system traversal (handled by RIM-01)
+
+  Rollback:
+    - PageRank convergence failure → fall back to degree-centrality ranking
+    - Empty graph → return empty ranking
+
+  Design:
+    - SymbolRanker runs iterative PageRank on SymbolGraph
+    - Chat personalization boosts symbols mentioned in recent conversation
+    - Personalization weight is configurable (default 0.3)
+    - Ranking is re-computed when chat context changes significantly
+
+  Returns:
+    - Success: RankedSymbolList with scores
+    - Failure: Empty list with fallback flag
+end note
+
+== rim02 RANK Symbols ==
+
+agent -> ranker : RANK_SYMBOLS(graph, chat_context)
+activate ranker
+
+ranker -> graph : get_adjacency()
+activate graph
+graph --> ranker : adjacency_map
+deactivate graph
+
+ranker -> history : get_recent_tokens(last_n=50)
+activate history
+history --> ranker : recent_tokens
+deactivate history
+
+ranker -> ranker : extract_mentioned_symbols(recent_tokens)
+
+ranker -> ranker : initialize_pagerank_scores(nodes, damping=0.85)
+
+loop until convergence or max_iterations=50
+    ranker -> ranker : iterate_pagerank_step()
+end
+
+ranker -> ranker : apply_chat_boost(scores, mentioned_symbols, weight=0.3)
+
+ranker -> ranker : sort_by_score_desc()
+
+ranker --> agent : RankedSymbolList(symbols, scores)
+deactivate ranker
+
+note over user, history
+  Flow:
+    - AgentOrchestrator → SymbolRanker → SymbolGraph + ConversationHistory → RankedSymbolList
+
+  State:
+    - IDLE → COMPUTING → CONVERGING → BOOSTING → SORTED
+
+  Failure:
+    - Convergence failure → fallback to degree centrality
+    - Empty graph → empty ranking
+
+  Success:
+    - RankedSymbolList sorted by importance score
+
+  Key invariants:
+    - PageRank always converges for connected graphs
+    - Chat boost never exceeds max_score of base ranking
+    - Ranking is deterministic for same input
+end note
+
+@enduml

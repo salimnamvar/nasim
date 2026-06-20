@@ -1,31 +1,60 @@
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-.eggs/
+*.pyo
+*.pyd
+*.pyc
+*$py.class
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Build & Distribution
 build/
 dist/
+out/
+output/
+outputs/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
 
-# Test / lint caches
-.pytest_cache/
-.ruff_cache/
-.coverage
-htmlcov/
-
-# Virtualenvs
+# Virtual Environments
 .venv/
 venv/
+env/
+ENV/
+.python-version
 
-# Per-machine config override (never committed)
-cfg/nasim.local.toml
+# Testing & Coverage
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.cover
+.hypothesis/
+nosetests.xml
+TEST*.xml
 
-# E2E scratch workspace
-test/e2e/_workspace/
+# Linters & Caches
+.ruff_cache/
+.cache/
+.eslintcache
 
-# Exported Claude Code session transcripts (working artifacts, not docs)
-docs/*-local-command-caveat*.txt
+# Hidden directories
+.*/
 
-# Editor / OS
+# IDE non-hidden artifacts
+*.iml
+*.ipr
+*.iws
 *.swp
+*.swo
+
+# OS
 .DS_Store
 .*/

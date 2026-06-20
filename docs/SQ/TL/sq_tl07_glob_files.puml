@@ -1,0 +1,45 @@
+@startuml sq_tl07_glob_files
+' ============================================================
+' Title:     TL-07 — Glob Files
+' Boundary:  nasim code agent CLI
+' Purpose:   Find files by glob pattern
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "GlobTool" as glob
+end box
+
+note over registry, glob
+  Scope:          Find files matching glob pattern
+  Preconditions:  Glob pattern provided by LLM
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Excludes:       Content search, file reading
+  Rollback:       Error string returned to LLM
+  Design:         Uses pathlib.Path.glob()
+end note
+
+== TL-07 GLOB Files ==
+
+registry -> glob : execute(pattern, base_path)
+glob -> glob : Path(base_path).glob(pattern)
+glob -> glob : collect and sort matching paths
+
+break Permission denied
+    glob --> registry : "Error: permission denied: path"
+end
+
+glob --> registry : sorted list of matching file paths
+
+note over registry, glob
+  Flow:    pattern -> pathlib.glob -> sorted paths
+  State:   No state change
+  Failure: Permission denied -> error string
+  Success: Sorted list of matching file paths
+end note
+
+@enduml

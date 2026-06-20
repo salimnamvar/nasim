@@ -1,0 +1,85 @@
+@startuml uc_observability
+' ============================================================
+' Title:     nasim — UC: Observability
+' Boundary:  nasim code agent CLI + HTTP API + MCP
+' Purpose:   Structured logging, metrics, trace correlation (emit-only per tenas pattern)
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "AgentOrchestrator" as agent
+actor "Provider" as provider
+actor "ToolRegistry" as tools
+actor "Instrumentation" as entry
+actor "Developer / Platform" as ops
+
+rectangle "Observability" {
+    usecase "STREAM Structured Log" as OBS_01
+    usecase "RECORD Metrics" as OBS_02
+    usecase "CORRELATE Trace" as OBS_03
+    usecase "REDACT Sensitive" as OBS_04
+    usecase "EXPOSE /metrics" as OBS_05
+}
+
+rectangle "Wire Log (peer domain)" {
+    usecase "APPEND Event (WRL)" as WRL
+}
+
+rectangle "External" {
+    component "Stdout (JSON)" as stdout
+    component "Prometheus scrape" as prom
+    component "Container Runtime" as runtime
+}
+
+agent --> OBS_01
+agent --> OBS_02
+agent --> OBS_03
+provider --> OBS_01
+provider --> OBS_02
+tools --> OBS_01
+tools --> OBS_02
+entry --> OBS_03
+entry --> OBS_01
+ops --> OBS_05
+
+OBS_01 ..> stdout : "writes JSON (trace_id, span_id, context)"
+OBS_02 ..> OBS_03 : <<include>>
+OBS_04 ..> OBS_01 : <<extend>>
+OBS_04 ..> OBS_02 : <<extend>>
+OBS_05 ..> prom : "pull only"
+
+WRL ..> OBS_01 : "may project domain events to structured (optional)"
+
+note over agent, runtime
+  Scope:
+    - OBS-01: emit structured log records (always JSON to stdout)
+    - OBS-02: increment/observe counters and histograms
+    - OBS-03: bind/generate trace/span ids per entrypoint (CLI turn / HTTP req / MCP)
+    - OBS-04: redact secrets before emission
+    - OBS-05: serve /metrics (prometheus-client, pull model)
+
+  Preconditions:
+    - Observability configured (levels, redaction)
+    - Context (trace) available via TraceCorrelator
+
+  Excludes:
+    - Log shipping / collection (platform: log agent, Loki)
+    - Wire log append (WRL group, domain replay/fork)
+
+  Design:
+    - Emit-only (tenas): never push, never know about collectors
+    - Correlation ids injected into every log + wire event + metric label where cheap
+    - Dual output concern: machine (JSON) vs human (renderer decides)
+    - Wire events are separate first-class domain artifact (replay, fork)
+
+  Invariants:
+    - stdout only for logs
+    - /metrics pull only
+    - No secrets in emissions (redaction mandatory)
+end note
+@enduml

@@ -1,0 +1,55 @@
+@startuml ct_api_repo_intelligence
+' ============================================================
+' Title:     nasim — Repo Intelligence API
+' Boundary:  nasim code agent CLI
+' Purpose:   Public interfaces for repository intelligence module
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Repo Intelligence API
+
+skinparam classAttributeIconSize 0
+
+package "Repo Intelligence API" #FBE9E7 {
+
+    interface "RepoIntelligenceManager" <<interface>> {
+        + index_repository(root : str) : None
+        + rank_symbols(chat_files : list[str], budget : int) : list[RankedSymbol]
+        + search_semantic(query : str, top_k : int) : list[SearchResult]
+        + inject_repomap(budget : int) : str
+    }
+
+    interface "ASTIndexAdapter" <<interface>> {
+        + extract_tags(file_path : str) : list[ASTTag]
+        + build_index(root : str) : None
+    }
+
+    interface "SymbolGraph" <<interface>> {
+        + add_node(node : SymbolNode) : None
+        + add_edge(edge : SymbolEdge) : None
+        + pagerank(personalization : dict[str, float]) : dict[str, float]
+    }
+}
+
+note bottom of RepoIntelligenceManager
+  Facade coordinating index, ranking, search, and map injection.
+  index_repository triggers full AST parse + embedding build.
+  inject_repomap returns formatted string for context graph.
+end note
+
+note bottom of ASTIndexAdapter
+  Tree-sitter based AST parser.
+  extract_tags returns all symbols from a single file.
+  build_index walks directory tree and populates SymbolGraph.
+end note
+
+note right of SymbolGraph
+  NetworkX-backed directed graph.
+  pagerank uses chat-file personalization
+  to boost symbols relevant to current session.
+end note
+
+@enduml

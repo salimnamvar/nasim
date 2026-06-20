@@ -1,0 +1,119 @@
+@startuml sq_agt02_dispatch_tool_call
+' ============================================================
+' Title:     AGT-02 — DISPATCH Tool Call
+' Boundary:  nasim code agent CLI
+' Purpose:   Tool dispatch with permission gate check
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "PermissionGate" as gate
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "Tool" as tool
+end box
+box "Safety Layer" #FFF9C4
+end box
+
+note over user, tool
+  Scope:
+    - agt02 DISPATCH Tool Call — single tool execution within agt01 loop
+
+  Preconditions:
+    - agt01 in progress, LLM returned tool_calls array
+    - ToolRegistry populated with available tools
+    - PermissionGate initialized with safety_mode from Config
+
+  Contexts:
+    - Called from agt01 (PROCESS User Task) for each tool_call
+    - Part of the inner loop within the agentic cycle
+
+  Excludes:
+    - LLM call logic (prv02 handles that)
+    - Permission prompt rendering (CLI-06 handles the user prompt)
+    - Tool result display (CLI-03 handles that)
+
+  Rollback:
+    - Tool not found → ToolResult(success=false, error="unknown tool")
+    - Permission denied → ToolResult(success=false, error="permission denied")
+    - Tool execution error → ToolResult(success=false, error=exception message)
+
+  Design:
+    - PermissionGate checks tool.safe flag against safety_mode
+    - In "ask" mode: unsafe tools return AWAITING_APPROVAL event
+    - In "auto" mode: all tools execute without prompt
+    - In "off" mode: unsafe tools blocked, safe tools execute
+    - ToolRegistry.find() by tool name from LLM tool_call
+    - ToolResult is structured (success, content, error) — never raw string
+
+  Returns:
+    - Success: ToolResult with content
+    - Failure: ToolResult with error description
+    - Blocked: ToolResult(success=false, error="permission denied")
+end note
+
+== agt02 DISPATCH Tool Call ==
+
+agent -> agent : receive tool_call from LLM response
+note right of agent
+  tool_call = {name: "read_file", arguments: {...}}
+end note
+
+agent -> gate : CHECK(tool_call.name)
+activate gate
+
+gate -> gate : check tool.safe against safety_mode
+
+alt safety_mode = ask AND tool.unsafe
+    gate --> agent : AWAITING_APPROVAL event
+    note right of gate
+      CLI-06 renders [y/N] prompt
+      User approves → agent re-calls agt02
+      User rejects → ToolResult(denied)
+    end note
+else safety_mode = off AND tool.unsafe
+    gate --> agent : ToolResult(success=false, error="permission denied")
+else safe tool or auto mode
+    gate --> agent : approved
+end
+
+deactivate gate
+
+agent -> registry : find(tool_call.name)
+activate registry
+
+alt tool not found
+    registry --> agent : null
+    agent -> agent : ToolResult(success=false, error="unknown tool: {name}")
+else tool found
+    registry --> tool : tool
+    deactivate registry
+    activate tool
+    agent -> tool : execute(tool_call.arguments)
+    tool --> agent : ToolResult
+    deactivate tool
+end
+
+agent --> agent : append ToolResult to messages
+
+note over user, tool
+  Flow:
+    - AgentOrchestrator → PermissionGate → ToolRegistry → Tool.execute()
+
+  State:
+    - THINKING → TOOL_EXEC → THINKING (with tool result in messages)
+
+  Key invariants:
+    - Every tool call goes through PermissionGate
+    - ToolResult is always structured (success, content, error)
+    - Unknown tool returns error ToolResult (not exception)
+end note
+
+@enduml

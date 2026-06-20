@@ -1,0 +1,46 @@
+@startuml sq_cfg02_validate_config
+' ============================================================
+' Title:     CFG-02 — Validate Config
+' Boundary:  nasim code agent CLI
+' Purpose:   Config field validation
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+box "Config Layer" #E0F7FA
+  participant "ConfigLoader" as cfg
+end box
+
+note over cfg
+  Scope:          Validate Config fields against schema
+  Preconditions:  Config loaded from sources
+  Contexts:       Called by CFG-01 (Load Config) after merge
+  Excludes:       Config loading (CFG-01)
+  Rollback:       Validation error -> ConfigError with details
+  Design:         Typed dataclass with __post_init__ validation
+end note
+
+== CFG-02 Validate Config ==
+
+cfg -> cfg : Config.__post_init__()
+cfg -> cfg : check provider in ["ollama", "openai", "anthropic"]
+cfg -> cfg : check safety_mode in ["ask", "auto", "off"]
+cfg -> cfg : check context_budget > 0
+cfg -> cfg : check timeout > 0
+
+break Validation fails
+    cfg -> cfg : raise ConfigError("field: message")
+end
+
+cfg --> cfg : Config valid
+
+note over cfg
+  Flow:    Config dataclass -> field checks -> valid or ConfigError
+  State:   No state change
+  Failure: Invalid field value -> ConfigError
+  Success: Config validated
+end note
+
+@enduml

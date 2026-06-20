@@ -1,0 +1,95 @@
+@startuml sq_wrl01_append_event
+' ============================================================
+' Title:     WRL-01 — APPEND Event to Wire Log
+' Boundary:  nasim code agent CLI
+' Purpose:   Append event to wire log
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Wire Log Layer" #FFF3E0
+  participant "WireLogger" as logger
+  participant "EventSerializer" as serializer
+end box
+box "FileSystem Layer" #F3E5F5
+  participant "FileSystem" as fs
+end box
+
+note over user, fs
+  Scope:
+    - wrl01 APPEND Event — append event to wire log
+
+  Preconditions:
+    - Wire log file path configured
+    - FileSystem write access available
+
+  Contexts:
+    - Called on every significant agent event
+    - Prerequisite for WRL-02 (Read Log), WRL-03 (Fork), WRL-04 (Replay)
+
+  Excludes:
+    - Log reading (handled by WRL-02)
+    - Session forking (handled by WRL-03)
+
+  Rollback:
+    - Write failure → event lost, log warning
+
+  Design:
+    - WireLogger appends serialized events to log file
+    - EventSerializer handles JSON serialization with timestamps
+    - Each event includes: type, timestamp, payload, session_id
+    - Log is append-only (no in-place edits)
+    - Buffered writes for performance (flush on session end)
+
+  Returns:
+    - Success: AppendResult with event_id and offset
+    - Failure: AppendError with details
+end note
+
+== wrl01 APPEND Event ==
+
+agent -> logger : APPEND_EVENT(event)
+activate logger
+
+logger -> serializer : serialize(event)
+activate serializer
+serializer --> logger : serialized_event
+deactivate serializer
+
+logger -> logger : add_metadata(serialized_event, session_id, timestamp)
+
+logger -> fs : append_file(log_path, serialized_event)
+activate fs
+fs --> logger : write_result
+deactivate fs
+
+logger --> agent : AppendResult(event_id, offset)
+deactivate logger
+
+note over user, fs
+  Flow:
+    - AgentOrchestrator → WireLogger → EventSerializer + FileSystem → AppendResult
+
+  State:
+    - IDLE → SERIALIZING → APPENDING → DONE
+
+  Failure:
+    - Write failure → event lost, warning logged
+
+  Success:
+    - AppendResult with event_id and offset
+
+  Key invariants:
+    - Log is append-only
+    - Each event has unique event_id
+    - Timestamp always included
+end note
+
+@enduml

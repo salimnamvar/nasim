@@ -1,0 +1,94 @@
+@startuml ct_data_repo_intelligence
+' ============================================================
+' Title:     nasim — Repo Intelligence Data Structures
+' Boundary:  nasim code agent CLI
+' Purpose:   Data models for AST index, symbol graph, ranking, and search
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Repo Intelligence Data Structures
+
+skinparam classAttributeIconSize 0
+
+package "Repo Intelligence Data" #FBE9E7 {
+
+    class ASTTag <<dataclass>> {
+        + file_path : str
+        + symbol_name : str
+        + symbol_type : SymbolType
+        + line_start : int
+        + line_end : int
+        + language : str
+    }
+
+    class SymbolNode <<dataclass>> {
+        + name : str
+        + file_path : str
+        + symbol_type : SymbolType
+        + line_start : int
+        + line_end : int
+    }
+
+    class SymbolEdge <<dataclass>> {
+        + source : str
+        + target : str
+        + edge_type : EdgeType
+    }
+
+    class RankedSymbol <<dataclass>> {
+        + name : str
+        + file_path : str
+        + rank_score : float
+        + context_relevance : float
+    }
+
+    class SearchResult <<dataclass>> {
+        + file_path : str
+        + chunk_text : str
+        + score : float
+        + distance : float
+    }
+
+    class RepoMap <<dataclass>> {
+        + symbols : list[RankedSymbol]
+        + total_tokens : int
+        + budget_used : int
+    }
+
+    enum SymbolType {
+        FUNCTION
+        CLASS
+        METHOD
+        VARIABLE
+        IMPORT
+    }
+
+    enum EdgeType {
+        CALLS
+        IMPORTS
+        INHERITS
+        USES
+    }
+
+    ASTTag --> SymbolType
+    SymbolNode --> SymbolType
+    SymbolEdge --> EdgeType
+    RepoMap --> RankedSymbol : contains
+}
+
+note bottom of ASTTag
+  AST-derived symbol tags from tree-sitter parsing.
+  Enables fast symbol lookup by name, type, or file path.
+  Line numbers enable precise navigation to definitions.
+end note
+
+note bottom of RepoMap
+  Final output injected into context graph.
+  Symbols ranked by PageRank + chat-file relevance.
+  Budget-capped to avoid exceeding token limits.
+end note
+
+@enduml

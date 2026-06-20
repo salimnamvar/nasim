@@ -1,0 +1,77 @@
+@startuml ct_data_evaluation
+' ============================================================
+' Title:     nasim — Evaluation Data Structures
+' Boundary:  nasim code agent CLI
+' Purpose:   Data models for success checks, quality signals, and retry
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Evaluation Data Structures
+
+skinparam classAttributeIconSize 0
+
+package "Evaluation Data" #E8F5E9 {
+
+    class SuccessCheck <<dataclass>> {
+        + name : str
+        + command : str
+        + expected_exit_code : int
+        + timeout : int
+    }
+
+    class QualitySignal <<dataclass>> {
+        + accept : bool | float
+        + feedback : str
+        + checks_passed : list[str]
+        + checks_failed : list[str]
+    }
+
+    class ReviewResult <<dataclass>> {
+        + score : float
+        + rationale : str
+        + suggestions : list[str]
+    }
+
+    class RetryConfig <<dataclass>> {
+        + max_retries : int
+        + retry_delay : float
+        + on_failure_strategy : FailureStrategy
+    }
+
+    class TurnBudget <<dataclass>> {
+        + turns_taken : int
+        + max_turns : int
+        + remaining : int
+    }
+
+    enum FailureStrategy {
+        ABORT
+        FALLBACK_MODEL
+        HUMAN_ESCALATION
+    }
+
+    RetryConfig --> FailureStrategy
+}
+
+note bottom of SuccessCheck
+  Defines a concrete validation command.
+  exit_code 0 = pass, non-zero = fail.
+  timeout in seconds to prevent hangs.
+end note
+
+note bottom of QualitySignal
+  Composite quality assessment from check runner + LLM reviewer.
+  accept is bool (hard gate) or float (0.0-1.0 soft score).
+  feedback is human-readable explanation for retry logic.
+end note
+
+note right of TurnBudget
+  Injected into system prompt each turn.
+  Agent sees remaining turns and adjusts strategy.
+  Prevents infinite loops.
+end note
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml sq_rtg02_apply_fallback
+' ============================================================
+' Title:     nasim — SQ: Apply Fallback
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Apply fallback chain when primary model fails
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md IMP-04
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Apply Fallback (RTG-02)
+
+participant "ModelRouter" as router
+participant "ProviderFactory" as factory
+participant "Provider" as provider
+
+== Apply Fallback ==
+
+router -> router : apply_fallback(primary_model)
+activate router
+
+router -> factory : create_provider(primary_model)
+activate factory
+
+alt primary available
+    factory --> router : Provider(primary)
+    deactivate factory
+else primary unavailable
+    factory --> router : null
+    deactivate factory
+
+    router -> router : select next in fallback chain
+    router -> factory : create_provider(fallback_model)
+    activate factory
+    factory --> router : Provider(fallback)
+    deactivate factory
+end
+
+router --> router : selected_provider
+deactivate router
+
+@enduml

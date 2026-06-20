@@ -1,0 +1,68 @@
+@startuml sq_cli01_process_user_input
+' ============================================================
+' Title:     CLI-01 — PROCESS User Input
+' Boundary:  nasim code agent CLI
+' Purpose:   REPL input loop delegates to agent and renders output
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+  participant "Renderer" as renderer
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+
+note over user, agent
+  Scope:          Single user input processing cycle
+  Preconditions:  REPL initialized, AgentOrchestrator ready
+  Contexts:       Called by main REPL loop
+  Excludes:       Slash commands (CLI-02), session persistence
+  Rollback:       Error -> display error -> return to IDLE
+  Design:         Events emitted by agent, rendered by Renderer
+end note
+
+== CLI-01 PROCESS User Input ==
+
+user -> repl : types input
+repl -> repl : check for slash command
+
+alt is slash command
+    repl -> repl : delegate to SlashCommandHandler (CLI-02)
+else normal input
+    repl -> agent : PROCESS(user_input)
+    agent -> agent : append user message
+    agent -> agent : call Provider (PRV-02/03)
+    loop tool call iterations
+        repl -> repl : receive AgentEvent stream
+        agent -> agent : DISPATCH tool (AGT-02)
+        agent -> repl : ToolStart event
+        repl -> renderer : render ToolStart
+        agent -> repl : ToolResult event
+        repl -> renderer : render ToolResult
+    end
+    agent -> repl : TextChunk events
+    repl -> renderer : render TextChunk
+    repl -> renderer : render Done
+    renderer --> user : formatted output
+end
+
+break Agent throws exception
+    repl -> renderer : render Error event
+    renderer --> user : red error display
+end
+
+note over user, agent
+  Flow:    User -> REPLSession -> AgentOrchestrator -> Provider -> events -> Renderer -> User
+  State:   IDLE -> LISTENING -> THINKING -> [TOOL_EXEC]* -> RESPONDING -> IDLE
+  Failure: Agent exception -> Error event -> IDLE
+  Success: Final text rendered to user
+end note
+
+@enduml

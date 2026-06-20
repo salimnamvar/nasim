@@ -1,0 +1,42 @@
+@startuml uc_plugins
+' ============================================================
+' Title:     nasim — UC: Plugin System
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Plugin discovery, loading, and dynamic registration
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Developer" as user
+actor "AgentOrchestrator" as agent
+
+rectangle "Plugin System" {
+    usecase "Discover Plugins" as UC_PLG_01
+    usecase "Load Plugin Manifest" as UC_PLG_02
+    usecase "Register Plugin Tools" as UC_PLG_03
+    usecase "Register Plugin Hooks" as UC_PLG_04
+    usecase "Enable/Disable Plugin" as UC_PLG_05
+}
+
+rectangle "Tool Layer" {
+    usecase "Register Tool" as UC_TL_REG
+}
+
+rectangle "Hook Layer" {
+    usecase "Register Hook" as UC_HK_01
+}
+
+user --> UC_PLG_05
+agent --> UC_PLG_01
+UC_PLG_01 ..> UC_PLG_02 : <<include>>
+UC_PLG_02 ..> UC_PLG_03 : <<include>>
+UC_PLG_02 ..> UC_PLG_04 : <<include>>
+UC_PLG_03 ..> UC_TL_REG : <<include>>
+UC_PLG_04 ..> UC_HK_01 : <<include>>
+
+@enduml

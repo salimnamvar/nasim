@@ -1,0 +1,92 @@
+@startuml er_repo_intelligence
+' ============================================================
+' Title:     nasim — Repo Intelligence ERD
+' Boundary:  nasim code agent CLI
+' Purpose:   Physical schema for repository intelligence index
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' Note:      AST-based repository index with code embeddings
+'            for semantic code search and cross-file analysis.
+'            Physical storage: ~/.nasim/repo_index/<project_hash>/
+' ============================================================
+
+title nasim — Repo Intelligence ERD
+
+entity "repo_index_metadata" as rim {
+    * root_path : TEXT (path) <<PK>>
+    --
+    * total_files : INTEGER
+    * total_symbols : INTEGER
+    * last_indexed : TEXT (ISO 8601)
+    * index_version : INTEGER
+}
+
+entity "ast_tag" as at {
+    * file_path : TEXT (path)
+    * symbol_name : TEXT
+    * symbol_type : TEXT {function|class|method|variable|import}
+    --
+    * line_start : INTEGER
+    * line_end : INTEGER
+    * language : TEXT
+    * last_indexed : TEXT (ISO 8601)
+}
+
+entity "symbol_reference" as sr {
+    * source_file : TEXT (path)
+    * source_symbol : TEXT
+    * target_file : TEXT (path)
+    * target_symbol : TEXT
+    --
+    * reference_type : TEXT {calls|imports|inherits|uses}
+}
+
+entity "code_embedding" as ce {
+    * file_path : TEXT (path)
+    * chunk_index : INTEGER
+    --
+    * chunk_text : TEXT
+    * embedding : BLOB
+    * last_indexed : TEXT (ISO 8601)
+}
+
+rim ||--o{ at : "indexes"
+rim ||--o{ ce : "embeds"
+rim ||--o{ sr : "references"
+
+note bottom of rim
+  Physical storage: ~/.nasim/repo_index/<project_hash>/
+  Project identified by hash of root_path.
+  Index version enables incremental re-indexing.
+  One set of index files per project.
+
+  Notation:
+    * prefix = Mandatory (NOT NULL)
+    <<PK>> = Primary key
+    <<FK>> = Foreign key
+    {A|B|C} = Enum constraint
+    TEXT (JSON) = JSON blob stored as TEXT
+    BLOB = Binary vector embedding data
+end note
+
+note bottom of at
+  AST-derived symbol tags. Enables fast symbol lookup
+  by name, type, or file path. Line numbers enable
+  precise navigation to definitions.
+end note
+
+note bottom of sr
+  Cross-file symbol references. Enables dependency
+  analysis, impact assessment, and call graph traversal.
+  Reference type categorizes the relationship.
+end note
+
+note right of ce
+  Code chunks with vector embeddings.
+  Enables semantic code search beyond
+  exact keyword matching.
+end note
+
+@enduml

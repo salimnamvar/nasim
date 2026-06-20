@@ -1,0 +1,135 @@
+dataContractSpecification: "3.1.0"
+id: "urn:nasim:data-contract:session-store"
+info:
+  title: "nasim Session Store Data Contract"
+  description: |
+    Data contract for nasim session persistence.
+    Defines the logical schema for session JSON Lines files.
+  version: "1.0.0"
+  contact:
+    name: Salim Namvar
+    email: salim.namvar@gmail.com
+
+kind: dataContract
+metadata:
+  status: active
+  owner: nasim-agent
+
+terms:
+  usage: "Session persistence for agent conversations"
+  limitations: "JSON Lines format, no relational constraints"
+
+schemas:
+  - id: session
+    type: avro
+    description: Agent conversation session
+    fields:
+      - name: id
+        type: string
+        description: Session UUID (primary key)
+        required: true
+        unique: true
+        examples:
+          - "550e8400-e29b-41d4-a716-446655440000"
+      - name: created_at
+        type: timestamp
+        description: Creation timestamp (ISO 8601)
+        required: true
+        examples:
+          - "2026-06-20T10:30:00Z"
+      - name: model
+        type: string
+        description: LLM model name
+        required: true
+        examples:
+          - "qwen2.5-coder:14b"
+      - name: provider
+        type: string
+        description: LLM provider name
+        required: false
+        examples:
+          - "ollama"
+      - name: config_snapshot
+        type: string
+        description: Config snapshot at session creation (JSON)
+        required: false
+      - name: message_count
+        type: integer
+        description: Number of messages in session
+        required: false
+      - name: total_tokens
+        type: integer
+        description: Total token count across all messages
+        required: false
+
+  - id: message
+    type: avro
+    description: Message within a session
+    fields:
+      - name: session_id
+        type: string
+        description: Parent session UUID (foreign key)
+        required: true
+      - name: sequence
+        type: integer
+        description: Message sequence number (ordering)
+        required: true
+      - name: role
+        type: string
+        description: Message role
+        required: true
+        constraints:
+          allowedValues:
+            - system
+            - user
+            - assistant
+            - tool
+      - name: content
+        type: string
+        description: Message content
+        required: false
+      - name: tool_calls
+        type: string
+        description: Tool calls JSON (for assistant messages)
+        required: false
+      - name: tool_call_id
+        type: string
+        description: Tool call ID (for tool responses)
+        required: false
+      - name: tokens
+        type: integer
+        description: Token count for this message
+        required: false
+      - name: timestamp
+        type: timestamp
+        description: Message timestamp (ISO 8601)
+        required: false
+
+quality:
+  - type: completeness
+    description: "All sessions must have id, created_at, model"
+    severity: critical
+  - type: uniqueness
+    description: "Session IDs must be unique"
+    severity: critical
+  - type: freshness
+    description: "Session files should be written atomically"
+    severity: high
+  - type: accuracy
+    description: "Message sequence numbers must be contiguous"
+    severity: medium
+
+storage:
+  type: file
+  format: jsonl
+  location: "~/.nasim/sessions/{session_id}/session.jsonl"
+  description: |
+    Each session is stored as a JSON Lines file.
+    Line 1: session metadata (id, created_at, model, etc.)
+    Subsequent lines: messages in sequence order.
+    Atomic writes via temp file + rename.
+
+sla:
+  availability: "best-effort"
+  durability: "local filesystem"
+  latency: "< 100ms for read/write"

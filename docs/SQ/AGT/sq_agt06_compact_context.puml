@@ -1,0 +1,45 @@
+@startuml sq_agt06_compact_context
+' ============================================================
+' Title:     AGT-06 — COMPACT Context
+' Boundary:  nasim code agent CLI
+' Purpose:   Context compaction when token budget exceeded
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "ConversationHistory" as history
+  participant "ContextCompactor" as compactor
+end box
+
+note over agent, compactor
+  Scope:          Context compaction when token budget exceeded
+  Preconditions:  token_count > context_budget
+  Contexts:       Called by AGT-03 (Manage Conversation)
+  Excludes:       Token tracking (CTX-01)
+  Rollback:       Truncate oldest messages as fallback
+  Design:         Secondary LLM call to summarize old exchanges
+end note
+
+== AGT-06 COMPACT Context ==
+
+agent -> history : check token_count > budget
+history --> agent : COMPACT_NEEDED
+agent -> compactor : compact(messages, budget)
+ref over compactor
+  CTX-02: COMPACT Context
+end ref
+compactor --> agent : shortened messages
+agent -> history : replace messages with shortened list
+
+note over agent, compactor
+  Flow:    budget check -> select old -> summarize -> replace
+  State:   THINKING -> COMPACTING -> THINKING
+  Failure: LLM fails -> truncate fallback
+  Success: Messages shortened, token count reduced
+end note
+
+@enduml

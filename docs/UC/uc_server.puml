@@ -1,0 +1,110 @@
+@startuml uc_server
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Usecase.puml
+!theme plain
+
+' ============================================================
+' Title:     nasim — Server Layer Use Cases
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Use cases for HTTP server interface
+'            ROD-compliant resource operations
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.car-framework-csr-rod.md
+' Review:    —
+' ============================================================
+
+title nasim — Server Layer Use Cases
+
+left to right direction
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "HTTP Client" as client
+
+' ============================================================
+' System
+' ============================================================
+
+rectangle "nasim HTTP API" as system {
+
+    ' ============================================================
+    ' Session Operations
+    ' ============================================================
+
+    package "Session Operations" {
+        usecase "UC-SRV-01: List Sessions" as UC01
+        usecase "UC-SRV-02: Create Session" as UC02
+        usecase "UC-SRV-03: Get Session" as UC03
+        usecase "UC-SRV-04: Update Session" as UC04
+        usecase "UC-SRV-05: Delete Session" as UC05
+        usecase "UC-SRV-06: Send Message" as UC06
+        usecase "UC-SRV-07: List Messages" as UC07
+    }
+
+    ' ============================================================
+    ' Tool Operations
+    ' ============================================================
+
+    package "Tool Operations" {
+        usecase "UC-SRV-08: List Tools" as UC08
+        usecase "UC-SRV-09: Get Tool" as UC09
+    }
+
+    ' ============================================================
+    ' Config Operations
+    ' ============================================================
+
+    package "Config Operations" {
+        usecase "UC-SRV-10: Get Config" as UC10
+        usecase "UC-SRV-11: Update Config" as UC11
+    }
+}
+
+' ============================================================
+' Relationships
+' ============================================================
+
+client --> UC01
+client --> UC02
+client --> UC03
+client --> UC04
+client --> UC05
+client --> UC06
+client --> UC07
+client --> UC08
+client --> UC09
+client --> UC10
+client --> UC11
+
+' ============================================================
+' Notes
+' ============================================================
+
+note right of UC01
+  GET /sessions
+  Pagination: page_size, page_token
+  Returns: list of Session resources
+end note
+
+note right of UC02
+  POST /sessions
+  Body: SessionCreate (model required)
+  Returns: 201 + Session resource
+end note
+
+note right of UC06
+  POST /sessions/{session}:send
+  Custom method (ROD AIP-136)
+  Body: MessageCreate (content required)
+  Returns: SSE stream of AgentEvents
+end note
+
+note right of UC08
+  GET /tools
+  Returns: list of Tool resources
+  Read-only, no pagination needed
+end note
+
+@enduml

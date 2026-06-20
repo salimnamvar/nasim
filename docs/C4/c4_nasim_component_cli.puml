@@ -1,0 +1,32 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+
+
+' ============================================================
+' Title:     nasim — CLI Component Diagram
+' Boundary:  nasim CLI process
+' Purpose:   CLI layer internal components
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' ============================================================
+
+title nasim — CLI Component Diagram
+
+Container_Boundary(cli_boundary, "CLI Process") {
+    Component(arg_parser, "ArgParser", "", "CLI argument parsing with layered config overrides")
+    Component(repl_session, "REPLSession", "", "Interactive REPL loop, input handling, slash command dispatch")
+    Component(renderer, "Renderer", "", "Terminal output: colors, diffs, streaming tokens, tool display")
+    Component(slash_handler, "SlashCommandHandler", "", "Maps /cmd strings to agent actions")
+}
+
+Container_Ext(core_library, "Core Library")
+
+Rel(repl_session, core_library, "delegates to agent orchestrator")
+Rel(repl_session, renderer, "AgentEvents to terminal output")
+Rel(repl_session, slash_handler, "/cmd to action")
+Rel(slash_handler, core_library, "delegates to agent")
+Rel(arg_parser, core_library, "CLI flags override config")
+
+@enduml

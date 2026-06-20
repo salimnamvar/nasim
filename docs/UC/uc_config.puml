@@ -1,0 +1,35 @@
+@startuml uc_config
+' ============================================================
+' Title:     nasim — UC: Configuration
+' Boundary:  nasim code agent CLI
+' Purpose:   Config loading, validation, and layered overrides
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Developer" as user
+actor "ArgParser" as parser
+
+rectangle "Configuration" {
+    usecase "Load Config" as UC_CFG_01
+    usecase "Validate Config" as UC_CFG_02
+    usecase "Merge Layered Config" as UC_CFG_03
+}
+
+System_Ext(global_yaml, "Global YAML", "~/.nasim/config.yaml")
+System_Ext(project_yaml, "Project YAML", ".nasim/config.yaml")
+System_Ext(env_vars, "Env Vars", "NASIM_*")
+
+parser --> UC_CFG_01
+UC_CFG_01 ..> UC_CFG_03 : <<include>>
+UC_CFG_03 ..> UC_CFG_02 : <<include>>
+UC_CFG_01 ..> global_yaml
+UC_CFG_01 ..> project_yaml
+UC_CFG_01 ..> env_vars
+
+@enduml

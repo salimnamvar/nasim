@@ -1,0 +1,46 @@
+@startuml c4_nasim_component_sandbox
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+
+
+' ============================================================
+' Title:     nasim — Sandbox Component Diagram
+' Boundary:  nasim core library — Sandbox group
+' Purpose:   OS-level process isolation and diff staging for shell and edit operations
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+title nasim — Sandbox Component Diagram
+
+Container_Boundary(sandbox_boundary, "Sandbox Group") {
+    Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
+    Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")
+    Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement, resource limits")
+    Component(diff_sandbox_mgr, "DiffSandboxManager", "", "Manages sandboxed diff staging and application")
+    Component(edit_staging_area, "EditStagingArea", "", "Stages file edits before sandbox-validated application")
+    Component(diff_computer, "DiffComputer", "", "Computes diffs between original and staged content")
+    Component(diff_presenter, "DiffPresenter", "", "Formats diffs for human review and approval")
+    Component(staged_applicator, "StagedApplicator", "", "Applies approved staged diffs to filesystem")
+}
+
+System_Ext(host_shell, "Host Shell", "subprocess execution")
+System_Ext(host_fs, "Host Filesystem", "restricted mount points")
+
+Rel(sandbox_executor, sandbox_policy, "applies policy before exec")
+Rel(sandbox_executor, sandbox_monitor, "monitors running process")
+Rel(sandbox_executor, host_shell, "runs isolated subprocess")
+Rel(sandbox_executor, host_fs, "restricted file access")
+Rel(diff_sandbox_mgr, edit_staging_area, "stages edits")
+Rel(diff_sandbox_mgr, sandbox_executor, "validates in sandbox")
+Rel(edit_staging_area, diff_computer, "computes diff")
+Rel(edit_staging_area, diff_presenter, "presents for review")
+Rel(diff_computer, host_fs, "reads original files")
+Rel(staged_applicator, edit_staging_area, "reads approved edits")
+Rel(staged_applicator, sandbox_executor, "applies in sandbox")
+Rel(staged_applicator, host_fs, "writes final files")
+Rel(diff_presenter, staged_applicator, "triggers apply after approval")
+
+@enduml

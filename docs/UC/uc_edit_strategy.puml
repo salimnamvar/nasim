@@ -1,0 +1,40 @@
+@startuml uc_edit_strategy
+' ============================================================
+' Title:     nasim — UC: Edit Strategy
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Optimal edit format selection, application, validation, review
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "AgentOrchestrator" as agent
+
+rectangle "Edit Strategy" {
+    usecase "SELECT Strategy" as UC_EDT_01
+    usecase "APPLY Edit" as UC_EDT_02
+    usecase "VALIDATE Edit" as UC_EDT_03
+    usecase "STAGE Edit" as UC_EDT_04
+    usecase "REVIEW Diff" as UC_EDT_05
+    usecase "REVERT Edit" as UC_EDT_06
+}
+
+rectangle "External" {
+    component "Host Filesystem" as fs
+}
+
+agent --> UC_EDT_01
+agent --> UC_EDT_02
+agent --> UC_EDT_05
+agent --> UC_EDT_06
+UC_EDT_01 ..> UC_EDT_02 : <<include>>
+UC_EDT_02 ..> UC_EDT_03 : <<include>>
+UC_EDT_02 ..> UC_EDT_04 : <<include>>
+UC_EDT_04 ..> UC_EDT_05 : <<include>>
+UC_EDT_02 ..> fs : <<include>>
+
+@enduml

@@ -1,0 +1,41 @@
+@startuml uc_session
+' ============================================================
+' Title:     nasim — UC: Session Persistence
+' Boundary:  nasim code agent CLI
+' Purpose:   Save, load, and list conversation sessions
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Developer" as user
+actor "AgentOrchestrator" as agent
+
+rectangle "Session Layer" {
+    usecase "Save Session" as UC_SSN_01
+    usecase "Load Session" as UC_SSN_02
+    usecase "List Sessions" as UC_SSN_03
+    usecase "Resume Session" as UC_SSN_04
+    usecase "FORK Session" as UC_SSN_05
+    usecase "UNDO Turn" as UC_SSN_06
+}
+
+System_Ext(session_dir, "Session Dir", "~/.nasim/sessions/")
+
+user --> UC_SSN_03
+agent --> UC_SSN_01
+agent --> UC_SSN_02
+user --> UC_SSN_05
+agent --> UC_SSN_06
+UC_SSN_02 ..> UC_SSN_04 : <<include>>
+UC_SSN_05 ..> UC_SSN_01 : <<include>>
+UC_SSN_06 ..> UC_SSN_02 : <<include>>
+UC_SSN_01 ..> session_dir
+UC_SSN_02 ..> session_dir
+UC_SSN_03 ..> session_dir
+
+@enduml

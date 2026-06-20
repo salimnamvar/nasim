@@ -1,0 +1,30 @@
+@startuml sq_hk01_register_hook
+' ============================================================
+' Title:     nasim — SQ: Register Hook
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Register a hook in the HookManager
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Register Hook (HK-01)
+
+participant "PluginLoader" as loader
+participant "HookManager" as hooks
+participant "Hook" as hook
+
+== Register Hook ==
+
+loader -> hooks : register(event, handler)
+activate hooks
+hooks -> hook : Hook(name, event, handler)
+activate hook
+hook --> hooks : hook instance
+deactivate hook
+hooks --> hooks : hooks[event].append(hook)
+hooks --> loader : registered
+deactivate hooks
+
+@enduml

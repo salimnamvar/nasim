@@ -1,0 +1,57 @@
+@startuml sq_srv03_send_message
+' ============================================================
+' Title:     nasim — SQ: Send Message (API)
+' Boundary:  nasim code agent CLI + HTTP API
+' Purpose:   Send a user message and receive SSE stream response
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/audit/nasim-car-improvement-plan.md CAR-11
+' Review:    —
+' ============================================================
+
+title nasim — SQ: Send Message via API (SRV-03)
+
+participant "HTTP Client" as client
+participant "ServerRouter" as router
+participant "AgentOrchestrator" as agent
+participant "Provider" as provider
+participant "ToolRegistry" as tools
+participant "SSEHandler" as sse
+participant "SessionStore" as store
+
+== Send Message ==
+
+client -> router : POST /v1/sessions/{id}/messages
+activate router
+router -> agent : PROCESS(message)
+activate agent
+
+agent -> provider : chat(messages, tools)
+activate provider
+provider --> agent : LLMResponse
+deactivate provider
+
+loop tool calls
+    agent -> tools : execute(tool_name, args)
+    activate tools
+    tools --> agent : ToolResult
+    deactivate tools
+end
+
+agent --> agent : yield AgentEvents
+deactivate agent
+
+router -> sse : stream_events(events)
+activate sse
+sse --> client : SSE stream (TextChunk, ToolStart, ToolResult, Done)
+deactivate sse
+
+router -> store : save(session_id, messages)
+activate store
+store --> router : saved
+deactivate store
+
+router --> client : 200 (SSE stream complete)
+deactivate router
+
+@enduml

@@ -1,0 +1,67 @@
+@startuml sq_tl04_list_directory
+' ============================================================
+' Title:     TL-04 — List Directory
+' Boundary:  nasim code agent CLI
+' Purpose:   List files and directories at a path
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "DirTool" as dt
+end box
+participant "Host Filesystem" as fs
+
+note over user, fs
+  Scope:          List directory entries sorted by type then name
+  Preconditions:  Path provided (default: current directory)
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Excludes:       File read/write
+  Rollback:       Error string returned to LLM
+  Design:         Directories first, then files, alphabetical
+end note
+
+== TL-04 LIST Directory ==
+
+user -> repl : (entry via AGT-01)
+repl -> agent : (entry via AGT-01)
+agent -> registry : execute("list_dir", {path})
+registry -> dt : execute(path)
+dt -> fs : Path(path).resolve()
+
+break Path not found
+    fs --> dt : FileNotFoundError
+    dt --> registry : ToolResult(success=False, error="path not found")
+    registry --> agent : ToolResult
+end
+
+break Not a directory
+    dt --> registry : ToolResult(success=False, error="not a directory")
+    registry --> agent : ToolResult
+end
+
+dt -> fs : sorted(p.iterdir())
+fs --> dt : entries
+dt -> dt : format with d/ prefix for dirs
+dt --> registry : ToolResult(success=True, content=formatted_listing)
+registry --> agent : ToolResult
+
+note over user, fs
+  Flow:    resolve -> iterdir -> sort -> format -> ToolResult
+  State:   No state change
+  Failure: Not found or not directory -> ToolResult(success=False)
+  Success: Directory listing with type prefixes
+end note
+
+@enduml
