@@ -1,6 +1,6 @@
-@startuml sq_prv02_call_provider_chat
+@startuml sq_prv02_request_chat
 ' ============================================================
-' Title:     PRV-02 — Call Provider Chat
+' Title:     PRV-02 — Request Chat
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Synchronous LLM chat completion via provider abstraction
 ' Milestone: v1.0
@@ -46,7 +46,7 @@ provider --> agent : LLMResponse(content, tool_calls)
 
 note over user, api
   Flow:    Messages -> HTTP POST -> JSON parse -> LLMResponse
-  State:   THINKING -> THINKING (no state change)
+  State:   <back:#FFF3E0>THINKING</back> -> <back:#FFF3E0>THINKING</back> (no state change)
   Failure: HTTP error or timeout -> ProviderError
   Success: LLMResponse with content and/or tool_calls
 end note

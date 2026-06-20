@@ -1,0 +1,40 @@
+@startuml sq_mem03_search_knowledge
+' ============================================================
+' Title:     MEM-03 — SEARCH Knowledge
+' Boundary:  nasim code agent
+' Purpose:   Full-text search across knowledge store
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — MEM-03 SEARCH Knowledge
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Full-text search across all knowledge
+  Preconditions:  MemoryIndex populated with entries
+  Excludes:       Direct key recall (MEM-02)
+  Contexts:       Agent memory search, cross-project discovery
+  Rollback:       No rollback needed (read-only operation)
+  Design:         BM25 ranking with relevance scoring
+end note
+
+== MEM-03 SEARCH Knowledge ==
+
+AgentOrchestrator -> MemoryIndex: search(query, filters)
+MemoryIndex -> MemoryIndex: tokenize query
+MemoryIndex -> MemoryIndex: FTS5 query with BM25 ranking
+MemoryIndex -> MemoryIndex: rank results by relevance
+MemoryIndex --> AgentOrchestrator: ranked_results
+
+note over participants
+  Flow:    Tokenize -> FTS5 query -> rank -> return
+  State:   searching -> ranking -> returned
+  Failure: No results -> return empty list, log query
+  Success: Agent receives ranked search results
+end note
+
+@enduml

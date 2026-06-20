@@ -87,7 +87,7 @@ note over prom, metrics
     - Prometheus → GET /metrics → ServerApp → MetricsCollector → metrics text
 
   State:
-    - IDLE → COLLECTING → SERVING → DONE
+    - <back:#ECEFF1>IDLE</back> → COLLECTING → <back:#E0F2F1>SERVING</back> → DONE
 
   Failure:
     - Metrics disabled → 503 or empty output

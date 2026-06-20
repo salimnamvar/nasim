@@ -1,6 +1,6 @@
-@startuml sq_cli02_execute_slash_command
+@startuml sq_cli02_dispatch_slash_command
 ' ============================================================
-' Title:     CLI-02 — Execute Slash Command
+' Title:     CLI-02 — Dispatch Slash Command
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Slash command routing and execution
 ' Milestone: v1.0

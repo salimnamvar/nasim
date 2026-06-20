@@ -1,6 +1,6 @@
-@startuml sq_tl11_git_status_diff_commit
+@startuml sq_tl11_read_git_status
 ' ============================================================
-' Title:     TL-11 — Git Status Diff Commit
+' Title:     TL-11 — Read Git Status
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Git operations: status, diff, commit
 ' Milestone: v1.0

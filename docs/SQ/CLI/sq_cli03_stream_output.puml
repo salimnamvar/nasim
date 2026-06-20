@@ -1,6 +1,6 @@
-@startuml sq_cli03_display_streaming_output
+@startuml sq_cli03_stream_output
 ' ============================================================
-' Title:     CLI-03 — STREAM Output
+' Title:     CLI-03 — Stream Output
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Streaming token-by-token output with rich formatting
 ' Milestone: v1.0

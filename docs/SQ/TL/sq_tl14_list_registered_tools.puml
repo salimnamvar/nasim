@@ -1,0 +1,44 @@
+@startuml sq_tl14_list_registered_tools
+' ============================================================
+' Title:     TL-14 — List Registered Tools
+' Boundary:  nasim code agent
+' Purpose:   Return list of all tools registered in the ToolRegistry
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — TL-14 List Registered Tools
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+end box
+
+note over participants
+  Scope:          List all registered tools with names and descriptions
+  Preconditions:  ToolRegistry initialized
+  Excludes:       Tool execution, tool registration
+  Contexts:       Called by AGT-02
+  Rollback:       Error string returned to LLM
+  Design:         Read-only; no mutation
+  Classification: Process Decomposition
+end note
+
+== TL-14 List Registered Tools ==
+
+agent -> registry : execute("list_tools", {})
+registry -> registry : enumerate registered tools
+registry --> agent : ToolResult(success=True, tools=[...])
+
+note over participants
+  Flow:    AgentOrchestrator -> ToolRegistry -> list all registered tools -> ToolResult
+  State:   No state change
+  Failure: N/A (read-only query)
+  Success: List of tool names and descriptions
+end note
+
+@enduml

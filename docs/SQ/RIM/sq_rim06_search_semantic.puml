@@ -1,6 +1,6 @@
-@startuml sq_rim03_search_semantic
+@startuml sq_rim06_search_semantic
 ' ============================================================
-' Title:     RIM-03 — SEARCH Semantic (Embedding-based Similarity)
+' Title:     RIM-06 — Search Semantic
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Embedding-based code similarity search across repository
 ' Milestone: v1.0
@@ -82,7 +82,7 @@ note over user, provider
     - AgentOrchestrator → SemanticSearch → Provider(embed) → EmbeddingStore → SearchResultList
 
   State:
-    - IDLE → EMBEDDING → SEARCHING → FILTERING → DONE
+    - <back:#ECEFF1>IDLE</back> → EMBEDDING → SEARCHING → FILTERING → DONE
 
   Failure:
     - Embedding failure → empty results + fallback flag

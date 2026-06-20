@@ -1,0 +1,43 @@
+@startuml sq_mcp04_expose_nasim_tools
+' ============================================================
+' Title:     MCP-04 — EXPOSE nasim Tools
+' Boundary:  nasim code agent
+' Purpose:   Expose nasim tools to external MCP clients
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — MCP-04 EXPOSE nasim Tools
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Serving nasim tools via MCP server interface
+  Preconditions:  MCPServerRuntime initialized, tools registered
+  Excludes:       Tool discovery, adaptation (see MCP-02, MCP-03)
+  Contexts:       External MCP client connection lifecycle
+  Rollback:       Disconnect client on tool execution failure
+  Design:         Request validation and rate limiting
+end note
+
+== MCP-04 EXPOSE nasim Tools ==
+
+External MCP Client -> MCPServerRuntime: list_tools()
+MCPServerRuntime -> ToolRegistry: get_all_tools()
+ToolRegistry --> MCPServerRuntime: tool_list
+MCPServerRuntime --> External MCP Client: tool_definitions
+External MCP Client -> MCPServerRuntime: call_tool(name, args)
+MCPServerRuntime -> ToolRegistry: execute(name, args)
+ToolRegistry --> MCPServerRuntime: result
+MCPServerRuntime --> External MCP Client: tool_result
+
+note over participants
+  Flow:    Client lists tools -> calls tool -> server executes -> returns result
+  State:   idle -> processing -> complete
+  Failure: Tool not found -> error response; execution failure -> error response
+  Success: Client receives tool execution result
+end note
+
+@enduml

@@ -96,7 +96,7 @@ note over logger, config
     - Emitter → LogRedactor → Config (rules) → sanitized record/payload
 
   State:
-    - IDLE → LOADING RULES → APPLYING → DONE
+    - <back:#ECEFF1>IDLE</back> → LOADING RULES → APPLYING → DONE
 
   Failure:
     - Rule load failure → default rules only

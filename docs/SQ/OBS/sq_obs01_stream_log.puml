@@ -96,7 +96,7 @@ note over agent, stdout
     - AgentOrchestrator → StructuredLogger → TraceCorrelator + LogRedactor → DualOutputAdapter → Stdout
 
   State:
-    - IDLE → BUILDING → REDACTING → EMITTING → DONE
+    - <back:#ECEFF1>IDLE</back> → BUILDING → REDACTING → EMITTING → DONE
 
   Failure:
     - Write failure → stderr warning, never raises

@@ -1,6 +1,6 @@
-@startuml sq_hk03_post_tool_hook
+@startuml sq_hk03_dispatch_post_tool_hook
 ' ============================================================
-' Title:     nasim — SQ: Execute Post-Tool Hook
+' Title:     nasim — SQ: Dispatch Post-Tool Hook
 ' Boundary:  nasim code agent CLI + HTTP API
 ' Purpose:   Execute hooks after tool execution
 ' Milestone: v1.0

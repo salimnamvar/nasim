@@ -1,54 +1,58 @@
-@startuml sq_srv02_create_session
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Sequence.puml
-!theme plain
-
+@startuml sq_srv02_insert_session
 ' ============================================================
-' Title:     nasim — SQ: Create Session
-' UC:        SRV-02
-' Purpose:   ROD-compliant Create operation for sessions
+' Title:     SRV-02 — INSERT Session
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Create and persist a new agent session
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.car-framework-csr-rod.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
-title nasim — SQ: Create Session (SRV-02)
+title nasim — SRV-02 INSERT Session
 
-actor "HTTP Client" as client
+actor "HTTPClient" as client
 participant "ServerRouter" as router
 participant "SessionStore" as store
 
-== Request ==
+note over client, store
+  Scope:          Create and persist a new agent session
+  Preconditions:  ServerRouter initialized, SessionStore available
+  Excludes:       Session dispatch (SRV-06), Session deletion (SRV-05)
+  Contexts:       Called by HTTPClient via POST /v1/sessions
+  Rollback:       500 if SessionStore write fails
+  Design:         CSR: Controller(ServerRouter) -> Repository(SessionStore). ROD: standard insert (AIP-136)
+end note
 
-client -> router : POST /sessions
+== SRV-02 INSERT Session ==
+
+client -> router : POST /v1/sessions
 activate router
 
-router -> router : Validate request (SessionCreate)
-router -> router : Generate session UUID
-
-router -> store : save_session(session_id, config)
-activate store
-
-alt Success
-    store --> router : session
-    deactivate store
-    
-    router --> client : 201 Created
-    note right of client
-        {
-            "id": "uuid-...",
-            "created_at": "2026-06-20T...",
-            "model": "qwen2.5-coder:14b",
-            "state": "IDLE"
-        }
-    end note
-else Error
-    store --> router : error
-    deactivate store
-    
-    router --> client : 500 INTERNAL
+router -> router : Validate request body
+break Invalid request [400]
+  router --> client : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid request", status: "INVALID_ARGUMENT"}}
 end
 
+router -> router : Generate session UUID
+
+router -> store : INSERT session(session_id, config)
+activate store
+store --> router : Session
+deactivate store
+
+break Store write fails [500]
+  router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to create session", status: "INTERNAL"}}
+end
+
+router --> client : 201 Created {id, created_at, model, state}
 deactivate router
+
+note over client, store
+  Flow:    HTTPClient -> ServerRouter -> SessionStore
+  State:   <back:#E3F2FD>CREATED</back>
+  Failure: 400 invalid body, 500 store write failure
+  Success: 201 Created with session metadata
+end note
 
 @enduml

@@ -1,0 +1,65 @@
+@startuml sq_ssn06_revert_turn
+' ============================================================
+' Title:     SSN-06 — Revert Turn
+' Boundary:  nasim code agent CLI
+' Purpose:   Restore session to a previous snapshot or turn
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — SSN-06 Revert Turn
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Session Layer" #F1F8E9
+  participant "SessionVersioning" as ver
+end box
+database "Snapshot Store" as snap
+
+note over agent, snap
+  Scope:          Restore session to a previous snapshot or specific turn
+  Preconditions:  Snapshot exists (created via SSN-05)
+  Excludes:       Snapshot creation (SSN-05), session persistence (SSN-01)
+  Contexts:       Called when user requests undo or revert
+  Rollback:       Snapshot not found → display error, retain current state
+  Design:         Revert replaces current messages with snapshot copy
+end note
+
+== SSN-06 Revert Turn ==
+
+agent -> ver : revert(session_id, snapshot_id)
+activate ver
+
+ver -> snap : load snapshot(snapshot_id)
+activate snap
+alt snapshot found
+    snap --> ver : snapshot_messages
+    deactivate snap
+else snapshot not found
+    snap --> ver : NotFound
+    deactivate snap
+    ver --> agent : RevertError("snapshot not found")
+end
+
+ver -> ver : replace current messages with snapshot
+ver -> ver : truncate messages after snapshot point
+
+ver --> agent : Reverted(snapshot_id, turn_count)
+deactivate ver
+
+break Snapshot load error
+    snap --> ver : IOError
+    ver --> agent : RevertError("snapshot unreadable")
+end
+
+note over agent, snap
+  Flow:    AgentOrchestrator → SessionVersioning → find snapshot → restore to turn
+  State:   <back:#2E7D32>ACTIVE</back> → REVERTING → <back:#2E7D32>ACTIVE</back>
+  Failure: Snapshot not found → error, retain current
+  Success: Session restored to snapshot point
+end note
+
+@enduml

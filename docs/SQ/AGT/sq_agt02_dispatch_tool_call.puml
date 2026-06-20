@@ -108,7 +108,7 @@ note over user, tool
     - AgentOrchestrator → PermissionGate → ToolRegistry → Tool.execute()
 
   State:
-    - THINKING → TOOL_EXEC → THINKING (with tool result in messages)
+    - <back:#FFF3E0>THINKING</back> → <back:#F3E5F5>TOOL_EXEC</back> → <back:#FFF3E0>THINKING</back> (with tool result in messages)
 
   Key invariants:
     - Every tool call goes through PermissionGate

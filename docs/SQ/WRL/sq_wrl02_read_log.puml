@@ -82,7 +82,7 @@ note over user, fs
     - AgentOrchestrator → WireLogger → FileSystem + EventDeserializer → EventStream
 
   State:
-    - IDLE → READING → DESERIALIZING → FILTERING → DONE
+    - <back:#ECEFF1>IDLE</back> → READING → DESERIALIZING → FILTERING → DONE
 
   Failure:
     - Read failure → partial events + error

@@ -1,0 +1,39 @@
+@startuml sq_vcs01_read_git_status
+' ============================================================
+' Title:     VCS-01 — READ Git Status
+' Boundary:  nasim code agent
+' Purpose:   Read working tree status and staged changes
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — VCS-01 READ Git Status
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Git working tree status inspection
+  Preconditions:  Git repository initialized
+  Excludes:       Commit operations (VCS-02), diff (VCS-03)
+  Contexts:       Agent status checks, pre-commit validation
+  Rollback:       No rollback needed (read-only operation)
+  Design:         Cached status with file system watch invalidation
+end note
+
+== VCS-01 READ Git Status ==
+
+AgentOrchestrator -> GitStatus: get_status()
+GitStatus -> GitStatus: git status --porcelain
+GitStatus -> GitStatus: parse status output
+GitStatus --> AgentOrchestrator: status_summary(staged, modified, untracked)
+
+note over participants
+  Flow:    Execute git status -> parse -> return summary
+  State:   idle -> querying -> returned
+  Failure: Not a git repo -> return error status
+  Success: Agent receives staged/modified/untracked file lists
+end note
+
+@enduml

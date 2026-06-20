@@ -1,0 +1,42 @@
+@startuml sq_mem01_persist_knowledge
+' ============================================================
+' Title:     MEM-01 — PERSIST Knowledge
+' Boundary:  nasim code agent
+' Purpose:   Store cross-session knowledge entries
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — MEM-01 PERSIST Knowledge
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Knowledge persistence across sessions
+  Preconditions:  MemoryStore initialized, scope valid
+  Excludes:       Search and recall (MEM-02, MEM-03)
+  Contexts:       Session checkpoint, learning capture
+  Rollback:       Transactional write with rollback on index failure
+  Design:         Append-only store with index synchronization
+end note
+
+== MEM-01 PERSIST Knowledge ==
+
+AgentOrchestrator -> MemoryStore: persist(key, value, scope)
+MemoryStore -> MemoryScope: validate_scope(scope)
+MemoryScope --> MemoryStore: scope_valid
+MemoryStore -> MemoryStore: write_to_disk(key, value)
+MemoryStore -> MemoryIndex: index_entry(key, value, metadata)
+MemoryIndex --> MemoryStore: indexed
+MemoryStore --> AgentOrchestrator: persist_confirmed(key)
+
+note over participants
+  Flow:    Validate scope -> write disk -> index -> confirm
+  State:   validating -> writing -> indexing -> persisted
+  Failure: Disk write fails -> rollback, no index update
+  Success: Entry persisted and indexed for search
+end note
+
+@enduml

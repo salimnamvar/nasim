@@ -1,6 +1,6 @@
-@startuml sq_agt03_manage_conversation
+@startuml sq_agt03_update_conversation
 ' ============================================================
-' Title:     AGT-03 — Manage Conversation
+' Title:     AGT-03 — Update Conversation
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Message list management and token tracking
 ' Milestone: v1.0

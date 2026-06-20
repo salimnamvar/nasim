@@ -1,0 +1,59 @@
+@startuml sm_plugin_lifecycle
+' ============================================================
+' Title:     nasim — Plugin Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Entity lifecycle for Plugin (persisted in config)
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — Plugin Lifecycle
+
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+}
+
+[*] --> DISCOVERED : PLG-01 scan
+
+state "DISCOVERED" as DISCOVERED #ECEFF1
+DISCOVERED : Plugin found on filesystem.
+DISCOVERED : PLG-01 DISCOVER Plugins.
+
+state "LOADING" as LOADING #FFF3E0
+LOADING : Plugin manifest being parsed.
+LOADING : PLG-02 LOAD Manifest.
+
+state "LOADED" as LOADED #90CAF9
+LOADED : Plugin manifest parsed, tools registered.
+LOADED : PLG-03 REGISTER Plugin Tools.
+
+state "ENABLED" as ENABLED #2E7D32
+ENABLED : Plugin active and available.
+ENABLED : PLG-05 ENABLE Plugin.
+
+state "DISABLED" as DISABLED #CE93D8
+DISABLED : Plugin deactivated.
+DISABLED : PLG-06 DISABLE Plugin.
+
+state "ERROR" as ERROR #EF5350
+ERROR : Plugin failed to load or crashed.
+ERROR : Load error or runtime exception.
+
+DISCOVERED --> LOADING : PLG-02 load manifest
+DISCOVERED --> ERROR : manifest not found
+LOADING --> LOADED : PLG-03 tools registered
+LOADING --> ERROR : parse error
+LOADED --> ENABLED : PLG-05 enable
+LOADED --> DISABLED : PLG-06 disable
+ENABLED --> DISABLED : PLG-06 disable
+DISABLED --> ENABLED : PLG-05 re-enable
+ENABLED --> ERROR : runtime error
+LOADED --> ERROR : registration error
+
+ERROR --> DISCOVERED : PLG-01 re-discover
+
+@enduml

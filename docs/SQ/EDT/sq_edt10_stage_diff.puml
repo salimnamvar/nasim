@@ -1,6 +1,6 @@
-@startuml sq_edt04_stage_edit
+@startuml sq_edt10_stage_diff
 ' ============================================================
-' Title:     EDT-04 — STAGE Edit (DiffSandbox)
+' Title:     EDT-10 — Stage Diff
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Stage edit in DiffSandbox for review
 ' Milestone: v1.0
@@ -72,7 +72,7 @@ note over user, gate
     - AgentOrchestrator → DiffSandbox → StagedEdit
 
   State:
-    - IDLE → STAGING → STAGED
+    - <back:#ECEFF1>IDLE</back> → <back:#F1F8E9>STAGING</back> → STAGED
 
   Failure:
     - Staging failure → discard edit

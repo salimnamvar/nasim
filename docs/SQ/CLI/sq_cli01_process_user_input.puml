@@ -60,7 +60,7 @@ end
 
 note over user, agent
   Flow:    User -> REPLSession -> AgentOrchestrator -> Provider -> events -> Renderer -> User
-  State:   IDLE -> LISTENING -> THINKING -> [TOOL_EXEC]* -> RESPONDING -> IDLE
+  State:   <back:#ECEFF1>IDLE</back> -> <back:#E8EAF6>LISTENING</back> -> <back:#FFF3E0>THINKING</back> -> [<back:#F3E5F5>TOOL_EXEC</back>]* -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
   Failure: Agent exception -> Error event -> IDLE
   Success: Final text rendered to user
 end note

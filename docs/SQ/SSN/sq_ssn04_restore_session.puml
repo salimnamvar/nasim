@@ -1,6 +1,6 @@
-@startuml sq_ssn04_resume_session
+@startuml sq_ssn04_restore_session
 ' ============================================================
-' Title:     SSN-04 — Resume Session
+' Title:     SSN-04 — Restore Session
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Resume a previous session by loading its history
 ' Milestone: v1.0

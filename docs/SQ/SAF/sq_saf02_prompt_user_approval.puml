@@ -43,7 +43,7 @@ end
 
 note over user, gate
   Flow:    gate -> Renderer -> user prompt -> choice -> gate
-  State:   TOOL_EXEC -> AWAITING_APPROVAL -> TOOL_EXEC or IDLE
+  State:   <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> -> <back:#F3E5F5>TOOL_EXEC</back> or <back:#ECEFF1>IDLE</back>
   Failure: User rejects -> tool skipped
   Success: User approves -> tool executes
 end note

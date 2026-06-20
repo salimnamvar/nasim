@@ -1,6 +1,6 @@
-@startuml sq_cli04_parse_cli_arguments
+@startuml sq_cli04_read_cli_arguments
 ' ============================================================
-' Title:     CLI-04 — Parse CLI Arguments
+' Title:     CLI-04 — Read CLI Arguments
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Startup argument parsing and config initialization
 ' Milestone: v1.0

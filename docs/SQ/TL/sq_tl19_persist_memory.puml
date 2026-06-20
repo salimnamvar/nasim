@@ -1,0 +1,56 @@
+@startuml sq_tl19_persist_memory
+' ============================================================
+' Title:     TL-19 — Persist Memory
+' Boundary:  nasim code agent
+' Purpose:   Persist knowledge to memory via MemoryTool
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — TL-19 Persist Memory
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "MemoryTool" as tool
+end box
+participant "MemoryStore" as mem
+
+note over participants
+  Scope:          Persist a knowledge item to the memory store
+  Preconditions:  MemoryTool initialized
+  Excludes:       Memory recall, search, scoping
+  Contexts:       Called by AGT-02; delegates to MEM-01
+  Rollback:       Error string returned to LLM
+  Design:         Delegates to MEM-01 PERSIST Knowledge
+  Classification: Process Decomposition
+end note
+
+== TL-19 Persist Memory ==
+
+agent -> registry : execute("persist_memory", {key, value, scope})
+registry -> tool : execute(key, value, scope)
+tool -> mem : MEM-01 persist(key, value, scope)
+
+break Storage failure
+    mem --> tool : StorageError
+    tool --> registry : ToolResult(success=False, error="persist failed")
+    registry --> agent : ToolResult
+end
+
+mem --> tool : persisted
+tool --> registry : ToolResult(success=True)
+registry --> agent : ToolResult
+
+note over participants
+  Flow:    AgentOrchestrator -> ToolRegistry -> MemoryTool -> MEM-01 PERSIST Knowledge -> ToolResult
+  State:   Knowledge item stored
+  Failure: Storage failure -> ToolResult(success=False)
+  Success: Knowledge persisted
+end note
+
+@enduml

@@ -1,6 +1,6 @@
-@startuml sq_ssn01_save_session
+@startuml sq_ssn01_persist_session
 ' ============================================================
-' Title:     SSN-01 — Save Session
+' Title:     SSN-01 — Persist Session
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Persist conversation history to disk
 ' Milestone: v1.0

@@ -1,0 +1,53 @@
+@startuml sq_plg03_register_plugin_tools
+' ============================================================
+' Title:     PLG-03 — Register Plugin Tools
+' Boundary:  nasim code agent
+' Purpose:   Register all tools declared in a plugin manifest
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — PLG-03 Register Plugin Tools
+
+box "Tool Layer" #F3E5F5
+  participant "PluginLoader" as loader
+  participant "ToolRegistry" as registry
+end box
+
+note over participants
+  Scope:          Register plugin-declared tools into ToolRegistry
+  Preconditions:  Valid PluginManifest loaded (PLG-02)
+  Excludes:       Hook registration, plugin activation
+  Contexts:       Called during plugin enable (PLG-05)
+  Rollback:       Registration failure logged; other tools still registered
+  Design:         Namespaced tool names to avoid collisions
+  Classification: Process Decomposition
+end note
+
+== PLG-03 Register Plugin Tools ==
+
+loader -> loader : enumerate tools from PluginManifest
+
+loop for each tool in manifest
+    loader -> registry : register(plugin::tool_name, handler)
+
+    break Name collision
+        registry --> loader : CollisionError
+        loader --> loader : log warning, skip tool
+    end
+
+    registry --> loader : registered
+end
+
+loader --> loader : all tools registered
+
+note over participants
+  Flow:    PluginLoader -> enumerate plugin tools -> register in ToolRegistry
+  State:   Tools added to registry
+  Failure: Name collision -> tool skipped with warning
+  Success: All plugin tools registered
+end note
+
+@enduml

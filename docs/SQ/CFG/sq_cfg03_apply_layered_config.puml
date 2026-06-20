@@ -1,6 +1,6 @@
-@startuml sq_cfg03_merge_layered_config
+@startuml sq_cfg03_apply_layered_config
 ' ============================================================
-' Title:     CFG-03 — Merge Layered Config
+' Title:     CFG-03 — Apply Layered Config
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Config layer merge with precedence
 ' Milestone: v1.0

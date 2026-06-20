@@ -37,7 +37,7 @@ agent -> history : replace messages with shortened list
 
 note over agent, compactor
   Flow:    budget check -> select old -> summarize -> replace
-  State:   THINKING -> COMPACTING -> THINKING
+  State:   <back:#FFF3E0>THINKING</back> -> <back:#E0F2F1>COMPACTING</back> -> <back:#FFF3E0>THINKING</back>
   Failure: LLM fails -> truncate fallback
   Success: Messages shortened, token count reduced
 end note

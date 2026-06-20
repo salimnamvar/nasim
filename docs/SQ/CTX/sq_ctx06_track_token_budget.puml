@@ -1,6 +1,6 @@
-@startuml sq_ctx01_track_token_count
+@startuml sq_ctx06_track_token_budget
 ' ============================================================
-' Title:     CTX-01 — Track Token Count
+' Title:     CTX-06 — Track Token Budget
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Track token count as messages are added
 ' Milestone: v1.0

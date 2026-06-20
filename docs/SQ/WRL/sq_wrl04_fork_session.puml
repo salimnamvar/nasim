@@ -1,6 +1,6 @@
-@startuml sq_wrl03_fork_session
+@startuml sq_wrl04_fork_session
 ' ============================================================
-' Title:     WRL-03 — FORK Session
+' Title:     WRL-04 — Fork Session
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Fork session at any turn
 ' Milestone: v1.0
@@ -83,7 +83,7 @@ note over user, session
     - AgentOrchestrator → SessionForker → WireLogger + SessionManager → ForkResult
 
   State:
-    - IDLE → READING → CREATING → COPYING → DONE
+    - <back:#ECEFF1>IDLE</back> → READING → CREATING → COPYING → DONE
 
   Failure:
     - Fork failure → no session created

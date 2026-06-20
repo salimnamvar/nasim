@@ -1,0 +1,51 @@
+@startuml sq_plg05_enable_plugin
+' ============================================================
+' Title:     PLG-05 — Enable Plugin
+' Boundary:  nasim code agent
+' Purpose:   Load plugin and activate its tools and hooks
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — PLG-05 Enable Plugin
+
+box "Tool Layer" #F3E5F5
+  participant "PluginLoader" as loader
+  participant "ToolRegistry" as registry
+end box
+box "Hooks Layer" #FFFDE7
+  participant "HookManager" as hm
+end box
+
+note over participants
+  Scope:          Load plugin, register tools and hooks, set state ENABLED
+  Preconditions:  Valid PluginManifest loaded (PLG-02)
+  Excludes:       Plugin discovery, disable
+  Contexts:       Called by CLI or PluginLoader
+  Rollback:       Partial enable logged; state set to ERROR
+  Design:         Atomic enable: tools + hooks + state
+  Classification: Process Decomposition
+end note
+
+== PLG-05 Enable Plugin ==
+
+loader -> loader : PLG-03 register_plugin_tools()
+loader -> loader : PLG-04 register_plugin_hooks()
+loader -> loader : set state ENABLED
+
+break Tool or hook registration fails
+    loader -> loader : set state ERROR, log failure
+end
+
+loader --> loader : plugin enabled
+
+note over participants
+  Flow:    PluginLoader -> load plugin -> activate tools + hooks -> set state ENABLED
+  State:   Plugin state: DISABLED -> ENABLED (or ERROR)
+  Failure: Registration failure -> state ERROR, partial enable logged
+  Success: Plugin enabled with tools and hooks active
+end note
+
+@enduml

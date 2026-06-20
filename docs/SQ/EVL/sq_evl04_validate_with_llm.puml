@@ -1,6 +1,6 @@
-@startuml sq_evl02_invoke_llm_reviewer
+@startuml sq_evl04_validate_with_llm
 ' ============================================================
-' Title:     EVL-02 — INVOKE LLM Reviewer
+' Title:     EVL-04 — Validate With LLM
 ' Boundary:  nasim code agent CLI
 ' Purpose:   LLM-as-judge scoring for edit quality
 ' Milestone: v1.0
@@ -89,7 +89,7 @@ note over user, fs
     - AgentOrchestrator → LLMReviewer → FileSystem + Provider → ReviewResult
 
   State:
-    - IDLE → READING → PROMPTING → SCORING → DONE
+    - <back:#ECEFF1>IDLE</back> → READING → PROMPTING → SCORING → DONE
 
   Failure:
     - LLM call failure → skip review

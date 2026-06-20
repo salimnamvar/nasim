@@ -1,6 +1,6 @@
-@startuml sq_evl01_run_success_checks
+@startuml sq_evl01_evaluate_task
 ' ============================================================
-' Title:     EVL-01 — RUN Success Checks
+' Title:     EVL-01 — Evaluate Task
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Shell exit code verification for edit success
 ' Milestone: v1.0
@@ -81,7 +81,7 @@ note over user, tool
     - AgentOrchestrator → SuccessChecker → [ShellRunner]* → CheckResult
 
   State:
-    - IDLE → RUNNING → AGGREGATING → DONE
+    - <back:#ECEFF1>IDLE</back> → RUNNING → AGGREGATING → DONE
 
   Failure:
     - Any check fails → CheckResult(passed=false)

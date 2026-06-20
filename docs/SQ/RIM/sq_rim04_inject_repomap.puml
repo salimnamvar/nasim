@@ -95,7 +95,7 @@ note over user, history
     - AgentOrchestrator → RepoMapInjector → TokenBudget + SymbolRanker + ConversationHistory → RepoMapContext
 
   State:
-    - IDLE → BUDGETING → SELECTING → FORMATTING → TRUNCATING → INJECTED
+    - <back:#ECEFF1>IDLE</back> → BUDGETING → SELECTING → FORMATTING → TRUNCATING → INJECTED
 
   Failure:
     - Budget exceeded → truncate to fit

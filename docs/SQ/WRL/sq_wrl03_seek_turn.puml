@@ -1,0 +1,50 @@
+@startuml sq_wrl03_seek_turn
+' ============================================================
+' Title:     WRL-03 — SEEK Turn
+' Boundary:  nasim code agent
+' Purpose:   Seek to a specific turn in the wire log
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — WRL-03 SEEK Turn
+
+box "Wire Log Group" #FFFDE7
+  participant "TurnIndex" as idx
+  participant "WireReader" as reader
+end box
+
+note over idx, reader
+  Scope:          Seek to a specific turn in the wire log
+  Preconditions:  Wire log exists, TurnIndex built
+  Excludes:       Log append (WRL-01), session fork (WRL-04)
+  Contexts:       Called by WRL-04 FORK Session or replay flows
+  Rollback:       N/A (read-only)
+  Design:         Uses TurnIndex for O(1) random access by turn number
+  Classification: Process Decomposition
+end note
+
+== WRL-03 SEEK Turn ==
+
+idx -> idx : LOOKUP turn_number
+idx -> reader : READ from offset
+activate reader
+
+break Turn not found
+  reader --> idx : NotFound
+  idx --> idx : return error
+end
+
+reader --> idx : WireEvents[turn]
+deactivate reader
+
+note over idx, reader
+  Flow:    TurnIndex -> lookup offset -> WireReader -> read events for turn
+  State:   No state change
+  Failure: Turn not found in index
+  Success: Wire events for the requested turn
+end note
+
+@enduml

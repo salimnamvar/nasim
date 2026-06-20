@@ -95,7 +95,7 @@ note over user, config
     - AgentOrchestrator → EditStrategySelector → Config + EditFormat → EditStrategy
 
   State:
-    - IDLE → EVALUATING → SELECTING → VALIDATING → READY
+    - <back:#ECEFF1>IDLE</back> → <back:#F9FBE7>EVALUATING</back> → SELECTING → VALIDATING → READY
 
   Failure:
     - No compatible format → error + manual suggestion

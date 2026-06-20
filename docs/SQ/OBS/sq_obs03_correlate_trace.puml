@@ -109,7 +109,7 @@ note over cli, otel
     - → Every child span links back to root trace_id
 
   State:
-    - IDLE → GENERATING → PROPAGATING → DONE
+    - <back:#ECEFF1>IDLE</back> → GENERATING → PROPAGATING → DONE
 
   Failure:
     - Trace generation failure → fallback to random ids

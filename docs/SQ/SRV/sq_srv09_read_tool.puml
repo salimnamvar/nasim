@@ -1,0 +1,59 @@
+@startuml sq_srv09_read_tool
+' ============================================================
+' Title:     SRV-09 — READ Tool
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Read details of a specific registered tool
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — SRV-09 READ Tool
+
+actor "HTTPClient" as client
+
+box "Server Layer" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+end box
+
+note over client, registry
+  Scope:          Read details of a specific registered tool
+  Preconditions:  ToolRegistry initialized
+  Excludes:       Tool execution, tool listing
+  Contexts:       Called by HTTPClient via GET /v1/tools/{name}
+  Rollback:       404 if tool not found
+  Design:         ROD: standard read. Returns full tool metadata.
+end note
+
+== SRV-09 READ Tool ==
+
+client -> router : GET /v1/tools/{name}
+activate router
+
+router -> registry : GET tool(name)
+activate registry
+
+break Tool not found
+  registry --> router : NotFound
+  deactivate registry
+  router --> client : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Tool not found", status: "NOT_FOUND"}}
+end
+
+registry --> router : ToolMetadata
+deactivate registry
+
+router --> client : 200 OK {tool: {name, description, safe, parameters}}
+deactivate router
+
+note over client, registry
+  Flow:    HTTPClient -> ServerRouter -> ToolRegistry -> return tool
+  State:   No state change
+  Failure: 404 tool not found
+  Success: 200 OK with tool metadata
+end note
+
+@enduml

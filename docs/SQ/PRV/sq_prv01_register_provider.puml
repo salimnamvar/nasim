@@ -1,6 +1,6 @@
-@startuml sq_prv01_initialize_provider
+@startuml sq_prv01_register_provider
 ' ============================================================
-' Title:     PRV-01 — Initialize Provider
+' Title:     PRV-01 — Register Provider
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Provider instantiation from config
 ' Milestone: v1.0

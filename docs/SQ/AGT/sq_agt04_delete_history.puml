@@ -1,6 +1,6 @@
-@startuml sq_agt04_reset_history
+@startuml sq_agt04_delete_history
 ' ============================================================
-' Title:     AGT-04 — Reset History
+' Title:     AGT-04 — Delete History
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Clear conversation history
 ' Milestone: v1.0

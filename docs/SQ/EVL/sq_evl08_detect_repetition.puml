@@ -1,6 +1,6 @@
-@startuml sq_evl04_detect_repetition
+@startuml sq_evl08_detect_repetition
 ' ============================================================
-' Title:     EVL-04 — DETECT Repetition
+' Title:     EVL-08 — Detect Repetition
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Tool-call loop detection
 ' Milestone: v1.0
@@ -83,7 +83,7 @@ note over user, gate
     - AgentOrchestrator → RepetitionDetector → ToolCallHistory → RepetitionResult
 
   State:
-    - IDLE → ANALYZING → DETECTING → DONE
+    - <back:#ECEFF1>IDLE</back> → ANALYZING → DETECTING → DONE
 
   Failure:
     - Loop detected → LoopDetected error

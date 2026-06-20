@@ -1,0 +1,64 @@
+@startuml sq_srv05_retire_session
+' ============================================================
+' Title:     SRV-05 — RETIRE Session
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Mark a session as retired (soft delete)
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — SRV-05 RETIRE Session
+
+actor "HTTPClient" as client
+
+box "Server Layer" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Session Layer" #F3E5F5
+  participant "SessionStore" as store
+end box
+
+note over client, store
+  Scope:          Mark a session as retired (soft delete)
+  Preconditions:  Session exists on disk
+  Excludes:       Hard delete, message operations
+  Contexts:       Called by HTTPClient via DELETE /v1/sessions/{id}
+  Rollback:       404 if session not found
+  Design:         ROD: standard delete. Soft delete (retired flag).
+end note
+
+== SRV-05 RETIRE Session ==
+
+client -> router : DELETE /v1/sessions/{id}
+activate router
+
+router -> store : READ session exists
+activate store
+
+break Session not found
+  store --> router : NotFound
+  deactivate store
+  router --> client : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
+end
+
+store --> router : SessionStatus
+deactivate store
+
+router -> store : RETIRE session
+activate store
+store --> router : retired
+deactivate store
+
+router --> client : 200 OK {retired: true}
+deactivate router
+
+note over client, store
+  Flow:    HTTPClient -> ServerRouter -> SessionStore -> retire -> 200
+  State:   <back:#2E7D32>ACTIVE</back> -> <back:#757575>CLOSED</back>
+  Failure: 404 not found
+  Success: 200 OK with retired status
+end note
+
+@enduml

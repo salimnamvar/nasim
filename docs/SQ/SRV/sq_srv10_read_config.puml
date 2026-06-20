@@ -1,0 +1,52 @@
+@startuml sq_srv10_read_config
+' ============================================================
+' Title:     SRV-10 — READ Config
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Read current agent configuration
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — SRV-10 READ Config
+
+actor "HTTPClient" as client
+
+box "Server Layer" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Config Layer" #FCE4EC
+  participant "ConfigLoader" as config
+end box
+
+note over client, config
+  Scope:          Read current agent configuration
+  Preconditions:  ConfigLoader initialized
+  Excludes:       Config update, config validation
+  Contexts:       Called by HTTPClient via GET /v1/config
+  Rollback:       N/A (read-only)
+  Design:         ROD: standard read. Returns sanitized config (no secrets).
+end note
+
+== SRV-10 READ Config ==
+
+client -> router : GET /v1/config
+activate router
+
+router -> config : READ config
+activate config
+config --> router : Config(provider, model, safety, budget)
+deactivate config
+
+router --> client : 200 OK {config: {provider: "...", model: "...", safety_mode: "..."}}
+deactivate router
+
+note over client, config
+  Flow:    HTTPClient -> ServerRouter -> ConfigLoader -> return config
+  State:   No state change
+  Failure: N/A
+  Success: 200 OK with sanitized config
+end note
+
+@enduml

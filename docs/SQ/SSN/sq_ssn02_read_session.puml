@@ -1,6 +1,6 @@
-@startuml sq_ssn02_load_session
+@startuml sq_ssn02_read_session
 ' ============================================================
-' Title:     SSN-02 — Load Session
+' Title:     SSN-02 — Read Session
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Load conversation history from disk
 ' Milestone: v1.0

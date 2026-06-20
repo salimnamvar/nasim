@@ -34,7 +34,7 @@ plan --> agent : formatted plan text
 
 note over agent, plan
   Flow:    tool call -> queue -> display as plan
-  State:   THINKING -> PLANNING
+  State:   <back:#FFF3E0>THINKING</back> -> <back:#F1F8E9>PLANNING</back>
   Failure: N/A
   Success: Tool calls queued and displayed as plan
 end note

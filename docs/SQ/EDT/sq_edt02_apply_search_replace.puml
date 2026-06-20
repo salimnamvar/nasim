@@ -1,6 +1,6 @@
-@startuml sq_edt02_apply_edit
+@startuml sq_edt02_apply_search_replace
 ' ============================================================
-' Title:     EDT-02 — APPLY Edit
+' Title:     EDT-02 — Apply Search Replace
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Execute edit via selected strategy
 ' Milestone: v1.0
@@ -96,7 +96,7 @@ note over user, gate
     - AgentOrchestrator → EditApplier → PermissionGate + FileSystem + EditStrategy → EditResult
 
   State:
-    - IDLE → READING → BACKING_UP → WRITING → DIFFING → DONE
+    - <back:#ECEFF1>IDLE</back> → READING → BACKING_UP → WRITING → DIFFING → DONE
 
   Failure:
     - Permission denied → abort, no file change

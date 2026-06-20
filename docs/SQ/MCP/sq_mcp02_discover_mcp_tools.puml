@@ -1,0 +1,43 @@
+@startuml sq_mcp02_discover_mcp_tools
+' ============================================================
+' Title:     MCP-02 — DISCOVER MCP Tools
+' Boundary:  nasim code agent
+' Purpose:   Discover and register tools from connected MCP server
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — MCP-02 DISCOVER MCP Tools
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Tool discovery from connected MCP server
+  Preconditions:  MCP server connected (MCP-01 complete)
+  Excludes:       Connection management, tool adaptation (MCP-03)
+  Contexts:       Agent initialization, server reconnection
+  Rollback:       Clear partially discovered tools on failure
+  Design:         Lazy discovery with caching
+end note
+
+== MCP-02 DISCOVER MCP Tools ==
+
+MCPClientRuntime -> MCPDiscovery: discover_tools(connection)
+MCPDiscovery -> External MCP Server: list_tools()
+External MCP Server --> MCPDiscovery: tool_list (name, description, schema)
+MCPDiscovery -> MCPToolAdapter: adapt_tool(tool_definition)
+MCPToolAdapter --> MCPDiscovery: wrapped_tool
+MCPDiscovery -> ToolRegistry: register(wrapped_tool)
+ToolRegistry --> MCPDiscovery: registration_confirmed
+MCPDiscovery --> MCPClientRuntime: discovery_complete
+
+note over participants
+  Flow:    List tools -> wrap each -> register in registry
+  State:   discovering -> wrapping -> registered
+  Failure: Partial discovery -> register available tools, log failures
+  Success: All tools available in ToolRegistry
+end note
+
+@enduml

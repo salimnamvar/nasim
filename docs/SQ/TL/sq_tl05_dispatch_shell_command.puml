@@ -1,6 +1,6 @@
-@startuml sq_tl05_execute_shell_command
+@startuml sq_tl05_dispatch_shell_command
 ' ============================================================
-' Title:     TL-05 — Execute Shell Command
+' Title:     TL-05 — Dispatch Shell Command
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Shell command execution with timeout
 ' Milestone: v1.0

@@ -1,0 +1,42 @@
+@startuml sq_mcp01_connect_mcp_server
+' ============================================================
+' Title:     MCP-01 — CONNECT MCP Server
+' Boundary:  nasim code agent
+' Purpose:   Connect to external MCP server via stdio/SSE
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — MCP-01 CONNECT MCP Server
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Connection establishment to external MCP server
+  Preconditions:  MCP server endpoint configured in agent settings
+  Excludes:       Tool discovery and adaptation (see MCP-02, MCP-03)
+  Contexts:       Agent initialization, server reconnection
+  Rollback:       Close socket on failure, retry with backoff
+  Design:         Connection pooling and heartbeat monitoring
+end note
+
+== MCP-01 CONNECT MCP Server ==
+
+AgentOrchestrator -> MCPClientRuntime: connect(server_config)
+MCPClientRuntime -> External MCP Server: establish stdio/SSE connection
+External MCP Server --> MCPClientRuntime: connection established
+MCPClientRuntime -> External MCP Server: send initialize handshake
+External MCP Server --> MCPClientRuntime: handshake response (capabilities)
+MCPClientRuntime -> MCPClientRuntime: store connection state
+MCPClientRuntime --> AgentOrchestrator: connection ready
+
+note over participants
+  Flow:    Establish connection -> handshake -> ready
+  State:   disconnected -> connecting -> connected -> ready
+  Failure: Connection refused/timeout -> retry with exponential backoff
+  Success: Agent receives ready connection handle
+end note
+
+@enduml

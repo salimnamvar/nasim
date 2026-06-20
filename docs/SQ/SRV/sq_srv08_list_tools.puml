@@ -1,0 +1,52 @@
+@startuml sq_srv08_list_tools
+' ============================================================
+' Title:     SRV-08 — LIST Tools
+' Boundary:  nasim code agent HTTP API
+' Purpose:   List all registered tools available to the agent
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — SRV-08 LIST Tools
+
+actor "HTTPClient" as client
+
+box "Server Layer" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+end box
+
+note over client, registry
+  Scope:          List all registered tools available to the agent
+  Preconditions:  ToolRegistry initialized
+  Excludes:       Tool execution, tool registration
+  Contexts:       Called by HTTPClient via GET /v1/tools
+  Rollback:       N/A (read-only)
+  Design:         ROD: standard list. Returns tool metadata.
+end note
+
+== SRV-08 LIST Tools ==
+
+client -> router : GET /v1/tools
+activate router
+
+router -> registry : LIST tools
+activate registry
+registry --> router : ToolList[name, description, safe]
+deactivate registry
+
+router --> client : 200 OK {tools: [...]}
+deactivate router
+
+note over client, registry
+  Flow:    HTTPClient -> ServerRouter -> ToolRegistry -> return list
+  State:   No state change
+  Failure: N/A
+  Success: 200 OK with tool list
+end note
+
+@enduml

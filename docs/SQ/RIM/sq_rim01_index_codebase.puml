@@ -1,6 +1,6 @@
-@startuml sq_rim01_index_repository
+@startuml sq_rim01_index_codebase
 ' ============================================================
-' Title:     RIM-01 — INDEX Repository (AST + Symbol Graph)
+' Title:     RIM-01 — Index Codebase
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Build AST index and symbol graph from project source
 ' Milestone: v1.0
@@ -105,7 +105,7 @@ note over user, fs
     - AgentOrchestrator → RepoIndexer → [FileSystem → ASTParser → SymbolGraph]* → IndexStats
 
   State:
-    - IDLE → SCANNING → PARSING → GRAPH_BUILDING → READY
+    - <back:#ECEFF1>IDLE</back> → SCANNING → PARSING → GRAPH_BUILDING → READY
 
   Failure:
     - Parse error → skip file, continue

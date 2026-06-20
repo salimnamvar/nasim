@@ -1,6 +1,6 @@
-@startuml sq_saf01_check_tool_permission
+@startuml sq_saf01_check_permission
 ' ============================================================
-' Title:     SAF-01 — CHECK Tool Permission
+' Title:     SAF-01 — Check Permission
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Per-tool safety check before execution
 ' Milestone: v1.0

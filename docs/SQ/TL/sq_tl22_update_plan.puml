@@ -1,0 +1,58 @@
+@startuml sq_tl22_update_plan
+' ============================================================
+' Title:     TL-22 — Update Plan
+' Boundary:  nasim code agent
+' Purpose:   Update status or content of an existing plan step
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — TL-22 Update Plan
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "PlanTool" as tool
+end box
+
+note over participants
+  Scope:          Update status or content of a plan step by ID
+  Preconditions:  Plan step exists with given ID
+  Excludes:       Plan step creation, deletion, listing
+  Contexts:       Called by AGT-02
+  Rollback:       Error string returned to LLM
+  Design:         Validates status transitions
+  Classification: Process Decomposition
+end note
+
+== TL-22 Update Plan ==
+
+agent -> registry : execute("update_plan", {step_id, status, description})
+registry -> tool : execute(step_id, status, description)
+
+break Step not found
+    tool --> registry : ToolResult(success=False, error="step not found")
+    registry --> agent : ToolResult
+end
+
+break Invalid status transition
+    tool --> registry : ToolResult(success=False, error="invalid transition")
+    registry --> agent : ToolResult
+end
+
+tool -> tool : update fields
+tool --> registry : ToolResult(success=True, step)
+registry --> agent : ToolResult
+
+note over participants
+  Flow:    AgentOrchestrator -> ToolRegistry -> PlanTool -> update plan step -> ToolResult
+  State:   Plan step status/content updated
+  Failure: Step not found or invalid transition -> ToolResult(success=False)
+  Success: Updated plan step returned
+end note
+
+@enduml

@@ -1,6 +1,6 @@
-@startuml sq_hk02_pre_tool_hook
+@startuml sq_hk02_dispatch_pre_tool_hook
 ' ============================================================
-' Title:     nasim — SQ: Execute Pre-Tool Hook
+' Title:     nasim — SQ: Dispatch Pre-Tool Hook
 ' Boundary:  nasim code agent CLI + HTTP API
 ' Purpose:   Execute hooks before tool execution
 ' Milestone: v1.0

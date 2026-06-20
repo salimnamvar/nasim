@@ -1,6 +1,6 @@
-@startuml sq_evl05_inject_turn_budget
+@startuml sq_evl09_inject_turn_budget
 ' ============================================================
-' Title:     EVL-05 — INJECT Turn Budget
+' Title:     EVL-09 — Inject Turn Budget
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Turn budget injection per-turn
 ' Milestone: v1.0
@@ -86,7 +86,7 @@ note over user, history
     - AgentOrchestrator → TurnBudgetInjector → TurnBudget + ConversationHistory → BudgetStatus
 
   State:
-    - IDLE → COMPUTING → CHECKING → INJECTING → DONE
+    - <back:#ECEFF1>IDLE</back> → COMPUTING → CHECKING → INJECTING → DONE
 
   Failure:
     - Budget exhausted → BudgetExhausted error

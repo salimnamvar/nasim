@@ -1,0 +1,47 @@
+@startuml sq_tl21_insert_plan
+' ============================================================
+' Title:     TL-21 — Insert Plan
+' Boundary:  nasim code agent
+' Purpose:   Add a new plan step via PlanTool
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — TL-21 Insert Plan
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "PlanTool" as tool
+end box
+
+note over participants
+  Scope:          Add a new step to the execution plan
+  Preconditions:  PlanTool initialized
+  Excludes:       Plan update, deletion, listing
+  Contexts:       Called by AGT-02
+  Rollback:       Error string returned to LLM
+  Design:         Auto-generates step ID; initial status PENDING
+  Classification: Process Decomposition
+end note
+
+== TL-21 Insert Plan ==
+
+agent -> registry : execute("insert_plan", {description, dependencies?})
+registry -> tool : execute(description, dependencies)
+tool -> tool : generate step ID, set status PENDING
+tool --> registry : ToolResult(success=True, step_id)
+registry --> agent : ToolResult
+
+note over participants
+  Flow:    AgentOrchestrator -> ToolRegistry -> PlanTool -> add plan step -> ToolResult
+  State:   New plan step created (PENDING)
+  Failure: Invalid input -> ToolResult(success=False)
+  Success: Plan step ID returned
+end note
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml sq_hk06_validate_hook_result
+' ============================================================
+' Title:     HK-06 — Validate Hook Result
+' Boundary:  nasim code agent
+' Purpose:   Validate a HookResult for correctness and safety
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — HK-06 Validate Hook Result
+
+box "Hooks Layer" #FFFDE7
+  participant "HookManager" as hm
+end box
+
+note over participants
+  Scope:          Validate a HookResult for allow/deny/modify correctness
+  Preconditions:  HookResult produced by a hook
+  Excludes:       Hook execution, hook registration
+  Contexts:       Called internally by HookManager
+  Rollback:       Invalid result treated as DENY
+  Design:         Ensures result schema compliance
+  Classification: Process Decomposition
+end note
+
+== HK-06 Validate Hook Result ==
+
+hm -> hm : validate(hook_result)
+
+break Result schema invalid
+    hm --> hm : treat as DENY
+end
+
+break action not in [ALLOW, DENY, MODIFY]
+    hm --> hm : treat as DENY
+end
+
+hm --> hm : validated result
+
+note over participants
+  Flow:    HookManager -> validate HookResult -> allow/deny/modify -> return validated result
+  State:   No state change
+  Failure: Invalid schema or unknown action -> treated as DENY
+  Success: Validated HookResult returned
+end note
+
+@enduml

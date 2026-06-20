@@ -1,50 +1,54 @@
 @startuml sq_srv01_list_sessions
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Sequence.puml
-!theme plain
-
 ' ============================================================
-' Title:     nasim — SQ: List Sessions
-' UC:        SRV-01
-' Purpose:   ROD-compliant List operation for sessions
+' Title:     SRV-01 — LIST Sessions
+' Boundary:  nasim code agent HTTP API
+' Purpose:   List all sessions with pagination
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.car-framework-csr-rod.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
-title nasim — SQ: List Sessions (SRV-01)
+title nasim — SRV-01 LIST Sessions
 
-actor "HTTP Client" as client
+actor "HTTPClient" as client
 participant "ServerRouter" as router
 participant "SessionStore" as store
 
-== Request ==
+note over client, store
+  Scope:          List all sessions with pagination
+  Preconditions:  ServerRouter initialized, SessionStore available
+  Excludes:       Session CRUD (SRV-02..05), Message operations (SRV-06..07)
+  Contexts:       Called by HTTPClient via GET /v1/sessions
+  Rollback:       None (read-only operation)
+  Design:         CSR: Controller(ServerRouter) -> Repository(SessionStore). ROD: standard list (AIP-136)
+end note
 
-client -> router : GET /sessions?page_size=10&page_token=abc
+== SRV-01 LIST Sessions ==
+
+client -> router : GET /v1/sessions?page_size=10&page_token=abc
 activate router
 
-router -> router : Parse query params (page_size, page_token)
-router -> store : list_sessions(limit=10, cursor="abc")
+router -> store : LIST sessions(limit=10, cursor="abc")
 activate store
 
-alt Session exists
+alt Sessions exist
     store --> router : sessions, next_page_token
     deactivate store
-    
-    router --> client : 200 OK
-    note right of client
-        {
-            "sessions": [...],
-            "next_page_token": "def"
-        }
-    end note
+    router --> client : 200 OK {sessions: [...], next_page_token: "def"}
 else No sessions
     store --> router : empty list, no token
     deactivate store
-    
-    router --> client : 200 OK (empty list)
+    router --> client : 200 OK {sessions: [], next_page_token: null}
 end
 
 deactivate router
+
+note over client, store
+  Flow:    HTTPClient -> ServerRouter -> SessionStore
+  State:   <back:#2E7D32>ACTIVE</back>
+  Failure: None (read-only)
+  Success: 200 OK with session list and pagination token
+end note
 
 @enduml

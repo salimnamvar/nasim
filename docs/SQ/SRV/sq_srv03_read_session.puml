@@ -1,0 +1,59 @@
+@startuml sq_srv03_read_session
+' ============================================================
+' Title:     SRV-03 — READ Session
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Read a session's current state and messages
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — SRV-03 READ Session
+
+actor "HTTPClient" as client
+
+box "Server Layer" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Session Layer" #F3E5F5
+  participant "SessionStore" as store
+end box
+
+note over client, store
+  Scope:          Read a session's current state and messages
+  Preconditions:  Session exists on disk
+  Excludes:       Session creation (SRV-02), message dispatch (SRV-06)
+  Contexts:       Called by HTTPClient via GET /v1/sessions/{id}
+  Rollback:       404 if session not found
+  Design:         ROD: standard read. Returns full session state.
+end note
+
+== SRV-03 READ Session ==
+
+client -> router : GET /v1/sessions/{id}
+activate router
+
+router -> store : READ session
+activate store
+
+break Session not found
+  store --> router : NotFound
+  deactivate store
+  router --> client : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
+end
+
+store --> router : Session(messages, metadata)
+deactivate store
+
+router --> client : 200 OK {session: {id, messages, created_at, updated_at}}
+deactivate router
+
+note over client, store
+  Flow:    HTTPClient -> ServerRouter -> SessionStore -> return session
+  State:   No state change
+  Failure: 404 session not found
+  Success: 200 OK with session data
+end note
+
+@enduml

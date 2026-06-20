@@ -1,0 +1,40 @@
+@startuml sq_mcp03_adapt_mcp_tool
+' ============================================================
+' Title:     MCP-03 — ADAPT MCP Tool
+' Boundary:  nasim code agent
+' Purpose:   Wrap MCP server tool into nasim Tool format
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — MCP-03 ADAPT MCP Tool
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Tool format adaptation from MCP to nasim
+  Preconditions:  Tool discovered from MCP server (MCP-02)
+  Excludes:       Discovery and registration logic
+  Contexts:       Called by MCPDiscovery during tool registration
+  Rollback:       Reject incompatible tool schemas
+  Design:         Schema mapping with type coercion
+end note
+
+== MCP-03 ADAPT MCP Tool ==
+
+MCPToolAdapter -> MCPToolAdapter: parse MCP tool schema
+MCPToolAdapter -> MCPToolAdapter: map types to nasim Tool format
+MCPToolAdapter -> MCPToolAdapter: create execution wrapper
+MCPToolAdapter -> ToolRegistry: register(adapted_tool)
+ToolRegistry --> MCPToolAdapter: tool_registered(name, version)
+
+note over participants
+  Flow:    Parse schema -> map types -> create wrapper -> register
+  State:   adapting -> wrapped -> registered
+  Failure: Incompatible schema -> skip tool, log warning
+  Success: Tool available in nasim ToolRegistry with MCP backend
+end note
+
+@enduml

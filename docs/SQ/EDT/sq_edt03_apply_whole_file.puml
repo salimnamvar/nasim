@@ -1,6 +1,6 @@
-@startuml sq_edt03_validate_edit
+@startuml sq_edt03_apply_whole_file
 ' ============================================================
-' Title:     EDT-03 — VALIDATE Edit
+' Title:     EDT-03 — Apply Whole File
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Verify edit applied correctly
 ' Milestone: v1.0
@@ -82,7 +82,7 @@ note over user, tool
     - AgentOrchestrator → EditValidator → FileSystem + ToolRegistry → ValidationResult
 
   State:
-    - IDLE → READING → CHECKING → LINTING → DONE
+    - <back:#ECEFF1>IDLE</back> → READING → CHECKING → LINTING → DONE
 
   Failure:
     - Diff mismatch → validation fails

@@ -1,6 +1,6 @@
-@startuml sq_ctx03_summarize_old_exchanges
+@startuml sq_ctx03_distill_nodes
 ' ============================================================
-' Title:     CTX-03 — Summarize Old Exchanges
+' Title:     CTX-03 — Distill Nodes
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Summarize old message exchanges into compact form
 ' Milestone: v1.0
@@ -42,7 +42,7 @@ compactor --> compactor : return summary message
 
 note over compactor, provider
   Flow:    select old -> build prompt -> LLM summarize -> summary message
-  State:   COMPACTING
+  State:   <back:#E0F2F1>COMPACTING</back>
   Failure: Empty summary -> truncated raw fallback
   Success: Summary message ready to replace old exchanges
 end note

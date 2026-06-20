@@ -78,7 +78,7 @@ note over user, fs
     - AgentOrchestrator → WireLogger → EventSerializer + FileSystem → AppendResult
 
   State:
-    - IDLE → SERIALIZING → APPENDING → DONE
+    - <back:#ECEFF1>IDLE</back> → SERIALIZING → APPENDING → DONE
 
   Failure:
     - Write failure → event lost, warning logged

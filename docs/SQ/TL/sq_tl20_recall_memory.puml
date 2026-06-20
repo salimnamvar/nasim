@@ -1,0 +1,56 @@
+@startuml sq_tl20_recall_memory
+' ============================================================
+' Title:     TL-20 — Recall Memory
+' Boundary:  nasim code agent
+' Purpose:   Recall knowledge from memory via MemoryTool
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — TL-20 Recall Memory
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "MemoryTool" as tool
+end box
+participant "MemoryStore" as mem
+
+note over participants
+  Scope:          Recall knowledge from the memory store by query
+  Preconditions:  MemoryTool initialized, memory not empty
+  Excludes:       Memory persist, search, scoping
+  Contexts:       Called by AGT-02; delegates to MEM-02
+  Rollback:       Error string returned to LLM
+  Design:         Delegates to MEM-02 RECALL Knowledge
+  Classification: Process Decomposition
+end note
+
+== TL-20 Recall Memory ==
+
+agent -> registry : execute("recall_memory", {query, scope?})
+registry -> tool : execute(query, scope)
+tool -> mem : MEM-02 recall(query, scope)
+
+break No matching knowledge
+    mem --> tool : empty result
+    tool --> registry : ToolResult(success=False, error="no match")
+    registry --> agent : ToolResult
+end
+
+mem --> tool : matching knowledge
+tool --> registry : ToolResult(success=True, knowledge)
+registry --> agent : ToolResult
+
+note over participants
+  Flow:    AgentOrchestrator -> ToolRegistry -> MemoryTool -> MEM-02 RECALL Knowledge -> ToolResult
+  State:   No state change
+  Failure: No matching knowledge -> ToolResult(success=False)
+  Success: Recalled knowledge returned
+end note
+
+@enduml

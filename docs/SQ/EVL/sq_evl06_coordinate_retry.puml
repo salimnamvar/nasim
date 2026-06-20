@@ -1,6 +1,6 @@
-@startuml sq_evl03_coordinate_retry
+@startuml sq_evl06_coordinate_retry
 ' ============================================================
-' Title:     EVL-03 — COORDINATE Retry
+' Title:     EVL-06 — Coordinate Retry
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Retry with feedback on failure
 ' Milestone: v1.0
@@ -89,7 +89,7 @@ note over user, budget
     - AgentOrchestrator → RetryCoordinator → FileSystem + FeedbackInjector → RetryResult
 
   State:
-    - IDLE → CHECKING_LIMIT → RESTORING → INJECTING → DONE
+    - <back:#ECEFF1>IDLE</back> → CHECKING_LIMIT → RESTORING → INJECTING → DONE
 
   Failure:
     - Max retries exceeded → RetryExhausted error

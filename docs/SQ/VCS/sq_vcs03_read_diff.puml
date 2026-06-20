@@ -1,0 +1,39 @@
+@startuml sq_vcs03_read_diff
+' ============================================================
+' Title:     VCS-03 — READ Diff
+' Boundary:  nasim code agent
+' Purpose:   Read diff of staged or unstaged changes
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — VCS-03 READ Diff
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Diff inspection for staged/unstaged changes
+  Preconditions:  Git repository with changes
+  Excludes:       Commit operations (VCS-02)
+  Contexts:       Pre-commit review, change inspection
+  Rollback:       No rollback needed (read-only operation)
+  Design:         Unified diff format with context lines
+end note
+
+== VCS-03 READ Diff ==
+
+AgentOrchestrator -> GitStatus: get_diff(scope)
+GitStatus -> GitStatus: git diff --cached (staged) or git diff (unstaged)
+GitStatus -> GitStatus: parse diff output
+GitStatus --> AgentOrchestrator: diff_content(files, hunks)
+
+note over participants
+  Flow:    Determine scope -> execute git diff -> parse -> return
+  State:   idle -> diffing -> returned
+  Failure: No changes -> return empty diff
+  Success: Agent receives diff content with file/hunk structure
+end note
+
+@enduml

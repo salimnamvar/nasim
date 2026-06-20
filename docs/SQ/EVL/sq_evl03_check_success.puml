@@ -1,0 +1,71 @@
+@startuml sq_evl03_check_success
+' ============================================================
+' Title:     EVL-03 — CHECK Success
+' Boundary:  nasim code agent
+' Purpose:   Run user-defined success checks and return pass/fail
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — EVL-03 CHECK Success
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Layer" #F9FBE7
+  participant "EvaluationEngine" as engine
+  participant "SuccessCheckRunner" as runner
+end box
+box "Tool Layer" #F3E5F5
+  participant "ShellRunner" as shell
+end box
+
+note over participants
+  Scope:          Run user-defined success checks and aggregate pass/fail
+  Preconditions:  Success check commands configured, shell environment available
+  Excludes:       Task completion evaluation (EVL-02), retry coordination (EVL-04)
+  Contexts:       EVL-01 EVALUATE Task delegates success checks here
+  Rollback:       No state change — read-only execution
+  Design:         SuccessCheckRunner executes each check, captures exit codes and output
+  Classification: Process Decomposition
+end note
+
+== EVL-03 CHECK Success ==
+
+agent -> engine : CHECK_SUCCESS(check_commands[])
+activate engine
+
+engine -> runner : run_checks(check_commands)
+activate runner
+
+loop for each check_command
+    runner -> shell : execute(check_command, timeout=30s)
+    activate shell
+    alt exit_code == 0
+        shell --> runner : CheckOutput(exit_code=0, stdout)
+    else exit_code != 0
+        shell --> runner : CheckOutput(exit_code, stderr)
+    end
+    deactivate shell
+
+    runner -> runner : record_result(check_command, output)
+end
+
+runner -> runner : aggregate_results()
+
+runner --> engine : SuccessCheckResult(passed, results[])
+deactivate runner
+
+engine --> agent : SuccessCheckResult
+deactivate engine
+
+note over participants
+  Flow:    EvaluationEngine -> SuccessCheckRunner -> run user-defined checks -> return pass/fail
+  State:   <back:#ECEFF1>IDLE</back> → RUNNING → AGGREGATING → DONE
+  Failure: Any check fails → SuccessCheckResult(passed=false)
+  Success: All checks pass → SuccessCheckResult(passed=true)
+end note
+
+@enduml

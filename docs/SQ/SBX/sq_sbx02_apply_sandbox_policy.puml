@@ -1,0 +1,40 @@
+@startuml sq_sbx02_apply_sandbox_policy
+' ============================================================
+' Title:     SBX-02 — APPLY Sandbox Policy
+' Boundary:  nasim code agent
+' Purpose:   Load and apply sandbox security policy
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — SBX-02 APPLY Sandbox Policy
+
+' Participants with box colors per C4 layer
+
+note over participants
+  Scope:          Sandbox policy loading and application
+  Preconditions:  Policy file exists, SandboxPolicy initialized
+  Excludes:       Command execution (SBX-01), monitoring (SBX-03)
+  Contexts:       Called by SBX-01 before command execution
+  Rollback:       Revert to default policy on validation failure
+  Design:         Declarative policy with rule inheritance
+end note
+
+== SBX-02 APPLY Sandbox Policy ==
+
+AgentOrchestrator -> SandboxPolicy: load_policy(policy_path)
+SandboxPolicy -> SandboxPolicy: read policy file
+SandboxPolicy -> SandboxPolicy: validate rules
+SandboxPolicy -> SandboxPolicy: apply to sandbox instance
+SandboxPolicy --> AgentOrchestrator: policy_applied(rules_count)
+
+note over participants
+  Flow:    Read policy -> validate -> apply -> confirm
+  State:   loading -> validating -> applied
+  Failure: Invalid policy -> revert to defaults, log error
+  Success: Agent receives policy application confirmation
+end note
+
+@enduml

@@ -1,6 +1,6 @@
-@startuml sq_agt01_execute_user_task
+@startuml sq_agt01_process_user_task
 ' ============================================================
-' Title:     AGT-01 — PROCESS User Task
+' Title:     AGT-01 — Process User Task
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Core agentic loop: LLM call -> tool dispatch -> repeat
 ' Milestone: v1.0
@@ -58,9 +58,6 @@ note over user, gate
     - PermissionGate consulted before every tool execution
     - Recursive: after tool dispatch, re-calls Provider for next response
 
-  Returns:
-    - Success: Done event with final text response
-    - Failure: Error event with error description
 end note
 
 == agt01 PROCESS User Task ==
@@ -119,7 +116,7 @@ note over user, gate
     - User → REPLSession → AgentOrchestrator → Provider → (tool loop) → Done
 
   State:
-    - IDLE → LISTENING → THINKING → [TOOL_EXEC]* → RESPONDING → IDLE
+    - <back:#ECEFF1>IDLE</back> → <back:#E8EAF6>LISTENING</back> → <back:#FFF3E0>THINKING</back> → [<back:#F3E5F5>TOOL_EXEC</back>]* → <back:#E8F5E9>RESPONDING</back> → <back:#ECEFF1>IDLE</back>
 
   Failure:
     - LLM error or tool error → ERROR → IDLE
@@ -127,10 +124,6 @@ note over user, gate
   Success:
     - Done event with final text response
 
-  Key invariants:
-    - AgentOrchestrator never prints directly
-    - Every tool call goes through PermissionGate
-    - ConversationHistory owns message list integrity
 end note
 
 @enduml

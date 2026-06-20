@@ -1,0 +1,63 @@
+@startuml sq_agt14_handle_error
+' ============================================================
+' Title:     AGT-14 — Handle Error
+' Boundary:  nasim code agent
+' Purpose:   Classify errors and determine recovery action
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — AGT-14 Handle Error
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "ErrorBoundary" as eb
+end box
+box "Safety Layer" #FFF9C4
+  participant "SafetyCoordinator" as safety
+end box
+
+note over agent, safety
+  Scope:          Classify errors and determine recovery strategy
+  Preconditions:  Error occurred in agent loop (LLM, tool, or session)
+  Excludes:       Error display (CLI-03), error logging (OBS-01)
+  Contexts:       Called by AGT-01 when LLM or tool call fails
+  Rollback:       Unrecoverable error → terminate task with error event
+  Design:         Error classification drives retry, fallback, or abort decisions
+end note
+
+== AGT-14 Handle Error ==
+
+agent -> eb : handle(error)
+activate eb
+
+eb -> eb : classify error type
+eb -> eb : determine severity
+
+alt retryable error (transient)
+    eb -> eb : set retry policy (backoff + max retries)
+    eb --> agent : RecoveryAction(retry)
+else recoverable error (config)
+    eb -> safety : check safety constraints
+    activate safety
+    safety --> eb : safety_status
+    deactivate safety
+    eb -> eb : determine fallback strategy
+    eb --> agent : RecoveryAction(fallback)
+else unrecoverable error
+    eb -> eb : log error details
+    eb --> agent : RecoveryAction(abort)
+end
+
+deactivate eb
+
+note over agent, safety
+  Flow:    AgentOrchestrator → ErrorBoundary → classify → determine recovery → return action
+  State:   <back:#FFEBEE>ERROR</back> → CLASSIFYING → <back:#FBE9E7>RETRY</back> | FALLBACK | ABORT
+  Failure: Unrecoverable → abort with error event
+  Success: Recovery action returned for agent to execute
+end note
+
+@enduml

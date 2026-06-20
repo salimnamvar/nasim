@@ -1,0 +1,100 @@
+@startuml sq_edt07_apply_diff_sandbox
+' ============================================================
+' Title:     EDT-07 — APPLY Diff Sandbox
+' Boundary:  nasim code agent
+' Purpose:   Apply diff in isolated sandbox before committing to real file
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — EDT-07 APPLY Diff Sandbox
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Layer" #FFF3E0
+  participant "EditStrategyManager" as esm
+  participant "DiffSandboxCoder" as dsc
+end box
+box "Sandbox Layer" #B3E5FC
+  participant "DiffSandboxManager" as dsm
+end box
+box "FileSystem Layer" #F3E5F5
+  participant "FileSystem" as fs
+end box
+
+note over participants
+  Scope:          Apply diff in sandbox, validate, then commit to real file
+  Preconditions:  Diff generated, sandbox environment available
+  Excludes:       Direct file edits, AST-level manipulation
+  Contexts:       EDT-01 SELECT Strategy chooses this for risky or large diffs
+  Rollback:       Sandbox validation fails → discard sandbox, report error
+  Design:         DiffSandboxCoder delegates to DiffSandboxManager for isolation
+  Classification: Process Decomposition
+end note
+
+== EDT-07 APPLY Diff Sandbox ==
+
+agent -> esm : APPLY_DIFF_SANDBOX(file_path, diff_patch)
+activate esm
+
+esm -> dsc : code_sandboxed_diff(file_path, diff_patch)
+activate dsc
+
+dsc -> dsm : create_sandbox(file_path)
+activate dsm
+dsm -> fs : copy_to_sandbox(file_path)
+activate fs
+fs --> dsm : sandbox_path
+deactivate fs
+dsm --> dsc : SandboxHandle(sandbox_path)
+deactivate dsm
+
+dsc -> dsm : apply_diff(sandbox_path, diff_patch)
+activate dsm
+dsm -> fs : apply_patch(sandbox_path, diff_patch)
+activate fs
+fs --> dsm : patch_result
+deactivate fs
+dsm --> dsc : DiffApplyResult
+deactivate dsm
+
+dsc -> dsm : validate_sandbox(sandbox_path)
+activate dsm
+dsm -> dsm : run_syntax_check(sandbox_path)
+dsm -> dsm : run_basic_validation(sandbox_path)
+dsm --> dsc : ValidationResult
+deactivate dsm
+
+alt validation passes
+    dsc -> dsm : commit_sandbox(sandbox_path, file_path)
+    activate dsm
+    dsm -> fs : move_sandbox_to_target(sandbox_path, file_path)
+    activate fs
+    fs --> dsm : write_result
+    deactivate fs
+    dsm --> dsc : CommitResult
+    deactivate dsm
+else validation fails
+    dsc -> dsm : discard_sandbox(sandbox_path)
+    activate dsm
+    dsm --> dsc : DiscardResult
+    deactivate dsm
+end
+
+dsc --> esm : EditResult(success, file_path)
+deactivate dsc
+
+esm --> agent : EditResult
+deactivate esm
+
+note over participants
+  Flow:    AgentOrchestrator → EditStrategyManager → DiffSandboxCoder → DiffSandboxManager → sandbox validate → apply
+  State:   <back:#ECEFF1>IDLE</back> → SANDBOXING → APPLYING → VALIDATING → COMMITTING → DONE
+  Failure: Validation fails → sandbox discarded, error reported
+  Success: EditResult with sandbox-validated file applied
+end note
+
+@enduml

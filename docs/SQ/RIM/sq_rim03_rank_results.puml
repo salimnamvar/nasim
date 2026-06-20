@@ -1,6 +1,6 @@
-@startuml sq_rim02_rank_symbols
+@startuml sq_rim03_rank_results
 ' ============================================================
-' Title:     RIM-02 — RANK Symbols (PageRank + Chat Personalization)
+' Title:     RIM-03 — Rank Results
 ' Boundary:  nasim code agent CLI
 ' Purpose:   PageRank ranking with chat-personalization for symbol importance
 ' Milestone: v1.0
@@ -89,7 +89,7 @@ note over user, history
     - AgentOrchestrator → SymbolRanker → SymbolGraph + ConversationHistory → RankedSymbolList
 
   State:
-    - IDLE → COMPUTING → CONVERGING → BOOSTING → SORTED
+    - <back:#ECEFF1>IDLE</back> → COMPUTING → CONVERGING → BOOSTING → SORTED
 
   Failure:
     - Convergence failure → fallback to degree centrality

@@ -1,0 +1,61 @@
+@startuml sm_plan_lifecycle
+' ============================================================
+' Title:     nasim — Plan Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Entity lifecycle for Plan (persisted in PlanSession)
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — Plan Lifecycle
+
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+}
+
+[*] --> EMPTY : Startup
+
+state "EMPTY" as EMPTY #ECEFF1
+EMPTY : No plan active.
+EMPTY : Default state.
+
+state "BUILDING" as BUILDING #FFF3E0
+BUILDING : Plan being constructed.
+BUILDING : AGT-07 QUEUE Plan.
+
+state "QUEUED" as QUEUED #E3F2FD
+QUEUED : Plan queued for approval.
+QUEUED : Plan construction complete.
+
+state "APPROVED" as APPROVED #2E7D32
+APPROVED : Plan approved by user.
+APPROVED : AGT-08 APPROVE Plan.
+
+state "EXECUTING" as EXECUTING #A5D6A7
+EXECUTING : Plan steps being executed.
+EXECUTING : Approved plan, tool calls dispatched.
+
+state "COMPLETED" as COMPLETED #1B5E20
+COMPLETED : All plan steps finished.
+COMPLETED : Terminal state.
+
+state "REJECTED" as REJECTED #B71C1C
+REJECTED : Plan rejected by user.
+REJECTED : Terminal state.
+
+EMPTY --> BUILDING : AGT-07 /plan command
+BUILDING --> QUEUED : AGT-07 plan queued
+BUILDING --> EMPTY : AGT-07 /plan off
+QUEUED --> APPROVED : AGT-08 /approve
+QUEUED --> REJECTED : User rejects
+APPROVED --> EXECUTING : AGT-08 execution starts
+EXECUTING --> COMPLETED : All steps done
+EXECUTING --> EMPTY : Execution error, plan discarded
+COMPLETED --> [*]
+REJECTED --> [*]
+
+@enduml

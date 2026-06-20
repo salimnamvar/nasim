@@ -55,7 +55,7 @@ provider --> agent : stream complete
 
 note over user, api
   Flow:    Messages -> HTTP stream -> parse chunks -> yield str | ToolCall
-  State:   THINKING -> THINKING (no state change)
+  State:   <back:#FFF3E0>THINKING</back> -> <back:#FFF3E0>THINKING</back> (no state change)
   Failure: Connection drop -> ProviderError
   Success: Stream of text tokens and ToolCall objects
 end note

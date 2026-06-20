@@ -94,7 +94,7 @@ note over agent, prom
     - AgentOrchestrator/Provider/ToolRegistry → MetricsCollector → in-memory metrics → /metrics scrape
 
   State:
-    - IDLE → RECORDING → DONE
+    - <back:#ECEFF1>IDLE</back> → RECORDING → DONE
 
   Failure:
     - Record failure → silently ignored (never blocks agent)

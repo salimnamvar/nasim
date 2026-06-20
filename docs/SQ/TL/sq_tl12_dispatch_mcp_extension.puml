@@ -1,6 +1,6 @@
-@startuml sq_tl12_invoke_mcp_extension
+@startuml sq_tl12_dispatch_mcp_extension
 ' ============================================================
-' Title:     TL-12 — Invoke MCP Extension
+' Title:     TL-12 — Dispatch MCP Extension
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Invoke tools from MCP server extensions
 ' Milestone: v1.0
