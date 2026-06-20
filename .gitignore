@@ -45,7 +45,7 @@ TEST*.xml
 .cache/
 .eslintcache
 
-# Hidden directories (all dot-dirs ignored — AI context, IDE, agent tooling, etc.)
+# Hidden directories
 .*/
 
 # IDE non-hidden artifacts
