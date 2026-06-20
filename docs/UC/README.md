@@ -14,13 +14,12 @@
 | AGT-02 | AGT | DISPATCH Tool Call | AgentOrchestrator |
 | AGT-03 | AGT | UPDATE Conversation | ConversationHistory |
 | AGT-04 | AGT | DELETE History | ConversationHistory |
-| AGT-05 | AGT | CHECK Permission | PermissionGate |
 | AGT-06 | AGT | COMPACT Context | ContextCompactor |
 | AGT-07 | AGT | QUEUE Plan | PlanSession |
 | AGT-08 | AGT | APPROVE Plan | PlanSession |
 | AGT-09 | AGT | SPAWN Subagent | SubagentCoordinator |
 | AGT-10 | AGT | COLLECT Subagent Result | SubagentCoordinator |
-| AGT-11 | AGT | DELEGATE Task | PersonaManager |
+| AGT-11 | AGT | DELEGATE to Persona | PersonaManager |
 | AGT-12 | AGT | LOAD Persona | PersonaManager |
 | AGT-13 | AGT | SWITCH Persona | PersonaManager |
 | AGT-14 | AGT | HANDLE Error | ErrorBoundary |
@@ -28,7 +27,7 @@
 | PRV-01 | PRV | REGISTER Provider | ProviderFactory |
 | PRV-02 | PRV | REQUEST Chat | Provider |
 | PRV-03 | PRV | STREAM Chat | Provider |
-| PRV-04 | PRV | SELECT Provider | ProviderFactory |
+| PRV-04 | PRV | SELECT Provider Backend | ProviderFactory |
 | CFG-01 | CFG | LOAD Config | ConfigLoader |
 | CFG-02 | CFG | VALIDATE Config | ConfigLoader |
 | CFG-03 | CFG | APPLY Layered Config | ConfigLoader |
@@ -107,6 +106,7 @@
 | OBS-03 | OBS | CORRELATE Trace | TraceCorrelator |
 | OBS-04 | OBS | REDACT Sensitive | LogRedactor |
 | OBS-05 | OBS | EXPOSE /metrics | MetricsCollector |
+| OBS-06 | OBS | EXPORT OTLP | OTelExporter |
 | MEM-01 | MEM | PERSIST Knowledge | MemoryStore |
 | MEM-02 | MEM | RECALL Knowledge | MemoryStore |
 | MEM-03 | MEM | SEARCH Knowledge | MemoryIndex |

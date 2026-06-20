@@ -43,7 +43,7 @@ skinparam actor<<system>> {
 ' Actors
 ' ============================================================
 
-actor "HTTP Client" as HTTPClient <<system>>
+actor "Agent" as Agent <<system>>
 
 ' ============================================================
 ' System Boundary
@@ -68,7 +68,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-HTTPClient --> EDT01
+Agent --> EDT01
 
 ' ============================================================
 ' Relationships

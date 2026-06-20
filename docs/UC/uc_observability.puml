@@ -57,6 +57,7 @@ rectangle "nasim" {
     usecase "**OBS-03 CORRELATE Trace**\n--\nGenerate and bind trace/span ids per entrypoint" as OBS03
     usecase "**OBS-04 REDACT Sensitive**\n--\nStrip secrets before any emission" as OBS04
     usecase "**OBS-05 EXPOSE /metrics**\n--\nServe /metrics endpoint for pull scrape" as OBS05
+    usecase "**OBS-06 EXPORT OTLP**\n--\nExport traces/metrics via OTLP (optional)" as OBS06
   }
 }
 

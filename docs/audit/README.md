@@ -23,6 +23,8 @@
 | [audit.2026.06.20.deep.domain.audit.md](audit.2026.06.20.deep.domain.audit.md) | ML / RL / NLP domain audit | **DOMAIN AUDIT** — Per-agent deep-dive with 20-dimension scoring (ML, RL, NLP, SWE); enhancement roadmap E-01–E-09; 9.1/10 target |
 | [audit.2026.06.20.logging.observability.car.md](audit.2026.06.20.logging.observability.car.md) | Logging & Observability (CAR) | **FOCUSED AUDIT** — nasim vs tenas LOG draft + 28 refs; wire vs structured; C4 gaps + enhancement to 9.5+ design |
 | [audit.2026.06.20.c4-design-layer.car.md](audit.2026.06.20.c4-design-layer.car.md) | C4 Layer Deep Audit (CAR) | **DEEP C4 AUDIT** — Strict audit of Context→Container→Component vs c4.md + design-chain + cicd + anti-patterns + 2026 agentic best practices; 213 linter findings analyzed; full principle checklist + CAR items |
+| [audit.2026.06.20.uc-layer.car.md](audit.2026.06.20.uc-layer.car.md) | UC Layer Audit (CAR) | **UC AUDIT** — Audit of UC diagrams vs C4 + uc.md rules; 15 critical defects; corrected verb vocabulary, actor vocabulary, reference style template |
+| [audit.2026.06.20.sq-sm-chain.car.md](audit.2026.06.20.sq-sm-chain.car.md) | C4→UC→SM→SQ Chain Audit (CAR) | **CHAIN AUDIT** — 80 of 151 SQ files present; 71 missing; SM has 1 of 4 required files; full structural template compliance; ROD/CSR/DRY/OOP violations; proposed state color palette |
 
 ---
 
@@ -41,6 +43,8 @@
 10. **audit.2026.06.20.deep.domain.audit.md** — ML/RL/NLP deep domain audit with per-agent 20-dim scoring and E-01–E-09 enhancement roadmap (latest)
 11. **audit.2026.06.20.logging.observability.car.md** — dedicated logging/observability + wire log vs tenas + references (CAR)
 12. **audit.2026.06.20.c4-design-layer.car.md** — strict C4 Context/Container/Component deep audit (linter + all principles + CAR items)
+13. **audit.2026.06.20.uc-layer.car.md** — UC diagrams vs C4; 15 critical defects; corrected verb/actor vocabulary
+14. **audit.2026.06.20.sq-sm-chain.car.md** — C4→UC→SM→SQ chain: 71 missing SQ files, 3 missing SM files, structural template compliance, ROD/CSR/DRY findings, color palette
 
 ---
 

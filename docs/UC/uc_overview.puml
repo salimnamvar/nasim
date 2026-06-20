@@ -62,7 +62,7 @@ rectangle "nasim" {
   }
 
   package "Provider (PRV)" {
-    usecase "**PRV-01 REQUEST Chat**\n--\nLLM provider abstraction via litellm" as PRV01
+    usecase "**PRV-01 REGISTER Provider**\n--\nLLM provider abstraction via litellm" as PRV01
   }
 
   package "Tools (TL)" {
@@ -82,11 +82,11 @@ rectangle "nasim" {
   }
 
   package "Server (SRV)" {
-    usecase "**SRV-01 SERVE HTTP API**\n--\nRESTful API + SSE streaming" as SRV01
+    usecase "**SRV-01 LIST Sessions**\n--\nRESTful API + SSE streaming" as SRV01
   }
 
   package "Hooks (HK)" {
-    usecase "**HK-01 DISPATCH Hook**\n--\nPre/post hooks for tool use and LLM calls" as HK01
+    usecase "**HK-01 REGISTER Hook**\n--\nPre/post hooks for tool use and LLM calls" as HK01
   }
 
   package "Plugins (PLG)" {

@@ -56,17 +56,20 @@ rectangle "nasim" {
     usecase "**AGT-02 DISPATCH Tool Call**\n--\nRoute tool call to registry" as AGT02
     usecase "**AGT-03 UPDATE Conversation**\n--\nManage message list and token count" as AGT03
     usecase "**AGT-04 DELETE History**\n--\nReset conversation history" as AGT04
-    usecase "**AGT-05 CHECK Permission**\n--\nValidate tool permission via SafetyCoordinator" as AGT05
     usecase "**AGT-06 COMPACT Context**\n--\nSummarize old exchanges via secondary LLM" as AGT06
     usecase "**AGT-07 QUEUE Plan**\n--\nHold queued tool calls in plan mode" as AGT07
     usecase "**AGT-08 APPROVE Plan**\n--\nDrain queued plan calls" as AGT08
     usecase "**AGT-09 SPAWN Subagent**\n--\nCreate child agent with restricted tools" as AGT09
     usecase "**AGT-10 COLLECT Subagent Result**\n--\nGather results from completed child agents" as AGT10
-    usecase "**AGT-11 DELEGATE Task**\n--\nAssign tasks to specialized roles" as AGT11
+    usecase "**AGT-11 DELEGATE to Persona**\n--\nAssign tasks to specialized persona roles" as AGT11
     usecase "**AGT-12 LOAD Persona**\n--\nLoad persona configuration" as AGT12
     usecase "**AGT-13 SWITCH Persona**\n--\nSwitch to different persona at runtime" as AGT13
     usecase "**AGT-14 HANDLE Error**\n--\nStructured error handling with recovery" as AGT14
     usecase "**AGT-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection, egress checks" as AGT15
+  }
+
+  package "Safety Group (SAF)" {
+    usecase "**SAF-01 CHECK Permission**\n--\nValidate tool permission via PermissionGate" as SAF01
   }
 }
 
@@ -83,7 +86,7 @@ HTTPClient --> AGT01
 
 AGT01 ..> AGT02 : <<include>>
 AGT01 ..> AGT03 : <<include>>
-AGT02 ..> AGT05 : <<include>>
+AGT02 ..> SAF01 : <<include>>
 AGT01 ..> AGT06 : <<extend>>
 AGT07 ..> AGT08 : <<extend>>
 AGT01 ..> AGT09 : <<extend>>

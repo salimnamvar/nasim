@@ -33,10 +33,17 @@ skinparam actor {
   FontSize 12
 }
 
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
 ' ============================================================
 ' Actors
 ' ============================================================
 
+actor "Agent" as Agent <<system>>
 actor "Developer" as Developer
 
 ' ============================================================
@@ -56,6 +63,9 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
+Agent --> RTG01
+Agent --> RTG02
+Agent --> RTG03
 Developer --> RTG04
 
 ' ============================================================

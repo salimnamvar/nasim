@@ -43,7 +43,7 @@ skinparam actor<<system>> {
 ' Actors
 ' ============================================================
 
-actor "HTTP Client" as HTTPClient <<system>>
+actor "Agent" as Agent <<system>>
 
 ' ============================================================
 ' System Boundary
@@ -54,7 +54,7 @@ rectangle "nasim" {
     usecase "**PRV-01 REGISTER Provider**\n--\nInitialize provider from config" as PRV01
     usecase "**PRV-02 REQUEST Chat**\n--\nSend chat request to LLM provider" as PRV02
     usecase "**PRV-03 STREAM Chat**\n--\nStream chat response from LLM provider" as PRV03
-    usecase "**PRV-04 SELECT Provider**\n--\nSelect provider backend from config" as PRV04
+    usecase "**PRV-04 SELECT Provider Backend**\n--\nSelect provider backend from config" as PRV04
   }
 }
 
@@ -62,8 +62,8 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-HTTPClient --> PRV02
-HTTPClient --> PRV03
+Agent --> PRV02
+Agent --> PRV03
 
 ' ============================================================
 ' Relationships
