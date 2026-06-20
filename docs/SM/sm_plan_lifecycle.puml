@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Plan (persisted in PlanSession)
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   6.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' ============================================================
@@ -53,7 +53,7 @@ BUILDING --> EMPTY : AGT-07 /plan off
 QUEUED --> APPROVED : AGT-08 /approve
 QUEUED --> REJECTED : AGT-08 user rejects
 APPROVED --> EXECUTING : AGT-08 execution starts
-EXECUTING --> COMPLETED : AGT-01 all steps executed
+EXECUTING --> COMPLETED : implicit: last step executed
 EXECUTING --> EMPTY : Execution error, plan discarded
 COMPLETED --> [*]
 REJECTED --> [*]

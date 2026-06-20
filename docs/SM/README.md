@@ -42,7 +42,7 @@
 | QUEUED | Plan queued for approval | Plan construction complete | #E3F2FD |
 | APPROVED | Plan approved by user | AGT-08 APPROVE Plan | #2E7D32 |
 | EXECUTING | Plan steps being executed | Plan approved, execution started | #A5D6A7 |
-| COMPLETED | All plan steps finished | AGT-01 all steps executed | #1B5E20 |
+| COMPLETED | All plan steps finished | Implicit: agent loop finishes all steps | #1B5E20 |
 | REJECTED | Plan rejected by user | User rejects plan | #B71C1C |
 
 ## Plugin Lifecycle States (Entity)
@@ -98,7 +98,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
 | APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
 | EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
-| COMPLETED | AGT-01 PROCESS User Task | Implicit: agent loop finishes all steps |
+| COMPLETED | Implicit | Agent loop finishes all steps |
 | REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
 
 ### Plugin Lifecycle

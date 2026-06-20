@@ -17,7 +17,7 @@ title nasim — Component Overview
 Container_Boundary(core_library, "Core Library") {
 
     Container_Boundary(agent_group, "Agent Group") {
-        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields AgentEvent objects")
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields structured events")
         Component(subagent_coord, "SubagentCoordinator", "", "Parent-child orchestration, nesting limit 5, result aggregation")
         Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions")
         Component(persona_mgr, "PersonaManager", "", "Runtime persona switching for specialized agent roles")
@@ -39,9 +39,11 @@ Container_Boundary(core_library, "Core Library") {
     }
 
     Container_Boundary(tool_group, "Tool Group") {
+        Component(tool_abc, "Tool", "ABC", "Base tool: name, description, parameters, safe, execute")
         Component(tool_registry, "ToolRegistry", "", "Instance-based tool registry, dynamic registration for MCP")
         Component(file_tools, "FileTools", "", "ReadFileTool, WriteFileTool, EditFileTool")
         Component(search_tools, "SearchTools", "", "GrepTool, GlobTool, FindFileTool")
+        Component(dir_tool, "DirTool", "", "List directory contents")
         Component(shell_tool, "ShellTool", "", "Shell command execution via sandbox")
         Component(web_tools, "WebTools", "", "WebFetchTool, WebSearchTool")
         Component(git_tool, "GitTool", "", "Git status, diff, commit operations")
@@ -115,6 +117,7 @@ Container_Boundary(core_library, "Core Library") {
         Component(context_propagator, "ContextPropagator", "contextvars + threading", "Propagates trace context across Provider, Tool, Hook, Subagent, MCP boundaries")
         Component(log_redactor, "LogRedactor", "regex patterns", "Strips secrets before any emission. Always on")
         Component(dual_output_adapter, "DualOutputAdapter", "tty detection", "CLI: JSON to stdout (machine) + rich Renderer when isatty (human)")
+        Component(instrumentation_mw, "InstrumentationMiddleware", "ASGI middleware", "Outermost request handler for HTTP mode. Extracts/generates request_id; binds to contextvars for correlation via ContextPropagator")
         Component(otel_exporter, "OTelExporter", "opentelemetry-sdk (optional)", "Behind otel feature flag. Bridges spans to OTel SDK")
     }
 
@@ -157,7 +160,6 @@ Container_Boundary(core_library, "Core Library") {
         Component(architect_coder, "ArchitectCoder", "", "Multi-file architectural edit strategy with planning")
         Component(inline_patch_coder, "InlinePatchCoder", "", "apply-patch format edit")
         Component(strategy_selector, "StrategySelector", "", "Selects optimal strategy: edit size, risk, file type heuristics")
-        Component(strategy_heuristics, "StrategyHeuristics", "", "Rules: edit_size, risk_level, file_type, complexity")
     }
 
     Container_Boundary(evaluation_group, "Evaluation Group") {
@@ -176,14 +178,11 @@ Container_Boundary(core_library, "Core Library") {
         Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
         Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")
         Component(wire_reader, "WireReader", "", "Reads and parses wire log entries for replay and analysis")
-        Component(turn_index, "TurnIndex", "", "Indexes wire log entries by turn number for fast random access")
         Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
     }
 
     Container_Boundary(context_graph_group, "Context Graph Group") {
         Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
-        Component(context_node, "ContextNode", "data structure", "Context unit: code block, memory entry, file section with token cost")
-        Component(context_edge, "ContextEdge", "data structure", "Typed edge between nodes: depends, references, includes, follows")
         Component(context_processor, "ContextProcessor", "ABC", "Base interface for pipeline processors")
         Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
         Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget")
@@ -224,12 +223,12 @@ Rel(agent_orch, eval_engine, "EVALUATE, RETRY")
 Rel(agent_orch, wire_log, "APPEND, REPLAY")
 Rel(agent_orch, context_graph, "PROCESS")
 Rel(agent_orch, safety_coord, "safety validation before tool exec")
-' Rel(agent_orch, cli_container) and Rel(agent_orch, server_container) REMOVED
-' Core must never depend on its callers — dependency inversion violation fixed (p1.md #1)
+
 
 Rel(conv_history, compactor, "compact when exceeded")
 Rel(compactor, provider, "secondary LLM call")
 
+Rel(tool_registry, tool_abc, "manages instances")
 Rel(tool_registry, sandbox_executor, "sandboxed execution")
 Rel(tool_registry, mcp_tool_adapter, "MCP tools")
 
@@ -263,7 +262,6 @@ Rel(repo_intel_mgr, semantic_search_svc, "vector search")
 Rel(repo_intel_mgr, repo_map_builder, "build repo map")
 
 Rel(edit_strategy_mgr, strategy_selector, "select strategy")
-Rel(strategy_selector, strategy_heuristics, "applies rules")
 Rel(search_replace_coder, edit_strategy, "extends")
 Rel(whole_file_coder, edit_strategy, "extends")
 Rel(unified_diff_coder, edit_strategy, "extends")
@@ -284,7 +282,6 @@ Rel(eval_engine, turn_budget_injector, "inject budget")
 
 Rel(wire_log, wire_appender, "append entries")
 Rel(wire_log, wire_reader, "read entries")
-Rel(wire_log, turn_index, "index by turn")
 Rel(wire_log, session_fork_mgr, "fork from turn")
 
 Rel(pipeline_orchestrator, truncation_processor, "truncation stage")
@@ -307,6 +304,9 @@ Rel(config_loader, structured_logger, "configures log level and format")
 Rel(config_loader, metrics_collector, "enables/disables metrics")
 Rel(config_loader, log_redactor, "configures redaction rules")
 Rel(config_loader, otel_exporter, "enables/disables OTel feature")
+Rel(instrumentation_mw, context_propagator, "generates and binds request_id to contextvars")
+Rel(instrumentation_mw, metrics_collector, "records HTTP request duration and status")
+Rel(instrumentation_mw, structured_logger, "logs HTTP request lifecycle")
 Rel(trace_correlator, otel_exporter, "bridges spans to OTel SDK (optional)")
 Rel(metrics_collector, otel_exporter, "bridges metrics to OTel SDK (optional)")
 

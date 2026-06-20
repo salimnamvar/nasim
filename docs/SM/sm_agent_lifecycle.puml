@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI + HTTP API
 ' Purpose:   Process FSM showing all agent states and transitions
 ' Milestone: v1.0
-' Version:   5.0.0
+' Version:   6.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
@@ -99,10 +99,10 @@ LISTENING --> THINKING : CLI-01 input parsed
 
 THINKING --> RESPONDING : PRV-02 LLM returns text
 THINKING --> TOOL_EXEC : PRV-02 LLM returns tool_calls
-THINKING --> COMPACTING : token_count > budget
+THINKING --> COMPACTING : AGT-06 token_count > budget
 THINKING --> ROUTING : RTG-01 ModelRouter resolving
 THINKING --> ERROR : PRV-02 LLM call fails
-THINKING --> SERVING : Response to HTTP client
+THINKING --> RESPONDING : SRV-06 Response to HTTP client
 THINKING --> EVALUATING : task_complete AND evaluation_enabled
 
 ROUTING --> THINKING : RTG-01 Model selected

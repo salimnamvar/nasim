@@ -17,8 +17,13 @@ title nasim — Context Graph Component Diagram
 
 Container_Boundary(context_graph_boundary, "Context Graph Group") {
     Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
-    Component(context_node, "ContextNode", "data structure", "Context unit: code block, memory entry, file section with token cost. Internal to ContextGraph")
-    Component(context_edge, "ContextEdge", "data structure", "Typed edge between nodes: depends, references, includes, follows. Internal to ContextGraph")
+    note right of context_graph
+      Graph structure composed of ContextNode units
+      (code block, memory entry, file section) and
+      ContextEdge relationships (depends, references,
+      includes, follows) — data structures, not runtime components
+    end note
+
     Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
     Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget")
     Component(distillation_processor, "DistillationProcessor", "", "Summarizes and distills long context nodes")
@@ -31,8 +36,7 @@ Container_Ext(memory_group, "Memory Group")
 Container_Ext(repo_intelligence_group, "Repo Intelligence Group")
 System_Ext(llm_backend, "LLM Backend", "Used for distillation and summarization calls")
 
-Rel(context_graph, context_node, "contains nodes")
-Rel(context_graph, context_edge, "contains edges")
+
 Rel(pipeline_orchestrator, truncation_processor, "truncation stage")
 Rel(pipeline_orchestrator, distillation_processor, "distillation stage")
 Rel(pipeline_orchestrator, injection_processor, "injection stage")
@@ -40,8 +44,8 @@ Rel(pipeline_orchestrator, compaction_processor, "compaction stage")
 Rel(pipeline_orchestrator, token_budget_tracker, "track budget")
 Rel(pipeline_orchestrator, context_graph, "operates on graph")
 Rel(distillation_processor, llm_backend, "summarization call")
-Rel(injection_processor, memory_group, "INJECT Memory")
-Rel(injection_processor, repo_intelligence_group, "INJECT RepoMap")
+Rel(injection_processor, memory_group, "injects memory")
+Rel(injection_processor, repo_intelligence_group, "injects repo map")
 Rel(truncation_processor, token_budget_tracker, "queries remaining budget")
 Rel(compaction_processor, context_graph, "merges nodes")
 Rel(token_budget_tracker, context_graph, "reads node costs")

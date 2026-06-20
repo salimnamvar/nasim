@@ -17,16 +17,20 @@ title nasim — Router Component Diagram
 Container_Boundary(router_boundary, "Router Group") {
     Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
     Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
-    Component(provider_caps, "ProviderCapabilities", "", "Capability declaration + static metadata: streaming, tools, vision, reasoning, context limits, pricing")
 }
 
-Container_Ext(agent_group, "Agent Group")
-Container_Ext(provider_group, "Provider Group")
+note right of model_router
+  ProviderCapabilities is static metadata
+  (streaming, tools, vision, reasoning,
+  context limits, pricing) — not a runtime component
+end note
 
-Rel(agent_group, model_router, "route model selection")
-Rel(model_router, provider_group, "route to provider")
-Rel(model_router, provider_caps, "query capabilities")
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(provider, "Provider", "Provider Group")
+
+Rel(agent_orch, model_router, "route model selection")
+Rel(model_router, provider, "route to provider")
 Rel(model_router, fallback_chain, "trigger failover")
-Rel(fallback_chain, provider_group, "failover to next provider")
+Rel(fallback_chain, provider, "failover to next provider")
 
 @enduml

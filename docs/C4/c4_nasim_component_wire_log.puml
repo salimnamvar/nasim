@@ -19,20 +19,23 @@ Container_Boundary(wire_log_boundary, "Wire Log Group") {
     Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
     Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")
     Component(wire_reader, "WireReader", "ABC", "Reads and parses wire log entries for replay and analysis")
-    Component(turn_index, "TurnIndex", "", "Indexes wire log entries by turn number for fast random access")
     Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
 }
+
+note right of wire_log
+  TurnIndex is a data structure that indexes
+  wire log entries by turn number for fast
+  random access — not a runtime component
+end note
 
 Container_Ext(session_group, "Session Group")
 System_Ext(wire_log_dir, "Wire Log Storage", "~/.nasim/wire-logs/<session-id>/")
 
 Rel(wire_log, wire_appender, "appends entries")
 Rel(wire_log, wire_reader, "reads entries")
-Rel(wire_log, turn_index, "indexes by turn")
 Rel(wire_log, session_fork_mgr, "fork from turn")
 Rel(wire_appender, wire_log_dir, "writes log files")
 Rel(wire_reader, wire_log_dir, "reads log files")
-Rel(turn_index, wire_log_dir, "builds index")
 Rel(session_fork_mgr, session_group, "creates forked session")
 
 @enduml

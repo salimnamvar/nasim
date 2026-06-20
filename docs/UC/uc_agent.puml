@@ -6,7 +6,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Core agentic loop, permissions, context, plans, subagents
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -101,7 +101,7 @@ Agent --> SAF01_ext
 AGT01 ..> AGT02 : <<include>>
 AGT01 ..> AGT03 : <<include>>
 AGT02 ..> SAF01_ext : <<include>>
-AGT15 ..> SAF01_ext : <<include>>
+AGT15 ..> AGT02 : <<include>>
 AGT01 ..> AGT06 : <<extend>>
 AGT07 ..> AGT08 : <<extend>>
 AGT01 ..> AGT09 : <<extend>>

@@ -70,3 +70,5 @@
 - **No orphan components:** Every component in detail diagrams appears in the cross-container overview (ContextNode and ContextEdge are internal data structures within ContextGraph, not standalone components)
 - **Include pinned:** All diagrams pin C4-PlantUML to v2.10.0
 - **Version consistency:** All diagram headers use Version 6.0.0
+- **Passive Policies:** CompactionPolicy, StrategyHeuristics are configuration/rule objects. They appear in UC as passive policies but are NOT C4 components (no runtime behavior).
+- **Boundary syntax:** Internal logical groupings in component diagrams use `Boundary` (PlantUML generic) rather than `Container_Boundary` to avoid implying deployable container semantics for logical groups. This is an intentional deviation from strict C4-PlantUML for clarity.

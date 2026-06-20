@@ -21,13 +21,13 @@ Container_Boundary(safety_boundary, "Safety Group") {
     Component(egress_inspector, "EgressInspector", "", "Inspects outbound data for policy violations")
 }
 
-Container_Ext(agent_group, "Agent Group")
-Container_Ext(tool_group, "Tool Group")
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
-Rel(agent_group, safety_coord, "validates before tool dispatch")
+Rel(agent_orch, safety_coord, "validates before tool dispatch")
 Rel(safety_coord, permission_gate, "evaluates permissions")
 Rel(safety_coord, injection_scanner, "scans for injection")
 Rel(safety_coord, egress_inspector, "inspects outbound data")
-Rel(tool_group, safety_coord, "triggers safety checks")
+Rel(tool_registry, safety_coord, "triggers safety checks")
 
 @enduml

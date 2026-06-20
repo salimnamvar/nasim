@@ -26,8 +26,7 @@ Container_Boundary(edit_strategy_boundary, "Edit Strategy Group") {
     Component(fenced_block_coder, "FencedBlockCoder", "", "Fenced code block format edit")
     Component(function_level_coder, "FunctionLevelCoder", "", "AST-targeted function replacement")
     Component(inline_patch_coder, "InlinePatchCoder", "", "apply-patch format edit")
-    Component(strategy_selector, "StrategySelector", "", "Selects optimal strategy: edit size, risk, file type heuristics")
-    Component(strategy_heuristics, "StrategyHeuristics", "", "Rules: edit_size, risk_level, file_type, complexity")
+    Component(strategy_selector, "StrategySelector", "", "Selects optimal strategy: edit size, risk, file type heuristics. Applies heuristics: edit_size, risk_level, file_type, complexity")
 }
 
 Container_Ext(sandbox_group, "Sandbox Group")
@@ -44,7 +43,6 @@ Rel(fenced_block_coder, edit_strategy, "extends")
 Rel(function_level_coder, edit_strategy, "extends")
 Rel(inline_patch_coder, edit_strategy, "extends")
 Rel(strategy_selector, edit_strategy_mgr, "returns strategy choice")
-Rel(strategy_selector, strategy_heuristics, "applies rules")
 Rel(search_replace_coder, host_fs, "applies edits")
 Rel(whole_file_coder, host_fs, "rewrites files")
 Rel(unified_diff_coder, host_fs, "applies diffs")

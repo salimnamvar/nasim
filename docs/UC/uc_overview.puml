@@ -6,7 +6,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Cross-cutting view of all UC groups and actor interactions
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -190,6 +190,5 @@ UC_AGT ..> UC_RTG : <<include>>
 UC_AGT ..> UC_CTX : <<include>>
 UC_AGT ..> UC_EDT : <<extend>>
 UC_AGT ..> UC_EVL : <<extend>>
-UC_OBS ..> UC_WRL : <<extend>>
 
 @enduml

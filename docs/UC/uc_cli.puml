@@ -6,7 +6,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   REPL, argument parsing, slash commands, rich rendering
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
