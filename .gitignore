@@ -45,11 +45,10 @@ TEST*.xml
 .cache/
 .eslintcache
 
-# IDE
-.vscode/
-.vs/
-.vshistory/
-.idea/
+# Hidden directories (all dot-dirs ignored — AI context, IDE, agent tooling, etc.)
+.*/
+
+# IDE non-hidden artifacts
 *.iml
 *.ipr
 *.iws
@@ -67,14 +66,6 @@ $RECYCLE.BIN/
 *~
 .nfs*
 
-# AI Context
-.claude/
-.grok/
-.agents/
-.codex/
-.copilot/
-.copilot-suggestions/
-.githooks/
 
 # Node.js
 node_modules/
