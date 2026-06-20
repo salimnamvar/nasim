@@ -1,0 +1,52 @@
+@startuml sq_prv02_call_provider_chat
+' ============================================================
+' Title:     PRV-02 — Call Provider Chat
+' Boundary:  nasim code agent CLI
+' Purpose:   Synchronous LLM chat completion via provider abstraction
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+participant "AgentOrchestrator" as agent
+participant "Provider" as provider
+participant "LLM Provider API" as api
+
+box "Agent Layer" #E3F2FD
+end box
+box "Provider Layer" #FFF3E0
+end box
+
+note over provider
+  Scope:          Single synchronous chat completion
+  Preconditions:  Provider initialized and reachable
+  Excludes:       Streaming (PRV-03), tool parsing
+  Contexts:       Called by AGT-01 (Process User Task)
+  Rollback:       HTTP error raised as ProviderError
+  Design:         Uses httpx.AsyncClient with timeout
+end note
+
+user -> agent : (entry via AGT-01)
+agent -> provider : chat(messages, tools)
+provider -> api : HTTP POST /api/chat {model, messages, tools, stream:false}
+
+break HTTP error or timeout
+    api --> provider : connection error / timeout
+    provider --> agent : ProviderError("Connection failed")
+    agent -> agent : handle error -> ERROR state
+end
+
+api --> provider : JSON response
+provider -> provider : parse response -> LLMResponse
+provider --> agent : LLMResponse(content, tool_calls)
+
+note over provider
+  Flow:    Messages -> HTTP POST -> JSON parse -> LLMResponse
+  State:   THINKING -> THINKING (no state change)
+  Failure: HTTP error or timeout -> ProviderError
+  Success: LLMResponse with content and/or tool_calls
+end note
+
+@enduml

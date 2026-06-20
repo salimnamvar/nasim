@@ -1,0 +1,56 @@
+@startuml sq_cfg01_load_config
+' ============================================================
+' Title:     CFG-01 — Load Config
+' Boundary:  nasim code agent CLI
+' Purpose:   Layered config loading from all sources
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "ArgParser" as parser
+participant "ConfigLoader" as cfg
+database "Global YAML" as global_yaml
+database "Project YAML" as project_yaml
+database "Env Vars" as env_vars
+
+box "CLI Layer" #E8F5E9
+end box
+box "Config Layer" #E0F7FA
+end box
+
+note over cfg
+  Scope:          Load config from all sources and merge
+  Preconditions:  CLI invoked
+  Excludes:       Runtime config changes
+  Contexts:       Called by CLI-04 (Parse CLI Arguments)
+  Rollback:       Invalid YAML -> ConfigError
+  Design:         4-layer merge: global < project < env < CLI
+end note
+
+parser -> cfg : load(cli_args=argv)
+cfg -> global_yaml : read ~/.nasim/config.yaml
+global_yaml --> cfg : global_defaults
+cfg -> project_yaml : read .nasim/config.yaml
+project_yaml --> cfg : project_overrides
+cfg -> env_vars : read NASIM_* vars
+env_vars --> cfg : env_overrides
+cfg -> cfg : merge(global_defaults, project_overrides, env_overrides, cli_args)
+cfg -> cfg : validate Config fields
+
+break Invalid YAML or missing required fields
+    cfg -> cfg : raise ConfigError("details")
+    cfg --> parser : ConfigError
+end
+
+cfg --> parser : Config object
+
+note over cfg
+  Flow:    4 sources -> merge -> validate -> Config
+  State:   No state change
+  Failure: Invalid YAML or validation error -> ConfigError
+  Success: Typed Config dataclass ready
+end note
+
+@enduml

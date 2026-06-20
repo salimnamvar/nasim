@@ -1,0 +1,61 @@
+@startuml sq_tl11_git_status_diff_commit
+' ============================================================
+' Title:     TL-11 — Git Status Diff Commit
+' Boundary:  nasim code agent CLI
+' Purpose:   Git operations: status, diff, commit
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "ToolRegistry" as registry
+participant "GitTool" as git
+participant "Host Shell" as shell
+
+box "Tool Layer" #F3E5F5
+end box
+
+note over git
+  Scope:          Git status, diff, and commit operations
+  Preconditions:  Git repo in working directory
+  Excludes:       Branch operations, merge, push
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Rollback:       Git error returned as error string
+  Design:         Delegates to git CLI via subprocess
+end note
+
+registry -> git : execute(action, args)
+
+alt action = "status"
+    git -> shell : subprocess: git status --porcelain
+    shell --> git : status output
+    git --> registry : formatted status
+else action = "diff"
+    git -> shell : subprocess: git diff [args]
+    shell --> git : diff output
+    git --> registry : diff text
+else action = "commit"
+    git -> shell : subprocess: git add -A && git commit -m msg
+    shell --> git : commit output
+    git --> registry : commit confirmation
+end
+
+break Not a git repo
+    shell --> git : fatal: not a git repository
+    git --> registry : "Error: not a git repository"
+end
+
+break Nothing to commit
+    shell --> git : nothing to commit
+    git --> registry : "Nothing to commit"
+end
+
+note over git
+  Flow:    action -> git CLI -> output -> formatted string
+  State:   No state change
+  Failure: Not a repo, nothing to commit -> error string
+  Success: Git operation output
+end note
+
+@enduml

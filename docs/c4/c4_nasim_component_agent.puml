@@ -1,0 +1,48 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Agent Component Diagram
+' Boundary:  nasim code agent CLI
+' Purpose:   Agent layer internal components
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Agent Component Diagram
+
+Container_Boundary(agent_boundary, "Agent Layer") {
+    Component(agent_orch, "AgentOrchestrator", "nasim/agent/orchestrator.py", "Drives LLM/tool loop; emits AgentEvents; stateless per turn")
+    Component(conv_history, "ConversationHistory", "nasim/agent/history.py", "Owns messages list + token_count; triggers compaction")
+    Component(compactor, "ContextCompactor", "nasim/agent/compactor.py", "Summarizes old exchanges via secondary LLM call when budget exceeded")
+    Component(perm_gate, "PermissionGate", "nasim/agent/permission.py", "Per-tool safety check; blocks or prompts in ask mode")
+    Component(plan_session, "PlanSession", "nasim/agent/plan.py", "Holds queued tool calls in plan mode (Phase 2)")
+    Component(agent_events, "AgentEvent", "nasim/agent/events.py", "Event types: TextChunk, ToolStart, ToolResult, Error, Done")
+}
+
+System_Boundary(provider_boundary, "Provider Layer") {
+    Component(provider, "Provider", "nasim/provider/base.py", "Protocol: chat(), chat_stream(), model_name")
+}
+
+System_Boundary(tool_boundary, "Tool Layer") {
+    Component(tool_registry, "ToolRegistry", "nasim/tools/base.py", "Instance-based registry with dynamic registration")
+}
+
+System_Boundary(session_boundary, "Session Layer") {
+    Component(session_store, "SessionStore", "nasim/session/store.py", "Persists/loads message history")
+}
+
+Rel(agent_orch, provider, "chat / chat_stream")
+Rel(agent_orch, tool_registry, "execute tool calls")
+Rel(agent_orch, conv_history, "reads/writes messages")
+Rel(agent_orch, perm_gate, "checks tool permissions")
+Rel(agent_orch, agent_events, "yields events")
+Rel(conv_history, compactor, "triggers compaction")
+Rel(compactor, provider, "secondary LLM call for summarization")
+Rel(agent_orch, session_store, "save/load session")
+Rel(agent_orch, plan_session, "queue/approve plan (Phase 2)")
+
+SHOW_LEGEND()

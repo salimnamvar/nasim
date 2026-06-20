@@ -3,9 +3,9 @@
 ' Title:     nasim — UC: CLI Interaction
 ' Boundary:  nasim code agent CLI
 ' Purpose:   User interactions with the CLI layer
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
 ' Review:    —
 ' ============================================================
 
@@ -15,15 +15,29 @@ skinparam packageStyle rectangle
 actor "Developer" as user
 
 rectangle "CLI Interaction" {
-    usecase "Process User Input" as UC_CLI_01
+    usecase "PROCESS User Input" as UC_CLI_01
     usecase "Execute Slash Command" as UC_CLI_02
-    usecase "Display Streaming Output" as UC_CLI_03
+    usecase "STREAM Output" as UC_CLI_03
     usecase "Parse CLI Arguments" as UC_CLI_04
+    usecase "Toggle Plan Mode" as UC_CLI_05
+    usecase "Prompt Safety Approval" as UC_CLI_06
+}
+
+rectangle "Agent Layer" {
+    usecase "PROCESS User Task" as UC_AGT_01
+    usecase "Queue Plan" as UC_AGT_07
+    usecase "APPROVE Plan" as UC_AGT_08
+    usecase "CHECK Tool Permission" as UC_AGT_05
 }
 
 user --> UC_CLI_01
 user --> UC_CLI_02
+user --> UC_CLI_05
 UC_CLI_01 ..> UC_CLI_03 : <<include>>
 UC_CLI_04 ..> UC_CLI_01 : <<include>>
+UC_CLI_01 ..> UC_AGT_01 : <<include>>
+UC_CLI_05 ..> UC_AGT_07 : <<include>>
+UC_CLI_06 ..> UC_AGT_05 : <<include>>
+UC_CLI_02 ..> UC_AGT_08 : <<extend>>
 
 @enduml

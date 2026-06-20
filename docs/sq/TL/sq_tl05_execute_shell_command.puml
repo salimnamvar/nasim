@@ -2,63 +2,61 @@
 ' ============================================================
 ' Title:     TL-05 — Execute Shell Command
 ' Boundary:  nasim code agent CLI
-' Purpose:   Run a shell command via subprocess
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Purpose:   Shell command execution with timeout
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
-participant "TOOL_REGISTRY" as registry
+participant "REPLSession" as repl
+participant "AgentOrchestrator" as agent
+participant "ToolRegistry" as registry
 participant "ShellTool" as st
 participant "Host Shell" as shell
 
-box "Tools (tools.py)" #F3E5F5
+box "Tool Layer" #F3E5F5
 end box
 
 note over st
   Scope:          Execute shell command with timeout
   Preconditions:  Command string provided by LLM
   Excludes:       File operations
-  Contexts:       Called by AGT-02 (Dispatch Tool Call)
-  Rollback:       Error string with exit code returned to LLM
-  Design:         capture_output=True, text=True, default 30s timeout
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Rollback:       Error string returned to LLM
+  Design:         subprocess.run with shell=True, configurable timeout
+  Safety:         Unsafe tool — requires permission check (SAF-01)
 end note
 
-user -> cli : (entry via AGT-01)
-cli -> agent : (entry via AGT-01)
-agent -> registry : execute_tool("shell_exec", {command, timeout})
-registry -> st : shell_exec(command, timeout)
-st -> shell : subprocess.run(command, shell=True, capture_output=True)
+user -> repl : (entry via AGT-01)
+repl -> agent : (entry via AGT-01)
+agent -> registry : execute("shell_exec", {command, timeout})
+registry -> st : execute(command, timeout)
+st -> shell : subprocess.run(command, shell=True, timeout=timeout)
 
 break Timeout
     shell --> st : TimeoutExpired
-    st --> registry : "Error: command timed out after Ns"
-    registry --> agent : error string
+    st --> registry : ToolResult(success=False, error="command timed out after Ns")
+    registry --> agent : ToolResult
 end
 
-break Other exception
-    shell --> st : OSError / ValueError
-    st --> registry : "Error executing command: exception"
-    registry --> agent : error string
+break Execution error
+    shell --> st : Exception
+    st --> registry : ToolResult(success=False, error="Error executing command")
+    registry --> agent : ToolResult
 end
 
 shell --> st : CompletedProcess(stdout, stderr, returncode)
-st -> st : combine stdout + stderr
-alt returncode != 0
-    st -> st : append "(exit code: N)"
-end
-st --> registry : combined output
-registry --> agent : result string
+st -> st : format output (stdout + stderr + exit code)
+st --> registry : ToolResult(success=True, content=command_output)
+registry --> agent : ToolResult
 
 note over st
-  Flow:    subprocess.run -> combine output -> return
+  Flow:    command -> subprocess.run -> format output -> ToolResult
   State:   No state change
-  Failure: Timeout, OS error, non-zero exit -> error string
-  Success: Combined stdout/stderr (or "(no output)")
+  Failure: Timeout, execution error -> ToolResult(success=False)
+  Success: Command output (stdout + stderr)
 end note
 
 @enduml

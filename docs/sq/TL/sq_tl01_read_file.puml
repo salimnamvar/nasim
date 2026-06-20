@@ -3,60 +3,58 @@
 ' Title:     TL-01 — Read File
 ' Boundary:  nasim code agent CLI
 ' Purpose:   File read tool execution
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
-participant "TOOL_REGISTRY" as registry
-participant "FileTools" as ft
+participant "REPLSession" as repl
+participant "AgentOrchestrator" as agent
+participant "ToolRegistry" as registry
+participant "ReadFileTool" as ft
 participant "Host Filesystem" as fs
 
-box "Agent Core (agent.py)" #E3F2FD
-end box
-box "Tools (tools.py)" #F3E5F5
+box "Tool Layer" #F3E5F5
 end box
 
 note over ft
   Scope:          Read file contents with line numbers
   Preconditions:  File path provided by LLM
   Excludes:       Write, edit, directory listing
-  Contexts:       Called by AGT-02 (Dispatch Tool Call)
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Error string returned to LLM
   Design:         Supports offset/limit for large files
 end note
 
-user -> cli : (entry via AGT-01)
-cli -> agent : (entry via AGT-01)
-agent -> registry : execute_tool("read_file", {path, offset, limit})
-registry -> ft : read_file(path, offset, limit)
+user -> repl : (entry via AGT-01)
+repl -> agent : (entry via AGT-01)
+agent -> registry : execute("read_file", {path, offset, limit})
+registry -> ft : execute(path, offset, limit)
 ft -> fs : Path(path).read_text()
 
 break File not found or not a file
     fs --> ft : FileNotFoundError / IsADirectoryError
-    ft --> registry : "Error: file not found: path"
-    registry --> agent : error string
+    ft --> registry : ToolResult(success=False, error="file not found")
+    registry --> agent : ToolResult
 end
 
 break Read error (encoding, permissions)
     fs --> ft : PermissionError / UnicodeDecodeError
-    ft --> registry : "Error reading path: exception"
-    registry --> agent : error string
+    ft --> registry : ToolResult(success=False, error="Error reading path")
+    registry --> agent : ToolResult
 end
 
 fs --> ft : file content
 ft -> ft : add line numbers, apply offset/limit
-ft --> registry : numbered content string
-registry --> agent : result string
+ft --> registry : ToolResult(success=True, content=numbered_content)
+registry --> agent : ToolResult
 
 note over ft
-  Flow:    Path -> read_text -> line numbers -> string
+  Flow:    Path -> read_text -> line numbers -> ToolResult
   State:   No state change
-  Failure: File not found, permissions, encoding -> error string
+  Failure: File not found, permissions, encoding -> ToolResult(success=False)
   Success: File content with line numbers
 end note
 

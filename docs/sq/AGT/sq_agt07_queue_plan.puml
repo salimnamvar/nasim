@@ -1,0 +1,41 @@
+@startuml sq_agt07_queue_plan
+' ============================================================
+' Title:     AGT-07 — Queue Plan
+' Boundary:  nasim code agent CLI
+' Purpose:   Queue tool calls in plan mode without executing
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "AgentOrchestrator" as agent
+participant "PlanSession" as plan
+
+box "Agent Layer" #E3F2FD
+end box
+
+note over plan
+  Scope:          Queue tool calls in plan mode
+  Preconditions:  Plan mode active (/plan toggled)
+  Excludes:       Tool execution, permission checks
+  Contexts:       Called by AGT-01 (PROCESS User Task) in plan mode
+  Rollback:       N/A — queued calls are never executed until approved
+  Design:         Tool calls displayed as plan, not executed
+end note
+
+agent -> plan : queue_tool_call(tool_name, args)
+plan -> plan : append to pending_calls list
+plan --> agent : queued
+
+agent -> plan : display_plan()
+plan --> agent : formatted plan text
+
+note over plan
+  Flow:    tool call -> queue -> display as plan
+  State:   THINKING -> PLANNING
+  Failure: N/A
+  Success: Tool calls queued and displayed as plan
+end note
+
+@enduml

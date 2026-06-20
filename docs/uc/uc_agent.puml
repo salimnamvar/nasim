@@ -2,10 +2,10 @@
 ' ============================================================
 ' Title:     nasim — UC: Agent Core
 ' Boundary:  nasim code agent CLI
-' Purpose:   Core agentic loop operations
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
+' Purpose:   Core agentic loop operations and new capabilities
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
 ' Review:    —
 ' ============================================================
 
@@ -15,34 +15,21 @@ skinparam packageStyle rectangle
 actor "Developer" as user
 
 rectangle "Agent Core" {
-    usecase "Execute User Task" as UC_AGT_01
-    usecase "Invoke Tool" as UC_AGT_02
+    usecase "PROCESS User Task" as UC_AGT_01
+    usecase "DISPATCH Tool Call" as UC_AGT_02
     usecase "Manage Conversation" as UC_AGT_03
     usecase "Reset History" as UC_AGT_04
-}
-
-rectangle "LLM Layer" {
-    usecase "Call Ollama Chat" as UC_LLM_01
-    usecase "Stream Ollama Chat" as UC_LLM_02
-}
-
-rectangle "Tool Layer" {
-    usecase "Read File" as UC_TL_01
-    usecase "Write File" as UC_TL_02
-    usecase "Edit File" as UC_TL_03
-    usecase "List Directory" as UC_TL_04
-    usecase "Execute Shell Command" as UC_TL_05
+    usecase "CHECK Tool Permission" as UC_AGT_05
+    usecase "COMPACT Context" as UC_AGT_06
+    usecase "Queue Plan" as UC_AGT_07
+    usecase "APPROVE Plan" as UC_AGT_08
 }
 
 user --> UC_AGT_01
-UC_AGT_01 ..> UC_LLM_01 : <<include>>
-UC_AGT_01 ..> UC_LLM_02 : <<include>>
 UC_AGT_01 ..> UC_AGT_02 : <<include>>
 UC_AGT_01 ..> UC_AGT_03 : <<include>>
-UC_AGT_02 ..> UC_TL_01 : <<include>>
-UC_AGT_02 ..> UC_TL_02 : <<include>>
-UC_AGT_02 ..> UC_TL_03 : <<include>>
-UC_AGT_02 ..> UC_TL_04 : <<include>>
-UC_AGT_02 ..> UC_TL_05 : <<include>>
+UC_AGT_02 ..> UC_AGT_05 : <<include>>
+UC_AGT_01 ..> UC_AGT_06 : <<extend>>
+UC_AGT_07 ..> UC_AGT_08 : <<extend>>
 
 @enduml

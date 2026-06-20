@@ -5,10 +5,10 @@ LAYOUT_LEFT_RIGHT()
 ' ============================================================
 ' Title:     nasim — System Context
 ' Boundary:  nasim code agent CLI
-' Purpose:   Show nasim as a system and its external dependencies
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
+' Purpose:   Show nasim as a system and all external dependencies
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
 ' Review:    —
 ' ============================================================
 
@@ -16,15 +16,19 @@ title nasim — System Context
 
 Person(user, "Developer", "Uses terminal to interact with nasim")
 
-System(nasim, "nasim", "CLI code agent that reads, writes, and edits code using an LLM")
+System(nasim, "nasim", "CLI code agent that reads, writes, searches, and edits code using LLM providers")
 
-System_Ext(ollama, "Ollama Server", "LLM inference API on remote host (black)")
+System_Ext(llm_provider, "LLM Provider", "Inference API: Ollama, OpenAI, Anthropic, or compatible backend")
 System_Ext(host_fs, "Host Filesystem", "Project files and directories")
 System_Ext(host_shell, "Host Shell", "Shell for executing commands")
+System_Ext(web, "Web", "Documentation, package APIs, search engines")
+System_Ext(mcp_server, "MCP Server", "Extension tools via Model Context Protocol")
 
 Rel(user, nasim, "types commands and reads output", "terminal")
-Rel(nasim, ollama, "sends chat requests, receives responses", "HTTP/JSON")
-Rel(nasim, host_fs, "reads and writes files", "path operations")
+Rel(nasim, llm_provider, "sends chat requests, receives responses", "HTTP/JSON")
+Rel(nasim, host_fs, "reads, writes, searches files", "path operations")
 Rel(nasim, host_shell, "executes shell commands", "subprocess")
+Rel(nasim, web, "fetches documentation, searches", "HTTP")
+Rel(nasim, mcp_server, "discovers and invokes extension tools", "stdio/SSE")
 
 SHOW_LEGEND()

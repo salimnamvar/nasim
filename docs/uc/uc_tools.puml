@@ -1,0 +1,63 @@
+@startuml uc_tools
+' ============================================================
+' Title:     nasim — UC: Tool Layer
+' Boundary:  nasim code agent CLI
+' Purpose:   All tool implementations (file, search, shell, web, git, MCP)
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "AgentOrchestrator" as agent
+
+rectangle "File Tools" {
+    usecase "Read File" as UC_TL_01
+    usecase "Write File" as UC_TL_02
+    usecase "Edit File" as UC_TL_03
+}
+
+rectangle "Directory Tools" {
+    usecase "List Directory" as UC_TL_04
+}
+
+rectangle "Shell Tools" {
+    usecase "Execute Shell Command" as UC_TL_05
+}
+
+rectangle "Search Tools" {
+    usecase "Grep Search" as UC_TL_06
+    usecase "Glob Files" as UC_TL_07
+    usecase "Find Files" as UC_TL_08
+}
+
+rectangle "Web Tools" {
+    usecase "FETCH Web Content" as UC_TL_09
+    usecase "SEARCH Web" as UC_TL_10
+}
+
+rectangle "Git Tools" {
+    usecase "Git Status Diff Commit" as UC_TL_11
+}
+
+rectangle "MCP Tools" {
+    usecase "Invoke MCP Extension" as UC_TL_12
+}
+
+agent --> UC_TL_01
+agent --> UC_TL_02
+agent --> UC_TL_03
+agent --> UC_TL_04
+agent --> UC_TL_05
+agent --> UC_TL_06
+agent --> UC_TL_07
+agent --> UC_TL_08
+agent --> UC_TL_09
+agent --> UC_TL_10
+agent --> UC_TL_11
+agent --> UC_TL_12
+
+@enduml

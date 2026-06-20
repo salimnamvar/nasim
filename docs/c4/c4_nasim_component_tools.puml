@@ -1,0 +1,52 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Tools Component Diagram
+' Boundary:  nasim code agent CLI
+' Purpose:   Tool layer internal components
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Tools Component Diagram
+
+Container_Boundary(tool_boundary, "Tool Layer") {
+    Component(tool_abc, "Tool", "nasim/tools/base.py", "ABC: name, description, parameters, safe, execute()")
+    Component(tool_registry, "ToolRegistry", "nasim/tools/base.py", "Instance-based registry; dynamic registration for MCP")
+    Component(tool_result, "ToolResult", "nasim/tools/base.py", "Structured result: success, content, error")
+
+    Component(file_tools, "FileTools", "nasim/tools/file.py", "ReadFileTool, WriteFileTool, EditFileTool")
+    Component(search_tools, "SearchTools", "nasim/tools/search.py", "GrepTool, GlobTool, FindFileTool")
+    Component(shell_tool, "ShellTool", "nasim/tools/shell.py", "Execute shell commands with timeout")
+    Component(dir_tool, "DirTool", "nasim/tools/directory.py", "List directory contents")
+    Component(web_tools, "WebTools", "nasim/tools/web.py", "WebFetchTool, WebSearchTool")
+    Component(git_tool, "GitTool", "nasim/tools/git.py", "Git status, diff, commit operations")
+    Component(mcp_adapter, "MCPToolAdapter", "nasim/tools/mcp.py", "Wraps MCP server tools (Phase 2)")
+}
+
+System_Ext(host_fs, "Host Filesystem")
+System_Ext(host_shell, "Host Shell")
+System_Ext(web, "Web")
+System_Ext(mcp_server, "MCP Server")
+
+Rel(tool_registry, tool_abc, "manages instances")
+Rel(tool_registry, tool_result, "returns results")
+Rel(file_tools, tool_abc, "extends")
+Rel(search_tools, tool_abc, "extends")
+Rel(shell_tool, tool_abc, "extends")
+Rel(dir_tool, tool_abc, "extends")
+Rel(web_tools, tool_abc, "extends")
+Rel(git_tool, tool_abc, "extends")
+Rel(mcp_adapter, tool_abc, "extends")
+Rel(file_tools, host_fs, "path I/O")
+Rel(search_tools, host_fs, "search files")
+Rel(shell_tool, host_shell, "subprocess")
+Rel(dir_tool, host_fs, "directory listing")
+Rel(web_tools, web, "HTTP")
+Rel(mcp_adapter, mcp_server, "stdio/SSE")
+
+SHOW_LEGEND()

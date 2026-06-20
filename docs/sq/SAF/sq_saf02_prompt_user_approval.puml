@@ -1,0 +1,49 @@
+@startuml sq_saf02_prompt_user_approval
+' ============================================================
+' Title:     SAF-02 — Prompt User Approval
+' Boundary:  nasim code agent CLI
+' Purpose:   Display approval prompt for unsafe tool execution
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+participant "PermissionGate" as gate
+participant "Renderer" as renderer
+
+box "Agent Layer" #E3F2FD
+end box
+box "CLI Layer" #E8F5E9
+end box
+
+note over gate
+  Scope:          Prompt user for approval of unsafe tool
+  Preconditions:  safety_mode=ask AND tool.safe=False
+  Excludes:       Permission check logic (SAF-01)
+  Contexts:       Called by SAF-01 (CHECK Tool Permission)
+  Rollback:       User rejects -> tool skipped
+  Design:         Shows tool name + args, prompts [y/N]
+end note
+
+gate -> renderer : display_approval(tool_name, args)
+renderer --> user : "Allow <tool_name>(<args>)? [y/N]"
+
+user -> renderer : y or N
+renderer --> gate : choice (bool)
+
+alt user = y
+    gate --> agent_orch : approved
+else user = N
+    gate --> agent_orch : rejected
+end
+
+note over gate
+  Flow:    gate -> Renderer -> user prompt -> choice -> gate
+  State:   TOOL_EXEC -> AWAITING_APPROVAL -> TOOL_EXEC or IDLE
+  Failure: User rejects -> tool skipped
+  Success: User approves -> tool executes
+end note
+
+@enduml

@@ -1,49 +1,60 @@
 @startuml sq_cli03_display_streaming_output
 ' ============================================================
-' Title:     CLI-03 — Display Streaming Output
+' Title:     CLI-03 — STREAM Output
 ' Boundary:  nasim code agent CLI
-' Purpose:   Print tokens as they arrive from the LLM
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Purpose:   Streaming token-by-token output with rich formatting
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
+participant "REPLSession" as repl
+participant "Renderer" as renderer
 
-box "CLI (cli.py)" #E8F5E9
+box "CLI Layer" #E8F5E9
 end box
 
-note over cli
-  Scope:          Streaming display of LLM tokens
-  Preconditions:  Streaming mode enabled (--no-stream to disable)
-  Excludes:       Sync mode display
-  Contexts:       Called by CLI-01 via Agent.run_streaming()
-  Rollback:       KeyboardInterrupt -> stop streaming
-  Design:         print(end="") for token-by-token output
+note over renderer
+  Scope:          Rendering AgentEvents to terminal
+  Preconditions:  Agent event stream active
+  Excludes:       Agent loop logic, tool execution
+  Contexts:       Called by CLI-01 (PROCESS User Input)
+  Rollback:       N/A — renderer is passive consumer
+  Design:         Uses Rich library for colors, diffs, formatting
 end note
 
-user -> cli : (entry via AGT-01)
-cli -> agent : run_streaming(user_input)
-loop stream tokens
-    agent --> cli : token string
-    cli -> cli : print(token, end="", flush=True)
-end
-agent --> cli : (stream complete)
-cli -> cli : print()
-cli --> user : (output complete)
+repl -> renderer : subscribe to AgentEvent stream
 
-break KeyboardInterrupt
-    cli --> user : "\n(interrupted)"
+loop for each event
+    alt TextChunk event
+        repl -> renderer : TextChunk(text)
+        renderer -> renderer : colored output (green for nasim>)
+        renderer --> user : streamed token
+    else ToolStart event
+        repl -> renderer : ToolStart(name, args)
+        renderer -> renderer : dimmed box with tool name + args
+        renderer --> user : tool call display
+    else ToolResult event
+        repl -> renderer : ToolResult(name, result, truncated)
+        renderer -> renderer : truncated result (max 200 chars)
+        renderer --> user : tool result preview
+    else Error event
+        repl -> renderer : Error(message)
+        renderer -> renderer : red highlight
+        renderer --> user : error display
+    else Done event
+        repl -> renderer : Done()
+        renderer -> renderer : newline + reset
+    end
 end
 
-note over cli
-  Flow:    Agent yields tokens -> CLI prints -> repeat
-  State:   THINKING / RESPONDING
-  Failure: KeyboardInterrupt -> stop and return to IDLE
-  Success: Full response printed to terminal
+note over renderer
+  Flow:    Event stream -> Renderer -> formatted terminal output
+  State:   No state change
+  Failure: N/A — renderer is passive
+  Success: All events rendered with appropriate formatting
 end note
 
 @enduml

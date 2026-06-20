@@ -1,62 +1,66 @@
 @startuml sq_cli01_process_user_input
 ' ============================================================
-' Title:     CLI-01 — Process User Input
+' Title:     CLI-01 — PROCESS User Input
 ' Boundary:  nasim code agent CLI
-' Purpose:   REPL loop: read input, dispatch, display output
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Purpose:   REPL input loop delegates to agent and renders output
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
+participant "REPLSession" as repl
+participant "AgentOrchestrator" as agent
+participant "Renderer" as renderer
 
-box "CLI (cli.py)" #E8F5E9
+box "CLI Layer" #E8F5E9
 end box
-box "Agent Core (agent.py)" #E3F2FD
+box "Agent Layer" #E3F2FD
 end box
 
-note over cli
-  Scope:          REPL input loop
-  Preconditions:  Agent initialized, Ollama reachable
-  Excludes:       Slash commands, streaming detail
-  Contexts:       Top-level entry point
-  Rollback:       Error caught, returned to IDLE
-  Design:         Ctrl+C interrupts current turn, Ctrl+D exits
+note over repl
+  Scope:          Single user input processing cycle
+  Preconditions:  REPL initialized, AgentOrchestrator ready
+  Excludes:       Slash commands (CLI-02), session persistence
+  Contexts:       Called by main REPL loop
+  Rollback:       Error -> display error -> return to IDLE
+  Design:         Events emitted by agent, rendered by Renderer
 end note
 
-loop forever
-    user -> cli : types input (or Ctrl+D)
-    alt input is /quit or EOF
-        cli --> user : "Bye."
-    else input is /help
-        cli --> user : display help text
-    else input is /reset
-        cli -> agent : reset()
-        agent --> cli : history cleared
-        cli --> user : "History cleared."
-    else input is /model
-        cli --> user : display current model
-    else empty input
-        cli --> user : (skip)
-    else normal input
-        ref over cli, agent
-          AGT-01: Process User Task
-        end ref
+user -> repl : types input
+repl -> repl : check for slash command
+
+alt is slash command
+    repl -> repl : delegate to SlashCommandHandler (CLI-02)
+else normal input
+    repl -> agent : PROCESS(user_input)
+    agent -> agent : append user message
+    agent -> agent : call Provider (PRV-02/03)
+    loop tool call iterations
+        repl -> repl : receive AgentEvent stream
+        agent -> agent : DISPATCH tool (AGT-02)
+        agent -> repl : ToolStart event
+        repl -> renderer : render ToolStart
+        agent -> repl : ToolResult event
+        repl -> renderer : render ToolResult
     end
+    agent -> repl : TextChunk events
+    repl -> renderer : render TextChunk
+    repl -> renderer : render Done
+    renderer --> user : formatted output
 end
 
-break EOFError
-    cli --> user : "Bye."
+break Agent throws exception
+    repl -> renderer : render Error event
+    renderer --> user : red error display
 end
 
-note over cli
-  Flow:    User -> input() -> dispatch -> response -> loop
-  State:   IDLE -> LISTENING -> (THINKING ->)* -> IDLE
-  Failure: EOFError -> exit; other errors -> display and continue
-  Success: Response displayed, return to IDLE
+note over repl
+  Flow:    User -> REPLSession -> AgentOrchestrator -> Provider -> events -> Renderer -> User
+  State:   IDLE -> LISTENING -> THINKING -> [TOOL_EXEC]* -> RESPONDING -> IDLE
+  Failure: Agent exception -> Error event -> IDLE
+  Success: Final text rendered to user
 end note
 
 @enduml

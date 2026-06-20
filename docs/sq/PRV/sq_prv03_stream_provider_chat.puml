@@ -1,0 +1,61 @@
+@startuml sq_prv03_stream_provider_chat
+' ============================================================
+' Title:     PRV-03 — STREAM Provider Chat
+' Boundary:  nasim code agent CLI
+' Purpose:   Streaming LLM chat completion via provider abstraction
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+participant "AgentOrchestrator" as agent
+participant "Provider" as provider
+participant "LLM Provider API" as api
+
+box "Agent Layer" #E3F2FD
+end box
+box "Provider Layer" #FFF3E0
+end box
+
+note over provider
+  Scope:          Streaming chat completion yielding chunks
+  Preconditions:  Provider initialized and reachable
+  Excludes:       Sync chat (PRV-02), tool execution
+  Contexts:       Called by AGT-01 (Process User Task)
+  Rollback:       Connection drop -> ProviderError
+  Design:         Yields str | ToolCall chunks from HTTP stream
+end note
+
+user -> agent : (entry via AGT-01)
+agent -> provider : chat_stream(messages, tools)
+provider -> api : HTTP POST /api/chat {model, messages, tools, stream:true}
+
+break Connection drops mid-stream
+    api --> provider : broken pipe / timeout
+    provider --> agent : ProviderError("Stream interrupted")
+    agent -> agent : handle error -> ERROR state
+end
+
+loop for each chunk
+    api --> provider : JSON chunk
+    provider -> provider : parse chunk
+    alt text content chunk
+        provider --> agent : yield str(token)
+    else tool_call chunk
+        provider -> provider : accumulate ToolCall by index
+    end
+end
+
+provider -> provider : yield accumulated ToolCalls
+provider --> agent : stream complete
+
+note over provider
+  Flow:    Messages -> HTTP stream -> parse chunks -> yield str | ToolCall
+  State:   THINKING -> THINKING (no state change)
+  Failure: Connection drop -> ProviderError
+  Success: Stream of text tokens and ToolCall objects
+end note
+
+@enduml

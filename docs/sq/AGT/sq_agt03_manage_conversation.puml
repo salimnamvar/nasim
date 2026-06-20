@@ -2,41 +2,49 @@
 ' ============================================================
 ' Title:     AGT-03 — Manage Conversation
 ' Boundary:  nasim code agent CLI
-' Purpose:   Maintain message history and system prompt
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Purpose:   Message list management and token tracking
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
-actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
+participant "AgentOrchestrator" as agent
+participant "ConversationHistory" as history
 
-box "Agent Core (agent.py)" #E3F2FD
+box "Agent Layer" #E3F2FD
 end box
 
-note over agent
-  Scope:          Message list management
-  Preconditions:  Agent initialized with system prompt
-  Excludes:       LLM calls, tool execution
-  Contexts:       Called by AGT-01 (Process User Task)
-  Rollback:       N/A (in-memory only)
-  Design:         Messages list; system prompt always first element
+note over history
+  Scope:          Message list management and token tracking
+  Preconditions:  ConversationHistory initialized
+  Excludes:       Context compaction (CTX-02)
+  Contexts:       Called by AGT-01 (PROCESS User Task)
+  Rollback:       N/A
+  Design:         Owns messages + token_count; triggers compaction
 end note
 
-user -> cli : (entry via AGT-01)
-cli -> agent : (entry via AGT-01)
+agent -> history : add_message(msg)
+history -> history : self.messages.append(msg)
+history -> history : self.token_count += estimate_tokens(msg)
 
-agent -> agent : messages.append({role: "user", content: input})
-agent -> agent : messages.append({role: "assistant", content/response})
-agent -> agent : messages.append({role: "tool", content: result})
+alt token_count > context_budget
+    history --> agent : COMPACT_NEEDED
+    ref over history, agent
+      CTX-02: COMPACT Context
+    end ref
+else within budget
+    history --> agent : ok
+end
 
-note over agent
-  Flow:    User/assistant/tool messages appended to list
-  State:   No state change
-  Failure: N/A (in-memory operations)
-  Success: Messages list updated for next LLM call
+agent -> history : get_messages()
+history --> agent : messages list
+
+note over history
+  Flow:    add message -> track tokens -> check budget -> compact if needed
+  State:   No state change (or COMPACTING if budget exceeded)
+  Failure: N/A
+  Success: Messages managed, token count tracked
 end note
 
 @enduml

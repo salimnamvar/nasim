@@ -1,0 +1,39 @@
+@startuml sq_cfg03_merge_layered_config
+' ============================================================
+' Title:     CFG-03 — Merge Layered Config
+' Boundary:  nasim code agent CLI
+' Purpose:   Config layer merge with precedence
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "ConfigLoader" as cfg
+
+box "Config Layer" #E0F7FA
+end box
+
+note over cfg
+  Scope:          Merge 4 config layers with precedence
+  Preconditions:  All sources loaded
+  Excludes:       Validation (CFG-02)
+  Contexts:       Called by CFG-01 (Load Config)
+  Rollback:       N/A — merge always produces a result
+  Design:         Precedence: CLI > env > project > global
+end note
+
+cfg -> cfg : start with global_defaults
+cfg -> cfg : overlay project_overrides (skip None values)
+cfg -> cfg : overlay env_overrides (skip None values)
+cfg -> cfg : overlay cli_args (skip None values)
+cfg -> cfg : return merged Config
+
+note over cfg
+  Flow:    global -> project -> env -> CLI -> merged Config
+  State:   No state change
+  Failure: N/A — merge is always defined
+  Success: Merged Config with correct precedence
+end note
+
+@enduml

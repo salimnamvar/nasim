@@ -1,77 +1,73 @@
 @startuml sq_agt01_execute_user_task
 ' ============================================================
-' Title:     AGT-01 — Process User Task
+' Title:     AGT-01 — PROCESS User Task
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Core agentic loop: LLM call -> tool dispatch -> repeat
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
-participant "OllamaClient" as llm
+participant "REPLSession" as repl
+participant "AgentOrchestrator" as agent
+participant "Provider" as provider
 participant "ToolRegistry" as tool
 
-box "CLI (cli.py)" #E8F5E9
+box "CLI Layer" #E8F5E9
 end box
-box "Agent Core (agent.py)" #E3F2FD
+box "Agent Layer" #E3F2FD
 end box
-box "LLM (llm.py)" #FFF3E0
+box "Provider Layer" #FFF3E0
 end box
-box "Tools (tools.py)" #F3E5F5
+box "Tool Layer" #F3E5F5
 end box
 
-note over cli
+note over agent
   Scope:          Single user task execution
-  Preconditions:  Agent initialized, Ollama reachable
+  Preconditions:  Agent initialized, Provider reachable
   Excludes:       Slash commands, streaming display
-  Contexts:       Called by CLI-01 (Process User Input)
+  Contexts:       Called by CLI-01 (PROCESS User Input)
   Rollback:       Error state -> IDLE
-  Design:         Max 20 iterations to prevent infinite loops
+  Design:         Max iterations configurable; emits AgentEvents
 end note
 
-user -> cli : types input
-cli -> agent : run(user_input)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 agent -> agent : append user message to messages
-
-ref over agent, llm
-  LLM-01: Call Ollama Chat
+ref over agent, provider
+  PRV-02: Call Provider Chat (or PRV-03: STREAM)
 end ref
 
 alt LLM returns text only
     agent -> agent : append assistant message to messages
-    agent --> cli : final text
-    cli --> user : display response
+    agent --> repl : AgentEvent(Done)
 else LLM returns tool calls
     agent -> agent : append assistant message with tool_calls
     loop for each tool_call
         ref over agent, tool
-          AGT-02: Dispatch Tool Call
+          AGT-02: DISPATCH Tool Call
         end ref
     end
-    ref over agent, llm
-      LLM-01: Call Ollama Chat  [recurse]
+    ref over agent, provider
+      PRV-02: Call Provider Chat [recurse]
     end ref
     agent -> agent : append assistant message to messages
-    agent --> cli : final text
-    cli --> user : display response
+    agent --> repl : AgentEvent(Done)
 end
 
 break LLM call fails or tool execution errors
     agent -> agent : append error message
-    agent --> cli : error text
-    cli --> user : display error
+    agent --> repl : AgentEvent(Error)
 end
 
-note over cli
-  Flow:    User -> CLI -> Agent -> LLM -> (tool loop) -> response
+note over agent
+  Flow:    User -> REPLSession -> AgentOrchestrator -> Provider -> (tool loop) -> Done
   State:   IDLE -> LISTENING -> THINKING -> [TOOL_EXEC]* -> RESPONDING -> IDLE
   Failure: LLM error or tool error -> ERROR -> IDLE
-  Success: Final text displayed to user
+  Success: Done event with final text
 end note
 
 @enduml

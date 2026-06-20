@@ -1,0 +1,27 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — Session Component Diagram
+' Boundary:  nasim code agent CLI
+' Purpose:   Session layer internal components
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — Session Component Diagram
+
+Container_Boundary(session_boundary, "Session Layer") {
+    Component(session_store, "SessionStore", "nasim/session/store.py", "Persists/loads message history to ~/.nasim/sessions/ as JSON Lines")
+    Component(session_model, "Session", "nasim/session/model.py", "Session dataclass: id, created_at, messages snapshot")
+}
+
+System_Ext(session_dir, "Session Directory", "~/.nasim/sessions/<session-id>/")
+
+Rel(session_store, session_model, "creates/loads Session objects")
+Rel(session_store, session_dir, "reads/writes JSON Lines files")
+
+SHOW_LEGEND()

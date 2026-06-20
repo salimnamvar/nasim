@@ -3,62 +3,63 @@
 ' Title:     TL-03 — Edit File
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Replace an exact string in a file
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
-participant "TOOL_REGISTRY" as registry
-participant "FileTools" as ft
+participant "REPLSession" as repl
+participant "AgentOrchestrator" as agent
+participant "ToolRegistry" as registry
+participant "EditFileTool" as ft
 participant "Host Filesystem" as fs
 
-box "Tools (tools.py)" #F3E5F5
+box "Tool Layer" #F3E5F5
 end box
 
 note over ft
   Scope:          Find-and-replace in a file
   Preconditions:  Path, old_string, new_string provided by LLM
   Excludes:       Read, write
-  Contexts:       Called by AGT-02 (Dispatch Tool Call)
-  Rollback:       Error string if old_string not found or ambiguous
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Rollback:       Error if old_string not found or ambiguous
   Design:         Fails if old_string appears 0 or >1 times
+  Safety:         Requires permission check (SAF-01)
 end note
 
-user -> cli : (entry via AGT-01)
-cli -> agent : (entry via AGT-01)
-agent -> registry : execute_tool("edit_file", {path, old_string, new_string})
-registry -> ft : edit_file(path, old_string, new_string)
+user -> repl : (entry via AGT-01)
+repl -> agent : (entry via AGT-01)
+agent -> registry : execute("edit_file", {path, old_string, new_string})
+registry -> ft : execute(path, old_string, new_string)
 ft -> fs : Path(path).read_text()
 
 break File not found
     fs --> ft : FileNotFoundError
-    ft --> registry : "Error: file not found: path"
-    registry --> agent : error string
+    ft --> registry : ToolResult(success=False, error="Error: file not found")
+    registry --> agent : ToolResult
 end
 
 ft -> ft : content.count(old_string)
 
 alt count == 0
-    ft --> registry : "Error: old_string not found in path"
-    registry --> agent : error string
+    ft --> registry : ToolResult(success=False, error="old_string not found")
+    registry --> agent : ToolResult
 else count > 1
-    ft --> registry : "Error: old_string found N times"
-    registry --> agent : error string
+    ft --> registry : ToolResult(success=False, error="old_string found N times (ambiguous)")
+    registry --> agent : ToolResult
 else count == 1
     ft -> ft : content.replace(old_string, new_string, 1)
     ft -> fs : Path(path).write_text(new_content)
-    ft --> registry : "Edited path: replaced 1 occurrence"
-    registry --> agent : result string
+    ft --> registry : ToolResult(success=True, content="Edited: replaced 1 occurrence")
+    registry --> agent : ToolResult
 end
 
 note over ft
-  Flow:    read -> count -> replace -> write
+  Flow:    read -> count -> replace -> write -> ToolResult
   State:   No state change
-  Failure: Not found or ambiguous -> error string
+  Failure: Not found or ambiguous -> ToolResult(success=False)
   Success: Single replacement written
 end note
 

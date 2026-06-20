@@ -4,10 +4,10 @@
 ' ============================================================
 ' Title:     nasim — Container Diagram
 ' Boundary:  nasim code agent CLI
-' Purpose:   Show the deployable units and their technology choices
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
+' Purpose:   Show all deployable units and technology choices
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
 ' Review:    —
 ' ============================================================
 
@@ -16,24 +16,32 @@ title nasim — Container Diagram
 Person(user, "Developer", "Terminal user")
 
 System_Boundary(nasim, "nasim") {
-    Container(cli, "CLI", "Python REPL", "Interactive terminal interface, command parsing, slash commands")
-    Container(agent, "Agent", "Python", "Core agentic loop: LLM call -> tool dispatch -> result loop")
-    Container(llm_client, "LLM Client", "Python requests", "Ollama API client with streaming and tool call parsing")
-    Container(tool_manager, "Tool Manager", "Python", "Tool registry, dispatch, and execution")
-    Container(ctx_manager, "Context Manager", "Python", "Conversation history and system prompt management")
+    Container(cli, "CLI", "Python REPL", "Interactive terminal interface, argument parsing, slash commands, rich rendering")
+    Container(agent, "Agent Core", "Python", "Orchestrator, conversation history, context compaction, permissions, plan mode")
+    Container(provider, "Provider Layer", "Python httpx", "Provider abstraction with Ollama, OpenAI, Anthropic backends")
+    Container(tools, "Tool Layer", "Python", "Tool registry with file, search, shell, web, git, MCP tools")
+    Container(config, "Config", "Python YAML", "Layered config: global YAML + project YAML + env + CLI flags")
+    Container(session, "Session Store", "Python JSON", "Persists conversation history to ~/.nasim/sessions/")
 }
 
-System_Ext(ollama, "Ollama Server", "LLM inference on black (qwen2.5-coder:14b)")
+System_Ext(llm_provider, "LLM Provider", "Ollama / OpenAI / Anthropic API")
 System_Ext(host_fs, "Host Filesystem", "Project code files")
 System_Ext(host_shell, "Host Shell", "subprocess execution")
+System_Ext(web, "Web", "Documentation and search")
+System_Ext(mcp_server, "MCP Server", "Extension tools")
 
 Rel(user, cli, "types input, reads output")
-Rel(cli, agent, "sends user input, receives final response")
-Rel(agent, ctx_manager, "manages conversation messages")
-Rel(agent, llm_client, "calls LLM with messages + tools")
-Rel(agent, tool_manager, "dispatches tool calls")
-Rel(llm_client, ollama, "HTTP POST /api/chat", "JSON streaming")
-Rel(tool_manager, host_fs, "read/write/edit files")
-Rel(tool_manager, host_shell, "execute commands")
+Rel(cli, agent, "sends user input, receives events")
+Rel(agent, provider, "calls provider chat/stream")
+Rel(agent, tools, "dispatches tool calls")
+Rel(agent, session, "loads/saves conversation history")
+Rel(provider, llm_provider, "HTTP POST", "JSON streaming")
+Rel(tools, host_fs, "read/write/search files")
+Rel(tools, host_shell, "execute commands")
+Rel(tools, web, "fetch/search")
+Rel(tools, mcp_server, "invoke extension tools")
+Rel(config, agent, "provides settings")
+Rel(config, provider, "provides provider config")
+Rel(config, tools, "provides tool config")
 
 SHOW_LEGEND()

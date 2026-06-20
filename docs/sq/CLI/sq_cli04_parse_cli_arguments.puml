@@ -2,37 +2,59 @@
 ' ============================================================
 ' Title:     CLI-04 — Parse CLI Arguments
 ' Boundary:  nasim code agent CLI
-' Purpose:   Parse command-line arguments at startup
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Purpose:   Startup argument parsing and config initialization
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
+participant "ArgParser" as parser
+participant "ConfigLoader" as cfg
 
-box "CLI (cli.py)" #E8F5E9
+box "CLI Layer" #E8F5E9
+end box
+box "Config Layer" #E0F7FA
 end box
 
-note over cli
-  Scope:          argparse-based argument parsing
-  Preconditions:  Script invoked from terminal
-  Excludes:       Runtime behavior
-  Contexts:       Called once at startup before REPL
-  Rollback:       --help -> exit(0); invalid args -> argparse error
-  Design:         --model, --server, --no-stream, -c
+note over parser
+  Scope:          CLI argument parsing and config initialization
+  Preconditions:  Developer invokes nasim command
+  Excludes:       Runtime input processing (CLI-01)
+  Contexts:       Entry point for all CLI invocations
+  Rollback:       Invalid args -> print usage -> exit(1)
+  Design:         Args override config; layered resolution
 end note
 
-user -> cli : python run.py [args]
-cli -> cli : parse_args()
-cli --> user : Namespace(model, server, no_stream, command)
+user -> parser : nasim [args]
+parser -> parser : argparse.ArgumentParser.parse_args()
+parser -> cfg : load(cli_args=argv)
+cfg -> cfg : read ~/.nasim/config.yaml
+cfg -> cfg : read .nasim/config.yaml
+cfg -> cfg : read NASIM_* env vars
+cfg -> cfg : merge: CLI > env > project > global
+cfg -> cfg : validate Config fields
+cfg --> parser : Config object
 
-note over cli
-  Flow:    sys.argv -> argparse -> Namespace
-  State:   No state change (pre-REPL)
-  Failure: Invalid args -> argparse error + exit(1)
-  Success: Namespace returned to main()
+break Invalid arguments
+    parser -> parser : print usage
+    parser --> user : exit(1)
+end
+
+break Invalid config
+    cfg -> cfg : raise ConfigError
+    cfg --> parser : ConfigError
+    parser --> user : "Config error: details"
+end
+
+parser --> user : Config ready, start REPL or single-shot
+
+note over parser
+  Flow:    argv -> ArgParser -> ConfigLoader -> layered merge -> Config
+  State:   No state change
+  Failure: Invalid args or config -> error + exit
+  Success: Config object ready for component initialization
 end note
 
 @enduml

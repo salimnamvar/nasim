@@ -1,0 +1,39 @@
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+skinparam linetype polyline
+
+' ============================================================
+' Title:     nasim — CLI Component Diagram
+' Boundary:  nasim code agent CLI
+' Purpose:   CLI layer internal components
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+title nasim — CLI Component Diagram
+
+Container_Boundary(cli_boundary, "CLI Layer") {
+    Component(arg_parser, "ArgParser", "nasim/cli/args.py", "CLI argument parsing with layered config overrides")
+    Component(repl_session, "REPLSession", "nasim/cli/repl.py", "Interactive REPL loop, input handling, slash command dispatch")
+    Component(renderer, "Renderer", "nasim/cli/renderer.py", "Terminal output: colors, diffs, streaming tokens, tool display")
+    Component(slash_handler, "SlashCommandHandler", "nasim/cli/commands.py", "Maps /cmd strings to agent actions")
+}
+
+System_Boundary(agent_boundary, "Agent Layer") {
+    Component(agent_orch, "AgentOrchestrator", "nasim/agent/orchestrator.py", "Drives LLM/tool loop, emits AgentEvents")
+}
+
+System_Boundary(config_boundary, "Config Layer") {
+    Component(config_loader, "ConfigLoader", "nasim/config/loader.py", "Loads layered YAML + env + CLI config")
+}
+
+Rel(repl_session, agent_orch, "user input -> AgentEvents")
+Rel(repl_session, renderer, "renders events")
+Rel(repl_session, slash_handler, "dispatches /commands")
+Rel(slash_handler, agent_orch, "delegates to agent")
+Rel(arg_parser, config_loader, "CLI flags override config")
+Rel(repl_session, config_loader, "reads session config")
+
+SHOW_LEGEND()

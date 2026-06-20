@@ -3,53 +3,54 @@
 ' Title:     TL-02 — Write File
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Create or overwrite a file
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
-participant "TOOL_REGISTRY" as registry
-participant "FileTools" as ft
+participant "REPLSession" as repl
+participant "AgentOrchestrator" as agent
+participant "ToolRegistry" as registry
+participant "WriteFileTool" as ft
 participant "Host Filesystem" as fs
 
-box "Tools (tools.py)" #F3E5F5
+box "Tool Layer" #F3E5F5
 end box
 
 note over ft
   Scope:          Write content to a file
   Preconditions:  Path and content provided by LLM
   Excludes:       Read, edit
-  Contexts:       Called by AGT-02 (Dispatch Tool Call)
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Error string returned to LLM
   Design:         Creates parent directories automatically
+  Safety:         Requires permission check (SAF-01)
 end note
 
-user -> cli : (entry via AGT-01)
-cli -> agent : (entry via AGT-01)
-agent -> registry : execute_tool("write_file", {path, content})
-registry -> ft : write_file(path, content)
+user -> repl : (entry via AGT-01)
+repl -> agent : (entry via AGT-01)
+agent -> registry : execute("write_file", {path, content})
+registry -> ft : execute(path, content)
 ft -> fs : Path(path).mkdir(parents=True)
 ft -> fs : Path(path).write_text(content)
 
 break Write error (permissions, disk full)
     fs --> ft : PermissionError / OSError
-    ft --> registry : "Error writing path: exception"
-    registry --> agent : error string
+    ft --> registry : ToolResult(success=False, error="Error writing path: exception")
+    registry --> agent : ToolResult
 end
 
 fs --> ft : OK
-ft --> registry : "Wrote N bytes to path"
-registry --> agent : result string
+ft --> registry : ToolResult(success=True, content="Wrote N bytes to path")
+registry --> agent : ToolResult
 
 note over ft
-  Flow:    mkdir -> write_text -> byte count
+  Flow:    mkdir -> write_text -> ToolResult
   State:   No state change
-  Failure: Permissions, disk space -> error string
-  Success: "Wrote N bytes to path"
+  Failure: Permissions, disk space -> ToolResult(success=False)
+  Success: ToolResult(success=True, "Wrote N bytes")
 end note
 
 @enduml

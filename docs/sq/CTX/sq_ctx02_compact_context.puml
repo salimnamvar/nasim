@@ -1,0 +1,54 @@
+@startuml sq_ctx02_compact_context
+' ============================================================
+' Title:     CTX-02 — COMPACT Context
+' Boundary:  nasim code agent CLI
+' Purpose:   Compact context when token budget exceeded
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "ConversationHistory" as history
+participant "ContextCompactor" as compactor
+participant "Provider" as provider
+
+box "Agent Layer" #E3F2FD
+end box
+box "Provider Layer" #FFF3E0
+end box
+
+note over compactor
+  Scope:          Compact context when token budget exceeded
+  Preconditions:  token_count > context_budget
+  Excludes:       Token tracking (CTX-01)
+  Contexts:       Called by CTX-01 when budget exceeded
+  Rollback:       Secondary LLM fails -> truncate oldest messages
+  Design:         Summarize oldest N exchanges via secondary LLM call
+end note
+
+history -> compactor : compact(messages, budget)
+compactor -> compactor : select oldest exchanges (keep system prompt + recent)
+compactor -> compactor : build summarization prompt
+
+compactor -> provider : chat([summary_prompt + selected_messages])
+
+break Secondary LLM call fails
+    provider --> compactor : ProviderError
+    compactor -> compactor : fallback: truncate oldest messages
+    compactor --> history : shortened messages (truncated)
+end
+
+provider --> compactor : summary text
+compactor -> compactor : create summary message
+compactor -> compactor : replace selected messages with summary
+compactor --> history : shortened messages (summarized)
+
+note over compactor
+  Flow:    budget exceeded -> select old -> summarize -> replace
+  State:   COMPACTING -> THINKING
+  Failure: LLM fails -> truncate fallback
+  Success: Messages shortened, token count reduced
+end note
+
+@enduml

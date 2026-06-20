@@ -1,63 +1,63 @@
 @startuml sq_llm02_stream_ollama_chat
 ' ============================================================
-' Title:     LLM-02 — Stream Ollama Chat
+' Title:     LLM-02 — STREAM Provider Chat
 ' Boundary:  nasim code agent CLI
-' Purpose:   Streaming LLM call yielding tokens incrementally
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Purpose:   Streaming LLM chat completion via provider abstraction
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
-participant "OllamaClient" as llm
-participant "Ollama Server" as ollama
+participant "REPLSession" as repl
+participant "AgentOrchestrator" as agent
+participant "Provider" as provider
+participant "LLM Provider API" as api
 
-box "Agent Core (agent.py)" #E3F2FD
+box "Agent Layer" #E3F2FD
 end box
-box "LLM (llm.py)" #FFF3E0
+box "Provider Layer" #FFF3E0
 end box
 
-note over llm
-  Scope:          Streaming chat completion
-  Preconditions:  Ollama server reachable
-  Excludes:       Sync mode, tool call parsing detail
-  Contexts:       Called by AGT-01 (Process User Task)
-  Rollback:       HTTP error raised to caller
-  Design:         Yields str (tokens) or ToolCall objects
+note over provider
+  Scope:          Streaming chat completion yielding chunks
+  Preconditions:  Provider initialized and reachable
+  Excludes:       Sync chat (LLM-01), tool execution
+  Contexts:       Called by AGT-01 (PROCESS User Task)
+  Rollback:       Connection drop -> ProviderError
+  Design:         Yields str | ToolCall chunks from HTTP stream
 end note
 
-user -> cli : (entry via AGT-01)
-cli -> agent : run_streaming(user_input)
-agent -> llm : chat_stream(messages, tools)
-llm -> ollama : POST /api/chat {stream: true}
+user -> repl : (entry via AGT-01)
+repl -> agent : (entry via AGT-01)
+agent -> provider : chat_stream(messages, tools)
+provider -> api : HTTP POST {model, messages, tools, stream:true}
 
-break HTTP error or timeout
-    ollama --> llm : connection error
-    llm --> agent : exception
+break Connection drops mid-stream
+    api --> provider : broken pipe / timeout
+    provider --> agent : ProviderError("Stream interrupted")
+    agent -> agent : handle error -> ERROR state
 end
 
-loop stream chunks
-    ollama --> llm : JSON chunk {message: {content/token}}
-    alt content token
-        llm --> agent : yield str(token)
-        agent --> cli : yield token
-        cli -> cli : print(token, end="")
-    else tool_calls
-        llm -> llm : accumulate ToolCall buffers
+loop for each chunk
+    api --> provider : JSON chunk
+    provider -> provider : parse chunk
+    alt text content
+        provider --> agent : yield str(token)
+    else tool_call
+        provider -> provider : accumulate ToolCall by index
     end
 end
 
-llm --> agent : yield ToolCall (if any)
-llm -> llm : finalize response
+provider -> provider : yield accumulated ToolCalls
+provider --> agent : stream complete
 
-note over llm
-  Flow:    Messages -> stream -> chunks -> yield tokens/ToolCalls
-  State:   No state change
-  Failure: HTTP error -> exception
-  Success: Tokens yielded to Agent, then ToolCalls if present
+note over provider
+  Flow:    Messages -> HTTP stream -> parse chunks -> yield str | ToolCall
+  State:   THINKING -> THINKING (no state change)
+  Failure: Connection drop -> ProviderError
+  Success: Stream of text tokens and ToolCall objects
 end note
 
 @enduml

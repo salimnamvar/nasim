@@ -2,49 +2,69 @@
 ' ============================================================
 ' Title:     CLI-02 — Execute Slash Command
 ' Boundary:  nasim code agent CLI
-' Purpose:   Handle /help, /reset, /quit, /model commands
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
-' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' Purpose:   Slash command routing and execution
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
 ' ============================================================
 
 actor "Developer" as user
-participant "CLI" as cli
-participant "Agent" as agent
+participant "REPLSession" as repl
+participant "SlashCommandHandler" as cmd
+participant "Renderer" as renderer
+participant "AgentOrchestrator" as agent
 
-box "CLI (cli.py)" #E8F5E9
+box "CLI Layer" #E8F5E9
+end box
+box "Agent Layer" #E3F2FD
 end box
 
-note over cli
+note over cmd
   Scope:          Slash command parsing and dispatch
-  Preconditions:  User input starts with /
-  Excludes:       Normal user input
-  Contexts:       Called by CLI-01 (Process User Input)
-  Rollback:       Unknown command -> display error
-  Design:         Commands are local to CLI; no LLM call
+  Preconditions:  REPL running, input starts with /
+  Excludes:       Normal user input (CLI-01)
+  Contexts:       Called by CLI-01 (PROCESS User Input)
+  Rollback:       Unknown command -> error message
+  Design:         Commands: /help, /reset, /model, /quit, /plan, /sessions
 end note
 
-user -> cli : "/command"
-alt /quit or /exit
-    cli --> user : "Bye." [exit loop]
-else /help
-    cli --> user : display commands list
+user -> repl : /command
+repl -> cmd : dispatch("/command")
+cmd -> cmd : parse command name and args
+
+alt /help
+    cmd -> renderer : display help text
+    renderer --> user : help menu
 else /reset
-    cli -> agent : reset()
-    agent --> cli : OK
-    cli --> user : "History cleared."
+    cmd -> agent : reset()
+    agent -> agent : clear conversation history
+    cmd -> renderer : "History cleared."
+    renderer --> user : confirmation
 else /model
-    cli --> user : display model name
+    cmd -> renderer : display current model name
+    renderer --> user : model info
+else /plan
+    cmd -> agent : toggle_plan_mode()
+    agent -> agent : toggle PLANNING state
+    cmd -> renderer : "Plan mode: ON/OFF"
+    renderer --> user : confirmation
+else /sessions
+    cmd -> renderer : list available sessions
+    renderer --> user : session list
+else /quit or /exit
+    cmd -> repl : signal exit
+    repl --> user : "Bye."
 else unknown command
-    cli --> user : "Unknown command: /command"
+    cmd -> renderer : "Unknown command: /cmd"
+    renderer --> user : error display
 end
 
-note over cli
-  Flow:    Slash command -> match -> action -> IDLE
-  State:   No state change (IDLE -> IDLE)
+note over cmd
+  Flow:    /cmd -> SlashCommandHandler -> action -> Renderer -> User
+  State:   No state change (except /plan toggles PLANNING, /reset clears history)
   Failure: Unknown command -> error message
-  Success: Command executed, response displayed
+  Success: Command action completed
 end note
 
 @enduml

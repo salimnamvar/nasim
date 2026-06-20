@@ -1,0 +1,51 @@
+@startuml sq_saf01_check_tool_permission
+' ============================================================
+' Title:     SAF-01 — CHECK Tool Permission
+' Boundary:  nasim code agent CLI
+' Purpose:   Per-tool safety check before execution
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "AgentOrchestrator" as agent
+participant "PermissionGate" as gate
+participant "ToolRegistry" as registry
+
+box "Agent Layer" #E3F2FD
+end box
+
+note over gate
+  Scope:          Check tool permission before execution
+  Preconditions:  Tool call received from LLM
+  Excludes:       User approval prompt (SAF-02)
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Rollback:       Rejected -> skip tool execution
+  Design:         tool.safe flag determines check behavior
+end note
+
+agent -> gate : check(tool_name, safety_mode)
+gate -> registry : get_tool(tool_name)
+registry --> gate : Tool(safe=True/False)
+
+alt tool.safe = True
+    gate --> agent : approved (no prompt needed)
+else tool.safe = False AND safety_mode = "auto"
+    gate --> agent : approved (auto-approve unsafe)
+else tool.safe = False AND safety_mode = "ask"
+    ref over gate, agent
+      SAF-02: Prompt User Approval
+    end ref
+else safety_mode = "off"
+    gate --> agent : approved (no checks)
+end
+
+note over gate
+  Flow:    tool_name -> check safe flag -> check mode -> approve/reject
+  State:   No state change (or AWAITING_APPROVAL if ask mode)
+  Failure: User rejects (N) -> tool skipped
+  Success: Permission approved, tool execution proceeds
+end note
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml sq_ctx03_summarize_old_exchanges
+' ============================================================
+' Title:     CTX-03 — Summarize Old Exchanges
+' Boundary:  nasim code agent CLI
+' Purpose:   Summarize old message exchanges into compact form
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "ContextCompactor" as compactor
+participant "Provider" as provider
+
+box "Agent Layer" #E3F2FD
+end box
+box "Provider Layer" #FFF3E0
+end box
+
+note over compactor
+  Scope:          Summarize selected old exchanges
+  Preconditions:  ContextCompactor has selected messages to summarize
+  Excludes:       Budget tracking, message selection
+  Contexts:       Called by CTX-02 (COMPACT Context)
+  Rollback:       Empty summary -> use truncated raw content
+  Design:         Uses same provider as main agent for consistency
+end note
+
+compactor -> compactor : extract_oldest(messages, count)
+compactor -> compactor : build prompt: "Summarize these exchanges concisely"
+compactor -> provider : chat([summary_prompt + old_messages])
+
+break Summary is empty or provider fails
+    provider --> compactor : empty/error
+    compactor -> compactor : use truncated raw content as summary
+end
+
+provider --> compactor : summary text
+compactor -> compactor : create summary message {role: "system", content: summary}
+compactor --> compactor : return summary message
+
+note over compactor
+  Flow:    select old -> build prompt -> LLM summarize -> summary message
+  State:   COMPACTING
+  Failure: Empty summary -> truncated raw fallback
+  Success: Summary message ready to replace old exchanges
+end note
+
+@enduml

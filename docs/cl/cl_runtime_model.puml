@@ -1,0 +1,264 @@
+@startuml cl_runtime_model
+' ============================================================
+' Title:     nasim — Runtime Model
+' Boundary:  nasim code agent CLI
+' Purpose:   Core runtime classes and their relationships
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' Note:      This is a runtime structure diagram, not a pure domain
+'            model. nasim has no business domain entities — these are
+'            the classes that comprise the agent system. Documented
+'            deviation from cl.md domain-only policy.
+' ============================================================
+
+skinparam classAttributeIconSize 0
+
+package "Provider Layer" #FFF3E0 {
+    interface Provider {
+        + model_name : str
+        + chat(messages, tools) : LLMResponse
+        + chat_stream(messages, tools) : Iterator[str | ToolCall]
+    }
+
+    class OllamaProvider {
+        + base_url : str
+        + model : str
+        + timeout : int
+        + chat(messages, tools) : LLMResponse
+        + chat_stream(messages, tools) : Iterator
+    }
+
+    class OpenAIProvider {
+        + api_key : str
+        + model : str
+        + chat(messages, tools) : LLMResponse
+        + chat_stream(messages, tools) : Iterator
+    }
+
+    class AnthropicProvider {
+        + api_key : str
+        + model : str
+        + chat(messages, tools) : LLMResponse
+        + chat_stream(messages, tools) : Iterator
+    }
+
+    class ProviderFactory {
+        + create_provider(config) : Provider
+        + select_backend(name) : type
+    }
+
+    class LLMResponse {
+        + content : str
+        + tool_calls : list[ToolCall]
+        + done : bool
+        + total_duration_ms : float
+        + eval_count : int
+    }
+
+    class ToolCall {
+        + name : str
+        + arguments : dict
+        + id : str
+    }
+}
+
+package "Agent Layer" #E3F2FD {
+    class AgentOrchestrator {
+        - provider : Provider
+        - tool_registry : ToolRegistry
+        - history : ConversationHistory
+        - perm_gate : PermissionGate
+        - plan : PlanSession
+        + PROCESS(user_input) : Iterator[AgentEvent]
+        + reset()
+    }
+
+    class ConversationHistory {
+        - messages : list[dict]
+        - token_count : int
+        - context_budget : int
+        + add_message(msg)
+        + get_messages() : list[dict]
+        + reset()
+        + check_budget() : bool
+    }
+
+    class ContextCompactor {
+        + compact(messages, budget) : list[dict]
+        - summarize_old_exchanges(messages) : str
+        - extract_oldest(messages, count) : list[dict]
+    }
+
+    class PermissionGate {
+        - mode : str
+        + check(tool_name, safety_mode) : bool
+        + apply_mode(mode)
+    }
+
+    class PlanSession {
+        - pending_calls : list[tuple]
+        + queue_tool_call(name, args)
+        + approve_plan() : list[ToolResult]
+        + display_plan() : str
+        + is_active() : bool
+    }
+
+    abstract class AgentEvent
+    class TextChunk {
+        + text : str
+    }
+    class ToolStart {
+        + name : str
+        + args : dict
+    }
+    class ToolResult {
+        + name : str
+        + success : bool
+        + content : str
+        + error : str | None
+    }
+    class Error {
+        + message : str
+    }
+    class Done {
+        + final_text : str
+    }
+}
+
+package "Tool Layer" #F3E5F5 {
+    abstract class Tool {
+        + name : str
+        + description : str
+        + parameters : dict
+        + safe : bool
+        + execute(**args) : ToolResult
+    }
+
+    class ToolRegistry {
+        - tools : dict[str, Tool]
+        + register(tool)
+        + execute(name, args) : ToolResult
+        + get_tool(name) : Tool
+        + get_definitions() : list[dict]
+    }
+
+    class ReadFileTool {
+        + execute(path, offset, limit) : ToolResult
+    }
+    class WriteFileTool {
+        + execute(path, content) : ToolResult
+    }
+    class EditFileTool {
+        + execute(path, old_string, new_string) : ToolResult
+    }
+    class GrepTool {
+        + execute(pattern, path, case_sensitive, include_glob) : ToolResult
+    }
+    class GlobTool {
+        + execute(pattern, base_path) : ToolResult
+    }
+    class FindFileTool {
+        + execute(name_pattern, path, max_depth) : ToolResult
+    }
+    class ShellTool {
+        + execute(command, timeout) : ToolResult
+    }
+    class DirTool {
+        + execute(path) : ToolResult
+    }
+    class WebFetchTool {
+        + execute(url, timeout) : ToolResult
+    }
+    class WebSearchTool {
+        + execute(query, num_results) : ToolResult
+    }
+    class GitTool {
+        + execute(action, args) : ToolResult
+    }
+    class MCPToolAdapter {
+        + execute(tool_name, args) : ToolResult
+    }
+}
+
+package "Config Layer" #E0F7FA {
+    class Config {
+        + provider : str
+        + model : str
+        + server_url : str
+        + safety_mode : str
+        + context_budget : int
+        + timeout : int
+        + max_iterations : int
+        + mcp_servers : list[dict]
+    }
+
+    class ConfigLoader {
+        + load(cli_args) : Config
+        - read_global_yaml() : dict
+        - read_project_yaml() : dict
+        - read_env_vars() : dict
+        - merge(layers) : Config
+        - validate(config)
+    }
+}
+
+package "Session Layer" #F1F8E9 {
+    class Session {
+        + id : str
+        + created_at : datetime
+        + messages : list[dict]
+    }
+
+    class SessionStore {
+        + save(session_id, messages)
+        + load(session_id) : Session
+        + load_latest() : Session
+        + list_sessions() : list[tuple]
+    }
+}
+
+' Relationships
+Provider <|.. OllamaProvider
+Provider <|.. OpenAIProvider
+Provider <|.. AnthropicProvider
+ProviderFactory --> Provider : creates
+Provider --> LLMResponse : returns
+LLMResponse --> ToolCall : contains
+
+AgentOrchestrator --> Provider : uses
+AgentOrchestrator --> ToolRegistry : dispatches to
+AgentOrchestrator --> ConversationHistory : owns
+AgentOrchestrator --> PermissionGate : checks
+AgentOrchestrator --> PlanSession : uses (Phase 2)
+AgentOrchestrator --> AgentEvent : yields
+AgentOrchestrator --> SessionStore : loads/saves
+
+ConversationHistory --> ContextCompactor : triggers
+ContextCompactor --> Provider : secondary call
+
+AgentEvent <|-- TextChunk
+AgentEvent <|-- ToolStart
+AgentEvent <|-- ToolResult
+AgentEvent <|-- Error
+AgentEvent <|-- Done
+
+ToolRegistry --> Tool : manages
+Tool <|.. ReadFileTool
+Tool <|.. WriteFileTool
+Tool <|.. EditFileTool
+Tool <|.. GrepTool
+Tool <|.. GlobTool
+Tool <|.. FindFileTool
+Tool <|.. ShellTool
+Tool <|.. DirTool
+Tool <|.. WebFetchTool
+Tool <|.. WebSearchTool
+Tool <|.. GitTool
+Tool <|.. MCPToolAdapter
+
+ConfigLoader --> Config : produces
+SessionStore --> Session : manages
+
+@enduml

@@ -3,10 +3,12 @@
 ' Title:     nasim — Agent Lifecycle State Machine
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Define agent states and transitions during task execution
-' Milestone: v0.1
-' Version:   1.0.0
-' Source:    —
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
 ' Review:    —
+' Note:      Process FSM, not entity lifecycle. SMT ownership rules
+'            from sm.md do not apply (documented deviation).
 ' ============================================================
 
 skinparam state {
@@ -16,6 +18,9 @@ skinparam state {
     BackgroundColor<<tool_exec>> #F3E5F5
     BackgroundColor<<responding>> #FCE4EC
     BackgroundColor<<error>> #FFEBEE
+    BackgroundColor<<compacting>> #E0F7FA
+    BackgroundColor<<awaiting_approval>> #FFF9C4
+    BackgroundColor<<planning>> #F1F8E9
 }
 
 state "IDLE" as idle <<idle>> : Waiting for user input
@@ -24,18 +29,46 @@ state "THINKING" as thinking <<thinking>> : LLM processing, generating response 
 state "TOOL_EXEC" as tool_exec <<tool_exec>> : Executing a tool call from LLM
 state "RESPONDING" as responding <<responding>> : Streaming final text response to user
 state "ERROR" as error <<error>> : Error occurred, displaying error message
+state "COMPACTING" as compacting <<compacting>> : Summarizing old exchanges to free context budget
+state "AWAITING_APPROVAL" as awaiting_approval <<awaiting_approval>> : PermissionGate waiting for user [y/N]
+state "PLANNING" as planning <<planning>> : Plan mode active, tool calls queued not executed
 
 [*] --> idle
 idle --> listening : user input received
 listening --> thinking : input parsed, messages built
 thinking --> responding : LLM returns text (no tool calls)
 thinking --> tool_exec : LLM returns tool calls
+thinking --> compacting : token_count > budget_threshold
 tool_exec --> thinking : tool result appended to messages
+tool_exec --> awaiting_approval : safety_mode = ask AND tool.unsafe
+awaiting_approval --> tool_exec : user approves [y]
+awaiting_approval --> idle : user rejects [N]
+compacting --> thinking : compaction complete, messages shortened
 responding --> idle : response complete
 thinking --> error : LLM call fails
 tool_exec --> error : tool execution fails
 error --> idle : error displayed
 
 idle --> [*] : /quit or EOF
+
+note right of planning
+  Plan mode (Phase 2):
+  /plan toggles PLANNING state.
+  Tool calls queued, not executed.
+  /approve drains queue.
+end note
+
+note right of compacting
+  ContextCompactor triggered when
+  token_count > context_budget.
+  Summarizes oldest exchanges via
+  secondary LLM call.
+end note
+
+note right of awaiting_approval
+  PermissionGate in ask mode:
+  unsafe tools prompt user [y/N]
+  before execution.
+end note
 
 @enduml

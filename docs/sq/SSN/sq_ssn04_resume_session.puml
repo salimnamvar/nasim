@@ -1,0 +1,57 @@
+@startuml sq_ssn04_resume_session
+' ============================================================
+' Title:     SSN-04 — Resume Session
+' Boundary:  nasim code agent CLI
+' Purpose:   Resume a previous session by loading its history
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+participant "REPLSession" as repl
+participant "SessionStore" as store
+participant "AgentOrchestrator" as agent
+
+box "CLI Layer" #E8F5E9
+end box
+box "Session Layer" #F1F8E9
+end box
+box "Agent Layer" #E3F2FD
+end box
+
+note over store
+  Scope:          Resume session from --continue or --session flag
+  Preconditions:  CLI invoked with --continue or --session <id>
+  Excludes:       New session creation
+  Contexts:       Called by CLI-04 (Parse CLI Arguments)
+  Rollback:       No session found -> start fresh
+  Design:         --continue loads latest; --session loads by ID
+end note
+
+user -> repl : nasim --continue (or --session <id>)
+repl -> store : load_latest() or load(session_id)
+ref over store
+  SSN-02: Load Session
+end ref
+
+alt Session found
+    store --> repl : Session(id, messages)
+    repl -> agent : restore messages
+    agent -> agent : set self.messages = session.messages
+    repl --> user : "Resumed session <id> (<N> messages)"
+else Session not found
+    store --> repl : FileNotFoundError
+    repl -> agent : start fresh
+    repl --> user : "No session found, starting fresh"
+end
+
+note over store
+  Flow:    --continue -> load_latest -> restore messages -> continue
+  State:   No state change
+  Failure: No session -> start fresh
+  Success: Conversation restored, ready for input
+end note
+
+@enduml

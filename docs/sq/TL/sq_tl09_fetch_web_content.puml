@@ -1,0 +1,52 @@
+@startuml sq_tl09_fetch_web_content
+' ============================================================
+' Title:     TL-09 — FETCH Web Content
+' Boundary:  nasim code agent CLI
+' Purpose:   Fetch URL content and convert to markdown
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Review:    —
+' ============================================================
+
+participant "ToolRegistry" as registry
+participant "WebFetchTool" as fetch
+participant "Web" as web
+
+box "Tool Layer" #F3E5F5
+end box
+
+note over fetch
+  Scope:          Fetch URL content as markdown text
+  Preconditions:  URL provided by LLM
+  Excludes:       Web search (TL-10)
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
+  Rollback:       HTTP error returned as error string
+  Design:         Uses httpx + html2text for conversion
+end note
+
+registry -> fetch : execute(url, timeout)
+fetch -> web : httpx GET url (timeout=timeout)
+
+break HTTP error (4xx, 5xx)
+    web --> fetch : HTTPError
+    fetch --> registry : "Error: HTTP {status_code} for {url}"
+end
+
+break Timeout
+    web --> fetch : TimeoutException
+    fetch --> registry : "Error: timeout fetching {url}"
+end
+
+web --> fetch : HTML content
+fetch -> fetch : html2text.convert(html) -> markdown
+fetch --> registry : markdown text
+
+note over fetch
+  Flow:    URL -> HTTP GET -> html2text -> markdown
+  State:   No state change
+  Failure: HTTP error, timeout -> error string
+  Success: Page content as markdown text
+end note
+
+@enduml
