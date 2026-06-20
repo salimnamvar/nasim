@@ -1,29 +1,45 @@
 @startuml sq_llm01_call_ollama_chat
 ' ============================================================
-' Title:     LLM-01 — Call Ollama Chat (Sync)
+' Title:     LLM-01 — Call Ollama Chat
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Synchronous LLM call to Ollama API
 ' Milestone: v0.1
 ' Version:   1.0.0
 ' Source:    —
-' Review:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
 ' ============================================================
 
-participant "AgentLoop" as agent
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
 participant "OllamaClient" as llm
 participant "Ollama Server" as ollama
+
+box "Agent Core (agent.py)" #E3F2FD
+end box
+box "LLM (llm.py)" #FFF3E0
+end box
 
 note over llm
   Scope:          Single synchronous chat completion
   Preconditions:  Ollama server reachable at configured URL
-  Excludes:       Streaming, tool call parsing
-  Contexts:       Called by AGT-01
+  Excludes:       Streaming, tool call parsing details
+  Contexts:       Called by AGT-01 (Process User Task)
   Rollback:       HTTP error raised to caller
   Design:         Uses requests.post with timeout
 end note
 
+user -> cli : (entry via AGT-01)
+cli -> agent : (entry via AGT-01)
 agent -> llm : chat(messages, tools)
 llm -> ollama : POST /api/chat {model, messages, tools, stream:false}
+
+break HTTP error or timeout
+    ollama --> llm : connection error / timeout
+    llm --> agent : exception raised
+    agent -> agent : handle error
+end
+
 ollama --> llm : JSON response
 llm -> llm : _parse_response(data)
 llm --> agent : LLMResponse(content, tool_calls)
@@ -31,7 +47,7 @@ llm --> agent : LLMResponse(content, tool_calls)
 note over llm
   Flow:    Messages -> HTTP POST -> JSON parse -> LLMResponse
   State:   No state change
-  Failure: HTTP error or timeout -> exception
+  Failure: HTTP error or timeout -> exception to Agent
   Success: LLMResponse with content and/or tool_calls
 end note
 

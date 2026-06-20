@@ -1,0 +1,49 @@
+@startuml sq_cli03_display_streaming_output
+' ============================================================
+' Title:     CLI-03 — Display Streaming Output
+' Boundary:  nasim code agent CLI
+' Purpose:   Print tokens as they arrive from the LLM
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+
+box "CLI (cli.py)" #E8F5E9
+end box
+
+note over cli
+  Scope:          Streaming display of LLM tokens
+  Preconditions:  Streaming mode enabled (--no-stream to disable)
+  Excludes:       Sync mode display
+  Contexts:       Called by CLI-01 via Agent.run_streaming()
+  Rollback:       KeyboardInterrupt -> stop streaming
+  Design:         print(end="") for token-by-token output
+end note
+
+user -> cli : (entry via AGT-01)
+cli -> agent : run_streaming(user_input)
+loop stream tokens
+    agent --> cli : token string
+    cli -> cli : print(token, end="", flush=True)
+end
+agent --> cli : (stream complete)
+cli -> cli : print()
+cli --> user : (output complete)
+
+break KeyboardInterrupt
+    cli --> user : "\n(interrupted)"
+end
+
+note over cli
+  Flow:    Agent yields tokens -> CLI prints -> repeat
+  State:   THINKING / RESPONDING
+  Failure: KeyboardInterrupt -> stop and return to IDLE
+  Success: Full response printed to terminal
+end note
+
+@enduml

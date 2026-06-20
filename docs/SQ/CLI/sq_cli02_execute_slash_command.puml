@@ -1,0 +1,50 @@
+@startuml sq_cli02_execute_slash_command
+' ============================================================
+' Title:     CLI-02 — Execute Slash Command
+' Boundary:  nasim code agent CLI
+' Purpose:   Handle /help, /reset, /quit, /model commands
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+
+box "CLI (cli.py)" #E8F5E9
+end box
+
+note over cli
+  Scope:          Slash command parsing and dispatch
+  Preconditions:  User input starts with /
+  Excludes:       Normal user input
+  Contexts:       Called by CLI-01 (Process User Input)
+  Rollback:       Unknown command -> display error
+  Design:         Commands are local to CLI; no LLM call
+end note
+
+user -> cli : "/command"
+alt /quit or /exit
+    cli --> user : "Bye." [exit loop]
+else /help
+    cli --> user : display commands list
+else /reset
+    cli -> agent : reset()
+    agent --> cli : OK
+    cli --> user : "History cleared."
+else /model
+    cli --> user : display model name
+else unknown command
+    cli --> user : "Unknown command: /command"
+end
+
+note over cli
+  Flow:    Slash command -> match -> action -> IDLE
+  State:   No state change (IDLE -> IDLE)
+  Failure: Unknown command -> error message
+  Success: Command executed, response displayed
+end note
+
+@enduml

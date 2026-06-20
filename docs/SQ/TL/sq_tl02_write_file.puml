@@ -1,0 +1,55 @@
+@startuml sq_tl02_write_file
+' ============================================================
+' Title:     TL-02 — Write File
+' Boundary:  nasim code agent CLI
+' Purpose:   Create or overwrite a file
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+participant "TOOL_REGISTRY" as registry
+participant "FileTools" as ft
+participant "Host Filesystem" as fs
+
+box "Tools (tools.py)" #F3E5F5
+end box
+
+note over ft
+  Scope:          Write content to a file
+  Preconditions:  Path and content provided by LLM
+  Excludes:       Read, edit
+  Contexts:       Called by AGT-02 (Dispatch Tool Call)
+  Rollback:       Error string returned to LLM
+  Design:         Creates parent directories automatically
+end note
+
+user -> cli : (entry via AGT-01)
+cli -> agent : (entry via AGT-01)
+agent -> registry : execute_tool("write_file", {path, content})
+registry -> ft : write_file(path, content)
+ft -> fs : Path(path).mkdir(parents=True)
+ft -> fs : Path(path).write_text(content)
+
+break Write error (permissions, disk full)
+    fs --> ft : PermissionError / OSError
+    ft --> registry : "Error writing path: exception"
+    registry --> agent : error string
+end
+
+fs --> ft : OK
+ft --> registry : "Wrote N bytes to path"
+registry --> agent : result string
+
+note over ft
+  Flow:    mkdir -> write_text -> byte count
+  State:   No state change
+  Failure: Permissions, disk space -> error string
+  Success: "Wrote N bytes to path"
+end note
+
+@enduml

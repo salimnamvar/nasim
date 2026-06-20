@@ -1,0 +1,41 @@
+@startuml sq_agt04_reset_history
+' ============================================================
+' Title:     AGT-04 — Reset History
+' Boundary:  nasim code agent CLI
+' Purpose:   Clear conversation history, keep system prompt
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+
+box "Agent Core (agent.py)" #E3F2FD
+end box
+
+note over agent
+  Scope:          Clear conversation history
+  Preconditions:  Agent has messages history
+  Excludes:       System prompt (preserved)
+  Contexts:       Called by CLI-02 (/reset command)
+  Rollback:       N/A (destructive, but system prompt preserved)
+  Design:         Keeps only messages[0] (system prompt)
+end note
+
+user -> cli : "/reset"
+cli -> agent : reset()
+agent -> agent : messages = [messages[0]]
+agent --> cli : OK
+cli --> user : "History cleared."
+
+note over agent
+  Flow:    /reset -> Agent.reset() -> keep system prompt only
+  State:   No state change (IDLE -> IDLE)
+  Failure: N/A
+  Success: Conversation history cleared
+end note
+
+@enduml

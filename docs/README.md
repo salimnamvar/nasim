@@ -3,11 +3,13 @@
 ## Design Chain
 
 ```
-C4  →  UC  →  SM  →  SQ  →  ERD  →  CL  →  Code
+C4  →  UC  →  SM  →  SQ  →  CL  →  Code
 ```
 
-nasim is a CLI tool with no persistent storage, so the chain terminates at CL
-(no ERD/CT/DATA needed — no databases or structured stores).
+nasim is a CLI tool with no persistent storage. The chain terminates at CL —
+no ERD, CT/DATA, or CT/API layers are needed (no databases, no HTTP APIs
+exposed by nasim itself). The Ollama server is an external dependency, not
+a nasim API.
 
 ## Quick Navigation
 
@@ -27,12 +29,11 @@ nasim is a CLI tool with no persistent storage, so the chain terminates at CL
 - [SM Inventory](SM/README.md)
 
 ### Sequence Diagrams
-- [AGT-01: Execute User Task](SQ/AGENT/sq_agt01_execute_user_task.puml) — Core loop
-- [LLM-01: Call Ollama Chat](SQ/LLM/sq_llm01_call_ollama_chat.puml) — Sync LLM call
-- [TL-01: Read File](SQ/TOOL/sq_tl01_read_file.puml) — File read tool
+- [SQ Inventory](SQ/README.md) — All 15 SQ diagrams (1:1 with UCs)
 
 ### Class Diagram
-- [Domain Model](CL/cl_domain_model.puml) — Core classes and relationships
+- [Runtime Model](CL/cl_domain_model.puml) — Core classes and relationships
+- [CL Inventory](CL/README.md)
 
 ## Architecture Decisions
 
@@ -41,3 +42,5 @@ nasim is a CLI tool with no persistent storage, so the chain terminates at CL
 3. **Streaming support** — tokens displayed as they arrive for better UX.
 4. **Max iteration guard** — agent stops after 20 tool-call rounds to prevent infinite loops.
 5. **String-based tool results** — tools return strings, not structured objects. LLM parses results.
+6. **Process FSM, not entity lifecycle** — SM states are transient agent states, not persisted entity lifecycle. SMT ownership rules from `sm.md` do not apply (documented deviation).
+7. **CL covers runtime structure** — nasim has no business domain entities; CL diagrams document the runtime class model (documented deviation).

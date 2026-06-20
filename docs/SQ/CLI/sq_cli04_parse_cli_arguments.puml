@@ -1,0 +1,38 @@
+@startuml sq_cli04_parse_cli_arguments
+' ============================================================
+' Title:     CLI-04 — Parse CLI Arguments
+' Boundary:  nasim code agent CLI
+' Purpose:   Parse command-line arguments at startup
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+
+box "CLI (cli.py)" #E8F5E9
+end box
+
+note over cli
+  Scope:          argparse-based argument parsing
+  Preconditions:  Script invoked from terminal
+  Excludes:       Runtime behavior
+  Contexts:       Called once at startup before REPL
+  Rollback:       --help -> exit(0); invalid args -> argparse error
+  Design:         --model, --server, --no-stream, -c
+end note
+
+user -> cli : python run.py [args]
+cli -> cli : parse_args()
+cli --> user : Namespace(model, server, no_stream, command)
+
+note over cli
+  Flow:    sys.argv -> argparse -> Namespace
+  State:   No state change (pre-REPL)
+  Failure: Invalid args -> argparse error + exit(1)
+  Success: Namespace returned to main()
+end note
+
+@enduml

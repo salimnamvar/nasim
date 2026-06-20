@@ -1,0 +1,62 @@
+@startuml sq_cli01_process_user_input
+' ============================================================
+' Title:     CLI-01 — Process User Input
+' Boundary:  nasim code agent CLI
+' Purpose:   REPL loop: read input, dispatch, display output
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+
+box "CLI (cli.py)" #E8F5E9
+end box
+box "Agent Core (agent.py)" #E3F2FD
+end box
+
+note over cli
+  Scope:          REPL input loop
+  Preconditions:  Agent initialized, Ollama reachable
+  Excludes:       Slash commands, streaming detail
+  Contexts:       Top-level entry point
+  Rollback:       Error caught, returned to IDLE
+  Design:         Ctrl+C interrupts current turn, Ctrl+D exits
+end note
+
+loop forever
+    user -> cli : types input (or Ctrl+D)
+    alt input is /quit or EOF
+        cli --> user : "Bye."
+    else input is /help
+        cli --> user : display help text
+    else input is /reset
+        cli -> agent : reset()
+        agent --> cli : history cleared
+        cli --> user : "History cleared."
+    else input is /model
+        cli --> user : display current model
+    else empty input
+        cli --> user : (skip)
+    else normal input
+        ref over cli, agent
+          AGT-01: Process User Task
+        end ref
+    end
+end
+
+break EOFError
+    cli --> user : "Bye."
+end
+
+note over cli
+  Flow:    User -> input() -> dispatch -> response -> loop
+  State:   IDLE -> LISTENING -> (THINKING ->)* -> IDLE
+  Failure: EOFError -> exit; other errors -> display and continue
+  Success: Response displayed, return to IDLE
+end note
+
+@enduml

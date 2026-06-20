@@ -1,0 +1,58 @@
+@startuml sq_agt02_dispatch_tool_call
+' ============================================================
+' Title:     AGT-02 — Dispatch Tool Call
+' Boundary:  nasim code agent CLI
+' Purpose:   Execute a single tool call from the LLM
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+participant "TOOL_REGISTRY" as registry
+participant "Tool Handler" as handler
+
+box "Agent Core (agent.py)" #E3F2FD
+end box
+box "Tools (tools.py)" #F3E5F5
+end box
+
+note over registry
+  Scope:          Single tool dispatch and execution
+  Preconditions:  LLM returned tool_calls list
+  Excludes:       LLM calls, conversation management
+  Contexts:       Called by AGT-01 (Process User Task)
+  Rollback:       Error string returned to LLM as tool result
+  Design:         Tools return strings; LLM parses results
+end note
+
+user -> cli : (entry via AGT-01)
+cli -> agent : (entry via AGT-01)
+agent -> registry : execute_tool(name, arguments)
+
+alt Tool found
+    registry -> handler : TOOL_REGISTRY[name]["handler"](**arguments)
+    handler --> registry : result string
+    registry --> agent : result string
+    agent -> agent : append tool result to messages
+else Tool not found
+    registry --> agent : "Error: unknown tool 'name'"
+    agent -> agent : append error to messages
+end
+
+break Handler throws exception
+    registry --> agent : "Error executing name: exception"
+    agent -> agent : append error to messages
+end
+
+note over registry
+  Flow:    Agent -> TOOL_REGISTRY -> handler -> result string
+  State:   THINKING -> TOOL_EXEC -> THINKING
+  Failure: Unknown tool or handler exception -> error string in messages
+  Success: Tool result appended to conversation
+end note
+
+@enduml

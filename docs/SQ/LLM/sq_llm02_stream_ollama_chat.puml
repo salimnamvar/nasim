@@ -1,0 +1,63 @@
+@startuml sq_llm02_stream_ollama_chat
+' ============================================================
+' Title:     LLM-02 — Stream Ollama Chat
+' Boundary:  nasim code agent CLI
+' Purpose:   Streaming LLM call yielding tokens incrementally
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+participant "OllamaClient" as llm
+participant "Ollama Server" as ollama
+
+box "Agent Core (agent.py)" #E3F2FD
+end box
+box "LLM (llm.py)" #FFF3E0
+end box
+
+note over llm
+  Scope:          Streaming chat completion
+  Preconditions:  Ollama server reachable
+  Excludes:       Sync mode, tool call parsing detail
+  Contexts:       Called by AGT-01 (Process User Task)
+  Rollback:       HTTP error raised to caller
+  Design:         Yields str (tokens) or ToolCall objects
+end note
+
+user -> cli : (entry via AGT-01)
+cli -> agent : run_streaming(user_input)
+agent -> llm : chat_stream(messages, tools)
+llm -> ollama : POST /api/chat {stream: true}
+
+break HTTP error or timeout
+    ollama --> llm : connection error
+    llm --> agent : exception
+end
+
+loop stream chunks
+    ollama --> llm : JSON chunk {message: {content/token}}
+    alt content token
+        llm --> agent : yield str(token)
+        agent --> cli : yield token
+        cli -> cli : print(token, end="")
+    else tool_calls
+        llm -> llm : accumulate ToolCall buffers
+    end
+end
+
+llm --> agent : yield ToolCall (if any)
+llm -> llm : finalize response
+
+note over llm
+  Flow:    Messages -> stream -> chunks -> yield tokens/ToolCalls
+  State:   No state change
+  Failure: HTTP error -> exception
+  Success: Tokens yielded to Agent, then ToolCalls if present
+end note
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml sq_agt03_manage_conversation
+' ============================================================
+' Title:     AGT-03 — Manage Conversation
+' Boundary:  nasim code agent CLI
+' Purpose:   Maintain message history and system prompt
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+
+box "Agent Core (agent.py)" #E3F2FD
+end box
+
+note over agent
+  Scope:          Message list management
+  Preconditions:  Agent initialized with system prompt
+  Excludes:       LLM calls, tool execution
+  Contexts:       Called by AGT-01 (Process User Task)
+  Rollback:       N/A (in-memory only)
+  Design:         Messages list; system prompt always first element
+end note
+
+user -> cli : (entry via AGT-01)
+cli -> agent : (entry via AGT-01)
+
+agent -> agent : messages.append({role: "user", content: input})
+agent -> agent : messages.append({role: "assistant", content/response})
+agent -> agent : messages.append({role: "tool", content: result})
+
+note over agent
+  Flow:    User/assistant/tool messages appended to list
+  State:   No state change
+  Failure: N/A (in-memory operations)
+  Success: Messages list updated for next LLM call
+end note
+
+@enduml

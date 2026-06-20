@@ -1,0 +1,77 @@
+@startuml sq_agt01_execute_user_task
+' ============================================================
+' Title:     AGT-01 — Process User Task
+' Boundary:  nasim code agent CLI
+' Purpose:   Core agentic loop: LLM call -> tool dispatch -> repeat
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+participant "OllamaClient" as llm
+participant "ToolRegistry" as tool
+
+box "CLI (cli.py)" #E8F5E9
+end box
+box "Agent Core (agent.py)" #E3F2FD
+end box
+box "LLM (llm.py)" #FFF3E0
+end box
+box "Tools (tools.py)" #F3E5F5
+end box
+
+note over cli
+  Scope:          Single user task execution
+  Preconditions:  Agent initialized, Ollama reachable
+  Excludes:       Slash commands, streaming display
+  Contexts:       Called by CLI-01 (Process User Input)
+  Rollback:       Error state -> IDLE
+  Design:         Max 20 iterations to prevent infinite loops
+end note
+
+user -> cli : types input
+cli -> agent : run(user_input)
+
+agent -> agent : append user message to messages
+
+ref over agent, llm
+  LLM-01: Call Ollama Chat
+end ref
+
+alt LLM returns text only
+    agent -> agent : append assistant message to messages
+    agent --> cli : final text
+    cli --> user : display response
+else LLM returns tool calls
+    agent -> agent : append assistant message with tool_calls
+    loop for each tool_call
+        ref over agent, tool
+          AGT-02: Dispatch Tool Call
+        end ref
+    end
+    ref over agent, llm
+      LLM-01: Call Ollama Chat  [recurse]
+    end ref
+    agent -> agent : append assistant message to messages
+    agent --> cli : final text
+    cli --> user : display response
+end
+
+break LLM call fails or tool execution errors
+    agent -> agent : append error message
+    agent --> cli : error text
+    cli --> user : display error
+end
+
+note over cli
+  Flow:    User -> CLI -> Agent -> LLM -> (tool loop) -> response
+  State:   IDLE -> LISTENING -> THINKING -> [TOOL_EXEC]* -> RESPONDING -> IDLE
+  Failure: LLM error or tool error -> ERROR -> IDLE
+  Success: Final text displayed to user
+end note
+
+@enduml

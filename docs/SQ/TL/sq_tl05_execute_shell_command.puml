@@ -1,0 +1,64 @@
+@startuml sq_tl05_execute_shell_command
+' ============================================================
+' Title:     TL-05 — Execute Shell Command
+' Boundary:  nasim code agent CLI
+' Purpose:   Run a shell command via subprocess
+' Milestone: v0.1
+' Version:   1.0.0
+' Source:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
+' ============================================================
+
+actor "Developer" as user
+participant "CLI" as cli
+participant "Agent" as agent
+participant "TOOL_REGISTRY" as registry
+participant "ShellTool" as st
+participant "Host Shell" as shell
+
+box "Tools (tools.py)" #F3E5F5
+end box
+
+note over st
+  Scope:          Execute shell command with timeout
+  Preconditions:  Command string provided by LLM
+  Excludes:       File operations
+  Contexts:       Called by AGT-02 (Dispatch Tool Call)
+  Rollback:       Error string with exit code returned to LLM
+  Design:         capture_output=True, text=True, default 30s timeout
+end note
+
+user -> cli : (entry via AGT-01)
+cli -> agent : (entry via AGT-01)
+agent -> registry : execute_tool("shell_exec", {command, timeout})
+registry -> st : shell_exec(command, timeout)
+st -> shell : subprocess.run(command, shell=True, capture_output=True)
+
+break Timeout
+    shell --> st : TimeoutExpired
+    st --> registry : "Error: command timed out after Ns"
+    registry --> agent : error string
+end
+
+break Other exception
+    shell --> st : OSError / ValueError
+    st --> registry : "Error executing command: exception"
+    registry --> agent : error string
+end
+
+shell --> st : CompletedProcess(stdout, stderr, returncode)
+st -> st : combine stdout + stderr
+alt returncode != 0
+    st -> st : append "(exit code: N)"
+end
+st --> registry : combined output
+registry --> agent : result string
+
+note over st
+  Flow:    subprocess.run -> combine output -> return
+  State:   No state change
+  Failure: Timeout, OS error, non-zero exit -> error string
+  Success: Combined stdout/stderr (or "(no output)")
+end note
+
+@enduml

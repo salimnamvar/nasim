@@ -1,56 +1,51 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+skinparam linetype polyline
 
 ' ============================================================
 ' Title:     nasim — Component Diagram
 ' Boundary:  nasim code agent CLI
-' Purpose:   Show internal components, their responsibilities, and data flow
+' Purpose:   Show internal components matching functional code structure
 ' Milestone: v0.1
 ' Version:   1.0.0
 ' Source:    —
-' Review:    —
+' Review:    docs/audit/audit_2026-06-20_design-chain.md
 ' ============================================================
 
 title nasim — Component Diagram
 
-Container_Boundary(cli_boundary, "CLI Layer") {
-    Component(repl, "REPL", "cli.py", "Input loop, slash commands (/help, /reset, /quit), streaming display")
-    Component(arg_parser, "ArgParser", "cli.py", "CLI argument parsing (--model, --server, -c)")
+Container_Boundary(cli_boundary, "CLI (cli.py)") {
+    Component(cli_main, "main", "cli.py", "Entry point, argument parsing, REPL loop")
 }
 
-Container_Boundary(agent_boundary, "Agent Core") {
-    Component(agent_loop, "AgentLoop", "agent.py", "Orchestrates LLM calls and tool execution, enforces max iterations")
-    Component(ctx_mgr, "ContextManager", "agent.py", "Maintains message list, system prompt, history reset")
+Container_Boundary(agent_boundary, "Agent Core (agent.py)") {
+    Component(agent, "Agent", "agent.py", "Orchestrates LLM + tool loop, holds messages, enforces max iterations")
 }
 
-Container_Boundary(llm_boundary, "LLM Layer") {
-    Component(ollama_client, "OllamaClient", "llm.py", "HTTP client for Ollama /api/chat, supports streaming and tool calls")
-    Component(response_parser, "ResponseParser", "llm.py", "Parses Ollama response into LLMResponse with ToolCall objects")
+Container_Boundary(llm_boundary, "LLM (llm.py)") {
+    Component(ollama_client, "OllamaClient", "llm.py", "Ollama /api/chat client, sync + streaming, response parsing")
 }
 
-Container_Boundary(tool_boundary, "Tool Layer") {
-    Component(tool_registry, "ToolRegistry", "tools.py", "Decorator-based registration, OpenAI-compatible tool definitions")
-    Component(tool_executor, "ToolExecutor", "tools.py", "Dispatches tool calls, handles errors, returns string results")
-    Component(file_tools, "FileTools", "tools.py", "read_file, write_file, edit_file implementations")
-    Component(shell_tool, "ShellTool", "tools.py", "shell_exec with timeout support")
-    Component(dir_tool, "DirTool", "tools.py", "list_dir implementation")
+Container_Boundary(tool_boundary, "Tools (tools.py)") {
+    Component(tool_registry, "TOOL_REGISTRY", "tools.py", "Decorator-based tool registration, OpenAI-compatible definitions")
+    Component(execute_tool, "execute_tool()", "tools.py", "Dispatches tool calls by name")
+    Component(file_tools, "FileTools", "tools.py", "read_file, write_file, edit_file")
+    Component(shell_tool, "ShellTool", "tools.py", "shell_exec with timeout")
+    Component(dir_tool, "DirTool", "tools.py", "list_dir")
 }
 
 System_Ext(ollama, "Ollama Server", "HTTP API")
 System_Ext(host_fs, "Host Filesystem")
 System_Ext(host_shell, "Host Shell")
 
-Rel(repl, agent_loop, "user input -> final response")
-Rel(repl, arg_parser, "parses args")
-Rel(agent_loop, ctx_mgr, "get/build message list")
-Rel(agent_loop, ollama_client, "chat(messages, tools)")
-Rel(agent_loop, tool_executor, "execute_tool(name, args)")
-Rel(ollama_client, response_parser, "raw JSON -> LLMResponse")
+Rel(cli_main, agent, "user input -> response")
+Rel(agent, ollama_client, "chat(messages, tools)")
+Rel(agent, execute_tool, "execute_tool(name, args)")
 Rel(ollama_client, ollama, "HTTP POST", "JSON")
-Rel(tool_executor, tool_registry, "lookup handler by name")
-Rel(tool_executor, file_tools, "read/write/edit")
-Rel(tool_executor, shell_tool, "subprocess.run")
-Rel(tool_executor, dir_tool, "pathlib iteration")
+Rel(execute_tool, tool_registry, "lookup handler")
+Rel(execute_tool, file_tools, "read/write/edit")
+Rel(execute_tool, shell_tool, "subprocess")
+Rel(execute_tool, dir_tool, "pathlib")
 Rel(file_tools, host_fs, "path I/O")
 Rel(shell_tool, host_shell, "subprocess")
 Rel(dir_tool, host_fs, "directory listing")
