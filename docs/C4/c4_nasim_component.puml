@@ -182,6 +182,8 @@ Container_Boundary(core_library, "Core Library") {
 
     Container_Boundary(context_graph_group, "Context Graph Group") {
         Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
+        Component(context_node, "ContextNode", "data structure", "Context unit: code block, memory entry, file section with token cost")
+        Component(context_edge, "ContextEdge", "data structure", "Typed edge between nodes: depends, references, includes, follows")
         Component(context_processor, "ContextProcessor", "ABC", "Base interface for pipeline processors")
         Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
         Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget")
@@ -221,6 +223,7 @@ Rel(agent_orch, edit_strategy_mgr, "SELECT, APPLY")
 Rel(agent_orch, eval_engine, "EVALUATE, RETRY")
 Rel(agent_orch, wire_log, "APPEND, REPLAY")
 Rel(agent_orch, context_graph, "PROCESS")
+Rel(agent_orch, safety_coord, "safety validation before tool exec")
 ' Rel(agent_orch, cli_container) and Rel(agent_orch, server_container) REMOVED
 ' Core must never depend on its callers — dependency inversion violation fixed (p1.md #1)
 

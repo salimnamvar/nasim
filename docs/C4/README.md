@@ -6,7 +6,7 @@
 |---------|-------|----------|-------------|
 | c4_nasim_context.puml | Context | System | nasim with all external actors and systems (15 external) |
 | c4_nasim_container.puml | Container | System | Deployable units: CLI, HTTP Server, Core Library (3 containers) |
-| c4_nasim_component.puml | Component | Cross-container | Core Library component overview: all 18 groups and interactions |
+| c4_nasim_component.puml | Component | Cross-container | Core Library component overview: all 20 groups and interactions |
 
 ## Per-Group Component Diagrams
 
@@ -31,7 +31,7 @@
 | c4_nasim_component_edit_strategy.puml | Edit Strategy | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector, StrategyHeuristics |
 | c4_nasim_component_evaluation.puml | Evaluation | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector, QualitySignal |
 | c4_nasim_component_wire_log.puml | Wire Log | WireLog, WireAppender, WireReader, TurnIndex, SessionForkManager |
-| c4_nasim_component_context_graph.puml | Context Graph | ContextGraph, ContextProcessor (ABC), PipelineOrchestrator, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
+| c4_nasim_component_context_graph.puml | Context Graph | ContextGraph, ContextNode (data structure), ContextEdge (data structure), ContextProcessor (ABC), PipelineOrchestrator, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
 
 ## Actors
 
@@ -67,6 +67,6 @@
 - **No God Objects:** AgentOrchestrator delegates to SafetyCoordinator (Safety group), SubagentCoordinator, PersonaManager, ErrorBoundary
 - **MCP first-class:** ClientRuntime, ServerRuntime, ToolAdapter, Discovery as separate components
 - **No System_Ext abuse:** Internal containers referenced via Container_Ext only
-- **No orphan components:** Every component in detail diagrams appears in the cross-container overview
+- **No orphan components:** Every component in detail diagrams appears in the cross-container overview (ContextNode and ContextEdge are internal data structures within ContextGraph, not standalone components)
 - **Include pinned:** All diagrams pin C4-PlantUML to v2.10.0
 - **Version consistency:** All diagram headers use Version 6.0.0

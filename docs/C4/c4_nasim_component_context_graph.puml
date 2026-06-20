@@ -17,8 +17,8 @@ title nasim — Context Graph Component Diagram
 
 Container_Boundary(context_graph_boundary, "Context Graph Group") {
     Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
-    Component(context_node, "ContextNode", "", "Context unit: code block, memory entry, file section with token cost")
-    Component(context_edge, "ContextEdge", "", "Typed edge between nodes: depends, references, includes, follows")
+    Component(context_node, "ContextNode", "data structure", "Context unit: code block, memory entry, file section with token cost. Internal to ContextGraph")
+    Component(context_edge, "ContextEdge", "data structure", "Typed edge between nodes: depends, references, includes, follows. Internal to ContextGraph")
     Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
     Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget")
     Component(distillation_processor, "DistillationProcessor", "", "Summarizes and distills long context nodes")
