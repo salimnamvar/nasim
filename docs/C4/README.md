@@ -4,7 +4,7 @@
 
 | Diagram | Level | Boundary | Description |
 |---------|-------|----------|-------------|
-| c4_nasim_context.puml | Context | System | nasim with all external actors and systems (12 external) |
+| c4_nasim_context.puml | Context | System | nasim with all external actors and systems (15 external) |
 | c4_nasim_container.puml | Container | System | Deployable units: CLI, HTTP Server, Core Library (3 containers) |
 | c4_nasim_component.puml | Component | Cross-container | Core Library component overview: all 18 groups and interactions |
 

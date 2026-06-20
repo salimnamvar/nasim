@@ -5,7 +5,7 @@
 ' ============================================================
 ' Title: nasim — System Context
 ' Boundary: nasim code agent
-' Purpose: Show nasim as a system with all interfaces and external dependencies
+' Purpose: Show nasim as a system with all interfaces and external dependencies (15 external)
 ' Milestone: v1.0
 ' Version: 6.0.0
 ' Source: docs/audit/audit.2026.06.20.deep.domain.audit.md
