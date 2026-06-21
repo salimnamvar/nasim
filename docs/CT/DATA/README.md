@@ -6,13 +6,22 @@ Back to [docs/](../README.md).
 
 ## Contracts
 
+### Data Contracts (ODCS YAML)
+
 | File | Store Boundary | Entity Count | Description |
 | ---- | -------------- | :----------: | ----------- |
 | `nasim_session_store.datacontract.yaml` | Session Store | 3 | Session metadata, messages, file metadata |
-| `nasim_memory_store.datacontract.yaml` | Memory Store | 3 | Knowledge entries, index, scope |
-| `nasim_todo_store.datacontract.yaml` | Todo Store | 2 | Todo items, session association |
+| `data_contract_session_store.yaml` | Session Store | — | Legacy/alternate session store contract |
+
+### Data Contract Diagrams (PlantUML)
+
+| File | Store Boundary | Entity Count | Description |
+| ---- | -------------- | :----------: | ----------- |
 | `ct_data_wire_log.puml` | Wire Log | 3 | WireEvent, TurnIndexEntry, WireMetadata |
 | `ct_data_observability.puml` | Observability | 6 | LogRecord, MetricPoint, TraceContext, ObservabilityConfig, RedactionRule, LogLevel |
+| `ct_data_repo_intelligence.puml` | Repo Intelligence | — | Repo intelligence data structures |
+| `ct_data_evaluation.puml` | Evaluation | — | Evaluation data structures |
+| `ct_data_context_graph.puml` | Context Graph | — | Context graph data structures |
 
 ## Store Summary
 
@@ -35,6 +44,6 @@ and outputs to CL (entity names, attributes) and CT/API (request/response schema
 
 | Layer | Path |
 | ----- | ---- |
-| ERD (source) | `docs/er/er_session_store.puml` |
-| CL (target) | `docs/cl/cl_runtime_model.puml` |
+| ERD (source) | `docs/ER/er_session_store.puml` |
+| CL (target) | `docs/CL/cl_runtime_model.puml` |
 | CT/API (sibling) | `docs/CT/API/openapi.yaml` |

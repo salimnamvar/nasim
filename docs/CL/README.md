@@ -13,8 +13,8 @@ Back to [docs/](../README.md).
 
 ## Class List
 
-| Class | Module | Type | C4 Component | Description |
-|-------|--------|------|-------------|-------------|
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
 | Provider | `nasim/provider/base.py` | Protocol | Provider | Unified LLM interface: chat, chat_stream, model_name via litellm |
 | LiteLLMProxy | `nasim/provider/litellm.py` | class | Provider | Universal LLM proxy: 100+ providers via model string prefix |
 | ModelRouter | `nasim/provider/router.py` | class | Provider | Model selection, fallback, task classification |
@@ -137,6 +137,7 @@ Back to [docs/](../README.md).
 - nasim is a CLI agent tool with HTTP API server mode. The CL diagram covers runtime structure
   rather than a pure domain model (no business entities). This is a deliberate
   deviation from the OVMS-style domain CL — documented in entities.md.
+- **Implementation status:** All module paths are planned. No Python source code exists yet.
 - AgentEvent hierarchy uses ABC base with concrete subtypes (TextChunk, ToolStart, ToolResultEvent, Error, Done).
 - Tool ABC defines the contract; ToolRegistry manages instances.
 - Provider Protocol defines the interface; concrete implementations per backend.
@@ -154,8 +155,8 @@ Back to [docs/](../README.md).
 
 | Layer | Path |
 | ----- | ---- |
-| C4 components (source) | `docs/c4/` |
-| UC inventory | `docs/uc/` |
-| SQ diagrams | `docs/sq/` |
-| ERD — session store | `docs/er/er_session_store.puml` |
-| Entity registry | `docs/entities.md` |
+| C4 components (source) | `docs/C4/` |
+| UC inventory | `docs/UC/` |
+| SQ diagrams | `docs/SQ/` |
+| ERD — session store | `docs/ER/er_session_store.puml` |
+| Entity registry | `docs/ENTITIES.md` |

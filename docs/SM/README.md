@@ -101,7 +101,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
 | APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
 | EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
-| COMPLETED | Implicit | Agent loop finishes all steps |
+| COMPLETED | AGT-01 PROCESS User Task | Agent loop finishes all steps |
 | REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
 
 ### Plugin Lifecycle

@@ -4,27 +4,35 @@
 
 Built through systematic investigation and original synthesis of usage patterns.
 
-Current status: early functional proof-of-concept with a clean design chain already in place for the target architecture.
+Current status: comprehensive design chain with 148 sequence diagrams, 109 use cases, full C4 architecture, and detailed implementation roadmap. Implementation has not yet begun.
 
-## What nasim does (today)
+## What nasim is
 
-- Interactive REPL + one-shot command mode
-- Basic file and shell tools (`read_file`, `write_file`, `edit_file`, `list_dir`, `shell_exec`)
-- Ollama-backed LLM with streaming support
-- Minimal agent loop with tool calling
+A CLI code agent + HTTP API server + MCP server, designed from first principles with a complete C4 → UC → SM → SQ → ERD → CL → CT/DATA → CT/API → Code design chain.
 
-## What it is designed to become
+## What exists today
 
-Full design chain exists under `docs/`:
+- Complete design chain under `docs/` (frozen)
+- Implementation roadmap under `docs/RDM/` (10 milestone docs)
+- Reference agent audits against 28 agents under `docs/audit/`
+- Research data on Ollama models under `data/`
+- Development scripts: lint, clean, environment setup
+- Utility scripts: Ollama model scraping/analysis, doc merging
 
-- C4 context/container/component diagrams
-- 42 Use Cases (UC)
-- State Machine (agent lifecycle)
-- 1:1 Sequence Diagrams (SQ)
-- Entity definitions, runtime Class Diagram (CL)
-- Session persistence (JSON), provider abstraction, safety/permission gates, context compaction, layered config, MCP tool extension points
+## Design artifacts
 
-See [docs/README.md](docs/README.md) and the audit notes in `docs/audit/`.
+| Layer | Artifacts | Status |
+|-------|-----------|--------|
+| C4 Architecture | 24 diagrams (context, container, 21 component groups) | Frozen |
+| Use Cases | 22 UC files — 109 UCs across 21 groups | Frozen |
+| State Machine | 4 diagrams (agent, session, plan, plugin lifecycles) | Frozen |
+| Sequence Diagrams | 148 diagrams across 21 groups | Frozen |
+| ERD | 5 store schemas | Frozen |
+| Class Diagram | 1 runtime model | Frozen |
+| Data Contracts | 5 ODCS v3.1.0 contracts + 2 YAML schemas | Frozen |
+| HTTP API Surface | 6 API puml + OpenAPI 3.1.0 + ROD decisions | Frozen |
+| Implementation Roadmap | 10 milestone docs | Active |
+| Audit Reports | 17 audit documents (28 reference agents) | Active |
 
 ## Quick start
 
@@ -33,15 +41,15 @@ See [docs/README.md](docs/README.md) and the audit notes in `docs/audit/`.
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
-
-# Run
-python run.py --model qwen2.5-coder:14b --server http://localhost:11434
-
-# Or one command
-python run.py -c "explain the project structure"
 ```
 
-Requires a running Ollama instance with a capable coding model.
+### Environment setup (recommended on new machine)
+
+```bash
+bash scripts/setup/setup_env.sh
+```
+
+Requires Python 3.10+. Reads `pyproject.toml` automatically.
 
 ## Development
 
@@ -52,33 +60,44 @@ bash scripts/lint.sh
 # Clean build / cache artifacts
 bash scripts/clean.sh
 
-# Full environment provisioning (recommended on new machine)
+# Full environment provisioning
 bash scripts/setup/setup_env.sh
 ```
 
 See [scripts/README.md](scripts/README.md) and [scripts/setup/README.md](scripts/setup/README.md).
 
-## Project layout (current)
+## Project layout
 
 ```
 nasim/
-├── nasim/
-│   ├── agent.py      # core agent loop + tool orchestration
-│   ├── cli.py        # REPL + arg parsing + streaming UX
-│   ├── llm.py        # Ollama client (streaming + tool calls)
-│   └── tools.py      # tool registry + implementations
-├── docs/             # full design chain (C4, UC, SM, SQ, CL, entities)
-├── scripts/          # lint, clean, setup
-├── data/             # research data (reference agent analysis)
-├── run.py            # convenience entry
-└── pyproject.toml
+├── docs/              # full design chain (C4, UC, SM, SQ, ERD, CL, CT, audit, RDM)
+│   ├── C4/            # 24 C4 architecture diagrams
+│   ├── UC/            # 22 use case diagrams (109 UCs)
+│   ├── SM/            # 4 state machine diagrams
+│   ├── SQ/            # 148 sequence diagrams across 21 groups
+│   ├── ER/            # 5 entity-relationship diagrams
+│   ├── CL/            # class diagram (runtime model)
+│   ├── CT/DATA/       # data contracts (ODCS v3.1.0)
+│   ├── CT/API/        # HTTP API surface (OAS 3.1.0)
+│   ├── RDM/           # implementation roadmap (10 milestones)
+│   ├── MM/            # design chain maps
+│   ├── audit/         # reference agent audits (17 docs)
+│   ├── prompt/        # prompt engineering docs (p1–p9)
+│   └── REF/           # reference agent list
+├── scripts/           # lint, clean, setup, ollama tools, doc merge
+├── data/              # research data (Ollama model analysis)
+├── C4.md              # C4 consolidated view
+├── UC.md              # UC consolidated view
+├── SM.md              # SM consolidated view
+├── pyproject.toml
+└── README.md
 ```
 
 ## Configuration (planned)
 
-Layered config (global → project → env → CLI) is designed but not fully implemented in v0.1.
+Layered config (global → project → env → CLI) is designed but not implemented.
 
-See `docs/uc/uc_config.puml` and `docs/c4/c4_nasim_component_config.puml`.
+See `docs/UC/uc_config.puml` and `docs/C4/c4_nasim_component_config.puml`.
 
 ## License
 
@@ -92,6 +111,6 @@ Copyright 2026 Salim Namvar.
 
 nasim exists to explore what a high-quality, understandable, and extensible code agent looks like when you start from first principles and real usage patterns.
 
-The heavy design work (C4 → Code) has already been done. Implementation will follow the documented architecture.
+The heavy design work (C4 → Code) is complete. Implementation will follow the documented roadmap in `docs/RDM/`.
 
 Contributions that respect the design chain and the "original synthesis" goal are welcome once the project stabilizes.

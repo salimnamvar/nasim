@@ -8,7 +8,7 @@
 | c4_nasim_container.puml | Container | System | Deployable units: CLI, HTTP Server, Core Library (3 containers) |
 | c4_nasim_component.puml | Component | Cross-container | Core Library component overview: all 20 groups and interactions |
 
-## Per-Group Component Diagrams
+## Per-Group Component Diagrams (21 diagrams)
 
 | Diagram | Group | Components |
 |---------|-------|------------|
@@ -32,6 +32,8 @@
 | c4_nasim_component_evaluation.puml | Evaluation | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector, QualitySignal |
 | c4_nasim_component_wire_log.puml | Wire Log | WireLog, WireAppender, WireReader, TurnIndex, SessionForkManager |
 | c4_nasim_component_context_graph.puml | Context Graph | ContextGraph, ContextNode (data structure), ContextEdge (data structure), ContextProcessor (ABC), PipelineOrchestrator, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
+
+**Total: 24 C4 diagrams (1 context + 1 container + 1 overview + 21 group components)**
 
 ## Actors
 
