@@ -27,8 +27,10 @@
 | [audit.2026.06.20.sq-sm-chain.car.md](audit.2026.06.20.sq-sm-chain.car.md) | C4→UC→SM→SQ Chain Audit (CAR) | **CHAIN AUDIT** — 80 of 151 SQ files present; 71 missing; SM has 1 of 4 required files; full structural template compliance; ROD/CSR/DRY/OOP violations; proposed state color palette |
 | [audit.2026.06.21.design-chain.car.md](audit.2026.06.21.design-chain.car.md) | Design Chain Refinement Audit (CAR) | **DESIGN CHAIN AUDIT** — Full C4→UC→SM→SQ audit with cross-layer sync checks, prompt file resolution, AGT-05 orphan resolution |
 | [c4_fix_report.md](c4_fix_report.md) | C4 fix report | C4 diagram fixes applied |
+| [audit_2026_frontier_agents_comparison.md](audit_2026_frontier_agents_comparison.md) | Frontier comparison audit (2026) | **FRONTIER AUDIT** — nasim vs 28 agents across 12 dimensions; C1–C12 criteria; 19-item CAR roadmap; P0/P1/P2/P3 implementation phases |
+| [audit_2026_frontier_design_comparison.md](audit_2026_frontier_design_comparison.md) | Design-level frontier audit (2026) | **DESIGN AUDIT** — Scores nasim's DESIGN (not implementation) against 2026 frontier standards; 15 criteria × 10; 10 CAR design gaps; design score 74/100 |
 
-**Total: 18 audit documents**
+**Total: 20 audit documents**
 
 ---
 
@@ -50,6 +52,8 @@
 14. **audit.2026.06.20.uc-layer.car.md** — UC diagrams vs C4; 15 critical defects; corrected verb/actor vocabulary
 15. **audit.2026.06.20.sq-sm-chain.car.md** — C4→UC→SM→SQ chain: 71 missing SQ files, 3 missing SM files, structural template compliance, ROD/CSR/DRY findings, color palette
 16. **audit.2026.06.21.design-chain.car.md** — Design chain refinement: cross-layer sync, prompt file resolution, AGT-05 orphan cleanup
+17. **audit_2026_frontier_agents_comparison.md** — Frontier comparison: 28-agent corpus; C1–C12 criteria; nasim scored against 2026 standard; P0–P3 implementation roadmap
+18. **audit_2026_frontier_design_comparison.md** — **Start here for design evaluation**: scores nasim's DESIGN (not code) against 2026 frontier; 15 dimensions; 10 CAR design gaps DGA-01..10; design score 74/100
 
 ---
 
