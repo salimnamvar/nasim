@@ -17,7 +17,7 @@ skinparam state {
   FontColor #000000
 }
 
-[*] --> EMPTY : Startup
+[*] --> EMPTY : AGT-07
 
 state "EMPTY" as EMPTY #ECEFF1
 EMPTY : No plan active.
@@ -47,15 +47,15 @@ state "REJECTED" as REJECTED #B71C1C
 REJECTED : Plan rejected by user.
 REJECTED : Terminal state.
 
-EMPTY --> BUILDING : AGT-07 /plan command
-BUILDING --> QUEUED : AGT-07 plan queued
-BUILDING --> EMPTY : AGT-07 /plan off
-QUEUED --> APPROVED : AGT-08 /approve
-QUEUED --> REJECTED : AGT-08 user rejects
-APPROVED --> EXECUTING : AGT-08 execution starts
-EXECUTING --> COMPLETED : AGT-01 last step executed
-EXECUTING --> EMPTY : AGT-14 execution error, plan discarded
-COMPLETED --> [*] : AGT-01 plan completed
-REJECTED --> [*] : AGT-08 plan rejected
+EMPTY --> BUILDING : AGT-07
+BUILDING --> QUEUED : AGT-07
+BUILDING --> EMPTY : AGT-07
+QUEUED --> APPROVED : AGT-08
+QUEUED --> REJECTED : AGT-08
+APPROVED --> EXECUTING : AGT-08
+EXECUTING --> COMPLETED : AGT-01
+EXECUTING --> EMPTY : AGT-14
+COMPLETED --> [*] : AGT-01
+REJECTED --> [*] : AGT-08
 
 @enduml

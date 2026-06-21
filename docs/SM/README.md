@@ -74,6 +74,9 @@
   SMT ownership rules apply: one lifecycle-write UC per target state.
 - All hex colors are canonical — state-machine diagrams use `state "STATE" as STATE #HEX`
   syntax per PlantUML standard.
+- **Transition labels** use UC-ID-only convention (e.g., `AGT-01`, `PRV-02`, `SAF-02`).
+  No human-readable suffixes. Multiple transitions from one state may share a UC ID
+  when the same action produces different outcomes (e.g., `PRV-02` → RESPONDING, TOOL_EXEC, ERROR).
 
 ## Lifecycle-Write UC Mapping (SMT Ownership)
 

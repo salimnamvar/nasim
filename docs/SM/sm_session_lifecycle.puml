@@ -17,7 +17,7 @@ skinparam state {
   FontColor #000000
 }
 
-[*] --> CREATED : SSN-01 PERSIST Session
+[*] --> CREATED : SSN-01
 
 state "CREATED" as CREATED #E3F2FD
 CREATED : Session record initialized.
@@ -43,16 +43,16 @@ state "CLOSED" as CLOSED #757575
 CLOSED : Session terminated.
 CLOSED : Terminal state.
 
-CREATED --> ACTIVE : SSN-01 session initialized
-ACTIVE --> SAVED : SSN-01 explicit save
-ACTIVE --> BRANCHED : WRL-04 fork session
-ACTIVE --> CLOSED : SSN-01 /quit or explicit close
-SAVED --> RESTORED : SSN-04 restore session
-RESTORED --> ACTIVE : SSN-01 session resumed
-RESTORED --> SAVED : SSN-01 save after restore
-BRANCHED --> ACTIVE : SSN-01 child session starts
-BRANCHED --> CLOSED : SSN-01 child session closed
-SAVED --> CLOSED : SSN-01 explicit close after save
+CREATED --> ACTIVE : SSN-01
+ACTIVE --> SAVED : SSN-01
+ACTIVE --> BRANCHED : WRL-04
+ACTIVE --> CLOSED : SSN-01
+SAVED --> RESTORED : SSN-04
+RESTORED --> ACTIVE : SSN-01
+RESTORED --> SAVED : SSN-01
+BRANCHED --> ACTIVE : SSN-01
+BRANCHED --> CLOSED : SSN-01
+SAVED --> CLOSED : SSN-01
 
 CLOSED --> [*]
 
