@@ -98,10 +98,10 @@ Agent --> SAF01_ext
 ' Relationships
 ' ============================================================
 
-AGT01 ..> AGT02 : <<include>>
+AGT01 ..> AGT15 : <<include>>
 AGT01 ..> AGT03 : <<include>>
-AGT02 ..> SAF01_ext : <<include>>
 AGT15 ..> AGT02 : <<include>>
+AGT02 ..> SAF01_ext : <<include>>
 AGT01 ..> AGT06 : <<extend>>
 AGT07 ..> AGT08 : <<extend>>
 AGT01 ..> AGT09 : <<extend>>

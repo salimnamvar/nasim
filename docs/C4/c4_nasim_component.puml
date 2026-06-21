@@ -207,31 +207,46 @@ System_Ext(lsp_server, "LSP Server")
 ' Core Relationships
 ' ============================================================
 
-Rel(agent_orch, provider, "chat, stream")
-Rel(provider, litellm_proxy, "delegates all LLM calls")
-Rel(agent_orch, tool_registry, "execute tools")
-Rel(agent_orch, conv_history, "messages, token tracking")
-Rel(agent_orch, plan_session, "queue, drain plan")
-Rel(agent_orch, subagent_coord, "spawn, collect")
-Rel(agent_orch, error_boundary, "handle errors")
-Rel(agent_orch, persona_mgr, "load persona")
-Rel(agent_orch, structured_logger, "emit logs")
-Rel(agent_orch, metrics_collector, "record metrics")
-Rel(agent_orch, context_propagator, "obtain trace context")
-Rel(agent_orch, memory_store, "persist, retrieve")
-Rel(agent_orch, session_store, "save, load")
-Rel(agent_orch, repo_intel_mgr, "INDEX, RANK, INJECT")
-Rel(agent_orch, edit_strategy_mgr, "SELECT, APPLY")
-Rel(agent_orch, eval_engine, "EVALUATE, RETRY")
-Rel(agent_orch, wire_log, "APPEND, REPLAY")
-Rel(agent_orch, context_graph, "PROCESS")
-Rel(agent_orch, safety_coord, "safety validation before tool exec")
-Rel(agent_orch, model_router, "route model selection")
-Rel(agent_orch, hook_manager, "triggers pre/post hooks")
-Rel(agent_orch, cli_container, "serves REPL interface")
+' --- Container wiring (CLI/Server → Core) ---
+Rel(cli_container, server_router, "delegates REPL to core")
 Rel(server_container, server_app, "serves HTTP API")
 
-Rel(conv_history, compactor, "compact when exceeded")
+' ============================================================
+' Core Relationships
+' ============================================================
+
+' --- AgentOrchestrator: 10 outgoing (No God Object compliant) ---
+Rel(agent_orch, provider, "chat, stream")
+Rel(agent_orch, tool_registry, "execute tools")
+Rel(agent_orch, subagent_coord, "spawn, collect")
+Rel(agent_orch, error_boundary, "handle errors")
+Rel(agent_orch, safety_coord, "safety pipeline: permission, injection, egress")
+Rel(agent_orch, hook_manager, "triggers pre/post hooks")
+Rel(agent_orch, model_router, "route model selection")
+Rel(agent_orch, memory_store, "persist, retrieve")
+Rel(agent_orch, session_store, "save, load")
+Rel(agent_orch, context_graph, "PROCESS")
+
+' --- Delegated: context management (agent_orch → context_graph orchestrates) ---
+Rel(context_graph, conv_history, "messages, token tracking")
+Rel(context_graph, plan_session, "queue, drain plan")
+Rel(context_graph, compactor, "compact when exceeded")
+
+' --- Delegated: observability (context_propagator carries trace, wired internally) ---
+Rel(context_propagator, structured_logger, "injects trace context into records")
+Rel(context_propagator, metrics_collector, "record metrics via trace context")
+
+' --- Delegated: edit strategy & evaluation (accessed via context_graph pipeline) ---
+Rel(context_graph, edit_strategy_mgr, "SELECT, APPLY edits")
+Rel(context_graph, eval_engine, "EVALUATE, RETRY tasks")
+Rel(context_graph, wire_log, "APPEND, REPLAY events")
+Rel(context_graph, repo_intel_mgr, "INDEX, RANK, INJECT repo intel")
+Rel(context_graph, persona_mgr, "load persona config")
+
+' --- Provider chain ---
+Rel(provider, litellm_proxy, "delegates all LLM calls")
+
+' --- Conversation compaction ---
 Rel(compactor, provider, "secondary LLM call")
 
 Rel(model_router, fallback_chain, "trigger failover")

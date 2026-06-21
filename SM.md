@@ -225,8 +225,9 @@ THINKING : LLM processing messages.
 THINKING : PRV-02 REQUEST Chat or PRV-03 STREAM Chat.
 
 state "TOOL_EXEC" as TOOL_EXEC #F3E5F5
-TOOL_EXEC : Executing a tool call.
+TOOL_EXEC : ToolRegistry executing tool call.
 TOOL_EXEC : AGT-02 DISPATCH Tool Call.
+TOOL_EXEC : Delegated by AgentOrchestrator.
 
 state "RESPONDING" as RESPONDING #E8F5E9
 RESPONDING : Streaming final text to user.
