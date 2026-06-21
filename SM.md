@@ -78,6 +78,9 @@
   SMT ownership rules apply: one lifecycle-write UC per target state.
 - All hex colors are canonical — state-machine diagrams use `state "STATE" as STATE #HEX`
   syntax per PlantUML standard.
+- **Transition labels** use UC-ID-only convention (e.g., `AGT-01`, `PRV-02`, `SAF-02`).
+  No human-readable suffixes. Multiple transitions from one state may share a UC ID
+  when the same action produces different outcomes (e.g., `PRV-02` → RESPONDING, TOOL_EXEC, ERROR).
 
 ## Lifecycle-Write UC Mapping (SMT Ownership)
 
@@ -102,7 +105,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
 | APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
 | EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
-| COMPLETED | Implicit | Agent loop finishes all steps |
+| COMPLETED | AGT-01 PROCESS User Task | Agent loop finishes all steps |
 | REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
 
 ### Plugin Lifecycle
@@ -139,7 +142,7 @@ skinparam state {
   FontColor #000000
 }
 
-[*] --> CREATED : SSN-01 PERSIST Session
+[*] --> CREATED : SSN-01
 
 state "CREATED" as CREATED #E3F2FD
 CREATED : Session record initialized.
@@ -165,16 +168,16 @@ state "CLOSED" as CLOSED #757575
 CLOSED : Session terminated.
 CLOSED : Terminal state.
 
-CREATED --> ACTIVE : SSN-01 session initialized
-ACTIVE --> SAVED : SSN-01 explicit save
-ACTIVE --> BRANCHED : WRL-04 fork session
-ACTIVE --> CLOSED : SSN-01 /quit or explicit close
-SAVED --> RESTORED : SSN-04 restore session
-RESTORED --> ACTIVE : SSN-01 session resumed
-RESTORED --> SAVED : SSN-01 save after restore
-BRANCHED --> ACTIVE : SSN-01 child session starts
-BRANCHED --> CLOSED : SSN-01 child session closed
-SAVED --> CLOSED : SSN-01 explicit close after save
+CREATED --> ACTIVE : SSN-01
+ACTIVE --> SAVED : SSN-01
+ACTIVE --> BRANCHED : WRL-04
+ACTIVE --> CLOSED : SSN-01
+SAVED --> RESTORED : SSN-04
+RESTORED --> ACTIVE : SSN-01
+RESTORED --> SAVED : SSN-01
+BRANCHED --> ACTIVE : SSN-01
+BRANCHED --> CLOSED : SSN-01
+SAVED --> CLOSED : SSN-01
 
 CLOSED --> [*]
 
@@ -207,7 +210,7 @@ skinparam state {
   FontColor #000000
 }
 
-[*] --> IDLE : Startup / AGT-01 init
+[*] --> IDLE : AGT-01
 
 state "IDLE" as IDLE #ECEFF1
 IDLE : Agent waiting for user input.
@@ -277,60 +280,60 @@ state "AWAITING_DIFF_APPROVAL" as AWAITING_DIFF_APPROVAL #FCE4EC
 AWAITING_DIFF_APPROVAL : Presenting diff to user.
 AWAITING_DIFF_APPROVAL : SAF-02 REQUEST Approval.
 
-IDLE --> LISTENING : CLI-01 PROCESS User Input
-IDLE --> SERVING : SRV-06 HTTP request received
-IDLE --> [*] : /quit or EOF
+IDLE --> LISTENING : CLI-01
+IDLE --> SERVING : SRV-06
+IDLE --> [*] : CLI-02
 
-LISTENING --> THINKING : CLI-01 input parsed
+LISTENING --> THINKING : CLI-01
 
-THINKING --> RESPONDING : PRV-02 LLM returns text
-THINKING --> TOOL_EXEC : PRV-02 LLM returns tool_calls
-THINKING --> COMPACTING : AGT-06 token_count > budget
-THINKING --> ROUTING : RTG-01 ModelRouter resolving
-THINKING --> ERROR : PRV-02 LLM call fails
-THINKING --> RESPONDING : SRV-06 Response to HTTP client
-THINKING --> EVALUATING : task_complete AND evaluation_enabled
+THINKING --> RESPONDING : PRV-02
+THINKING --> TOOL_EXEC : PRV-02
+THINKING --> COMPACTING : AGT-06
+THINKING --> ROUTING : RTG-01
+THINKING --> ERROR : PRV-02
+THINKING --> RESPONDING : SRV-06
+THINKING --> EVALUATING : EVL-01
 
-ROUTING --> THINKING : RTG-01 Model selected
+ROUTING --> THINKING : RTG-01
 
-TOOL_EXEC --> THINKING : AGT-02 Tool result appended
-TOOL_EXEC --> AWAITING_APPROVAL : SAF-03 safety_mode=ask AND unsafe
-TOOL_EXEC --> HOOK_RUNNING : HK-02 pre-tool hook registered
-TOOL_EXEC --> ERROR : AGT-02 Tool execution fails
-TOOL_EXEC --> STAGING : EDT-10 diff_sandbox mode
+TOOL_EXEC --> THINKING : AGT-02
+TOOL_EXEC --> AWAITING_APPROVAL : SAF-03
+TOOL_EXEC --> HOOK_RUNNING : HK-02
+TOOL_EXEC --> ERROR : AGT-02
+TOOL_EXEC --> STAGING : EDT-10
 
-HOOK_RUNNING --> TOOL_EXEC : HK-02 Hook allows
-HOOK_RUNNING --> IDLE : HK-02 Hook denies
+HOOK_RUNNING --> TOOL_EXEC : HK-02
+HOOK_RUNNING --> IDLE : HK-02
 
-AWAITING_APPROVAL --> TOOL_EXEC : User approves (y)
-AWAITING_APPROVAL --> IDLE : User rejects (N)
+AWAITING_APPROVAL --> TOOL_EXEC : SAF-02
+AWAITING_APPROVAL --> IDLE : SAF-02
 
-COMPACTING --> THINKING : AGT-06 Compaction complete
+COMPACTING --> THINKING : AGT-06
 
-RESPONDING --> IDLE : CLI-03 Response complete
+RESPONDING --> IDLE : CLI-03
 
-ERROR --> IDLE : AGT-14 Error displayed
+ERROR --> IDLE : AGT-14
 
-SERVING --> THINKING : SRV-06 Request processed
-SERVING --> IDLE : SRV-06 Response complete
+SERVING --> THINKING : SRV-06
+SERVING --> IDLE : SRV-06
 
-IDLE --> PLANNING : AGT-07 /plan command
-PLANNING --> IDLE : AGT-07 /plan off
+IDLE --> PLANNING : AGT-07
+PLANNING --> IDLE : AGT-07
 
-EVALUATING --> REVIEWING : EVL-01 success checks passed
-EVALUATING --> RETRYING : EVL-01 success checks failed
-EVALUATING --> THINKING : EVL-01 evaluation passed
+EVALUATING --> REVIEWING : EVL-01
+EVALUATING --> RETRYING : EVL-01
+EVALUATING --> THINKING : EVL-01
 
-REVIEWING --> THINKING : EVL-04 review approved
-REVIEWING --> RETRYING : EVL-04 review rejected
+REVIEWING --> THINKING : EVL-04
+REVIEWING --> RETRYING : EVL-04
 
-RETRYING --> THINKING : EVL-06 retry with feedback
-RETRYING --> ERROR : EVL-06 max retries exceeded
+RETRYING --> THINKING : EVL-06
+RETRYING --> ERROR : EVL-06
 
-STAGING --> AWAITING_DIFF_APPROVAL : EDT-10 present diff
+STAGING --> AWAITING_DIFF_APPROVAL : EDT-10
 
-AWAITING_DIFF_APPROVAL --> TOOL_EXEC : User approves diff
-AWAITING_DIFF_APPROVAL --> IDLE : User rejects diff
+AWAITING_DIFF_APPROVAL --> TOOL_EXEC : SAF-02
+AWAITING_DIFF_APPROVAL --> IDLE : SAF-02
 
 @enduml
 
@@ -344,7 +347,7 @@ AWAITING_DIFF_APPROVAL --> IDLE : User rejects diff
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Plugin (persisted in config)
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   6.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' ============================================================
@@ -357,7 +360,7 @@ skinparam state {
   FontColor #000000
 }
 
-[*] --> DISCOVERED : PLG-01 scan
+[*] --> DISCOVERED : PLG-01
 
 state "DISCOVERED" as DISCOVERED #ECEFF1
 DISCOVERED : Plugin found on filesystem.
@@ -383,18 +386,18 @@ state "ERROR" as ERROR #EF5350
 ERROR : Plugin failed to load or crashed.
 ERROR : Load error or runtime exception.
 
-DISCOVERED --> LOADING : PLG-02 load manifest
-DISCOVERED --> ERROR : PLG-01 manifest not found
-LOADING --> LOADED : PLG-03 tools registered
-LOADING --> ERROR : PLG-02 parse error
-LOADED --> ENABLED : PLG-05 enable
-LOADED --> DISABLED : PLG-06 disable
-ENABLED --> DISABLED : PLG-06 disable
-DISABLED --> ENABLED : PLG-05 re-enable
-ENABLED --> ERROR : PLG-01 runtime error
-LOADED --> ERROR : PLG-03 registration error
+DISCOVERED --> LOADING : PLG-02
+DISCOVERED --> ERROR : PLG-01
+LOADING --> LOADED : PLG-03
+LOADING --> ERROR : PLG-02
+LOADED --> ENABLED : PLG-05
+LOADED --> DISABLED : PLG-06
+ENABLED --> DISABLED : PLG-06
+DISABLED --> ENABLED : PLG-05
+ENABLED --> ERROR : PLG-01
+LOADED --> ERROR : PLG-03
 
-ERROR --> DISCOVERED : PLG-01 re-discover
+ERROR --> DISCOVERED : PLG-01
 
 @enduml
 
@@ -421,7 +424,7 @@ skinparam state {
   FontColor #000000
 }
 
-[*] --> EMPTY : Startup
+[*] --> EMPTY : AGT-07
 
 state "EMPTY" as EMPTY #ECEFF1
 EMPTY : No plan active.
@@ -451,16 +454,16 @@ state "REJECTED" as REJECTED #B71C1C
 REJECTED : Plan rejected by user.
 REJECTED : Terminal state.
 
-EMPTY --> BUILDING : AGT-07 /plan command
-BUILDING --> QUEUED : AGT-07 plan queued
-BUILDING --> EMPTY : AGT-07 /plan off
-QUEUED --> APPROVED : AGT-08 /approve
-QUEUED --> REJECTED : AGT-08 user rejects
-APPROVED --> EXECUTING : AGT-08 execution starts
-EXECUTING --> COMPLETED : implicit: last step executed
-EXECUTING --> EMPTY : Execution error, plan discarded
-COMPLETED --> [*]
-REJECTED --> [*]
+EMPTY --> BUILDING : AGT-07
+BUILDING --> QUEUED : AGT-07
+BUILDING --> EMPTY : AGT-07
+QUEUED --> APPROVED : AGT-08
+QUEUED --> REJECTED : AGT-08
+APPROVED --> EXECUTING : AGT-08
+EXECUTING --> COMPLETED : AGT-01
+EXECUTING --> EMPTY : AGT-14
+COMPLETED --> [*] : AGT-01
+REJECTED --> [*] : AGT-08
 
 @enduml
 
