@@ -5,7 +5,7 @@
 ' Purpose:   Compact context when token budget exceeded
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -24,6 +24,7 @@ note over history, provider
   Excludes:       Token tracking (CTX-01)
   Rollback:       Secondary LLM fails -> truncate oldest messages
   Design:         Summarize oldest N exchanges via secondary LLM call
+  Classification: Process Decomposition
 end note
 
 == CTX-02 COMPACT Context ==
@@ -47,7 +48,7 @@ compactor --> history : shortened messages (summarized)
 
 note over history, provider
   Flow:    budget exceeded -> select old -> summarize -> replace
-  State:   COMPACTING -> THINKING
+  State:   <back:#E0F2F1>COMPACTING</back> -> <back:#FFF3E0>THINKING</back>
   Failure: LLM fails -> truncate fallback
   Success: Messages shortened, token count reduced
 end note

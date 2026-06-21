@@ -1,0 +1,101 @@
+@startuml sq_rim06_search_semantic
+' ============================================================
+' Title:     RIM-06 — Search Semantic
+' Boundary:  nasim code agent CLI
+' Purpose:   Embedding-based code similarity search across repository
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Repo Index Layer" #FFF3E0
+  participant "RepoIndexer" as indexer
+  participant "SemanticSearch" as search
+  participant "EmbeddingStore" as embeddings
+end box
+box "Provider Layer" #E3F2FD
+  participant "Provider" as provider
+end box
+
+note over user, provider
+  Scope:
+    - rim03 SEARCH Semantic — embedding-based code similarity search
+
+  Preconditions:
+    - RIM-01 completed (AST index available)
+    - EmbeddingStore populated with code embeddings
+    - Provider available for embedding generation
+
+  Contexts:
+    - Called by AgentOrchestrator when user query requires semantic understanding
+    - Complementary to RIM-02 (structural ranking)
+
+  Excludes:
+    - Structural/graph-based search (handled by RIM-02)
+    - Full-text grep search (handled by TL-02)
+
+  Rollback:
+    - Embedding generation failure → return empty results
+    - Store unavailable → fall back to keyword search
+
+  Design:
+  Classification: Primary Orchestrator
+    - SemanticSearch embeds query via Provider
+    - Cosine similarity against EmbeddingStore
+    - Top-K results returned with similarity scores
+    - Results filtered by minimum similarity threshold (default 0.3)
+
+  Returns:
+    - Success: SearchResultList with snippets and scores
+    - Failure: Empty results with fallback flag
+end note
+
+== rim03 SEARCH Semantic ==
+
+agent -> search : SEARCH(query, top_k=10)
+activate search
+
+search -> provider : embed(query_text)
+activate provider
+provider --> search : query_embedding
+deactivate provider
+
+search -> embeddings : cosine_search(query_embedding, top_k=10)
+activate embeddings
+embeddings --> search : raw_results[]
+deactivate embeddings
+
+search -> search : filter_by_threshold(results, min_sim=0.3)
+
+search -> search : format_snippets(filtered_results)
+
+search --> agent : SearchResultList(results, scores, snippets)
+deactivate search
+
+note over user, provider
+  Flow:
+    - AgentOrchestrator → SemanticSearch → Provider(embed) → EmbeddingStore → SearchResultList
+
+  State:
+    - <back:#ECEFF1>IDLE</back> → EMBEDDING → SEARCHING → FILTERING → DONE
+
+  Failure:
+    - Embedding failure → empty results + fallback flag
+    - Store unavailable → keyword fallback
+
+  Success:
+    - SearchResultList with similarity-scored snippets
+
+  Key invariants:
+    - Query embedding generated fresh each search
+    - Similarity threshold prevents low-quality matches
+    - Top-K bounded to prevent excessive results
+end note
+
+@enduml

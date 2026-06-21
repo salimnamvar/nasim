@@ -41,15 +41,22 @@ def write_to_master(file_path, outfile):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Merge directory contents into one MD file.")
+
+    # Define a default path based on a likely location
+    default_input = ["/home/salim/prj/salim/nasim/code/nasim/docs/SQ"]
+
     parser.add_argument(
         "inputs",
-        nargs="+",
+        nargs="*",  # Changed from "+" to "*" so it's truly optional
         help="List of directories or files to process",
-        default=["/home/salim/prj/salim/nasim/code/nasim/docs/C4"],
+        default=default_input,
     )
-    parser.add_argument("-o", "--output", help="Path to the output master .md file", default="c4.md")
+    parser.add_argument("-o", "--output", help="Path to the output master .md file", default="SQ.md")
 
     args = parser.parse_args()
 
-    merge_documents(args.inputs, args.output)
-    print(f"Successfully merged into {args.output}")
+    # If the user provided no inputs, ensure we use the default
+    inputs_to_process = args.inputs if args.inputs else default_input
+
+    merge_documents(inputs_to_process, args.output)
+    print(f"Successfully merged into {os.path.abspath(args.output)}")

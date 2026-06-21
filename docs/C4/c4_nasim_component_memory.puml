@@ -38,8 +38,5 @@ Rel(memory_retriever, memory_index, "query index")
 Rel(memory_retriever, memory_store, "fetch entries")
 Rel(memory_indexer, memory_index, "index entries")
 Rel(memory_indexer, memory_store, "read entries for indexing")
-Rel(episodic_mem_adapter, memory_retriever, "retrieve episodic context")
-Rel(semantic_mem_adapter, memory_retriever, "retrieve semantic context")
-Rel(working_mem_adapter, memory_store, "short-term persistence")
 
 @enduml

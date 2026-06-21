@@ -1,0 +1,61 @@
+@startuml sq_srv10_read_config
+' ============================================================
+' Title:     SRV-10 — READ Config
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Read current agent configuration
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/UC/README.md
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
+' ============================================================
+
+title nasim — SRV-10 READ Config
+
+actor "HTTPClient" as client
+
+box "Server Layer" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Config Layer" #FCE4EC
+  participant "ConfigLoader" as config
+end box
+
+note over client, config
+  Scope:          Read current agent configuration
+  Preconditions:  ConfigLoader initialized
+  Excludes:       Config update, config validation
+  Contexts:       Called by HTTPClient via GET /v1/config
+  Rollback:       500 if config read fails
+  Design:         CSR: Controller(ServerRouter) -> Repository(ConfigLoader). ROD: standard read (AIP-136). Returns sanitized config (no secrets).
+  Classification: Primary Orchestrator
+end note
+
+== SRV-10 READ Config ==
+
+client -> router : GET /v1/config
+activate router
+
+router -> config : READ config
+activate config
+
+break Config read failure [500]
+    config --> router : InternalError
+    deactivate config
+    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to read config", status: "INTERNAL"}}
+end
+
+config --> router : Config(provider, model, safety, budget)
+deactivate config
+
+router --> client : 200 OK {config: {provider: "...", model: "...", safety_mode: "..."}}
+deactivate router
+
+note over client, config
+  Flow:    HTTPClient -> ServerRouter -> ConfigLoader -> return config
+  State:   No state change
+  Failure: 500 INTERNAL on config read failure
+  Success: 200 OK with sanitized config
+  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
+end note
+
+@enduml

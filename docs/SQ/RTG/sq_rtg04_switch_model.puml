@@ -1,0 +1,50 @@
+@startuml sq_rtg04_switch_model
+' ============================================================
+' Title:     RTG-04 — Switch Model
+' Boundary:  nasim code agent
+' Purpose:   Change the active model at runtime
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — RTG-04 Switch Model
+
+box "CLI Layer" #E8F5E9
+  participant "Developer" as dev
+end box
+box "Router Layer" #EDE7F6
+  participant "ModelRouter" as router
+end box
+
+note over participants
+  Scope:          Change active model via CLI or agent request
+  Preconditions:  Target model available in catalog
+  Excludes:       Model classification, fallback
+  Contexts:       Called by CLI-07 SWITCH Model or AGT-01
+  Rollback:       Previous model restored on switch failure
+  Design:         Atomic config update; validates model availability
+  Classification: Process Decomposition
+end note
+
+== RTG-04 Switch Model ==
+
+dev -> router : switch_model(target_model)
+
+break Model not in catalog
+    router --> dev : Error("model not available")
+end
+
+router -> router : validate model availability
+router -> router : update active_model config
+router --> dev : switched to target_model
+
+note over participants
+  Flow:    Developer/Agent -> ModelRouter -> change active model -> update config
+  State:   Active model updated
+  Failure: Model not available -> error returned
+  Success: Active model switched
+end note
+
+@enduml

@@ -1,50 +1,111 @@
 @startuml uc_agent
+
 ' ============================================================
-' Title:     nasim — UC: Agent Core
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   Core agentic loop, permissions, context, plans, hooks
+' Title:     nasim — UC: Agent Group
+' Group:     AGT (Agent Core)
+' Boundary:  nasim code agent
+' Purpose:   Core agentic loop, permissions, context, plans, subagents
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Agent Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "Developer" as user
-actor "HTTP Client" as client
-
-rectangle "Agent Core" {
-    usecase "PROCESS User Task" as UC_AGT_01
-    usecase "DISPATCH Tool Call" as UC_AGT_02
-    usecase "Manage Conversation" as UC_AGT_03
-    usecase "Reset History" as UC_AGT_04
-    usecase "CHECK Tool Permission" as UC_AGT_05
-    usecase "COMPACT Context" as UC_AGT_06
-    usecase "Queue Plan" as UC_AGT_07
-    usecase "APPROVE Plan" as UC_AGT_08
-    usecase "EVALUATE Task" as UC_AGT_09
-    usecase "INJECT Turn Budget" as UC_AGT_10
-    usecase "Execute Pre-Tool Hook" as UC_HK_02
-    usecase "Execute Post-Tool Hook" as UC_HK_03
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "Provider Layer" {
-    usecase "Select Model" as UC_RTG_01
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-user --> UC_AGT_01
-client --> UC_AGT_01
-UC_AGT_01 ..> UC_AGT_02 : <<include>>
-UC_AGT_01 ..> UC_AGT_03 : <<include>>
-UC_AGT_02 ..> UC_AGT_05 : <<include>>
-UC_AGT_02 ..> UC_HK_02 : <<include>>
-UC_AGT_02 ..> UC_HK_03 : <<include>>
-UC_AGT_01 ..> UC_AGT_06 : <<extend>>
-UC_AGT_07 ..> UC_AGT_08 : <<extend>>
-UC_AGT_01 ..> UC_RTG_01 : <<include>>
-UC_AGT_01 ..> UC_AGT_09 : <<extend>>
-UC_AGT_01 ..> UC_AGT_10 : <<include>>
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' Cross-Group External References
+' ============================================================
+
+usecase "SAF-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Agent Group (AGT)" {
+    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop: provider call, tool dispatch" as AGT01
+    usecase "**AGT-02 DISPATCH Tool Call**\n--\nRoute tool call to registry" as AGT02
+    usecase "**AGT-03 UPDATE Conversation**\n--\nManage message list and token count" as AGT03
+    usecase "**AGT-04 DELETE History**\n--\nReset conversation history" as AGT04
+    usecase "**AGT-06 COMPACT Context**\n--\nSummarize old exchanges via secondary LLM" as AGT06
+    usecase "**AGT-07 QUEUE Plan**\n--\nHold queued tool calls in plan mode" as AGT07
+    usecase "**AGT-08 APPROVE Plan**\n--\nDrain queued plan calls" as AGT08
+    usecase "**AGT-09 SPAWN Subagent**\n--\nCreate child agent with restricted tools" as AGT09
+    usecase "**AGT-10 COLLECT Subagent Result**\n--\nGather results from completed child agents" as AGT10
+    usecase "**AGT-11 DELEGATE to Persona**\n--\nAssign tasks to specialized persona roles" as AGT11
+    usecase "**AGT-12 LOAD Persona**\n--\nLoad persona configuration" as AGT12
+    usecase "**AGT-13 SWITCH Persona**\n--\nSwitch to different persona at runtime" as AGT13
+    usecase "**AGT-14 HANDLE Error**\n--\nStructured error handling with recovery" as AGT14
+    usecase "**AGT-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection, egress checks" as AGT15
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> AGT01
+Agent --> AGT04
+Agent --> AGT07
+Agent --> AGT11
+Agent --> AGT12
+Agent --> AGT13
+Agent --> AGT15
+Agent --> SAF01_ext
+
+' ============================================================
+' Relationships
+' ============================================================
+
+AGT01 ..> AGT15 : <<include>>
+AGT01 ..> AGT03 : <<include>>
+AGT15 ..> AGT02 : <<include>>
+AGT02 ..> SAF01_ext : <<include>>
+AGT01 ..> AGT06 : <<extend>>
+AGT07 ..> AGT08 : <<extend>>
+AGT01 ..> AGT09 : <<extend>>
+AGT09 ..> AGT10 : <<include>>
+AGT01 ..> AGT14 : <<extend>>
 
 @enduml

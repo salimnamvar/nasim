@@ -8,35 +8,36 @@ Back to [docs/](../README.md).
 
 ## Diagrams
 
-| File | Purpose |
-| ---- | ------- |
-| `mm_design_chain_summary.puml` | Single-page summary of all design layers and their status |
-| `mm_design_chain_detail.puml` | Expanded view with component counts, UC groups, and layer notes |
+No PlantUML diagrams exist in this directory yet. The README serves as the chain overview.
 
 ## Design Chain
 
 ```
-C4 → UC → SM → SQ → ERD → CL → Code
+C4 → UC → SM → SQ → ERD → CL → CT/DATA → CT/API → Code
 ```
 
 | Layer | Location |
 | ----- | -------- |
-| C4 Architecture | `docs/c4/` |
-| Use Cases | `docs/uc/` |
-| State Machine | `docs/sm/` |
-| Sequence Diagrams | `docs/sq/` |
-| ERD (logical schema) | `docs/er/` |
-| Class Diagram | `docs/cl/` |
-| Implementation Roadmap | `docs/rdm/` |
+| C4 Architecture | `docs/C4/` |
+| Use Cases | `docs/UC/` |
+| State Machine | `docs/SM/` |
+| Sequence Diagrams | `docs/SQ/` |
+| ERD (logical schema) | `docs/ER/` |
+| Class Diagram | `docs/CL/` |
+| Data Contracts | `docs/CT/DATA/` |
+| API Surface | `docs/CT/API/` |
+| Implementation Roadmap | `docs/RDM/` |
 
 ## Layer Status
 
 | Layer | Status | Artifacts | Notes |
 | ----- | ------ | --------- | ----- |
-| C4 | Frozen | 10 diagrams | Context + container + 8 component diagrams |
-| UC | Frozen | 8 UC files + inventory | 42 UCs across 9 groups |
-| SM | Frozen | 1 diagram + inventory | Agent lifecycle process FSM |
-| SQ | Frozen | 42 diagrams | 1:1 with UCs, by group |
-| ERD | Frozen | 1 diagram + inventory | Session JSON Lines schema |
-| CL | Frozen | 1 diagram + inventory | Runtime class model |
+| C4 | Frozen | 24 diagrams | Context + container + 21 component groups |
+| UC | Frozen | 22 UC files + inventory | 148 UCs across 21 groups |
+| SM | Frozen | 4 diagrams + inventory | Agent, session, plan, plugin lifecycles |
+| SQ | Frozen | 148 diagrams | 1:1 with UCs, across 21 groups |
+| ERD | Frozen | 5 diagrams + inventory | Session, memory, observability, repo intelligence, wire log |
+| CL | Frozen | 1 diagram + inventory | Runtime class model (90+ classes) |
+| CT/DATA | Frozen | 5 contract diagrams + 2 YAML | ODCS v3.1.0 data contracts |
+| CT/API | Frozen | 6 API diagrams + OpenAPI + ROD | OAS 3.1.0 HTTP API surface |
 | RDM | Active | 10 milestone docs | Implementation roadmap |

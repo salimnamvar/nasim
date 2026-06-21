@@ -1,0 +1,105 @@
+@startuml sq_evl06_coordinate_retry
+' ============================================================
+' Title:     EVL-06 — Coordinate Retry
+' Boundary:  nasim code agent CLI
+' Purpose:   Retry with feedback on failure
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Layer" #FFF3E0
+  participant "RetryCoordinator" as retry
+  participant "FeedbackInjector" as feedback
+  participant "TurnBudgetInjector" as budget
+end box
+box "Sandbox Layer" #F1F8E9
+  participant "FileSystem" as fs
+end box
+
+note over user, budget
+  Scope:
+    - evl03 COORDINATE Retry — retry with feedback on failure
+
+  Preconditions:
+    - EVL-01 or EVL-02 identified failure
+    - Backup file available for revert
+    - Turn budget not exhausted
+
+  Contexts:
+    - Called after evaluation failure (EVL-01 or EVL-02)
+    - Triggers new EDT cycle with injected feedback
+
+  Excludes:
+    - Evaluation logic (handled by EVL-01/02)
+    - Turn budget management (handled by EVL-05)
+
+  Rollback:
+    - Max retries exceeded → abort, report to user
+    - Turn budget exhausted → abort, report to user
+
+  Design:
+  Classification: Primary Orchestrator
+    - RetryCoordinator manages retry count and limits
+    - FeedbackInjector formats failure details for next LLM call
+    - Backup restored before retry attempt
+    - Max 3 retries per edit before escalating
+
+  Returns:
+    - Success: RetryResult with retry_count and next_action
+    - Failure: RetryExhausted error
+end note
+
+== evl03 COORDINATE Retry ==
+
+agent -> retry : COORDINATE_RETRY(edit_result, check_result, review_result)
+activate retry
+
+retry -> retry : increment_retry_count()
+
+retry -> retry : check_retry_limit(max=3)
+
+alt retry_count <= max_retries
+    retry -> fs : restore_backup(edit_result.backup_path)
+    activate fs
+    fs --> retry : restore_success
+    deactivate fs
+
+    retry -> feedback : INJECT_FEEDBACK(check_result, review_result)
+    activate feedback
+    feedback --> retry : feedback_context
+    deactivate feedback
+
+    retry --> agent : RetryResult(retry_count, feedback_context, continue=true)
+else retry_count > max_retries
+    retry --> agent : RetryExhausted(retry_count, final_error)
+end
+
+deactivate retry
+
+note over user, budget
+  Flow:
+    - AgentOrchestrator → RetryCoordinator → FileSystem + FeedbackInjector → RetryResult
+
+  State:
+    - <back:#ECEFF1>IDLE</back> → CHECKING_LIMIT → RESTORING → INJECTING → DONE
+
+  Failure:
+    - Max retries exceeded → RetryExhausted error
+
+  Success:
+    - RetryResult with feedback for next attempt
+
+  Key invariants:
+    - Backup always restored before retry
+    - Retry count never exceeds max_retries
+    - Feedback always includes specific failure reasons
+end note
+
+@enduml

@@ -5,7 +5,7 @@
 ' Purpose:   Display approval prompt for unsafe tool execution
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -25,6 +25,7 @@ note over user, gate
   Excludes:       Permission check logic (SAF-01)
   Rollback:       User rejects -> tool skipped
   Design:         Shows tool name + args, prompts [y/N]
+  Classification: Primary Orchestrator
 end note
 
 == SAF-02 Prompt User Approval ==
@@ -43,7 +44,7 @@ end
 
 note over user, gate
   Flow:    gate -> Renderer -> user prompt -> choice -> gate
-  State:   TOOL_EXEC -> AWAITING_APPROVAL -> TOOL_EXEC or IDLE
+  State:   <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> -> <back:#F3E5F5>TOOL_EXEC</back> or <back:#ECEFF1>IDLE</back>
   Failure: User rejects -> tool skipped
   Success: User approves -> tool executes
 end note

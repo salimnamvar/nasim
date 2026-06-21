@@ -1,0 +1,64 @@
+@startuml sq_srv02_insert_session
+' ============================================================
+' Title:     SRV-02 — INSERT Session
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Create and persist a new agent session
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    —
+' ============================================================
+
+title nasim — SRV-02 INSERT Session
+
+actor "HTTPClient" as client
+
+box "Server Layer" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Session Layer" #F3E5F5
+  participant "SessionStore" as store
+end box
+
+note over client, store
+  Scope:          Create and persist a new agent session
+  Preconditions:  ServerRouter initialized, SessionStore available
+  Excludes:       Session dispatch (SRV-06), Session deletion (SRV-05)
+  Contexts:       Called by HTTPClient via POST /v1/sessions
+  Rollback:       500 if SessionStore write fails
+  Design:         CSR: Controller(ServerRouter) -> Repository(SessionStore). ROD: standard insert (AIP-136)
+  Classification: Primary Orchestrator
+end note
+
+== SRV-02 INSERT Session ==
+
+client -> router : POST /v1/sessions
+activate router
+
+router -> router : Validate request body
+break Invalid request [400]
+  router --> client : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid request", status: "INVALID_ARGUMENT"}}
+end
+
+router -> router : Generate session UUID
+
+router -> store : INSERT session(session_id, config)
+activate store
+store --> router : Session
+deactivate store
+
+break Store write fails [500]
+  router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to create session", status: "INTERNAL"}}
+end
+
+router --> client : 201 Created {id, created_at, model, state}
+deactivate router
+
+note over client, store
+  Flow:    HTTPClient -> ServerRouter -> SessionStore
+  State:   <back:#E3F2FD>CREATED</back>
+  Failure: 400 invalid body, 500 store write failure
+  Success: 201 Created with session metadata
+end note
+
+@enduml

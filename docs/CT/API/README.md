@@ -6,10 +6,23 @@ Back to [docs/](../README.md).
 
 ## Artifacts
 
+### OpenAPI + ROD
+
 | File | Scope | Description |
 | ---- | ----- | ----------- |
-| `openapi.yaml` | HTTP API | OpenAPI 3.1.0 spec — 7 endpoints across 4 resources |
+| `openapi.yaml` | HTTP API | OpenAPI 3.1.0 spec — 23 endpoints across 8 resources |
 | `rod_decisions.md` | ROD | Resource model, methods, field behavior, pagination, errors |
+
+### API Diagrams (PlantUML)
+
+| File | Scope | Description |
+| ---- | ----- | ----------- |
+| `ct_api_wire_log.puml` | Wire Log | Wire log API surface |
+| `ct_api_observability.puml` | Observability | Observability API surface |
+| `ct_api_repo_intelligence.puml` | Repo Intelligence | Repo intelligence API surface |
+| `ct_api_edit_strategy.puml` | Edit Strategy | Edit strategy API surface |
+| `ct_api_evaluation.puml` | Evaluation | Evaluation API surface |
+| `ct_api_context_graph.puml` | Context Graph | Context graph API surface |
 
 ## Resource Model
 
@@ -52,6 +65,8 @@ Back to [docs/](../README.md).
 | POST | `/v1/sessions/{session_id}/todos` | tl16CreateTodo | TL-16 | Create todo item |
 | PATCH | `/v1/sessions/{session_id}/todos/{todo_id}` | tl17UpdateTodo | TL-17 | Update todo item |
 
+**Total: 23 endpoints across 8 resources**
+
 ## Design Chain Position
 
 ```
@@ -65,7 +80,7 @@ and UC (operation definitions), and outputs to Code (route handlers, schemas).
 
 | Layer | Path |
 | ----- | ---- |
-| UC (source) | `docs/uc/uc_server.puml` |
-| SQ (source) | `docs/sq/SRV/` |
-| CL (source) | `docs/cl/cl_runtime_model.puml` |
+| UC (source) | `docs/UC/uc_server.puml` |
+| SQ (source) | `docs/SQ/SRV/` |
+| CL (source) | `docs/CL/cl_runtime_model.puml` |
 | CT/DATA (sibling) | `docs/CT/DATA/nasim_session_store.datacontract.yaml` |

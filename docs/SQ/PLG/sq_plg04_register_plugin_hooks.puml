@@ -1,0 +1,55 @@
+@startuml sq_plg04_register_plugin_hooks
+' ============================================================
+' Title:     PLG-04 — Register Plugin Hooks
+' Boundary:  nasim code agent
+' Purpose:   Register all hooks declared in a plugin manifest
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — PLG-04 Register Plugin Hooks
+
+box "Tool Layer" #F3E5F5
+  participant "PluginLoader" as loader
+end box
+box "Hooks Layer" #FFFDE7
+  participant "HookManager" as hm
+end box
+
+note over participants
+  Scope:          Register plugin-declared hooks into HookManager
+  Preconditions:  Valid PluginManifest loaded (PLG-02)
+  Excludes:       Tool registration, plugin activation
+  Contexts:       Called during plugin enable (PLG-05)
+  Rollback:       Registration failure logged; other hooks still registered
+  Design:         Plugin hooks prefixed with plugin name
+  Classification: Process Decomposition
+end note
+
+== PLG-04 Register Plugin Hooks ==
+
+loader -> loader : enumerate hooks from PluginManifest
+
+loop for each hook in manifest
+    loader -> hm : register(event, handler, priority)
+
+    break Registration failure
+        hm --> loader : RegistrationError
+        loader --> loader : log warning, skip hook
+    end
+
+    hm --> loader : registered
+end
+
+loader --> loader : all hooks registered
+
+note over participants
+  Flow:    PluginLoader -> enumerate plugin hooks -> register in HookManager
+  State:   Hooks added to HookManager
+  Failure: Registration failure -> hook skipped with warning
+  Success: All plugin hooks registered
+end note
+
+@enduml

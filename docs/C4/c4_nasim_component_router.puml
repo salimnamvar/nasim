@@ -1,0 +1,30 @@
+@startuml c4_nasim_component_router
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+
+' ============================================================
+' Title:     nasim — Router Component Diagram
+' Boundary:  nasim core library — Router group
+' Purpose:   Model selection, fallback chains, capability queries
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    —
+' ============================================================
+
+title nasim — Router Component Diagram
+
+Container_Boundary(router_boundary, "Router Group") {
+    Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
+    Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
+}
+
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(provider, "Provider", "Provider Group")
+
+Rel(agent_orch, model_router, "route model selection")
+Rel(model_router, provider, "route to provider")
+Rel(model_router, fallback_chain, "trigger failover")
+Rel(fallback_chain, provider, "failover to next provider")
+
+@enduml

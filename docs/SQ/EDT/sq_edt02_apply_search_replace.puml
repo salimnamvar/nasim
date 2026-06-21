@@ -1,0 +1,76 @@
+@startuml sq_edt02_apply_search_replace
+' ============================================================
+' Title:     EDT-02 — APPLY Search-Replace
+' Boundary:  nasim code agent
+' Purpose:   Execute edit via search-replace strategy
+' Milestone: v1.0
+' Version:   3.0.0
+' Source:    docs/UC/README.md
+' Review:    Prompt audit 2026-06-21 (cop.md: PermissionGate removed, safety at AGT-15 level)
+' ============================================================
+
+title nasim — EDT-02 APPLY Search-Replace
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Layer" #FFF3E0
+  participant "EditApplier" as applier
+  participant "SearchReplaceCoder" as strategy
+end box
+box "Sandbox Layer" #F1F8E9
+  participant "FileSystem" as fs
+end box
+
+note over agent, fs
+  Scope:          Execute edit via search-replace strategy
+  Preconditions:  EDT-01 completed (EditStrategy selected), target file exists and is writable
+  Contexts:       Called by AgentOrchestrator after EDT-01
+  Excludes:       Strategy selection (EDT-01), post-edit validation (EDT-03), diff staging (EDT-10)
+  Rollback:       Write failure -> restore original file from backup
+  Design:         EditApplier reads original, applies SearchReplaceCoder strategy, writes result. Backup created before modification.
+  Classification: Process Decomposition
+end note
+
+== EDT-02 APPLY Search-Replace ==
+
+agent -> applier : APPLY_EDIT(strategy, file_path)
+activate applier
+
+applier -> fs : read_file(file_path)
+activate fs
+fs --> applier : original_content
+deactivate fs
+
+applier -> fs : create_backup(file_path)
+activate fs
+fs --> applier : backup_path
+deactivate fs
+
+applier -> strategy : apply(original_content)
+activate strategy
+strategy --> applier : modified_content
+deactivate strategy
+
+applier -> fs : write_file(file_path, modified_content)
+activate fs
+fs --> applier : write_success
+deactivate fs
+
+applier -> applier : compute_diff(original_content, modified_content)
+
+applier --> agent : EditResult(diff, file_path, backup_path)
+deactivate applier
+
+note over agent, fs
+  Flow:    AgentOrchestrator -> EditApplier -> SearchReplaceCoder + FileSystem -> EditResult
+  State:   <back:#ECEFF1>IDLE</back> -> READING -> BACKING_UP -> WRITING -> DIFFING -> DONE
+  Failure: Write failure -> restore from backup
+  Success: EditResult with diff and backup path
+  Key invariants:
+    - Backup always created before modification
+    - Original file restored on any failure
+    - Safety checked at AGT-15 level before tool dispatch
+end note
+
+@enduml

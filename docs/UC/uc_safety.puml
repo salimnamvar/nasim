@@ -1,36 +1,69 @@
 @startuml uc_safety
+
 ' ============================================================
-' Title:     nasim — UC: Safety and Permissions
-' Boundary:  nasim code agent CLI
-' Purpose:   Tool permission checks and user approval prompts
+' Title:     nasim — UC: Safety Group
+' Group:     SAF (Safety)
+' Boundary:  nasim code agent
+' Purpose:   Permission gates, user approval, safety modes
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Safety Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "Developer" as user
-actor "AgentOrchestrator" as agent
-
-rectangle "Safety Layer" {
-    usecase "CHECK Tool Permission" as UC_SAF_01
-    usecase "Prompt User Approval" as UC_SAF_02
-    usecase "Apply Safety Mode" as UC_SAF_03
-    usecase "CHECK Diff Sandbox" as UC_SAF_04
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "Config Layer" {
-    usecase "Load Config" as UC_CFG_01
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-agent --> UC_SAF_01
-agent --> UC_SAF_04
-UC_SAF_01 ..> UC_SAF_03 : <<include>>
-UC_SAF_01 ..> UC_SAF_02 : <<extend>>
-UC_SAF_03 ..> UC_CFG_01 : <<include>>
-UC_SAF_04 --> user : prompt [y/N]
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Developer" as Developer
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Safety Group (SAF)" {
+    usecase "**SAF-01 CHECK Permission**\n--\nValidate tool permission via PermissionGate" as SAF01
+    usecase "**SAF-02 REQUEST Approval**\n--\nPrompt user for safety approval" as SAF02
+    usecase "**SAF-03 APPLY Safety Mode**\n--\nApply safety mode: allow, ask, deny" as SAF03
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Developer --> SAF02
+Agent --> SAF01
+Agent --> SAF03
+
+' ============================================================
+' Relationships
+' ============================================================
+
+SAF03 ..> SAF01 : <<include>>
 
 @enduml

@@ -1,0 +1,63 @@
+@startuml sq_prv01_register_provider
+' ============================================================
+' Title:     PRV-01 — Register Provider
+' Boundary:  nasim code agent CLI
+' Purpose:   Provider instantiation from config
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "ArgParser" as parser
+end box
+box "Provider Layer" #FFF3E0
+  participant "ProviderFactory" as factory
+  participant "Provider" as proto
+end box
+
+note over user, proto
+  Scope:          Provider instantiation from configuration
+  Preconditions:  Config loaded with valid provider name
+  Contexts:       Called by main() during startup
+  Excludes:       Provider chat/stream (PRV-02/03)
+  Rollback:       Unknown provider -> ConfigError
+  Design:         Factory pattern; one class per backend
+  Classification: Primary Orchestrator
+end note
+
+== PRV-01 Initialize Provider ==
+
+user -> parser : nasim --provider ollama
+parser -> parser : parse args -> Config
+parser -> factory : create_provider(config)
+factory -> factory : lookup config.provider
+
+alt provider = "ollama"
+    factory -> proto : OllamaProvider(url, model, timeout)
+else provider = "openai"
+    factory -> proto : OpenAIProvider(api_key, model)
+else provider = "anthropic"
+    factory -> proto : AnthropicProvider(api_key, model)
+end
+
+break Unknown provider type
+    factory -> factory : raise ConfigError("Unknown provider: X")
+    factory --> parser : ConfigError
+    parser --> user : error message
+end
+
+factory --> parser : Provider instance
+parser --> user : Provider ready
+
+note over user, proto
+  Flow:    Config -> Factory -> provider class lookup -> instance
+  State:   No state change
+  Failure: Unknown provider type -> ConfigError
+  Success: Provider instance ready for chat/stream
+end note
+
+@enduml

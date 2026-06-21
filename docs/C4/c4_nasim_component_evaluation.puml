@@ -24,6 +24,7 @@ Container_Boundary(evaluation_boundary, "Evaluation Group") {
     Component(retry_coordinator, "RetryCoordinator", "", "Coordinates retry attempts with backoff and escalation")
     Component(repetition_detector, "RepetitionDetector", "", "Detects repeated failures or loops, triggers escalation")
     Component(turn_budget_injector, "TurnBudgetInjector", "", "Injects turn budget limits and progress signals into context")
+    Component(quality_signal, "QualitySignal", "", "Records quality metrics: task success, retry counts, token usage, latency")
 }
 
 Container_Ext(provider_group, "Provider Group")
@@ -36,9 +37,8 @@ Rel(eval_engine, test_runner, "run test suites")
 Rel(eval_engine, retry_coordinator, "coordinate retry")
 Rel(eval_engine, repetition_detector, "detect loops")
 Rel(eval_engine, turn_budget_injector, "inject budget limits")
+Rel(eval_engine, quality_signal, "records quality metrics")
 Rel(llm_reviewer, provider_group, "LLM review call")
 Rel(test_runner, tool_group, "executes test commands")
-Rel(retry_coordinator, eval_engine, "triggers re-evaluation")
-Rel(repetition_detector, eval_engine, "signals escalation")
 
 @enduml

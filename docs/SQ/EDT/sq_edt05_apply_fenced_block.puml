@@ -1,0 +1,61 @@
+@startuml sq_edt05_apply_fenced_block
+' ============================================================
+' Title:     EDT-05 — APPLY Fenced Block
+' Boundary:  nasim code agent
+' Purpose:   Apply fenced code block format edit
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — EDT-05 APPLY Fenced Block
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Layer" #FFF3E0
+  participant "EditStrategyManager" as mgr
+  participant "FencedBlockCoder" as coder
+end box
+
+note over agent, coder
+  Scope:          Apply fenced code block format edit
+  Preconditions:  EditStrategyManager initialized, file exists
+  Excludes:       Strategy selection (EDT-01), validation (EDT-03)
+  Contexts:       Called by AGT-02 DISPATCH Tool Call
+  Rollback:       Block extraction failure returns error
+  Design:         Extracts fenced code block, replaces matching section
+  Classification: Process Decomposition
+end note
+
+== EDT-05 APPLY Fenced Block ==
+
+agent -> mgr : APPLY_FENCED_BLOCK(file, block)
+activate mgr
+
+mgr -> coder : apply(block, file_content)
+activate coder
+
+coder -> coder : extract fenced block content
+coder -> coder : locate matching section in file
+coder -> coder : replace section
+
+break Section not found
+  coder --> mgr : BlockError(section_not_found)
+end
+
+coder --> mgr : ModifiedContent
+deactivate coder
+
+mgr --> agent : ToolResult(success=True)
+deactivate mgr
+
+note over agent, coder
+  Flow:    Agent -> EditStrategyManager -> FencedBlockCoder -> extract -> locate -> replace
+  State:   No state change
+  Failure: Section not found, ambiguous match -> ToolResult(success=False)
+  Success: File modified with fenced block replacement
+end note
+
+@enduml

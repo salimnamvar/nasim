@@ -1,0 +1,33 @@
+@startuml c4_nasim_component_safety
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+
+' ============================================================
+' Title:     nasim — Safety Component Diagram
+' Boundary:  nasim core library — Safety group
+' Purpose:   Permission gating, injection scanning, egress inspection
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    —
+' ============================================================
+
+title nasim — Safety Component Diagram
+
+Container_Boundary(safety_boundary, "Safety Group") {
+    Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
+    Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")
+    Component(injection_scanner, "InjectionScanner", "", "Detects prompt injection patterns in tool outputs")
+    Component(egress_inspector, "EgressInspector", "", "Inspects outbound data for policy violations")
+}
+
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
+
+Rel(agent_orch, safety_coord, "validates before tool dispatch")
+Rel(safety_coord, permission_gate, "evaluates permissions")
+Rel(safety_coord, injection_scanner, "scans for injection")
+Rel(safety_coord, egress_inspector, "inspects outbound data")
+Rel(tool_registry, safety_coord, "triggers safety checks")
+
+@enduml

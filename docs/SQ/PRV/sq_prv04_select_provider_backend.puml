@@ -5,7 +5,7 @@
 ' Purpose:   Map config.provider string to provider class
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -23,6 +23,7 @@ note over cfg, factory
   Excludes:       Provider instantiation (PRV-01)
   Rollback:       Unknown provider -> ConfigError
   Design:         Registry mapping: str -> class
+  Classification: Process Decomposition
 end note
 
 == PRV-04 Select Provider Backend ==

@@ -1,0 +1,70 @@
+@startuml sq_vcs02_insert_commit
+' ============================================================
+' Title:     VCS-02 — INSERT Commit
+' Boundary:  nasim code agent
+' Purpose:   Create a commit with conventional message
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — VCS-02 INSERT Commit
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Git Layer" #E8EAF6
+  participant "GitCommit" as commit
+  participant "GitStatus" as status
+end box
+box "External" #F5F5F5
+  participant "Git Repository" as git
+end box
+
+note over agent, git
+  Scope:          Git commit creation with conventional format
+  Preconditions:  Files staged, commit message valid
+  Excludes:       Status checking (VCS-01), diff (VCS-03)
+  Contexts:       Called by VCS-04 (AUTO-COMMIT), manual commit requests
+  Rollback:       Reset HEAD if commit fails mid-operation
+  Design:         Atomic commit with pre-commit hook validation
+  Classification: Process Decomposition
+end note
+
+== VCS-02 INSERT Commit ==
+
+agent -> commit : commit(message, files)
+activate commit
+
+commit -> status : check_staged()
+activate status
+status --> commit : staged_files
+deactivate status
+
+break No staged files
+    commit --> agent : error("no staged files")
+end
+
+commit -> commit : validate_message(message)
+
+break Invalid message format
+    commit --> agent : error("invalid commit message")
+end
+
+commit -> git : git commit -m message
+activate git
+git --> commit : commit_output
+deactivate git
+
+commit --> agent : commit_result(hash, files)
+deactivate commit
+
+note over agent, git
+  Flow:    AgentOrchestrator -> GitCommit -> check staged -> validate message -> commit -> return hash
+  State:   No state change
+  Failure: Pre-commit hook fails -> abort, return error
+  Success: Agent receives commit hash and file list
+end note
+
+@enduml

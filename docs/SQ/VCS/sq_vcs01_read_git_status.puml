@@ -1,0 +1,60 @@
+@startuml sq_vcs01_read_git_status
+' ============================================================
+' Title:     VCS-01 — READ Git Status
+' Boundary:  nasim code agent
+' Purpose:   Read working tree status and staged changes
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — VCS-01 READ Git Status
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Git Layer" #E8EAF6
+  participant "GitStatus" as status
+end box
+box "External" #F5F5F5
+  participant "Git Repository" as git
+end box
+
+note over agent, git
+  Scope:          Git working tree status inspection
+  Preconditions:  Git repository initialized
+  Excludes:       Commit operations (VCS-02), diff (VCS-03)
+  Contexts:       Called by TL-11 (READ Git Status), pre-commit validation
+  Rollback:       No rollback needed (read-only operation)
+  Design:         Cached status with file system watch invalidation
+  Classification: Process Decomposition
+end note
+
+== VCS-01 READ Git Status ==
+
+agent -> status : get_status()
+activate status
+
+status -> git : git status --porcelain
+activate git
+git --> status : raw_output
+deactivate git
+
+status -> status : parse status output
+
+break Not a git repo
+    status --> agent : error_status("not a git repository")
+end
+
+status --> agent : status_summary(staged, modified, untracked)
+deactivate status
+
+note over agent, git
+  Flow:    AgentOrchestrator -> GitStatus -> execute git status -> parse -> return summary
+  State:   No state change
+  Failure: Not a git repo -> return error status
+  Success: Agent receives staged/modified/untracked file lists
+end note
+
+@enduml

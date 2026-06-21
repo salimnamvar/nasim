@@ -10,10 +10,11 @@ Back to [docs/](../README.md).
 | ---- | -------------- | ---- | ----------- |
 | `er_session_store.puml` | Session Store | JSON Lines | Session metadata + messages + file metadata |
 | `er_memory_store.puml` | Memory Store | JSON Lines | Cross-session knowledge entries with FTS5 index |
-| `er_todo_store.puml` | Todo Store | JSON Lines | Task tracking within sessions |
-| `er_git_state.puml` | Git State | JSON Lines | Git branch and commit tracking per session |
-| `er_wire_log.puml` | Wire Log | JSON Lines | Append-only per-session event store with turn index |
 | `er_observability.puml` | Observability | In-memory / stdout | Structured logs, metrics, trace context, redaction rules |
+| `er_repo_intelligence.puml` | Repo Intelligence | JSON Lines | AST index, symbol graph, embedding store |
+| `er_wire_log.puml` | Wire Log | JSON Lines | Append-only per-session event store with turn index |
+
+**Total: 5 ERD diagrams**
 
 ## Notation
 
@@ -63,6 +64,6 @@ ERD bridges the logical session model and the physical JSON Lines implementation
 
 | Layer | Path |
 | ----- | ---- |
-| Class diagram (source) | `docs/cl/cl_runtime_model.puml` |
-| Lifecycle states | `docs/sm/sm_agent_lifecycle.puml` |
-| Session UCs | `docs/uc/uc_session.puml` |
+| Class diagram (source) | `docs/CL/cl_runtime_model.puml` |
+| Lifecycle states | `docs/SM/sm_agent_lifecycle.puml` |
+| Session UCs | `docs/UC/uc_session.puml` |

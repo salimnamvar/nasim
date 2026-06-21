@@ -1,0 +1,50 @@
+@startuml sq_rtg03_classify_task
+' ============================================================
+' Title:     RTG-03 — Classify Task
+' Boundary:  nasim code agent
+' Purpose:   Classify task type and select optimal model
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — RTG-03 Classify Task
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Router Layer" #EDE7F6
+  participant "ModelRouter" as router
+end box
+
+note over participants
+  Scope:          Classify incoming task and select optimal model
+  Preconditions:  ModelRouter initialized with model catalog
+  Excludes:       Model switching, fallback application
+  Contexts:       Called by AGT-01 or RTG-01
+  Rollback:       Default model used on classification failure
+  Design:         Heuristic or LLM-based classification
+  Classification: Process Decomposition
+end note
+
+== RTG-03 Classify Task ==
+
+agent -> router : classify(task_description, context)
+
+break Classification fails
+    router --> agent : default_model
+end
+
+router -> router : analyze task type (code, research, refactor, etc.)
+router -> router : select model by capability match
+router --> agent : selected_model
+
+note over participants
+  Flow:    AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model
+  State:   No state change
+  Failure: Classification failure -> default model returned
+  Success: Optimal model selected for task type
+end note
+
+@enduml

@@ -29,9 +29,9 @@ Container_Boundary(tool_boundary, "Tool Group") {
     Component(todo_tool, "TodoTool", "", "Task tracking within session")
     Component(memory_tool, "MemoryTool", "", "Persist and retrieve cross-session knowledge")
     Component(plan_tool, "PlanTool", "", "Plan creation and management")
-    Component(repo_map_tool, "RepoMapTool", "ABC", "Generates and queries repository map summaries")
-    Component(semantic_search_tool, "SemanticSearchTool", "ABC", "Embedding-based semantic code search")
-    Component(review_tool, "ReviewTool", "ABC", "LLM-driven code review and quality assessment")
+    Component(repo_map_tool, "RepoMapTool", "", "Generates and queries repository map summaries")
+    Component(semantic_search_tool, "SemanticSearchTool", "", "Embedding-based semantic code search")
+    Component(review_tool, "ReviewTool", "", "LLM-driven code review and quality assessment")
 }
 
 Container_Ext(sandbox_group, "Sandbox Group")
@@ -68,5 +68,6 @@ Rel(lsp_tool, lsp_server, "LSP protocol")
 Rel(repo_map_tool, repo_intelligence_group, "queries repo map")
 Rel(semantic_search_tool, repo_intelligence_group, "vector search")
 Rel(review_tool, provider_group, "LLM review call")
+Rel(tool_registry, mcp_server, "discovers and registers MCP tools")
 
 @enduml

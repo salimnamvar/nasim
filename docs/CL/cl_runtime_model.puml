@@ -578,7 +578,7 @@ AgentOrchestrator --> Provider : uses
 AgentOrchestrator --> ToolRegistry : dispatches to
 AgentOrchestrator --> ConversationHistory : owns
 AgentOrchestrator --> PermissionGate : checks
-AgentOrchestrator --> PlanSession : uses (Phase 2)
+AgentOrchestrator --> PlanSession : uses
 AgentOrchestrator --> AgentEvent : yields
 AgentOrchestrator --> SessionStore : loads/saves
 AgentOrchestrator --> HookManager : triggers hooks

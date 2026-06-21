@@ -5,7 +5,7 @@
 ' Purpose:   Create or overwrite a file
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -30,6 +30,7 @@ note over user, fs
   Excludes:       Read, edit
   Rollback:       Error string returned to LLM
   Design:         Creates parent directories automatically
+  Classification: Primary Orchestrator
   Safety:         Requires permission check (SAF-01)
 end note
 

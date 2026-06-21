@@ -1,0 +1,60 @@
+@startuml sq_edt04_apply_unified_diff
+' ============================================================
+' Title:     EDT-04 — APPLY Unified Diff
+' Boundary:  nasim code agent
+' Purpose:   Apply unified diff format edit to file
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — EDT-04 APPLY Unified Diff
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Layer" #FFF3E0
+  participant "EditStrategyManager" as mgr
+  participant "UnifiedDiffCoder" as coder
+end box
+
+note over agent, coder
+  Scope:          Apply unified diff format edit to file
+  Preconditions:  EditStrategyManager initialized, file exists
+  Excludes:       Strategy selection (EDT-01), validation (EDT-03)
+  Contexts:       Called by AGT-02 DISPATCH Tool Call
+  Rollback:       Diff application failure returns error
+  Design:         Parses unified diff, applies hunks sequentially
+  Classification: Process Decomposition
+end note
+
+== EDT-04 APPLY Unified Diff ==
+
+agent -> mgr : APPLY_UNIFIED_DIFF(file, diff)
+activate mgr
+
+mgr -> coder : apply(diff, file_content)
+activate coder
+
+coder -> coder : parse diff hunks
+coder -> coder : apply each hunk
+
+break Hunk application fails
+  coder --> mgr : DiffError(hunk_mismatch)
+end
+
+coder --> mgr : ModifiedContent
+deactivate coder
+
+mgr --> agent : ToolResult(success=True)
+deactivate mgr
+
+note over agent, coder
+  Flow:    Agent -> EditStrategyManager -> UnifiedDiffCoder -> parse hunks -> apply -> result
+  State:   No state change
+  Failure: Hunk mismatch, file not found -> ToolResult(success=False)
+  Success: File modified with unified diff
+end note
+
+@enduml

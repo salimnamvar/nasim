@@ -1,0 +1,70 @@
+@startuml uc_git
+
+' ============================================================
+' Title:     nasim — UC: Git Group
+' Group:     VCS (Git Integration)
+' Boundary:  nasim code agent
+' Purpose:   Version control awareness: status, diff, commit
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' ============================================================
+
+left to right direction
+
+title nasim — Git Use Cases
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Git Group (VCS)" {
+    usecase "**VCS-01 READ Git Status**\n--\nRead working tree status and staged changes" as VCS01
+    usecase "**VCS-02 INSERT Commit**\n--\nCreate commits with conventional messages" as VCS02
+    usecase "**VCS-03 READ Diff**\n--\nRead diff between working tree and HEAD" as VCS03
+    usecase "**VCS-04 AUTO-COMMIT**\n--\nAuto-commit after file edits" as VCS04
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> VCS01
+Agent --> VCS02
+Agent --> VCS03
+Agent --> VCS04
+
+' ============================================================
+' Relationships
+' ============================================================
+
+VCS04 ..> VCS02 : <<include>>
+
+@enduml

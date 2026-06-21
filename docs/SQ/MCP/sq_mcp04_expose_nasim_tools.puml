@@ -1,0 +1,73 @@
+@startuml sq_mcp04_expose_nasim_tools
+' ============================================================
+' Title:     MCP-04 — EXPOSE nasim Tools
+' Boundary:  nasim code agent
+' Purpose:   Expose nasim tools to external MCP clients
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — MCP-04 EXPOSE nasim Tools
+
+box "MCP Layer" #EDE7F6
+  participant "MCPServerRuntime" as server
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+end box
+box "External" #F5F5F5
+  participant "MCP Client" as client
+end box
+
+note over server, client
+  Scope:          Serving nasim tools via MCP server interface
+  Preconditions:  MCPServerRuntime initialized, tools registered
+  Excludes:       Tool discovery, adaptation (MCP-02, MCP-03)
+  Contexts:       External MCP client connection lifecycle
+  Rollback:       Disconnect client on tool execution failure
+  Design:         Request validation and rate limiting
+  Classification: Process Decomposition
+end note
+
+== MCP-04 EXPOSE nasim Tools ==
+
+client -> server : list_tools()
+activate server
+
+server -> registry : get_all_tools()
+activate registry
+registry --> server : tool_list
+deactivate registry
+
+server --> client : tool_definitions
+deactivate server
+
+client -> server : call_tool(name, args)
+activate server
+
+break Tool not found
+    server --> client : error("tool not found")
+end
+
+server -> registry : execute(name, args)
+activate registry
+registry --> server : result
+deactivate registry
+
+break Execution failure
+    server --> client : error("execution failed")
+end
+
+server --> client : tool_result
+deactivate server
+
+note over server, client
+  Flow:    MCP Client -> MCPServerRuntime -> ToolRegistry -> execute -> return result
+  State:   No state change
+  Failure: Tool not found or execution failure -> error response
+  Success: Client receives tool execution result
+end note
+
+@enduml

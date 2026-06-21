@@ -5,7 +5,7 @@
 ' Purpose:   Config field validation
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -20,6 +20,7 @@ note over cfg
   Excludes:       Config loading (CFG-01)
   Rollback:       Validation error -> ConfigError with details
   Design:         Typed dataclass with __post_init__ validation
+  Classification: Process Decomposition
 end note
 
 == CFG-02 Validate Config ==

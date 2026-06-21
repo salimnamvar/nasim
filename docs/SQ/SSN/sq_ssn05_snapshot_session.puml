@@ -1,0 +1,59 @@
+@startuml sq_ssn05_snapshot_session
+' ============================================================
+' Title:     SSN-05 — Snapshot Session
+' Boundary:  nasim code agent CLI
+' Purpose:   Create a point-in-time snapshot of session state
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — SSN-05 Snapshot Session
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Session Layer" #F1F8E9
+  participant "SessionVersioning" as ver
+end box
+database "Snapshot Store" as snap
+
+note over agent, snap
+  Scope:          Create a point-in-time snapshot of session messages
+  Preconditions:  Active session with messages
+  Excludes:       Session read (SSN-02), revert (SSN-06)
+  Contexts:       Called before risky operations or on explicit request
+  Rollback:       Snapshot failure → log warning, continue without snapshot
+  Design:         Snapshot stored as immutable copy; supports revert via SSN-06
+  Classification: Process Decomposition
+end note
+
+== SSN-05 Snapshot Session ==
+
+agent -> ver : snapshot(session_id)
+activate ver
+
+ver -> ver : serialize current messages
+ver -> snap : write snapshot (immutable copy)
+activate snap
+snap --> ver : snapshot_id
+deactivate snap
+
+ver --> agent : SnapshotCreated(snapshot_id)
+deactivate ver
+
+break Disk write error
+    snap --> ver : IOError
+    ver --> agent : SnapshotError
+    agent -> agent : log warning, continue without snapshot
+end
+
+note over agent, snap
+  Flow:    AgentOrchestrator → SessionVersioning → create snapshot → store
+  State:   No state change (snapshot is side-effect)
+  Failure: Disk error → log warning, continue
+  Success: Snapshot ID returned for future revert (SSN-06)
+end note
+
+@enduml

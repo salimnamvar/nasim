@@ -1,0 +1,78 @@
+@startuml sq_edt09_apply_inline_patch
+' ============================================================
+' Title:     EDT-09 — APPLY Inline Patch
+' Boundary:  nasim code agent
+' Purpose:   Apply inline patch with line-level precision
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — EDT-09 APPLY Inline Patch
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Layer" #FFF3E0
+  participant "EditStrategyManager" as esm
+  participant "InlinePatchCoder" as ipc
+end box
+box "FileSystem Layer" #F3E5F5
+  participant "FileSystem" as fs
+end box
+
+note over participants
+  Scope:          Inline patch application with line-level precision
+  Preconditions:  Patch generated with line offsets, target file readable
+  Excludes:       Whole-file rewrites, sandbox isolation, AST manipulation
+  Contexts:       EDT-01 SELECT Strategy selects this for precise line-targeted edits
+  Rollback:       Patch context mismatch → reject patch, report conflict
+  Design:         InlinePatchCoder parses patch format, validates context lines, applies at offset
+  Classification: Process Decomposition
+end note
+
+== EDT-09 APPLY Inline Patch ==
+
+agent -> esm : APPLY_INLINE_PATCH(file_path, patch)
+activate esm
+
+esm -> ipc : code_inline_patch(file_path, patch)
+activate ipc
+
+ipc -> ipc : parse_patch(patch)
+
+ipc -> fs : read_file(file_path)
+activate fs
+fs --> ipc : source_lines
+deactivate fs
+
+ipc -> ipc : validate_context_lines(source_lines, patch.context_lines)
+
+alt context validation passes
+    ipc -> ipc : apply_hunks(source_lines, patch.hunks)
+
+    ipc -> fs : write_file(file_path, patched_source)
+    activate fs
+    fs --> ipc : write_result
+    deactivate fs
+
+    ipc -> ipc : validate_no_conflicts(patched_source)
+else context mismatch
+    ipc -> ipc : reject_patch(reason="context mismatch")
+end
+
+ipc --> esm : EditResult(success, file_path, lines_changed)
+deactivate ipc
+
+esm --> agent : EditResult
+deactivate esm
+
+note over participants
+  Flow:    AgentOrchestrator → EditStrategyManager → InlinePatchCoder → parse patch → apply → validate
+  State:   <back:#ECEFF1>IDLE</back> → PARSING → VALIDATING → APPLYING → DONE
+  Failure: Context mismatch → patch rejected, conflict reported
+  Success: EditResult with patched file and line change count
+end note
+
+@enduml

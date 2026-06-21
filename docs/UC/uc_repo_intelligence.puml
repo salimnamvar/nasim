@@ -1,42 +1,82 @@
 @startuml uc_repo_intelligence
+
 ' ============================================================
-' Title:     nasim — UC: Repo Intelligence Management
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   AST indexing, symbol ranking, semantic search, context injection
+' Title:     nasim — UC: Repo Intelligence Group
+' Group:     RIM (Repo Intelligence)
+' Boundary:  nasim code agent
+' Purpose:   Codebase intelligence: AST indexing, symbol graph, semantic search, repo mapping
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Repo Intelligence Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "AgentOrchestrator" as agent
-actor "ContextGraph" as ctx
-
-rectangle "Repo Intelligence" {
-    usecase "INDEX Repository" as UC_RIM_01
-    usecase "RANK Symbols" as UC_RIM_02
-    usecase "SEARCH Semantic" as UC_RIM_03
-    usecase "INJECT RepoMap" as UC_RIM_04
-    usecase "INVALIDATE Index" as UC_RIM_05
-    usecase "EXTRACT AST Tags" as UC_RIM_06
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "External" {
-    component "Tree-sitter" as treesitter
-    component "Embedding Model" as embedding
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-agent --> UC_RIM_01
-agent --> UC_RIM_03
-agent --> UC_RIM_04
-agent --> UC_RIM_05
-ctx --> UC_RIM_04
-UC_RIM_01 ..> UC_RIM_06 : <<include>>
-UC_RIM_03 ..> embedding : <<include>>
-UC_RIM_06 ..> treesitter : <<include>>
-UC_RIM_01 ..> UC_RIM_02 : <<include>>
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Repo Intelligence Group (RIM)" {
+    usecase "**RIM-01 INDEX Codebase**\n--\nAST indexing via tree-sitter" as RIM01
+    usecase "**RIM-02 BUILD Symbol Graph**\n--\nCross-file symbol reference graph" as RIM02
+    usecase "**RIM-03 RANK Results**\n--\nPageRank ranking of code symbols" as RIM03
+    usecase "**RIM-04 INJECT RepoMap**\n--\nGenerate token-budgeted repo-map" as RIM04
+    usecase "**RIM-05 EMBED Code**\n--\nGenerate vector embeddings for code" as RIM05
+    usecase "**RIM-06 SEARCH Semantic**\n--\nVector similarity search over embeddings" as RIM06
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> RIM01
+Agent --> RIM02
+Agent --> RIM03
+Agent --> RIM04
+Agent --> RIM05
+Agent --> RIM06
+
+' ============================================================
+' Relationships
+' ============================================================
+
+RIM01 ..> RIM02 : <<include>>
+RIM02 ..> RIM03 : <<include>>
+RIM05 ..> RIM06 : <<include>>
 
 @enduml
