@@ -19,12 +19,6 @@ Container_Boundary(router_boundary, "Router Group") {
     Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
 }
 
-note right of model_router
-  ProviderCapabilities is static metadata
-  (streaming, tools, vision, reasoning,
-  context limits, pricing) — not a runtime component
-end note
-
 Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 Component_Ext(provider, "Provider", "Provider Group")
 
