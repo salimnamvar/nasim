@@ -5,7 +5,7 @@
 ' Purpose:   Sequential scan for replay
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -43,6 +43,7 @@ note over user, fs
     - Read failure → return partial events with error
 
   Design:
+  Classification: Primary Orchestrator
     - WireLogger reads log file sequentially
     - EventDeserializer parses each line into Event objects
     - Supports filtering by session_id and event type

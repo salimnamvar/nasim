@@ -5,7 +5,7 @@
 ' Purpose:   Message list management and token tracking
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -21,6 +21,7 @@ note over agent, history
   Excludes:       Context compaction (CTX-02)
   Rollback:       N/A
   Design:         Owns messages + token_count; triggers compaction
+  Classification: Process Decomposition
 end note
 
 == AGT-03 Manage Conversation ==

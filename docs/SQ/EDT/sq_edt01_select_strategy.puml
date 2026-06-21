@@ -1,62 +1,38 @@
 @startuml sq_edt01_select_strategy
 ' ============================================================
-' Title:     EDT-01 — SELECT Edit Strategy
-' Boundary:  nasim code agent CLI
+' Title:     EDT-01 — SELECT Strategy
+' Boundary:  nasim code agent
 ' Purpose:   Choose optimal edit format for the target model
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+title nasim — EDT-01 SELECT Strategy
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
-  participant "EditStrategySelector" as selector
-  participant "EditFormat" as format
+box "Edit Strategy Layer" #FFF3E0
+  participant "StrategySelector" as selector
+  participant "EditStrategy" as strategy
 end box
-box "Provider Layer" #E3F2FD
-  participant "Provider" as provider
-end box
-box "Config Layer" #E8F5E9
-  participant "Config" as config
+box "Config Layer" #FCE4EC
+  participant "ConfigLoader" as config
 end box
 
-note over user, config
-  Scope:
-    - edt01 SELECT Strategy — choose optimal edit format for model
-
-  Preconditions:
-    - Agent has identified a file to edit
-    - Config loaded with supported edit formats
-
-  Contexts:
-    - Called before EDT-02 (Apply Edit)
-    - Entry point for the edit subsystem
-
-  Excludes:
-    - Edit execution (handled by EDT-02)
-    - Edit validation (handled by EDT-03)
-
-  Rollback:
-    - No valid strategy → return error, suggest manual edit
-
-  Design:
-    - EditStrategySelector evaluates model capabilities vs edit requirements
-    - Supported formats: SEARCH_REPLACE, UNIFIED_DIFF, FULL_REWRITE, INSERT_LINE
-    - Strategy selected based on: model support, diff size, file type
-    - Large diffs (>50 lines) prefer FULL_REWRITE
-    - Small surgical edits prefer SEARCH_REPLACE
-
-  Returns:
-    - Success: EditStrategy with format and parameters
-    - Failure: Error with recommendation
+note over agent, config
+  Scope:          Choose optimal edit format for the target model
+  Preconditions:  Agent has identified a file to edit, Config loaded
+  Excludes:       Edit execution (EDT-02..09), diff staging (EDT-10)
+  Contexts:       Called before EDT-02 (APPLY Search-Replace); entry point for edit subsystem
+  Rollback:       No valid strategy -> return error, suggest manual edit
+  Design:         StrategySelector evaluates model capabilities vs edit requirements; format selected by diff size and model support
+  Classification: Primary Orchestrator
 end note
 
-== edt01 SELECT Strategy ==
+== EDT-01 SELECT Strategy ==
 
 agent -> selector : SELECT_STRATEGY(file_path, edit_description, model_id)
 activate selector
@@ -69,20 +45,20 @@ deactivate config
 selector -> selector : estimate_diff_size(edit_description)
 
 alt diff_size <= 5 lines
-    selector -> format : CREATE_SEARCH_REPLACE(file_path, edit_description)
-    activate format
-    format --> selector : SearchReplaceEdit
-    deactivate format
+    selector -> strategy : CREATE_SEARCH_REPLACE(file_path, edit_description)
+    activate strategy
+    strategy --> selector : SearchReplaceEdit
+    deactivate strategy
 else diff_size <= 50 lines
-    selector -> format : CREATE_UNIFIED_DIFF(file_path, edit_description)
-    activate format
-    format --> selector : UnifiedDiffEdit
-    deactivate format
+    selector -> strategy : CREATE_UNIFIED_DIFF(file_path, edit_description)
+    activate strategy
+    strategy --> selector : UnifiedDiffEdit
+    deactivate strategy
 else diff_size > 50 lines
-    selector -> format : CREATE_FULL_REWRITE(file_path, edit_description)
-    activate format
-    format --> selector : FullRewriteEdit
-    deactivate format
+    selector -> strategy : CREATE_FULL_REWRITE(file_path, edit_description)
+    activate strategy
+    strategy --> selector : FullRewriteEdit
+    deactivate strategy
 end
 
 selector -> selector : validate_format_compatibility(strategy, model_id)
@@ -90,23 +66,11 @@ selector -> selector : validate_format_compatibility(strategy, model_id)
 selector --> agent : EditStrategy(format, parameters, confidence)
 deactivate selector
 
-note over user, config
-  Flow:
-    - AgentOrchestrator → EditStrategySelector → Config + EditFormat → EditStrategy
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → <back:#F9FBE7>EVALUATING</back> → SELECTING → VALIDATING → READY
-
-  Failure:
-    - No compatible format → error + manual suggestion
-
-  Success:
-    - EditStrategy with chosen format and parameters
-
-  Key invariants:
-    - Selected format always supported by target model
-    - Confidence score reflects strategy reliability
-    - Fallback chain: SEARCH_REPLACE → UNIFIED_DIFF → FULL_REWRITE
+note over agent, config
+  Flow:    AgentOrchestrator -> StrategySelector -> Config + EditStrategy -> EditStrategy
+  State:   <back:#ECEFF1>IDLE</back> -> <back:#FFF3E0>THINKING</back> -> <back:#ECEFF1>IDLE</back>
+  Failure: No compatible format -> error + manual suggestion
+  Success: EditStrategy with chosen format and parameters
 end note
 
 @enduml

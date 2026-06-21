@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CTX-05 Compact Nodes
@@ -26,6 +26,7 @@ note over pipe, provider
   Contexts:       Called when token budget is tight and nodes overlap
   Rollback:       Merge failure → retain original nodes
   Design:         Identifies overlapping nodes and merges via secondary LLM or heuristics
+  Classification: Process Decomposition
 end note
 
 == CTX-05 Compact Nodes ==

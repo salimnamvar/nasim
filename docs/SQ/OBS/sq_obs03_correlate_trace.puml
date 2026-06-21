@@ -5,7 +5,7 @@
 ' Purpose:   Generate and propagate trace context across nasim surfaces
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -45,6 +45,7 @@ note over cli, otel
     - Wire log (WRL, but receives correlation ids)
 
   Design:
+  Classification: Primary Orchestrator
     - TraceCorrelator generates root trace/span per entrypoint
     - ContextPropagator ensures trace flows across boundaries
     - Every LogRecord and WireEvent carries: trace_id, span_id, parent_span_id

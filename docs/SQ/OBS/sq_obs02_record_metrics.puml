@@ -5,7 +5,7 @@
 ' Purpose:   Record metric points for token usage, latency, tool calls
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -40,6 +40,7 @@ note over agent, prom
     - Metrics export to OTel (optional, behind flag)
 
   Design:
+  Classification: Primary Orchestrator
     - MetricsCollector provides counter/gauge/histogram handles
     - Convenience methods instrument key nasim events
     - Labels are low-cardinality (model, provider, tool, success)

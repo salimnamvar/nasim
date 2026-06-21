@@ -1,57 +1,57 @@
 @startuml sq_hk05_dispatch_post_llm_hook
 ' ============================================================
-' Title:     HK-05 — Dispatch Post-LLM Hook
+' Title:     HK-05 — DISPATCH Post-LLM Hook
 ' Boundary:  nasim code agent
-' Purpose:   Execute registered hooks after LLM call completes
+' Purpose:   Execute hooks after LLM call completes
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — HK-05 Dispatch Post-LLM Hook
+title nasim — HK-05 DISPATCH Post-LLM Hook
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
 box "Hooks Layer" #FFFDE7
-  participant "HookManager" as hm
+  participant "HookManager" as hooks
+  participant "Hook" as hook
 end box
-participant "Hook" as hook
 
-note over participants
-  Scope:          Execute all PostLLMCall hooks in priority order
-  Preconditions:  Hooks registered for PostLLMCall event
-  Excludes:       Pre-LLM hooks, tool hooks
-  Contexts:       Called by AGT-01
+note over agent, hook
+  Scope:          Execute hooks after LLM call completes
+  Preconditions:  LLM call completed, hooks registered for PostLLMCall event
+  Excludes:       Pre-LLM hooks (HK-04), tool hooks (HK-02/03)
+  Contexts:       Called by AGT-01 (PROCESS User Task) after PRV-02
   Rollback:       Hook failure logged; pipeline continues
   Design:         Priority-ordered execution; short-circuit on deny
   Classification: Process Decomposition
 end note
 
-== HK-05 Dispatch Post-LLM Hook ==
+== HK-05 DISPATCH Post-LLM Hook ==
 
-agent -> hm : dispatch(PostLLMCall, llm_result)
-activate hm
-hm -> hm : find hooks for PostLLMCall
+agent -> hooks : dispatch(PostLLMCall, llm_result)
+activate hooks
+hooks -> hooks : find hooks for PostLLMCall
 
 loop for each hook in priority order
-    hm -> hook : execute(llm_result)
+    hooks -> hook : execute(llm_result)
     activate hook
-    hook --> hm : HookResult(action, data?)
+    hook --> hooks : HookResult(action, data?)
     deactivate hook
 
     break action == DENY
-        hm --> agent : HookResult(action=DENY, reason)
+        hooks --> agent : HookResult(action=DENY, reason)
     end
 end
 
-hm --> agent : HookResult(action=ALLOW, modified_data?)
-deactivate hm
+hooks --> agent : HookResult(action=ALLOW, modified_data?)
+deactivate hooks
 
-note over participants
-  Flow:    AgentOrchestrator -> HookManager -> find hooks for PostLLMCall -> execute in priority order -> return HookResult
-  State:   No state change
+note over agent, hook
+  Flow:    AgentOrchestrator -> HookManager -> find hooks -> execute in priority order -> return HookResult
+  State:   <back:#FFFDE7>HOOK_RUNNING</back>
   Failure: Hook failure logged; remaining hooks still execute
   Success: HookResult returned to agent
 end note

@@ -5,7 +5,7 @@
 ' Purpose:   Serve /metrics endpoint for Prometheus pull scrape
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -39,6 +39,7 @@ note over prom, metrics
     - OTel export (optional, behind flag)
 
   Design:
+  Classification: Primary Orchestrator
     - MetricsCollector exposes prometheus-client generate_latest()
     - ServerApp adds /metrics route (GET only)
     - Content-Type: text/plain; version=0.0.4

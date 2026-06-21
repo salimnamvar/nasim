@@ -43,7 +43,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Merge directory contents into one MD file.")
 
     # Define a default path based on a likely location
-    default_input = ["/home/salim/prj/salim/nasim/code/nasim/docs/SM"]
+    default_input = ["/home/salim/prj/salim/nasim/code/nasim/docs/C4"]
 
     parser.add_argument(
         "inputs",
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         help="List of directories or files to process",
         default=default_input,
     )
-    parser.add_argument("-o", "--output", help="Path to the output master .md file", default="SM.md")
+    parser.add_argument("-o", "--output", help="Path to the output master .md file", default="C4.md")
 
     args = parser.parse_args()
 

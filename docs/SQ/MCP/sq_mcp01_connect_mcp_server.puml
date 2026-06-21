@@ -4,37 +4,62 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Connect to external MCP server via stdio/SSE
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — MCP-01 CONNECT MCP Server
 
-' Participants with box colors per C4 layer
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "MCP Layer" #EDE7F6
+  participant "MCPClientRuntime" as client
+end box
+box "External" #F5F5F5
+  participant "MCP Server" as server
+end box
 
-note over participants
+note over agent, server
   Scope:          Connection establishment to external MCP server
   Preconditions:  MCP server endpoint configured in agent settings
-  Excludes:       Tool discovery and adaptation (see MCP-02, MCP-03)
-  Contexts:       Agent initialization, server reconnection
+  Excludes:       Tool discovery and adaptation (MCP-02, MCP-03)
+  Contexts:       Called during agent initialization
   Rollback:       Close socket on failure, retry with backoff
   Design:         Connection pooling and heartbeat monitoring
+  Classification: Process Decomposition
 end note
 
 == MCP-01 CONNECT MCP Server ==
 
-AgentOrchestrator -> MCPClientRuntime: connect(server_config)
-MCPClientRuntime -> External MCP Server: establish stdio/SSE connection
-External MCP Server --> MCPClientRuntime: connection established
-MCPClientRuntime -> External MCP Server: send initialize handshake
-External MCP Server --> MCPClientRuntime: handshake response (capabilities)
-MCPClientRuntime -> MCPClientRuntime: store connection state
-MCPClientRuntime --> AgentOrchestrator: connection ready
+agent -> client : connect(server_config)
+activate client
 
-note over participants
-  Flow:    Establish connection -> handshake -> ready
-  State:   disconnected -> connecting -> connected -> ready
+client -> server : establish stdio/SSE connection
+activate server
+
+break Connection refused
+    server --> client : ConnectionError
+    client --> agent : connection_failed("retry with backoff")
+end
+
+server --> client : connection established
+deactivate server
+
+client -> server : send initialize handshake
+activate server
+server --> client : handshake response (capabilities)
+deactivate server
+
+client -> client : store connection state
+
+client --> agent : connection ready
+deactivate client
+
+note over agent, server
+  Flow:    AgentOrchestrator -> MCPClientRuntime -> establish connection -> handshake -> ready
+  State:   No state change
   Failure: Connection refused/timeout -> retry with exponential backoff
   Success: Agent receives ready connection handle
 end note

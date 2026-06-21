@@ -5,7 +5,7 @@
 ' Purpose:   Clear conversation history
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -21,6 +21,7 @@ note over agent, history
   Excludes:       Session persistence
   Rollback:       N/A
   Design:         Keeps system prompt, clears all other messages
+  Classification: Process Decomposition
 end note
 
 == AGT-04 Reset History ==

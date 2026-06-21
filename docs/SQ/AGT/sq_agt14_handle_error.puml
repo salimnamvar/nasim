@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-14 Handle Error
@@ -26,6 +26,7 @@ note over agent, safety
   Contexts:       Called by AGT-01 when LLM or tool call fails
   Rollback:       Unrecoverable error → terminate task with error event
   Design:         Error classification drives retry, fallback, or abort decisions
+  Classification: Process Decomposition
 end note
 
 == AGT-14 Handle Error ==

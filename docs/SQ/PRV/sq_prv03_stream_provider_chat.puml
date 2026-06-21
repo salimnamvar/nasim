@@ -5,7 +5,7 @@
 ' Purpose:   Streaming LLM chat completion via provider abstraction
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -26,6 +26,7 @@ note over user, api
   Excludes:       Sync chat (PRV-02), tool execution
   Rollback:       Connection drop -> ProviderError
   Design:         Yields str | ToolCall chunks from HTTP stream
+  Classification: Primary Orchestrator
 end note
 
 == PRV-03 STREAM Provider Chat ==

@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CLI-05 Enable Plan Mode
@@ -28,6 +28,7 @@ note over user, agent
   Contexts:       Invoked by Developer via /plan-mode command
   Rollback:       Toggle failure → display error, retain current state
   Design:         Plan mode flag stored in session state; affects AGT-01 loop behavior
+  Classification: Primary Orchestrator
 end note
 
 == CLI-05 Enable Plan Mode ==

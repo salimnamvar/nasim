@@ -4,37 +4,59 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Store cross-session knowledge entries
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — MEM-01 PERSIST Knowledge
 
-' Participants with box colors per C4 layer
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Memory Layer" #E0F2F1
+  participant "MemoryStore" as store
+  participant "MemoryScope" as scope
+  participant "MemoryIndex" as index
+end box
 
-note over participants
-  Scope:          Knowledge persistence across sessions
+note over agent, index
+  Scope:          Store cross-session knowledge entries
   Preconditions:  MemoryStore initialized, scope valid
   Excludes:       Search and recall (MEM-02, MEM-03)
-  Contexts:       Session checkpoint, learning capture
+  Contexts:       Called by TL-19 (PERSIST Memory), session checkpoint
   Rollback:       Transactional write with rollback on index failure
   Design:         Append-only store with index synchronization
+  Classification: Process Decomposition
 end note
 
 == MEM-01 PERSIST Knowledge ==
 
-AgentOrchestrator -> MemoryStore: persist(key, value, scope)
-MemoryStore -> MemoryScope: validate_scope(scope)
-MemoryScope --> MemoryStore: scope_valid
-MemoryStore -> MemoryStore: write_to_disk(key, value)
-MemoryStore -> MemoryIndex: index_entry(key, value, metadata)
-MemoryIndex --> MemoryStore: indexed
-MemoryStore --> AgentOrchestrator: persist_confirmed(key)
+agent -> store : persist(key, value, scope)
+activate store
 
-note over participants
-  Flow:    Validate scope -> write disk -> index -> confirm
-  State:   validating -> writing -> indexing -> persisted
+store -> scope : validate_scope(scope)
+activate scope
+scope --> store : scope_valid
+deactivate scope
+
+store -> store : write_to_disk(key, value)
+
+break Disk write fails
+    store --> agent : PersistError("write failed")
+end
+
+store -> index : index_entry(key, value, metadata)
+activate index
+index --> store : indexed
+deactivate index
+
+store --> agent : persist_confirmed(key)
+deactivate store
+
+note over agent, index
+  Flow:    AgentOrchestrator -> MemoryStore -> validate scope -> write disk -> index -> confirm
+  State:   No state change
   Failure: Disk write fails -> rollback, no index update
   Success: Entry persisted and indexed for search
 end note

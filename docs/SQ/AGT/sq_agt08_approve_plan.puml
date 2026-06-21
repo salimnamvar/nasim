@@ -5,7 +5,7 @@
 ' Purpose:   Execute queued tool calls from plan mode
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -24,6 +24,7 @@ note over agent, registry
   Excludes:       Plan queuing (AGT-07)
   Rollback:       Partial execution on failure
   Design:         Drains pending_calls queue sequentially
+  Classification: Process Decomposition
 end note
 
 == AGT-08 APPROVE Plan ==

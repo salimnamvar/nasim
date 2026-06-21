@@ -6,15 +6,15 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — PLG-02 Load Manifest
 
-box "Tool Layer" #F3E5F5
+box "Plugins Layer" #EDE7F6
   participant "PluginLoader" as loader
 end box
-participant "Filesystem" as fs
+participant "Host Filesystem" as fs
 
 note over participants
   Scope:          Read manifest.yaml and parse plugin metadata

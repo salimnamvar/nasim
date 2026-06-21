@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SRV-05 RETIRE Session
@@ -27,6 +27,7 @@ note over client, store
   Contexts:       Called by HTTPClient via DELETE /v1/sessions/{id}
   Rollback:       404 if session not found
   Design:         ROD: standard delete. Soft delete (retired flag).
+  Classification: Primary Orchestrator
 end note
 
 == SRV-05 RETIRE Session ==

@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CLI-08 List Sessions
@@ -28,6 +28,7 @@ note over user, ssn
   Contexts:       Invoked by Developer via /sessions command
   Rollback:       Read error → display error message
   Design:         Delegates to SSN-03 LIST Sessions for actual retrieval
+  Classification: Primary Orchestrator
 end note
 
 == CLI-08 List Sessions ==

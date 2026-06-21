@@ -4,37 +4,63 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Execute command in OS-level sandbox
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-01 ISOLATE Command
 
-' Participants with box colors per C4 layer
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Sandbox Layer" #F1F8E9
+  participant "SandboxExecutor" as executor
+  participant "SandboxPolicy" as policy
+end box
+box "External" #F5F5F5
+  participant "Sandbox Runtime" as runtime
+end box
 
-note over participants
+note over agent, runtime
   Scope:          Sandboxed command execution
   Preconditions:  SandboxExecutor initialized, policy loaded
   Excludes:       Policy management (SBX-02), monitoring (SBX-03)
-  Contexts:       Tool execution, shell command runs
+  Contexts:       Called by TL-05 (DISPATCH Shell Command)
   Rollback:       Kill sandbox process on timeout or violation
   Design:         Process isolation with namespace and cgroup
+  Classification: Process Decomposition
 end note
 
 == SBX-01 ISOLATE Command ==
 
-AgentOrchestrator -> SandboxExecutor: execute(command, policy)
-SandboxExecutor -> SandboxPolicy: apply_rules(policy)
-SandboxPolicy --> SandboxExecutor: rules_applied
-SandboxExecutor -> SandboxExecutor: create sandbox (namespace, cgroup)
-SandboxExecutor -> SandboxExecutor: execute command in sandbox
-SandboxExecutor --> AgentOrchestrator: execution_result(output, exit_code)
+agent -> executor : execute(command, policy)
+activate executor
 
-note over participants
-  Flow:    Apply policy -> create sandbox -> execute -> return
-  State:   preparing -> executing -> complete
-  Failure: Policy violation -> kill sandbox, return violation error
+executor -> policy : apply_rules(policy)
+activate policy
+policy --> executor : rules_applied
+deactivate policy
+
+executor -> executor : create sandbox (namespace, cgroup)
+executor -> runtime : spawn_process(command)
+activate runtime
+
+break Timeout or resource violation
+    runtime --> executor : timeout/violation error
+    executor --> agent : execution_result(exit_code=124, error="timeout")
+end
+
+runtime --> executor : execution_result(output, exit_code)
+deactivate runtime
+
+executor --> agent : execution_result(output, exit_code)
+deactivate executor
+
+note over agent, runtime
+  Flow:    AgentOrchestrator -> SandboxExecutor -> apply policy -> create sandbox -> execute -> return
+  State:   <back:#F1F8E9>STAGING</back>
+  Failure: Policy violation or timeout -> kill sandbox, return violation error
   Success: Agent receives command output and exit code
 end note
 

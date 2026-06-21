@@ -5,7 +5,7 @@
 ' Purpose:   PageRank ranking with chat-personalization for symbol importance
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -44,6 +44,7 @@ note over user, history
     - Empty graph → return empty ranking
 
   Design:
+  Classification: Primary Orchestrator
     - SymbolRanker runs iterative PageRank on SymbolGraph
     - Chat personalization boosts symbols mentioned in recent conversation
     - Personalization weight is configurable (default 0.3)

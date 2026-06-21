@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SSN-06 Revert Turn
@@ -26,6 +26,7 @@ note over agent, snap
   Contexts:       Called when user requests undo or revert
   Rollback:       Snapshot not found → display error, retain current state
   Design:         Revert replaces current messages with snapshot copy
+  Classification: Process Decomposition
 end note
 
 == SSN-06 Revert Turn ==

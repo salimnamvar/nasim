@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-13 Switch Persona
@@ -26,6 +26,7 @@ note over agent, reg
   Contexts:       Called when user or task requests persona change mid-session
   Rollback:       New persona load fails → retain previous persona
   Design:         Atomic switch: unload current → load new; partial failure retains old
+  Classification: Process Decomposition
 end note
 
 == AGT-13 Switch Persona ==

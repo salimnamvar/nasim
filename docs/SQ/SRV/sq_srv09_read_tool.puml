@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SRV-09 READ Tool
@@ -27,6 +27,7 @@ note over client, registry
   Contexts:       Called by HTTPClient via GET /v1/tools/{name}
   Rollback:       404 if tool not found
   Design:         ROD: standard read. Returns full tool metadata.
+  Classification: Primary Orchestrator
 end note
 
 == SRV-09 READ Tool ==

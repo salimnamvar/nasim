@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-04 Switch Model
@@ -14,7 +14,9 @@ title nasim — RTG-04 Switch Model
 box "CLI Layer" #E8F5E9
   participant "Developer" as dev
 end box
-participant "ModelRouter" as router
+box "Router Layer" #EDE7F6
+  participant "ModelRouter" as router
+end box
 
 note over participants
   Scope:          Change active model via CLI or agent request

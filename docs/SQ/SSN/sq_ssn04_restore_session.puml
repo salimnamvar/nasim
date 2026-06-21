@@ -5,7 +5,7 @@
 ' Purpose:   Resume a previous session by loading its history
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -28,6 +28,7 @@ note over user, agent
   Excludes:       New session creation
   Rollback:       No session found -> start fresh
   Design:         --continue loads latest; --session loads by ID
+  Classification: Primary Orchestrator
 end note
 
 == SSN-04 Resume Session ==

@@ -5,7 +5,7 @@
 ' Purpose:   Summarize old message exchanges into compact form
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -23,6 +23,7 @@ note over compactor, provider
   Excludes:       Budget tracking, message selection
   Rollback:       Empty summary -> use truncated raw content
   Design:         Uses same provider as main agent for consistency
+  Classification: Process Decomposition
 end note
 
 == CTX-03 Summarize Old Exchanges ==

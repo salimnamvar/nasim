@@ -4,44 +4,55 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Monitor sandboxed process for timeout and resource usage
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-03 MONITOR Process
 
-' Participants with box colors per C4 layer
+box "Sandbox Layer" #F1F8E9
+  participant "SandboxExecutor" as executor
+  participant "SandboxMonitor" as monitor
+end box
 
-note over participants
+note over executor, monitor
   Scope:          Process monitoring within sandbox
   Preconditions:  Sandbox process running (SBX-01)
   Excludes:       Resource limiting (SBX-04)
   Contexts:       Long-running commands, background processes
   Rollback:       Kill process on timeout, enforce resource limits
   Design:         Watchdog thread with configurable intervals
+  Classification: Process Decomposition
 end note
 
 == SBX-03 MONITOR Process ==
 
-SandboxExecutor -> SandboxMonitor: start_watch(process_id, limits)
-SandboxMonitor -> SandboxMonitor: poll process status
-SandboxMonitor -> SandboxMonitor: check timeout elapsed
-SandboxMonitor -> SandboxMonitor: check resource usage (CPU, memory)
-alt timeout exceeded
-  SandboxMonitor -> SandboxExecutor: kill_process(SIGKILL)
-  SandboxExecutor --> SandboxMonitor: process_killed
-else resource limit exceeded
-  SandboxMonitor -> SandboxExecutor: enforce_limit(violation)
-  SandboxExecutor --> SandboxMonitor: limit_enforced
-else normal completion
-  SandboxMonitor -> SandboxMonitor: record final stats
-end
-SandboxMonitor --> SandboxExecutor: watch_complete(stats)
+executor -> monitor : start_watch(process_id, limits)
+activate monitor
 
-note over participants
-  Flow:    Start watch -> poll -> enforce limits -> complete
-  State:   watching -> enforcing -> complete
+loop while process running
+    monitor -> monitor : poll process status
+    monitor -> monitor : check timeout elapsed
+    monitor -> monitor : check resource usage (CPU, memory)
+end
+
+alt timeout exceeded
+    monitor -> executor : kill_process(SIGKILL)
+    executor --> monitor : process_killed
+else resource limit exceeded
+    monitor -> executor : enforce_limit(violation)
+    executor --> monitor : limit_enforced
+else normal completion
+    monitor -> monitor : record final stats
+end
+
+monitor --> executor : watch_complete(stats)
+deactivate monitor
+
+note over executor, monitor
+  Flow:    SandboxExecutor -> SandboxMonitor -> poll -> enforce limits -> complete
+  State:   No state change
   Failure: Timeout or resource violation -> kill/enforce
   Success: Executor receives process stats and completion status
 end note

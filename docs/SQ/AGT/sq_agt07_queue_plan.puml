@@ -5,7 +5,7 @@
 ' Purpose:   Queue tool calls in plan mode without executing
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -21,6 +21,7 @@ note over agent, plan
   Excludes:       Tool execution, permission checks
   Rollback:       N/A — queued calls are never executed until approved
   Design:         Tool calls displayed as plan, not executed
+  Classification: Process Decomposition
 end note
 
 == AGT-07 Queue Plan ==

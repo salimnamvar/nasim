@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CLI-07 Switch Model
@@ -31,6 +31,7 @@ note over user, rtg
   Contexts:       Invoked by Developer via /model command
   Rollback:       Model not found → display error, retain current model
   Design:         Delegates to RTG-04 SWITCH Model for actual provider switch
+  Classification: Primary Orchestrator
 end note
 
 == CLI-07 Switch Model ==

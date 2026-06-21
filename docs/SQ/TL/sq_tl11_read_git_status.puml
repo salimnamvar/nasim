@@ -5,7 +5,7 @@
 ' Purpose:   Git operations: status, diff, commit
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -23,6 +23,7 @@ note over git
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Git error returned as error string
   Design:         Delegates to git CLI via subprocess
+  Classification: Process Decomposition
 end note
 
 registry -> git : execute(action, args)

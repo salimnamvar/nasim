@@ -1,45 +1,45 @@
 @startuml sq_hk06_validate_hook_result
 ' ============================================================
-' Title:     HK-06 — Validate Hook Result
+' Title:     HK-06 — VALIDATE Hook Result
 ' Boundary:  nasim code agent
 ' Purpose:   Validate a HookResult for correctness and safety
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — HK-06 Validate Hook Result
+title nasim — HK-06 VALIDATE Hook Result
 
 box "Hooks Layer" #FFFDE7
-  participant "HookManager" as hm
+  participant "HookManager" as hooks
 end box
 
-note over participants
+note over hooks
   Scope:          Validate a HookResult for allow/deny/modify correctness
   Preconditions:  HookResult produced by a hook
   Excludes:       Hook execution, hook registration
-  Contexts:       Called internally by HookManager
+  Contexts:       Called internally by HookManager after each hook execution
   Rollback:       Invalid result treated as DENY
   Design:         Ensures result schema compliance
   Classification: Process Decomposition
 end note
 
-== HK-06 Validate Hook Result ==
+== HK-06 VALIDATE Hook Result ==
 
-hm -> hm : validate(hook_result)
+hooks -> hooks : validate(hook_result)
 
 break Result schema invalid
-    hm --> hm : treat as DENY
+    hooks --> hooks : treat as DENY
 end
 
 break action not in [ALLOW, DENY, MODIFY]
-    hm --> hm : treat as DENY
+    hooks --> hooks : treat as DENY
 end
 
-hm --> hm : validated result
+hooks --> hooks : validated result
 
-note over participants
+note over hooks
   Flow:    HookManager -> validate HookResult -> allow/deny/modify -> return validated result
   State:   No state change
   Failure: Invalid schema or unknown action -> treated as DENY

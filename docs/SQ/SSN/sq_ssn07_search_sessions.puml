@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SSN-07 Search Sessions
@@ -26,6 +26,7 @@ note over agent, fts
   Contexts:       Called when user searches past conversations
   Rollback:       Index missing → fallback to linear scan
   Design:         FTS5 for fast search; results ranked by relevance
+  Classification: Process Decomposition
 end note
 
 == SSN-07 Search Sessions ==

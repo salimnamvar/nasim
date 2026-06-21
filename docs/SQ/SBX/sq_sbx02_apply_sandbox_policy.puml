@@ -4,37 +4,55 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Load and apply sandbox security policy
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-02 APPLY Sandbox Policy
 
-' Participants with box colors per C4 layer
+box "Sandbox Layer" #F1F8E9
+  participant "SandboxExecutor" as executor
+  participant "SandboxPolicy" as policy
+end box
 
-note over participants
+note over executor, policy
   Scope:          Sandbox policy loading and application
   Preconditions:  Policy file exists, SandboxPolicy initialized
   Excludes:       Command execution (SBX-01), monitoring (SBX-03)
   Contexts:       Called by SBX-01 before command execution
   Rollback:       Revert to default policy on validation failure
   Design:         Declarative policy with rule inheritance
+  Classification: Process Decomposition
 end note
 
 == SBX-02 APPLY Sandbox Policy ==
 
-AgentOrchestrator -> SandboxPolicy: load_policy(policy_path)
-SandboxPolicy -> SandboxPolicy: read policy file
-SandboxPolicy -> SandboxPolicy: validate rules
-SandboxPolicy -> SandboxPolicy: apply to sandbox instance
-SandboxPolicy --> AgentOrchestrator: policy_applied(rules_count)
+executor -> policy : load_policy(policy_path)
+activate policy
 
-note over participants
-  Flow:    Read policy -> validate -> apply -> confirm
-  State:   loading -> validating -> applied
+policy -> policy : read policy file
+
+break Policy file not found
+    policy --> executor : default policy applied
+end
+
+policy -> policy : validate rules
+
+break Invalid policy rules
+    policy --> executor : revert to defaults, log error
+end
+
+policy -> policy : apply to sandbox instance
+
+policy --> executor : policy_applied(rules_count)
+deactivate policy
+
+note over executor, policy
+  Flow:    SandboxExecutor -> SandboxPolicy -> read policy -> validate -> apply -> confirm
+  State:   No state change
   Failure: Invalid policy -> revert to defaults, log error
-  Success: Agent receives policy application confirmation
+  Success: Executor receives policy application confirmation
 end note
 
 @enduml

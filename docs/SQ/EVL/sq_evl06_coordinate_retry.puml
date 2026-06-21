@@ -5,7 +5,7 @@
 ' Purpose:   Retry with feedback on failure
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -47,6 +47,7 @@ note over user, budget
     - Turn budget exhausted → abort, report to user
 
   Design:
+  Classification: Primary Orchestrator
     - RetryCoordinator manages retry count and limits
     - FeedbackInjector formats failure details for next LLM call
     - Backup restored before retry attempt

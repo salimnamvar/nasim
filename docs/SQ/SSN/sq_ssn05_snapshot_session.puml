@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SSN-05 Snapshot Session
@@ -26,6 +26,7 @@ note over agent, snap
   Contexts:       Called before risky operations or on explicit request
   Rollback:       Snapshot failure → log warning, continue without snapshot
   Design:         Snapshot stored as immutable copy; supports revert via SSN-06
+  Classification: Process Decomposition
 end note
 
 == SSN-05 Snapshot Session ==

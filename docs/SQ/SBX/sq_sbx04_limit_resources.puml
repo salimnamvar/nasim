@@ -4,36 +4,49 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Enforce CPU, memory, and disk quotas per sandbox instance
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-04 LIMIT Resources
 
-' Participants with box colors per C4 layer
+box "Sandbox Layer" #F1F8E9
+  participant "SandboxExecutor" as executor
+  participant "ResourceLimiter" as limiter
+end box
 
-note over participants
+note over executor, limiter
   Scope:          Resource quota enforcement via cgroups
   Preconditions:  Sandbox instance created, limits defined
   Excludes:       Process monitoring (SBX-03)
   Contexts:       Called by SandboxExecutor during sandbox creation
   Rollback:       Remove cgroup on setup failure
   Design:         Linux cgroup v2 with CPU, memory, disk I/O limits
+  Classification: Process Decomposition
 end note
 
 == SBX-04 LIMIT Resources ==
 
-SandboxExecutor -> ResourceLimiter: set_limits(cgroup_id, quotas)
-ResourceLimiter -> ResourceLimiter: create cgroup v2 hierarchy
-ResourceLimiter -> ResourceLimiter: set cpu.max (CPU quota)
-ResourceLimiter -> ResourceLimiter: set memory.max (memory limit)
-ResourceLimiter -> ResourceLimiter: set io.max (disk I/O limit)
-ResourceLimiter --> SandboxExecutor: limits_applied(cgroup_id)
+executor -> limiter : set_limits(cgroup_id, quotas)
+activate limiter
 
-note over participants
-  Flow:    Create cgroup -> set CPU -> set memory -> set I/O -> confirm
-  State:   creating -> configuring -> applied
+limiter -> limiter : create cgroup v2 hierarchy
+
+break Cgroup setup fails
+    limiter --> executor : CgroupError("setup failed")
+end
+
+limiter -> limiter : set cpu.max (CPU quota)
+limiter -> limiter : set memory.max (memory limit)
+limiter -> limiter : set io.max (disk I/O limit)
+
+limiter --> executor : limits_applied(cgroup_id)
+deactivate limiter
+
+note over executor, limiter
+  Flow:    SandboxExecutor -> ResourceLimiter -> create cgroup -> set CPU -> set memory -> set I/O -> confirm
+  State:   No state change
   Failure: Cgroup setup fails -> remove partial cgroup, return error
   Success: Executor receives cgroup with enforced limits
 end note

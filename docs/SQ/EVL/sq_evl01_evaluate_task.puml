@@ -1,12 +1,12 @@
 @startuml sq_evl01_evaluate_task
 ' ============================================================
-' Title:     EVL-01 — Evaluate Task
-' Boundary:  nasim code agent CLI
-' Purpose:   Shell exit code verification for edit success
+' Title:     EVL-01 — EVALUATE Task
+' Boundary:  nasim code agent
+' Purpose:   Evaluate task completion via success checks and quality signals
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 actor "Developer" as user
@@ -23,37 +23,16 @@ box "Tool Layer" #F3E5F5
 end box
 
 note over user, tool
-  Scope:
-    - evl01 RUN Success Checks — shell exit code verification
-
-  Preconditions:
-    - EDT-05 completed (edit applied and user-approved)
-    - Shell environment available
-    - Test/lint commands configured in project
-
-  Contexts:
-    - Called after edit application to verify correctness
-    - Feeds into EVL-03 (Coordinate Retry) on failure
-
-  Excludes:
-    - LLM-based review (handled by EVL-02)
-    - Repetition detection (handled by EVL-04)
-
-  Rollback:
-    - Check failure → report to EVL-03 for retry coordination
-
-  Design:
-    - SuccessChecker runs configured check commands
-    - Captures exit codes, stdout, stderr
-    - Aggregate pass/fail across all checks
-    - Timeout per check (default 30s)
-
-  Returns:
-    - Success: CheckResult with pass/fail and output
-    - Failure: CheckResult with failure details
+  Scope:          Evaluate task completion via success checks and quality signals
+  Preconditions:  EDT-05 completed (edit applied and user-approved), shell environment available
+  Excludes:       LLM-based review (EVL-04), repetition detection (EVL-08)
+  Contexts:       Called after edit application to verify correctness; feeds into EVL-06 (COORDINATE Retry) on failure
+  Rollback:       Check failure -> report to EVL-06 for retry coordination
+  Design:         SuccessChecker runs configured check commands with timeout; aggregate pass/fail across all checks
+  Classification: Primary Orchestrator
 end note
 
-== evl01 RUN Success Checks ==
+== EVL-01 EVALUATE Task ==
 
 agent -> checker : RUN_CHECKS(file_path, check_commands[])
 activate checker
@@ -77,22 +56,10 @@ checker --> agent : CheckResult(passed, results[])
 deactivate checker
 
 note over user, tool
-  Flow:
-    - AgentOrchestrator → SuccessChecker → [ShellRunner]* → CheckResult
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → RUNNING → AGGREGATING → DONE
-
-  Failure:
-    - Any check fails → CheckResult(passed=false)
-
-  Success:
-    - All checks pass → CheckResult(passed=true)
-
-  Key invariants:
-    - Each check runs with timeout protection
-    - Exit code 0 = success, non-zero = failure
-    - Results aggregated across all checks
+  Flow:    AgentOrchestrator -> SuccessChecker -> [ShellRunner]* -> CheckResult
+  State:   <back:#ECEFF1>IDLE</back> -> <back:#F9FBE7>EVALUATING</back> -> <back:#ECEFF1>IDLE</back>
+  Failure: Any check fails -> CheckResult(passed=false)
+  Success: All checks pass -> CheckResult(passed=true)
 end note
 
 @enduml

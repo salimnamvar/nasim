@@ -5,7 +5,7 @@
 ' Purpose:   Fetch URL content and convert to markdown
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -23,6 +23,7 @@ note over fetch
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       HTTP error returned as error string
   Design:         Uses httpx + html2text for conversion
+  Classification: Process Decomposition
 end note
 
 registry -> fetch : execute(url, timeout)

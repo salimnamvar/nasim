@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-15 Dispatch Safety Pipeline
@@ -28,6 +28,7 @@ note over agent, perm
   Contexts:       Called by AGT-02 before every tool dispatch
   Rollback:       Any stage fails → block tool execution, report violation
   Design:         Pipeline stages run sequentially; first failure short-circuits
+  Classification: Process Decomposition
 end note
 
 == AGT-15 Dispatch Safety Pipeline ==

@@ -5,7 +5,7 @@
 ' Purpose:   Execute edit via selected strategy
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -46,6 +46,7 @@ note over user, gate
     - Permission denied → abort, return error
 
   Design:
+  Classification: Primary Orchestrator
     - EditApplier reads original, applies strategy, writes result
     - Backup created before modification (atomic swap)
     - PermissionGate consulted before write

@@ -4,36 +4,57 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Automatically commit changes after edit operations
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — VCS-04 AUTO-COMMIT
 
-' Participants with box colors per C4 layer
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Git Layer" #E8EAF6
+  participant "GitIntegration" as integration
+  participant "GitStatus" as status
+  participant "GitCommit" as commit
+end box
 
-note over participants
+note over agent, commit
   Scope:          Automatic commit after file edits
   Preconditions:  File edits completed, working tree dirty
   Excludes:       Manual commit (VCS-02)
   Contexts:       Post-edit hook, batch operation cleanup
   Rollback:       Skip commit if no changes detected
   Design:         Debounced auto-commit with conventional message generation
+  Classification: Process Decomposition
 end note
 
 == VCS-04 AUTO-COMMIT ==
 
-AgentOrchestrator -> GitIntegration: auto_commit(edit_context)
-GitIntegration -> GitStatus: check_dirty()
-GitStatus --> GitIntegration: is_dirty
-GitIntegration -> GitCommit: commit(generated_message, files)
-GitCommit --> GitIntegration: commit_result(hash)
-GitIntegration --> AgentOrchestrator: auto_commit_complete(hash)
+agent -> integration : auto_commit(edit_context)
+activate integration
 
-note over participants
-  Flow:    Check dirty -> generate message -> commit -> return
-  State:   checking -> committing -> committed
+integration -> status : check_dirty()
+activate status
+status --> integration : is_dirty
+deactivate status
+
+break No changes detected
+    integration --> agent : auto_commit_complete(noop)
+end
+
+integration -> commit : commit(generated_message, files)
+activate commit
+commit --> integration : commit_result(hash)
+deactivate commit
+
+integration --> agent : auto_commit_complete(hash)
+deactivate integration
+
+note over agent, commit
+  Flow:    AgentOrchestrator -> GitIntegration -> check dirty -> generate message -> commit -> return
+  State:   No state change
   Failure: No changes -> skip commit, return noop
   Success: Agent receives commit hash from auto-commit
 end note

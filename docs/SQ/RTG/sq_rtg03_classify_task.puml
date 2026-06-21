@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-03 Classify Task
@@ -14,7 +14,9 @@ title nasim — RTG-03 Classify Task
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-participant "ModelRouter" as router
+box "Router Layer" #EDE7F6
+  participant "ModelRouter" as router
+end box
 
 note over participants
   Scope:          Classify incoming task and select optimal model

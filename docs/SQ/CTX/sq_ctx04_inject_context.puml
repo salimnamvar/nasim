@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CTX-04 Inject Context
@@ -29,6 +29,7 @@ note over pipe, agent
   Contexts:       Called before LLM call to enrich prompt context
   Rollback:       Injection failure → proceed with existing context
   Design:         InjectionProcessor queries RepoIndex for relevant code/docs
+  Classification: Process Decomposition
 end note
 
 == CTX-04 Inject Context ==

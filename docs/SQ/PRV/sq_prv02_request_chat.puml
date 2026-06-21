@@ -5,7 +5,7 @@
 ' Purpose:   Synchronous LLM chat completion via provider abstraction
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -26,6 +26,7 @@ note over user, api
   Excludes:       Streaming (PRV-03), tool parsing
   Rollback:       HTTP error raised as ProviderError
   Design:         Uses httpx.AsyncClient with timeout
+  Classification: Primary Orchestrator
 end note
 
 == PRV-02 Call Provider Chat ==

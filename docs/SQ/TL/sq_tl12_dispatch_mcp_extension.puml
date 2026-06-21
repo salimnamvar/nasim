@@ -5,7 +5,7 @@
 ' Purpose:   Invoke tools from MCP server extensions
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -25,6 +25,7 @@ note over mcp
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       MCP error returned as error string
   Design:         Wraps MCP tools as nasim Tool instances
+  Classification: Process Decomposition
 end note
 
 registry -> mcp : execute(tool_name, args)

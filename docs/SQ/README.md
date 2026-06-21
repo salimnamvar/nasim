@@ -1,6 +1,6 @@
 # nasim — SQ Inventory
 
-Sequence diagrams organised by UC group. 148 diagrams across 21 groups.
+Sequence diagrams organised by UC group. 149 diagrams across 21 groups.
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
 Back to [docs/](../README.md).
@@ -26,12 +26,12 @@ Back to [docs/](../README.md).
 | SAF | Safety — permission checks and user approval | 3 | `SAF/` |
 | SBX | Sandbox — OS-level process isolation | 4 | `SBX/` |
 | SRV | HTTP Server — REST API, SSE streaming | 11 | `SRV/` |
-| SSN | Session — persistence and resumption | 8 | `SSN/` |
+| SSN | Session — persistence and resumption | 9 | `SSN/` |
 | TL | Tool Layer — all tool implementations | 22 | `TL/` |
 | VCS | Version Control — Git status, diff, commit | 4 | `VCS/` |
 | WRL | Wire Log — append-only event store, fork, checkpoint | 5 | `WRL/` |
 
-**Total: 148 SQ diagrams across 21 groups**
+**Total: 149 SQ diagrams across 21 groups**
 
 ## SQ Diagram Convention
 

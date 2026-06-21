@@ -5,7 +5,7 @@
 ' Purpose:   Find files by name pattern with depth limit
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -22,6 +22,7 @@ note over find
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Error string returned to LLM
   Design:         Uses os.walk with depth limit
+  Classification: Process Decomposition
 end note
 
 registry -> find : execute(name_pattern, path, max_depth)

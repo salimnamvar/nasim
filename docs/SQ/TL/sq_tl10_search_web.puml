@@ -5,7 +5,7 @@
 ' Purpose:   Search the web for information
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -23,6 +23,7 @@ note over search
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Backend error returned as error string
   Design:         Configurable backend: DuckDuckGo, Brave, SerpAPI
+  Classification: Process Decomposition
 end note
 
 registry -> search : execute(query, num_results)

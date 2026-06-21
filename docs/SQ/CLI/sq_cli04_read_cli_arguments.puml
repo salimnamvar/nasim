@@ -5,7 +5,7 @@
 ' Purpose:   Startup argument parsing and config initialization
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -25,6 +25,7 @@ note over user, cfg
   Excludes:       Runtime input processing (CLI-01)
   Rollback:       Invalid args -> print usage -> exit(1)
   Design:         Args override config; layered resolution
+  Classification: Primary Orchestrator
 end note
 
 == CLI-04 Parse CLI Arguments ==

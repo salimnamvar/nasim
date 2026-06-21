@@ -1,39 +1,67 @@
 @startuml sq_hk03_dispatch_post_tool_hook
 ' ============================================================
-' Title:     nasim — SQ: Dispatch Post-Tool Hook
-' Boundary:  nasim code agent CLI + HTTP API
+' Title:     HK-03 — DISPATCH Post-Tool Hook
+' Boundary:  nasim code agent
 ' Purpose:   Execute hooks after tool execution
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
-' Review:    —
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SQ: Post-Tool Hook (HK-03)
+title nasim — HK-03 DISPATCH Post-Tool Hook
 
-participant "AgentOrchestrator" as agent
-participant "ToolRegistry" as tools
-participant "HookManager" as hooks
-participant "Hook" as hook
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as tools
+end box
+box "Hooks Layer" #FFFDE7
+  participant "HookManager" as hooks
+  participant "Hook" as hook
+end box
 
-== Post-Tool Hook ==
+note over agent, hook
+  Scope:          Execute hooks after tool execution
+  Preconditions:  Tool execution completed, hooks registered for PostToolCall event
+  Excludes:       Pre-tool hooks (HK-02), LLM hooks (HK-04/05)
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call) after tool execution
+  Rollback:       Hook failure logged; pipeline continues
+  Design:         Priority-ordered execution; short-circuit on deny
+  Classification: Process Decomposition
+end note
+
+== HK-03 DISPATCH Post-Tool Hook ==
 
 agent -> tools : execute(tool_name, args)
 activate tools
 tools --> agent : ToolResult
 deactivate tools
 
-agent -> hooks : execute_post_tool(tool_name, result)
+agent -> hooks : dispatch(PostToolCall, tool_name, result)
 activate hooks
+hooks -> hooks : find hooks for PostToolCall
 
-loop for each registered hook
-    hooks -> hook : handler(tool_name, result)
+loop for each hook in priority order
+    hooks -> hook : execute(tool_name, result)
     activate hook
-    hook --> hooks : HookResult(allow=true, modified_result=...)
+    hook --> hooks : HookResult(action, data?)
     deactivate hook
+
+    break action == DENY
+        hooks --> agent : HookResult(action=DENY, reason)
+    end
 end
 
-hooks --> agent : HookResult
+hooks --> agent : HookResult(action=ALLOW, modified_result?)
 deactivate hooks
+
+note over agent, hook
+  Flow:    Tool execution -> AgentOrchestrator -> HookManager -> find hooks -> execute in priority order -> return HookResult
+  State:   <back:#FFFDE7>HOOK_RUNNING</back>
+  Failure: Hook failure logged; remaining hooks still execute
+  Success: HookResult returned to agent
+end note
 
 @enduml

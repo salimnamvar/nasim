@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-11 Delegate to Persona
@@ -26,6 +26,7 @@ note over agent, reg
   Contexts:       Called by AgentOrchestrator when task requires specialized behavior
   Rollback:       Persona not found → fallback to default persona
   Design:         Persona selection based on task tags or explicit request
+  Classification: Process Decomposition
 end note
 
 == AGT-11 Delegate to Persona ==

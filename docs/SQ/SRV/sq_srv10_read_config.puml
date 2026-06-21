@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SRV-10 READ Config
@@ -27,6 +27,7 @@ note over client, config
   Contexts:       Called by HTTPClient via GET /v1/config
   Rollback:       N/A (read-only)
   Design:         ROD: standard read. Returns sanitized config (no secrets).
+  Classification: Primary Orchestrator
 end note
 
 == SRV-10 READ Config ==

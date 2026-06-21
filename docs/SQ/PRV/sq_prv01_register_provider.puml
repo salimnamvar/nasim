@@ -5,7 +5,7 @@
 ' Purpose:   Provider instantiation from config
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -26,6 +26,7 @@ note over user, proto
   Excludes:       Provider chat/stream (PRV-02/03)
   Rollback:       Unknown provider -> ConfigError
   Design:         Factory pattern; one class per backend
+  Classification: Primary Orchestrator
 end note
 
 == PRV-01 Initialize Provider ==

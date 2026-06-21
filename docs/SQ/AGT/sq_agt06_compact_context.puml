@@ -5,7 +5,7 @@
 ' Purpose:   Context compaction when token budget exceeded
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -22,6 +22,7 @@ note over agent, compactor
   Excludes:       Token tracking (CTX-01)
   Rollback:       Truncate oldest messages as fallback
   Design:         Secondary LLM call to summarize old exchanges
+  Classification: Process Decomposition
 end note
 
 == AGT-06 COMPACT Context ==

@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SRV-08 LIST Tools
@@ -27,6 +27,7 @@ note over client, registry
   Contexts:       Called by HTTPClient via GET /v1/tools
   Rollback:       N/A (read-only)
   Design:         ROD: standard list. Returns tool metadata.
+  Classification: Primary Orchestrator
 end note
 
 == SRV-08 LIST Tools ==

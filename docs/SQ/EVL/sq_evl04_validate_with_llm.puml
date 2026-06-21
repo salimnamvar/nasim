@@ -5,7 +5,7 @@
 ' Purpose:   LLM-as-judge scoring for edit quality
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -45,6 +45,7 @@ note over user, fs
     - LLM call failure → skip review, proceed with exit code results only
 
   Design:
+  Classification: Primary Orchestrator
     - LLMReviewer sends original + edited file to Provider
     - Prompt asks for quality score (1-10) and feedback
     - Score below threshold triggers retry via EVL-03

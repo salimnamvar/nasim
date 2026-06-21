@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-12 Load Persona
@@ -26,6 +26,7 @@ note over agent, reg
   Contexts:       Called by AGT-11 or directly by AgentOrchestrator
   Rollback:       Config parse error → log error, retain current persona
   Design:         Persona config includes system prompt, allowed tools, model override
+  Classification: Process Decomposition
 end note
 
 == AGT-12 Load Persona ==

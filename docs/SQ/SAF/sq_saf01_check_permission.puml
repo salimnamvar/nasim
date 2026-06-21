@@ -5,7 +5,7 @@
 ' Purpose:   Per-tool safety check before execution
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -24,6 +24,7 @@ note over agent, registry
   Excludes:       User approval prompt (SAF-02)
   Rollback:       Rejected -> skip tool execution
   Design:         tool.safe flag determines check behavior
+  Classification: Process Decomposition
 end note
 
 == SAF-01 CHECK Tool Permission ==

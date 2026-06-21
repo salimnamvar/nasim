@@ -5,7 +5,7 @@
 ' Purpose:   REPL input loop delegates to agent and renders output
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -26,6 +26,7 @@ note over user, agent
   Excludes:       Slash commands (CLI-02), session persistence
   Rollback:       Error -> display error -> return to IDLE
   Design:         Events emitted by agent, rendered by Renderer
+  Classification: Primary Orchestrator
 end note
 
 == CLI-01 PROCESS User Input ==

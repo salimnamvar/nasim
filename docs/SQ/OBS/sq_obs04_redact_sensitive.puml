@@ -5,7 +5,7 @@
 ' Purpose:   Strip secrets before emission to structured logs or wire
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -38,6 +38,7 @@ note over logger, config
     - Wire append (WRL-01)
 
   Design:
+  Classification: Primary Orchestrator
     - LogRedactor applies regex patterns to record fields
     - Global rules: env vars, API keys, .env content, passwords
     - Per-project rules: custom patterns from config

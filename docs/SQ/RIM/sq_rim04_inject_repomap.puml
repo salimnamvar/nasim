@@ -5,7 +5,7 @@
 ' Purpose:   Token-budgeted repo-map injection into LLM context
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -46,6 +46,7 @@ note over user, history
     - Empty index → inject empty map with warning
 
   Design:
+  Classification: Primary Orchestrator
     - RepoMapInjector selects top-ranked symbols within token budget
     - Budget split: 60% structure overview, 25% relevant snippets, 15% reserves
     - Output formatted as structured text for LLM consumption

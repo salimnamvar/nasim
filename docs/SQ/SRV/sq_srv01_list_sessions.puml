@@ -12,8 +12,13 @@
 title nasim — SRV-01 LIST Sessions
 
 actor "HTTPClient" as client
-participant "ServerRouter" as router
-participant "SessionStore" as store
+
+box "Server Layer" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Session Layer" #F3E5F5
+  participant "SessionStore" as store
+end box
 
 note over client, store
   Scope:          List all sessions with pagination
@@ -22,6 +27,7 @@ note over client, store
   Contexts:       Called by HTTPClient via GET /v1/sessions
   Rollback:       None (read-only operation)
   Design:         CSR: Controller(ServerRouter) -> Repository(SessionStore). ROD: standard list (AIP-136)
+  Classification: Primary Orchestrator
 end note
 
 == SRV-01 LIST Sessions ==

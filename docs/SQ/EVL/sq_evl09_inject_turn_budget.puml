@@ -5,7 +5,7 @@
 ' Purpose:   Turn budget injection per-turn
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -42,6 +42,7 @@ note over user, history
     - Budget exceeded → force task completion
 
   Design:
+  Classification: Primary Orchestrator
     - TurnBudgetInjector computes remaining budget
     - Injects formatted status into system message
     - Warns when budget drops below threshold (20%)

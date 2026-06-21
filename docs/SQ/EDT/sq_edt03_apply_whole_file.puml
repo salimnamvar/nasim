@@ -5,7 +5,7 @@
 ' Purpose:   Verify edit applied correctly
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -43,6 +43,7 @@ note over user, tool
     - Validation failure → trigger revert via backup_path
 
   Design:
+  Classification: Primary Orchestrator
     - EditValidator reads edited file and compares with expected
     - Syntax check via language-specific linter (if available)
     - Diff verification ensures intended changes applied

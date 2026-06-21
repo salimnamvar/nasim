@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SRV-06 DISPATCH Message
@@ -42,6 +42,7 @@ note over client, trace
   Contexts:       Called by HTTPClient via POST /v1/sessions/{id}:dispatch
   Rollback:       404 if session not found, 400 if invalid body, 502 if agent fails
   Design:         CSR: Controller(ServerRouter) -> Service(AgentService) -> Repository(SessionStore). ROD: custom method :dispatch (AIP-136)
+  Classification: Primary Orchestrator
 end note
 
 == SRV-06 DISPATCH Message ==

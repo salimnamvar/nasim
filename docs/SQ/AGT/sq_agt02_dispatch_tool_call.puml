@@ -5,7 +5,7 @@
 ' Purpose:   Tool dispatch with permission gate check
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -20,6 +20,7 @@ box "Tool Layer" #F3E5F5
   participant "Tool" as tool
 end box
 box "Safety Layer" #FFF9C4
+  participant "SafetyCoordinator" as safety
 end box
 
 note over user, tool
@@ -46,6 +47,7 @@ note over user, tool
     - Tool execution error → ToolResult(success=false, error=exception message)
 
   Design:
+  Classification: Primary Orchestrator
     - PermissionGate checks tool.safe flag against safety_mode
     - In "ask" mode: unsafe tools return AWAITING_APPROVAL event
     - In "auto" mode: all tools execute without prompt
@@ -53,10 +55,6 @@ note over user, tool
     - ToolRegistry.find() by tool name from LLM tool_call
     - ToolResult is structured (success, content, error) — never raw string
 
-  Returns:
-    - Success: ToolResult with content
-    - Failure: ToolResult with error description
-    - Blocked: ToolResult(success=false, error="permission denied")
 end note
 
 == agt02 DISPATCH Tool Call ==

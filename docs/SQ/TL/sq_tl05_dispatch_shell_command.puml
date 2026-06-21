@@ -5,7 +5,7 @@
 ' Purpose:   Shell command execution with timeout
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -30,6 +30,7 @@ note over user, shell
   Excludes:       File operations
   Rollback:       Error string returned to LLM
   Design:         subprocess.run with shell=True, configurable timeout
+  Classification: Primary Orchestrator
   Safety:         Unsafe tool — requires permission check (SAF-01)
 end note
 

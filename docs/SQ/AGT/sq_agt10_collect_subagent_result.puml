@@ -6,7 +6,7 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-10 Collect Subagent Result
@@ -26,6 +26,7 @@ note over agent, store
   Contexts:       Called after AGT-09 when parent needs child result
   Rollback:       Timeout → cancel child, return partial result
   Design:         Blocking wait with configurable timeout; result aggregated into parent context
+  Classification: Process Decomposition
 end note
 
 == AGT-10 Collect Subagent Result ==
