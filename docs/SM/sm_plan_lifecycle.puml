@@ -53,9 +53,9 @@ BUILDING --> EMPTY : AGT-07 /plan off
 QUEUED --> APPROVED : AGT-08 /approve
 QUEUED --> REJECTED : AGT-08 user rejects
 APPROVED --> EXECUTING : AGT-08 execution starts
-EXECUTING --> COMPLETED : implicit: last step executed
-EXECUTING --> EMPTY : Execution error, plan discarded
-COMPLETED --> [*]
-REJECTED --> [*]
+EXECUTING --> COMPLETED : AGT-01 last step executed
+EXECUTING --> EMPTY : AGT-14 execution error, plan discarded
+COMPLETED --> [*] : AGT-01 plan completed
+REJECTED --> [*] : AGT-08 plan rejected
 
 @enduml

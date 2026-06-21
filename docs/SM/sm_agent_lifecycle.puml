@@ -21,7 +21,7 @@ skinparam state {
   FontColor #000000
 }
 
-[*] --> IDLE : Startup / AGT-01 init
+[*] --> IDLE : AGT-01 Startup
 
 state "IDLE" as IDLE #ECEFF1
 IDLE : Agent waiting for user input.

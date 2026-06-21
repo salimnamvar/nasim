@@ -43,6 +43,8 @@
 | SSN-06 | SSN | REVERT Turn | SessionVersioning |
 | SSN-07 | SSN | SEARCH Sessions | SessionSearch |
 | SSN-08 | SSN | BRANCH Session | SessionFork |
+| SSN-09 | SSN | DELETE Session | SessionStore |
+| SSN-09 | SSN | DELETE Session | SessionStore |
 | SAF-01 | SAF | CHECK Permission | SafetyCoordinator |
 | SAF-02 | SAF | REQUEST Approval | SafetyCoordinator |
 | SAF-03 | SAF | APPLY Safety Mode | SafetyCoordinator |
@@ -79,11 +81,11 @@
 | TL-21 | TL | INSERT Plan | PlanTool |
 | TL-22 | TL | UPDATE Plan | PlanTool |
 | SRV-01 | SRV | LIST Sessions | ServerRouter |
-| SRV-02 | SRV | INSERT Session | ServerRouter |
+| SRV-02 | SRV | CREATE Session | ServerRouter |
 | SRV-03 | SRV | READ Session | ServerRouter |
 | SRV-04 | SRV | UPDATE Session | ServerRouter |
-| SRV-05 | SRV | RETIRE Session | ServerRouter |
-| SRV-06 | SRV | DISPATCH Message | ServerRouter |
+| SRV-05 | SRV | DELETE Session | ServerRouter |
+| SRV-06 | SRV | SEND Message | ServerRouter |
 | SRV-07 | SRV | LIST Messages | ServerRouter |
 | SRV-08 | SRV | LIST Tools | ServerRouter |
 | SRV-09 | SRV | READ Tool | ServerRouter |
@@ -145,14 +147,14 @@
 | EVL-04 | EVL | VALIDATE With LLM | LLMReviewer |
 | EVL-05 | EVL | VALIDATE Test Suite | TestRunner |
 | EVL-06 | EVL | COORDINATE Retry | RetryCoordinator |
-| EVL-07 | EVL | RECORD Quality Signal | QualitySignal |
+| EVL-07 | EVL | RECORD Quality Signal | EvaluationEngine |
 | EVL-08 | EVL | DETECT Repetition | RepetitionDetector |
 | EVL-09 | EVL | INJECT Turn Budget | TurnBudgetInjector |
 | WRL-01 | WRL | APPEND Event | WireLog |
 | WRL-02 | WRL | READ Log | WireReader |
-| WRL-03 | WRL | SEEK Turn | TurnIndex |
+| WRL-03 | WRL | SEEK Turn | WireLog |
 | WRL-04 | WRL | FORK Session | SessionForkManager |
-| WRL-05 | WRL | CHECKPOINT Turn | TurnIndex |
+| WRL-05 | WRL | CHECKPOINT Turn | WireLog |
 
 ## Passive Policies (no behavioral UC)
 
@@ -162,6 +164,8 @@ These C4 components are configuration/rule objects with no standalone behavioral
 |--------------|-------------|------|
 | CompactionPolicy | AGT (Agent) | Compaction rules: token threshold, message age, importance scoring |
 | StrategyHeuristics | EDT (Edit Strategy) | Rules: edit_size, risk_level, file_type, complexity |
+
+**Sub-UCs:** CTX-02..06, EVL-02..09, EDT-02..10 are sub-use-cases of their parent UCs (CTX-01, EVL-01, EDT-01). They inherit the same Component Owner as their parent and are not listed separately to avoid inventory duplication.
 
 
 
@@ -261,7 +265,7 @@ SSN08 ..> SSN01 : <<include>>
 ' Boundary:  nasim code agent
 ' Purpose:   RESTful API + SSE streaming for web/mobile/desktop clients
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -958,7 +962,7 @@ SBX01 ..> SBX04 : <<include>>
 ' Boundary:  nasim code agent
 ' Purpose:   REPL, argument parsing, slash commands, rich rendering
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -1062,7 +1066,7 @@ CLI08 ..> SSN03_ext : <<include>>
 ' Boundary:  nasim code agent
 ' Purpose:   Core agentic loop, permissions, context, plans, subagents
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -1157,7 +1161,7 @@ Agent --> SAF01_ext
 AGT01 ..> AGT02 : <<include>>
 AGT01 ..> AGT03 : <<include>>
 AGT02 ..> SAF01_ext : <<include>>
-AGT15 ..> SAF01_ext : <<include>>
+AGT15 ..> AGT02 : <<include>>
 AGT01 ..> AGT06 : <<extend>>
 AGT07 ..> AGT08 : <<extend>>
 AGT01 ..> AGT09 : <<extend>>
@@ -1445,7 +1449,7 @@ VCS04 ..> VCS02 : <<include>>
 ' Boundary:  nasim code agent
 ' Purpose:   Cross-cutting view of all UC groups and actor interactions
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   6.0.0
 ' Source:    docs/ENTITIES.md
 ' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
@@ -1629,7 +1633,6 @@ UC_AGT ..> UC_RTG : <<include>>
 UC_AGT ..> UC_CTX : <<include>>
 UC_AGT ..> UC_EDT : <<extend>>
 UC_AGT ..> UC_EVL : <<extend>>
-UC_OBS ..> UC_WRL : <<extend>>
 
 @enduml
 

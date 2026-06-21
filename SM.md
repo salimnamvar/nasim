@@ -46,7 +46,7 @@
 | QUEUED | Plan queued for approval | Plan construction complete | #E3F2FD |
 | APPROVED | Plan approved by user | AGT-08 APPROVE Plan | #2E7D32 |
 | EXECUTING | Plan steps being executed | Plan approved, execution started | #A5D6A7 |
-| COMPLETED | All plan steps finished | AGT-01 all steps executed | #1B5E20 |
+| COMPLETED | All plan steps finished | Implicit: agent loop finishes all steps | #1B5E20 |
 | REJECTED | Plan rejected by user | User rejects plan | #B71C1C |
 
 ## Plugin Lifecycle States (Entity)
@@ -102,7 +102,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
 | APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
 | EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
-| COMPLETED | AGT-01 PROCESS User Task | Implicit: agent loop finishes all steps |
+| COMPLETED | Implicit | Agent loop finishes all steps |
 | REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
 
 ### Plugin Lifecycle
@@ -126,7 +126,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Session (persisted to disk)
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   6.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' ============================================================
@@ -170,7 +170,7 @@ ACTIVE --> SAVED : SSN-01 explicit save
 ACTIVE --> BRANCHED : WRL-04 fork session
 ACTIVE --> CLOSED : SSN-01 /quit or explicit close
 SAVED --> RESTORED : SSN-04 restore session
-RESTORED --> ACTIVE : SSN-04 session resumed
+RESTORED --> ACTIVE : SSN-01 session resumed
 RESTORED --> SAVED : SSN-01 save after restore
 BRANCHED --> ACTIVE : SSN-01 child session starts
 BRANCHED --> CLOSED : SSN-01 child session closed
@@ -190,7 +190,7 @@ CLOSED --> [*]
 ' Boundary:  nasim code agent CLI + HTTP API
 ' Purpose:   Process FSM showing all agent states and transitions
 ' Milestone: v1.0
-' Version:   5.0.0
+' Version:   6.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
@@ -285,10 +285,10 @@ LISTENING --> THINKING : CLI-01 input parsed
 
 THINKING --> RESPONDING : PRV-02 LLM returns text
 THINKING --> TOOL_EXEC : PRV-02 LLM returns tool_calls
-THINKING --> COMPACTING : token_count > budget
+THINKING --> COMPACTING : AGT-06 token_count > budget
 THINKING --> ROUTING : RTG-01 ModelRouter resolving
 THINKING --> ERROR : PRV-02 LLM call fails
-THINKING --> SERVING : Response to HTTP client
+THINKING --> RESPONDING : SRV-06 Response to HTTP client
 THINKING --> EVALUATING : task_complete AND evaluation_enabled
 
 ROUTING --> THINKING : RTG-01 Model selected
@@ -408,7 +408,7 @@ ERROR --> DISCOVERED : PLG-01 re-discover
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Plan (persisted in PlanSession)
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   6.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' ============================================================
@@ -457,7 +457,7 @@ BUILDING --> EMPTY : AGT-07 /plan off
 QUEUED --> APPROVED : AGT-08 /approve
 QUEUED --> REJECTED : AGT-08 user rejects
 APPROVED --> EXECUTING : AGT-08 execution starts
-EXECUTING --> COMPLETED : AGT-01 all steps executed
+EXECUTING --> COMPLETED : implicit: last step executed
 EXECUTING --> EMPTY : Execution error, plan discarded
 COMPLETED --> [*]
 REJECTED --> [*]

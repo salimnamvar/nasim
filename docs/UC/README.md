@@ -40,7 +40,6 @@
 | SSN-07 | SSN | SEARCH Sessions | SessionSearch |
 | SSN-08 | SSN | BRANCH Session | SessionFork |
 | SSN-09 | SSN | DELETE Session | SessionStore |
-| SSN-09 | SSN | DELETE Session | SessionStore |
 | SAF-01 | SAF | CHECK Permission | SafetyCoordinator |
 | SAF-02 | SAF | REQUEST Approval | SafetyCoordinator |
 | SAF-03 | SAF | APPLY Safety Mode | SafetyCoordinator |
@@ -154,10 +153,10 @@
 
 ## Passive Policies (no behavioral UC)
 
-These C4 components are configuration/rule objects with no standalone behavioral use cases. They are invoked internally by their owning domain logic.
+These are configuration/rule objects with no standalone behavioral use cases. They are NOT C4 components (no runtime behavior). They are invoked internally by their owning domain logic.
 
-| C4 Component | Owner Group | Role |
-|--------------|-------------|------|
+| Data Structure | Owner Group | Role |
+|----------------|-------------|------|
 | CompactionPolicy | AGT (Agent) | Compaction rules: token threshold, message age, importance scoring |
 | StrategyHeuristics | EDT (Edit Strategy) | Rules: edit_size, risk_level, file_type, complexity |
 

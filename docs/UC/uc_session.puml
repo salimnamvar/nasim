@@ -53,6 +53,7 @@ rectangle "nasim" {
     usecase "**SSN-06 REVERT Turn**\n--\nUndo last turn in session" as SSN06
     usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" as SSN07
     usecase "**SSN-08 BRANCH Session**\n--\nFork conversation from any point" as SSN08
+    usecase "**SSN-09 DELETE Session**\n--\nDelete session from storage" as SSN09
   }
 }
 
@@ -68,6 +69,7 @@ Agent --> SSN05
 Agent --> SSN06
 Agent --> SSN07
 Agent --> SSN08
+Agent --> SSN09
 
 ' ============================================================
 ' Relationships
