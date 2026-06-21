@@ -22,12 +22,6 @@ Container_Boundary(wire_log_boundary, "Wire Log Group") {
     Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
 }
 
-note right of wire_log
-  TurnIndex is a data structure that indexes
-  wire log entries by turn number for fast
-  random access — not a runtime component
-end note
-
 Container_Ext(session_group, "Session Group")
 System_Ext(wire_log_dir, "Wire Log Storage", "~/.nasim/wire-logs/<session-id>/")
 
