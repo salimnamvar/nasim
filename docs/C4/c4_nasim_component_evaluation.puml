@@ -37,6 +37,7 @@ Rel(eval_engine, test_runner, "run test suites")
 Rel(eval_engine, retry_coordinator, "coordinate retry")
 Rel(eval_engine, repetition_detector, "detect loops")
 Rel(eval_engine, turn_budget_injector, "inject budget limits")
+Rel(eval_engine, quality_signal, "records quality metrics")
 Rel(llm_reviewer, provider_group, "LLM review call")
 Rel(test_runner, tool_group, "executes test commands")
 

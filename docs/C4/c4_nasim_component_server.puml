@@ -25,6 +25,7 @@ Container_Boundary(server_boundary, "HTTP API Server Process") {
 Container_Ext(core_library, "Core Library")
 
 Rel(server_app, server_router, "mounts routes")
+Rel(server_router, api_schema, "validates requests/responses")
 Rel(server_router, core_library, "delegates to agent orchestrator")
 Rel(server_router, sse_handler, "streams via")
 Rel(sse_handler, core_library, "consumes AgentEvents")

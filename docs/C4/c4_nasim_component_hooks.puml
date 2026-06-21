@@ -25,5 +25,6 @@ System_Ext(plugin_loader, "Plugin Loader", "Plugin discovery")
 
 Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall")
 Rel(plugin_loader, hook_manager, "registers plugin hooks")
+Rel(hook_manager, tool_registry, "queries tool metadata for hook dispatch")
 
 @enduml
