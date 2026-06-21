@@ -112,40 +112,10 @@ end
 
 ---
 
-### 5. Owners, estimates, and rollout plan
-
-- **Phase 1 (48–72h)** — *SQ→C4 parity & AIP-193 fixes*  
-  - **Owner:** SQ maintainers (per group) + C4 owner for naming alignment.  
-  - **Effort:** ~1–2 hours per SQ group with mismatches (estimate 8–16 hours total).  
-- **Phase 2 (24–48h)** — *SM normalization & method canonicalization*  
-  - **Owner:** SM maintainers + UC owner.  
-  - **Effort:** ~4–8 hours.  
-- **Phase 3 (ongoing)** — *DRY refactor for refs and documentation updates*  
-  - **Owner:** Documentation lead.  
-  - **Effort:** ~8–16 hours.
-
----
-
-### 6. Suggested automated checks (to add to CI)
+### 5. Suggested automated checks (to add to CI)
 
 - **SQ→C4 lifeline validator:** parse PlantUML SQs and assert each lifeline name exists in the C4 component index.  
 - **UC→SQ presence check:** assert each UC ID in UC.md has at least one SQ file named or tagged with that UC ID.  
 - **SM label linter:** assert all transition labels match `^[A-Z]{2,4}-\d{2}$` (or the UC-ID pattern used).  
 - **AIP-193 presence check:** for SRV/CLI SQs, assert a `map_to_aip_193` or equivalent failure mapping exists.  
 - **Method-name canonicalizer:** run a mapping table to normalize arrow labels.
-
----
-
-### Next steps I will apply if you want me to proceed now
-
-- **Produce a prioritized patchset** for the top 10 SQ files with mismatches (rename lifelines, add AIP-193 branches, normalize method names). 
-
-  
-- **Generate the canonical method-name table** and a small scriptable mapping you can run to apply consistent renames. 
-
-  
-- **Create CI linter rules** (YAML + regex) you can drop into the repo to enforce the checks above.
-
----
-
-If you want, I will **generate the prioritized patchset now** (sample PlantUML diffs for each changed file and a one‑page changelog). I will include the canonical method-name table and the CI linter rules in the same output. 

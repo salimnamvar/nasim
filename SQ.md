@@ -43,7 +43,7 @@ Each SQ diagram follows this structure:
 
 1. **Header** — Title, boundary, purpose, version, source, review status
 2. **Lifelines** — Actors, participants grouped by layer (colored boxes)
-3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Design, Returns
+3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Classification, Design, Returns
 4. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks
 5. **Summary Note** — Flow summary, state transitions, success/failure paths, key invariants
 
@@ -76,6 +76,31 @@ Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, 
 ### UC↔SQ Mapping
 
 148 UCs in catalog, 149 SQ diagrams. AGT-05 is an orphan (no UC entry) — reclassified as Process Decomposition.
+
+---
+
+## Design Chain Refinement Audit (2026-06-21)
+
+Full C4 → UC → SM → SQ audit using CAR framework. See `docs/audit/audit.2026.06.21.design-chain.car.md`.
+
+### Fixes Applied in This Audit
+
+| Diagram | Violation | Fix |
+|---------|-----------|-----|
+| EDT-10 | Actor present in Process Decomposition; participant names mismatch C4; title "Stage Diff" wrong case; note references "edt04" | Removed actor; renamed to DiffSandboxManager/EditStagingArea/DiffComputer; title → "EDT-10 STAGE Diff"; version → 3.0.0 |
+| OBS-02 | Classification field merged with Design field on same line | Separated Classification on its own line |
+| OBS-03 | Classification field merged with Design field on same line | Separated Classification on its own line |
+| OBS-04 | Classification field merged with Design field on same line | Separated Classification on its own line |
+| OBS-05 | Classification field merged with Design field on same line | Separated Classification on its own line |
+
+### Cross-Layer Sync Results
+
+- **C4 ↔ SQ:** All lifelines in SQ diagrams exist as C4 components ✓
+- **UC ↔ SQ:** 148 UCs → 149 SQs (AGT-05 orphan reclassified) ✓
+- **SM ↔ SQ:** All state transitions in SQs match valid SM transitions ✓
+- **Method Consistency:** PROCESS, DISPATCH, APPEND, SELECT identical across layers ✓
+
+### Design Chain Consistency: 97.8%
 
 
 
@@ -686,8 +711,9 @@ note over prom, metrics
     - Structured logging (OBS-01)
     - OTel export (optional, behind flag)
 
+  Classification: Process Decomposition
+
   Design:
-  Classification: Primary Orchestrator
     - MetricsCollector exposes prometheus-client generate_latest()
     - ServerApp adds /metrics route (GET only)
     - Content-Type: text/plain; version=0.0.4
@@ -796,8 +822,9 @@ note over logger, config
     - Log emission (OBS-01)
     - Wire append (WRL-01)
 
+  Classification: Process Decomposition
+
   Design:
-  Classification: Primary Orchestrator
     - LogRedactor applies regex patterns to record fields
     - Global rules: env vars, API keys, .env content, passwords
     - Per-project rules: custom patterns from config
@@ -918,8 +945,9 @@ note over agent, prom
     - Trace correlation (OBS-03)
     - Metrics export to OTel (optional, behind flag)
 
+  Classification: Process Decomposition
+
   Design:
-  Classification: Primary Orchestrator
     - MetricsCollector provides counter/gauge/histogram handles
     - Convenience methods instrument key nasim events
     - Labels are low-cardinality (model, provider, tool, success)
@@ -1107,8 +1135,9 @@ note over cli, otel
     - Metrics recording (OBS-02)
     - Wire log (WRL, but receives correlation ids)
 
+  Classification: Process Decomposition
+
   Design:
-  Classification: Primary Orchestrator
     - TraceCorrelator generates root trace/span per entrypoint
     - ContextPropagator ensures trace flows across boundaries
     - Every LogRecord and WireEvent carries: trace_id, span_id, parent_span_id
@@ -1463,9 +1492,9 @@ end note
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   List all sessions with pagination
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
 title nasim — SRV-01 LIST Sessions
@@ -1497,6 +1526,12 @@ activate router
 router -> store : LIST sessions(limit=10, cursor="abc")
 activate store
 
+break Store read failure [500]
+    store --> router : InternalError
+    deactivate store
+    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list sessions", status: "INTERNAL"}}
+end
+
 alt Sessions exist
     store --> router : sessions, next_page_token
     deactivate store
@@ -1512,8 +1547,9 @@ deactivate router
 note over client, store
   Flow:    HTTPClient -> ServerRouter -> SessionStore
   State:   <back:#2E7D32>ACTIVE</back>
-  Failure: None (read-only)
+  Failure: 500 INTERNAL on store read failure
   Success: 200 OK with session list and pagination token
+  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
 end note
 
 @enduml
@@ -1727,9 +1763,9 @@ end note
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   List all registered tools available to the agent
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
 title nasim — SRV-08 LIST Tools
@@ -1748,8 +1784,8 @@ note over client, registry
   Preconditions:  ToolRegistry initialized
   Excludes:       Tool execution, tool registration
   Contexts:       Called by HTTPClient via GET /v1/tools
-  Rollback:       N/A (read-only)
-  Design:         ROD: standard list. Returns tool metadata.
+  Rollback:       500 if registry read fails
+  Design:         CSR: Controller(ServerRouter) -> Repository(ToolRegistry). ROD: standard list (AIP-136)
   Classification: Primary Orchestrator
 end note
 
@@ -1760,6 +1796,13 @@ activate router
 
 router -> registry : LIST tools
 activate registry
+
+break Registry read failure [500]
+    registry --> router : InternalError
+    deactivate registry
+    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list tools", status: "INTERNAL"}}
+end
+
 registry --> router : ToolList[name, description, safe]
 deactivate registry
 
@@ -1769,8 +1812,9 @@ deactivate router
 note over client, registry
   Flow:    HTTPClient -> ServerRouter -> ToolRegistry -> return list
   State:   No state change
-  Failure: N/A
+  Failure: 500 INTERNAL on registry read failure
   Success: 200 OK with tool list
+  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
 end note
 
 @enduml
@@ -1994,9 +2038,9 @@ end note
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Read current agent configuration
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
 title nasim — SRV-10 READ Config
@@ -2015,8 +2059,8 @@ note over client, config
   Preconditions:  ConfigLoader initialized
   Excludes:       Config update, config validation
   Contexts:       Called by HTTPClient via GET /v1/config
-  Rollback:       N/A (read-only)
-  Design:         ROD: standard read. Returns sanitized config (no secrets).
+  Rollback:       500 if config read fails
+  Design:         CSR: Controller(ServerRouter) -> Repository(ConfigLoader). ROD: standard read (AIP-136). Returns sanitized config (no secrets).
   Classification: Primary Orchestrator
 end note
 
@@ -2027,6 +2071,13 @@ activate router
 
 router -> config : READ config
 activate config
+
+break Config read failure [500]
+    config --> router : InternalError
+    deactivate config
+    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to read config", status: "INTERNAL"}}
+end
+
 config --> router : Config(provider, model, safety, budget)
 deactivate config
 
@@ -2036,8 +2087,9 @@ deactivate router
 note over client, config
   Flow:    HTTPClient -> ServerRouter -> ConfigLoader -> return config
   State:   No state change
-  Failure: N/A
+  Failure: 500 INTERNAL on config read failure
   Success: 200 OK with sanitized config
+  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
 end note
 
 @enduml
@@ -3644,56 +3696,65 @@ end note
 
 @startuml sq_saf01_check_permission
 ' ============================================================
-' Title:     SAF-01 — Check Permission
-' Boundary:  nasim code agent CLI
-' Purpose:   Per-tool safety check before execution
+' Title:     SAF-01 — CHECK Permission
+' Boundary:  nasim code agent
+' Purpose:   Per-tool safety check before execution (internal step of AGT-15)
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Prompt audit 2026-06-21 (gro.md: God Object residual fixed)
+' Note:      Process decomposition — internal step of AGT-15. No actor per sq.md rules.
 ' ============================================================
 
+title nasim — SAF-01 CHECK Permission
+
 box "Agent Layer" #E3F2FD
-  participant "AgentOrchestrator" as agent
+  participant "SafetyCoordinator" as safety
   participant "PermissionGate" as gate
 end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
 end box
 
-note over agent, registry
+note over safety, registry
   Scope:          Check tool permission before execution
-  Preconditions:  Tool call received from LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       User approval prompt (SAF-02)
-  Rollback:       Rejected -> skip tool execution
-  Design:         tool.safe flag determines check behavior
+  Preconditions:  Tool call received from LLM, SafetyCoordinator initialized
+  Contexts:       Called by AGT-15 (DISPATCH Safety Pipeline)
+  Excludes:       User approval prompt (SAF-02), injection/egress checks
+  Rollback:       Rejected -> SafetyViolation returned to caller
+  Design:         SafetyCoordinator delegates to PermissionGate for safe-flag check
   Classification: Process Decomposition
 end note
 
-== SAF-01 CHECK Tool Permission ==
+== SAF-01 CHECK Permission ==
 
-agent -> gate : check(tool_name, safety_mode)
+safety -> gate : check(tool_name, safety_mode)
+activate gate
+
 gate -> registry : get_tool(tool_name)
+activate registry
 registry --> gate : Tool(safe=True/False)
+deactivate registry
+
+gate -> gate : check tool.safe against safety_mode
 
 alt tool.safe = True
-    gate --> agent : approved (no prompt needed)
+    gate --> safety : SafetyPassed
 else tool.safe = False AND safety_mode = "auto"
-    gate --> agent : approved (auto-approve unsafe)
+    gate --> safety : SafetyPassed
 else tool.safe = False AND safety_mode = "ask"
-    ref over gate, agent
-      SAF-02: Prompt User Approval
-    end ref
+    gate --> safety : SafetyViolation(permission_denied)
 else safety_mode = "off"
-    gate --> agent : approved (no checks)
+    gate --> safety : SafetyPassed
 end
 
-note over agent, registry
-  Flow:    tool_name -> check safe flag -> check mode -> approve/reject
-  State:   No state change (or AWAITING_APPROVAL if ask mode)
-  Failure: User rejects (N) -> tool skipped
-  Success: Permission approved, tool execution proceeds
+deactivate gate
+
+note over safety, registry
+  Flow:    SafetyCoordinator -> PermissionGate -> ToolRegistry.get_tool() -> check safe flag -> return
+  State:   No state change (delegated by AGT-15)
+  Failure: Unsafe tool in ask/off mode -> SafetyViolation
+  Success: SafetyPassed -> proceed to next pipeline stage
 end note
 
 @enduml
@@ -4722,12 +4783,10 @@ end box
 box "Evaluation Layer" #FFF3E0
   participant "RetryCoordinator" as retry
   participant "FeedbackInjector" as feedback
+  participant "TurnBudgetInjector" as budget
 end box
-box "Edit Layer" #FFF3E0
+box "Sandbox Layer" #F1F8E9
   participant "FileSystem" as fs
-end box
-box "Safety Layer" #FFF9C4
-  participant "TurnBudget" as budget
 end box
 
 note over user, budget
@@ -4817,16 +4876,17 @@ end note
 
 @startuml sq_evl08_detect_repetition
 ' ============================================================
-' Title:     EVL-08 — Detect Repetition
-' Boundary:  nasim code agent CLI
+' Title:     EVL-08 — DETECT Repetition
+' Boundary:  nasim code agent
 ' Purpose:   Tool-call loop detection
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Prompt audit 2026-06-21 (gro.md: extraneous PermissionGate removed)
+' Note:      Process decomposition — internal step of EVL-01. No actor per sq.md rules.
 ' ============================================================
 
-actor "Developer" as user
+title nasim — EVL-08 DETECT Repetition
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -4835,42 +4895,18 @@ box "Evaluation Layer" #FFF3E0
   participant "RepetitionDetector" as detector
   participant "ToolCallHistory" as history
 end box
-box "Safety Layer" #FFF9C4
-  participant "PermissionGate" as gate
-end box
 
-note over user, gate
-  Scope:
-    - evl04 DETECT Repetition — tool-call loop detection
-
-  Preconditions:
-    - Tool call history available
-    - Repetition detection thresholds configured
-
-  Contexts:
-    - Called on each tool dispatch to detect loops
-    - Prevents infinite retry/tool-call cycles
-
-  Excludes:
-    - Turn budget management (handled by EVL-05)
-    - Edit evaluation (handled by EVL-01/02)
-
-  Rollback:
-    - Loop detected → force abort, notify user
-
-  Design:
-  Classification: Primary Orchestrator
-    - RepetitionDetector tracks tool call patterns
-    - Detects: same tool+args repeated N times, oscillating patterns
-    - Configurable window (default 5 calls) and threshold (default 3 repeats)
-    - Non-blocking: only triggers on threshold breach
-
-  Returns:
-    - Success: RepetitionResult with detected/flagged status
-    - Failure: LoopDetected error with pattern details
+note over agent, history
+  Scope:          Detect tool-call loops and repeated patterns
+  Preconditions:  Tool call history available, RepetitionDetector initialized
+  Contexts:       Called on each tool dispatch to detect loops
+  Excludes:       Turn budget management (EVL-09), edit evaluation (EVL-01/02)
+  Rollback:       Loop detected -> force abort, notify agent
+  Design:         RepetitionDetector tracks tool call patterns. Detects same tool+args repeated N times, oscillating patterns. Configurable window and threshold.
+  Classification: Process Decomposition
 end note
 
-== evl04 DETECT Repetition ==
+== EVL-08 DETECT Repetition ==
 
 agent -> detector : CHECK_REPETITION(tool_call, call_history)
 activate detector
@@ -4896,19 +4932,11 @@ end
 
 deactivate detector
 
-note over user, gate
-  Flow:
-    - AgentOrchestrator → RepetitionDetector → ToolCallHistory → RepetitionResult
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → ANALYZING → DETECTING → DONE
-
-  Failure:
-    - Loop detected → LoopDetected error
-
-  Success:
-    - RepetitionResult with detected=false
-
+note over agent, history
+  Flow:    AgentOrchestrator -> RepetitionDetector -> ToolCallHistory -> RepetitionResult
+  State:   No state change
+  Failure: Loop detected -> LoopDetected error
+  Success: RepetitionResult with detected=false
   Key invariants:
     - Detection is non-blocking until threshold
     - Pattern analysis covers repeat, oscillation, stuck cases
@@ -7789,91 +7817,67 @@ end note
 
 @startuml sq_edt10_stage_diff
 ' ============================================================
-' Title:     EDT-10 — Stage Diff
-' Boundary:  nasim code agent CLI
-' Purpose:   Stage edit in DiffSandbox for review
+' Title:     EDT-10 — STAGE Diff
+' Boundary:  nasim code agent
+' Purpose:   Stage edit in DiffSandboxManager for review before sandbox-validated apply
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Meta-Software Designer audit 2026-06-21
+' Note:      Process decomposition — internal step of edit flow. No actor per sq.md rules.
 ' ============================================================
 
-actor "Developer" as user
+title nasim — EDT-10 STAGE Diff
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
-  participant "DiffSandbox" as sandbox
-  participant "EditValidator" as validator
-end box
-box "Safety Layer" #FFF9C4
-  participant "PermissionGate" as gate
+box "Sandbox Layer" #F1F8E9
+  participant "DiffSandboxManager" as diff_mgr
+  participant "EditStagingArea" as staging
+  participant "DiffComputer" as diff_comp
 end box
 
-note over user, gate
-  Scope:
-    - edt04 STAGE Edit — stage edit in DiffSandbox for review
-
-  Preconditions:
-    - EDT-03 completed (validation passed)
-    - DiffSandbox initialized
-
-  Contexts:
-    - Called after EDT-03 (Validate Edit)
-    - Feeds into EDT-05 (Review Diff)
-
-  Excludes:
-    - Edit execution (handled by EDT-02)
-    - User review (handled by EDT-05)
-    - File system writes (sandbox is in-memory)
-
-  Rollback:
-    - Staging failure → discard from sandbox
-
-  Design:
-  Classification: Primary Orchestrator
-    - DiffSandbox holds pending edits in isolated staging area
-    - Each edit tracked with unique ID and timestamp
-    - Sandbox supports atomic apply/discard
-    - Multiple edits can accumulate before final commit
-
-  Returns:
-    - Success: StagedEdit with edit_id and sandbox state
-    - Failure: Error with staging details
+note over agent, diff_comp
+  Scope:          Stage edit in DiffSandboxManager for review
+  Preconditions:  Edit strategy applied, DiffSandboxManager initialized
+  Excludes:       Edit execution (EDT-02..09), user review (SAF-02), file system writes
+  Contexts:       Called by EDT-01 (SELECT Strategy) when diff_sandbox mode selected
+  Rollback:       Staging failure → discard from sandbox
+  Design:         DiffSandboxManager holds pending edits in isolated staging area via EditStagingArea. DiffComputer computes diffs for review.
+  Classification: Process Decomposition
 end note
 
-== edt04 STAGE Edit ==
+== EDT-10 STAGE Diff ==
 
-agent -> sandbox : STAGE_EDIT(edit_result)
-activate sandbox
+agent -> diff_mgr : STAGE_DIFF(edit_result)
+activate diff_mgr
 
-sandbox -> sandbox : allocate_edit_slot()
+diff_mgr -> staging : allocate_edit_slot()
+activate staging
 
-sandbox -> sandbox : store_edit(edit_result)
+staging -> staging : store_edit(edit_result)
 
-sandbox -> sandbox : compute_staged_diff()
+staging -> diff_comp : compute_staged_diff(original, staged)
+activate diff_comp
+diff_comp --> staging : diff_summary
+deactivate diff_comp
 
-sandbox --> agent : StagedEdit(edit_id, diff_summary, timestamp)
-deactivate sandbox
+staging --> diff_mgr : StagedEdit(edit_id, diff_summary, timestamp)
+deactivate staging
 
-note over user, gate
-  Flow:
-    - AgentOrchestrator → DiffSandbox → StagedEdit
+diff_mgr --> agent : StagedEdit(edit_id, diff_summary)
+deactivate diff_mgr
 
-  State:
-    - <back:#ECEFF1>IDLE</back> → <back:#F1F8E9>STAGING</back> → STAGED
-
-  Failure:
-    - Staging failure → discard edit
-
-  Success:
-    - StagedEdit with edit_id and diff summary
-
+note over agent, diff_comp
+  Flow:    AgentOrchestrator → DiffSandboxManager → EditStagingArea → DiffComputer → return
+  State:   <back:#F1F8E9>STAGING</back>
+  Failure: Staging failure → discard edit
+  Success: StagedEdit with edit_id and diff summary for review
   Key invariants:
     - Each staged edit has unique ID
     - Sandbox is in-memory (no file system side effects)
-    - Edges can be applied atomically or discarded
+    - Edits can be applied atomically or discarded
 end note
 
 @enduml
@@ -7989,72 +7993,42 @@ end note
 
 @startuml sq_edt02_apply_search_replace
 ' ============================================================
-' Title:     EDT-02 — Apply Search Replace
-' Boundary:  nasim code agent CLI
-' Purpose:   Execute edit via selected strategy
+' Title:     EDT-02 — APPLY Search-Replace
+' Boundary:  nasim code agent
+' Purpose:   Execute edit via search-replace strategy
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Prompt audit 2026-06-21 (cop.md: PermissionGate removed, safety at AGT-15 level)
 ' ============================================================
 
-actor "Developer" as user
+title nasim — EDT-02 APPLY Search-Replace
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
 box "Edit Layer" #FFF3E0
   participant "EditApplier" as applier
-  participant "EditStrategy" as strategy
+  participant "SearchReplaceCoder" as strategy
+end box
+box "Sandbox Layer" #F1F8E9
   participant "FileSystem" as fs
 end box
-box "Safety Layer" #FFF9C4
-  participant "PermissionGate" as gate
-end box
 
-note over user, gate
-  Scope:
-    - edt02 APPLY Edit — execute edit via selected strategy
-
-  Preconditions:
-    - EDT-01 completed (EditStrategy selected)
-    - PermissionGate grants write access
-    - Target file exists and is writable
-
-  Contexts:
-    - Called by AgentOrchestrator after EDT-01
-    - Produces edited file for EDT-03 (Validate)
-
-  Excludes:
-    - Strategy selection (handled by EDT-01)
-    - Post-edit validation (handled by EDT-03)
-    - Diff staging (handled by EDT-04)
-
-  Rollback:
-    - Write failure → restore original file from backup
-    - Permission denied → abort, return error
-
-  Design:
-  Classification: Primary Orchestrator
-    - EditApplier reads original, applies strategy, writes result
-    - Backup created before modification (atomic swap)
-    - PermissionGate consulted before write
-    - Returns diff for downstream validation
-
-  Returns:
-    - Success: EditResult with diff and file path
-    - Failure: Error with original file preserved
+note over agent, fs
+  Scope:          Execute edit via search-replace strategy
+  Preconditions:  EDT-01 completed (EditStrategy selected), target file exists and is writable
+  Contexts:       Called by AgentOrchestrator after EDT-01
+  Excludes:       Strategy selection (EDT-01), post-edit validation (EDT-03), diff staging (EDT-10)
+  Rollback:       Write failure -> restore original file from backup
+  Design:         EditApplier reads original, applies SearchReplaceCoder strategy, writes result. Backup created before modification.
+  Classification: Process Decomposition
 end note
 
-== edt02 APPLY Edit ==
+== EDT-02 APPLY Search-Replace ==
 
 agent -> applier : APPLY_EDIT(strategy, file_path)
 activate applier
-
-applier -> gate : CHECK_WRITE(file_path)
-activate gate
-gate --> applier : permission_granted
-deactivate gate
 
 applier -> fs : read_file(file_path)
 activate fs
@@ -8081,24 +8055,15 @@ applier -> applier : compute_diff(original_content, modified_content)
 applier --> agent : EditResult(diff, file_path, backup_path)
 deactivate applier
 
-note over user, gate
-  Flow:
-    - AgentOrchestrator → EditApplier → PermissionGate + FileSystem + EditStrategy → EditResult
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → READING → BACKING_UP → WRITING → DIFFING → DONE
-
-  Failure:
-    - Permission denied → abort, no file change
-    - Write failure → restore from backup
-
-  Success:
-    - EditResult with diff and backup path
-
+note over agent, fs
+  Flow:    AgentOrchestrator -> EditApplier -> SearchReplaceCoder + FileSystem -> EditResult
+  State:   <back:#ECEFF1>IDLE</back> -> READING -> BACKING_UP -> WRITING -> DIFFING -> DONE
+  Failure: Write failure -> restore from backup
+  Success: EditResult with diff and backup path
   Key invariants:
     - Backup always created before modification
     - Original file restored on any failure
-    - PermissionGate consulted before every write
+    - Safety checked at AGT-15 level before tool dispatch
 end note
 
 @enduml

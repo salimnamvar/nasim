@@ -16,26 +16,26 @@ All other mandatory rules—God Object prohibition, passive policies as data onl
 
 ## Layer-by-Layer Audit Results
 
-### ✅ C4 Architecture Layer
+### C4 Architecture Layer [PASS]
 - **God Objects:** None. `AgentOrchestrator` delegates all non‑core responsibilities to `SafetyCoordinator`, `SubagentCoordinator`, `PersonaManager`, `ErrorBoundary`, and `ModelRouter`.  
 - **Passive Policies:** `CompactionPolicy` and `StrategyHeuristics` are correctly identified as data structures and do not appear as runtime components.  
 - **Deployable Units:** Exactly 3 – CLI, HTTP Server, Core Library – as required.  
 - **Boundary Syntax:** `Boundary` is used for logical groupings; `Container_Ext` correctly references internal containers.  
 - **Version & Pinning:** All diagrams use C4‑PlantUML v2.10.0 and version 6.0.0 uniformly.
 
-### ✅ Use Case Layer
+### Use Case Layer [PASS]
 - All 109 use cases have a clearly defined **Component Owner** that exists in the C4 component inventory.  
 - External references (e.g., `SRV‑06` including `AGT‑01_ext`) are properly mapped using `<<extref>>` in the UC diagrams.  
 - The UC inventory is complete and matches the SQ count (148 UCs + 1 process decomposition).
 
-### ❌ State Machine Layer – **VIOLATION FOUND**
+### State Machine Layer [FAIL]
 - **Issue:** In `sm_agent_lifecycle.puml`, the transition from `TOOL_EXEC` to `AWAITING_APPROVAL` is labeled `SAF‑03` (APPLY Safety Mode).  
   **Correct label:** `SAF‑02` (REQUEST Approval) because the entry into awaiting approval is triggered by requesting user confirmation, not by applying a safety mode policy.  
 - **Impact:** This breaks the deterministic mapping between SM transitions and UC IDs, violating the “one lifecycle‑write UC per target state” rule for the `AWAITING_APPROVAL` state.  
 - **Fix:** Replace `SAF‑03` with `SAF‑02` on that edge.  
 - All other transitions in `sm_agent_lifecycle.puml`, `sm_session_lifecycle.puml`, `sm_plan_lifecycle.puml`, and `sm_plugin_lifecycle.puml` are correctly labelled with UC‑IDs only and use the canonical hex colours.
 
-### ✅ Sequence Diagram Layer
+### Sequence Diagram Layer [PASS]
 - **CSR Pattern:** All diagrams follow Controller → Service → Repository/Component.  
 - **ROD/AIP‑193:** All HTTP interface diagrams (`SRV‑*`) return structured errors with `{error: {code, message, status}}`.  
 - **Mega‑Section Framework:** Every SQ contains an Intro Note (Scope/Preconditions), Body (Technical Flow), and Summary Note (State Transitions/Result).  
