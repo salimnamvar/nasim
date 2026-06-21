@@ -5,7 +5,7 @@
 ' Purpose:   List files and directories at a path
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -30,6 +30,7 @@ note over user, fs
   Excludes:       File read/write
   Rollback:       Error string returned to LLM
   Design:         Directories first, then files, alphabetical
+  Classification: Primary Orchestrator
 end note
 
 == TL-04 LIST Directory ==

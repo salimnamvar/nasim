@@ -46,7 +46,7 @@ All code written in any milestone **must** follow these without deferral:
 | --- | --- | --- |
 | Language | Python 3.11+ | Modern typing, `match` statement, `asyncio` |
 | CLI framework | `click` + `rich` | Structured CLI, rich terminal output |
-| LLM providers | `httpx` (sync) | Async-ready for future web server mode |
+| LLM providers | `httpx` (sync) | Async-ready for web server mode |
 | Config | `pydantic` + `pydantic-settings` | Typed config with validation |
 | Session storage | JSON Lines (`pathlib` + `json`) | No database required |
 | Testing | `pytest` + `pytest-asyncio` + `httpx` TestClient | Layered: agent/tool/cli |

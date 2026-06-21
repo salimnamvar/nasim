@@ -1,0 +1,62 @@
+@startuml sq_hk02_dispatch_pre_tool_hook
+' ============================================================
+' Title:     HK-02 — DISPATCH Pre-Tool Hook
+' Boundary:  nasim code agent
+' Purpose:   Execute hooks before tool execution
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — HK-02 DISPATCH Pre-Tool Hook
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Hooks Layer" #FFFDE7
+  participant "HookManager" as hooks
+  participant "Hook" as hook
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as tools
+end box
+
+note over agent, tools
+  Scope:          Execute hooks before tool execution
+  Preconditions:  Hooks registered for PreToolCall event
+  Excludes:       Post-tool hooks (HK-03), LLM hooks (HK-04/05)
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call) before tool execution
+  Rollback:       Hook deny blocks tool execution
+  Design:         Priority-ordered execution; short-circuit on deny
+  Classification: Process Decomposition
+end note
+
+== HK-02 DISPATCH Pre-Tool Hook ==
+
+agent -> hooks : dispatch(PreToolCall, tool_name, args)
+activate hooks
+hooks -> hooks : find hooks for PreToolCall
+
+loop for each hook in priority order
+    hooks -> hook : execute(tool_name, args)
+    activate hook
+    hook --> hooks : HookResult(action, data?)
+    deactivate hook
+
+    break action == DENY
+        hooks --> agent : HookResult(action=DENY, reason)
+    end
+end
+
+hooks --> agent : HookResult(action=ALLOW, modified_args?)
+deactivate hooks
+
+note over agent, tools
+  Flow:    AgentOrchestrator -> HookManager -> find hooks -> execute in priority order -> return HookResult
+  State:   <back:#FFFDE7>HOOK_RUNNING</back>
+  Failure: Hook deny blocks tool execution, returns DENY
+  Success: HookResult(action=ALLOW) returned to agent
+end note
+
+@enduml

@@ -1,0 +1,59 @@
+@startuml sm_session_lifecycle
+' ============================================================
+' Title:     nasim — Session Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Entity lifecycle for Session (persisted to disk)
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' ============================================================
+
+title nasim — Session Lifecycle
+
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+}
+
+[*] --> CREATED : SSN-01
+
+state "CREATED" as CREATED #E3F2FD
+CREATED : Session record initialized.
+CREATED : SSN-01 PERSIST Session owns all writes here.
+
+state "ACTIVE" as ACTIVE #2E7D32
+ACTIVE : Session accepting messages.
+ACTIVE : SSN-02 READ Session, SRV-06 DISPATCH Message.
+
+state "SAVED" as SAVED #1565C0
+SAVED : Session persisted to disk.
+SAVED : SSN-01 PERSIST Session.
+
+state "RESTORED" as RESTORED #1E88E5
+RESTORED : Session loaded from disk.
+RESTORED : SSN-04 RESTORE Session.
+
+state "BRANCHED" as BRANCHED #7B1FA2
+BRANCHED : Session forked from parent.
+BRANCHED : WRL-04 FORK Session.
+
+state "CLOSED" as CLOSED #757575
+CLOSED : Session terminated.
+CLOSED : Terminal state.
+
+CREATED --> ACTIVE : SSN-01
+ACTIVE --> SAVED : SSN-01
+ACTIVE --> BRANCHED : WRL-04
+ACTIVE --> CLOSED : SSN-01
+SAVED --> RESTORED : SSN-04
+RESTORED --> ACTIVE : SSN-01
+RESTORED --> SAVED : SSN-01
+BRANCHED --> ACTIVE : SSN-01
+BRANCHED --> CLOSED : SSN-01
+SAVED --> CLOSED : SSN-01
+
+CLOSED --> [*]
+
+@enduml

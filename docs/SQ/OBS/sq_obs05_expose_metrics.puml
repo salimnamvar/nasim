@@ -5,7 +5,7 @@
 ' Purpose:   Serve /metrics endpoint for Prometheus pull scrape
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -37,6 +37,8 @@ note over prom, metrics
     - Metrics recording (OBS-02)
     - Structured logging (OBS-01)
     - OTel export (optional, behind flag)
+
+  Classification: Process Decomposition
 
   Design:
     - MetricsCollector exposes prometheus-client generate_latest()
@@ -87,7 +89,7 @@ note over prom, metrics
     - Prometheus → GET /metrics → ServerApp → MetricsCollector → metrics text
 
   State:
-    - IDLE → COLLECTING → SERVING → DONE
+    - <back:#ECEFF1>IDLE</back> → COLLECTING → <back:#E0F2F1>SERVING</back> → DONE
 
   Failure:
     - Metrics disabled → 503 or empty output

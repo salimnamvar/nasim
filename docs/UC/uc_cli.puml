@@ -1,55 +1,99 @@
 @startuml uc_cli
+
 ' ============================================================
-' Title:     nasim — UC: CLI Interaction
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   User interactions with the CLI layer
+' Title:     nasim — UC: CLI Group
+' Group:     CLI (CLI Layer)
+' Boundary:  nasim code agent
+' Purpose:   REPL, argument parsing, slash commands, rich rendering
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — CLI Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "Developer" as user
-
-rectangle "CLI Interaction" {
-    usecase "PROCESS User Input" as UC_CLI_01
-    usecase "Execute Slash Command" as UC_CLI_02
-    usecase "STREAM Output" as UC_CLI_03
-    usecase "Parse CLI Arguments" as UC_CLI_04
-    usecase "Toggle Plan Mode" as UC_CLI_05
-    usecase "Prompt Safety Approval" as UC_CLI_06
-    usecase "Switch Model" as UC_CLI_07
-    usecase "List Sessions" as UC_CLI_08
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "Agent Layer" {
-    usecase "PROCESS User Task" as UC_AGT_01
-    usecase "Queue Plan" as UC_AGT_07
-    usecase "APPROVE Plan" as UC_AGT_08
-    usecase "CHECK Tool Permission" as UC_AGT_05
-    usecase "Reset History" as UC_AGT_04
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-rectangle "Session Layer" {
-    usecase "List Sessions" as UC_SSN_03
-    usecase "Resume Session" as UC_SSN_04
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
 }
 
-user --> UC_CLI_01
-user --> UC_CLI_02
-user --> UC_CLI_05
-user --> UC_CLI_07
-user --> UC_CLI_08
-UC_CLI_01 ..> UC_CLI_03 : <<include>>
-UC_CLI_04 ..> UC_CLI_01 : <<include>>
-UC_CLI_01 ..> UC_AGT_01 : <<include>>
-UC_CLI_05 ..> UC_AGT_07 : <<include>>
-UC_CLI_06 ..> UC_AGT_05 : <<include>>
-UC_CLI_02 ..> UC_AGT_08 : <<extend>>
-UC_CLI_02 ..> UC_AGT_04 : <<extend>>
-UC_CLI_08 ..> UC_SSN_03 : <<include>>
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Developer" as Developer
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' Cross-Group External References
+' ============================================================
+
+usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
+usecase "RTG-04\nSWITCH Model\n[uc_router]" as RTG04_ext <<extref>>
+usecase "AGT-07\nQUEUE Plan\n[uc_agent]" as AGT07_ext <<extref>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "CLI Group (CLI)" {
+    usecase "**CLI-01 PROCESS User Input**\n--\nREPL loop, input handling, slash command dispatch" as CLI01
+    usecase "**CLI-02 DISPATCH Slash Command**\n--\nMap /cmd strings to agent actions" as CLI02
+    usecase "**CLI-03 STREAM Output**\n--\nRender AgentEvents to terminal" as CLI03
+    usecase "**CLI-04 READ CLI Arguments**\n--\nParse CLI args with layered config overrides" as CLI04
+    usecase "**CLI-05 ENABLE Plan Mode**\n--\nToggle plan mode on/off" as CLI05
+    usecase "**CLI-06 REQUEST Approval**\n--\nPrompt user for safety approval" as CLI06
+    usecase "**CLI-07 SWITCH Model**\n--\nSwitch model at runtime" as CLI07
+    usecase "**CLI-08 LIST Sessions**\n--\nList saved sessions" as CLI08
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Developer --> CLI01
+Developer --> CLI02
+Developer --> CLI05
+Developer --> CLI07
+Developer --> CLI08
+Agent --> CLI03
+Agent --> CLI04
+Agent --> CLI06
+
+' ============================================================
+' Relationships
+' ============================================================
+
+CLI01 ..> CLI03 : <<include>>
+CLI01 ..> CLI04 : <<include>>
+CLI01 ..> CLI06 : <<extend>>
+CLI07 ..> RTG04_ext : <<include>>
+CLI05 ..> AGT07_ext : <<include>>
+CLI08 ..> SSN03_ext : <<include>>
 
 @enduml

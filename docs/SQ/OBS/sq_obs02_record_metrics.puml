@@ -5,7 +5,7 @@
 ' Purpose:   Record metric points for token usage, latency, tool calls
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -38,6 +38,8 @@ note over agent, prom
     - Structured logging (OBS-01)
     - Trace correlation (OBS-03)
     - Metrics export to OTel (optional, behind flag)
+
+  Classification: Process Decomposition
 
   Design:
     - MetricsCollector provides counter/gauge/histogram handles
@@ -94,7 +96,7 @@ note over agent, prom
     - AgentOrchestrator/Provider/ToolRegistry → MetricsCollector → in-memory metrics → /metrics scrape
 
   State:
-    - IDLE → RECORDING → DONE
+    - <back:#ECEFF1>IDLE</back> → RECORDING → DONE
 
   Failure:
     - Record failure → silently ignored (never blocks agent)

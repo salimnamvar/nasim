@@ -1,45 +1,77 @@
 @startuml uc_hooks
+
 ' ============================================================
-' Title:     nasim — UC: Hook System
-' Boundary:  nasim code agent CLI + HTTP API
+' Title:     nasim — UC: Hooks Group
+' Group:     HK (Hooks)
+' Boundary:  nasim code agent
 ' Purpose:   Pre/post hooks for tool use and LLM calls
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Hooks Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "AgentOrchestrator" as agent
-
-rectangle "Hook System" {
-    usecase "Register Hook" as UC_HK_01
-    usecase "Execute Pre-Tool Hook" as UC_HK_02
-    usecase "Execute Post-Tool Hook" as UC_HK_03
-    usecase "Execute Pre-LLM Hook" as UC_HK_04
-    usecase "Execute Post-LLM Hook" as UC_HK_05
-    usecase "Evaluate Hook Result" as UC_HK_06
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "Tool Layer" {
-    usecase "Execute Tool" as UC_TL_EXEC
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-rectangle "Provider Layer" {
-    usecase "Call Provider Chat" as UC_PRV_02
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Hooks Group (HK)" {
+    usecase "**HK-01 REGISTER Hook**\n--\nRegister hook with name, event type, handler, priority" as HK01
+    usecase "**HK-02 DISPATCH Pre-Tool Hook**\n--\nExecute hook before tool use" as HK02
+    usecase "**HK-03 DISPATCH Post-Tool Hook**\n--\nExecute hook after tool use" as HK03
+    usecase "**HK-04 DISPATCH Pre-LLM Hook**\n--\nExecute hook before LLM call" as HK04
+    usecase "**HK-05 DISPATCH Post-LLM Hook**\n--\nExecute hook after LLM call" as HK05
+    usecase "**HK-06 VALIDATE Hook Result**\n--\nValidate hook result: allow, deny, modify" as HK06
+  }
 }
 
-agent --> UC_HK_02
-agent --> UC_HK_03
-agent --> UC_HK_04
-agent --> UC_HK_05
-UC_HK_02 ..> UC_HK_06 : <<include>>
-UC_HK_03 ..> UC_HK_06 : <<include>>
-UC_HK_04 ..> UC_HK_06 : <<include>>
-UC_HK_05 ..> UC_HK_06 : <<include>>
-UC_HK_06 ..> UC_TL_EXEC : <<extend>>
-UC_HK_06 ..> UC_PRV_02 : <<extend>>
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> HK01
+Agent --> HK02
+Agent --> HK03
+Agent --> HK04
+Agent --> HK05
+Agent --> HK06
+
+' ============================================================
+' Relationships
+' ============================================================
+
+HK02 ..> HK06 : <<include>>
+HK03 ..> HK06 : <<include>>
+HK04 ..> HK06 : <<include>>
+HK05 ..> HK06 : <<include>>
 
 @enduml

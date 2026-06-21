@@ -1,0 +1,67 @@
+@startuml sq_cli08_list_sessions
+' ============================================================
+' Title:     CLI-08 — List Sessions
+' Boundary:  nasim code agent CLI
+' Purpose:   List sessions via slash command
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — CLI-08 List Sessions
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+  participant "SlashCommandHandler" as cmd
+end box
+box "Session Layer" #F1F8E9
+  participant "SessionStore" as ssn
+end box
+
+note over user, ssn
+  Scope:          List available sessions via /sessions slash command
+  Preconditions:  REPLSession active, SessionStore initialized
+  Excludes:       Session read (SSN-02), session persist (SSN-01)
+  Contexts:       Invoked by Developer via /sessions command
+  Rollback:       Read error → display error message
+  Design:         Delegates to SSN-03 LIST Sessions for actual retrieval
+  Classification: Primary Orchestrator
+end note
+
+== CLI-08 List Sessions ==
+
+user -> repl : "/sessions"
+repl -> cmd : dispatch("/sessions")
+activate cmd
+
+cmd -> ssn : list_sessions()
+activate ssn
+
+ssn -> ssn : scan session directory
+ssn --> cmd : session_list [id, created_at, summary]
+deactivate ssn
+
+cmd -> cmd : format session table
+
+cmd --> repl : CommandResult(formatted_table)
+deactivate cmd
+
+repl --> user : displayed session list
+
+break Session directory unreadable
+    ssn --> cmd : IOError
+    cmd --> repl : CommandError
+    repl --> user : "Failed to list sessions"
+end
+
+note over user, ssn
+  Flow:    Developer → REPLSession → SlashCommandHandler → SSN-03 LIST Sessions → display
+  State:   <back:#ECEFF1>IDLE</back> → LISTING → <back:#ECEFF1>IDLE</back>
+  Failure: Directory error → display error
+  Success: Session list formatted and displayed
+end note
+
+@enduml

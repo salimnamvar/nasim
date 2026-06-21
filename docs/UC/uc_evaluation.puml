@@ -1,46 +1,90 @@
 @startuml uc_evaluation
+
 ' ============================================================
-' Title:     nasim — UC: Evaluation
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   Quality verification, LLM review, test execution, retry coordination
+' Title:     nasim — UC: Evaluation Group
+' Group:     EVL (Evaluation)
+' Boundary:  nasim code agent
+' Purpose:   Task evaluation: success checks, LLM review, retry coordination
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Evaluation Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "AgentOrchestrator" as agent
-actor "Developer" as user
-
-rectangle "Evaluation" {
-    usecase "RUN Success Checks" as UC_EVL_01
-    usecase "INVOKE LLM Reviewer" as UC_EVL_02
-    usecase "RUN Test Suite" as UC_EVL_03
-    usecase "RECORD Result" as UC_EVL_04
-    usecase "COORDINATE Retry" as UC_EVL_05
-    usecase "DETECT Repetition" as UC_EVL_06
-    usecase "INJECT Turn Budget" as UC_EVL_07
-    usecase "RESET On Failure" as UC_EVL_08
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "External" {
-    component "Host Shell" as shell
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-agent --> UC_EVL_01
-agent --> UC_EVL_02
-agent --> UC_EVL_03
-agent --> UC_EVL_06
-agent --> UC_EVL_07
-user --> UC_EVL_03
-UC_EVL_01 ..> UC_EVL_04 : <<include>>
-UC_EVL_02 ..> UC_EVL_04 : <<include>>
-UC_EVL_03 ..> shell : <<include>>
-UC_EVL_05 ..> UC_EVL_06 : <<include>>
-UC_EVL_05 ..> UC_EVL_02 : <<include>>
-UC_EVL_08 ..> UC_EVL_04 : <<include>>
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Evaluation Group (EVL)" {
+    usecase "**EVL-01 EVALUATE Task**\n--\nOrchestrate task evaluation: checks, scores, retries" as EVL01
+    usecase "**EVL-02 CHECK Task Completion**\n--\nEvaluate task completion against success criteria" as EVL02
+    usecase "**EVL-03 CHECK Success**\n--\nRun user-defined success checks" as EVL03
+    usecase "**EVL-04 VALIDATE With LLM**\n--\nLLM-based code review and quality assessment" as EVL04
+    usecase "**EVL-05 VALIDATE Test Suite**\n--\nRun project test suites" as EVL05
+    usecase "**EVL-06 COORDINATE Retry**\n--\nCoordinate retry with backoff and escalation" as EVL06
+    usecase "**EVL-07 RECORD Quality Signal**\n--\nProduce accept/reject with feedback" as EVL07
+    usecase "**EVL-08 DETECT Repetition**\n--\nDetect repeated failures or loops" as EVL08
+    usecase "**EVL-09 INJECT Turn Budget**\n--\nInject turn budget limits into context" as EVL09
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> EVL01
+Agent --> EVL02
+Agent --> EVL03
+Agent --> EVL04
+Agent --> EVL05
+Agent --> EVL06
+Agent --> EVL07
+Agent --> EVL08
+Agent --> EVL09
+
+' ============================================================
+' Relationships
+' ============================================================
+
+EVL01 ..> EVL02 : <<include>>
+EVL01 ..> EVL03 : <<include>>
+EVL01 ..> EVL04 : <<include>>
+EVL01 ..> EVL05 : <<include>>
+EVL01 ..> EVL06 : <<include>>
 
 @enduml

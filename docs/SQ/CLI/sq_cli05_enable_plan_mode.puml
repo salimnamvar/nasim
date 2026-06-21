@@ -1,0 +1,65 @@
+@startuml sq_cli05_enable_plan_mode
+' ============================================================
+' Title:     CLI-05 — Enable Plan Mode
+' Boundary:  nasim code agent CLI
+' Purpose:   Toggle plan mode via slash command
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — CLI-05 Enable Plan Mode
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+  participant "SlashCommandHandler" as cmd
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+
+note over user, agent
+  Scope:          Toggle plan mode on/off via slash command
+  Preconditions:  REPLSession active, SlashCommandHandler registered
+  Excludes:       Plan execution (AGT-07/08), model switching (CLI-07)
+  Contexts:       Invoked by Developer via /plan-mode command
+  Rollback:       Toggle failure → display error, retain current state
+  Design:         Plan mode flag stored in session state; affects AGT-01 loop behavior
+  Classification: Primary Orchestrator
+end note
+
+== CLI-05 Enable Plan Mode ==
+
+user -> repl : "/plan-mode"
+repl -> cmd : dispatch("/plan-mode")
+activate cmd
+
+cmd -> cmd : parse command arguments
+cmd -> cmd : toggle plan_mode flag
+
+cmd -> agent : set_plan_mode(enabled/disabled)
+activate agent
+agent --> cmd : plan_mode_updated
+deactivate agent
+
+cmd --> repl : CommandResult(confirmation)
+deactivate cmd
+
+repl --> user : "Plan mode: ON/OFF"
+
+break Toggle error
+    cmd --> repl : CommandError
+    repl --> user : "Failed to toggle plan mode"
+end
+
+note over user, agent
+  Flow:    Developer → REPLSession → SlashCommandHandler → toggle → confirm
+  State:   <back:#ECEFF1>IDLE</back> → TOGGLING → <back:#ECEFF1>IDLE</back>
+  Failure: Toggle error → display error, retain state
+  Success: Plan mode toggled, confirmation shown
+end note
+
+@enduml

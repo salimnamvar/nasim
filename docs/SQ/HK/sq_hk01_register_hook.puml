@@ -1,30 +1,51 @@
 @startuml sq_hk01_register_hook
 ' ============================================================
-' Title:     nasim — SQ: Register Hook
-' Boundary:  nasim code agent CLI + HTTP API
+' Title:     HK-01 — REGISTER Hook
+' Boundary:  nasim code agent
 ' Purpose:   Register a hook in the HookManager
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
-' Review:    —
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SQ: Register Hook (HK-01)
+title nasim — HK-01 REGISTER Hook
 
-participant "PluginLoader" as loader
-participant "HookManager" as hooks
-participant "Hook" as hook
+box "Plugins Layer" #EDE7F6
+  participant "PluginLoader" as loader
+end box
+box "Hooks Layer" #FFFDE7
+  participant "HookManager" as hooks
+  participant "Hook" as hook
+end box
 
-== Register Hook ==
+note over loader, hook
+  Scope:          Register a hook in the HookManager
+  Preconditions:  HookManager initialized, PluginLoader active
+  Excludes:       Hook execution (HK-02..05), hook validation (HK-06)
+  Contexts:       Called by PLG-04 (REGISTER Plugin Hooks)
+  Rollback:       Registration failure logged, hook not added
+  Design:         PluginLoader registers plugin-provided hooks at load time
+  Classification: Process Decomposition
+end note
 
-loader -> hooks : register(event, handler)
+== HK-01 REGISTER Hook ==
+
+loader -> hooks : register(event, handler, priority)
 activate hooks
-hooks -> hook : Hook(name, event, handler)
+hooks -> hook : Hook(name, event, handler, priority)
 activate hook
 hook --> hooks : hook instance
 deactivate hook
 hooks --> hooks : hooks[event].append(hook)
 hooks --> loader : registered
 deactivate hooks
+
+note over loader, hook
+  Flow:    PluginLoader -> HookManager -> Hook creation -> append to registry
+  State:   No state change
+  Failure: Duplicate hook name -> log warning, skip
+  Success: Hook registered for event
+end note
 
 @enduml

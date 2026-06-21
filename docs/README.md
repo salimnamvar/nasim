@@ -20,95 +20,19 @@ Each layer must be authored in order. No layer may be authored before the one ab
 
 | Directory | Layer | Status | Contents |
 | --------- | ----- | ------ | -------- |
-| [C4/](c4/README.md) | C4 Architecture | Frozen | Context, container, 18 component diagrams (3 containers, 12 groups, tenas style) |
-| [UC/](uc/README.md) | Use Cases | Frozen | 109 UCs — 17 groups (CLI/AGT/PRV/CFG/SSN/SAF/CTX/LLM/TL/SRV/HK/PLG/RTG/OBS/MEM/VCS/SBX) |
-| [SM/](sm/README.md) | State Machine | Frozen | Agent lifecycle — 20 states (process FSM, not entity lifecycle) |
-| [SQ/](sq/README.md) | Sequence Diagrams | Frozen | 55 diagrams — one per UC, by group |
-| [ER/](er/README.md) | ERD | Frozen | Session, memory, todo JSON Lines schemas — logical stores |
-| [CL/](cl/README.md) | Class Diagram | Frozen | Runtime class model — 90+ classes across 12 groups |
-| [CT/DATA/](CT/DATA/README.md) | Data Contracts | Frozen | ODCS v3.1.0 — session, memory, todo store data contracts |
+| [C4/](C4/README.md) | C4 Architecture | Frozen | Context, container, 21 component diagrams (24 total) |
+| [UC/](UC/README.md) | Use Cases | Frozen | 148 UCs — 21 groups (CLI/AGT/PRV/CFG/SSN/SAF/CTX/MCP/TL/SRV/HK/PLG/RTG/OBS/MEM/VCS/SBX/RIM/EDT/EVL/WRL) |
+| [SM/](SM/README.md) | State Machine | Frozen | 4 diagrams — agent lifecycle (process FSM), session, plan, plugin lifecycles |
+| [SQ/](SQ/README.md) | Sequence Diagrams | Frozen | 148 diagrams across 21 groups (1:1 with UCs) |
+| [ER/](ER/README.md) | ERD | Frozen | 5 store schemas (session, memory, todo, wire log, observability, repo intelligence) |
+| [CL/](CL/README.md) | Class Diagram | Frozen | Runtime class model — 90+ classes across 12 groups |
+| [CT/DATA/](CT/DATA/README.md) | Data Contracts | Frozen | ODCS v3.1.0 — 5 contract diagrams + 2 YAML schemas |
 | [CT/API/](CT/API/README.md) | HTTP API Surface | Frozen | OAS 3.1.0 + ROD — 23 endpoints, 8 resources |
-| [RDM/](rdm/README.md) | Implementation Roadmap | Active | Milestone docs for coding |
-| [MM/](mm/README.md) | Design Chain Maps | Frozen | Summary and detail chain overview diagrams |
-| [audit/](audit/README.md) | Audit Reports | Active | Reference agent audits, gap analysis, CAR improvement plan |
-
-## Quick Navigation
-
-### C4 Architecture
-- [Context](c4/c4_nasim_context.puml) — System boundary and external dependencies (11 external systems)
-- [Container](c4/c4_nasim_container.puml) — Deployable units and technology choices (15 containers)
-- [Component Overview](c4/c4_nasim_component.puml) — Cross-container overview
-- [Component: CLI](c4/c4_nasim_component_cli.puml) — CLI layer components
-- [Component: Agent](c4/c4_nasim_component_agent.puml) — Agent layer components (11 components)
-- [Component: Provider](c4/c4_nasim_component_provider.puml) — Provider layer components (8 components)
-- [Component: Tools](c4/c4_nasim_component_tools.puml) — Tool layer components (19 components)
-- [Component: Config](c4/c4_nasim_component_config.puml) — Config layer components
-- [Component: Session](c4/c4_nasim_component_session.puml) — Session layer components (5 components)
-- [Component: Server](c4/c4_nasim_component_server.puml) — Server layer components (ROD-compliant)
-- [Component: Sandbox](c4/c4_nasim_component_sandbox.puml) — Sandbox layer components
-- [Component: Observability](c4/c4_nasim_component_observability.puml) — Observability layer components
-- [Component: Memory](c4/c4_nasim_component_memory.puml) — Memory layer components
-- [Component: Git](c4/c4_nasim_component_git.puml) — Git integration layer components
-- [Component Inventory](c4/README.md)
-
-### Use Cases
-- [CLI Interaction](uc/uc_cli.puml) — User I/O, slash commands, plan toggle, model switch
-- [Agent Core](uc/uc_agent.puml) — Agentic loop, permissions, context, plans, hooks, subagents
-- [Provider Layer](uc/uc_provider.puml) — Provider abstraction and LLM interaction
-- [Configuration](uc/uc_config.puml) — Config loading and validation
-- [Session Persistence](uc/uc_session.puml) — Save, load, list, snapshot, search, fork sessions
-- [Safety](uc/uc_safety.puml) — Permission checks, user approval, sandbox
-- [Context Management](uc/uc_context.puml) — Token counting and compaction
-- [Tool Layer](uc/uc_tools.puml) — All tool implementations (19 tools)
-- [HTTP Server](uc/uc_server.puml) — REST API and SSE streaming
-- [Hook System](uc/uc_hooks.puml) — Pre/post hooks for tool and LLM lifecycle
-- [Plugin System](uc/uc_plugins.puml) — Plugin discovery and registration
-- [Model Router](uc/uc_router.puml) — Model selection and fallback
-- [Observability](uc/uc_observability.puml) — Logging, metrics, traces
-- [Memory](uc/uc_memory.puml) — Cross-session knowledge
-- [Git Integration](uc/uc_git.puml) — Version control awareness
-- [Sandbox](uc/uc_sandbox.puml) — OS-level process isolation
-- [UC Inventory](uc/README.md) — 109 UCs total
-
-### State Machine
-- [Agent Lifecycle](sm/sm_agent_lifecycle.puml) — 20 agent states including subagent, sandbox, memory, git states
-- [SM Inventory](sm/README.md)
-
-### Sequence Diagrams
-- [SQ Inventory](sq/README.md) — 55 SQ diagrams (1:1 with UCs)
-
-### Class Diagram
-- [Runtime Model](cl/cl_runtime_model.puml) — All runtime classes and relationships (90+ classes)
-- [CL Inventory](cl/README.md)
-
-### Data Contracts (CT/DATA)
-- [Session Store Contract](CT/DATA/nasim_session_store.datacontract.yaml) — ODCS v3.1.0
-- [Memory Store Contract](CT/DATA/nasim_memory_store.datacontract.yaml) — ODCS v3.1.0
-- [Todo Store Contract](CT/DATA/nasim_todo_store.datacontract.yaml) — ODCS v3.1.0
-- [CT/DATA Inventory](CT/DATA/README.md)
-
-### HTTP API Surface (CT/API)
-- [OpenAPI Spec](CT/API/openapi.yaml) — OAS 3.1.0 — 23 endpoints, 8 resources
-- [ROD Decisions](CT/API/rod_decisions.md) — Resource model, methods, field behavior, errors
-- [CT/API Inventory](CT/API/README.md)
-
-### Entity Registry
-- [entities.md](entities.md) — Canonical names for all components, UCs, actors (17 UC groups)
-
-### Implementation Roadmap
-- [RDM Overview](rdm/README.md) — Principles, stack, milestones, CI gates
-
-### Design Chain Maps
-- [MM Overview](mm/README.md) — Meta-level navigation diagrams
-
-### Audit Reports
-- [Audit Overview](audit/README.md) — Reference agent audits, gap analysis, CAR plan
-- [Comprehensive Reference Audit](audit/audit.2026.06.20.comprehensive.reference.audit.md) — MASTER: 28 agents, C4 gap analysis, enhancement roadmap
-- [Reference Agents Deep Dive](audit/reference-agents-deep-dive.md) — All 27 agents analyzed
-- [Gap Analysis](audit/nasim-gap-analysis.md) — Design principles compliance + gaps
-- [CAR Improvement Plan](audit/nasim-car-improvement-plan.md) — 18 improvement items
-- [Design Principles Comparison](audit/design-principles-comparison.md) — Design comparison
-- [CSR + ROD Audit](audit/audit.2026.06.20.car-framework-csr-rod.md) — Controller-Service-Repository + Resource-Oriented Design audit
+| [RDM/](RDM/README.md) | Implementation Roadmap | Active | 10 milestone docs for coding |
+| [MM/](MM/README.md) | Design Chain Maps | Frozen | Summary and detail chain overview diagrams |
+| [audit/](audit/README.md) | Audit Reports | Active | 17 audit reports — reference agent audits, gap analysis, CAR improvement plan |
+| [prompt/](prompt/) | Prompt Engineering | Reference | p1–p9.md design directives |
+| [REF/](REF/) | Reference Data | Reference | agents.md reference agent list |
 
 ## Architecture Decisions
 

@@ -5,7 +5,7 @@
 ' Purpose:   Layered config loading from all sources
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -26,6 +26,7 @@ note over parser, cfg
   Excludes:       Runtime config changes
   Rollback:       Invalid YAML -> ConfigError
   Design:         4-layer merge: global < project < env < CLI
+  Classification: Process Decomposition
 end note
 
 == CFG-01 Load Config ==

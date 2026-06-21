@@ -1,0 +1,51 @@
+@startuml sq_plg06_disable_plugin
+' ============================================================
+' Title:     PLG-06 — Disable Plugin
+' Boundary:  nasim code agent
+' Purpose:   Deactivate plugin tools and hooks, set state DISABLED
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — PLG-06 Disable Plugin
+
+box "Tool Layer" #F3E5F5
+  participant "PluginLoader" as loader
+  participant "ToolRegistry" as registry
+end box
+box "Hooks Layer" #FFFDE7
+  participant "HookManager" as hm
+end box
+
+note over participants
+  Scope:          Deactivate plugin tools and hooks, set state DISABLED
+  Preconditions:  Plugin is currently ENABLED
+  Excludes:       Plugin enable, discovery, removal
+  Contexts:       Called by CLI or PluginLoader
+  Rollback:       Partial disable logged; state set to ERROR
+  Design:         Reverse of PLG-05; unregister tools then hooks
+  Classification: Process Decomposition
+end note
+
+== PLG-06 Disable Plugin ==
+
+loader -> registry : unregister plugin tools
+loader -> hm : unregister plugin hooks
+loader -> loader : set state DISABLED
+
+break Unregister failure
+    loader -> loader : set state ERROR, log failure
+end
+
+loader --> loader : plugin disabled
+
+note over participants
+  Flow:    PluginLoader -> deactivate tools + hooks -> set state DISABLED
+  State:   Plugin state: ENABLED -> DISABLED (or ERROR)
+  Failure: Unregister failure -> state ERROR, partial disable logged
+  Success: Plugin disabled with tools and hooks removed
+end note
+
+@enduml

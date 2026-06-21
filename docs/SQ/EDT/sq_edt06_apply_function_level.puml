@@ -1,0 +1,80 @@
+@startuml sq_edt06_apply_function_level
+' ============================================================
+' Title:     EDT-06 — APPLY Function-Level
+' Boundary:  nasim code agent
+' Purpose:   Edit a single function via AST-aware replace
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — EDT-06 APPLY Function-Level
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Layer" #FFF3E0
+  participant "EditStrategyManager" as esm
+  participant "FunctionLevelCoder" as flc
+end box
+box "Tool Layer" #F3E5F5
+  participant "ASTParser" as ast
+end box
+box "FileSystem Layer" #F3E5F5
+  participant "FileSystem" as fs
+end box
+
+note over participants
+  Scope:          Function-level edit via AST parse and targeted replace
+  Preconditions:  File identified, function boundary determinable
+  Excludes:       Multi-file edits, whole-file rewrites
+  Contexts:       EDT-01 SELECT Strategy selects this for function-scoped diffs
+  Rollback:       AST parse failure → fallback to EDT-02 or EDT-03
+  Design:         FunctionLevelCoder locates function node, replaces body, validates AST integrity
+  Classification: Process Decomposition
+end note
+
+== EDT-06 APPLY Function-Level ==
+
+agent -> esm : APPLY_FUNCTION_LEVEL(file_path, function_name, new_body)
+activate esm
+
+esm -> flc : code_function_edit(file_path, function_name, new_body)
+activate flc
+
+flc -> fs : read_file(file_path)
+activate fs
+fs --> flc : source_content
+deactivate fs
+
+flc -> ast : parse(source_content)
+activate ast
+ast --> flc : ast_root
+deactivate ast
+
+flc -> flc : locate_function_node(ast_root, function_name)
+
+flc -> flc : replace_function_body(node, new_body)
+
+flc -> flc : validate_ast_integrity(ast_root)
+
+flc -> fs : write_file(file_path, modified_source)
+activate fs
+fs --> flc : write_result
+deactivate fs
+
+flc --> esm : EditResult(success, file_path, function_name)
+deactivate flc
+
+esm --> agent : EditResult
+deactivate esm
+
+note over participants
+  Flow:    AgentOrchestrator → EditStrategyManager → FunctionLevelCoder → AST parse → replace function → validate
+  State:   <back:#ECEFF1>IDLE</back> → PARSING → REPLACING → VALIDATING → DONE
+  Failure: AST parse error → fallback to EDT-02/EDT-03; function not found → error
+  Success: EditResult with modified file and function scope
+end note
+
+@enduml

@@ -1,110 +1,117 @@
 @startuml uc_server
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Usecase.puml
-!theme plain
 
 ' ============================================================
-' Title:     nasim — Server Layer Use Cases
-' Boundary:  nasim code agent HTTP API
-' Purpose:   Use cases for HTTP server interface
-'            ROD-compliant resource operations
+' Title:     nasim — UC: Server Group
+' Group:     SRV (HTTP Server)
+' Boundary:  nasim code agent
+' Purpose:   RESTful API + SSE streaming for web/mobile/desktop clients
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.car-framework-csr-rod.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
-
-title nasim — Server Layer Use Cases
 
 left to right direction
+
+title nasim — Server Use Cases
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
 
 ' ============================================================
 ' Actors
 ' ============================================================
 
-actor "HTTP Client" as client
+actor "HTTP Client" as HTTPClient <<system>>
 
 ' ============================================================
-' System
+' Cross-Group External References
 ' ============================================================
 
-rectangle "nasim HTTP API" as system {
+usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
+usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
+usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
+usecase "SSN-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
 
-    ' ============================================================
-    ' Session Operations
-    ' ============================================================
+usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
 
-    package "Session Operations" {
-        usecase "UC-SRV-01: List Sessions" as UC01
-        usecase "UC-SRV-02: Create Session" as UC02
-        usecase "UC-SRV-03: Get Session" as UC03
-        usecase "UC-SRV-04: Update Session" as UC04
-        usecase "UC-SRV-05: Delete Session" as UC05
-        usecase "UC-SRV-06: Send Message" as UC06
-        usecase "UC-SRV-07: List Messages" as UC07
-    }
+usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
 
-    ' ============================================================
-    ' Tool Operations
-    ' ============================================================
+' ============================================================
+' System Boundary
+' ============================================================
 
-    package "Tool Operations" {
-        usecase "UC-SRV-08: List Tools" as UC08
-        usecase "UC-SRV-09: Get Tool" as UC09
-    }
-
-    ' ============================================================
-    ' Config Operations
-    ' ============================================================
-
-    package "Config Operations" {
-        usecase "UC-SRV-10: Get Config" as UC10
-        usecase "UC-SRV-11: Update Config" as UC11
-    }
+rectangle "nasim" {
+  package "Server Group (SRV)" {
+    usecase "**SRV-01 LIST Sessions**\n--\nList all sessions with pagination" as SRV01
+    usecase "**SRV-02 CREATE Session**\n--\nCreate a new session" as SRV02
+    usecase "**SRV-03 READ Session**\n--\nGet session details by ID" as SRV03
+    usecase "**SRV-04 UPDATE Session**\n--\nUpdate session metadata" as SRV04
+    usecase "**SRV-05 DELETE Session**\n--\nDelete a session" as SRV05
+    usecase "**SRV-06 SEND Message**\n--\nSend message and receive SSE stream" as SRV06
+    usecase "**SRV-07 LIST Messages**\n--\nList messages in a session" as SRV07
+    usecase "**SRV-08 LIST Tools**\n--\nList registered tools" as SRV08
+    usecase "**SRV-09 READ Tool**\n--\nGet tool details" as SRV09
+    usecase "**SRV-10 READ Config**\n--\nGet current configuration" as SRV10
+    usecase "**SRV-11 UPDATE Config**\n--\nUpdate configuration" as SRV11
+  }
 }
 
 ' ============================================================
-' Relationships
+' Actor -> Use Case Associations
 ' ============================================================
 
-client --> UC01
-client --> UC02
-client --> UC03
-client --> UC04
-client --> UC05
-client --> UC06
-client --> UC07
-client --> UC08
-client --> UC09
-client --> UC10
-client --> UC11
+HTTPClient --> SRV01
+HTTPClient --> SRV02
+HTTPClient --> SRV03
+HTTPClient --> SRV04
+HTTPClient --> SRV05
+HTTPClient --> SRV06
+HTTPClient --> SRV07
+HTTPClient --> SRV08
+HTTPClient --> SRV09
+HTTPClient --> SRV10
+HTTPClient --> SRV11
 
 ' ============================================================
-' Notes
+' Relationships (Boundary -> External UC traceability)
 ' ============================================================
 
-note right of UC01
-  GET /sessions
-  Pagination: page_size, page_token
-  Returns: list of Session resources
-end note
-
-note right of UC02
-  POST /sessions
-  Body: SessionCreate (model required)
-  Returns: 201 + Session resource
-end note
-
-note right of UC06
-  POST /sessions/{session}:send
-  Custom method (ROD AIP-136)
-  Body: MessageCreate (content required)
-  Returns: SSE stream of AgentEvents
-end note
-
-note right of UC08
-  GET /tools
-  Returns: list of Tool resources
-  Read-only, no pagination needed
-end note
+SRV01 ..> SSN03_ext : <<include>>
+SRV02 ..> SSN01_ext : <<include>>
+SRV03 ..> SSN02_ext : <<include>>
+SRV04 ..> SSN01_ext : <<include>>
+SRV05 ..> SSN09_ext : <<include>>
+SRV06 ..> AGT01_ext : <<include>>
+SRV07 ..> SSN02_ext : <<include>>
+SRV10 ..> CFG01_ext : <<include>>
 
 @enduml

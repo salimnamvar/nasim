@@ -1,0 +1,101 @@
+@startuml sq_wrl04_fork_session
+' ============================================================
+' Title:     WRL-04 — Fork Session
+' Boundary:  nasim code agent CLI
+' Purpose:   Fork session at any turn
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    —
+' ============================================================
+
+actor "Developer" as user
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Wire Log Layer" #FFF3E0
+  participant "WireLogger" as logger
+  participant "SessionForker" as forker
+end box
+box "Session Layer" #E8F5E9
+  participant "SessionManager" as session
+end box
+
+note over user, session
+  Scope:
+    - wrl03 FORK Session — fork session at any turn
+
+  Preconditions:
+    - Wire log has events for source session
+    - SessionManager available for new session creation
+
+  Contexts:
+    - Called when user wants to branch from a specific turn
+    - Uses WRL-02 (Read Log) to get events up to fork point
+
+  Excludes:
+    - Log reading (handled by WRL-02)
+    - Session replay (handled by WRL-04)
+    - Event writing (handled by WRL-01)
+
+  Rollback:
+    - Fork failure → no new session created
+
+  Design:
+  Classification: Primary Orchestrator
+    - SessionForker reads events up to fork_point from wire log
+    - Creates new session with copied event history
+    - New session gets unique session_id
+    - Fork point marked in wire log for traceability
+
+  Returns:
+    - Success: ForkResult with new_session_id and fork_point
+    - Failure: ForkError with details
+end note
+
+== wrl03 FORK Session ==
+
+agent -> forker : FORK_SESSION(source_session_id, fork_turn)
+activate forker
+
+forker -> logger : READ_LOG(source_session_id, up_to_turn=fork_turn)
+activate logger
+logger --> forker : events[]
+deactivate logger
+
+forker -> session : CREATE_SESSION(forked_from=source_session_id)
+activate session
+session --> forker : new_session_id
+deactivate session
+
+forker -> forker : copy_events_to_session(events, new_session_id)
+
+forker -> logger : APPEND_EVENT(ForkEvent(source, fork_point, new_session_id))
+activate logger
+logger --> forker : append_success
+deactivate logger
+
+forker --> agent : ForkResult(new_session_id, fork_turn, event_count)
+deactivate forker
+
+note over user, session
+  Flow:
+    - AgentOrchestrator → SessionForker → WireLogger + SessionManager → ForkResult
+
+  State:
+    - <back:#ECEFF1>IDLE</back> → READING → CREATING → COPYING → DONE
+
+  Failure:
+    - Fork failure → no session created
+
+  Success:
+    - ForkResult with new session ID
+
+  Key invariants:
+    - Fork point always recorded in wire log
+    - New session gets unique ID
+    - Events copied atomically (all or none)
+end note
+
+@enduml

@@ -1,0 +1,66 @@
+@startuml sq_cli06_request_approval
+' ============================================================
+' Title:     CLI-06 — Request Approval
+' Boundary:  nasim code agent CLI
+' Purpose:   Display approval prompt and collect developer decision
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — CLI-06 Request Approval
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "Renderer" as renderer
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Safety Layer" #FFF9C4
+  participant "SafetyCoordinator" as safety
+end box
+
+note over user, safety
+  Scope:          Display approval prompt for dangerous operations and collect decision
+  Preconditions:  SafetyCoordinator flagged operation requiring approval
+  Excludes:       Permission checks (SAF-01), auto-approve scenarios
+  Contexts:       Called by AGT-02 when tool requires user confirmation
+  Rollback:       Timeout → default deny
+  Design:         Renderer displays prompt; blocks until user responds or timeout
+  Classification: Primary Orchestrator
+end note
+
+== CLI-06 Request Approval ==
+
+agent -> safety : requires_approval(tool_call)
+activate safety
+safety --> agent : true
+deactivate safety
+
+agent -> renderer : request_approval(tool_description, args)
+activate renderer
+
+renderer --> user : "Allow {tool}({args})? [y/N]"
+user --> renderer : decision (y/n/timeout)
+
+alt approved
+    renderer --> agent : Approved
+else denied
+    renderer --> agent : Denied
+else timeout
+    renderer --> agent : Denied(timeout)
+end
+
+deactivate renderer
+
+note over user, safety
+  Flow:    AgentOrchestrator → Renderer → display prompt → Developer → decision
+  State:   PENDING → APPROVED | DENIED
+  Failure: Timeout → default deny
+  Success: Developer decision returned to agent
+end note
+
+@enduml

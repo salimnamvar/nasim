@@ -1,0 +1,76 @@
+@startuml sq_agt15_dispatch_safety_pipeline
+' ============================================================
+' Title:     AGT-15 — Dispatch Safety Pipeline
+' Boundary:  nasim code agent
+' Purpose:   Run injection scan, egress inspect, and permission check
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — AGT-15 Dispatch Safety Pipeline
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "SafetyCoordinator" as safety
+end box
+box "Safety Layer" #FFF9C4
+  participant "InjectionScanner" as inj
+  participant "EgressInspector" as egr
+  participant "PermissionGate" as perm
+end box
+
+note over agent, perm
+  Scope:          Run full safety pipeline before tool execution
+  Preconditions:  Tool call queued, SafetyCoordinator initialized
+  Excludes:       Individual safety checks (SAF-01/02/03)
+  Contexts:       Called by AGT-02 before every tool dispatch
+  Rollback:       Any stage fails → block tool execution, report violation
+  Design:         Pipeline stages run sequentially; first failure short-circuits
+  Classification: Process Decomposition
+end note
+
+== AGT-15 Dispatch Safety Pipeline ==
+
+agent -> safety : dispatch_safety_check(tool_call)
+activate safety
+
+safety -> inj : scan_prompt(injected_content)
+activate inj
+inj --> safety : scan_result (pass | block)
+deactivate inj
+
+alt injection detected
+    safety --> agent : SafetyViolation(injection)
+end
+
+safety -> egr : inspect_output(tool_output)
+activate egr
+egr --> safety : inspect_result (pass | flag)
+deactivate egr
+
+alt egress violation
+    safety --> agent : SafetyViolation(egress)
+end
+
+safety -> perm : check_permission(tool_name, args)
+activate perm
+perm --> safety : perm_result (allow | deny)
+deactivate perm
+
+alt permission denied
+    safety --> agent : SafetyViolation(permission)
+end
+
+safety --> agent : SafetyPassed
+deactivate safety
+
+note over agent, perm
+  Flow:    AgentOrchestrator → SafetyCoordinator → injection scan → egress inspect → permission check → return
+  State:   CHECKING → INJECTION → EGRESS → PERMISSION → PASSED | BLOCKED
+  Failure: Any stage fails → block, report violation
+  Success: SafetyPassed, tool execution allowed
+end note
+
+@enduml

@@ -1,3 +1,4 @@
+@startuml c4_nasim_component_plugins
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 LAYOUT_LEFT_RIGHT()
@@ -18,7 +19,6 @@ title nasim — Plugins Component Diagram
 
 Container_Boundary(plugins_boundary, "Plugins Group") {
     Component(plugin_loader, "PluginLoader", "nasim/plugins/loader.py", "Discovers and loads plugins from ~/.nasim/plugins/")
-    Component(plugin_manifest, "PluginManifest", "nasim/plugins/manifest.py", "Plugin metadata: name, version, tools, hooks, dependencies")
 }
 
 System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
@@ -26,7 +26,6 @@ System_Ext(tool_registry, "Tool Registry", "Instance-based tool registry")
 System_Ext(hook_manager, "Hook Manager", "Hook registration")
 
 Rel(plugin_loader, plugin_dir, "discovers plugin manifests")
-Rel(plugin_loader, plugin_manifest, "parses manifest")
 Rel(plugin_loader, tool_registry, "registers plugin tools")
 Rel(plugin_loader, hook_manager, "registers plugin hooks")
 

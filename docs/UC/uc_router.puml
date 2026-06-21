@@ -1,47 +1,77 @@
 @startuml uc_router
+
 ' ============================================================
-' Title:     nasim — UC: Model Router
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   Model selection, fallback, and routing strategies
+' Title:     nasim — UC: Router Group
+' Group:     RTG (Model Router)
+' Boundary:  nasim code agent
+' Purpose:   Model selection, fallback chains, task classification
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md IMP-04
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Router Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "AgentOrchestrator" as agent
-
-rectangle "Model Router" {
-    usecase "Select Model" as UC_RTG_01
-    usecase "Apply Fallback" as UC_RTG_02
-    usecase "Classify Task" as UC_RTG_03
-    usecase "Switch Model Mid-Session" as UC_RTG_04
-    usecase "CLASSIFY Task Type" as UC_RTG_05
-    usecase "MATCH Capabilities" as UC_RTG_06
-    usecase "OPTIMIZE Cost" as UC_RTG_07
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "Provider Layer" {
-    usecase "Select Provider Backend" as UC_PRV_04
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-rectangle "Config Layer" {
-    usecase "Load Config" as UC_CFG_01
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
 }
 
-agent --> UC_RTG_01
-agent --> UC_RTG_04
-agent --> UC_RTG_05
-agent --> UC_RTG_06
-agent --> UC_RTG_07
-UC_RTG_01 ..> UC_RTG_03 : <<include>>
-UC_RTG_01 ..> UC_PRV_04 : <<include>>
-UC_RTG_02 ..> UC_PRV_04 : <<include>>
-UC_RTG_01 ..> UC_CFG_01 : <<include>>
-UC_RTG_05 ..> UC_RTG_06 : <<include>>
-UC_RTG_06 ..> UC_RTG_07 : <<include>>
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Router Group (RTG)" {
+    usecase "**RTG-01 SELECT Model**\n--\nSelect optimal model for task" as RTG01
+    usecase "**RTG-02 APPLY Fallback**\n--\nTrigger provider failover on error" as RTG02
+    usecase "**RTG-03 CLASSIFY Task**\n--\nClassify task type for model selection" as RTG03
+    usecase "**RTG-04 SWITCH Model**\n--\nSwitch model at runtime" as RTG04
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> RTG01
+Agent --> RTG02
+Agent --> RTG03
+Agent --> RTG04
+
+' ============================================================
+' Relationships
+' ============================================================
+
+RTG01 ..> RTG03 : <<include>>
+RTG01 ..> RTG02 : <<extend>>
 
 @enduml

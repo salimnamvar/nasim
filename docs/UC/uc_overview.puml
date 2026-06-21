@@ -1,0 +1,194 @@
+@startuml uc_overview
+
+' ============================================================
+' Title:     nasim — UC: Overview
+' Group:     ALL (All Groups)
+' Boundary:  nasim code agent
+' Purpose:   Cross-cutting view of all UC groups and actor interactions
+' Milestone: v1.0
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' ============================================================
+
+left to right direction
+
+title nasim — UC Overview
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Developer" as Developer
+actor "HTTP Client" as HTTPClient <<system>>
+actor "MCP Client" as MCPClient <<system>>
+actor "Observability Platform" as Platform <<system>>
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+
+  package "CLI (CLI)" {
+    usecase "CLI-01\nPROCESS User Input\n[uc_cli]" as UC_CLI <<extref>>
+  }
+
+  package "Agent Core (AGT)" {
+    usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as UC_AGT <<extref>>
+  }
+
+  package "Provider (PRV)" {
+    usecase "PRV-01\nREGISTER Provider\n[uc_provider]" as UC_PRV <<extref>>
+  }
+
+  package "Tools (TL)" {
+    usecase "TL-01\nREAD File\n[uc_tools]" as UC_TL <<extref>>
+  }
+
+  package "MCP (MCP)" {
+    usecase "MCP-01\nCONNECT MCP Server\n[uc_mcp]" as UC_MCP <<extref>>
+  }
+
+  package "Config (CFG)" {
+    usecase "CFG-01\nLOAD Config\n[uc_config]" as UC_CFG <<extref>>
+  }
+
+  package "Session (SSN)" {
+    usecase "SSN-01\nPERSIST Session\n[uc_session]" as UC_SSN <<extref>>
+  }
+
+  package "Server (SRV)" {
+    usecase "SRV-01\nLIST Sessions\n[uc_server]" as UC_SRV <<extref>>
+  }
+
+  package "Hooks (HK)" {
+    usecase "HK-01\nREGISTER Hook\n[uc_hooks]" as UC_HK <<extref>>
+  }
+
+  package "Plugins (PLG)" {
+    usecase "PLG-01\nDISCOVER Plugins\n[uc_plugins]" as UC_PLG <<extref>>
+  }
+
+  package "Safety (SAF)" {
+    usecase "SAF-01\nCHECK Permission\n[uc_safety]" as UC_SAF <<extref>>
+  }
+
+  package "Router (RTG)" {
+    usecase "RTG-01\nSELECT Model\n[uc_router]" as UC_RTG <<extref>>
+  }
+
+  package "Observability (OBS)" {
+    usecase "OBS-01\nSTREAM Structured Log\n[uc_observability]" as UC_OBS <<extref>>
+  }
+
+  package "Memory (MEM)" {
+    usecase "MEM-01\nPERSIST Knowledge\n[uc_memory]" as UC_MEM <<extref>>
+  }
+
+  package "Git (VCS)" {
+    usecase "VCS-01\nREAD Git Status\n[uc_git]" as UC_VCS <<extref>>
+  }
+
+  package "Sandbox (SBX)" {
+    usecase "SBX-01\nISOLATE Command\n[uc_sandbox]" as UC_SBX <<extref>>
+  }
+
+  package "Repo Intelligence (RIM)" {
+    usecase "RIM-01\nINDEX Codebase\n[uc_repo_intelligence]" as UC_RIM <<extref>>
+  }
+
+  package "Edit Strategy (EDT)" {
+    usecase "EDT-01\nSELECT Strategy\n[uc_edit_strategy]" as UC_EDT <<extref>>
+  }
+
+  package "Evaluation (EVL)" {
+    usecase "EVL-01\nEVALUATE Task\n[uc_evaluation]" as UC_EVL <<extref>>
+  }
+
+  package "Wire Log (WRL)" {
+    usecase "WRL-01\nAPPEND Event\n[uc_wire_log]" as UC_WRL <<extref>>
+  }
+
+  package "Context Graph (CTX)" {
+    usecase "CTX-01\nPROCESS Context\n[uc_context]" as UC_CTX <<extref>>
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Developer --> UC_CLI
+Developer --> UC_SAF
+
+HTTPClient --> UC_SRV
+HTTPClient --> UC_OBS
+
+MCPClient --> UC_MCP
+
+Platform --> UC_OBS
+
+Agent --> UC_AGT
+Agent --> UC_PRV
+Agent --> UC_TL
+Agent --> UC_MCP
+Agent --> UC_CFG
+Agent --> UC_SSN
+Agent --> UC_HK
+Agent --> UC_PLG
+Agent --> UC_SAF
+Agent --> UC_RTG
+Agent --> UC_OBS
+Agent --> UC_MEM
+Agent --> UC_VCS
+Agent --> UC_SBX
+Agent --> UC_RIM
+Agent --> UC_EDT
+Agent --> UC_EVL
+Agent --> UC_WRL
+Agent --> UC_CTX
+
+' ============================================================
+' Key Relationships
+' ============================================================
+
+UC_CLI ..> UC_AGT : <<include>>
+UC_AGT ..> UC_RTG : <<include>>
+UC_AGT ..> UC_CTX : <<include>>
+UC_AGT ..> UC_EDT : <<extend>>
+UC_AGT ..> UC_EVL : <<extend>>
+
+@enduml

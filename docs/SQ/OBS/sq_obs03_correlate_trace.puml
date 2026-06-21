@@ -5,7 +5,7 @@
 ' Purpose:   Generate and propagate trace context across nasim surfaces
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -43,6 +43,8 @@ note over cli, otel
     - Structured logging (OBS-01, but consumes trace context)
     - Metrics recording (OBS-02)
     - Wire log (WRL, but receives correlation ids)
+
+  Classification: Process Decomposition
 
   Design:
     - TraceCorrelator generates root trace/span per entrypoint
@@ -109,7 +111,7 @@ note over cli, otel
     - → Every child span links back to root trace_id
 
   State:
-    - IDLE → GENERATING → PROPAGATING → DONE
+    - <back:#ECEFF1>IDLE</back> → GENERATING → PROPAGATING → DONE
 
   Failure:
     - Trace generation failure → fallback to random ids

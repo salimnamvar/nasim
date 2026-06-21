@@ -1,40 +1,87 @@
 @startuml uc_edit_strategy
+
 ' ============================================================
-' Title:     nasim — UC: Edit Strategy
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   Optimal edit format selection, application, validation, review
+' Title:     nasim — UC: Edit Strategy Group
+' Group:     EDT (Edit Strategy)
+' Boundary:  nasim code agent
+' Purpose:   Polymorphic edit strategies with sandboxed diff staging
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Edit Strategy Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "AgentOrchestrator" as agent
-
-rectangle "Edit Strategy" {
-    usecase "SELECT Strategy" as UC_EDT_01
-    usecase "APPLY Edit" as UC_EDT_02
-    usecase "VALIDATE Edit" as UC_EDT_03
-    usecase "STAGE Edit" as UC_EDT_04
-    usecase "REVIEW Diff" as UC_EDT_05
-    usecase "REVERT Edit" as UC_EDT_06
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "External" {
-    component "Host Filesystem" as fs
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-agent --> UC_EDT_01
-agent --> UC_EDT_02
-agent --> UC_EDT_05
-agent --> UC_EDT_06
-UC_EDT_01 ..> UC_EDT_02 : <<include>>
-UC_EDT_02 ..> UC_EDT_03 : <<include>>
-UC_EDT_02 ..> UC_EDT_04 : <<include>>
-UC_EDT_04 ..> UC_EDT_05 : <<include>>
-UC_EDT_02 ..> fs : <<include>>
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Edit Strategy Group (EDT)" {
+    usecase "**EDT-01 SELECT Strategy**\n--\nSelect optimal edit strategy for model" as EDT01
+    usecase "**EDT-02 APPLY Search-Replace**\n--\nSearch-and-replace edit with fuzzy matching" as EDT02
+    usecase "**EDT-03 APPLY Whole-File**\n--\nWhole file rewrite strategy" as EDT03
+    usecase "**EDT-04 APPLY Unified Diff**\n--\nUnified diff format edit" as EDT04
+    usecase "**EDT-05 APPLY Fenced Block**\n--\nFenced code block format edit" as EDT05
+    usecase "**EDT-06 APPLY Function-Level**\n--\nAST-targeted function replacement" as EDT06
+    usecase "**EDT-07 APPLY Diff Sandbox**\n--\nSandboxed diff with validation" as EDT07
+    usecase "**EDT-08 APPLY Architect**\n--\nMulti-file architectural edit" as EDT08
+    usecase "**EDT-09 APPLY Inline Patch**\n--\napply-patch format edit" as EDT09
+    usecase "**EDT-10 STAGE Diff**\n--\nStage edits for review before apply" as EDT10
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> EDT01
+
+' ============================================================
+' Relationships
+' ============================================================
+
+EDT01 ..> EDT02 : <<include>>
+EDT01 ..> EDT03 : <<include>>
+EDT01 ..> EDT04 : <<include>>
+EDT01 ..> EDT05 : <<include>>
+EDT01 ..> EDT06 : <<include>>
+EDT01 ..> EDT07 : <<include>>
+EDT01 ..> EDT08 : <<include>>
+EDT01 ..> EDT09 : <<include>>
+EDT07 ..> EDT10 : <<include>>
 
 @enduml

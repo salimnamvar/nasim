@@ -1,0 +1,62 @@
+@startuml sq_tl13_read_lsp
+' ============================================================
+' Title:     TL-13 — Read LSP
+' Boundary:  nasim code agent
+' Purpose:   Query LSP server for hover, definition, or references
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — TL-13 Read LSP
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "LspTool" as tool
+end box
+participant "LSP Server" as lsp
+
+note over participants
+  Scope:          Query LSP server for hover, definition, or references
+  Preconditions:  LSP server running for target language
+  Excludes:       LSP initialization, diagnostics, code actions
+  Contexts:       Called by AGT-02
+  Rollback:       Error string returned to LLM
+  Design:         Stateless query; no session-side cache
+  Classification: Process Decomposition
+end note
+
+== TL-13 Read LSP ==
+
+agent -> registry : execute("lsp", {query, params})
+registry -> tool : execute(query, params)
+tool -> lsp : send request(query, params)
+
+break LSP server unreachable or times out
+    lsp --> tool : ConnectionError / TimeoutError
+    tool --> registry : ToolResult(success=False, error="LSP unavailable")
+    registry --> agent : ToolResult
+end
+
+break Query returns no results
+    lsp --> tool : empty result
+    tool --> registry : ToolResult(success=False, error="no results")
+    registry --> agent : ToolResult
+end
+
+lsp --> tool : hover/definition/references result
+tool --> registry : ToolResult(success=True, result)
+registry --> agent : ToolResult
+
+note over participants
+  Flow:    AgentOrchestrator -> ToolRegistry -> LspTool -> LSP server -> hover/definition/references -> ToolResult
+  State:   No state change
+  Failure: LSP unavailable or no results -> ToolResult(success=False)
+  Success: LSP query result returned
+end note
+
+@enduml

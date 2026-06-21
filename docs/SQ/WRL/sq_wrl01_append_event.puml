@@ -1,95 +1,68 @@
 @startuml sq_wrl01_append_event
 ' ============================================================
-' Title:     WRL-01 — APPEND Event to Wire Log
-' Boundary:  nasim code agent CLI
+' Title:     WRL-01 — APPEND Event
+' Boundary:  nasim code agent
 ' Purpose:   Append event to wire log
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+title nasim — WRL-01 APPEND Event
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Wire Log Layer" #FFF3E0
-  participant "WireLogger" as logger
-  participant "EventSerializer" as serializer
+box "Wire Log Layer" #E0F2F1
+  participant "WireLog" as wirelog
+  participant "WireAppender" as appender
 end box
-box "FileSystem Layer" #F3E5F5
-  participant "FileSystem" as fs
+box "External" #F5F5F5
+  participant "Host Filesystem" as fs
 end box
 
-note over user, fs
-  Scope:
-    - wrl01 APPEND Event — append event to wire log
-
-  Preconditions:
-    - Wire log file path configured
-    - FileSystem write access available
-
-  Contexts:
-    - Called on every significant agent event
-    - Prerequisite for WRL-02 (Read Log), WRL-03 (Fork), WRL-04 (Replay)
-
-  Excludes:
-    - Log reading (handled by WRL-02)
-    - Session forking (handled by WRL-03)
-
-  Rollback:
-    - Write failure → event lost, log warning
-
-  Design:
-    - WireLogger appends serialized events to log file
-    - EventSerializer handles JSON serialization with timestamps
-    - Each event includes: type, timestamp, payload, session_id
-    - Log is append-only (no in-place edits)
-    - Buffered writes for performance (flush on session end)
-
-  Returns:
-    - Success: AppendResult with event_id and offset
-    - Failure: AppendError with details
+note over agent, fs
+  Scope:          Append event to wire log
+  Preconditions:  Wire log file path configured, write access available
+  Excludes:       Log reading (WRL-02), session forking (WRL-04)
+  Contexts:       Called on every significant agent event; prerequisite for WRL-02/03/04
+  Rollback:       Write failure -> event lost, log warning
+  Design:         WireAppender appends serialized events; append-only log; buffered writes with flush on session end
+  Classification: Primary Orchestrator
 end note
 
-== wrl01 APPEND Event ==
+== WRL-01 APPEND Event ==
 
-agent -> logger : APPEND_EVENT(event)
-activate logger
+agent -> wirelog : APPEND_EVENT(event)
+activate wirelog
 
-logger -> serializer : serialize(event)
-activate serializer
-serializer --> logger : serialized_event
-deactivate serializer
+wirelog -> appender : serialize(event)
+activate appender
+appender --> wirelog : serialized_event
+deactivate appender
 
-logger -> logger : add_metadata(serialized_event, session_id, timestamp)
+wirelog -> wirelog : add_metadata(serialized_event, session_id, timestamp)
 
-logger -> fs : append_file(log_path, serialized_event)
+wirelog -> fs : append_file(log_path, serialized_event)
 activate fs
-fs --> logger : write_result
+
+break Write failure
+    fs --> wirelog : IOError
+    wirelog --> agent : AppendError("write failed")
+end
+
+fs --> wirelog : write_result
 deactivate fs
 
-logger --> agent : AppendResult(event_id, offset)
-deactivate logger
+wirelog --> agent : AppendResult(event_id, offset)
+deactivate wirelog
 
-note over user, fs
-  Flow:
-    - AgentOrchestrator → WireLogger → EventSerializer + FileSystem → AppendResult
-
-  State:
-    - IDLE → SERIALIZING → APPENDING → DONE
-
-  Failure:
-    - Write failure → event lost, warning logged
-
-  Success:
-    - AppendResult with event_id and offset
-
-  Key invariants:
-    - Log is append-only
-    - Each event has unique event_id
-    - Timestamp always included
+note over agent, fs
+  Flow:    AgentOrchestrator -> WireLog -> WireAppender -> Host Filesystem -> AppendResult
+  State:   No state change
+  Failure: Write failure -> event lost, warning logged
+  Success: AppendResult with event_id and offset
 end note
 
 @enduml

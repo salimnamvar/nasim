@@ -24,6 +24,7 @@ title nasim — Observability Components
 Container_Ext(ContainerRuntime, "Container Runtime", "Docker / Kubernetes CRI", "Passive infrastructure. Captures stdout/stderr from the process. Does not tail, transform, or ship logs.")
 Container_Ext(Prometheus, "Prometheus", "Metrics Store", "Pull-scrapes /metrics endpoint. Application never pushes metrics.")
 Container_Ext(OTelCollector, "OTel Collector", "OTLP/gRPC", "Optional. Receives traces/metrics via OTLP when otel feature is enabled. nasim never pulls from or configures the collector.")
+Container_Ext(cli_renderer, "CLI Renderer", "Rich terminal output engine", "Renders human-readable terminal output for CLI mode.")
 
 ' ============================================================
 ' nasim Core Library — Observability Group
@@ -67,7 +68,7 @@ Container_Boundary(nasim_core, "nasim Core Library") {
     }
 
     Boundary(config_group, "Config Group") {
-        Component(config, "Config", "dataclass", "Layered config: log.level, log.format, wire.enabled, observability.redact, metrics.enabled")
+        Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags")
     }
 }
 
@@ -90,14 +91,15 @@ Rel(context_propagator, wire_log, "injects correlation ids into wire events")
 Rel(log_redactor, structured_logger, "sanitizes log records before emission")
 Rel(log_redactor, wire_log, "sanitizes wire events before append")
 Rel(dual_output_adapter, structured_logger, "delegates structured JSON emission to stdout")
-Rel(dual_output_adapter, ContainerRuntime, "writes human-readable output when isatty")
+Rel(dual_output_adapter, ContainerRuntime, "writes JSON to stdout (machine-readable)")
+Rel(dual_output_adapter, cli_renderer, "delegates human-readable output when isatty")
 Rel(instrumentation_mw, context_propagator, "generates and binds request_id to contextvars")
 Rel(instrumentation_mw, metrics_collector, "records HTTP request duration and status")
 Rel(instrumentation_mw, structured_logger, "logs HTTP request lifecycle")
-Rel(config, structured_logger, "configures log level and format")
-Rel(config, metrics_collector, "enables/disables metrics emission")
-Rel(config, log_redactor, "configures redaction rules")
-Rel(config, otel_exporter, "enables/disables OTel feature")
+Rel(config_loader, structured_logger, "configures log level and format")
+Rel(config_loader, metrics_collector, "enables/disables metrics emission")
+Rel(config_loader, log_redactor, "configures redaction rules")
+Rel(config_loader, otel_exporter, "enables/disables OTel feature")
 
 ' ============================================================
 ' Optional OTel path (behind feature flag)

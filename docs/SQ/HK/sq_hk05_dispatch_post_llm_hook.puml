@@ -1,0 +1,59 @@
+@startuml sq_hk05_dispatch_post_llm_hook
+' ============================================================
+' Title:     HK-05 — DISPATCH Post-LLM Hook
+' Boundary:  nasim code agent
+' Purpose:   Execute hooks after LLM call completes
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — HK-05 DISPATCH Post-LLM Hook
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Hooks Layer" #FFFDE7
+  participant "HookManager" as hooks
+  participant "Hook" as hook
+end box
+
+note over agent, hook
+  Scope:          Execute hooks after LLM call completes
+  Preconditions:  LLM call completed, hooks registered for PostLLMCall event
+  Excludes:       Pre-LLM hooks (HK-04), tool hooks (HK-02/03)
+  Contexts:       Called by AGT-01 (PROCESS User Task) after PRV-02
+  Rollback:       Hook failure logged; pipeline continues
+  Design:         Priority-ordered execution; short-circuit on deny
+  Classification: Process Decomposition
+end note
+
+== HK-05 DISPATCH Post-LLM Hook ==
+
+agent -> hooks : dispatch(PostLLMCall, llm_result)
+activate hooks
+hooks -> hooks : find hooks for PostLLMCall
+
+loop for each hook in priority order
+    hooks -> hook : execute(llm_result)
+    activate hook
+    hook --> hooks : HookResult(action, data?)
+    deactivate hook
+
+    break action == DENY
+        hooks --> agent : HookResult(action=DENY, reason)
+    end
+end
+
+hooks --> agent : HookResult(action=ALLOW, modified_data?)
+deactivate hooks
+
+note over agent, hook
+  Flow:    AgentOrchestrator -> HookManager -> find hooks -> execute in priority order -> return HookResult
+  State:   <back:#FFFDE7>HOOK_RUNNING</back>
+  Failure: Hook failure logged; remaining hooks still execute
+  Success: HookResult returned to agent
+end note
+
+@enduml

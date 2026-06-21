@@ -1,0 +1,54 @@
+@startuml sq_sbx04_limit_resources
+' ============================================================
+' Title:     SBX-04 — LIMIT Resources
+' Boundary:  nasim code agent
+' Purpose:   Enforce CPU, memory, and disk quotas per sandbox instance
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — SBX-04 LIMIT Resources
+
+box "Sandbox Layer" #F1F8E9
+  participant "SandboxExecutor" as executor
+  participant "ResourceLimiter" as limiter
+end box
+
+note over executor, limiter
+  Scope:          Resource quota enforcement via cgroups
+  Preconditions:  Sandbox instance created, limits defined
+  Excludes:       Process monitoring (SBX-03)
+  Contexts:       Called by SandboxExecutor during sandbox creation
+  Rollback:       Remove cgroup on setup failure
+  Design:         Linux cgroup v2 with CPU, memory, disk I/O limits
+  Classification: Process Decomposition
+end note
+
+== SBX-04 LIMIT Resources ==
+
+executor -> limiter : set_limits(cgroup_id, quotas)
+activate limiter
+
+limiter -> limiter : create cgroup v2 hierarchy
+
+break Cgroup setup fails
+    limiter --> executor : CgroupError("setup failed")
+end
+
+limiter -> limiter : set cpu.max (CPU quota)
+limiter -> limiter : set memory.max (memory limit)
+limiter -> limiter : set io.max (disk I/O limit)
+
+limiter --> executor : limits_applied(cgroup_id)
+deactivate limiter
+
+note over executor, limiter
+  Flow:    SandboxExecutor -> ResourceLimiter -> create cgroup -> set CPU -> set memory -> set I/O -> confirm
+  State:   No state change
+  Failure: Cgroup setup fails -> remove partial cgroup, return error
+  Success: Executor receives cgroup with enforced limits
+end note
+
+@enduml

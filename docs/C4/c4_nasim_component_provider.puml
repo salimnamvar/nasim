@@ -18,13 +18,6 @@ LAYOUT_WITH_LEGEND()
 title nasim — Provider Components
 
 ' ============================================================
-' Tags & Styling
-' ============================================================
-
-AddElementTag("future", $bgColor="#F0F0F0", $fontColor="#666666", $borderColor="#999999", $borderStyle=DashedLine(), $legendText="Future scope (inactive)")
-AddRelTag("future_rel", $textColor="#666666", $lineColor="#999999", $lineStyle=DashedLine(), $legendText="Future relationship")
-
-' ============================================================
 ' Provider Group
 ' ============================================================
 
@@ -33,79 +26,19 @@ Container_Boundary(provider_boundary, "Provider Group") {
     Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name. All providers route through litellm.")
 
     Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")
-
-    Component(model_router, "ModelRouter", "", "Model selection: task classification, provider preference, context window matching")
-
-    Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
-
-    Component(provider_caps, "ProviderCapabilities", "", "Capability declaration: streaming, tools, vision, reasoning, context window per model")
-
-    Component(model_catalog, "ModelCatalog", "", "Model metadata: context limits, pricing, capabilities sourced from litellm database")
 }
 
 ' ============================================================
-' External: LLM Backends (all 100+ via litellm)
+' External: LLM Backends (consolidated — litellm routes to 100+)
 ' ============================================================
 
-System_Ext(anthropic_api, "Anthropic API", "Claude models")
-System_Ext(openai_api, "OpenAI API", "GPT, o-series models")
-System_Ext(google_api, "Google AI API", "Gemini models")
-System_Ext(deepseek_api, "DeepSeek API", "DeepSeek models")
-System_Ext(ollama_api, "Ollama Server", "Local inference")
-System_Ext(openrouter_api, "OpenRouter", "Model aggregator")
-System_Ext(bedrock_api, "AWS Bedrock", "Amazon-hosted models")
-System_Ext(vertex_api, "Google Vertex AI", "Enterprise Gemini")
-System_Ext(xai_api, "xAI API", "Grok models")
-System_Ext(mistral_api, "Mistral API", "Mistral models")
-System_Ext(groq_api, "Groq API", "Fast inference")
-System_Ext(together_api, "Together AI", "Open models")
-System_Ext(novita_api, "Novita AI", "Open models")
-System_Ext(huggingface_api, "HuggingFace", "Inference API")
-System_Ext(lmstudio_api, "LM Studio", "Local inference")
-System_Ext(deepinfra_api, "DeepInfra", "Open models")
-System_Ext(cerebras_api, "Cerebras", "Fast inference")
-System_Ext(perplexity_api, "Perplexity", "Search-augmented")
-System_Ext(cohere_api, "Cohere", "Command models")
-System_Ext(ibm_watsonx_api, "IBM watsonx", "Enterprise models")
-System_Ext(sambanova_api, "SambaNova", "Fast inference")
-System_Ext(nvidia_api, "NVIDIA NIM", "GPU-optimized models")
-System_Ext(cloudflare_api, "Cloudflare Workers AI", "Edge inference")
-System_Ext(vllm_api, "vLLM Server", "Local high-throughput")
-System_Ext(litellm_server, "LiteLLM Server", "Self-hosted proxy")
+System_Ext(all_llm_backends, "100+ LLM Backends", "Unified via litellm. Includes cloud (OpenAI, Anthropic, Google, DeepSeek, Mistral, Groq, Cohere, etc.) and local (Ollama, vLLM, LM Studio)")
 
 ' ============================================================
 ' Provider Relationships
 ' ============================================================
 
-Rel(model_router, provider, "selects provider for task")
-Rel(model_router, provider_caps, "queries capabilities")
-Rel(model_router, model_catalog, "resolves model metadata")
-Rel(model_router, fallback_chain, "triggers failover on error")
 Rel(provider, litellm_proxy, "delegates all LLM calls")
-Rel(litellm_proxy, anthropic_api, "routes to provider", "litellm handles auth + transport")
-Rel(litellm_proxy, openai_api, "routes to provider")
-Rel(litellm_proxy, google_api, "routes to provider")
-Rel(litellm_proxy, deepseek_api, "routes to provider")
-Rel(litellm_proxy, ollama_api, "routes to provider")
-Rel(litellm_proxy, openrouter_api, "routes to provider")
-Rel(litellm_proxy, bedrock_api, "routes to provider")
-Rel(litellm_proxy, vertex_api, "routes to provider")
-Rel(litellm_proxy, xai_api, "routes to provider")
-Rel(litellm_proxy, mistral_api, "routes to provider")
-Rel(litellm_proxy, groq_api, "routes to provider")
-Rel(litellm_proxy, together_api, "routes to provider")
-Rel(litellm_proxy, novita_api, "routes to provider")
-Rel(litellm_proxy, huggingface_api, "routes to provider")
-Rel(litellm_proxy, lmstudio_api, "routes to provider")
-Rel(litellm_proxy, deepinfra_api, "routes to provider")
-Rel(litellm_proxy, cerebras_api, "routes to provider")
-Rel(litellm_proxy, perplexity_api, "routes to provider")
-Rel(litellm_proxy, cohere_api, "routes to provider")
-Rel(litellm_proxy, ibm_watsonx_api, "routes to provider")
-Rel(litellm_proxy, sambanova_api, "routes to provider")
-Rel(litellm_proxy, nvidia_api, "routes to provider")
-Rel(litellm_proxy, cloudflare_api, "routes to provider")
-Rel(litellm_proxy, vllm_api, "routes to provider")
-Rel(litellm_proxy, litellm_server, "routes to self-hosted proxy")
+Rel(litellm_proxy, all_llm_backends, "routes via model string prefix", "HTTP/JSON")
 
 @enduml

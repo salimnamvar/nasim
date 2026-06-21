@@ -1,42 +1,76 @@
 @startuml uc_plugins
+
 ' ============================================================
-' Title:     nasim — UC: Plugin System
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   Plugin discovery, loading, and dynamic registration
+' Title:     nasim — UC: Plugins Group
+' Group:     PLG (Plugins)
+' Boundary:  nasim code agent
+' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/audit/nasim-car-improvement-plan.md CAR-18
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Plugins Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "Developer" as user
-actor "AgentOrchestrator" as agent
-
-rectangle "Plugin System" {
-    usecase "Discover Plugins" as UC_PLG_01
-    usecase "Load Plugin Manifest" as UC_PLG_02
-    usecase "Register Plugin Tools" as UC_PLG_03
-    usecase "Register Plugin Hooks" as UC_PLG_04
-    usecase "Enable/Disable Plugin" as UC_PLG_05
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "Tool Layer" {
-    usecase "Register Tool" as UC_TL_REG
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-rectangle "Hook Layer" {
-    usecase "Register Hook" as UC_HK_01
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Plugins Group (PLG)" {
+    usecase "**PLG-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" as PLG01
+    usecase "**PLG-02 LOAD Manifest**\n--\nParse plugin manifest metadata" as PLG02
+    usecase "**PLG-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" as PLG03
+    usecase "**PLG-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" as PLG04
+    usecase "**PLG-05 ENABLE Plugin**\n--\nEnable a plugin" as PLG05
+    usecase "**PLG-06 DISABLE Plugin**\n--\nDisable a plugin" as PLG06
+  }
 }
 
-user --> UC_PLG_05
-agent --> UC_PLG_01
-UC_PLG_01 ..> UC_PLG_02 : <<include>>
-UC_PLG_02 ..> UC_PLG_03 : <<include>>
-UC_PLG_02 ..> UC_PLG_04 : <<include>>
-UC_PLG_03 ..> UC_TL_REG : <<include>>
-UC_PLG_04 ..> UC_HK_01 : <<include>>
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> PLG01
+Agent --> PLG02
+Agent --> PLG03
+Agent --> PLG04
+Agent --> PLG05
+Agent --> PLG06
+
+' ============================================================
+' Relationships
+' ============================================================
+
+PLG01 ..> PLG02 : <<include>>
+PLG02 ..> PLG03 : <<include>>
+PLG02 ..> PLG04 : <<include>>
 
 @enduml

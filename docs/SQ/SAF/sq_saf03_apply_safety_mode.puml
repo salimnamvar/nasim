@@ -5,7 +5,7 @@
 ' Purpose:   Configure safety mode from config
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -23,6 +23,7 @@ note over cfg, gate
   Excludes:       Runtime permission checks (SAF-01)
   Rollback:       N/A — mode is always set
   Design:         ask | auto | off — set once at startup
+  Classification: Process Decomposition
 end note
 
 == SAF-03 Apply Safety Mode ==

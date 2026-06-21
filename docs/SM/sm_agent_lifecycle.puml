@@ -4,70 +4,146 @@
 ' Boundary:  nasim code agent CLI + HTTP API
 ' Purpose:   Process FSM showing all agent states and transitions
 ' Milestone: v1.0
-' Version:   4.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
 '            do not apply (documented deviation).
+' Convention: All transitions are triggered by the corresponding UC ID
+'            (e.g., EVL-01, EDT-10, AGT-07) as listed in docs/UC/README.md.
 ' ============================================================
 
 title nasim — Agent Lifecycle
 
-[*] --> IDLE : Startup
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+}
 
-IDLE --> LISTENING : User input received
-IDLE --> SERVING : HTTP request received (server mode)
-IDLE --> [*] : /quit or EOF
+[*] --> IDLE : AGT-01
 
-LISTENING --> THINKING : Input parsed
+state "IDLE" as IDLE #ECEFF1
+IDLE : Agent waiting for user input.
+IDLE : No active provider call.
 
-THINKING --> RESPONDING : LLM returns text
-THINKING --> TOOL_EXEC : LLM returns tool_calls
-THINKING --> COMPACTING : token_count > budget
-THINKING --> ROUTING : ModelRouter resolving
-THINKING --> ERROR : LLM call fails
-THINKING --> SERVING : Response to HTTP client
-THINKING --> EVALUATING : task_complete AND evaluation_enabled
+state "LISTENING" as LISTENING #E8EAF6
+LISTENING : Receiving and parsing user input.
+LISTENING : CLI-01 PROCESS User Input.
 
-ROUTING --> THINKING : Model selected
+state "THINKING" as THINKING #FFF3E0
+THINKING : LLM processing messages.
+THINKING : PRV-02 REQUEST Chat or PRV-03 STREAM Chat.
 
-TOOL_EXEC --> THINKING : Tool result appended
-TOOL_EXEC --> AWAITING_APPROVAL : safety_mode=ask AND unsafe
-TOOL_EXEC --> HOOK_RUNNING : Hook registered
-TOOL_EXEC --> ERROR : Tool execution fails
-TOOL_EXEC --> STAGING : diff_sandbox mode
+state "TOOL_EXEC" as TOOL_EXEC #F3E5F5
+TOOL_EXEC : Executing a tool call.
+TOOL_EXEC : AGT-02 DISPATCH Tool Call.
 
-HOOK_RUNNING --> TOOL_EXEC : Hook allows
-HOOK_RUNNING --> IDLE : Hook denies
+state "RESPONDING" as RESPONDING #E8F5E9
+RESPONDING : Streaming final text to user.
+RESPONDING : CLI-03 STREAM Output.
 
-AWAITING_APPROVAL --> TOOL_EXEC : User approves (y)
-AWAITING_APPROVAL --> IDLE : User rejects (N)
+state "ERROR" as ERROR #FFEBEE
+ERROR : Error occurred.
+ERROR : AGT-14 HANDLE Error.
 
-COMPACTING --> THINKING : Compaction complete
+state "COMPACTING" as COMPACTING #E0F2F1
+COMPACTING : Summarizing old exchanges.
+COMPACTING : AGT-06 COMPACT Context.
 
-RESPONDING --> IDLE : Response complete
+state "AWAITING_APPROVAL" as AWAITING_APPROVAL #FFF9C4
+AWAITING_APPROVAL : Waiting for user permission.
+AWAITING_APPROVAL : SAF-02 REQUEST Approval.
 
-ERROR --> IDLE : Error displayed
+state "PLANNING" as PLANNING #E3F2FD
+PLANNING : Plan mode, tool calls queued.
+PLANNING : AGT-07 QUEUE Plan.
 
-SERVING --> THINKING : Request processed
-SERVING --> IDLE : Response complete
+state "HOOK_RUNNING" as HOOK_RUNNING #FFFDE7
+HOOK_RUNNING : Pre/post hook executing.
+HOOK_RUNNING : HK-02..05 DISPATCH Hook.
 
-IDLE --> PLANNING : /plan command
-PLANNING --> IDLE : /plan off
+state "ROUTING" as ROUTING #EDE7F6
+ROUTING : Model selection in progress.
+ROUTING : RTG-01 SELECT Model.
 
-EVALUATING --> REVIEWING : success checks passed, optional review
-EVALUATING --> RETRYING : success checks failed
-EVALUATING --> THINKING : evaluation passed, continue
+state "SERVING" as SERVING #E0F7FA
+SERVING : HTTP server handling request.
+SERVING : SRV-06 DISPATCH Message.
 
-REVIEWING --> THINKING : review approved
-REVIEWING --> RETRYING : review rejected
+state "EVALUATING" as EVALUATING #F9FBE7
+EVALUATING : Evaluating task completion.
+EVALUATING : EVL-01 EVALUATE Task.
 
-RETRYING --> THINKING : retry with feedback
-RETRYING --> ERROR : max retries exceeded
+state "REVIEWING" as REVIEWING #FFF8E1
+REVIEWING : LLM review of results.
+REVIEWING : EVL-04 VALIDATE With LLM.
 
-STAGING --> AWAITING_DIFF_APPROVAL : present diff to user
+state "RETRYING" as RETRYING #FBE9E7
+RETRYING : Retrying with feedback.
+RETRYING : EVL-06 COORDINATE Retry.
 
-AWAITING_DIFF_APPROVAL --> TOOL_EXEC : user approves
-AWAITING_DIFF_APPROVAL --> IDLE : user rejects
+state "STAGING" as STAGING #F1F8E9
+STAGING : Diff sandbox staging.
+STAGING : EDT-10 STAGE Diff.
+
+state "AWAITING_DIFF_APPROVAL" as AWAITING_DIFF_APPROVAL #FCE4EC
+AWAITING_DIFF_APPROVAL : Presenting diff to user.
+AWAITING_DIFF_APPROVAL : SAF-02 REQUEST Approval.
+
+IDLE --> LISTENING : CLI-01
+IDLE --> SERVING : SRV-06
+IDLE --> [*] : CLI-02
+
+LISTENING --> THINKING : CLI-01
+
+THINKING --> RESPONDING : PRV-02
+THINKING --> TOOL_EXEC : PRV-02
+THINKING --> COMPACTING : AGT-06
+THINKING --> ROUTING : RTG-01
+THINKING --> ERROR : PRV-02
+THINKING --> RESPONDING : SRV-06
+THINKING --> EVALUATING : EVL-01
+
+ROUTING --> THINKING : RTG-01
+
+TOOL_EXEC --> THINKING : AGT-02
+TOOL_EXEC --> AWAITING_APPROVAL : SAF-02
+TOOL_EXEC --> HOOK_RUNNING : HK-02
+TOOL_EXEC --> ERROR : AGT-02
+TOOL_EXEC --> STAGING : EDT-10
+
+HOOK_RUNNING --> TOOL_EXEC : HK-02
+HOOK_RUNNING --> IDLE : HK-02
+
+AWAITING_APPROVAL --> TOOL_EXEC : SAF-02
+AWAITING_APPROVAL --> IDLE : SAF-02
+
+COMPACTING --> THINKING : AGT-06
+
+RESPONDING --> IDLE : CLI-03
+
+ERROR --> IDLE : AGT-14
+
+SERVING --> THINKING : SRV-06
+SERVING --> IDLE : SRV-06
+
+IDLE --> PLANNING : AGT-07
+PLANNING --> IDLE : AGT-07
+
+EVALUATING --> REVIEWING : EVL-01
+EVALUATING --> RETRYING : EVL-01
+EVALUATING --> THINKING : EVL-01
+
+REVIEWING --> THINKING : EVL-04
+REVIEWING --> RETRYING : EVL-04
+
+RETRYING --> THINKING : EVL-06
+RETRYING --> ERROR : EVL-06
+
+STAGING --> AWAITING_DIFF_APPROVAL : EDT-10
+
+AWAITING_DIFF_APPROVAL --> TOOL_EXEC : SAF-02
+AWAITING_DIFF_APPROVAL --> IDLE : SAF-02
 
 @enduml

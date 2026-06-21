@@ -1,0 +1,65 @@
+@startuml sq_evl05_validate_test_suite
+' ============================================================
+' Title:     EVL-05 — VALIDATE Test Suite
+' Boundary:  nasim code agent
+' Purpose:   Run test suite and collect pass/fail/skip results
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — EVL-05 VALIDATE Test Suite
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Layer" #F9FBE7
+  participant "EvaluationEngine" as engine
+  participant "TestRunner" as runner
+end box
+box "Tool Layer" #F3E5F5
+  participant "ShellRunner" as shell
+end box
+
+note over participants
+  Scope:          Execute test suite and collect structured results
+  Preconditions:  Test framework configured, test files present
+  Excludes:       LLM-based review, quality signal recording
+  Contexts:       EVL-01 EVALUATE Task delegates test validation here
+  Rollback:       No state change — read-only execution
+  Design:         TestRunner invokes configured test framework, parses output into structured results
+  Classification: Process Decomposition
+end note
+
+== EVL-05 VALIDATE Test Suite ==
+
+agent -> engine : VALIDATE_TEST_SUITE(test_command, project_path)
+activate engine
+
+engine -> runner : run_test_suite(test_command, project_path)
+activate runner
+
+runner -> shell : execute(test_command, timeout=120s, cwd=project_path)
+activate shell
+shell --> runner : TestOutput(exit_code, stdout, stderr)
+deactivate shell
+
+runner -> runner : parse_test_results(stdout)
+
+runner -> runner : classify_results(parsed_output)
+
+runner --> engine : TestSuiteResult(total, passed, failed, skipped, errors[])
+deactivate runner
+
+engine --> agent : TestSuiteResult
+deactivate engine
+
+note over participants
+  Flow:    EvaluationEngine -> TestRunner -> run test suite -> collect results -> return
+  State:   <back:#ECEFF1>IDLE</back> → RUNNING → PARSING → DONE
+  Failure: Test framework error → TestSuiteResult with error details
+  Success: TestSuiteResult with counts and failure details
+end note
+
+@enduml

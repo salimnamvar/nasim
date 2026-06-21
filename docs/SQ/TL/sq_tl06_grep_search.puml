@@ -5,7 +5,7 @@
 ' Purpose:   Search file contents by regex pattern
 ' Milestone: v1.0
 ' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
+' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
@@ -22,6 +22,7 @@ note over registry, shell
   Excludes:       File globbing, file reading
   Rollback:       Error string returned to LLM
   Design:         Prefers ripgrep; falls back to Python re
+  Classification: Process Decomposition
 end note
 
 == TL-06 GREP Search ==

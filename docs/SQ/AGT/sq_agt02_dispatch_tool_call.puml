@@ -1,119 +1,102 @@
 @startuml sq_agt02_dispatch_tool_call
 ' ============================================================
 ' Title:     AGT-02 — DISPATCH Tool Call
-' Boundary:  nasim code agent CLI
-' Purpose:   Tool dispatch with permission gate check
+' Boundary:  nasim code agent
+' Purpose:   Tool dispatch with Safety Pipeline (no God Object)
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   3.0.0
+' Source:    docs/UC/README.md
+' Review:    Meta-Software Designer audit 2026-06-21
+' Pattern:   Service (AgentOrchestrator) -> Safety (SafetyCoordinator) -> Repository (ToolRegistry)
 ' ============================================================
 
-actor "Developer" as user
+title nasim — AGT-02 DISPATCH Tool Call
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
+  participant "SafetyCoordinator" as safety
+  participant "ErrorBoundary" as eb
+end box
+box "Safety Layer" #FFF9C4
   participant "PermissionGate" as gate
+  participant "InjectionScanner" as inj
+  participant "EgressInspector" as egr
 end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
   participant "Tool" as tool
 end box
-box "Safety Layer" #FFF9C4
+box "Observability Layer" #E0F2F1
+  participant "StructuredLogger" as logger
 end box
 
-note over user, tool
-  Scope:
-    - agt02 DISPATCH Tool Call — single tool execution within agt01 loop
-
-  Preconditions:
-    - agt01 in progress, LLM returned tool_calls array
-    - ToolRegistry populated with available tools
-    - PermissionGate initialized with safety_mode from Config
-
-  Contexts:
-    - Called from agt01 (PROCESS User Task) for each tool_call
-    - Part of the inner loop within the agentic cycle
-
-  Excludes:
-    - LLM call logic (prv02 handles that)
-    - Permission prompt rendering (CLI-06 handles the user prompt)
-    - Tool result display (CLI-03 handles that)
-
-  Rollback:
-    - Tool not found → ToolResult(success=false, error="unknown tool")
-    - Permission denied → ToolResult(success=false, error="permission denied")
-    - Tool execution error → ToolResult(success=false, error=exception message)
-
-  Design:
-    - PermissionGate checks tool.safe flag against safety_mode
-    - In "ask" mode: unsafe tools return AWAITING_APPROVAL event
-    - In "auto" mode: all tools execute without prompt
-    - In "off" mode: unsafe tools blocked, safe tools execute
-    - ToolRegistry.find() by tool name from LLM tool_call
-    - ToolResult is structured (success, content, error) — never raw string
-
-  Returns:
-    - Success: ToolResult with content
-    - Failure: ToolResult with error description
-    - Blocked: ToolResult(success=false, error="permission denied")
+note over agent, logger
+  Scope:          Dispatch a single tool call with full safety pipeline
+  Preconditions:  Tool call from LLM, ToolRegistry populated, SafetyCoordinator initialized
+  Excludes:       LLM call logic (PRV-02), Permission prompt rendering (CLI-06), Tool result display (CLI-03)
+  Contexts:       Called by AGT-01 (PROCESS User Task) for each tool_call in the inner loop
+  Rollback:       Safety violation -> ToolResult(success=false); Tool error -> ErrorBoundary -> ToolResult(error)
+  Design:         NO GOD OBJECT: AgentOrchestrator delegates safety to SafetyCoordinator (AGT-15).
+                  SafetyCoordinator composes PermissionGate, InjectionScanner, EgressInspector.
+                  ToolResult is always structured (success, content, error)
+  Classification: UC-level Sub-flow
 end note
 
-== agt02 DISPATCH Tool Call ==
+== AGT-02 DISPATCH Tool Call ==
 
 agent -> agent : receive tool_call from LLM response
-note right of agent
-  tool_call = {name: "read_file", arguments: {...}}
-end note
 
-agent -> gate : CHECK(tool_call.name)
-activate gate
+hnote over agent #FFF9C4 : **State: AWAITING_APPROVAL** (if unsafe)
 
-gate -> gate : check tool.safe against safety_mode
+' --- NO GOD OBJECT: Delegate to SafetyCoordinator (AGT-15) ---
+agent -> safety : RUN_SAFETY_PIPELINE(tool_call)
+activate safety
+ref over safety
+  AGT-15: DISPATCH Safety Pipeline (injection, egress, permission)
+end ref
+safety --> agent : SafetyResult(approved/denied)
+deactivate safety
 
-alt safety_mode = ask AND tool.unsafe
-    gate --> agent : AWAITING_APPROVAL event
-    note right of gate
-      CLI-06 renders [y/N] prompt
-      User approves → agent re-calls agt02
-      User rejects → ToolResult(denied)
-    end note
-else safety_mode = off AND tool.unsafe
-    gate --> agent : ToolResult(success=false, error="permission denied")
-else safe tool or auto mode
-    gate --> agent : approved
+alt safety denied
+    agent -> agent : ToolResult(success=false, error="safety violation")
+    ref over agent, logger
+      OBS-01: STREAM Structured Log (tool blocked by safety)
+    end ref
+else safety approved
+    hnote over agent #F3E5F5 : **State: TOOL_EXEC**
+
+    agent -> registry : find(tool_call.name)
+    activate registry
+    alt tool not found
+        registry --> agent : null
+        agent -> eb : handle(UnknownTool)
+        activate eb
+        eb --> agent : RecoveryAction(abort)
+        deactivate eb
+        agent -> agent : ToolResult(success=false, error="unknown tool")
+    else tool found
+        registry --> tool : tool
+        deactivate registry
+        activate tool
+        agent -> tool : execute(tool_call.arguments)
+        tool --> agent : ToolResult
+        deactivate tool
+        ref over agent, logger
+          OBS-01: STREAM Structured Log (tool execution result)
+        end ref
+    end
 end
 
-deactivate gate
+agent -> agent : append ToolResult to messages
 
-agent -> registry : find(tool_call.name)
-activate registry
+hnote over agent #FFF3E0 : **State: THINKING**
 
-alt tool not found
-    registry --> agent : null
-    agent -> agent : ToolResult(success=false, error="unknown tool: {name}")
-else tool found
-    registry --> tool : tool
-    deactivate registry
-    activate tool
-    agent -> tool : execute(tool_call.arguments)
-    tool --> agent : ToolResult
-    deactivate tool
-end
-
-agent --> agent : append ToolResult to messages
-
-note over user, tool
-  Flow:
-    - AgentOrchestrator → PermissionGate → ToolRegistry → Tool.execute()
-
-  State:
-    - THINKING → TOOL_EXEC → THINKING (with tool result in messages)
-
-  Key invariants:
-    - Every tool call goes through PermissionGate
-    - ToolResult is always structured (success, content, error)
-    - Unknown tool returns error ToolResult (not exception)
+note over agent, logger
+  Flow:    AgentOrchestrator -> SafetyCoordinator (AGT-15) -> ToolRegistry -> Tool.execute()
+  State:   <back:#FFF3E0>THINKING</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> (if unsafe) -> <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF3E0>THINKING</back>
+  Failure: Safety violation -> ToolResult(error); Unknown tool -> ErrorBoundary -> ToolResult(error)
+  Success: ToolResult appended to ConversationHistory
+  Key invariants: Every tool goes through SafetyCoordinator. No direct PermissionGate call from AgentOrchestrator
 end note
 
 @enduml

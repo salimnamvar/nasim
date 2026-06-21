@@ -1,0 +1,60 @@
+@startuml sq_mem04_scope_knowledge
+' ============================================================
+' Title:     MEM-04 — SCOPE Knowledge
+' Boundary:  nasim code agent
+' Purpose:   Filter knowledge by scope (global, project, session)
+' Milestone: v1.0
+' Version:   2.0.0
+' Source:    docs/UC/README.md
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — MEM-04 SCOPE Knowledge
+
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Memory Layer" #E0F2F1
+  participant "MemoryScope" as scope
+  participant "MemoryStore" as store
+end box
+
+note over agent, store
+  Scope:          Scope-based filtering of knowledge entries
+  Preconditions:  MemoryStore with multi-scope entries
+  Excludes:       Search and recall (MEM-02, MEM-03)
+  Contexts:       Called by MEM-01 and MEM-02 for scope validation
+  Rollback:       No rollback needed (read-only operation)
+  Design:         Three-level scope hierarchy: global > project > session
+  Classification: Process Decomposition
+end note
+
+== MEM-04 SCOPE Knowledge ==
+
+agent -> scope : filter(query, scope)
+activate scope
+
+scope -> scope : resolve_scope_hierarchy(scope)
+
+scope -> store : get_entries_in_scope(scope)
+activate store
+store --> scope : entries
+deactivate store
+
+scope -> scope : apply scope mask
+
+break Invalid scope
+    scope --> agent : global scope entries (fallback)
+end
+
+scope --> agent : scoped_entries
+deactivate scope
+
+note over agent, store
+  Flow:    AgentOrchestrator -> MemoryScope -> resolve hierarchy -> fetch entries -> apply mask -> return
+  State:   No state change
+  Failure: Invalid scope -> return global scope entries
+  Success: Agent receives scope-filtered entries
+end note
+
+@enduml

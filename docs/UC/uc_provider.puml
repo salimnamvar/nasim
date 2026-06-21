@@ -1,35 +1,76 @@
 @startuml uc_provider
+
 ' ============================================================
-' Title:     nasim — UC: Provider Layer
-' Boundary:  nasim code agent CLI
-' Purpose:   Provider abstraction and LLM interaction
+' Title:     nasim — UC: Provider Group
+' Group:     PRV (Provider Abstraction)
+' Boundary:  nasim code agent
+' Purpose:   LLM provider abstraction via litellm proxy (100+ providers)
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/audit/audit_2026-06-20_capability-and-architecture.md
-' Review:    —
+' Version:   6.0.0
+' Source:    docs/ENTITIES.md
+' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
 ' ============================================================
 
 left to right direction
+
+title nasim — Provider Use Cases
+
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
-actor "Developer" as user
-actor "AgentOrchestrator" as agent
-
-rectangle "Provider Layer" {
-    usecase "Initialize Provider" as UC_PRV_01
-    usecase "Call Provider Chat" as UC_PRV_02
-    usecase "STREAM Provider Chat" as UC_PRV_03
-    usecase "Select Provider Backend" as UC_PRV_04
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
 }
 
-rectangle "Config Layer" {
-    usecase "Load Config" as UC_CFG_01
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
 }
 
-agent --> UC_PRV_02
-agent --> UC_PRV_03
-UC_PRV_01 ..> UC_CFG_01 : <<include>>
-UC_PRV_02 ..> UC_PRV_01 : <<include>>
-UC_PRV_03 ..> UC_PRV_01 : <<include>>
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "Agent" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Provider Group (PRV)" {
+    usecase "**PRV-01 REGISTER Provider**\n--\nInitialize provider from config" as PRV01
+    usecase "**PRV-02 REQUEST Chat**\n--\nSend chat request to LLM provider" as PRV02
+    usecase "**PRV-03 STREAM Chat**\n--\nStream chat response from LLM provider" as PRV03
+    usecase "**PRV-04 SELECT Provider Backend**\n--\nSelect provider backend from config" as PRV04
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+Agent --> PRV01
+Agent --> PRV02
+Agent --> PRV03
+Agent --> PRV04
+
+' ============================================================
+' Relationships
+' ============================================================
+
+PRV04 ..> PRV01 : <<include>>
 
 @enduml
