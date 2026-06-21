@@ -45,7 +45,7 @@ Each SQ diagram follows this structure:
 
 ## Meta-Software Designer Audit (2026-06-21)
 
-Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, qwe.md, cop.md, gem.md) against the existing 149 SQ diagrams. Key findings and fixes applied:
+Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, qwe.md, cop.md, gem.md) against the existing 148 SQ diagrams. Key findings and fixes applied:
 
 ### Critical Fixes Applied
 
@@ -92,7 +92,7 @@ Full C4 → UC → SM → SQ audit using CAR framework. See `docs/audit/audit.20
 ### Cross-Layer Sync Results
 
 - **C4 ↔ SQ:** All lifelines in SQ diagrams exist as C4 components ✓
-- **UC ↔ SQ:** 148 UCs → 149 SQs (AGT-05 orphan reclassified) ✓
+- **UC ↔ SQ:** 148 UCs → 148 SQs — 1:1 mapping ✓
 - **SM ↔ SQ:** All state transitions in SQs match valid SM transitions ✓
 - **Method Consistency:** PROCESS, DISPATCH, APPEND, SELECT identical across layers ✓
 

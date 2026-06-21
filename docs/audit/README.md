@@ -25,9 +25,10 @@
 | [audit.2026.06.20.c4-design-layer.car.md](audit.2026.06.20.c4-design-layer.car.md) | C4 Layer Deep Audit (CAR) | **DEEP C4 AUDIT** — Strict audit of Context→Container→Component vs c4.md + design-chain + cicd + anti-patterns + 2026 agentic best practices; 213 linter findings analyzed; full principle checklist + CAR items |
 | [audit.2026.06.20.uc-layer.car.md](audit.2026.06.20.uc-layer.car.md) | UC Layer Audit (CAR) | **UC AUDIT** — Audit of UC diagrams vs C4 + uc.md rules; 15 critical defects; corrected verb vocabulary, actor vocabulary, reference style template |
 | [audit.2026.06.20.sq-sm-chain.car.md](audit.2026.06.20.sq-sm-chain.car.md) | C4→UC→SM→SQ Chain Audit (CAR) | **CHAIN AUDIT** — 80 of 151 SQ files present; 71 missing; SM has 1 of 4 required files; full structural template compliance; ROD/CSR/DRY/OOP violations; proposed state color palette |
+| [audit.2026.06.21.design-chain.car.md](audit.2026.06.21.design-chain.car.md) | Design Chain Refinement Audit (CAR) | **DESIGN CHAIN AUDIT** — Full C4→UC→SM→SQ audit with cross-layer sync checks, prompt file resolution, AGT-05 orphan resolution |
 | [c4_fix_report.md](c4_fix_report.md) | C4 fix report | C4 diagram fixes applied |
 
-**Total: 17 audit documents**
+**Total: 18 audit documents**
 
 ---
 
@@ -48,6 +49,7 @@
 13. **audit.2026.06.20.c4-design-layer.car.md** — strict C4 Context/Container/Component deep audit (linter + all principles + CAR items)
 14. **audit.2026.06.20.uc-layer.car.md** — UC diagrams vs C4; 15 critical defects; corrected verb/actor vocabulary
 15. **audit.2026.06.20.sq-sm-chain.car.md** — C4→UC→SM→SQ chain: 71 missing SQ files, 3 missing SM files, structural template compliance, ROD/CSR/DRY findings, color palette
+16. **audit.2026.06.21.design-chain.car.md** — Design chain refinement: cross-layer sync, prompt file resolution, AGT-05 orphan cleanup
 
 ---
 
@@ -56,7 +58,7 @@
 ### nasim v0.1 is a design-only project
 - No Python source code exists yet — the `nasim/` package, `run.py`, and all modules referenced in CL are planned
 - Design chain is complete and frozen: C4 → UC → SM → SQ → ERD → CL → CT/DATA → CT/API
-- 109 UCs, 148 SQ diagrams, 24 C4 diagrams, canonical entity registry
+- 148 UCs, 148 SQ diagrams, 24 C4 diagrams, canonical entity registry
 - ODCS v3.1.0 data contracts + OAS 3.1.0 OpenAPI spec
 
 ### nasim's design chain is the best in class

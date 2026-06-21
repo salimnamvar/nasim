@@ -4,7 +4,7 @@
 
 Built through systematic investigation and original synthesis of usage patterns.
 
-Current status: comprehensive design chain with 148 sequence diagrams, 109 use cases, full C4 architecture, and detailed implementation roadmap. Implementation has not yet begun.
+Current status: comprehensive design chain with 148 sequence diagrams, 148 use cases, full C4 architecture, and detailed implementation roadmap. Implementation has not yet begun.
 
 ## What nasim is
 
@@ -24,7 +24,7 @@ A CLI code agent + HTTP API server + MCP server, designed from first principles 
 | Layer | Artifacts | Status |
 |-------|-----------|--------|
 | C4 Architecture | 24 diagrams (context, container, 21 component groups) | Frozen |
-| Use Cases | 22 UC files — 109 UCs across 21 groups | Frozen |
+| Use Cases | 22 UC files — 148 UCs across 21 groups | Frozen |
 | State Machine | 4 diagrams (agent, session, plan, plugin lifecycles) | Frozen |
 | Sequence Diagrams | 148 diagrams across 21 groups | Frozen |
 | ERD | 5 store schemas | Frozen |
@@ -32,7 +32,7 @@ A CLI code agent + HTTP API server + MCP server, designed from first principles 
 | Data Contracts | 5 ODCS v3.1.0 contracts + 2 YAML schemas | Frozen |
 | HTTP API Surface | 6 API puml + OpenAPI 3.1.0 + ROD decisions | Frozen |
 | Implementation Roadmap | 10 milestone docs | Active |
-| Audit Reports | 17 audit documents (28 reference agents) | Active |
+| Audit Reports | 18 audit documents (28 reference agents) | Active |
 
 ## Quick start
 
@@ -72,7 +72,7 @@ See [scripts/README.md](scripts/README.md) and [scripts/setup/README.md](scripts
 nasim/
 ├── docs/              # full design chain (C4, UC, SM, SQ, ERD, CL, CT, audit, RDM)
 │   ├── C4/            # 24 C4 architecture diagrams
-│   ├── UC/            # 22 use case diagrams (109 UCs)
+│   ├── UC/            # 22 use case diagrams (148 UCs)
 │   ├── SM/            # 4 state machine diagrams
 │   ├── SQ/            # 148 sequence diagrams across 21 groups
 │   ├── ER/            # 5 entity-relationship diagrams
@@ -81,7 +81,7 @@ nasim/
 │   ├── CT/API/        # HTTP API surface (OAS 3.1.0)
 │   ├── RDM/           # implementation roadmap (10 milestones)
 │   ├── MM/            # design chain maps
-│   ├── audit/         # reference agent audits (17 docs)
+│   ├── audit/         # reference agent audits (18 docs)
 │   ├── prompt/        # prompt engineering docs (p1–p9)
 │   └── REF/           # reference agent list
 ├── scripts/           # lint, clean, setup, ollama tools, doc merge
