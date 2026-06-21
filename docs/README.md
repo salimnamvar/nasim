@@ -23,7 +23,7 @@ Each layer must be authored in order. No layer may be authored before the one ab
 | [C4/](C4/README.md) | C4 Architecture | Frozen | Context, container, 21 component diagrams (24 total) |
 | [UC/](UC/README.md) | Use Cases | Frozen | 148 UCs — 21 groups (CLI/AGT/PRV/CFG/SSN/SAF/CTX/MCP/TL/SRV/HK/PLG/RTG/OBS/MEM/VCS/SBX/RIM/EDT/EVL/WRL) |
 | [SM/](SM/README.md) | State Machine | Frozen | 4 diagrams — agent lifecycle (process FSM), session, plan, plugin lifecycles |
-| [SQ/](SQ/README.md) | Sequence Diagrams | Frozen | 148 diagrams across 21 groups |
+| [SQ/](SQ/README.md) | Sequence Diagrams | Frozen | 149 diagrams across 21 groups (Meta-Software Designer audit 2026-06-21) |
 | [ER/](ER/README.md) | ERD | Frozen | 5 store schemas (session, memory, todo, wire log, observability, repo intelligence) |
 | [CL/](CL/README.md) | Class Diagram | Frozen | Runtime class model — 90+ classes across 12 groups |
 | [CT/DATA/](CT/DATA/README.md) | Data Contracts | Frozen | ODCS v3.1.0 — 5 contract diagrams + 2 YAML schemas |

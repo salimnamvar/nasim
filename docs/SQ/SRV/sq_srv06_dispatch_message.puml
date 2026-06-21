@@ -1,31 +1,26 @@
-@startuml sq_srv06_dispatch_message
+@startuml sq_srv06_send_message
 ' ============================================================
-' Title:     SRV-06 — DISPATCH Message
+' Title:     SRV-06 — SEND Message
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Dispatch a user message through the agent and stream SSE response
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Review:    Meta-Software Designer audit 2026-06-21
+' Pattern:   Controller (ServerRouter) -> Service (AgentOrchestrator) -> Repository (SessionStore)
 ' ============================================================
 
-title nasim — SRV-06 DISPATCH Message
+title nasim — SRV-06 SEND Message
 
 actor "HTTPClient" as client
 
 box "Server Layer" #E8EAF6
   participant "APISchema" as schema
   participant "ServerRouter" as router
-  participant "AgentService" as svc
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
-end box
-box "Provider Layer" #FFF3E0
-  participant "LiteLLMProxy" as provider
-end box
-box "Tool Layer" #F3E5F5
-  participant "ToolRegistry" as tools
+  participant "ErrorBoundary" as eb
 end box
 box "Session Layer" #F3E5F5
   participant "SessionStore" as store
@@ -41,11 +36,15 @@ note over client, trace
   Excludes:       Session CRUD (SRV-01..05), Tool listing (SRV-08..09)
   Contexts:       Called by HTTPClient via POST /v1/sessions/{id}:dispatch
   Rollback:       404 if session not found, 400 if invalid body, 502 if agent fails
-  Design:         CSR: Controller(ServerRouter) -> Service(AgentService) -> Repository(SessionStore). ROD: custom method :dispatch (AIP-136)
+  Design:         CSR: Controller(ServerRouter) -> Service(AgentOrchestrator). No God Object: AgentOrchestrator owns orchestration, delegates tool dispatch to SafetyCoordinator. ROD: custom method :dispatch (AIP-136)
   Classification: Primary Orchestrator
 end note
 
-== SRV-06 DISPATCH Message ==
+== SRV-06 SEND Message ==
+
+ref over agent, trace
+  OBS-03: CORRELATE Trace
+end ref
 
 client -> schema : validate(request_body)
 schema --> client : ValidatedDispatchRequest
@@ -66,20 +65,27 @@ break Invalid request body [400]
   router --> client : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid request", status: "INVALID_ARGUMENT"}}
 end
 
-router -> svc : DISPATCH(session_id, message)
-activate svc
+hnote over agent #FFF3E0 : **State: THINKING**
 
-ref over svc, agent
+router -> agent : PROCESS(session_id, message)
+activate agent
+ref over agent
   AGT-01: PROCESS User Task
 end ref
 
 break Agent error [502]
-  svc --> router : AgentError
+  agent -> eb : handle(AgentError)
+  activate eb
+  eb --> agent : RecoveryAction(retry/abort)
+  deactivate eb
+  agent --> router : AgentError
   router --> client : 502 UNAVAILABLE {error: {code: "UNAVAILABLE", message: "Agent error", status: "UNAVAILABLE"}}
 end
 
-svc --> router : AgentEventStream
-deactivate svc
+agent --> router : AgentEventStream
+deactivate agent
+
+hnote over sse #E8F5E9 : **State: RESPONDING**
 
 router -> sse : stream(events)
 activate sse
@@ -96,10 +102,11 @@ router --> client : 200 OK (stream complete)
 deactivate router
 
 note over client, trace
-  Flow:    HTTPClient -> ServerRouter -> AgentService -> AgentOrchestrator -> SSE stream
-  State:   <back:#E3F2FD>CREATED</back> -> <back:#2E7D32>ACTIVE</back>
-  Failure: 404 session not found, 400 invalid body, 502 agent error
+  Flow:    HTTPClient -> APISchema -> ServerRouter -> AgentOrchestrator -> SSE stream -> SessionStore
+  State:   <back:#ECEFF1>IDLE</back> -> <back:#E0F7FA>SERVING</back> -> <back:#FFF3E0>THINKING</back> -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
+  Failure: 404 NOT_FOUND, 400 INVALID_ARGUMENT, 502 UNAVAILABLE — all via ErrorBoundary
   Success: 200 OK with SSE event stream
+  ROD errors: AIP-193 {error: {code, message, status}} on all failure paths
 end note
 
 @enduml
