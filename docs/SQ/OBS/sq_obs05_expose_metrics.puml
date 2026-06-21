@@ -38,8 +38,9 @@ note over prom, metrics
     - Structured logging (OBS-01)
     - OTel export (optional, behind flag)
 
+  Classification: Process Decomposition
+
   Design:
-  Classification: Primary Orchestrator
     - MetricsCollector exposes prometheus-client generate_latest()
     - ServerApp adds /metrics route (GET only)
     - Content-Type: text/plain; version=0.0.4

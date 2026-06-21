@@ -4,9 +4,9 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   List all registered tools available to the agent
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
 title nasim — SRV-08 LIST Tools
@@ -25,8 +25,8 @@ note over client, registry
   Preconditions:  ToolRegistry initialized
   Excludes:       Tool execution, tool registration
   Contexts:       Called by HTTPClient via GET /v1/tools
-  Rollback:       N/A (read-only)
-  Design:         ROD: standard list. Returns tool metadata.
+  Rollback:       500 if registry read fails
+  Design:         CSR: Controller(ServerRouter) -> Repository(ToolRegistry). ROD: standard list (AIP-136)
   Classification: Primary Orchestrator
 end note
 
@@ -37,6 +37,13 @@ activate router
 
 router -> registry : LIST tools
 activate registry
+
+break Registry read failure [500]
+    registry --> router : InternalError
+    deactivate registry
+    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list tools", status: "INTERNAL"}}
+end
+
 registry --> router : ToolList[name, description, safe]
 deactivate registry
 
@@ -46,8 +53,9 @@ deactivate router
 note over client, registry
   Flow:    HTTPClient -> ServerRouter -> ToolRegistry -> return list
   State:   No state change
-  Failure: N/A
+  Failure: 500 INTERNAL on registry read failure
   Success: 200 OK with tool list
+  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
 end note
 
 @enduml

@@ -47,6 +47,36 @@ Each SQ diagram follows this structure:
 4. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks
 5. **Summary Note** — Flow summary, state transitions, success/failure paths, key invariants
 
+## Meta-Software Designer Audit (2026-06-21)
+
+Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, qwe.md, cop.md, gem.md) against the existing 149 SQ diagrams. Key findings and fixes applied:
+
+### Critical Fixes Applied
+
+| Diagram | Violation | Fix |
+|---------|-----------|-----|
+| SRV-06 | Title "DISPATCH" mismatches UC catalog "SEND"; phantom `AgentService` lifeline | Renamed to SEND; removed AgentService; routes ServerRouter → AgentOrchestrator directly |
+| MCP-01 | Missing actor; no ErrorBoundary; no AIP-193 errors | Added Developer actor + CLI entry chain; added ErrorBoundary; added AIP-193 error mapping |
+| CLI-01 | Inlined agent loop logic instead of `ref` blocks | Replaced inlined logic with `ref` blocks for AGT-01, CLI-02, OBS-01 |
+| AGT-02 | God Object: AgentOrchestrator calls PermissionGate directly | Delegated to SafetyCoordinator (AGT-15) which composes PermissionGate |
+| AGT-05 | Orphan SQ with no UC entry | Reclassified as Process Decomposition (internal step of AGT-15) |
+| TL-01 | Incorrect "Primary Orchestrator" classification; invalid actor | Changed to Process Decomposition; removed actor and CLI entry chain |
+| PRV-02 | Incorrect "Primary Orchestrator" classification; invalid actor | Changed to UC-level Sub-flow; removed actor |
+
+### Standards Enforced
+
+- **CSR Pattern**: Controller (CLI/HTTP) → Service (Agent) → Repository (Tools/Session). No God Objects.
+- **ErrorBoundary**: All failure paths terminate at ErrorBoundary (AGT-14). No inline error handling.
+- **SafetyCoordinator**: All safety checks delegated to SafetyCoordinator (AGT-15). No direct PermissionGate calls from AgentOrchestrator.
+- **SM State Colors**: `hnote` blocks with hex colors at state transition points during diagram flow.
+- **ROD AIP-193**: All server-facing failure paths use `{error: {code, message, status}}` format.
+- **ref Frames**: Cross-cutting concerns (OBS-01, AGT-15, HK-04/05) use `ref` blocks, never inlined.
+- **Actor Rules**: Process Decomposition diagrams have no actor. UC-level Sub-flows have actor + entry chain.
+
+### UC↔SQ Mapping
+
+148 UCs in catalog, 149 SQ diagrams. AGT-05 is an orphan (no UC entry) — reclassified as Process Decomposition.
+
 
 
 --- SOURCE: /home/salim/prj/salim/nasim/code/nasim/docs/SQ/MCP/sq_mcp02_discover_mcp_tools.puml ---
@@ -130,15 +160,21 @@ end note
 ' Boundary:  nasim code agent
 ' Purpose:   Connect to external MCP server via stdio/SSE
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Review:    Meta-Software Designer audit 2026-06-21
 ' ============================================================
 
 title nasim — MCP-01 CONNECT MCP Server
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
+  participant "ErrorBoundary" as eb
 end box
 box "MCP Layer" #EDE7F6
   participant "MCPClientRuntime" as client
@@ -147,17 +183,23 @@ box "External" #F5F5F5
   participant "MCP Server" as server
 end box
 
-note over agent, server
+note over user, server
   Scope:          Connection establishment to external MCP server
-  Preconditions:  MCP server endpoint configured in agent settings
+  Preconditions:  MCP server endpoint configured in config
   Excludes:       Tool discovery and adaptation (MCP-02, MCP-03)
-  Contexts:       Called during agent initialization
-  Rollback:       Close socket on failure, retry with backoff
-  Design:         Connection pooling and heartbeat monitoring
-  Classification: Process Decomposition
+  Contexts:       Called by TL-12 (DISPATCH MCP Extension) or agent initialization
+  Rollback:       Close socket on failure, map to AIP-193 error
+  Design:         Connection pooling and heartbeat monitoring. ErrorBoundary handles all connection failures
+  Classification: UC-level Sub-flow
 end note
 
 == MCP-01 CONNECT MCP Server ==
+
+user -> repl : invoke MCP connect
+repl -> agent : CONNECT_MCP(server_config)
+activate agent
+
+hnote over agent #FFF3E0 : **State: THINKING**
 
 agent -> client : connect(server_config)
 activate client
@@ -165,9 +207,15 @@ activate client
 client -> server : establish stdio/SSE connection
 activate server
 
-break Connection refused
+break Connection refused / timeout
     server --> client : ConnectionError
-    client --> agent : connection_failed("retry with backoff")
+    client --> eb : raise MCPConnectionFailed
+    activate eb
+    eb --> agent : map_to_aip_193(503, "MCP Server Unreachable")
+    deactivate eb
+    agent --> repl : AIP-193 Error (503)
+    deactivate agent
+    deactivate client
 end
 
 server --> client : connection established
@@ -180,14 +228,20 @@ deactivate server
 
 client -> client : store connection state
 
-client --> agent : connection ready
+client --> agent : ConnectionReady
 deactivate client
 
-note over agent, server
-  Flow:    AgentOrchestrator -> MCPClientRuntime -> establish connection -> handshake -> ready
-  State:   No state change
-  Failure: Connection refused/timeout -> retry with exponential backoff
+hnote over agent #ECEFF1 : **State: IDLE**
+
+agent --> repl : 200 OK (Connection Active)
+deactivate agent
+
+note over user, server
+  Flow:    Developer -> REPLSession -> AgentOrchestrator -> MCPClientRuntime -> establish connection -> handshake -> ready
+  State:   <back:#ECEFF1>IDLE</back> -> <back:#FFF3E0>THINKING</back> -> <back:#ECEFF1>IDLE</back>
+  Failure: Connection refused/timeout -> ErrorBoundary -> 503 UNAVAILABLE
   Success: Agent receives ready connection handle
+  ROD errors: 503 UNAVAILABLE {error: {code: "UNAVAILABLE", message: "MCP Server Unreachable", status: "UNAVAILABLE"}}
 end note
 
 @enduml
@@ -1217,34 +1271,29 @@ end note
 
 --- SOURCE: /home/salim/prj/salim/nasim/code/nasim/docs/SQ/SRV/sq_srv06_dispatch_message.puml ---
 
-@startuml sq_srv06_dispatch_message
+@startuml sq_srv06_send_message
 ' ============================================================
-' Title:     SRV-06 — DISPATCH Message
+' Title:     SRV-06 — SEND Message
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Dispatch a user message through the agent and stream SSE response
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Review:    Meta-Software Designer audit 2026-06-21
+' Pattern:   Controller (ServerRouter) -> Service (AgentOrchestrator) -> Repository (SessionStore)
 ' ============================================================
 
-title nasim — SRV-06 DISPATCH Message
+title nasim — SRV-06 SEND Message
 
 actor "HTTPClient" as client
 
 box "Server Layer" #E8EAF6
   participant "APISchema" as schema
   participant "ServerRouter" as router
-  participant "AgentService" as svc
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
-end box
-box "Provider Layer" #FFF3E0
-  participant "LiteLLMProxy" as provider
-end box
-box "Tool Layer" #F3E5F5
-  participant "ToolRegistry" as tools
+  participant "ErrorBoundary" as eb
 end box
 box "Session Layer" #F3E5F5
   participant "SessionStore" as store
@@ -1260,11 +1309,15 @@ note over client, trace
   Excludes:       Session CRUD (SRV-01..05), Tool listing (SRV-08..09)
   Contexts:       Called by HTTPClient via POST /v1/sessions/{id}:dispatch
   Rollback:       404 if session not found, 400 if invalid body, 502 if agent fails
-  Design:         CSR: Controller(ServerRouter) -> Service(AgentService) -> Repository(SessionStore). ROD: custom method :dispatch (AIP-136)
+  Design:         CSR: Controller(ServerRouter) -> Service(AgentOrchestrator). No God Object: AgentOrchestrator owns orchestration, delegates tool dispatch to SafetyCoordinator. ROD: custom method :dispatch (AIP-136)
   Classification: Primary Orchestrator
 end note
 
-== SRV-06 DISPATCH Message ==
+== SRV-06 SEND Message ==
+
+ref over agent, trace
+  OBS-03: CORRELATE Trace
+end ref
 
 client -> schema : validate(request_body)
 schema --> client : ValidatedDispatchRequest
@@ -1285,20 +1338,27 @@ break Invalid request body [400]
   router --> client : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid request", status: "INVALID_ARGUMENT"}}
 end
 
-router -> svc : DISPATCH(session_id, message)
-activate svc
+hnote over agent #FFF3E0 : **State: THINKING**
 
-ref over svc, agent
+router -> agent : PROCESS(session_id, message)
+activate agent
+ref over agent
   AGT-01: PROCESS User Task
 end ref
 
 break Agent error [502]
-  svc --> router : AgentError
+  agent -> eb : handle(AgentError)
+  activate eb
+  eb --> agent : RecoveryAction(retry/abort)
+  deactivate eb
+  agent --> router : AgentError
   router --> client : 502 UNAVAILABLE {error: {code: "UNAVAILABLE", message: "Agent error", status: "UNAVAILABLE"}}
 end
 
-svc --> router : AgentEventStream
-deactivate svc
+agent --> router : AgentEventStream
+deactivate agent
+
+hnote over sse #E8F5E9 : **State: RESPONDING**
 
 router -> sse : stream(events)
 activate sse
@@ -1315,10 +1375,11 @@ router --> client : 200 OK (stream complete)
 deactivate router
 
 note over client, trace
-  Flow:    HTTPClient -> ServerRouter -> AgentService -> AgentOrchestrator -> SSE stream
-  State:   <back:#E3F2FD>CREATED</back> -> <back:#2E7D32>ACTIVE</back>
-  Failure: 404 session not found, 400 invalid body, 502 agent error
+  Flow:    HTTPClient -> APISchema -> ServerRouter -> AgentOrchestrator -> SSE stream -> SessionStore
+  State:   <back:#ECEFF1>IDLE</back> -> <back:#E0F7FA>SERVING</back> -> <back:#FFF3E0>THINKING</back> -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
+  Failure: 404 NOT_FOUND, 400 INVALID_ARGUMENT, 502 UNAVAILABLE — all via ErrorBoundary
   Success: 200 OK with SSE event stream
+  ROD errors: AIP-193 {error: {code, message, status}} on all failure paths
 end note
 
 @enduml
@@ -2118,8 +2179,6 @@ end note
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
-
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -2128,19 +2187,20 @@ box "Provider Layer" #FFF3E0
 end box
 participant "LLM Provider API" as api
 
-note over user, api
+note over agent, api
   Scope:          Single synchronous chat completion
   Preconditions:  Provider initialized and reachable
   Contexts:       Called by AGT-01 (Process User Task)
   Excludes:       Streaming (PRV-03), tool parsing
   Rollback:       HTTP error raised as ProviderError
   Design:         Uses httpx.AsyncClient with timeout
-  Classification: Primary Orchestrator
+  Classification: UC-level Sub-flow (called by AGT-01)
 end note
 
-== PRV-02 Call Provider Chat ==
+== PRV-02 REQUEST Chat ==
 
-user -> agent : (entry via AGT-01)
+hnote over provider #FFF3E0 : **State: THINKING**
+
 agent -> provider : chat(messages, tools)
 provider -> api : HTTP POST /api/chat {model, messages, tools, stream:false}
 
@@ -2154,8 +2214,8 @@ api --> provider : JSON response
 provider -> provider : parse response -> LLMResponse
 provider --> agent : LLMResponse(content, tool_calls)
 
-note over user, api
-  Flow:    Messages -> HTTP POST -> JSON parse -> LLMResponse
+note over agent, api
+  Flow:    AgentOrchestrator -> Provider -> HTTP POST -> JSON parse -> LLMResponse
   State:   <back:#FFF3E0>THINKING</back> -> <back:#FFF3E0>THINKING</back> (no state change)
   Failure: HTTP error or timeout -> ProviderError
   Success: LLMResponse with content and/or tool_calls
@@ -6360,11 +6420,6 @@ end note
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
-
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
-end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -6374,20 +6429,18 @@ box "Tool Layer" #F3E5F5
 end box
 participant "Host Filesystem" as fs
 
-note over user, fs
+note over agent, fs
   Scope:          Read file contents with line numbers
   Preconditions:  File path provided by LLM
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Excludes:       Write, edit, directory listing
   Rollback:       Error string returned to LLM
   Design:         Supports offset/limit for large files
-  Classification: Primary Orchestrator
+  Classification: Process Decomposition (called by AGT-02, no actor)
 end note
 
 == TL-01 READ File ==
 
-user -> repl : (entry via AGT-01)
-repl -> agent : (entry via AGT-01)
 agent -> registry : execute("read_file", {path, offset, limit})
 registry -> ft : execute(path, offset, limit)
 ft -> fs : Path(path).read_text()
@@ -6409,8 +6462,8 @@ ft -> ft : add line numbers, apply offset/limit
 ft --> registry : ToolResult(success=True, content=numbered_content)
 registry --> agent : ToolResult
 
-note over user, fs
-  Flow:    Path -> read_text -> line numbers -> ToolResult
+note over agent, fs
+  Flow:    AgentOrchestrator -> ToolRegistry -> ReadFileTool -> Host Filesystem -> ToolResult
   State:   No state change
   Failure: File not found, permissions, encoding -> ToolResult(success=False)
   Success: File content with line numbers
@@ -6425,117 +6478,102 @@ end note
 @startuml sq_agt02_dispatch_tool_call
 ' ============================================================
 ' Title:     AGT-02 — DISPATCH Tool Call
-' Boundary:  nasim code agent CLI
-' Purpose:   Tool dispatch with permission gate check
+' Boundary:  nasim code agent
+' Purpose:   Tool dispatch with Safety Pipeline (no God Object)
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Meta-Software Designer audit 2026-06-21
+' Pattern:   Service (AgentOrchestrator) -> Safety (SafetyCoordinator) -> Repository (ToolRegistry)
 ' ============================================================
 
-actor "Developer" as user
+title nasim — AGT-02 DISPATCH Tool Call
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
+  participant "SafetyCoordinator" as safety
+  participant "ErrorBoundary" as eb
+end box
+box "Safety Layer" #FFF9C4
   participant "PermissionGate" as gate
+  participant "InjectionScanner" as inj
+  participant "EgressInspector" as egr
 end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
   participant "Tool" as tool
 end box
-box "Safety Layer" #FFF9C4
-  participant "SafetyCoordinator" as safety
+box "Observability Layer" #E0F2F1
+  participant "StructuredLogger" as logger
 end box
 
-note over user, tool
-  Scope:
-    - agt02 DISPATCH Tool Call — single tool execution within agt01 loop
-
-  Preconditions:
-    - agt01 in progress, LLM returned tool_calls array
-    - ToolRegistry populated with available tools
-    - PermissionGate initialized with safety_mode from Config
-
-  Contexts:
-    - Called from agt01 (PROCESS User Task) for each tool_call
-    - Part of the inner loop within the agentic cycle
-
-  Excludes:
-    - LLM call logic (prv02 handles that)
-    - Permission prompt rendering (CLI-06 handles the user prompt)
-    - Tool result display (CLI-03 handles that)
-
-  Rollback:
-    - Tool not found → ToolResult(success=false, error="unknown tool")
-    - Permission denied → ToolResult(success=false, error="permission denied")
-    - Tool execution error → ToolResult(success=false, error=exception message)
-
-  Design:
-  Classification: Primary Orchestrator
-    - PermissionGate checks tool.safe flag against safety_mode
-    - In "ask" mode: unsafe tools return AWAITING_APPROVAL event
-    - In "auto" mode: all tools execute without prompt
-    - In "off" mode: unsafe tools blocked, safe tools execute
-    - ToolRegistry.find() by tool name from LLM tool_call
-    - ToolResult is structured (success, content, error) — never raw string
-
+note over agent, logger
+  Scope:          Dispatch a single tool call with full safety pipeline
+  Preconditions:  Tool call from LLM, ToolRegistry populated, SafetyCoordinator initialized
+  Excludes:       LLM call logic (PRV-02), Permission prompt rendering (CLI-06), Tool result display (CLI-03)
+  Contexts:       Called by AGT-01 (PROCESS User Task) for each tool_call in the inner loop
+  Rollback:       Safety violation -> ToolResult(success=false); Tool error -> ErrorBoundary -> ToolResult(error)
+  Design:         NO GOD OBJECT: AgentOrchestrator delegates safety to SafetyCoordinator (AGT-15).
+                  SafetyCoordinator composes PermissionGate, InjectionScanner, EgressInspector.
+                  ToolResult is always structured (success, content, error)
+  Classification: UC-level Sub-flow
 end note
 
-== agt02 DISPATCH Tool Call ==
+== AGT-02 DISPATCH Tool Call ==
 
 agent -> agent : receive tool_call from LLM response
-note right of agent
-  tool_call = {name: "read_file", arguments: {...}}
-end note
 
-agent -> gate : CHECK(tool_call.name)
-activate gate
+hnote over agent #FFF9C4 : **State: AWAITING_APPROVAL** (if unsafe)
 
-gate -> gate : check tool.safe against safety_mode
+' --- NO GOD OBJECT: Delegate to SafetyCoordinator (AGT-15) ---
+agent -> safety : RUN_SAFETY_PIPELINE(tool_call)
+activate safety
+ref over safety
+  AGT-15: DISPATCH Safety Pipeline (injection, egress, permission)
+end ref
+safety --> agent : SafetyResult(approved/denied)
+deactivate safety
 
-alt safety_mode = ask AND tool.unsafe
-    gate --> agent : AWAITING_APPROVAL event
-    note right of gate
-      CLI-06 renders [y/N] prompt
-      User approves → agent re-calls agt02
-      User rejects → ToolResult(denied)
-    end note
-else safety_mode = off AND tool.unsafe
-    gate --> agent : ToolResult(success=false, error="permission denied")
-else safe tool or auto mode
-    gate --> agent : approved
+alt safety denied
+    agent -> agent : ToolResult(success=false, error="safety violation")
+    ref over agent, logger
+      OBS-01: STREAM Structured Log (tool blocked by safety)
+    end ref
+else safety approved
+    hnote over agent #F3E5F5 : **State: TOOL_EXEC**
+
+    agent -> registry : find(tool_call.name)
+    activate registry
+    alt tool not found
+        registry --> agent : null
+        agent -> eb : handle(UnknownTool)
+        activate eb
+        eb --> agent : RecoveryAction(abort)
+        deactivate eb
+        agent -> agent : ToolResult(success=false, error="unknown tool")
+    else tool found
+        registry --> tool : tool
+        deactivate registry
+        activate tool
+        agent -> tool : execute(tool_call.arguments)
+        tool --> agent : ToolResult
+        deactivate tool
+        ref over agent, logger
+          OBS-01: STREAM Structured Log (tool execution result)
+        end ref
+    end
 end
 
-deactivate gate
+agent -> agent : append ToolResult to messages
 
-agent -> registry : find(tool_call.name)
-activate registry
+hnote over agent #FFF3E0 : **State: THINKING**
 
-alt tool not found
-    registry --> agent : null
-    agent -> agent : ToolResult(success=false, error="unknown tool: {name}")
-else tool found
-    registry --> tool : tool
-    deactivate registry
-    activate tool
-    agent -> tool : execute(tool_call.arguments)
-    tool --> agent : ToolResult
-    deactivate tool
-end
-
-agent --> agent : append ToolResult to messages
-
-note over user, tool
-  Flow:
-    - AgentOrchestrator → PermissionGate → ToolRegistry → Tool.execute()
-
-  State:
-    - <back:#FFF3E0>THINKING</back> → <back:#F3E5F5>TOOL_EXEC</back> → <back:#FFF3E0>THINKING</back> (with tool result in messages)
-
-  Key invariants:
-    - Every tool call goes through PermissionGate
-    - ToolResult is always structured (success, content, error)
-    - Unknown tool returns error ToolResult (not exception)
+note over agent, logger
+  Flow:    AgentOrchestrator -> SafetyCoordinator (AGT-15) -> ToolRegistry -> Tool.execute()
+  State:   <back:#FFF3E0>THINKING</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> (if unsafe) -> <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF3E0>THINKING</back>
+  Failure: Safety violation -> ToolResult(error); Unknown tool -> ErrorBoundary -> ToolResult(error)
+  Success: ToolResult appended to ConversationHistory
+  Key invariants: Every tool goes through SafetyCoordinator. No direct PermissionGate call from AgentOrchestrator
 end note
 
 @enduml
@@ -7042,50 +7080,64 @@ end note
 
 @startuml sq_agt05_check_permission
 ' ============================================================
-' Title:     AGT-05 — Check Permission
-' Boundary:  nasim code agent CLI
-' Purpose:   Per-tool safety gate before execution
+' Title:     AGT-05 — CHECK Tool Permission
+' Boundary:  nasim code agent
+' Purpose:   Per-tool safety gate before execution (internal step of AGT-02)
 ' Milestone: v1.0
 ' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Meta-Software Designer audit 2026-06-21
+' Note:      Process decomposition — internal step of AGT-02 (DISPATCH Tool Call).
+'            Not a standalone UC. Actor forbidden per sq.md classification rules.
 ' ============================================================
 
+title nasim — AGT-05 CHECK Tool Permission
+
 box "Agent Layer" #E3F2FD
-  participant "AgentOrchestrator" as agent
+  participant "SafetyCoordinator" as safety
   participant "PermissionGate" as gate
 end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
 end box
 
-note over agent, registry
-  Scope:          Per-tool safety gate
-  Preconditions:  Tool call received from LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       Tool execution, user approval
-  Rollback:       Rejected -> skip tool
-  Design:         Checks tool.safe flag + safety_mode config
-  Classification: Process Decomposition
+note over safety, registry
+  Scope:          Per-tool safety gate — checks tool.safe flag against safety_mode
+  Preconditions:  Tool call received, SafetyCoordinator initialized
+  Excludes:       Tool execution, user approval prompt (CLI-06), injection/egress checks
+  Contexts:       Internal step of AGT-15 (DISPATCH Safety Pipeline), called by AGT-02
+  Rollback:       Rejected -> SafetyViolation returned to caller
+  Design:         First stage of safety pipeline. Checks tool.safe flag + safety_mode config
+  Classification: Process Decomposition (no actor — parent is AGT-02/AGT-15)
 end note
 
 == AGT-05 CHECK Tool Permission ==
 
-agent -> gate : check(tool_name, safety_mode)
+safety -> gate : check_permission(tool_name, args)
+activate gate
+
 gate -> registry : get_tool(tool_name)
+activate registry
 registry --> gate : Tool(safe=True/False)
+deactivate registry
 
-ref over gate
-  SAF-01: CHECK Tool Permission
-end ref
+gate -> gate : check tool.safe against safety_mode
 
-gate --> agent : approved / rejected
+alt safety_mode = ask AND tool.unsafe
+    gate --> safety : SafetyViolation(permission_denied)
+else safety_mode = off AND tool.unsafe
+    gate --> safety : SafetyViolation(permission_denied)
+else safe tool or auto mode
+    gate --> safety : SafetyPassed
+end
 
-note over agent, registry
-  Flow:    tool call -> check safe flag + mode -> approve/reject
-  State:   <back:#FFF3E0>THINKING</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> (if ask mode) -> <back:#F3E5F5>TOOL_EXEC</back>
-  Failure: Rejected -> tool skipped
-  Success: Approved -> proceed to execution
+deactivate gate
+
+note over safety, registry
+  Flow:    SafetyCoordinator -> PermissionGate -> ToolRegistry.get_tool() -> check safe flag -> return
+  State:   No state change (delegated by AGT-15)
+  Failure: Unsafe tool in ask/off mode -> SafetyViolation
+  Success: SafetyPassed -> proceed to next pipeline stage (injection, egress)
 end note
 
 @enduml
@@ -9720,10 +9772,12 @@ end note
 ' Boundary:  nasim code agent CLI
 ' Purpose:   REPL input loop delegates to agent and renders output
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Meta-Software Designer audit 2026-06-21
 ' ============================================================
+
+title nasim — CLI-01 PROCESS User Input
 
 actor "Developer" as user
 
@@ -9733,52 +9787,87 @@ box "CLI Layer" #E8F5E9
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
+  participant "ErrorBoundary" as eb
+end box
+box "Observability Layer" #E0F2F1
+  participant "StructuredLogger" as logger
 end box
 
-note over user, agent
+note over user, logger
   Scope:          Single user input processing cycle
   Preconditions:  REPL initialized, AgentOrchestrator ready
+  Excludes:       Slash commands (CLI-02), session persistence (SSN-01/02)
   Contexts:       Called by main REPL loop
-  Excludes:       Slash commands (CLI-02), session persistence
-  Rollback:       Error -> display error -> return to IDLE
-  Design:         Events emitted by agent, rendered by Renderer
+  Rollback:       Error -> display error via Renderer -> return to IDLE
+  Design:         Events emitted by agent, rendered by Renderer. ErrorBoundary handles all agent failures
   Classification: Primary Orchestrator
 end note
 
 == CLI-01 PROCESS User Input ==
 
 user -> repl : types input
+
+ref over repl, logger
+  OBS-01: STREAM Structured Log (user input received)
+end ref
+
 repl -> repl : check for slash command
 
 alt is slash command
-    repl -> repl : delegate to SlashCommandHandler (CLI-02)
+    ref over repl
+      CLI-02: DISPATCH Slash Command
+    end ref
 else normal input
     repl -> agent : PROCESS(user_input)
-    agent -> agent : append user message
-    agent -> agent : call Provider (PRV-02/03)
-    loop tool call iterations
-        repl -> repl : receive AgentEvent stream
-        agent -> agent : DISPATCH tool (AGT-02)
-        agent -> repl : ToolStart event
-        repl -> renderer : render ToolStart
-        agent -> repl : ToolResult event
-        repl -> renderer : render ToolResult
+    activate agent
+
+    hnote over agent #FFF3E0 : **State: THINKING**
+
+    ref over agent
+      AGT-01: PROCESS User Task
+    end ref
+
+    agent --> repl : AgentEvent stream
+
+    hnote over repl #E8F5E9 : **State: RESPONDING**
+
+    loop for each AgentEvent
+        alt TextChunk event
+            repl -> renderer : render TextChunk
+            renderer --> user : streamed token
+        else ToolStart event
+            repl -> renderer : render ToolStart
+            renderer --> user : tool call display
+        else ToolResult event
+            repl -> renderer : render ToolResult
+            renderer --> user : tool result preview
+        else Done event
+            repl -> renderer : render Done
+            renderer --> user : formatted output
+        end
     end
-    agent -> repl : TextChunk events
-    repl -> renderer : render TextChunk
-    repl -> renderer : render Done
-    renderer --> user : formatted output
+
+    deactivate agent
 end
 
 break Agent throws exception
+    repl -> eb : handle(Exception)
+    activate eb
+    eb --> repl : ErrorEvent
+    deactivate eb
+    ref over repl, logger
+      OBS-01: STREAM Structured Log (error)
+    end ref
     repl -> renderer : render Error event
     renderer --> user : red error display
 end
 
-note over user, agent
-  Flow:    User -> REPLSession -> AgentOrchestrator -> Provider -> events -> Renderer -> User
+hnote over repl #ECEFF1 : **State: IDLE**
+
+note over user, logger
+  Flow:    User -> REPLSession -> AgentOrchestrator -> [AGT-01] -> events -> Renderer -> User
   State:   <back:#ECEFF1>IDLE</back> -> <back:#E8EAF6>LISTENING</back> -> <back:#FFF3E0>THINKING</back> -> [<back:#F3E5F5>TOOL_EXEC</back>]* -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
-  Failure: Agent exception -> Error event -> IDLE
+  Failure: Exception -> ErrorBoundary -> Error event -> IDLE
   Success: Final text rendered to user
 end note
 

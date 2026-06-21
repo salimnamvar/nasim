@@ -37,8 +37,9 @@ note over logger, config
     - Log emission (OBS-01)
     - Wire append (WRL-01)
 
+  Classification: Process Decomposition
+
   Design:
-  Classification: Primary Orchestrator
     - LogRedactor applies regex patterns to record fields
     - Global rules: env vars, API keys, .env content, passwords
     - Per-project rules: custom patterns from config

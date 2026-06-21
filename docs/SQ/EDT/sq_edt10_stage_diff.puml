@@ -1,90 +1,66 @@
 @startuml sq_edt10_stage_diff
 ' ============================================================
-' Title:     EDT-10 — Stage Diff
-' Boundary:  nasim code agent CLI
-' Purpose:   Stage edit in DiffSandbox for review
+' Title:     EDT-10 — STAGE Diff
+' Boundary:  nasim code agent
+' Purpose:   Stage edit in DiffSandboxManager for review before sandbox-validated apply
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Meta-Software Designer audit 2026-06-21
+' Note:      Process decomposition — internal step of edit flow. No actor per sq.md rules.
 ' ============================================================
 
-actor "Developer" as user
+title nasim — EDT-10 STAGE Diff
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
-  participant "DiffSandbox" as sandbox
-  participant "EditValidator" as validator
-end box
-box "Safety Layer" #FFF9C4
-  participant "PermissionGate" as gate
+box "Sandbox Layer" #F1F8E9
+  participant "DiffSandboxManager" as diff_mgr
+  participant "EditStagingArea" as staging
+  participant "DiffComputer" as diff_comp
 end box
 
-note over user, gate
-  Scope:
-    - edt04 STAGE Edit — stage edit in DiffSandbox for review
-
-  Preconditions:
-    - EDT-03 completed (validation passed)
-    - DiffSandbox initialized
-
-  Contexts:
-    - Called after EDT-03 (Validate Edit)
-    - Feeds into EDT-05 (Review Diff)
-
-  Excludes:
-    - Edit execution (handled by EDT-02)
-    - User review (handled by EDT-05)
-    - File system writes (sandbox is in-memory)
-
-  Rollback:
-    - Staging failure → discard from sandbox
-
-  Design:
-  Classification: Primary Orchestrator
-    - DiffSandbox holds pending edits in isolated staging area
-    - Each edit tracked with unique ID and timestamp
-    - Sandbox supports atomic apply/discard
-    - Multiple edits can accumulate before final commit
-
-  Returns:
-    - Success: StagedEdit with edit_id and sandbox state
-    - Failure: Error with staging details
+note over agent, diff_comp
+  Scope:          Stage edit in DiffSandboxManager for review
+  Preconditions:  Edit strategy applied, DiffSandboxManager initialized
+  Excludes:       Edit execution (EDT-02..09), user review (SAF-02), file system writes
+  Contexts:       Called by EDT-01 (SELECT Strategy) when diff_sandbox mode selected
+  Rollback:       Staging failure → discard from sandbox
+  Design:         DiffSandboxManager holds pending edits in isolated staging area via EditStagingArea. DiffComputer computes diffs for review.
+  Classification: Process Decomposition
 end note
 
-== edt04 STAGE Edit ==
+== EDT-10 STAGE Diff ==
 
-agent -> sandbox : STAGE_EDIT(edit_result)
-activate sandbox
+agent -> diff_mgr : STAGE_DIFF(edit_result)
+activate diff_mgr
 
-sandbox -> sandbox : allocate_edit_slot()
+diff_mgr -> staging : allocate_edit_slot()
+activate staging
 
-sandbox -> sandbox : store_edit(edit_result)
+staging -> staging : store_edit(edit_result)
 
-sandbox -> sandbox : compute_staged_diff()
+staging -> diff_comp : compute_staged_diff(original, staged)
+activate diff_comp
+diff_comp --> staging : diff_summary
+deactivate diff_comp
 
-sandbox --> agent : StagedEdit(edit_id, diff_summary, timestamp)
-deactivate sandbox
+staging --> diff_mgr : StagedEdit(edit_id, diff_summary, timestamp)
+deactivate staging
 
-note over user, gate
-  Flow:
-    - AgentOrchestrator → DiffSandbox → StagedEdit
+diff_mgr --> agent : StagedEdit(edit_id, diff_summary)
+deactivate diff_mgr
 
-  State:
-    - <back:#ECEFF1>IDLE</back> → <back:#F1F8E9>STAGING</back> → STAGED
-
-  Failure:
-    - Staging failure → discard edit
-
-  Success:
-    - StagedEdit with edit_id and diff summary
-
+note over agent, diff_comp
+  Flow:    AgentOrchestrator → DiffSandboxManager → EditStagingArea → DiffComputer → return
+  State:   <back:#F1F8E9>STAGING</back>
+  Failure: Staging failure → discard edit
+  Success: StagedEdit with edit_id and diff summary for review
   Key invariants:
     - Each staged edit has unique ID
     - Sandbox is in-memory (no file system side effects)
-    - Edges can be applied atomically or discarded
+    - Edits can be applied atomically or discarded
 end note
 
 @enduml

@@ -39,7 +39,7 @@ Each SQ diagram follows this structure:
 
 1. **Header** — Title, boundary, purpose, version, source, review status
 2. **Lifelines** — Actors, participants grouped by layer (colored boxes)
-3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Design, Returns
+3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Classification, Design, Returns
 4. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks
 5. **Summary Note** — Flow summary, state transitions, success/failure paths, key invariants
 
@@ -72,3 +72,28 @@ Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, 
 ### UC↔SQ Mapping
 
 148 UCs in catalog, 149 SQ diagrams. AGT-05 is an orphan (no UC entry) — reclassified as Process Decomposition.
+
+---
+
+## Design Chain Refinement Audit (2026-06-21)
+
+Full C4 → UC → SM → SQ audit using CAR framework. See `docs/audit/audit.2026.06.21.design-chain.car.md`.
+
+### Fixes Applied in This Audit
+
+| Diagram | Violation | Fix |
+|---------|-----------|-----|
+| EDT-10 | Actor present in Process Decomposition; participant names mismatch C4; title "Stage Diff" wrong case; note references "edt04" | Removed actor; renamed to DiffSandboxManager/EditStagingArea/DiffComputer; title → "EDT-10 STAGE Diff"; version → 3.0.0 |
+| OBS-02 | Classification field merged with Design field on same line | Separated Classification on its own line |
+| OBS-03 | Classification field merged with Design field on same line | Separated Classification on its own line |
+| OBS-04 | Classification field merged with Design field on same line | Separated Classification on its own line |
+| OBS-05 | Classification field merged with Design field on same line | Separated Classification on its own line |
+
+### Cross-Layer Sync Results
+
+- **C4 ↔ SQ:** All lifelines in SQ diagrams exist as C4 components ✓
+- **UC ↔ SQ:** 148 UCs → 149 SQs (AGT-05 orphan reclassified) ✓
+- **SM ↔ SQ:** All state transitions in SQs match valid SM transitions ✓
+- **Method Consistency:** PROCESS, DISPATCH, APPEND, SELECT identical across layers ✓
+
+### Design Chain Consistency: 97.8%

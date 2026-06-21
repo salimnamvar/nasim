@@ -44,8 +44,9 @@ note over cli, otel
     - Metrics recording (OBS-02)
     - Wire log (WRL, but receives correlation ids)
 
+  Classification: Process Decomposition
+
   Design:
-  Classification: Primary Orchestrator
     - TraceCorrelator generates root trace/span per entrypoint
     - ContextPropagator ensures trace flows across boundaries
     - Every LogRecord and WireEvent carries: trace_id, span_id, parent_span_id

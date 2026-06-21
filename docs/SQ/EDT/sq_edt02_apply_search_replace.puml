@@ -1,71 +1,41 @@
 @startuml sq_edt02_apply_search_replace
 ' ============================================================
-' Title:     EDT-02 — Apply Search Replace
-' Boundary:  nasim code agent CLI
-' Purpose:   Execute edit via selected strategy
+' Title:     EDT-02 — APPLY Search-Replace
+' Boundary:  nasim code agent
+' Purpose:   Execute edit via search-replace strategy
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Prompt audit 2026-06-21 (cop.md: PermissionGate removed, safety at AGT-15 level)
 ' ============================================================
 
-actor "Developer" as user
+title nasim — EDT-02 APPLY Search-Replace
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
 box "Edit Layer" #FFF3E0
   participant "EditApplier" as applier
-  participant "EditStrategy" as strategy
+  participant "SearchReplaceCoder" as strategy
+end box
+box "Sandbox Layer" #F1F8E9
   participant "FileSystem" as fs
 end box
-box "Safety Layer" #FFF9C4
-  participant "PermissionGate" as gate
-end box
 
-note over user, gate
-  Scope:
-    - edt02 APPLY Edit — execute edit via selected strategy
-
-  Preconditions:
-    - EDT-01 completed (EditStrategy selected)
-    - PermissionGate grants write access
-    - Target file exists and is writable
-
-  Contexts:
-    - Called by AgentOrchestrator after EDT-01
-    - Produces edited file for EDT-03 (Validate)
-
-  Excludes:
-    - Strategy selection (handled by EDT-01)
-    - Post-edit validation (handled by EDT-03)
-    - Diff staging (handled by EDT-04)
-
-  Rollback:
-    - Write failure → restore original file from backup
-    - Permission denied → abort, return error
-
-  Design:
-  Classification: Primary Orchestrator
-    - EditApplier reads original, applies strategy, writes result
-    - Backup created before modification (atomic swap)
-    - PermissionGate consulted before write
-    - Returns diff for downstream validation
-
-  Returns:
-    - Success: EditResult with diff and file path
-    - Failure: Error with original file preserved
+note over agent, fs
+  Scope:          Execute edit via search-replace strategy
+  Preconditions:  EDT-01 completed (EditStrategy selected), target file exists and is writable
+  Contexts:       Called by AgentOrchestrator after EDT-01
+  Excludes:       Strategy selection (EDT-01), post-edit validation (EDT-03), diff staging (EDT-10)
+  Rollback:       Write failure -> restore original file from backup
+  Design:         EditApplier reads original, applies SearchReplaceCoder strategy, writes result. Backup created before modification.
+  Classification: Process Decomposition
 end note
 
-== edt02 APPLY Edit ==
+== EDT-02 APPLY Search-Replace ==
 
 agent -> applier : APPLY_EDIT(strategy, file_path)
 activate applier
-
-applier -> gate : CHECK_WRITE(file_path)
-activate gate
-gate --> applier : permission_granted
-deactivate gate
 
 applier -> fs : read_file(file_path)
 activate fs
@@ -92,24 +62,15 @@ applier -> applier : compute_diff(original_content, modified_content)
 applier --> agent : EditResult(diff, file_path, backup_path)
 deactivate applier
 
-note over user, gate
-  Flow:
-    - AgentOrchestrator → EditApplier → PermissionGate + FileSystem + EditStrategy → EditResult
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → READING → BACKING_UP → WRITING → DIFFING → DONE
-
-  Failure:
-    - Permission denied → abort, no file change
-    - Write failure → restore from backup
-
-  Success:
-    - EditResult with diff and backup path
-
+note over agent, fs
+  Flow:    AgentOrchestrator -> EditApplier -> SearchReplaceCoder + FileSystem -> EditResult
+  State:   <back:#ECEFF1>IDLE</back> -> READING -> BACKING_UP -> WRITING -> DIFFING -> DONE
+  Failure: Write failure -> restore from backup
+  Success: EditResult with diff and backup path
   Key invariants:
     - Backup always created before modification
     - Original file restored on any failure
-    - PermissionGate consulted before every write
+    - Safety checked at AGT-15 level before tool dispatch
 end note
 
 @enduml

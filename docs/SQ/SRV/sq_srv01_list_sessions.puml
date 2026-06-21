@@ -4,9 +4,9 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   List all sessions with pagination
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
 title nasim — SRV-01 LIST Sessions
@@ -38,6 +38,12 @@ activate router
 router -> store : LIST sessions(limit=10, cursor="abc")
 activate store
 
+break Store read failure [500]
+    store --> router : InternalError
+    deactivate store
+    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list sessions", status: "INTERNAL"}}
+end
+
 alt Sessions exist
     store --> router : sessions, next_page_token
     deactivate store
@@ -53,8 +59,9 @@ deactivate router
 note over client, store
   Flow:    HTTPClient -> ServerRouter -> SessionStore
   State:   <back:#2E7D32>ACTIVE</back>
-  Failure: None (read-only)
+  Failure: 500 INTERNAL on store read failure
   Success: 200 OK with session list and pagination token
+  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
 end note
 
 @enduml

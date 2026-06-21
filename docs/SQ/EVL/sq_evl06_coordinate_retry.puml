@@ -17,12 +17,10 @@ end box
 box "Evaluation Layer" #FFF3E0
   participant "RetryCoordinator" as retry
   participant "FeedbackInjector" as feedback
+  participant "TurnBudgetInjector" as budget
 end box
-box "Edit Layer" #FFF3E0
+box "Sandbox Layer" #F1F8E9
   participant "FileSystem" as fs
-end box
-box "Safety Layer" #FFF9C4
-  participant "TurnBudget" as budget
 end box
 
 note over user, budget

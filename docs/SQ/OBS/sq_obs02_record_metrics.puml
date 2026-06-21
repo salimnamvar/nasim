@@ -39,8 +39,9 @@ note over agent, prom
     - Trace correlation (OBS-03)
     - Metrics export to OTel (optional, behind flag)
 
+  Classification: Process Decomposition
+
   Design:
-  Classification: Primary Orchestrator
     - MetricsCollector provides counter/gauge/histogram handles
     - Convenience methods instrument key nasim events
     - Labels are low-cardinality (model, provider, tool, success)

@@ -4,9 +4,9 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Read current agent configuration
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
 title nasim — SRV-10 READ Config
@@ -25,8 +25,8 @@ note over client, config
   Preconditions:  ConfigLoader initialized
   Excludes:       Config update, config validation
   Contexts:       Called by HTTPClient via GET /v1/config
-  Rollback:       N/A (read-only)
-  Design:         ROD: standard read. Returns sanitized config (no secrets).
+  Rollback:       500 if config read fails
+  Design:         CSR: Controller(ServerRouter) -> Repository(ConfigLoader). ROD: standard read (AIP-136). Returns sanitized config (no secrets).
   Classification: Primary Orchestrator
 end note
 
@@ -37,6 +37,13 @@ activate router
 
 router -> config : READ config
 activate config
+
+break Config read failure [500]
+    config --> router : InternalError
+    deactivate config
+    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to read config", status: "INTERNAL"}}
+end
+
 config --> router : Config(provider, model, safety, budget)
 deactivate config
 
@@ -46,8 +53,9 @@ deactivate router
 note over client, config
   Flow:    HTTPClient -> ServerRouter -> ConfigLoader -> return config
   State:   No state change
-  Failure: N/A
+  Failure: 500 INTERNAL on config read failure
   Success: 200 OK with sanitized config
+  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
 end note
 
 @enduml

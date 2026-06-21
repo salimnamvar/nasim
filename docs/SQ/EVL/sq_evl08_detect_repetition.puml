@@ -1,15 +1,16 @@
 @startuml sq_evl08_detect_repetition
 ' ============================================================
-' Title:     EVL-08 — Detect Repetition
-' Boundary:  nasim code agent CLI
+' Title:     EVL-08 — DETECT Repetition
+' Boundary:  nasim code agent
 ' Purpose:   Tool-call loop detection
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Prompt audit 2026-06-21 (gro.md: extraneous PermissionGate removed)
+' Note:      Process decomposition — internal step of EVL-01. No actor per sq.md rules.
 ' ============================================================
 
-actor "Developer" as user
+title nasim — EVL-08 DETECT Repetition
 
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -18,42 +19,18 @@ box "Evaluation Layer" #FFF3E0
   participant "RepetitionDetector" as detector
   participant "ToolCallHistory" as history
 end box
-box "Safety Layer" #FFF9C4
-  participant "PermissionGate" as gate
-end box
 
-note over user, gate
-  Scope:
-    - evl04 DETECT Repetition — tool-call loop detection
-
-  Preconditions:
-    - Tool call history available
-    - Repetition detection thresholds configured
-
-  Contexts:
-    - Called on each tool dispatch to detect loops
-    - Prevents infinite retry/tool-call cycles
-
-  Excludes:
-    - Turn budget management (handled by EVL-05)
-    - Edit evaluation (handled by EVL-01/02)
-
-  Rollback:
-    - Loop detected → force abort, notify user
-
-  Design:
-  Classification: Primary Orchestrator
-    - RepetitionDetector tracks tool call patterns
-    - Detects: same tool+args repeated N times, oscillating patterns
-    - Configurable window (default 5 calls) and threshold (default 3 repeats)
-    - Non-blocking: only triggers on threshold breach
-
-  Returns:
-    - Success: RepetitionResult with detected/flagged status
-    - Failure: LoopDetected error with pattern details
+note over agent, history
+  Scope:          Detect tool-call loops and repeated patterns
+  Preconditions:  Tool call history available, RepetitionDetector initialized
+  Contexts:       Called on each tool dispatch to detect loops
+  Excludes:       Turn budget management (EVL-09), edit evaluation (EVL-01/02)
+  Rollback:       Loop detected -> force abort, notify agent
+  Design:         RepetitionDetector tracks tool call patterns. Detects same tool+args repeated N times, oscillating patterns. Configurable window and threshold.
+  Classification: Process Decomposition
 end note
 
-== evl04 DETECT Repetition ==
+== EVL-08 DETECT Repetition ==
 
 agent -> detector : CHECK_REPETITION(tool_call, call_history)
 activate detector
@@ -79,19 +56,11 @@ end
 
 deactivate detector
 
-note over user, gate
-  Flow:
-    - AgentOrchestrator → RepetitionDetector → ToolCallHistory → RepetitionResult
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → ANALYZING → DETECTING → DONE
-
-  Failure:
-    - Loop detected → LoopDetected error
-
-  Success:
-    - RepetitionResult with detected=false
-
+note over agent, history
+  Flow:    AgentOrchestrator -> RepetitionDetector -> ToolCallHistory -> RepetitionResult
+  State:   No state change
+  Failure: Loop detected -> LoopDetected error
+  Success: RepetitionResult with detected=false
   Key invariants:
     - Detection is non-blocking until threshold
     - Pattern analysis covers repeat, oscillation, stuck cases

@@ -1,55 +1,64 @@
 @startuml sq_saf01_check_permission
 ' ============================================================
-' Title:     SAF-01 — Check Permission
-' Boundary:  nasim code agent CLI
-' Purpose:   Per-tool safety check before execution
+' Title:     SAF-01 — CHECK Permission
+' Boundary:  nasim code agent
+' Purpose:   Per-tool safety check before execution (internal step of AGT-15)
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    Prompt audit 2026-06-21 (gro.md: God Object residual fixed)
+' Note:      Process decomposition — internal step of AGT-15. No actor per sq.md rules.
 ' ============================================================
 
+title nasim — SAF-01 CHECK Permission
+
 box "Agent Layer" #E3F2FD
-  participant "AgentOrchestrator" as agent
+  participant "SafetyCoordinator" as safety
   participant "PermissionGate" as gate
 end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
 end box
 
-note over agent, registry
+note over safety, registry
   Scope:          Check tool permission before execution
-  Preconditions:  Tool call received from LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       User approval prompt (SAF-02)
-  Rollback:       Rejected -> skip tool execution
-  Design:         tool.safe flag determines check behavior
+  Preconditions:  Tool call received from LLM, SafetyCoordinator initialized
+  Contexts:       Called by AGT-15 (DISPATCH Safety Pipeline)
+  Excludes:       User approval prompt (SAF-02), injection/egress checks
+  Rollback:       Rejected -> SafetyViolation returned to caller
+  Design:         SafetyCoordinator delegates to PermissionGate for safe-flag check
   Classification: Process Decomposition
 end note
 
-== SAF-01 CHECK Tool Permission ==
+== SAF-01 CHECK Permission ==
 
-agent -> gate : check(tool_name, safety_mode)
+safety -> gate : check(tool_name, safety_mode)
+activate gate
+
 gate -> registry : get_tool(tool_name)
+activate registry
 registry --> gate : Tool(safe=True/False)
+deactivate registry
+
+gate -> gate : check tool.safe against safety_mode
 
 alt tool.safe = True
-    gate --> agent : approved (no prompt needed)
+    gate --> safety : SafetyPassed
 else tool.safe = False AND safety_mode = "auto"
-    gate --> agent : approved (auto-approve unsafe)
+    gate --> safety : SafetyPassed
 else tool.safe = False AND safety_mode = "ask"
-    ref over gate, agent
-      SAF-02: Prompt User Approval
-    end ref
+    gate --> safety : SafetyViolation(permission_denied)
 else safety_mode = "off"
-    gate --> agent : approved (no checks)
+    gate --> safety : SafetyPassed
 end
 
-note over agent, registry
-  Flow:    tool_name -> check safe flag -> check mode -> approve/reject
-  State:   No state change (or AWAITING_APPROVAL if ask mode)
-  Failure: User rejects (N) -> tool skipped
-  Success: Permission approved, tool execution proceeds
+deactivate gate
+
+note over safety, registry
+  Flow:    SafetyCoordinator -> PermissionGate -> ToolRegistry.get_tool() -> check safe flag -> return
+  State:   No state change (delegated by AGT-15)
+  Failure: Unsafe tool in ask/off mode -> SafetyViolation
+  Success: SafetyPassed -> proceed to next pipeline stage
 end note
 
 @enduml
