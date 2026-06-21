@@ -1,7 +1,7 @@
 # nasim — Design Chain Refinement Audit (CAR Framework)
 
 **Date:** 2026-06-21  
-**Scope:** Full C4 → UC → SM → SQ design chain (149 SQ + 24 C4 + 148 UC + 4 SM)  
+**Scope:** Full C4 → UC → SM → SQ design chain (148 SQ + 24 C4 + 148 UC + 4 SM)  
 **Framework:** Challenge — Action — Result (CAR)  
 **Method:** Layer-by-layer audit with cross-layer synchronization checks + prompt file resolution
 
@@ -281,7 +281,7 @@ The "audited" diagrams are at v2.0.0 or v3.0.0 while unaudited diagrams remain a
 
 **Challenge:** Every UC ID must have a corresponding SQ.
 
-**Result:** 148 UCs, 149 SQ diagrams. AGT-05 is an orphan (no UC entry) — correctly reclassified as Process Decomposition (internal step of AGT-15). All other UCs have matching SQs.
+**Result:** 148 UCs, 148 SQ diagrams. 1:1 mapping. AGT-05 was deleted (redundant with AGT-15 inlined permission check).
 
 ### 5.3 SM ↔ SQ — PASS
 
@@ -408,7 +408,7 @@ The nasim design chain demonstrates **exceptional consistency** across all four 
 - **C4:** 24 diagrams — no God Objects, passive policies excluded, 3-unit constraint met
 - **UC:** 148 UCs — all have component owners, external references mapped
 - **SM:** 4 state machines — all UC-ID labels, canonical hex colors, lifecycle-write rules enforced
-- **SQ:** 149 diagrams — CSR pattern, ROD/AIP-193, DRY ref, Mega-Sections, state overlays
+- **SQ:** 148 diagrams — CSR pattern, ROD/AIP-193, DRY ref, Mega-Sections, state overlays
 - **Cross-Layer:** C4↔SQ, UC↔SQ, SM↔SQ, method names — all synchronized
 
 ---

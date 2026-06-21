@@ -1,6 +1,6 @@
 # nasim — SQ Inventory
 
-Sequence diagrams organised by UC group. 149 diagrams across 21 groups.
+Sequence diagrams organised by UC group. 148 diagrams across 21 groups.
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
 Back to [docs/](../README.md).
@@ -9,7 +9,7 @@ Back to [docs/](../README.md).
 
 | Group | Boundary | Diagrams | Subdirectory |
 | ----- | -------- | :------: | ------------ |
-| AGT | Agent Core — orchestrator, history, permissions, plans, subagents | 15 | `AGT/` |
+| AGT | Agent Core — orchestrator, history, permissions, plans, subagents | 14 | `AGT/` |
 | CLI | CLI Layer — REPL, parsing, rendering | 8 | `CLI/` |
 | CFG | Configuration — config loading and validation | 3 | `CFG/` |
 | CTX | Context Management — token counting and compaction | 6 | `CTX/` |
@@ -31,7 +31,7 @@ Back to [docs/](../README.md).
 | VCS | Version Control — Git status, diff, commit | 4 | `VCS/` |
 | WRL | Wire Log — append-only event store, fork, checkpoint | 5 | `WRL/` |
 
-**Total: 149 SQ diagrams across 21 groups**
+**Total: 148 SQ diagrams across 21 groups**
 
 ## SQ Diagram Convention
 
@@ -55,7 +55,7 @@ Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, 
 | MCP-01 | Missing actor; no ErrorBoundary; no AIP-193 errors | Added Developer actor + CLI entry chain; added ErrorBoundary; added AIP-193 error mapping |
 | CLI-01 | Inlined agent loop logic instead of `ref` blocks | Replaced inlined logic with `ref` blocks for AGT-01, CLI-02, OBS-01 |
 | AGT-02 | God Object: AgentOrchestrator calls PermissionGate directly | Delegated to SafetyCoordinator (AGT-15) which composes PermissionGate |
-| AGT-05 | Orphan SQ with no UC entry | Reclassified as Process Decomposition (internal step of AGT-15) |
+| AGT-05 | Orphan SQ with no UC entry | Deleted — redundant with AGT-15 inlined permission check |
 | TL-01 | Incorrect "Primary Orchestrator" classification; invalid actor | Changed to Process Decomposition; removed actor and CLI entry chain |
 | PRV-02 | Incorrect "Primary Orchestrator" classification; invalid actor | Changed to UC-level Sub-flow; removed actor |
 
@@ -71,7 +71,7 @@ Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, 
 
 ### UC↔SQ Mapping
 
-148 UCs in catalog, 149 SQ diagrams. AGT-05 is an orphan (no UC entry) — reclassified as Process Decomposition.
+148 UCs in catalog, 148 SQ diagrams. 1:1 mapping. AGT-05 (CHECK Tool Permission) was deleted — redundant with AGT-15 which already inlines the permission check.
 
 ---
 
