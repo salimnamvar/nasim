@@ -5,7 +5,7 @@
 ' Purpose:   Process FSM showing all agent states and transitions.
 '            All entry points route through the API (API-06).
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   8.0.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md

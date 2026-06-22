@@ -4,23 +4,30 @@
 
 ' ============================================================
 ' Title:     nasim — Component Overview (API-First)
-' Boundary:  nasim core library
-' Purpose:   Cross-container view of all component groups.
-'            API (ServerRouter) is the sole entry gate.
-'            All interface containers (CLI, WebApp, DesktopApp, MobileApp)
-'            connect exclusively through the API. No bypass allowed.
+' Boundary:  nasim (container)
+' Purpose:   Internal structure of the nasim container.
+'            API component (ServerRouter) is the sole entry gate.
+'            All interface containers connect exclusively through
+'            the API component. No bypass allowed.
 ' Milestone: v1.0
-' Version:   7.0.0
-' Source:    CAR refinement loop — API-First transformation
+' Version:   8.0.0
+' Source:    CAR refinement loop — C4 correction
 ' Review:    —
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
 title nasim — Component Overview
 
-Container_Boundary(core_library, "Core Library") {
+Container_Boundary(nasim, "nasim") {
 
-    Container_Boundary(agent_group, "Agent Group") {
+    Boundary(api_group, "API Group") {
+        Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
+        Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate for all interface containers.")
+        Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
+        Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
+    }
+
+    Boundary(agent_group, "Agent Group") {
         Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields structured events")
         Component(subagent_coord, "SubagentCoordinator", "", "Parent-child orchestration, nesting limit 5, result aggregation")
         Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions")
@@ -30,18 +37,18 @@ Container_Boundary(core_library, "Core Library") {
         Component(compactor, "ContextCompactor", "", "Summarizes old exchanges via secondary LLM call")
     }
 
-    Container_Boundary(provider_group, "Provider Group") {
+    Boundary(provider_group, "Provider Group") {
         Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name")
         Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix")
     }
 
-    Container_Boundary(router_group, "Router Group") {
+    Boundary(router_group, "Router Group") {
         Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
         Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
         Component(provider_caps, "ProviderCapabilities", "", "Capability declaration + static metadata: streaming, tools, vision, reasoning, context limits, pricing")
     }
 
-    Container_Boundary(tool_group, "Tool Group") {
+    Boundary(tool_group, "Tool Group") {
         Component(tool_abc, "Tool", "ABC", "Base tool: name, description, parameters, safe, execute")
         Component(tool_registry, "ToolRegistry", "", "Instance-based tool registry, dynamic registration for MCP")
         Component(file_tools, "FileTools", "", "ReadFileTool, WriteFileTool, EditFileTool")
@@ -60,41 +67,34 @@ Container_Boundary(core_library, "Core Library") {
         Component(review_tool, "ReviewTool", "", "LLM-driven code review and quality assessment")
     }
 
-    Container_Boundary(mcp_group, "MCP Group") {
+    Boundary(mcp_group, "MCP Group") {
         Component(mcp_client_rt, "MCPClientRuntime", "", "Connects to external MCP servers via stdio/SSE")
         Component(mcp_server_rt, "MCPServerRuntime", "", "Exposes nasim tools to external MCP clients")
         Component(mcp_tool_adapter, "MCPToolAdapter", "", "Wraps MCP server tools into nasim Tool format")
         Component(mcp_discovery, "MCPDiscovery", "", "Discovers and registers MCP server tools at startup")
     }
 
-    Container_Boundary(config_group, "Config Group") {
+    Boundary(config_group, "Config Group") {
         Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags")
         Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety_mode, context_budget, mcp_servers")
     }
 
-    Container_Boundary(session_group, "Session Group") {
+    Boundary(session_group, "Session Group") {
         Component(session_store, "SessionStore", "", "Persists/loads message history to ~/.nasim/sessions/")
         Component(session_versioning, "SessionVersioning", "", "Snapshots and undo for session state")
         Component(session_search, "SessionSearch", "", "Cross-session search via FTS5 index")
         Component(session_fork, "SessionFork", "", "Branch conversations from any point")
     }
 
-    Container_Boundary(api_group, "API Group (Entry Gate)") {
-        Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts. All interface containers connect here.")
-        Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate — no interface may bypass this to call internal services directly.")
-        Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
-        Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
-    }
-
-    Container_Boundary(hooks_group, "Hooks Group") {
+    Boundary(hooks_group, "Hooks Group") {
         Component(hook_manager, "HookManager", "", "Registers, discovers, and executes hooks in priority order")
     }
 
-    Container_Boundary(plugins_group, "Plugins Group") {
+    Boundary(plugins_group, "Plugins Group") {
         Component(plugin_loader, "PluginLoader", "", "Discovers and loads plugins from ~/.nasim/plugins/")
     }
 
-    Container_Boundary(sandbox_group, "Sandbox Group") {
+    Boundary(sandbox_group, "Sandbox Group") {
         Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
         Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules")
         Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement")
@@ -106,25 +106,25 @@ Container_Boundary(core_library, "Core Library") {
         Component(staged_applicator, "StagedApplicator", "", "Applies approved staged diffs to filesystem")
     }
 
-    Container_Boundary(safety_group, "Safety Group") {
+    Boundary(safety_group, "Safety Group") {
         Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
         Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")
         Component(injection_scanner, "InjectionScanner", "", "Detects prompt injection patterns in tool outputs")
         Component(egress_inspector, "EgressInspector", "", "Inspects outbound data for policy violations")
     }
 
-    Container_Boundary(observability_group, "Observability Group") {
+    Boundary(observability_group, "Observability Group") {
         Component(structured_logger, "StructuredLogger", "structlog + JSON", "Structured JSON logs to stdout only. Emit-only (tenas pattern)")
         Component(metrics_collector, "MetricsCollector", "prometheus-client", "Token usage, latency histograms, tool counts, errors. /metrics pull only")
         Component(trace_correlator, "TraceCorrelator", "contextvars", "Generates root trace/span per CLI turn or HTTP request")
         Component(context_propagator, "ContextPropagator", "contextvars + threading", "Propagates trace context across Provider, Tool, Hook, Subagent, MCP boundaries")
         Component(log_redactor, "LogRedactor", "regex patterns", "Strips secrets before any emission. Always on")
-        Component(dual_output_adapter, "DualOutputAdapter", "tty detection", "Interface adapter: writes JSON to stdout (machine) + delegates to Renderer when isatty (human). Used by CLI interface container.")
-        Component(instrumentation_mw, "InstrumentationMiddleware", "ASGI middleware", "Outermost request handler for HTTP mode. Extracts/generates request_id; binds to contextvars for correlation via ContextPropagator")
+        Component(dual_output_adapter, "DualOutputAdapter", "tty detection", "Interface adapter: writes JSON to stdout (machine) + delegates to Renderer when isatty (human)")
+        Component(instrumentation_mw, "InstrumentationMiddleware", "ASGI middleware", "Outermost request handler for HTTP mode. Extracts/generates request_id; binds to contextvars")
         Component(otel_exporter, "OTelExporter", "opentelemetry-sdk (optional)", "Behind otel feature flag. Bridges spans to OTel SDK")
     }
 
-    Container_Boundary(memory_group, "Memory Group") {
+    Boundary(memory_group, "Memory Group") {
         Component(memory_store, "MemoryStore", "", "Cross-session knowledge persistence and retrieval")
         Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search")
         Component(memory_scope, "MemoryScope", "", "Scope isolation: global, project, session")
@@ -135,13 +135,13 @@ Container_Boundary(core_library, "Core Library") {
         Component(memory_indexer, "MemoryIndexer", "", "Indexes new memory entries into FTS5 and embedding stores")
     }
 
-    Container_Boundary(git_group, "Git Group") {
+    Boundary(git_group, "Git Group") {
         Component(git_integration, "GitIntegration", "", "Auto-commit, branch awareness, diff tracking")
         Component(git_status, "GitStatus", "", "Read working tree status, staged changes")
         Component(git_commit, "GitCommit", "", "Create commits with conventional messages")
     }
 
-    Container_Boundary(repo_intelligence_group, "Repo Intelligence Group") {
+    Boundary(repo_intelligence_group, "Repo Intelligence Group") {
         Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Orchestrates codebase intelligence: indexing, search, ranking, repo mapping")
         Component(ast_index_adapter, "ASTIndexAdapter", "", "Tree-sitter based AST indexing for symbol extraction")
         Component(symbol_graph, "SymbolGraph", "", "Cross-file symbol reference graph")
@@ -151,7 +151,7 @@ Container_Boundary(core_library, "Core Library") {
         Component(repo_map_builder, "RepoMapBuilder", "", "Generates hierarchical repo map summaries for context injection")
     }
 
-    Container_Boundary(edit_strategy_group, "Edit Strategy Group") {
+    Boundary(edit_strategy_group, "Edit Strategy Group") {
         Component(edit_strategy_mgr, "EditStrategyManager", "", "Manages and selects edit strategy based on edit type and context")
         Component(edit_strategy, "EditStrategy", "ABC", "Base strategy interface: plan_edit, apply_edit, validate_edit")
         Component(search_replace_coder, "SearchReplaceCoder", "", "Search-and-replace based edit with fuzzy matching")
@@ -165,7 +165,7 @@ Container_Boundary(core_library, "Core Library") {
         Component(strategy_selector, "StrategySelector", "", "Selects optimal strategy based on edit type and context")
     }
 
-    Container_Boundary(evaluation_group, "Evaluation Group") {
+    Boundary(evaluation_group, "Evaluation Group") {
         Component(eval_engine, "EvaluationEngine", "", "Orchestrates task evaluation: runs checks, scores, retries")
         Component(task_evaluator, "TaskEvaluator", "", "Evaluates task completion against success criteria")
         Component(success_check_runner, "SuccessCheckRunner", "", "Runs user-defined success checks and assertions")
@@ -177,14 +177,14 @@ Container_Boundary(core_library, "Core Library") {
         Component(quality_signal, "QualitySignal", "", "Records quality metrics: task success, retry counts, token usage, latency")
     }
 
-    Container_Boundary(wire_log_group, "Wire Log Group") {
+    Boundary(wire_log_group, "Wire Log Group") {
         Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
         Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")
         Component(wire_reader, "WireReader", "", "Reads and parses wire log entries for replay and analysis")
         Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
     }
 
-    Container_Boundary(context_graph_group, "Context Graph Group") {
+    Boundary(context_graph_group, "Context Graph Group") {
         Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
         Component(context_processor, "ContextProcessor", "ABC", "Base interface for pipeline processors")
         Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
@@ -196,10 +196,6 @@ Container_Boundary(core_library, "Core Library") {
     }
 }
 
-' ============================================================
-' External: Interface Containers (all connect to API, no bypass)
-' ============================================================
-
 Container_Ext(cli_container, "CLI")
 Container_Ext(webapp_container, "WebApp")
 Container_Ext(desktop_container, "DesktopApp")
@@ -209,20 +205,17 @@ System_Ext(web, "Web")
 System_Ext(git_repo, "Git Repository")
 System_Ext(lsp_server, "LSP Server")
 
-' ============================================================
-' Interface → API wiring (ALL interfaces MUST go through ServerRouter)
-' ============================================================
+Rel(cli_container, server_router, "routes all calls through API component")
+Rel(webapp_container, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
+Rel(desktop_container, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
+Rel(mobile_container, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
 
-Rel(cli_container, server_router, "routes all calls through API")
-Rel(webapp_container, server_router, "routes all calls through API", "HTTP/JSON + SSE")
-Rel(desktop_container, server_router, "routes all calls through API", "HTTP/JSON + SSE")
-Rel(mobile_container, server_router, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(server_app, server_router, "mounts routes")
+Rel(server_router, api_schema, "validates requests/responses")
+Rel(server_router, agent_orch, "delegates to agent orchestrator")
+Rel(server_router, sse_handler, "streams via")
+Rel(sse_handler, agent_orch, "consumes events from core")
 
-' ============================================================
-' Core Internal Relationships
-' ============================================================
-
-' --- AgentOrchestrator: 10 outgoing (No God Object compliant) ---
 Rel(agent_orch, provider, "chat, stream")
 Rel(agent_orch, tool_registry, "execute tools")
 Rel(agent_orch, subagent_coord, "spawn, collect")
@@ -234,26 +227,20 @@ Rel(agent_orch, memory_store, "persist, retrieve")
 Rel(agent_orch, session_store, "save, load")
 Rel(agent_orch, context_graph, "PROCESS")
 
-' --- Delegated: context management (agent_orch → context_graph orchestrates) ---
 Rel(context_graph, conv_history, "messages, token tracking")
 Rel(context_graph, plan_session, "queue, drain plan")
 Rel(context_graph, compactor, "compact when exceeded")
 
-' --- Delegated: observability (context_propagator carries trace, wired internally) ---
 Rel(context_propagator, structured_logger, "injects trace context into records")
 Rel(context_propagator, metrics_collector, "record metrics via trace context")
 
-' --- Delegated: edit strategy & evaluation (accessed via context_graph pipeline) ---
 Rel(context_graph, edit_strategy_mgr, "SELECT, APPLY edits")
 Rel(context_graph, eval_engine, "EVALUATE, RETRY tasks")
 Rel(context_graph, wire_log, "APPEND, REPLAY events")
 Rel(context_graph, repo_intel_mgr, "INDEX, RANK, INJECT repo intel")
 Rel(context_graph, persona_mgr, "load persona config")
 
-' --- Provider chain ---
 Rel(provider, litellm_proxy, "delegates all LLM calls")
-
-' --- Conversation compaction ---
 Rel(compactor, provider, "secondary LLM call")
 
 Rel(model_router, fallback_chain, "trigger failover")
@@ -286,12 +273,6 @@ Rel(config_loader, config_schema, "loads typed config")
 Rel(session_versioning, session_store, "snapshots")
 Rel(session_search, session_store, "searches")
 Rel(session_fork, session_store, "forks")
-
-Rel(server_app, server_router, "mounts routes")
-Rel(server_router, api_schema, "validates requests/responses")
-Rel(server_router, sse_handler, "streams via")
-Rel(server_router, agent_orch, "delegates to core")
-Rel(sse_handler, agent_orch, "consumes events from core")
 
 Rel(sandbox_executor, sandbox_policy, "applies isolation rules")
 Rel(sandbox_executor, sandbox_monitor, "monitored by")
@@ -358,10 +339,6 @@ Rel(pipeline_orchestrator, distillation_processor, "distillation stage")
 Rel(pipeline_orchestrator, injection_processor, "injection stage")
 Rel(pipeline_orchestrator, compaction_processor, "compaction stage")
 Rel(pipeline_orchestrator, token_budget_tracker, "track budget")
-
-' ============================================================
-' Observability Internal Relationships
-' ============================================================
 
 Rel(trace_correlator, context_propagator, "provides root trace/span")
 Rel(context_propagator, structured_logger, "injects trace context into records")

@@ -4,14 +4,15 @@
 
 ' ============================================================
 ' Title: nasim — Container Diagram (API-First)
-' Boundary: nasim code agent
-' Purpose: Show API-First deployment: all interface containers
-'          connect exclusively to the API component within the
-'          Backend container. No interface may bypass the API.
+' Boundary: nasim
+' Purpose: Show deployable units. nasim is one container; CLI,
+'          WebApp, DesktopApp, MobileApp are interface containers
+'          that connect to nasim. API is a component inside nasim,
+'          not a separate container.
 ' Milestone: v1.0
-' Version: 7.0.0
-' Source: CAR refinement loop — API-First transformation
-' Review: —
+' Version:   8.0.0
+' Source:    CAR refinement loop — C4 correction
+' Review:    —
 ' ============================================================
 
 LAYOUT_LEFT_RIGHT()
@@ -19,43 +20,23 @@ LAYOUT_WITH_LEGEND()
 
 title nasim — Container Diagram (API-First)
 
-' ============================================================
-' Actors
-' ============================================================
-
 Person(user, "User", "Interacts via CLI, WebApp, DesktopApp, or MobileApp")
 
-' ============================================================
-' Interface Containers (separate deployable units)
-' ============================================================
-
 Container_Boundary(interfaces, "Interface Containers") {
-    Container(cli, "CLI", "Python click + rich", "Terminal interface: REPL, slash commands, rich rendering. Routes all calls through API.")
-    Container(webapp, "WebApp", "JavaScript SPA", "Browser-based interface. Connects to API via HTTP/SSE.")
-    Container(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application. Connects to API via HTTP/SSE.")
-    Container(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application. Connects to API via HTTP/SSE.")
+    Container(cli, "CLI", "Python click + rich", "Terminal interface: REPL, slash commands, rich rendering")
+    Container(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
+    Container(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application")
+    Container(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application")
 }
 
-' ============================================================
-' Backend Container (single deployable unit with API entry gate)
-' ============================================================
-
-System_Boundary(backend, "nasim Backend") {
-    Container(api, "API", "Python FastAPI Router", "Sole entry gate for all interface containers. ROD-compliant REST endpoints. No interface may bypass this component to call internal services directly.")
-    Container(core, "Core Library", "Python", "Agent orchestration, provider abstraction, tools, sessions, config, hooks, plugins, sandbox, observability, memory, git, MCP, context graph, evaluation, edit strategy, wire log")
-    Container(mcp_server, "MCP Server", "stdio/SSE", "Exposes nasim tools to external MCP clients")
-}
-
-' ============================================================
-' External Systems
-' ============================================================
+Container(nasim, "nasim", "Python", "API-First code agent: API component is the sole entry gate. No interface may bypass the API to call internal services directly.")
 
 System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: 100+ providers via litellm")
 System_Ext(host_fs, "Host Filesystem", "Project code files")
 System_Ext(host_shell, "Host Shell", "subprocess execution")
 System_Ext(web_ext, "Web", "Documentation and search")
-System_Ext(mcp_ext_server, "MCP Server (External)", "Extension tools via Model Context Protocol")
-System_Ext(mcp_ext_client, "MCP Client (External)", "External tools connecting to nasim MCP server")
+System_Ext(mcp_server, "MCP Server", "Extension tools via Model Context Protocol")
+System_Ext(mcp_client, "MCP Client", "External tools connecting to nasim MCP server")
 System_Ext(git_repo, "Git Repository", "Version control")
 System_Ext(sandbox_rt, "Sandbox Runtime", "OS-level isolation")
 System_Ext(lsp_server, "LSP Server", "Code intelligence")
@@ -66,51 +47,32 @@ System_Ext(vector_store, "Vector Store", "Persistent vector storage for similari
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace/metric export")
 System_Ext(obs_platform, "Observability Platform", "Agent-based collection, Loki logs, Prometheus metrics, Grafana dashboards. nasim emits only.")
 
-' ============================================================
-' Relationships: User → Interface → API (mandatory path)
-' ============================================================
-
 Rel(user, cli, "types input, reads output", "terminal")
 Rel(user, webapp, "interacts via browser", "HTTPS")
 Rel(user, desktop_app, "interacts via desktop app", "HTTPS")
 Rel(user, mobile_app, "interacts via mobile app", "HTTPS")
 
-' CRITICAL: All interfaces connect ONLY to API. No bypass.
-Rel(cli, api, "routes all calls through API", "in-process / HTTP")
-Rel(webapp, api, "routes all calls through API", "HTTP/JSON + SSE")
-Rel(desktop_app, api, "routes all calls through API", "HTTP/JSON + SSE")
-Rel(mobile_app, api, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(cli, nasim, "routes all calls through API component", "in-process / HTTP")
+Rel(webapp, nasim, "routes all calls through API component", "HTTP/JSON + SSE")
+Rel(desktop_app, nasim, "routes all calls through API component", "HTTP/JSON + SSE")
+Rel(mobile_app, nasim, "routes all calls through API component", "HTTP/JSON + SSE")
 
-' API → Core Library (internal delegation)
-Rel(api, core, "delegates to core library services", "in-process")
+Rel(mcp_client, nasim, "invokes nasim tools via MCP protocol", "stdio/SSE")
 
-' MCP Server → API (external clients go through API)
-Rel(mcp_ext_client, mcp_server, "invokes nasim tools via MCP protocol", "stdio/SSE")
-Rel(mcp_server, core, "accesses tool registry", "in-process")
-
-' ============================================================
-' Core Library → External Systems
-' ============================================================
-
-Rel(core, llm_backend, "HTTP POST", "JSON streaming")
-Rel(core, host_fs, "read/write/search files")
-Rel(core, host_shell, "execute commands via sandbox")
-Rel(core, web_ext, "fetch/search")
-Rel(core, mcp_ext_server, "invoke extension tools")
-Rel(core, git_repo, "git operations")
-Rel(core, sandbox_rt, "isolated execution")
-Rel(core, lsp_server, "code intelligence")
-Rel(core, plugin_dir, "plugin discovery")
-Rel(core, tree_sitter, "parses AST")
-Rel(core, embedding_model, "generates embeddings")
-Rel(core, vector_store, "vector CRUD")
-Rel(core, otel_collector, "exports traces/metrics (optional)", "OTLP/gRPC")
-
-' ============================================================
-' Observability Pipeline (tenas pattern: emit-only app, platform-owned collection)
-' ============================================================
-
-Rel(core, obs_platform, "writes structured logs to stdout", "stdout")
-Rel(obs_platform, core, "pull-scrapes /metrics endpoint", "HTTP GET")
+Rel(nasim, llm_backend, "HTTP POST", "JSON streaming")
+Rel(nasim, host_fs, "read/write/search files")
+Rel(nasim, host_shell, "execute commands via sandbox")
+Rel(nasim, web_ext, "fetch/search")
+Rel(nasim, mcp_server, "invoke extension tools")
+Rel(nasim, git_repo, "git operations")
+Rel(nasim, sandbox_rt, "isolated execution")
+Rel(nasim, lsp_server, "code intelligence")
+Rel(nasim, plugin_dir, "plugin discovery")
+Rel(nasim, tree_sitter, "parses AST")
+Rel(nasim, embedding_model, "generates embeddings")
+Rel(nasim, vector_store, "vector CRUD")
+Rel(nasim, otel_collector, "exports traces/metrics (optional)", "OTLP/gRPC")
+Rel(nasim, obs_platform, "writes structured logs to stdout", "stdout")
+Rel(obs_platform, nasim, "pull-scrapes /metrics endpoint", "HTTP GET")
 
 @enduml

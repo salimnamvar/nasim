@@ -2,44 +2,48 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 
-
 ' ============================================================
-' Title:     nasim — API Component Diagram (Entry Gate)
-' Boundary:  nasim Backend — API Group
-' Purpose:   API entry gate: sole entry point for all interface
-'            containers (CLI, WebApp, DesktopApp, MobileApp).
-'            No interface may bypass this component.
+' Title:     nasim — API Component Diagram
+' Boundary:  nasim (container)
+' Purpose:   API component group inside nasim. Shows how
+'            interface containers connect to ServerRouter.
+'            API is a component, not a container.
 ' Milestone: v1.0
-' Version:   7.0.0
-' Source:    CAR refinement loop — API-First transformation
+' Version:   8.0.0
+' Source:    CAR refinement loop — C4 correction
 ' Review:    —
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — API Component Diagram (Entry Gate)
+title nasim — API Component Diagram
 
-Container_Boundary(api_boundary, "API Group (Entry Gate)") {
-    Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts. All interface containers connect here.")
-    Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate — no interface may bypass this to call internal services directly.")
-    Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
-    Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
+Container_Boundary(nasim, "nasim") {
+    Boundary(api_group, "API Group") {
+        Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
+        Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate for all interface containers.")
+        Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
+        Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
+    }
+
+    Boundary(agent_group, "Agent Group") {
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop")
+    }
 }
 
 Container_Ext(cli, "CLI")
 Container_Ext(webapp, "WebApp")
 Container_Ext(desktop_app, "DesktopApp")
 Container_Ext(mobile_app, "MobileApp")
-Container_Ext(core_library, "Core Library")
 
-Rel(cli, server_router, "routes all calls through API")
-Rel(webapp, server_router, "routes all calls through API", "HTTP/JSON + SSE")
-Rel(desktop_app, server_router, "routes all calls through API", "HTTP/JSON + SSE")
-Rel(mobile_app, server_router, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(cli, server_router, "routes all calls through API component")
+Rel(webapp, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
+Rel(desktop_app, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
+Rel(mobile_app, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
 
 Rel(server_app, server_router, "mounts routes")
 Rel(server_router, api_schema, "validates requests/responses")
-Rel(server_router, core_library, "delegates to agent orchestrator")
+Rel(server_router, agent_orch, "delegates to agent orchestrator")
 Rel(server_router, sse_handler, "streams via")
-Rel(sse_handler, core_library, "consumes AgentEvents")
+Rel(sse_handler, agent_orch, "consumes AgentEvents")
 
 @enduml

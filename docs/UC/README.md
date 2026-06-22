@@ -4,27 +4,27 @@
 
 | Group | Boundary | Description |
 |-------|----------|-------------|
-| API | nasim Backend — API Entry Gate | Core business operations exposed via API (ROD-compliant). Sole entry point for all interface containers. |
-| CLI | Interface Container — CLI | CLI-specific interface UCs: REPL, slash commands, rendering. All business operations delegate to API. |
-| AGT | Core Library — Agent | Core agentic loop, permissions, context, plans, subagents |
-| PRV | Core Library — Provider | LLM provider abstraction via litellm proxy |
-| CFG | Core Library — Config | Config loading and validation |
-| SSN | Core Library — Session | Session persistence, versioning, search, fork |
-| SAF | Core Library — Safety | Permission gates, user approval, safety modes |
-| CTX | Core Library — Context Graph | Token counting, compaction, context pipeline |
-| MCP | Core Library — MCP | Model Context Protocol client/server |
-| TL | Core Library — Tools | All tool implementations |
-| HK | Core Library — Hooks | Pre/post hooks for tool and LLM lifecycle |
-| PLG | Core Library — Plugins | Plugin discovery, loading, registration |
-| RTG | Core Library — Router | Model selection, fallback chains |
-| OBS | Core Library — Observability | Structured logging, metrics, trace correlation |
-| MEM | Core Library — Memory | Cross-session knowledge persistence |
-| VCS | Core Library — Git | Version control integration |
-| SBX | Core Library — Sandbox | OS-level process isolation |
-| RIM | Core Library — Repo Intelligence | Codebase indexing, symbol graphs, embedding |
-| EDT | Core Library — Edit Strategy | Polymorphic edit strategies |
-| EVL | Core Library — Evaluation | Task evaluation and quality checks |
-| WRL | Core Library — Wire Log | Append-only event store, fork, checkpoint |
+| API | nasim — API Group | Core business operations exposed via API (ROD-compliant). Sole entry point for all interface containers. API is a component inside nasim. |
+| CLI | Interface Container — CLI | CLI-specific interface UCs: REPL, slash commands, rendering. All business operations delegate to API component inside nasim. |
+| AGT | nasim — Agent Group | Core agentic loop, permissions, context, plans, subagents |
+| PRV | nasim — Provider Group | LLM provider abstraction via litellm proxy |
+| CFG | nasim — Config | Config loading and validation |
+| SSN | nasim — Session | Session persistence, versioning, search, fork |
+| SAF | nasim — Safety | Permission gates, user approval, safety modes |
+| CTX | nasim — Context Graph | Token counting, compaction, context pipeline |
+| MCP | nasim — MCP | Model Context Protocol client/server |
+| TL | nasim — Tools | All tool implementations |
+| HK | nasim — Hooks | Pre/post hooks for tool and LLM lifecycle |
+| PLG | nasim — Plugins | Plugin discovery, loading, registration |
+| RTG | nasim — Router | Model selection, fallback chains |
+| OBS | nasim — Observability | Structured logging, metrics, trace correlation |
+| MEM | nasim — Memory | Cross-session knowledge persistence |
+| VCS | nasim — Git | Version control integration |
+| SBX | nasim — Sandbox | OS-level process isolation |
+| RIM | nasim — Repo Intelligence | Codebase indexing, symbol graphs, embedding |
+| EDT | nasim — Edit Strategy | Polymorphic edit strategies |
+| EVL | nasim — Evaluation | Task evaluation and quality checks |
+| WRL | nasim — Wire Log | Append-only event store, fork, checkpoint |
 
 ## API Group (Entry Gate) — Core Business UCs
 

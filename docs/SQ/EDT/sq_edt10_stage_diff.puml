@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Stage edit in DiffSandboxManager for review before sandbox-validated apply
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   8.0.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    Meta-Software Designer audit 2026-06-21
 ' Note:      Process decomposition — internal step of edit flow. Actor required per updated sq.md rules.
@@ -17,7 +17,7 @@ actor "User" as user
 box "API Group (Entry Gate)" #E8EAF6
   participant "ServerRouter" as router
 end box
-box "Agent Layer" #E3F2FD
+box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
 box "Sandbox Layer" #F1F8E9

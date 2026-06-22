@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Tool dispatch with Safety Pipeline (no God Object)
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   8.0.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    Meta-Software Designer audit 2026-06-21
 ' Pattern:   Service (AgentOrchestrator) -> Safety (SafetyCoordinator) -> Repository (ToolRegistry)
@@ -17,7 +17,7 @@ actor "User" as user
 box "API Group (Entry Gate)" #E8F5E9
   participant "ServerRouter" as router
 end box
-box "Agent Layer" #E3F2FD
+box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "SafetyCoordinator" as safety
   participant "ErrorBoundary" as eb

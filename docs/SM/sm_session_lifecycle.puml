@@ -5,7 +5,7 @@
 ' Purpose:   Entity lifecycle for Session (persisted to disk).
 '            All mutations routed through API Group (Entry Gate).
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   8.0.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================

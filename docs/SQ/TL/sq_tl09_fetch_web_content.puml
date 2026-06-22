@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Fetch URL content and convert to markdown
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   8.0.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -14,7 +14,7 @@ actor "User" as user
 box "API Group (Entry Gate)" #E8F5E9
   participant "ServerRouter" as router
 end box
-box "Agent Layer" #E3F2FD
+box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
 box "Tool Layer" #F3E5F5

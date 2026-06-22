@@ -1,67 +1,59 @@
-# nasim — CAR Audit Report: API-First Transformation
+# nasim — CAR Audit Report: C4-Corrected API-First Transformation
 
 **Date:** 2026-06-23
-**Scope:** Full design chain audit after API-First CAR refinement loop
-**Version:** 7.0.0
+**Scope:** Full design chain audit after C4 correction
+**Version:** 8.0.0
 
 ---
+
+## C4 Hierarchy (Corrected)
+
+```
+Context:   Person(User) → System(nasim) → System_Ext(...)
+Container: Person(User) → Container(CLI, WebApp, DesktopApp, MobileApp) → Container(nasim) → System_Ext(...)
+Component: Container_Ext(CLI, WebApp, ...) → Boundary(nasim) → Boundary(API Group) → Component(ServerRouter) → Component(AgentOrchestrator)
+```
+
+**Key distinction:** API (ServerRouter) is a **component** inside the nasim container, not a separate container. Interface containers are separate deployable units that connect to nasim through the API component.
 
 ## Audit Summary
 
 | Layer | Status | Changes Applied |
 |-------|--------|-----------------|
-| C4 Context | ✅ PASS | Single User actor, 15 external systems preserved |
-| C4 Container | ✅ PASS | 4 interface containers → API entry gate → Backend |
-| C4 Component | ✅ PASS | API Group (Entry Gate) is sole entry point |
-| C4 README | ✅ PASS | Architecture principles updated, API-First rule enforced |
-| UC Inventory | ✅ PASS | CLI reduced to 3 interface UCs, API Group with 11 ROD UCs |
-| UC Diagrams | ✅ PASS | All UC .puml diagrams use single User actor |
-| SM Agent Lifecycle | ✅ PASS | All entry/exit transitions use API-06 as sole entry gate |
-| SM Session Lifecycle | ✅ PASS | Mutations use API UCs (API-02 through API-05) |
-| SM README | ✅ PASS | Lifecycle-Write UC Mapping updated for API-First |
-| SQ Diagrams | ✅ PASS | 148 diagrams: Developer→User, HTTPClient→User, version→7.0.0 |
-| SQ Entry Chains | ✅ PASS | All `repl -> agent` bypass patterns eliminated |
-| SQ Flow Notes | ✅ PASS | REPLSession→ServerRouter, Developer→User in summaries |
-
-## Violations Found and Fixed
-
-| # | Violation | Scope | Fix |
-|---|-----------|-------|-----|
-| 1 | Two actors (Developer + HTTP Client) | C4 Context, UC, SQ | Unified to single `User` actor |
-| 2 | CLI bypasses API to call AgentOrchestrator directly | C4 Container, SQ | All interfaces route through API (ServerRouter) |
-| 3 | CLI and SRV have duplicate LIST Sessions UC | UC | Consolidated into API Group with 11 ROD-compliant UCs |
-| 4 | Agent SM entry triggered by CLI-01/SRV-06 | SM | All entry transitions use API-06 as sole entry gate |
-| 5 | Session SM mutations use SSN-01/SSN-04 | SM | Updated to API-02 through API-05 |
-| 6 | 130 SQ diagrams have `Developer` actor | SQ | Bulk replaced with `User` |
-| 7 | 12 SRV/OBS diagrams have `HTTPClient` actor | SQ | Bulk replaced with `User` |
-| 8 | 123 SQ diagrams have `repl -> agent` bypass | SQ | Replaced with `router -> agent` |
-| 9 | 72 SQ diagrams reference `REPLSession` in notes | SQ | Updated to `ServerRouter` |
-| 10 | Version numbers inconsistent (1.0.0–4.0.0) | SQ | All updated to 7.0.0 |
-| 11 | Source references outdated | SQ | Updated to CAR refinement loop reference |
+| C4 Context | ✅ PASS | Single User actor, nasim as System |
+| C4 Container | ✅ PASS | nasim is ONE Container; interfaces are separate Containers; API is NOT a container |
+| C4 Component | ✅ PASS | nasim boundary contains API Group (Boundary) + 19 other groups; API is component |
+| C4 Server Component | ✅ PASS | API Group boundary inside nasim; interface containers as Container_Ext |
+| C4 README | ✅ PASS | Correct hierarchy documented, architecture principles updated |
+| C4 Linter | ✅ PASS | 24 files, 0 violations |
+| UC | ✅ PASS | Boundaries corrected: nasim — API Group, nasim — Agent Group |
+| SM | ✅ PASS | Version 8.0.0, API-06 entry gate |
+| SQ | ✅ PASS | 148 diagrams: User actor, Agent Group naming, version 8.0.0 |
 
 ## Invariants Validated
 
 | Invariant | Status | Evidence |
 |-----------|--------|----------|
-| No CLI-only paths bypass API | ✅ | 0 `repl -> agent` patterns remain |
+| API is component, not container | ✅ | Container diagram: `Container(nasim, ...)` — no separate API container |
+| Interface containers connect to nasim | ✅ | `Rel(cli, nasim, ...)` — all interfaces → nasim container |
+| API Group is boundary inside nasim | ✅ | Component diagram: `Boundary(api_group, "API Group")` inside `Container_Boundary(nasim, ...)` |
+| No CLI bypass | ✅ | 0 `repl -> agent` patterns in SQ |
 | No God Objects | ✅ | AgentOrchestrator delegates to SafetyCoordinator, SubagentCoordinator, ErrorBoundary |
-| CSR Pattern enforced | ✅ | Controller(ServerRouter) → Service(AgentOrchestrator) → Repository(ToolRegistry/SessionStore) |
-| ROD AIP-193 compliance | ✅ | All failure paths use `{error: {code, message, status}}` format |
-| Adapter Pattern used | ✅ | EmbeddingAdapter, ASTIndexAdapter, MCPToolAdapter, DualOutputAdapter, etc. |
-| Single User actor | ✅ | 0 Developer/HTTPClient references in C4/UC/SM layers |
-| API as sole entry gate | ✅ | All interface containers → ServerRouter → Core |
-| SM transitions match UC IDs | ✅ | API-06, AGT-01, PRV-02, etc. consistent across SM and SQ |
-| UC↔SQ 1:1 mapping | ✅ | 148 UCs → 148 SQ diagrams |
+| CSR Pattern | ✅ | Controller(ServerRouter) → Service(AgentOrchestrator) → Repository(ToolRegistry/SessionStore) |
+| Single User actor | ✅ | 0 Developer/HTTPClient references |
+| C4 Linter clean | ✅ | 24 files, 0 violations |
+
+## Files Modified in This Correction
+
+| File | Change |
+|------|--------|
+| `docs/C4/c4_nasim_container.puml` | nasim is ONE Container; API is not a separate container |
+| `docs/C4/c4_nasim_component.puml` | Outer boundary is nasim; API Group is Boundary inside nasim |
+| `docs/C4/c4_nasim_component_server.puml` | Renamed to API Component Diagram; boundary is nasim |
+| `docs/C4/README.md` | Corrected hierarchy, architecture principles |
+| `docs/SQ/*.puml` (130 files) | Agent Layer → Agent Group; version → 8.0.0 |
+| `docs/SM/*.puml` (4 files) | version → 8.0.0 |
+| `docs/UC/*.puml` (21 files) | version → 8.0.0 |
+| `docs/UC/README.md` | Boundaries: Core Library → nasim |
 
 ## Design Chain Consistency: 100%
-
-All layers are now a mathematically consistent reflection of an API-First Platform.
-
----
-
-## Remaining Work (Future Iterations)
-
-1. **WebApp/DesktopApp/MobileApp SQ diagrams**: New SQ diagrams for these interface containers (currently only CLI has interface-specific diagrams)
-2. **API-01 through API-11 SQ diagrams**: Formal SQ diagrams for each API endpoint (currently SRV-01 through SRV-11 serve this role)
-3. **OpenAPI spec update**: Update `openapi.yaml` to reflect new API Group naming and AIP-136 custom methods
-4. **Code alignment**: Ensure Python source code reflects API-First architecture (ServerRouter as sole entry point)

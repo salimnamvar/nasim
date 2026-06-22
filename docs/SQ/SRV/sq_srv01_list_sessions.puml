@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   List all sessions with pagination
 ' Milestone: v1.0
-' Version:   7.0.0
+' Version:   8.0.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
