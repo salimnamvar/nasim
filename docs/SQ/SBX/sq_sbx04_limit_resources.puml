@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SBX-04 LIMIT Resources
+title nasim — SBX-04 UPDATE Resources
 
 actor "User" as user
 

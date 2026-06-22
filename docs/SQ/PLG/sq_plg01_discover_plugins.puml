@@ -20,6 +20,9 @@ end box
 box "Plugins Layer" #EDE7F6
   participant "PluginLoader" as loader
 end box
+box "Repository Layer" ##E8F5E9
+  participant "PluginRepository" as plugin_repo
+end box
 participant "Host Filesystem" as fs
 
 note over user, fs

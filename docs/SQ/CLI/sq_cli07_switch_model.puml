@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CLI-07 Switch Model
+title nasim — CLI-07 UPDATE Model
 
 actor "User" as user
 
@@ -22,6 +22,9 @@ box "Agent Group" #E3F2FD
 end box
 box "Routing Layer" #E8EAF6
   participant "RTGModelRouter" as rtg
+end box
+box "Repository Layer" ##E8F5E9
+  participant "SessionRepository" as session_repo
 end box
 
 note over user, rtg

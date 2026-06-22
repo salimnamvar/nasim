@@ -27,6 +27,9 @@ end box
 box "Config Layer" #E0F7FA
   participant "Config" as config
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ObservabilityRepository" as obs_repo
+end box
 
 note over user, config
   Scope:          OBS-04 REDACT SensitiveData — strip secrets before any emission

@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SSN-07 Search Sessions
+title nasim — SSN-07 LIST Sessions
 
 actor "User" as user
 

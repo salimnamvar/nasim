@@ -11,11 +11,14 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "Controller Layer" #E3F2FD
   participant "ArgParser" as parser
 end box
-box "Config Layer" #E0F7FA
+box "Service Layer" #F3E5F5
   participant "ConfigLoader" as cfg
+end box
+box "Repository Layer" #E8F5E9
+  participant "SessionRepository" as session_repo
 end box
 
 note over user, cfg

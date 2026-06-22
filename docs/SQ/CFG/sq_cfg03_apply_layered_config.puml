@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CFG-03 APPLY Layered Config
+title nasim — CFG-03 UPDATE Layered Config
 
 actor "User" as user
 
@@ -21,6 +21,9 @@ box "Agent Group" #E3F2FD
 end box
 box "Config Layer" #E0F7FA
   participant "ConfigLoader" as cfg
+end box
+box "Repository Layer" ##E8F5E9
+  participant "ConfigRepository" as cfg_repo
 end box
 
 note over user, cfg

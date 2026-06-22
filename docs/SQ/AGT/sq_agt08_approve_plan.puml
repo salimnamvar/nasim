@@ -23,6 +23,9 @@ end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
 end box
+box "Repository Layer" ##E8F5E9
+  participant "MemoryRepository" as memory
+end box
 
 note over user, registry
   Scope:          AGT-08 APPROVE Plan

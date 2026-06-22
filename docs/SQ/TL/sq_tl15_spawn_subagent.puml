@@ -21,6 +21,9 @@ box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
   participant "SubagentTool" as tool
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ToolRepository" as tool_repo
+end box
 participant "SubagentCoordinator" as coord
 
 note over user, coord

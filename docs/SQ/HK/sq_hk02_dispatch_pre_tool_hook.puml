@@ -26,6 +26,9 @@ end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as tools
 end box
+box "Repository Layer" ##E8F5E9
+  participant "HookRepository" as hook_repo
+end box
 
 note over user, tools
   Scope:          HK-02 DISPATCH Pre-Tool Hook

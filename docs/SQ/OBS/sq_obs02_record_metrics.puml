@@ -29,6 +29,9 @@ box "Observability Layer" #E0F2F1
   participant "MetricsCollector" as metrics
   participant "TraceCorrelator" as trace
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ObservabilityRepository" as obs_repo
+end box
 
 note over user, trace
   Scope:          OBS-02 RECORD Metrics — increment counters, observe histograms

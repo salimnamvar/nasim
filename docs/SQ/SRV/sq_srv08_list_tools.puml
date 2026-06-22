@@ -13,46 +13,55 @@ title nasim — SRV-08 LIST Tools
 
 actor "User" as user
 
-box "Server Layer" #E8EAF6
+box "Controller Layer" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Tool Layer" #F3E5F5
+box "Service Layer" #F3E5F5
+  participant "ToolService" as svc
+end box
+box "Repository Layer" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over client, registry
+note over user, registry
   Scope:          List all registered tools available to the agent
   Preconditions:  ToolRegistry initialized
   Contexts:       Called by HTTPClient via GET /v1/tools
   Excludes:       Tool execution, tool registration
   Rollback:       500 if registry read fails
-  Design:         CSR: Controller(ServerRouter) -> Repository(ToolRegistry). ROD: standard list (AIP-136)
+  Design:         CSR: Controller(ServerRouter) -> Service(ToolService) -> Repository(ToolRegistry). ROD: standard list (AIP-132)
   Classification: Primary Orchestrator
   Returns:        200 OK with tool list, or 500 INTERNAL error
 end note
 
 == SRV-08 LIST Tools ==
 
-client -> router : GET /v1/tools
+user -> router : GET /v1/tools
 activate router
 
-router -> registry : listTools()
+router -> svc : SRV-08 LIST Tools()
+activate svc
+
+svc -> registry : listTools()
 activate registry
 
 break Registry read failure [500]
-    registry --> router : InternalError
+    registry --> svc : InternalError
     deactivate registry
-    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list tools", status: "INTERNAL"}}
+    svc --> router : 500 INTERNAL
+    router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list tools", status: "INTERNAL"}}
 end
 
-registry --> router : ToolList[name, description, safe]
+registry --> svc : ToolList
 deactivate registry
 
-router --> client : 200 OK {tools: [...]}
+svc --> router : ListToolsResponse {tools: [...]}
+deactivate svc
+router --> user : 200 OK {tools: [...]}
 deactivate router
 
-note over client, registry
-  Flow:    SRV-08 listTools: HTTPClient -> ServerRouter -> ToolRegistry -> return list
+note over user, registry
+  Flow:    SRV-08 → listTools → respond
   State:   No state change
   Success: 200 OK with tool list
   Failure: 500 INTERNAL on registry read failure

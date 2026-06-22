@@ -23,6 +23,9 @@ end box
 box "Safety Layer" #FFF9C4
   participant "SafetyCoordinator" as safety
 end box
+box "Repository Layer" ##E8F5E9
+  participant "MemoryRepository" as memory
+end box
 
 note over user, safety
   Scope:          AGT-14 HANDLE Error

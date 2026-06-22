@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — RIM-06 SEARCH Semantic
+title nasim — RIM-06 LIST Semantic
 
 actor "User" as user
 

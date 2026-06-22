@@ -26,6 +26,9 @@ end box
 box "Provider Layer" #FFF3E0
   participant "LiteLLMProxy" as provider
 end box
+box "Repository Layer" ##E8F5E9
+  participant "HookRepository" as hook_repo
+end box
 
 note over user, provider
   Scope:          HK-04 DISPATCH Pre-LLM Hook

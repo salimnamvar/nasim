@@ -24,6 +24,9 @@ end box
 box "Context Layer" #E8F5E9
   participant "ConversationHistory" as history
 end box
+box "Repository Layer" ##E8F5E9
+  participant "EvaluationRepository" as eval_repo
+end box
 
 note over user, history
   Scope:          Turn budget injection per-turn

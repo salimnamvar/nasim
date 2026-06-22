@@ -25,6 +25,9 @@ end box
 box "Provider Layer" #FFF3E0
   participant "ProviderFactory" as factory
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ProviderRepository" as prov_repo
+end box
 
 note over user, factory
   Scope:          PRV-04 SELECT ProviderBackend — provider backend selection from config

@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — WRL-01 APPEND Event
+title nasim — WRL-01 INSERT Event
 
 actor "User" as user
 
@@ -25,6 +25,9 @@ box "Wire Log Layer" #E0F2F1
 end box
 box "External" #F5F5F5
   participant "Host Filesystem" as fs
+end box
+box "Repository Layer" ##E8F5E9
+  participant "LogRepository" as log_repo
 end box
 
 note over user, fs

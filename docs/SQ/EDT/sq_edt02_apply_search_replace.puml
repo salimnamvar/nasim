@@ -9,7 +9,7 @@
 ' Review:    Prompt audit 2026-06-21 (cop.md: PermissionGate removed, safety at AGT-15 level)
 ' ============================================================
 
-title nasim — EDT-02 APPLY Search-Replace
+title nasim — EDT-02 UPDATE Search-Replace
 
 actor "User" as user
 

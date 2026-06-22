@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — EDT-04 APPLY Unified Diff
+title nasim — EDT-04 UPDATE Unified Diff
 
 actor "User" as user
 
@@ -22,6 +22,9 @@ end box
 box "Edit Layer" #FFF3E0
   participant "EditStrategyManager" as mgr
   participant "UnifiedDiffCoder" as coder
+end box
+box "Repository Layer" ##E8F5E9
+  participant "FileRepository" as file_repo
 end box
 
 note over agent, coder

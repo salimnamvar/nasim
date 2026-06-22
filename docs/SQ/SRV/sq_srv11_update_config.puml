@@ -13,50 +13,61 @@ title nasim — SRV-11 UPDATE Config
 
 actor "User" as user
 
-box "Server Layer" #E8EAF6
-  participant "APISchema" as schema
+box "Controller Layer" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Config Layer" #FCE4EC
+box "Service Layer" #FCE4EC
+  participant "ConfigService" as svc
+end box
+box "Repository Layer" #E8F5E9
   participant "ConfigLoader" as config
 end box
 
-note over client, config
+note over user, config
   Scope:          Update agent configuration at runtime
   Preconditions:  ConfigLoader initialized
   Contexts:       Called by HTTPClient via PATCH /v1/config
   Excludes:       Config read, config validation
   Rollback:       400 if invalid config values
-  Design:         ROD: standard update. Partial config patch. Triggers CFG-03 APPLY.
+  Design:         CSR: Controller(ServerRouter) -> Service(ConfigService) -> Repository(ConfigLoader). ROD: standard update (AIP-134). Partial config patch. Triggers CFG-03 APPLY.
   Classification: Primary Orchestrator
   Returns:        200 OK with updated config, or 400 INVALID_ARGUMENT error
 end note
 
 == SRV-11 UPDATE Config ==
 
-client -> schema : validate(patch_body)
-schema --> client : ValidatedConfigPatch
-
-client -> router : PATCH /v1/config
+user -> router : PATCH /v1/config
 activate router
 
-router -> config : updateConfig(patch)
-activate config
-
-break Invalid config
-  config --> router : ConfigError(invalid_value)
-  deactivate config
-  router --> client : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid config", status: "INVALID_ARGUMENT"}}
+router -> router : Phase 1: validate patch body
+alt Structural validation failed [400]
+  router --> user : 400 INVALID_ARGUMENT
 end
 
-config --> router : applied
+router -> svc : SRV-11 UPDATE Config(patchData)
+activate svc
+
+svc -> svc : Phase 2: validate business rules
+svc -> config : updateConfig(patch)
+activate config
+
+break Invalid config [400]
+  config --> svc : ConfigError(invalid_value)
+  deactivate config
+  svc --> router : 400 INVALID_ARGUMENT
+  router --> user : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid config", status: "INVALID_ARGUMENT"}}
+end
+
+config --> svc : applied
 deactivate config
 
-router --> client : 200 OK {config: {updated_fields: [...]}}
+svc --> router : ConfigResponseDTO
+deactivate svc
+router --> user : 200 OK {config: {updated_fields: [...]}}
 deactivate router
 
-note over client, config
-  Flow:    SRV-11 updateConfig: HTTPClient -> validate -> ServerRouter -> ConfigLoader -> apply -> 200
+note over user, config
+  Flow:    SRV-11 → validate → updateConfig → respond
   State:   No state change
   Success: 200 OK with updated config
   Failure: 400 invalid config values

@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — TL-13 Read LSP
+title nasim — TL-13 READ LSP
 
 actor "User" as user
 
@@ -22,6 +22,9 @@ end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
   participant "LspTool" as tool
+end box
+box "Repository Layer" #E8F5E9
+  participant "ToolRepository" as tool_repo
 end box
 participant "LSP Server" as lsp
 

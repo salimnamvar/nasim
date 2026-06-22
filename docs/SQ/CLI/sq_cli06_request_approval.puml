@@ -9,18 +9,21 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CLI-06 Request Approval
+title nasim — CLI-06 REQUEST Approval
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "Controller Layer" #E3F2FD
   participant "Renderer" as renderer
 end box
-box "Agent Group" #E3F2FD
+box "Service Layer" #F3E5F5
   participant "AgentOrchestrator" as agent
 end box
 box "Safety Layer" #FFF9C4
   participant "SafetyCoordinator" as safety
+end box
+box "Repository Layer" #E8F5E9
+  participant "SessionRepository" as session_repo
 end box
 
 note over user, safety

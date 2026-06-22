@@ -13,46 +13,55 @@ title nasim — SRV-09 READ Tool
 
 actor "User" as user
 
-box "Server Layer" #E8EAF6
+box "Controller Layer" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Tool Layer" #F3E5F5
+box "Service Layer" #F3E5F5
+  participant "ToolService" as svc
+end box
+box "Repository Layer" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over client, registry
+note over user, registry
   Scope:          Read details of a specific registered tool
   Preconditions:  ToolRegistry initialized
   Contexts:       Called by HTTPClient via GET /v1/tools/{name}
   Excludes:       Tool execution, tool listing
   Rollback:       404 if tool not found
-  Design:         ROD: standard read. Returns full tool metadata.
+  Design:         CSR: Controller(ServerRouter) -> Service(ToolService) -> Repository(ToolRegistry). ROD: standard get (AIP-131)
   Classification: Primary Orchestrator
   Returns:        200 OK with tool metadata, or 404 NOT_FOUND error
 end note
 
 == SRV-09 READ Tool ==
 
-client -> router : GET /v1/tools/{name}
+user -> router : GET /v1/tools/{name}
 activate router
 
-router -> registry : readTool(name)
+router -> svc : SRV-09 READ Tool(name)
+activate svc
+
+svc -> registry : readTool(name)
 activate registry
 
-break Tool not found
-  registry --> router : NotFound
+break Tool not found [404]
+  registry --> svc : NotFound
   deactivate registry
-  router --> client : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Tool not found", status: "NOT_FOUND"}}
+  svc --> router : 404 NOT_FOUND
+  router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Tool not found", status: "NOT_FOUND"}}
 end
 
-registry --> router : ToolMetadata
+registry --> svc : ToolMetadata
 deactivate registry
 
-router --> client : 200 OK {tool: {name, description, safe, parameters}}
+svc --> router : ToolResponseDTO
+deactivate svc
+router --> user : 200 OK {tool: {name, description, safe, parameters}}
 deactivate router
 
-note over client, registry
-  Flow:    SRV-09 readTool: HTTPClient -> ServerRouter -> ToolRegistry -> return tool
+note over user, registry
+  Flow:    SRV-09 → readTool → respond
   State:   No state change
   Success: 200 OK with tool metadata
   Failure: 404 tool not found

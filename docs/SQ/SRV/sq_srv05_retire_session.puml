@@ -13,52 +13,62 @@ title nasim — SRV-05 RETIRE Session
 
 actor "User" as user
 
-box "Server Layer" #E8EAF6
+box "Controller Layer" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Layer" #F3E5F5
+box "Service Layer" #F3E5F5
+  participant "SessionService" as svc
+end box
+box "Repository Layer" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over client, store
+note over user, store
   Scope:          Mark a session as retired (soft delete)
   Preconditions:  Session exists on disk
   Contexts:       Called by HTTPClient via DELETE /v1/sessions/{id}
   Excludes:       Hard delete, message operations
   Rollback:       404 if session not found
-  Design:         ROD: standard delete. Soft delete (retired flag).
+  Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard delete (AIP-135)
   Classification: Primary Orchestrator
   Returns:        200 OK with retired status, or 404 NOT_FOUND error
 end note
 
 == SRV-05 RETIRE Session ==
 
-client -> router : DELETE /v1/sessions/{id}
+user -> router : DELETE /v1/sessions/{id}
 activate router
 
-router -> store : readSessionExists(sessionId)
+router -> svc : SRV-05 RETIRE Session(sessionId)
+activate svc
+
+svc -> store : readSessionExists(sessionId)
 activate store
 
-break Session not found
-  store --> router : NotFound
+break Session not found [404]
+  store --> svc : NotFound
   deactivate store
-  router --> client : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
+  svc --> router : 404 NOT_FOUND
+  router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
 end
 
-store --> router : SessionStatus
+store --> svc : SessionEntity
 deactivate store
 
-router -> store : retireSession(sessionId)
+svc -> svc : validateStateTransition(ACTIVE → CLOSED)
+svc -> store : retireSession(sessionId)
 activate store
-store --> router : retired
+store --> svc : retired
 deactivate store
 
-router --> client : 200 OK {retired: true}
+svc --> router : 200 OK
+deactivate svc
+router --> user : 200 OK {retired: true}
 deactivate router
 
-note over client, store
-  Flow:    SRV-05 retireSession: HTTPClient -> ServerRouter -> SessionStore -> retire -> 200
-  State:   <back:#2E7D32>ACTIVE</back> -> <back:#757575>CLOSED</back>
+note over user, store
+  Flow:    SRV-05 → read → validate state → retire → respond
+  State:   ACTIVE → CLOSED
   Success: 200 OK with retired status
   Failure: 404 not found
 end note

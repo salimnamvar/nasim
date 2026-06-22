@@ -13,14 +13,17 @@ title nasim — OBS-05 EXPOSE Metrics
 
 actor "User" as user
 
-box "Server Layer" #E3F2FD
+box "Controller Layer" #E3F2FD
   participant "ServerApp" as server
 end box
-box "Observability Layer" #E0F2F1
+box "Service Layer" #F3E5F5
   participant "MetricsCollector" as metrics
 end box
+box "Repository Layer" #E8F5E9
+  participant "ObservabilityRepository" as obs_repo
+end box
 
-note over client, metrics
+note over user, metrics
   Scope:          OBS-05 EXPOSE Metrics — serve metrics for pull scrape
   Preconditions:  MetricsCollector configured (metrics_enabled), ServerApp running (HTTP mode)
   Contexts:       HTTP mode: /metrics served by ServerApp. Prometheus pull-scrapes periodically
@@ -34,20 +37,20 @@ end note
 
 == OBS-05 EXPOSE Metrics (HTTP mode) ==
 
-client -> server : OBS-05 EXPOSE Metrics()
+user -> server : GET /metrics
 activate server
 
-server -> metrics : metrics.generate_latest()
+server -> metrics : OBS-05 EXPOSE Metrics()
 activate metrics
 metrics -> metrics : collect all metric families
 metrics --> server : MetricsText(format=prometheus)
 deactivate metrics
 
-server --> client : 200 OK — Content-Type: text/plain; version=0.0.4
+server --> user : 200 OK — Content-Type: text/plain; version=0.0.4
 deactivate server
 
-note over client, metrics
-  Flow:    OBS-05 → HTTPClient → ServerApp → MetricsCollector → metrics text
+note over user, metrics
+  Flow:    OBS-05 → ServerApp → MetricsCollector → metrics text
   State:   No state change
   Success: 200 OK — Prometheus-compatible metrics text
   Failure: 503 SERVICE_UNAVAILABLE — metrics disabled

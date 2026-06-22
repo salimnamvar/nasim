@@ -9,15 +9,21 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — MCP-02 DISCOVER McpTools
+title nasim — MCP-02 LIST McpTools
 
 actor "MCPClientRuntime" as mcp
 
+box "Controller Layer" #E3F2FD
+  participant "MCPController" as mcp_ctrl
+end box
+box "Service Layer" #F3E5F5
+  participant "MCPService" as mcp_svc
+end box
 box "MCP Layer" #EDE7F6
   participant "MCPDiscovery" as discovery
   participant "MCPToolAdapter" as adapter
 end box
-box "Tool Layer" #F3E5F5
+box "Repository Layer" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 box "External" #F5F5F5

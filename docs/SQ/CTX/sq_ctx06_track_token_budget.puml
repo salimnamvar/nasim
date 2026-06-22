@@ -18,6 +18,9 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ContextRepository" as ctx_repo
+end box
 
 note over agent, history
   Scope:          Track token count as messages accumulate

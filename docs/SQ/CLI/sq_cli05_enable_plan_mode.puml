@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CLI-05 Enable Plan Mode
+title nasim — CLI-05 ENABLE Plan Mode
 
 actor "User" as user
 

@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SSN-08 Branch Session
+title nasim — SSN-08 INSERT Session
 
 actor "User" as user
 

@@ -21,6 +21,9 @@ box "Agent Group" #E3F2FD
   participant "ConversationHistory" as history
   participant "ContextCompactor" as compactor
 end box
+box "Repository Layer" ##E8F5E9
+  participant "MemoryRepository" as memory
+end box
 
 note over user, compactor
   Scope:          AGT-06 COMPACT Context

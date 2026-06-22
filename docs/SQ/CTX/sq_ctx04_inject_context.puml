@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CTX-04 Inject Context
+title nasim — CTX-04 INJECT Context
 
 box "Context Layer" #E8EAF6
   participant "PipelineOrchestrator" as pipe

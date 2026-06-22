@@ -22,6 +22,9 @@ end box
 box "Hooks Layer" #FFFDE7
   participant "HookManager" as hooks
 end box
+box "Repository Layer" ##E8F5E9
+  participant "HookRepository" as hook_repo
+end box
 
 note over user, hooks
   Scope:          HK-06 VALIDATE Hook Result

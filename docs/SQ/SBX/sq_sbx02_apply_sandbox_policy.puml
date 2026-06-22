@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SBX-02 APPLY Sandbox Policy
+title nasim — SBX-02 UPDATE Sandbox Policy
 
 actor "User" as user
 

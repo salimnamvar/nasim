@@ -21,6 +21,9 @@ box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
   participant "FindFileTool" as find
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ToolRepository" as tool_repo
+end box
 
 note over user, find
   Scope:          Find files by name pattern with max depth

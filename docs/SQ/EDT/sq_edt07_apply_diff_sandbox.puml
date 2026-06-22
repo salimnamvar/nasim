@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — EDT-07 APPLY Diff Sandbox
+title nasim — EDT-07 UPDATE Diff Sandbox
 
 actor "User" as user
 

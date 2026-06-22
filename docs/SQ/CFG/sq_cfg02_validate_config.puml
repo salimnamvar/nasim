@@ -22,6 +22,9 @@ end box
 box "Config Layer" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ConfigRepository" as cfg_repo
+end box
 
 note over user, cfg
   Scope:          CFG-02 VALIDATE Config

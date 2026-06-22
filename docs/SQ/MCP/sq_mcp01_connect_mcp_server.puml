@@ -13,6 +13,12 @@ title nasim — MCP-01 CONNECT McpServer
 
 actor "MCPClientRuntime" as mcp
 
+box "Service Layer" #F3E5F5
+  participant "MCPService" as mcp_svc
+end box
+box "Controller Layer" #E3F2FD
+  participant "MCPController" as mcp_ctrl
+end box
 box "MCP Layer" #EDE7F6
   participant "ErrorBoundary" as eb
 end box

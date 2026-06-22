@@ -10,7 +10,7 @@
 ' Note:      Process decomposition — internal step of AGT-15
 ' ============================================================
 
-title nasim — SAF-01 CHECK Permission
+title nasim — SAF-01 READ Permission
 
 actor "User" as user
 
@@ -24,6 +24,9 @@ box "Agent Group" #E3F2FD
 end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
+end box
+box "Repository Layer" ##E8F5E9
+  participant "PolicyRepository" as policy_repo
 end box
 
 note over user, registry

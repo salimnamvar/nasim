@@ -13,11 +13,20 @@ title nasim — MCP-04 EXPOSE NasimTools
 
 actor "MCPClientRuntime" as mcp
 
+box "Service Layer" #F3E5F5
+  participant "MCPService" as mcp_svc
+end box
+box "Controller Layer" #E3F2FD
+  participant "MCPController" as mcp_ctrl
+end box
 box "MCP Layer" #EDE7F6
   participant "MCPServerRuntime" as server
 end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
+end box
+box "Repository Layer" ##E8F5E9
+  participant "MCPRepository" as mcp_repo
 end box
 
 note over mcp, registry

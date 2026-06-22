@@ -9,7 +9,7 @@
 ' Review:    —
 ' ============================================================
 
-title nasim — SAF-03 Apply Safety Mode
+title nasim — SAF-03 UPDATE Safety Mode
 
 actor "User" as user
 
@@ -22,6 +22,9 @@ box "Agent Group" #E3F2FD
 end box
 box "Config Layer" #E0F7FA
   participant "ConfigLoader" as cfg
+end box
+box "Repository Layer" ##E8F5E9
+  participant "PolicyRepository" as policy_repo
 end box
 
 note over user, cfg

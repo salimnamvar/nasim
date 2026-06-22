@@ -21,6 +21,9 @@ box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
   participant "EditFileTool" as ft
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ToolRepository" as tool_repo
+end box
 participant "Host Filesystem" as fs
 
 note over user, fs

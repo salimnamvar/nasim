@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — AGT-09 SPAWN Subagent
+title nasim — AGT-09 INSERT Subagent
 
 actor "User" as user
 

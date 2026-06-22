@@ -24,6 +24,9 @@ end box
 box "FileSystem Layer" #F3E5F5
   participant "FileSystem" as fs
 end box
+box "Repository Layer" ##E8F5E9
+  participant "LogRepository" as log_repo
+end box
 
 note over user, fs
   Scope:

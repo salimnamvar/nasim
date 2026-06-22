@@ -13,46 +13,55 @@ title nasim — SRV-03 READ Session
 
 actor "User" as user
 
-box "Server Layer" #E8EAF6
+box "Controller Layer" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Layer" #F3E5F5
+box "Service Layer" #F3E5F5
+  participant "SessionService" as svc
+end box
+box "Repository Layer" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over client, store
+note over user, store
   Scope:          Read a session's current state and messages
   Preconditions:  Session exists on disk
   Contexts:       Called by HTTPClient via GET /v1/sessions/{id}
   Excludes:       Session creation (SRV-02), message dispatch (SRV-06)
   Rollback:       404 if session not found
-  Design:         ROD: standard read. Returns full session state.
+  Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard get (AIP-131)
   Classification: Primary Orchestrator
   Returns:        200 OK with session data, or 404 NOT_FOUND error
 end note
 
 == SRV-03 READ Session ==
 
-client -> router : GET /v1/sessions/{id}
+user -> router : GET /v1/sessions/{id}
 activate router
 
-router -> store : readSession(sessionId)
+router -> svc : SRV-03 READ Session(sessionId)
+activate svc
+
+svc -> store : readSession(sessionId)
 activate store
 
-break Session not found
-  store --> router : NotFound
+break Session not found [404]
+  store --> svc : NotFound
   deactivate store
-  router --> client : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
+  svc --> router : 404 NOT_FOUND
+  router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
 end
 
-store --> router : Session(messages, metadata)
+store --> svc : SessionEntity
 deactivate store
 
-router --> client : 200 OK {session: {id, messages, created_at, updated_at}}
+svc --> router : SessionResponseDTO
+deactivate svc
+router --> user : 200 OK {session: {id, messages, created_at, updated_at}}
 deactivate router
 
-note over client, store
-  Flow:    SRV-03 readSession: HTTPClient -> ServerRouter -> SessionStore -> return session
+note over user, store
+  Flow:    SRV-03 → readSession → respond
   State:   No state change
   Success: 200 OK with session data
   Failure: 404 session not found

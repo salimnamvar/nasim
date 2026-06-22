@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SBX-01 ISOLATE Command
+title nasim — SBX-01 INSERT Command
 
 actor "User" as user
 

@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SSN-05 Snapshot Session
+title nasim — SSN-05 INSERT Session
 
 actor "User" as user
 

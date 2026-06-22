@@ -9,15 +9,18 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CLI-08 List Sessions
+title nasim — CLI-08 LIST Sessions
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "Controller Layer" #E3F2FD
   participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
-box "Session Layer" #F1F8E9
+box "Service Layer" #F3E5F5
+  participant "SessionService" as ssn_svc
+end box
+box "Repository Layer" #E8F5E9
   participant "SessionStore" as ssn
 end box
 
@@ -34,28 +37,37 @@ end note
 
 == CLI-08 List Sessions ==
 
-user -> repl : "/sessions"
-result -> cmd : dispatch("/sessions")
+user -> router : "/sessions"
+activate router
+router -> cmd : dispatch("/sessions")
 activate cmd
 
-cmd -> ssn : listSessions()
+cmd -> ssn_svc : CLI-08 LIST Sessions()
+activate ssn_svc
+
+ssn_svc -> ssn : listSessions()
 activate ssn
 
 ssn -> ssn : scan session directory
-ssn --> cmd : sessionList [id, created_at, summary]
+ssn --> ssn_svc : sessionList [id, created_at, summary]
 deactivate ssn
+
+ssn_svc --> cmd : ListSessionsResponse {sessions: [...]}
+deactivate ssn_svc
 
 cmd -> cmd : format session table
 
-cmd --> repl : CommandResult(formatted_table)
+cmd --> router : CommandResult(formatted_table)
 deactivate cmd
 
-result --> user : displayed session list
+router --> user : displayed session list
+deactivate router
 
-break Session directory unreadable
-    ssn --> cmd : IOError
-    cmd --> repl : CommandError
-    result --> user : "Failed to list sessions"
+break Session directory unreadable [500]
+    ssn --> ssn_svc : IOError
+    ssn_svc --> cmd : 500 INTERNAL
+    cmd --> router : CommandError
+    router --> user : "Failed to list sessions"
 end
 
 note over user, ssn

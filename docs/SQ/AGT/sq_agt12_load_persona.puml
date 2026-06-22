@@ -9,7 +9,7 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — AGT-12 LOAD Persona
+title nasim — AGT-12 READ Persona
 
 actor "User" as user
 
@@ -22,6 +22,9 @@ box "Agent Group" #E3F2FD
 end box
 box "Config Layer" #FCE4EC
   participant "PersonaRegistry" as reg
+end box
+box "Repository Layer" ##E8F5E9
+  participant "MemoryRepository" as memory
 end box
 
 note over user, reg

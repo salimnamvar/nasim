@@ -23,6 +23,9 @@ box "Provider Layer" #FFF3E0
   participant "ProviderFactory" as factory
   participant "Provider" as proto
 end box
+box "Repository Layer" ##E8F5E9
+  participant "ProviderRepository" as prov_repo
+end box
 
 note over user, proto
   Scope:          PRV-01 REGISTER Provider — provider instantiation from configuration

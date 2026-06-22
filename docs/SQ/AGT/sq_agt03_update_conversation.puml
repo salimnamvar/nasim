@@ -20,6 +20,9 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
 end box
+box "Repository Layer" ##E8F5E9
+  participant "MemoryRepository" as memory
+end box
 
 note over user, history
   Scope:          AGT-03 UPDATE Conversation

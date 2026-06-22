@@ -9,7 +9,7 @@
 ' Review:    —
 ' ============================================================
 
-title nasim — SAF-02 Prompt User Approval
+title nasim — SAF-02 PROMPT User Approval
 
 actor "User" as user
 
@@ -20,6 +20,9 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PermissionGate" as gate
+end box
+box "Repository Layer" ##E8F5E9
+  participant "PolicyRepository" as policy_repo
 end box
 
 note over user, gate

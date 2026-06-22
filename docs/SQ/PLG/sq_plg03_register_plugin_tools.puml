@@ -21,6 +21,9 @@ box "Tool Layer" #F3E5F5
   participant "PluginLoader" as loader
   participant "ToolRegistry" as registry
 end box
+box "Repository Layer" ##E8F5E9
+  participant "PluginRepository" as plugin_repo
+end box
 
 note over user, registry
   Scope:          Register plugin-declared tools into ToolRegistry

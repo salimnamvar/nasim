@@ -24,6 +24,9 @@ end box
 box "Hooks Layer" #FFFDE7
   participant "HookManager" as hm
 end box
+box "Repository Layer" ##E8F5E9
+  participant "PluginRepository" as plugin_repo
+end box
 
 note over user, hm
   Scope:          Load plugin, register tools and hooks, set state ENABLED

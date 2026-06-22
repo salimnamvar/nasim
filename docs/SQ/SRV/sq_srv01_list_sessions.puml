@@ -13,53 +13,63 @@ title nasim — SRV-01 LIST Sessions
 
 actor "User" as user
 
-box "Server Layer" #E8EAF6
+box "Controller Layer" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Layer" #F3E5F5
+box "Service Layer" #F3E5F5
+  participant "SessionService" as svc
+end box
+box "Repository Layer" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over client, store
+note over user, store
   Scope:          List all sessions with pagination
-  Preconditions:  ServerRouter initialized, SessionStore available
+  Preconditions:  ServerRouter initialized, SessionService available
   Contexts:       Called by HTTPClient via GET /v1/sessions
   Excludes:       Session CRUD (SRV-02..05), Message operations (SRV-06..07)
   Rollback:       None (read-only operation)
-  Design:         CSR: Controller(ServerRouter) -> Repository(SessionStore). ROD: standard list (AIP-136)
+  Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard list (AIP-132)
   Classification: Primary Orchestrator
   Returns:        200 OK with session list and pagination token, or 500 INTERNAL error
 end note
 
 == SRV-01 LIST Sessions ==
 
-client -> router : GET /v1/sessions?page_size=10&page_token=abc
+user -> router : GET /v1/sessions?page_size=10&page_token=abc
 activate router
 
-router -> store : listSessions(limit=10, cursor="abc")
+router -> svc : SRV-01 LIST Sessions(pageSize=10, pageToken="abc")
+activate svc
+
+svc -> store : listSessions(limit=10, cursor="abc")
 activate store
 
 break Store read failure [500]
-    store --> router : InternalError
+    store --> svc : InternalError
     deactivate store
-    router --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list sessions", status: "INTERNAL"}}
+    svc --> router : 500 INTERNAL
+    router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list sessions", status: "INTERNAL"}}
 end
 
 alt Sessions exist
-    store --> router : sessions, next_page_token
+    store --> svc : sessions, next_page_token
     deactivate store
-    router --> client : 200 OK {sessions: [...], next_page_token: "def"}
+    svc --> router : ListSessionsResponse {sessions, nextPageToken}
+    router --> user : 200 OK {sessions: [...], next_page_token: "def"}
 else No sessions
-    store --> router : empty list, no token
+    store --> svc : empty list, no token
     deactivate store
-    router --> client : 200 OK {sessions: [], next_page_token: null}
+    svc --> router : ListSessionsResponse {sessions: [], nextPageToken: ""}
+    router --> user : 200 OK {sessions: [], next_page_token: null}
 end
 
+deactivate svc
 deactivate router
 
-note over client, store
-  Flow:    SRV-01 listSessions: HTTPClient -> ServerRouter -> SessionStore
-  State:   <back:#2E7D32>ACTIVE</back>
+note over user, store
+  Flow:    SRV-01 → validate → listSessions → respond
+  State:   No state change
   Success: 200 OK with session list and pagination token
   Failure: 500 INTERNAL on store read failure
 end note
