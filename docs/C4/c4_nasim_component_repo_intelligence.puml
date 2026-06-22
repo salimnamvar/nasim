@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Repo Intelligence Component Diagram
-' Boundary:  nasim core library — Repo Intelligence group
+' Boundary:  nasim (container) — Repo Intelligence Group
 ' Purpose:   Codebase intelligence: AST indexing, symbol graph, semantic search, repo mapping
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
 ' Review:    —
 ' ============================================================
@@ -16,14 +16,16 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Repo Intelligence Component Diagram
 
-Container_Boundary(repo_intel_boundary, "Repo Intelligence Group") {
-    Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Orchestrates codebase intelligence: indexing, search, ranking, repo mapping")
-    Component(ast_index_adapter, "ASTIndexAdapter", "", "Tree-sitter based AST indexing for symbol extraction")
-    Component(symbol_graph, "SymbolGraph", "", "Cross-file symbol reference graph: definitions, usages, imports")
-    Component(ranking_service, "RankingService", "", "Ranks code search results by relevance, recency, usage frequency")
-    Component(embedding_adapter, "EmbeddingAdapter", "", "Wraps embedding model API for vector generation")
-    Component(semantic_search_svc, "SemanticSearchService", "", "Vector similarity search over code embeddings")
-    Component(repo_map_builder, "RepoMapBuilder", "", "Generates hierarchical repo map summaries for context injection")
+Container_Boundary(nasim, "nasim") {
+    Boundary(repo_intel_group, "Repo Intelligence Group") {
+        Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Orchestrates codebase intelligence: indexing, search, ranking, repo mapping")
+        Component(ast_index_adapter, "ASTIndexAdapter", "", "Tree-sitter based AST indexing for symbol extraction")
+        Component(symbol_graph, "SymbolGraph", "", "Cross-file symbol reference graph: definitions, usages, imports")
+        Component(ranking_service, "RankingService", "", "Ranks code search results by relevance, recency, usage frequency")
+        Component(embedding_adapter, "EmbeddingAdapter", "", "Wraps embedding model API for vector generation")
+        Component(semantic_search_svc, "SemanticSearchService", "", "Vector similarity search over code embeddings")
+        Component(repo_map_builder, "RepoMapBuilder", "", "Generates hierarchical repo map summaries for context injection")
+    }
 }
 
 System_Ext(tree_sitter, "Tree-sitter", "Incremental parser for source code AST")

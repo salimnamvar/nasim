@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Git Component Diagram
-' Boundary:  nasim core library — Git group
+' Boundary:  nasim (container) — Git Group
 ' Purpose:   Version control awareness: status, diff, commit
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
@@ -16,10 +16,12 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Git Component Diagram
 
-Container_Boundary(git_boundary, "Git Group") {
-    Component(git_integration, "GitIntegration", "", "Auto-commit after file edits, branch awareness, diff tracking")
-    Component(git_status, "GitStatus", "", "Read working tree status, staged changes, branch info")
-    Component(git_commit, "GitCommit", "", "Create commits with conventional commit messages")
+Container_Boundary(nasim, "nasim") {
+    Boundary(git_group, "Git Group") {
+        Component(git_integration, "GitIntegration", "", "Auto-commit after file edits, branch awareness, diff tracking")
+        Component(git_status, "GitStatus", "", "Read working tree status, staged changes, branch info")
+        Component(git_commit, "GitCommit", "", "Create commits with conventional commit messages")
+    }
 }
 
 System_Ext(git_repo, "Git Repository", "Version control for project files")

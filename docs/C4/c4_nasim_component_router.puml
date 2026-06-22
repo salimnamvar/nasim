@@ -4,10 +4,10 @@
 
 ' ============================================================
 ' Title:     nasim — Router Component Diagram
-' Boundary:  nasim core library — Router group
+' Boundary:  nasim (container) — Router Group
 ' Purpose:   Model selection, fallback chains, capability queries
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    —
 ' ============================================================
@@ -15,9 +15,11 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Router Component Diagram
 
-Container_Boundary(router_boundary, "Router Group") {
-    Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
-    Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
+Container_Boundary(nasim, "nasim") {
+    Boundary(router_group, "Router Group") {
+        Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
+        Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
+    }
 }
 
 Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")

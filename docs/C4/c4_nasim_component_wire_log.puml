@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Wire Log Component Diagram
-' Boundary:  nasim core library — Wire Log group
+' Boundary:  nasim (container) — Wire Log Group
 ' Purpose:   Agent-provider-tool interaction logging, replay, and session forking
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
 ' Review:    —
 ' ============================================================
@@ -16,14 +16,16 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Wire Log Component Diagram
 
-Container_Boundary(wire_log_boundary, "Wire Log Group") {
-    Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
-    Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")
-    Component(wire_reader, "WireReader", "ABC", "Reads and parses wire log entries for replay and analysis")
-    Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
+Container_Boundary(nasim, "nasim") {
+    Boundary(wire_log_group, "Wire Log Group") {
+        Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
+        Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")
+        Component(wire_reader, "WireReader", "ABC", "Reads and parses wire log entries for replay and analysis")
+        Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
+    }
 }
 
-Container_Ext(session_group, "Session Group")
+Component_Ext(session_store, "SessionStore", "Session Group")
 System_Ext(wire_log_dir, "Wire Log Storage", "~/.nasim/wire-logs/<session-id>/")
 
 Rel(wire_log, wire_appender, "appends entries")
@@ -31,6 +33,6 @@ Rel(wire_log, wire_reader, "reads entries")
 Rel(wire_log, session_fork_mgr, "fork from turn")
 Rel(wire_appender, wire_log_dir, "writes log files")
 Rel(wire_reader, wire_log_dir, "reads log files")
-Rel(session_fork_mgr, session_group, "creates forked session")
+Rel(session_fork_mgr, session_store, "creates forked session")
 
 @enduml

@@ -4,10 +4,10 @@
 
 ' ============================================================
 ' Title:     nasim — Safety Component Diagram
-' Boundary:  nasim core library — Safety group
+' Boundary:  nasim (container) — Safety Group
 ' Purpose:   Permission gating, injection scanning, egress inspection
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    —
 ' ============================================================
@@ -15,11 +15,13 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Safety Component Diagram
 
-Container_Boundary(safety_boundary, "Safety Group") {
-    Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
-    Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")
-    Component(injection_scanner, "InjectionScanner", "", "Detects prompt injection patterns in tool outputs")
-    Component(egress_inspector, "EgressInspector", "", "Inspects outbound data for policy violations")
+Container_Boundary(nasim, "nasim") {
+    Boundary(safety_group, "Safety Group") {
+        Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
+        Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")
+        Component(injection_scanner, "InjectionScanner", "", "Detects prompt injection patterns in tool outputs")
+        Component(egress_inspector, "EgressInspector", "", "Inspects outbound data for policy violations")
+    }
 }
 
 Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")

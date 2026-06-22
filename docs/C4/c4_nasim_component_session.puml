@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Session Component Diagram
-' Boundary:  nasim core library — Session group
+' Boundary:  nasim (container) — Session Group
 ' Purpose:   Session layer internal components
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
@@ -16,11 +16,13 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Session Component Diagram
 
-Container_Boundary(session_boundary, "Session Group") {
-    Component(session_store, "SessionStore", "", "Persists/loads message history to ~/.nasim/sessions/ as JSON Lines")
-    Component(session_versioning, "SessionVersioning", "", "Snapshots and undo for session state")
-    Component(session_search, "SessionSearch", "", "Cross-session search via FTS5 index")
-    Component(session_fork, "SessionFork", "", "Branch conversations from any point")
+Container_Boundary(nasim, "nasim") {
+    Boundary(session_group, "Session Group") {
+        Component(session_store, "SessionStore", "", "Persists/loads message history to ~/.nasim/sessions/ as JSON Lines")
+        Component(session_versioning, "SessionVersioning", "", "Snapshots and undo for session state")
+        Component(session_search, "SessionSearch", "", "Cross-session search via FTS5 index")
+        Component(session_fork, "SessionFork", "", "Branch conversations from any point")
+    }
 }
 
 System_Ext(session_dir, "Session Directory", "~/.nasim/sessions/<session-id>/")

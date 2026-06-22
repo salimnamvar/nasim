@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Evaluation Component Diagram
-' Boundary:  nasim core library — Evaluation group
+' Boundary:  nasim (container) — Evaluation Group
 ' Purpose:   Task evaluation: success checks, LLM review, testing, retry coordination
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
 ' Review:    —
 ' ============================================================
@@ -16,20 +16,22 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Evaluation Component Diagram
 
-Container_Boundary(evaluation_boundary, "Evaluation Group") {
-    Component(eval_engine, "EvaluationEngine", "", "Orchestrates task evaluation: runs checks, scores, retries")
-    Component(task_evaluator, "TaskEvaluator", "", "Evaluates task completion against success criteria")
-    Component(success_check_runner, "SuccessCheckRunner", "", "Runs user-defined success checks and assertions")
-    Component(llm_reviewer, "LLMReviewer", "", "LLM-based code review and quality assessment")
-    Component(test_runner, "TestRunner", "", "Runs project test suites to validate changes")
-    Component(retry_coordinator, "RetryCoordinator", "", "Coordinates retry attempts with backoff and escalation")
-    Component(repetition_detector, "RepetitionDetector", "", "Detects repeated failures or loops, triggers escalation")
-    Component(turn_budget_injector, "TurnBudgetInjector", "", "Injects turn budget limits and progress signals into context")
-    Component(quality_signal, "QualitySignal", "", "Records quality metrics: task success, retry counts, token usage, latency")
+Container_Boundary(nasim, "nasim") {
+    Boundary(evaluation_group, "Evaluation Group") {
+        Component(eval_engine, "EvaluationEngine", "", "Orchestrates task evaluation: runs checks, scores, retries")
+        Component(task_evaluator, "TaskEvaluator", "", "Evaluates task completion against success criteria")
+        Component(success_check_runner, "SuccessCheckRunner", "", "Runs user-defined success checks and assertions")
+        Component(llm_reviewer, "LLMReviewer", "", "LLM-based code review and quality assessment")
+        Component(test_runner, "TestRunner", "", "Runs project test suites to validate changes")
+        Component(retry_coordinator, "RetryCoordinator", "", "Coordinates retry attempts with backoff and escalation")
+        Component(repetition_detector, "RepetitionDetector", "", "Detects repeated failures or loops, triggers escalation")
+        Component(turn_budget_injector, "TurnBudgetInjector", "", "Injects turn budget limits and progress signals into context")
+        Component(quality_signal, "QualitySignal", "", "Records quality metrics: task success, retry counts, token usage, latency")
+    }
 }
 
-Container_Ext(provider_group, "Provider Group")
-Container_Ext(tool_group, "Tool Group")
+Component_Ext(provider, "Provider", "Provider Group")
+Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
 Rel(eval_engine, task_evaluator, "evaluate completion")
 Rel(eval_engine, success_check_runner, "run success checks")
@@ -39,7 +41,7 @@ Rel(eval_engine, retry_coordinator, "coordinate retry")
 Rel(eval_engine, repetition_detector, "detect loops")
 Rel(eval_engine, turn_budget_injector, "inject budget limits")
 Rel(eval_engine, quality_signal, "records quality metrics")
-Rel(llm_reviewer, provider_group, "LLM review call")
-Rel(test_runner, tool_group, "executes test commands")
+Rel(llm_reviewer, provider, "LLM review call")
+Rel(test_runner, tool_registry, "executes test commands")
 
 @enduml

@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — MCP Component Diagram
-' Boundary:  nasim core library — MCP group
+' Boundary:  nasim (container) — MCP Group
 ' Purpose:   Model Context Protocol as first-class subsystem
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
@@ -16,16 +16,18 @@
 LAYOUT_WITH_LEGEND()
 title nasim — MCP Component Diagram
 
-Container_Boundary(mcp_boundary, "MCP Group") {
-    Component(mcp_client_rt, "MCPClientRuntime", "nasim/mcp/client.py", "Connects to external MCP servers via stdio/SSE transport")
-    Component(mcp_server_rt, "MCPServerRuntime", "nasim/mcp/server.py", "Exposes nasim tools to external MCP clients via stdio/SSE")
-    Component(mcp_tool_adapter, "MCPToolAdapter", "nasim/mcp/adapter.py", "Wraps MCP server tools into nasim Tool ABC format")
-    Component(mcp_discovery, "MCPDiscovery", "nasim/mcp/discovery.py", "Discovers and registers MCP server tools at startup from config")
+Container_Boundary(nasim, "nasim") {
+    Boundary(mcp_group, "MCP Group") {
+        Component(mcp_client_rt, "MCPClientRuntime", "nasim/mcp/client.py", "Connects to external MCP servers via stdio/SSE transport")
+        Component(mcp_server_rt, "MCPServerRuntime", "nasim/mcp/server.py", "Exposes nasim tools to external MCP clients via stdio/SSE")
+        Component(mcp_tool_adapter, "MCPToolAdapter", "nasim/mcp/adapter.py", "Wraps MCP server tools into nasim Tool ABC format")
+        Component(mcp_discovery, "MCPDiscovery", "nasim/mcp/discovery.py", "Discovers and registers MCP server tools at startup from config")
+    }
 }
 
 System_Ext(mcp_server, "MCP Server", "External extension tools")
 System_Ext(mcp_client, "MCP Client", "External tool consumers")
-System_Ext(tool_registry, "ToolRegistry", "Tool Group — instance-based registry")
+Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
 Rel(mcp_client_rt, mcp_server, "connects via stdio/SSE")
 Rel(mcp_client_rt, mcp_discovery, "discovers tools")

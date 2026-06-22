@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Memory Component Diagram
-' Boundary:  nasim core library — Memory group
+' Boundary:  nasim (container) — Memory Group
 ' Purpose:   Cross-session knowledge persistence, retrieval, and RAG adapters
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
 ' Review:    —
 ' ============================================================
@@ -16,15 +16,17 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Memory Component Diagram
 
-Container_Boundary(memory_boundary, "Memory Group") {
-    Component(memory_store, "MemoryStore", "", "Persists knowledge entries with scope, key, content, timestamps")
-    Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search across stored knowledge")
-    Component(memory_scope, "MemoryScope", "", "Scope isolation: global, project, session-level knowledge")
-    Component(episodic_mem_adapter, "EpisodicMemoryAdapter", "", "Stores and retrieves episodic memory: past actions, outcomes, lessons")
-    Component(semantic_mem_adapter, "SemanticMemoryAdapter", "", "Stores and retrieves semantic memory: facts, rules, preferences")
-    Component(working_mem_adapter, "WorkingMemoryAdapter", "", "Short-term working memory for current session context")
-    Component(memory_retriever, "MemoryRetriever", "", "RAG retrieval: query memory stores, rank by relevance")
-    Component(memory_indexer, "MemoryIndexer", "", "Indexes new memory entries into FTS5 and embedding stores")
+Container_Boundary(nasim, "nasim") {
+    Boundary(memory_group, "Memory Group") {
+        Component(memory_store, "MemoryStore", "", "Persists knowledge entries with scope, key, content, timestamps")
+        Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search across stored knowledge")
+        Component(memory_scope, "MemoryScope", "", "Scope isolation: global, project, session-level knowledge")
+        Component(episodic_mem_adapter, "EpisodicMemoryAdapter", "", "Stores and retrieves episodic memory: past actions, outcomes, lessons")
+        Component(semantic_mem_adapter, "SemanticMemoryAdapter", "", "Stores and retrieves semantic memory: facts, rules, preferences")
+        Component(working_mem_adapter, "WorkingMemoryAdapter", "", "Short-term working memory for current session context")
+        Component(memory_retriever, "MemoryRetriever", "", "RAG retrieval: query memory stores, rank by relevance")
+        Component(memory_indexer, "MemoryIndexer", "", "Indexes new memory entries into FTS5 and embedding stores")
+    }
 }
 
 System_Ext(memory_backend, "Memory Backend", "Persistent storage for knowledge entries")

@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Sandbox Component Diagram
-' Boundary:  nasim core library — Sandbox group
+' Boundary:  nasim (container) — Sandbox Group
 ' Purpose:   OS-level process isolation and diff staging for shell and edit operations
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
 ' Review:    —
 ' ============================================================
@@ -16,16 +16,18 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Sandbox Component Diagram
 
-Container_Boundary(sandbox_boundary, "Sandbox Group") {
-    Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
-    Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")
-    Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement, resource limits")
-    Component(resource_limiter, "ResourceLimiter", "", "Enforces CPU, memory, and disk quotas per sandbox instance")
-    Component(diff_sandbox_mgr, "DiffSandboxManager", "", "Manages sandboxed diff staging and application")
-    Component(edit_staging_area, "EditStagingArea", "", "Stages file edits before sandbox-validated application")
-    Component(diff_computer, "DiffComputer", "", "Computes diffs between original and staged content")
-    Component(diff_presenter, "DiffPresenter", "", "Formats diffs for human review and approval")
-    Component(staged_applicator, "StagedApplicator", "", "Applies approved staged diffs to filesystem")
+Container_Boundary(nasim, "nasim") {
+    Boundary(sandbox_group, "Sandbox Group") {
+        Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
+        Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")
+        Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement, resource limits")
+        Component(resource_limiter, "ResourceLimiter", "", "Enforces CPU, memory, and disk quotas per sandbox instance")
+        Component(diff_sandbox_mgr, "DiffSandboxManager", "", "Manages sandboxed diff staging and application")
+        Component(edit_staging_area, "EditStagingArea", "", "Stages file edits before sandbox-validated application")
+        Component(diff_computer, "DiffComputer", "", "Computes diffs between original and staged content")
+        Component(diff_presenter, "DiffPresenter", "", "Formats diffs for human review and approval")
+        Component(staged_applicator, "StagedApplicator", "", "Applies approved staged diffs to filesystem")
+    }
 }
 
 System_Ext(host_shell, "Host Shell", "subprocess execution")

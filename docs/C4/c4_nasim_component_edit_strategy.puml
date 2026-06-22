@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Edit Strategy Component Diagram
-' Boundary:  nasim core library — Edit Strategy group
+' Boundary:  nasim (container) — Edit Strategy Group
 ' Purpose:   Pluggable edit strategies: search-replace, whole-file, diff, sandbox, architect
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
 ' Review:    —
 ' ============================================================
@@ -16,21 +16,23 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Edit Strategy Component Diagram
 
-Container_Boundary(edit_strategy_boundary, "Edit Strategy Group") {
-    Component(edit_strategy_mgr, "EditStrategyManager", "", "Manages and selects edit strategy based on edit type and context")
-    Component(edit_strategy, "EditStrategy", "ABC", "Base strategy interface: plan_edit, apply_edit, validate_edit")
-    Component(search_replace_coder, "SearchReplaceCoder", "", "Search-and-replace based edit with fuzzy matching")
-    Component(whole_file_coder, "WholeFileCoder", "", "Whole file rewrite strategy")
-    Component(unified_diff_coder, "UnifiedDiffCoder", "", "Unified diff format edit application")
-    Component(diff_sandbox_coder, "DiffSandboxCoder", "", "Sandboxed diff-based edit with validation")
-    Component(architect_coder, "ArchitectCoder", "", "Multi-file architectural edit strategy with planning")
-    Component(fenced_block_coder, "FencedBlockCoder", "", "Fenced code block format edit")
-    Component(function_level_coder, "FunctionLevelCoder", "", "AST-targeted function replacement")
-    Component(inline_patch_coder, "InlinePatchCoder", "", "apply-patch format edit")
-    Component(strategy_selector, "StrategySelector", "", "Selects optimal strategy: edit size, risk, file type heuristics. Applies heuristics: edit_size, risk_level, file_type, complexity")
+Container_Boundary(nasim, "nasim") {
+    Boundary(edit_strategy_group, "Edit Strategy Group") {
+        Component(edit_strategy_mgr, "EditStrategyManager", "", "Manages and selects edit strategy based on edit type and context")
+        Component(edit_strategy, "EditStrategy", "ABC", "Base strategy interface: plan_edit, apply_edit, validate_edit")
+        Component(search_replace_coder, "SearchReplaceCoder", "", "Search-and-replace based edit with fuzzy matching")
+        Component(whole_file_coder, "WholeFileCoder", "", "Whole file rewrite strategy")
+        Component(unified_diff_coder, "UnifiedDiffCoder", "", "Unified diff format edit application")
+        Component(diff_sandbox_coder, "DiffSandboxCoder", "", "Sandboxed diff-based edit with validation")
+        Component(architect_coder, "ArchitectCoder", "", "Multi-file architectural edit strategy with planning")
+        Component(fenced_block_coder, "FencedBlockCoder", "", "Fenced code block format edit")
+        Component(function_level_coder, "FunctionLevelCoder", "", "AST-targeted function replacement")
+        Component(inline_patch_coder, "InlinePatchCoder", "", "apply-patch format edit")
+        Component(strategy_selector, "StrategySelector", "", "Selects optimal strategy: edit size, risk, file type heuristics. Applies heuristics: edit_size, risk_level, file_type, complexity")
+    }
 }
 
-Component_Ext(diff_sandbox_mgr, "DiffSandboxManager", "Sandbox Group", "EDT-10: Stages diffs for review before sandbox-validated apply")
+Component_Ext(diff_sandbox_mgr, "DiffSandboxManager", "Sandbox Group")
 System_Ext(host_fs, "Host Filesystem", "Target files for editing")
 
 Rel(edit_strategy_mgr, strategy_selector, "selects strategy")
@@ -47,7 +49,7 @@ Rel(strategy_selector, edit_strategy_mgr, "returns strategy choice")
 Rel(search_replace_coder, host_fs, "applies edits")
 Rel(whole_file_coder, host_fs, "rewrites files")
 Rel(unified_diff_coder, host_fs, "applies diffs")
-Rel(diff_sandbox_coder, diff_sandbox_mgr, "EDT-10: stages diffs for sandbox-validated apply")
+Rel(diff_sandbox_coder, diff_sandbox_mgr, "stages diffs for sandbox-validated apply")
 Rel(architect_coder, host_fs, "multi-file edits")
 Rel(fenced_block_coder, host_fs, "applies edits")
 Rel(function_level_coder, host_fs, "AST-aware edits")

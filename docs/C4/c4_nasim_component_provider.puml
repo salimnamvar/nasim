@@ -1,45 +1,38 @@
-@startuml nasim_component_provider
+@startuml c4_nasim_component_provider
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 
 ' ============================================================
-' Title: nasim — Provider Component Diagram
-' Boundary: nasim core library — Provider group
-' Purpose: Universal LLM provider abstraction via litellm proxy (100+ providers)
+' Title:     nasim — Provider Component Diagram
+' Boundary:  nasim (container) — Provider Group
+' Purpose:   Provider Group: universal LLM abstraction via litellm.
+'            Provider is a Protocol — all LLM calls route through
+'            LiteLLM Proxy to 100+ backends without per-provider code.
 ' Milestone: v1.0
-' Version: 6.0.0
-' Source: docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review: —
+' Version:   9.0.0
+' Source:    docs/entities.md
+' Review:    —
 ' ============================================================
 
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title nasim — Provider Components
+title nasim — Provider Component Diagram
 
-' ============================================================
-' Provider Group
-' ============================================================
-
-Container_Boundary(provider_boundary, "Provider Group") {
-
-    Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name, capabilities. All providers route through litellm.")
-
-    Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")
-
-    Component(provider_caps, "ProviderCapabilities", "Capability declaration", "Per-model capability metadata: supports_tools, supports_vision, supports_streaming, max_context, supports_prompt_caching. Owned by Provider, queried by Router.")
+Container_Boundary(nasim, "nasim") {
+    Boundary(provider_group, "Provider Group") {
+        Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name, capabilities. All providers route through litellm.")
+        Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")
+        Component(provider_caps, "ProviderCapabilities", "", "Per-model capability metadata: supports_tools, supports_vision, supports_streaming, max_context, supports_prompt_caching.")
+    }
 }
 
-' ============================================================
-' External: LLM Backends (consolidated — litellm routes to 100+)
-' ============================================================
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(model_router, "ModelRouter", "Router Group")
+System_Ext(all_llm_backends, "LLM Backends", "Unified via litellm: OpenAI, Anthropic, Google, DeepSeek, Ollama, vLLM, and 100+ providers via model string prefix")
 
-System_Ext(all_llm_backends, "100+ LLM Backends", "Unified via litellm. Includes cloud (OpenAI, Anthropic, Google, DeepSeek, Mistral, Groq, Cohere, etc.) and local (Ollama, vLLM, LM Studio)")
-
-' ============================================================
-' Provider Relationships
-' ============================================================
-
+Rel(agent_orch, provider, "chat, chat_stream")
+Rel(model_router, provider_caps, "queries capabilities")
 Rel(provider, litellm_proxy, "delegates all LLM calls")
 Rel(provider, provider_caps, "exposes capabilities")
 Rel(litellm_proxy, all_llm_backends, "routes via model string prefix", "HTTP/JSON")

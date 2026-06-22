@@ -4,48 +4,52 @@
 
 ' ============================================================
 ' Title:     nasim — Agent Component Diagram
-' Boundary:  nasim core library — Agent group
-' Purpose:   Agent layer internal components
+' Boundary:  nasim (container) — Agent Group
+' Purpose:   Agent Group: core agentic loop (Service layer).
+'            AgentOrchestrator is the single orchestrating
+'            component for the nasim Service layer.
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   9.0.0
+' Source:    docs/entities.md
+' Review:    —
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
 
 title nasim — Agent Component Diagram
 
-Container_Boundary(agent_boundary, "Agent Group") {
-    Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields structured events")
-    Component(conv_history, "ConversationHistory", "", "Owns messages list and token count. Triggers compaction when budget exceeded")
-    Component(compactor, "ContextCompactor", "", "Summarizes old exchanges via secondary LLM call when budget exceeded")
-    Component(plan_session, "PlanSession", "", "Holds queued tool calls in plan mode. /approve drains the queue")
-    Component(subagent_coord, "SubagentCoordinator", "", "Parent-child orchestration, nesting limit 5, result aggregation")
-    Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions and error hierarchy")
-    Component(persona_mgr, "PersonaManager", "", "Runtime persona switching for specialized agent roles")
+Container_Boundary(nasim, "nasim") {
+    Boundary(agent_group, "Agent Group") {
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields structured events")
+        Component(conv_history, "ConversationHistory", "", "Owns messages list and token count. Triggers compaction when budget exceeded")
+        Component(compactor, "ContextCompactor", "", "Summarizes old exchanges via secondary LLM call when budget exceeded")
+        Component(plan_session, "PlanSession", "", "Holds queued tool calls in plan mode. /approve drains the queue")
+        Component(subagent_coord, "SubagentCoordinator", "", "Parent-child orchestration, nesting limit 5, result aggregation")
+        Component(error_boundary, "ErrorBoundary", "", "Structured error handling with recovery actions and error hierarchy")
+        Component(persona_mgr, "PersonaManager", "", "Runtime persona switching for specialized agent roles")
+    }
 }
 
-Container_Ext(provider_boundary, "Provider Group")
-Container_Ext(tool_boundary, "Tool Group")
-Container_Ext(session_boundary, "Session Group")
-Container_Ext(memory_boundary, "Memory Group")
-Container_Ext(observability_group, "Observability Group")
-Container_Ext(safety_boundary, "Safety Group")
+Component_Ext(provider, "Provider", "Provider Group")
+Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
+Component_Ext(session_store, "SessionStore", "Session Group")
+Component_Ext(memory_store, "MemoryStore", "Memory Group")
+Component_Ext(structured_logger, "StructuredLogger", "Observability Group")
+Component_Ext(safety_coord, "SafetyCoordinator", "Safety Group")
 
-Rel(agent_orch, provider_boundary, "chat, chat_stream")
-Rel(agent_orch, tool_boundary, "execute tool calls")
+Rel(agent_orch, provider, "chat, chat_stream")
+Rel(agent_orch, tool_registry, "execute tool calls")
 Rel(agent_orch, conv_history, "reads/writes messages")
-Rel(agent_orch, safety_boundary, "safety validation before tool exec")
+Rel(agent_orch, safety_coord, "safety validation before tool exec")
 Rel(agent_orch, subagent_coord, "spawn, collect child agents")
 Rel(agent_orch, error_boundary, "handle structured errors")
 Rel(agent_orch, persona_mgr, "load, switch persona")
-Rel(agent_orch, memory_boundary, "persist, retrieve knowledge")
-Rel(agent_orch, session_boundary, "save, load session")
-Rel(agent_orch, observability_group, "emit structured logs, metrics")
+Rel(agent_orch, memory_store, "persist, retrieve knowledge")
+Rel(agent_orch, session_store, "save, load session")
+Rel(agent_orch, structured_logger, "emit structured logs, metrics")
 Rel(agent_orch, plan_session, "queue, approve plan")
 Rel(conv_history, compactor, "triggers compaction")
-Rel(compactor, provider_boundary, "secondary LLM call for summarization")
+Rel(compactor, provider, "secondary LLM call for summarization")
 Rel(subagent_coord, agent_orch, "child agent inherits core")
 
 @enduml

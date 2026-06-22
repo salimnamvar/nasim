@@ -4,12 +4,12 @@
 
 ' ============================================================
 ' Title:     nasim — API Component Diagram
-' Boundary:  nasim (container)
+' Boundary:  nasim (container) — API Group
 ' Purpose:   API component group inside nasim. Shows how
 '            interface containers connect to ServerRouter.
 '            API is a component, not a container.
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.0.0
 ' Source:    CAR refinement loop — C4 correction
 ' Review:    —
 ' ============================================================
@@ -30,15 +30,15 @@ Container_Boundary(nasim, "nasim") {
     }
 }
 
-Container_Ext(cli, "CLI")
-Container_Ext(webapp, "WebApp")
-Container_Ext(desktop_app, "DesktopApp")
-Container_Ext(mobile_app, "MobileApp")
+Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
+Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application")
+Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application")
+System_Ext(mcp_client_ext, "MCP Client", "External tool or IDE connecting via MCP")
 
-Rel(cli, server_router, "routes all calls through API component")
-Rel(webapp, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
-Rel(desktop_app, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
-Rel(mobile_app, server_router, "routes all calls through API component", "HTTP/JSON + SSE")
+Rel(webapp, server_router, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
+Rel(desktop_app, server_router, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
+Rel(mobile_app, server_router, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
+Rel(mcp_client_ext, server_router, "invokes tools via MCP protocol", "stdio / SSE")
 
 Rel(server_app, server_router, "mounts routes")
 Rel(server_router, api_schema, "validates requests/responses")

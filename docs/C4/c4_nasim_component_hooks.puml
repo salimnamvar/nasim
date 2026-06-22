@@ -5,10 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — Hooks Component Diagram
-' Boundary:  nasim core library — Hooks group
+' Boundary:  nasim (container) — Hooks Group
 ' Purpose:   Pre/post hooks for tool use and LLM calls
 ' Milestone: v1.0
-' Version:   6.0.0
+' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
@@ -16,13 +16,15 @@
 LAYOUT_WITH_LEGEND()
 title nasim — Hooks Component Diagram
 
-Container_Boundary(hooks_boundary, "Hooks Group") {
-    Component(hook_manager, "HookManager", "nasim/hooks/manager.py", "Registers, discovers, and executes hooks in priority order")
+Container_Boundary(nasim, "nasim") {
+    Boundary(hooks_group, "Hooks Group") {
+        Component(hook_manager, "HookManager", "nasim/hooks/manager.py", "Registers, discovers, and executes hooks in priority order")
+    }
 }
 
-System_Ext(agent_orch, "AgentOrchestrator", "Agent Group — core agentic loop")
-System_Ext(tool_registry, "ToolRegistry", "Tool Group — instance-based registry")
-System_Ext(plugin_loader, "PluginLoader", "Plugins Group — plugin discovery")
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
+Component_Ext(plugin_loader, "PluginLoader", "Plugins Group")
 
 Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall")
 Rel(plugin_loader, hook_manager, "registers plugin hooks")

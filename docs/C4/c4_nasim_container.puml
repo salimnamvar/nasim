@@ -1,78 +1,75 @@
-@startuml nasim_container
+@startuml c4_nasim_container
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
 !theme plain
 
 ' ============================================================
-' Title: nasim — Container Diagram (API-First)
-' Boundary: nasim
-' Purpose: Show deployable units. nasim is one container; CLI,
-'          WebApp, DesktopApp, MobileApp are interface containers
-'          that connect to nasim. API is a component inside nasim,
-'          not a separate container.
+' Title:     nasim — Container Diagram
+' Boundary:  nasim system
+' Purpose:   Show all deployable units. nasim is one container
+'            (CLI mode and HTTP server mode run in the same
+'            Python process). WebApp, DesktopApp, and MobileApp
+'            are external interface containers that connect to
+'            nasim via HTTP. MCP Clients connect via MCP protocol.
 ' Milestone: v1.0
-' Version:   8.0.0
-' Source:    CAR refinement loop — C4 correction
+' Version:   9.0.0
+' Source:    docs/entities.md
 ' Review:    —
 ' ============================================================
 
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title nasim — Container Diagram (API-First)
+title nasim — Container Diagram
 
-Person(user, "User", "Interacts via CLI, WebApp, DesktopApp, or MobileApp")
+Person(user, "User", "Developer using nasim as an AI coding assistant")
 
-Container_Boundary(interfaces, "Interface Containers") {
-    Container(cli, "CLI", "Python click + rich", "Terminal interface: REPL, slash commands, rich rendering")
-    Container(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
-    Container(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application")
-    Container(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application")
+System_Boundary(nasim_sys, "nasim") {
+    Container(nasim, "nasim", "Python 3.10+", "Code agent: CLI REPL mode and HTTP server mode in the same process. CLI Group components handle terminal interaction; API Group handles HTTP. Agent core processes tasks and emits events.")
 }
 
-Container(nasim, "nasim", "Python", "API-First code agent: API component is the sole entry gate. No interface may bypass the API to call internal services directly.")
+Container(webapp, "WebApp", "JavaScript SPA", "Browser-based interface to nasim HTTP server")
+Container(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application connecting to nasim HTTP server")
+Container(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application connecting to nasim HTTP server")
 
-System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: 100+ providers via litellm")
-System_Ext(host_fs, "Host Filesystem", "Project code files")
-System_Ext(host_shell, "Host Shell", "subprocess execution")
-System_Ext(web_ext, "Web", "Documentation and search")
-System_Ext(mcp_server, "MCP Server", "Extension tools via Model Context Protocol")
-System_Ext(mcp_client, "MCP Client", "External tools connecting to nasim MCP server")
-System_Ext(git_repo, "Git Repository", "Version control")
-System_Ext(sandbox_rt, "Sandbox Runtime", "OS-level isolation")
-System_Ext(lsp_server, "LSP Server", "Code intelligence")
-System_Ext(plugin_dir, "Plugin Directory", "Community extensions")
-System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code")
-System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API)")
-System_Ext(vector_store, "Vector Store", "Persistent vector storage for similarity search")
-System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace/metric export")
-System_Ext(obs_platform, "Observability Platform", "Agent-based collection, Loki logs, Prometheus metrics, Grafana dashboards. nasim emits only.")
+System_Ext(mcp_client, "MCP Client", "External tool or IDE that invokes nasim as an MCP server")
+System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ via litellm")
+System_Ext(host_fs, "Host Filesystem", "Project code files and directories")
+System_Ext(host_shell, "Host Shell", "Shell execution via OS subprocess")
+System_Ext(web_ext, "Web", "Documentation pages and search engines")
+System_Ext(mcp_server, "MCP Server", "Extension tools provided to nasim via Model Context Protocol")
+System_Ext(git_repo, "Git Repository", "Version-controlled project files")
+System_Ext(sandbox_rt, "Sandbox Runtime", "OS-level process isolation (landlock, seccomp, bubblewrap)")
+System_Ext(lsp_server, "LSP Server", "Language server providing code intelligence")
+System_Ext(plugin_dir, "Plugin Directory", "Community plugins at ~/.nasim/plugins/")
+System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code indexing")
+System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API-based)")
+System_Ext(vector_store, "Vector Store", "Persistent vector storage for semantic code search")
+System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
+System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana. nasim emits only — platform owns collection, storage, and visualization.")
 
-Rel(user, cli, "types input, reads output", "terminal")
+Rel(user, nasim, "runs coding tasks (CLI mode)", "terminal REPL")
 Rel(user, webapp, "interacts via browser", "HTTPS")
-Rel(user, desktop_app, "interacts via desktop app", "HTTPS")
+Rel(user, desktop_app, "interacts via desktop app", "local")
 Rel(user, mobile_app, "interacts via mobile app", "HTTPS")
 
-Rel(cli, nasim, "routes all calls through API component", "in-process / HTTP")
-Rel(webapp, nasim, "routes all calls through API component", "HTTP/JSON + SSE")
-Rel(desktop_app, nasim, "routes all calls through API component", "HTTP/JSON + SSE")
-Rel(mobile_app, nasim, "routes all calls through API component", "HTTP/JSON + SSE")
+Rel(webapp, nasim, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
+Rel(desktop_app, nasim, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
+Rel(mobile_app, nasim, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
+Rel(mcp_client, nasim, "invokes tools via MCP protocol", "stdio / SSE")
 
-Rel(mcp_client, nasim, "invokes nasim tools via MCP protocol", "stdio/SSE")
-
-Rel(nasim, llm_backend, "HTTP POST", "JSON streaming")
-Rel(nasim, host_fs, "read/write/search files")
-Rel(nasim, host_shell, "execute commands via sandbox")
-Rel(nasim, web_ext, "fetch/search")
-Rel(nasim, mcp_server, "invoke extension tools")
-Rel(nasim, git_repo, "git operations")
-Rel(nasim, sandbox_rt, "isolated execution")
-Rel(nasim, lsp_server, "code intelligence")
-Rel(nasim, plugin_dir, "plugin discovery")
-Rel(nasim, tree_sitter, "parses AST")
-Rel(nasim, embedding_model, "generates embeddings")
-Rel(nasim, vector_store, "vector CRUD")
-Rel(nasim, otel_collector, "exports traces/metrics (optional)", "OTLP/gRPC")
-Rel(nasim, obs_platform, "writes structured logs to stdout", "stdout")
-Rel(obs_platform, nasim, "pull-scrapes /metrics endpoint", "HTTP GET")
+Rel(nasim, llm_backend, "sends chat requests, receives completions", "HTTP/JSON streaming")
+Rel(nasim, host_fs, "reads, writes, and searches project files")
+Rel(nasim, host_shell, "executes shell commands via sandbox")
+Rel(nasim, web_ext, "fetches documentation and search results", "HTTP")
+Rel(nasim, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
+Rel(nasim, git_repo, "reads status and creates commits", "git CLI")
+Rel(nasim, sandbox_rt, "executes commands in isolated environment")
+Rel(nasim, lsp_server, "queries code intelligence", "LSP protocol")
+Rel(nasim, plugin_dir, "discovers and loads plugins at startup")
+Rel(nasim, tree_sitter, "parses source code AST for indexing")
+Rel(nasim, embedding_model, "generates code embeddings")
+Rel(nasim, vector_store, "stores and retrieves code embeddings")
+Rel(nasim, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
+Rel(nasim, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
 
 @enduml
