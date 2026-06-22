@@ -5,10 +5,11 @@
 ' Group:     ALL (All Groups)
 ' Boundary:  nasim code agent
 ' Purpose:   Cross-cutting view of all UC groups and actor interactions
+'            Each group is a single use case matching C4 component groups
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   7.0.0
+' Source:    docs/C4/c4_nasim_component.puml
+' Review:    —
 ' ============================================================
 
 left to right direction
@@ -62,88 +63,84 @@ actor "Agent" as Agent <<system>>
 
 rectangle "nasim" {
 
-  package "CLI (CLI)" {
-    usecase "CLI-01\nPROCESS User Input\n[uc_cli]" as UC_CLI <<extref>>
+  package "Agent Group" {
+    usecase "Agent Group" as agent_group <<extref>>
   }
 
-  package "Agent Core (AGT)" {
-    usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as UC_AGT <<extref>>
+  package "Provider Group" {
+    usecase "Provider Group" as provider_group <<extref>>
   }
 
-  package "Provider (PRV)" {
-    usecase "PRV-01\nREGISTER Provider\n[uc_provider]" as UC_PRV <<extref>>
+  package "Router Group" {
+    usecase "Router Group" as router_group <<extref>>
   }
 
-  package "Tools (TL)" {
-    usecase "TL-01\nREAD File\n[uc_tools]" as UC_TL <<extref>>
+  package "Tool Group" {
+    usecase "Tool Group" as tool_group <<extref>>
   }
 
-  package "MCP (MCP)" {
-    usecase "MCP-01\nCONNECT MCP Server\n[uc_mcp]" as UC_MCP <<extref>>
+  package "MCP Group" {
+    usecase "MCP Group" as mcp_group <<extref>>
   }
 
-  package "Config (CFG)" {
-    usecase "CFG-01\nLOAD Config\n[uc_config]" as UC_CFG <<extref>>
+  package "Config Group" {
+    usecase "Config Group" as config_group <<extref>>
   }
 
-  package "Session (SSN)" {
-    usecase "SSN-01\nPERSIST Session\n[uc_session]" as UC_SSN <<extref>>
+  package "Session Group" {
+    usecase "Session Group" as session_group <<extref>>
   }
 
-  package "Server (SRV)" {
-    usecase "SRV-01\nLIST Sessions\n[uc_server]" as UC_SRV <<extref>>
+  package "Server Group" {
+    usecase "Server Group" as server_group <<extref>>
   }
 
-  package "Hooks (HK)" {
-    usecase "HK-01\nREGISTER Hook\n[uc_hooks]" as UC_HK <<extref>>
+  package "Hooks Group" {
+    usecase "Hooks Group" as hooks_group <<extref>>
   }
 
-  package "Plugins (PLG)" {
-    usecase "PLG-01\nDISCOVER Plugins\n[uc_plugins]" as UC_PLG <<extref>>
+  package "Plugins Group" {
+    usecase "Plugins Group" as plugins_group <<extref>>
   }
 
-  package "Safety (SAF)" {
-    usecase "SAF-01\nCHECK Permission\n[uc_safety]" as UC_SAF <<extref>>
+  package "Sandbox Group" {
+    usecase "Sandbox Group" as sandbox_group <<extref>>
   }
 
-  package "Router (RTG)" {
-    usecase "RTG-01\nSELECT Model\n[uc_router]" as UC_RTG <<extref>>
+  package "Safety Group" {
+    usecase "Safety Group" as safety_group <<extref>>
   }
 
-  package "Observability (OBS)" {
-    usecase "OBS-01\nSTREAM Structured Log\n[uc_observability]" as UC_OBS <<extref>>
+  package "Observability Group" {
+    usecase "Observability Group" as observability_group <<extref>>
   }
 
-  package "Memory (MEM)" {
-    usecase "MEM-01\nPERSIST Knowledge\n[uc_memory]" as UC_MEM <<extref>>
+  package "Memory Group" {
+    usecase "Memory Group" as memory_group <<extref>>
   }
 
-  package "Git (VCS)" {
-    usecase "VCS-01\nREAD Git Status\n[uc_git]" as UC_VCS <<extref>>
+  package "Git Group" {
+    usecase "Git Group" as git_group <<extref>>
   }
 
-  package "Sandbox (SBX)" {
-    usecase "SBX-01\nISOLATE Command\n[uc_sandbox]" as UC_SBX <<extref>>
+  package "Repo Intelligence Group" {
+    usecase "Repo Intelligence Group" as repo_intelligence_group <<extref>>
   }
 
-  package "Repo Intelligence (RIM)" {
-    usecase "RIM-01\nINDEX Codebase\n[uc_repo_intelligence]" as UC_RIM <<extref>>
+  package "Edit Strategy Group" {
+    usecase "Edit Strategy Group" as edit_strategy_group <<extref>>
   }
 
-  package "Edit Strategy (EDT)" {
-    usecase "EDT-01\nSELECT Strategy\n[uc_edit_strategy]" as UC_EDT <<extref>>
+  package "Evaluation Group" {
+    usecase "Evaluation Group" as evaluation_group <<extref>>
   }
 
-  package "Evaluation (EVL)" {
-    usecase "EVL-01\nEVALUATE Task\n[uc_evaluation]" as UC_EVL <<extref>>
+  package "Wire Log Group" {
+    usecase "Wire Log Group" as wire_log_group <<extref>>
   }
 
-  package "Wire Log (WRL)" {
-    usecase "WRL-01\nAPPEND Event\n[uc_wire_log]" as UC_WRL <<extref>>
-  }
-
-  package "Context Graph (CTX)" {
-    usecase "CTX-01\nPROCESS Context\n[uc_context]" as UC_CTX <<extref>>
+  package "Context Graph Group" {
+    usecase "Context Graph Group" as context_graph_group <<extref>>
   }
 }
 
@@ -151,44 +148,44 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> UC_CLI
-Developer --> UC_SAF
+Developer --> agent_group
+Developer --> safety_group
 
-HTTPClient --> UC_SRV
-HTTPClient --> UC_OBS
+HTTPClient --> server_group
+HTTPClient --> observability_group
 
-MCPClient --> UC_MCP
+MCPClient --> mcp_group
 
-Platform --> UC_OBS
+Platform --> observability_group
 
-Agent --> UC_AGT
-Agent --> UC_PRV
-Agent --> UC_TL
-Agent --> UC_MCP
-Agent --> UC_CFG
-Agent --> UC_SSN
-Agent --> UC_HK
-Agent --> UC_PLG
-Agent --> UC_SAF
-Agent --> UC_RTG
-Agent --> UC_OBS
-Agent --> UC_MEM
-Agent --> UC_VCS
-Agent --> UC_SBX
-Agent --> UC_RIM
-Agent --> UC_EDT
-Agent --> UC_EVL
-Agent --> UC_WRL
-Agent --> UC_CTX
+Agent --> agent_group
+Agent --> provider_group
+Agent --> router_group
+Agent --> tool_group
+Agent --> mcp_group
+Agent --> config_group
+Agent --> session_group
+Agent --> server_group
+Agent --> hooks_group
+Agent --> plugins_group
+Agent --> sandbox_group
+Agent --> safety_group
+Agent --> observability_group
+Agent --> memory_group
+Agent --> git_group
+Agent --> repo_intelligence_group
+Agent --> edit_strategy_group
+Agent --> evaluation_group
+Agent --> wire_log_group
+Agent --> context_graph_group
 
 ' ============================================================
 ' Key Relationships
 ' ============================================================
 
-UC_CLI ..> UC_AGT : <<include>>
-UC_AGT ..> UC_RTG : <<include>>
-UC_AGT ..> UC_CTX : <<include>>
-UC_AGT ..> UC_EDT : <<extend>>
-UC_AGT ..> UC_EVL : <<extend>>
+agent_group ..> router_group : <<include>>
+agent_group ..> context_graph_group : <<include>>
+agent_group ..> edit_strategy_group : <<extend>>
+agent_group ..> evaluation_group : <<extend>>
 
 @enduml
