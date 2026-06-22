@@ -25,7 +25,7 @@ end box
 box "External" #F5F5F5
   participant "LLM Provider API" as api
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "ProviderRepository" as prov_repo
 end box
 

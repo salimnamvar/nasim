@@ -23,7 +23,7 @@ end box
 box "Safety Layer" #FFF9C4
   participant "SafetyCoordinator" as safety
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 

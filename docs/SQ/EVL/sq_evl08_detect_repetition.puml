@@ -21,7 +21,7 @@ box "Evaluation Layer" #FFF3E0
   participant "RepetitionDetector" as detector
   participant "ToolCallHistory" as history
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "EvaluationRepository" as eval_repo
 end box
 

@@ -24,7 +24,7 @@ box "Git Layer" #E8EAF6
   participant "GitStatus" as status
   participant "GitCommit" as commit
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "GitRepository" as git_repo
 end box
 

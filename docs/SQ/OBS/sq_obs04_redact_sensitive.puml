@@ -27,7 +27,7 @@ end box
 box "Config Layer" #E0F7FA
   participant "Config" as config
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 

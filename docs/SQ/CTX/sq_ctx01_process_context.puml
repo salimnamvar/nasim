@@ -25,7 +25,7 @@ box "Context Graph Group" #E0F2F1
   participant "ContextPrioritizer" as prioritizer
   participant "TokenBudgetTracker" as tracker
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "ContextRepository" as ctx_repo
 end box
 

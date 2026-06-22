@@ -22,7 +22,7 @@ box "Tool Layer" #F3E5F5
   participant "GrepTool" as grep
   participant "ShellTool" as shell
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "ToolRepository" as tool_repo
 end box
 

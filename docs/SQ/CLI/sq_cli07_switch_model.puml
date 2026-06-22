@@ -23,7 +23,7 @@ end box
 box "Routing Layer" #E8EAF6
   participant "RTGModelRouter" as rtg
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "SessionRepository" as session_repo
 end box
 

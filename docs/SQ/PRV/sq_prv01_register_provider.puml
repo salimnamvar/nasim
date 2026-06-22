@@ -23,7 +23,7 @@ box "Provider Layer" #FFF3E0
   participant "ProviderFactory" as factory
   participant "Provider" as proto
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "ProviderRepository" as prov_repo
 end box
 

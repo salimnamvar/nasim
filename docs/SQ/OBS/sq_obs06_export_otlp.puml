@@ -27,7 +27,7 @@ end box
 box "External" #F5F5F5
   participant "OTel Backend" as backend
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 

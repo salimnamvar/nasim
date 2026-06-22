@@ -26,7 +26,7 @@ end box
 box "Config Layer" #FCE4EC
   participant "ConfigLoader" as config
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "FileRepository" as file_repo
 end box
 

@@ -22,7 +22,7 @@ end box
 box "Router Layer" #EDE7F6
   participant "ModelRouter" as router
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "ModelRepository" as model_repo
 end box
 

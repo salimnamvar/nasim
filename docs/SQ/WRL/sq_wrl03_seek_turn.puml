@@ -23,7 +23,7 @@ box "Wire Log Group" #FFFDE7
   participant "TurnIndex" as idx
   participant "WireReader" as reader
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "LogRepository" as log_repo
 end box
 

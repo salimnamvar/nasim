@@ -23,7 +23,7 @@ box "Edit Layer" #FFF3E0
   participant "EditStrategyManager" as mgr
   participant "UnifiedDiffCoder" as coder
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "FileRepository" as file_repo
 end box
 

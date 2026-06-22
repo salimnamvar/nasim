@@ -24,7 +24,7 @@ end box
 box "Session Layer" #E8F5E9
   participant "SessionManager" as session
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "LogRepository" as log_repo
 end box
 

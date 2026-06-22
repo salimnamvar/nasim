@@ -20,7 +20,7 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PlanSession" as plan
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 

@@ -23,7 +23,7 @@ end box
 box "Config Layer" #FCE4EC
   participant "PersonaRegistry" as reg
 end box
-box "Repository Layer" ##E8F5E9
+box "Repository Layer" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
