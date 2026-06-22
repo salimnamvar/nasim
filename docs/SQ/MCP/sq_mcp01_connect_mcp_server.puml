@@ -4,8 +4,8 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Connect to external MCP server via stdio/SSE
 ' Milestone: v1.0
-' Version:   4.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 

@@ -3,32 +3,33 @@
 !theme plain
 
 ' ============================================================
-' Title: nasim — System Context
+' Title: nasim — System Context (API-First)
 ' Boundary: nasim code agent
-' Purpose: Show nasim as a system with all interfaces and external dependencies (15 external)
+' Purpose: Show nasim as an API-First platform with single User actor
+'          and all external dependencies. All interfaces (CLI, WebApp,
+'          DesktopApp, MobileApp) connect exclusively through the API.
 ' Milestone: v1.0
-' Version: 6.0.0
-' Source: docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Version: 7.0.0
+' Source: CAR refinement loop — API-First transformation
 ' Review: —
 ' ============================================================
 
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title nasim — System Context
+title nasim — System Context (API-First)
 
 ' ============================================================
 ' Actors
 ' ============================================================
 
-Person(dev, "Developer", "Uses terminal to interact with nasim")
-Person(http_client, "HTTP Client", "Web-app, mobile-app, desktop-app via HTTP/SSE")
+Person(user, "User", "Interacts with nasim via CLI, WebApp, DesktopApp, or MobileApp. All paths route through the API.")
 
 ' ============================================================
 ' nasim System
 ' ============================================================
 
-System(nasim, "nasim", "Multi-interface code agent: CLI + HTTP API + MCP server")
+System(nasim, "nasim", "API-First code agent platform: all interfaces connect through the backend API entry gate")
 
 ' ============================================================
 ' External Systems
@@ -60,8 +61,7 @@ System_Ext(obs_platform, "Observability Platform", "Agent-based collection, Loki
 ' Relationships
 ' ============================================================
 
-Rel(dev, nasim, "types commands and reads output", "terminal")
-Rel(http_client, nasim, "sends requests, receives SSE streams", "HTTP/JSON")
+Rel(user, nasim, "interacts via CLI, WebApp, DesktopApp, or MobileApp — all routes through API", "terminal / HTTP / SSE")
 Rel(nasim, llm_backend, "sends chat requests, receives responses", "HTTP/JSON")
 Rel(nasim, host_fs, "reads, writes, searches files", "path operations")
 Rel(nasim, host_shell, "executes shell commands via sandbox", "subprocess")

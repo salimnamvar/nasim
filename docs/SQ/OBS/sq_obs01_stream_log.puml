@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Emit structured JSON log record to stdout
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — OBS-01 STREAM StructuredLog
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -45,7 +45,7 @@ end note
 
 user -> repl : OBS-01 STREAM StructuredLog(msg, level, extra)
 activate repl
-repl -> agent : OBS-01 STREAM StructuredLog(msg, level, extra)
+router -> agent : OBS-01 STREAM StructuredLog(msg, level, extra)
 activate agent
 
 agent -> logger : OBS-01 STREAM StructuredLog(msg, level, extra)
@@ -76,11 +76,11 @@ deactivate logger
 
 agent --> repl : None
 deactivate agent
-repl --> user : None
+result --> user : None
 deactivate repl
 
 note over user, stdout
-  Flow:    OBS-01 → Developer → REPLSession → AgentOrchestrator → StructuredLogger → TraceCorrelator + LogRedactor → DualOutputAdapter → Stdout
+  Flow:    OBS-01 → User → ServerRouter → AgentOrchestrator → StructuredLogger → TraceCorrelator + LogRedactor → DualOutputAdapter → Stdout
   State:   No state change
   Success: JSON line written to stdout
   Failure: Write failure -> stderr warning, never raises

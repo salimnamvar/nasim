@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Verify edit applied correctly
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -61,7 +61,7 @@ end note
 == edt03 VALIDATE Edit ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 agent -> validator : EDT-03 VALIDATE_EDIT(edit_result)
 activate validator
 
@@ -85,11 +85,11 @@ validator --> agent : ValidationResult(passed, reasons[])
 deactivate validator
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, tool
   Flow:
-    - User → REPLSession → AgentOrchestrator → EditValidator → FileSystem + ToolRegistry → ValidationResult
+    - User → ServerRouter → AgentOrchestrator → EditValidator → FileSystem + ToolRegistry → ValidationResult
 
   State:
     - <back:#ECEFF1>IDLE</back> → READING → CHECKING → LINTING → DONE

@@ -4,18 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Stage edit in DiffSandboxManager for review before sandbox-validated apply
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    Meta-Software Designer audit 2026-06-21
 ' Note:      Process decomposition — internal step of edit flow. Actor required per updated sq.md rules.
 ' ============================================================
 
 title nasim — EDT-10 STAGE Diff
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -41,7 +41,7 @@ end note
 == EDT-10 STAGE Diff ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 agent -> diff_mgr : EDT-10 STAGE_DIFF(edit_result)
 activate diff_mgr
@@ -63,10 +63,10 @@ diff_mgr --> agent : StagedEdit(edit_id, diff_summary)
 deactivate diff_mgr
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, diff_comp
-  Flow:    User → REPLSession → AgentOrchestrator → DiffSandboxManager → EditStagingArea → DiffComputer → return
+  Flow:    User → ServerRouter → AgentOrchestrator → DiffSandboxManager → EditStagingArea → DiffComputer → return
   State:   <back:#F1F8E9>STAGING</back>
   Success: StagedDiff(diff_id, diff_text) — diff staged for review
   Failure: StagingError — sandbox allocation or diff computation failed

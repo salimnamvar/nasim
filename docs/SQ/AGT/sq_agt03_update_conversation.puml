@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Message list management and token tracking
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-03 UPDATE Conversation
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -36,7 +36,7 @@ end note
 == AGT-03 UPDATE Conversation ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 activate agent
 
 agent -> history : agt03 ADD Message({msg})
@@ -59,7 +59,7 @@ deactivate history
 
 agent --> repl : AgentEvent(Done)
 deactivate agent
-repl --> user : result
+result --> user : result
 
 note over user, history
   Flow:    AGT-03 → add message → track tokens → check budget → compact if needed

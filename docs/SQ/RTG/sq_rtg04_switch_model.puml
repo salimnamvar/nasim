@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Change the active model at runtime
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-04 Switch Model
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -39,14 +39,14 @@ end note
 == RTG-04 Switch Model ==
 
 user -> repl : types input
-repl -> agent : RTG-04 PROCESS(user_input)
+router -> agent : RTG-04 PROCESS(user_input)
 
 agent -> router : RTG-04 SWITCH Model(target_model)
 
 break Model not in catalog
     router --> agent : Error("model not available")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: model not available
+    result --> user : error: model not available
 end
 
 router -> router : RTG-04 VALIDATE ModelAvailability(target_model)
@@ -55,10 +55,10 @@ router -> router : RTG-04 UPDATE ActiveModelConfig(target_model)
 router --> agent : Result(success=true, data={previous_model, new_model})
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: switched to target_model
+result --> user : result: switched to target_model
 
 note over user, router
-  Flow:    RTG-04 -> User -> REPLSession -> AgentOrchestrator -> ModelRouter -> validate -> update config -> return
+  Flow:    RTG-04 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> validate -> update config -> return
   State:   Active model updated
   Success: Result(success=true, data={previous_model, new_model})
   Failure: Result(success=false, error="model_not_available") — error returned

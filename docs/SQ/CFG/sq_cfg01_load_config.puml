@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Layered config loading from all sources
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -41,7 +41,7 @@ end note
 
 user -> repl : invoke agent
 activate repl
-repl -> agent : cfg01 LOAD Config(cli_args=argv)
+router -> agent : cfg01 LOAD Config(cli_args=argv)
 activate agent
 agent -> cfg : cfg01 LOAD Config(cli_args=argv)
 activate cfg
@@ -57,13 +57,13 @@ cfg -> cfg : cfg02 VALIDATE Config(fields)
 break Invalid YAML or missing required fields
     cfg --> agent : ConfigError("details")
     agent --> repl : ConfigError
-    repl --> user : config load failed
+    result --> user : config load failed
 end
 
 cfg --> agent : Config object
 agent --> repl : Config object
 deactivate agent
-repl --> user : config loaded
+result --> user : config loaded
 deactivate repl
 
 note over user, env_vars

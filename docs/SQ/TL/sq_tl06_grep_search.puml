@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Search file contents by regex pattern
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -37,7 +37,7 @@ end note
 == TL-06 GREP Search ==
 
 user -> repl : types input
-repl -> agent : TL-06 PROCESS(user_input)
+router -> agent : TL-06 PROCESS(user_input)
 agent -> registry : TL-06 GREP Search(pattern, path, case_sensitive, include_glob)
 registry -> grep : TL-06 GREP Search(pattern, path, case_sensitive, include_glob)
 
@@ -53,23 +53,23 @@ break No matches found
     grep --> registry : ToolResult(success=False, error="No matches found for pattern")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="No matches found for pattern")
+    result --> user : ToolResult(success=False, error="No matches found for pattern")
 end
 
 break Permission denied / path error
     grep --> registry : ToolResult(success=False, error="Error: permission denied / path not found")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="Error: permission denied / path not found")
+    result --> user : ToolResult(success=False, error="Error: permission denied / path not found")
 end
 
 grep --> registry : ToolResult(success=True, content=formatted_matches)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, shell
-  Flow:    TL-06: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> GrepTool -> ripgrep/Python -> ToolResult
+  Flow:    TL-06: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GrepTool -> ripgrep/Python -> ToolResult
   State:   No state change
   Success: List of matching file:line:content
   Failure: No matches, permission error -> ToolResult(success=False)

@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Seek to a specific turn in the wire log
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — WRL-03 SEEK Turn
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -38,7 +38,7 @@ end note
 == WRL-03 SEEK Turn ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 agent -> idx : wrl03 SEEK Turn(turn_number)
 
@@ -50,7 +50,7 @@ break Turn not found
   reader --> idx : 404 NOT_FOUND
   idx --> agent : 404 NOT_FOUND — turn not in index
   agent --> repl : AgentEvent(Error)
-  repl --> user : result — turn not found
+  result --> user : result — turn not found
 end
 
 reader --> idx : 200 OK — WireEvents[turn]
@@ -59,7 +59,7 @@ deactivate reader
 idx --> agent : 200 OK — WireEvents[turn]
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result — wire events for turn
+result --> user : result — wire events for turn
 
 note over user, reader
   Flow:    WRL-03 → lookup offset → read events for turn

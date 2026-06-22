@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Model selection and fallback routing
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-01 SELECT Model
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -47,7 +47,7 @@ end note
 == RTG-01 SELECT Model ==
 
 user -> repl : types input
-repl -> agent : RTG-01 PROCESS(user_input)
+router -> agent : RTG-01 PROCESS(user_input)
 
 agent -> router : RTG-01 SELECT Model(task_type)
 activate router
@@ -71,7 +71,7 @@ break No supported model found
     deactivate fallback
     router --> agent : Result(success=false, error="no_supported_model")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: no supported model
+    result --> user : error: no supported model
 end
 
 router -> fallback : RTG-01 RESOLVE Model(primary_model, fallback_chain)
@@ -83,10 +83,10 @@ router --> agent : Result(success=true, data=selected_model)
 deactivate router
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: selected model
+result --> user : result: selected model
 
 note over user, provider
-  Flow:    RTG-01 -> User -> REPLSession -> AgentOrchestrator -> ModelRouter -> classify -> check caps -> fallback chain -> return model
+  Flow:    RTG-01 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> classify -> check caps -> fallback chain -> return model
   State:   <back:#EDE7F6>ROUTING</back>
   Success: Result(success=true, data=selected_model)
   Failure: Result(success=false, error="no_supported_model") — fallback to default

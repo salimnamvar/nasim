@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Permanently delete a session and its associated data
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SSN-09 DELETE Session
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -40,7 +40,7 @@ end note
 == SSN-09 DELETE Session ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 agent -> store : ssn09 DELETE Session(session_id)
 activate store
@@ -50,7 +50,7 @@ store -> store : validate_session_exists(session_id)
 break Session not found
     store --> agent : 404 NOT_FOUND — DeleteError("session not found")
     agent --> repl : AgentEvent(Error)
-    repl --> user : result — session not found
+    result --> user : result — session not found
 end
 
 store -> fs : ssn09 REMOVE Directory(session_path)
@@ -60,7 +60,7 @@ break Permission denied
     fs --> store : PermissionError
     store --> agent : 403 FORBIDDEN — DeleteError("permission denied")
     agent --> repl : AgentEvent(Error)
-    repl --> user : result — permission denied
+    result --> user : result — permission denied
 end
 
 fs --> store : 200 OK — removed
@@ -72,7 +72,7 @@ store --> agent : 200 OK — delete_confirmed(session_id)
 deactivate store
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result — session permanently deleted
+result --> user : result — session permanently deleted
 
 note over user, fs
   Flow:    SSN-09 → validate → remove directory → clear index → confirm

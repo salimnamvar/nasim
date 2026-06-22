@@ -1,25 +1,27 @@
-# nasim — State Machine Inventory
+# nasim — State Machine Inventory (API-First)
 
 ## Agent Lifecycle States (Process FSM)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | Agent waiting for user input | Startup or response complete | #ECEFF1 |
-| LISTENING | Receiving and parsing user input | User types input | #E8EAF6 |
+| LISTENING | Receiving and parsing user input | API-06 DISPATCH Message received | #E8EAF6 |
 | THINKING | LLM processing messages | Input parsed, messages built | #FFF3E0 |
 | TOOL_EXEC | Executing a tool call | LLM returns tool_calls | #F3E5F5 |
-| RESPONDING | Streaming final text to user | LLM returns text only | #E8F5E9 |
+| RESPONDING | Streaming final text to user via API SSE | LLM returns text only | #E8F5E9 |
 | ERROR | Error occurred | LLM call or tool exec fails | #FFEBEE |
 | COMPACTING | Summarizing old exchanges | token_count > context_budget | #E0F2F1 |
 | AWAITING_APPROVAL | Waiting for user permission | safety_mode=ask AND unsafe tool | #FFF9C4 |
 | PLANNING | Plan mode, tool calls queued | /plan command entered | #E3F2FD |
 | HOOK_RUNNING | Pre/post hook executing | tool or LLM call with hooks | #FFFDE7 |
 | ROUTING | Model selection in progress | ModelRouter resolving model | #EDE7F6 |
-| SERVING | HTTP server handling request | HTTP client sends request | #E0F7FA |
+| SERVING | API processing request from any interface | API-06 DISPATCH Message | #E0F7FA |
 | EVALUATING | Evaluating task completion | task_complete AND evaluation_enabled | #F9FBE7 |
 | REVIEWING | LLM review of results | success checks passed, optional review | #FFF8E1 |
 | RETRYING | Retrying with feedback | success checks failed or review rejected | #FBE9E7 |
 | STAGING | Diff sandbox staging | tool exec in diff_sandbox mode | #F1F8E9 |
+
+> **API-First Entry:** All entry/exit transitions use `API-06` (DISPATCH Message) as the sole entry gate. No interface container may bypass the API.
 
 ### Transitions from STAGING
 
@@ -33,12 +35,12 @@
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
-| CREATED | Session record initialized | POST /v1/sessions | #E3F2FD |
+| CREATED | Session record initialized | API-02 CREATE Session | #E3F2FD |
 | ACTIVE | Session accepting messages | Session created or restored | #2E7D32 |
-| SAVED | Session persisted to disk | SSN-01 PERSIST Session | #1565C0 |
-| RESTORED | Session loaded from disk | SSN-04 RESTORE Session | #1E88E5 |
+| SAVED | Session persisted to disk | API-04 UPDATE Session | #1565C0 |
+| RESTORED | Session loaded from disk | API-03 GET Session | #1E88E5 |
 | BRANCHED | Session forked from parent | WRL-04 FORK Session | #7B1FA2 |
-| CLOSED | Session terminated | /quit or explicit close | #757575 |
+| CLOSED | Session terminated | API-05 DELETE Session | #757575 |
 
 ## Plan Lifecycle States (Entity)
 
@@ -67,8 +69,8 @@
 
 | File | Scope |
 |------|-------|
-| `sm_agent_lifecycle.puml` | Agent process FSM — 17 states |
-| `sm_session_lifecycle.puml` | Session entity lifecycle — 6 states |
+| `sm_agent_lifecycle.puml` | Agent process FSM — 17 states (API-First) |
+| `sm_session_lifecycle.puml` | Session entity lifecycle — 6 states (API-First) |
 | `sm_plan_lifecycle.puml` | Plan entity lifecycle — 7 states |
 | `sm_plugin_lifecycle.puml` | Plugin entity lifecycle — 6 states |
 
@@ -84,21 +86,23 @@
 - **Transition labels** use UC-ID-only convention (e.g., `AGT-01`, `PRV-02`, `SAF-02`).
   No human-readable suffixes. Multiple transitions from one state may share a UC ID
   when the same action produces different outcomes (e.g., `PRV-02` → RESPONDING, TOOL_EXEC, ERROR).
+- **API-First:** All entry/exit transitions in Agent SM use `API-06` as the sole entry gate.
+  Session lifecycle mutations use API UCs (API-02 through API-05).
 
 ## Lifecycle-Write UC Mapping (SMT Ownership)
 
 One lifecycle-write UC per target state. This table is the authoritative reference.
 
-### Session Lifecycle
+### Session Lifecycle (API-First)
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| CREATED | SSN-01 PERSIST Session | Session record initialized |
-| ACTIVE | SSN-01 PERSIST Session | Session accepting messages (after init/resume) |
-| SAVED | SSN-01 PERSIST Session | Session persisted to disk |
-| RESTORED | SSN-04 RESTORE Session | Session loaded from disk |
+| CREATED | API-02 CREATE Session | Session record initialized |
+| ACTIVE | API-02 CREATE Session | Session accepting messages (after init/resume) |
+| SAVED | API-04 UPDATE Session | Session persisted to disk |
+| RESTORED | API-03 GET Session | Session loaded from disk |
 | BRANCHED | WRL-04 FORK Session | Session forked from parent |
-| CLOSED | SSN-01 PERSIST Session | Session terminated (quit or error) |
+| CLOSED | API-05 DELETE Session | Session terminated (quit or error) |
 
 ### Plan Lifecycle
 

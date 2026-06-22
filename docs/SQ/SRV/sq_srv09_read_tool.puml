@@ -4,14 +4,14 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Read details of a specific registered tool
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SRV-09 READ Tool
 
-actor "HTTPClient" as client
+actor "User" as user
 
 box "Server Layer" #E8EAF6
   participant "ServerRouter" as router

@@ -1,20 +1,21 @@
 @startuml uc_overview
 
 ' ============================================================
-' Title:     nasim — UC: Overview
+' Title:     nasim — UC: Overview (API-First)
 ' Group:     ALL (All Groups)
 ' Boundary:  nasim code agent
-' Purpose:   Cross-cutting view of all UC groups and actor interactions
-'            Each group is a single use case matching C4 component groups
+' Purpose:   Cross-cutting view of all UC groups.
+'            Single User actor. All business operations route
+'            through the API Group (Entry Gate).
 ' Milestone: v1.0
 ' Version:   7.0.0
-' Source:    docs/C4/c4_nasim_component.puml
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
 left to right direction
 
-title nasim — UC Overview
+title nasim — UC Overview (API-First)
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -51,8 +52,7 @@ skinparam usecase<<extref>> {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
-actor "HTTP Client" as HTTPClient <<system>>
+actor "User" as User
 actor "MCP Client" as MCPClient <<system>>
 actor "Observability Platform" as Platform <<system>>
 actor "Agent" as Agent <<system>>
@@ -62,6 +62,17 @@ actor "Agent" as Agent <<system>>
 ' ============================================================
 
 rectangle "nasim" {
+
+  package "Interface Containers" {
+    usecase "CLI\n(REPL, /cmds)" as cli_group <<extref>>
+    usecase "WebApp\n(Browser)" as webapp_group <<extref>>
+    usecase "DesktopApp\n(Electron)" as desktop_group <<extref>>
+    usecase "MobileApp\n(React Native)" as mobile_group <<extref>>
+  }
+
+  package "API Group (Entry Gate)" {
+    usecase "API Group\n(ROD REST + SSE)" as api_group <<extref>>
+  }
 
   package "Agent Group" {
     usecase "Agent Group" as agent_group <<extref>>
@@ -89,10 +100,6 @@ rectangle "nasim" {
 
   package "Session Group" {
     usecase "Session Group" as session_group <<extref>>
-  }
-
-  package "Server Group" {
-    usecase "Server Group" as server_group <<extref>>
   }
 
   package "Hooks Group" {
@@ -148,11 +155,15 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> agent_group
-Developer --> safety_group
+User --> cli_group
+User --> webapp_group
+User --> desktop_group
+User --> mobile_group
 
-HTTPClient --> server_group
-HTTPClient --> observability_group
+cli_group ..> api_group : <<include>> : all routes through API
+webapp_group ..> api_group : <<include>> : all routes through API
+desktop_group ..> api_group : <<include>> : all routes through API
+mobile_group ..> api_group : <<include>> : all routes through API
 
 MCPClient --> mcp_group
 
@@ -165,7 +176,6 @@ Agent --> tool_group
 Agent --> mcp_group
 Agent --> config_group
 Agent --> session_group
-Agent --> server_group
 Agent --> hooks_group
 Agent --> plugins_group
 Agent --> sandbox_group
@@ -182,6 +192,11 @@ Agent --> context_graph_group
 ' ============================================================
 ' Key Relationships
 ' ============================================================
+
+api_group ..> agent_group : <<include>>
+api_group ..> session_group : <<include>>
+api_group ..> config_group : <<include>>
+api_group ..> tool_group : <<include>>
 
 agent_group ..> router_group : <<include>>
 agent_group ..> context_graph_group : <<include>>

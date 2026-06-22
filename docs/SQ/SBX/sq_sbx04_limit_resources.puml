@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Enforce CPU, memory, and disk quotas per sandbox instance
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-04 LIMIT Resources
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -40,7 +40,7 @@ end note
 == SBX-04 LIMIT Resources ==
 
 user -> repl : types input
-repl -> agent : SBX-04 PROCESS(user_input)
+router -> agent : SBX-04 PROCESS(user_input)
 
 agent -> executor : SBX-04 LIMIT Resources(cgroup_id, quotas)
 activate executor
@@ -54,7 +54,7 @@ break Cgroup setup fails
     limiter --> executor : CgroupError("setup failed")
     executor --> agent : Result(success=false, error="cgroup_setup_failed")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: cgroup setup failed
+    result --> user : error: cgroup setup failed
 end
 
 limiter -> limiter : SBX-04 SET CpuMax(CPU quota)
@@ -68,10 +68,10 @@ executor --> agent : Result(success=true, data={cgroup_id})
 deactivate executor
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: resources limited
+result --> user : result: resources limited
 
 note over user, limiter
-  Flow:    SBX-04 -> User -> REPLSession -> AgentOrchestrator -> SandboxExecutor -> ResourceLimiter -> create cgroup -> set CPU -> set memory -> set I/O -> confirm
+  Flow:    SBX-04 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> ResourceLimiter -> create cgroup -> set CPU -> set memory -> set I/O -> confirm
   State:   No state change
   Success: Result(success=true, data={cgroup_id})
   Failure: Result(success=false, error="cgroup_setup_failed") — remove partial cgroup, return error

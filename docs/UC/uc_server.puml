@@ -1,19 +1,22 @@
 @startuml uc_server
 
 ' ============================================================
-' Title:     nasim — UC: Server Group
-' Group:     SRV (HTTP Server)
+' Title:     nasim — UC: API Group (Entry Gate)
+' Group:     API (API Entry Gate)
 ' Boundary:  nasim code agent
-' Purpose:   RESTful API + SSE streaming for web/mobile/desktop clients
+' Purpose:   Core business operations exposed via API.
+'            Sole entry point for all interface containers
+'            (CLI, WebApp, DesktopApp, MobileApp).
+'            ROD-compliant REST endpoints (AIP-136/193).
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
 ' ============================================================
 
 left to right direction
 
-title nasim — Server Use Cases
+title nasim — API Use Cases (Entry Gate)
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -50,38 +53,41 @@ skinparam usecase<<extref>> {
 ' Actors
 ' ============================================================
 
-actor "HTTP Client" as HTTPClient <<system>>
+actor "User" as User
 
 ' ============================================================
 ' Cross-Group External References
 ' ============================================================
 
+usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
 usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
 usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
-usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
 usecase "SSN-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
 
 usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
 
 usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
+usecase "CFG-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
+
+usecase "TL-14\nLIST Registered Tools\n[uc_tools]" as TL14_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
 
 rectangle "nasim" {
-  package "Server Group (SRV)" {
-    usecase "**SRV-01 LIST Sessions**\n--\nList all sessions with pagination" as SRV01
-    usecase "**SRV-02 INSERT Session**\n--\nCreate a new session" as SRV02
-    usecase "**SRV-03 READ Session**\n--\nGet session details by ID" as SRV03
-    usecase "**SRV-04 UPDATE Session**\n--\nUpdate session metadata" as SRV04
-    usecase "**SRV-05 DELETE Session**\n--\nDelete a session" as SRV05
-    usecase "**SRV-06 DISPATCH Message**\n--\nSend message and receive SSE stream" as SRV06
-    usecase "**SRV-07 LIST Messages**\n--\nList messages in a session" as SRV07
-    usecase "**SRV-08 LIST Tools**\n--\nList registered tools" as SRV08
-    usecase "**SRV-09 READ Tool**\n--\nGet tool details" as SRV09
-    usecase "**SRV-10 READ Config**\n--\nGet current configuration" as SRV10
-    usecase "**SRV-11 UPDATE Config**\n--\nUpdate configuration" as SRV11
+  package "API Group (Entry Gate)" {
+    usecase "**API-01 LIST Sessions**\n--\nList all sessions with pagination\nGET /v1/sessions" as API01
+    usecase "**API-02 CREATE Session**\n--\nCreate a new session\nPOST /v1/sessions" as API02
+    usecase "**API-03 GET Session**\n--\nGet session details by ID\nGET /v1/sessions/{id}" as API03
+    usecase "**API-04 UPDATE Session**\n--\nUpdate session metadata\nPATCH /v1/sessions/{id}" as API04
+    usecase "**API-05 DELETE Session**\n--\nDelete a session\nDELETE /v1/sessions/{id}" as API05
+    usecase "**API-06 DISPATCH Message**\n--\nSend message, receive SSE stream\nPOST /v1/sessions/{id}:dispatch" as API06
+    usecase "**API-07 LIST Messages**\n--\nList messages in a session\nGET /v1/sessions/{id}/messages" as API07
+    usecase "**API-08 LIST Tools**\n--\nList registered tools\nGET /v1/tools" as API08
+    usecase "**API-09 GET Tool**\n--\nGet tool definition\nGET /v1/tools/{name}" as API09
+    usecase "**API-10 GET Config**\n--\nGet current configuration\nGET /v1/config" as API10
+    usecase "**API-11 UPDATE Config**\n--\nUpdate configuration at runtime\nPATCH /v1/config" as API11
   }
 }
 
@@ -89,29 +95,32 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-HTTPClient --> SRV01
-HTTPClient --> SRV02
-HTTPClient --> SRV03
-HTTPClient --> SRV04
-HTTPClient --> SRV05
-HTTPClient --> SRV06
-HTTPClient --> SRV07
-HTTPClient --> SRV08
-HTTPClient --> SRV09
-HTTPClient --> SRV10
-HTTPClient --> SRV11
+User --> API01
+User --> API02
+User --> API03
+User --> API04
+User --> API05
+User --> API06
+User --> API07
+User --> API08
+User --> API09
+User --> API10
+User --> API11
 
 ' ============================================================
-' Relationships (Boundary -> External UC traceability)
+' Relationships (API -> Core UC traceability)
 ' ============================================================
 
-SRV01 ..> SSN03_ext : <<include>>
-SRV02 ..> SSN01_ext : <<include>>
-SRV03 ..> SSN02_ext : <<include>>
-SRV04 ..> SSN01_ext : <<include>>
-SRV05 ..> SSN09_ext : <<include>>
-SRV06 ..> AGT01_ext : <<include>>
-SRV07 ..> SSN02_ext : <<include>>
-SRV10 ..> CFG01_ext : <<include>>
+API01 ..> SSN03_ext : <<include>>
+API02 ..> SSN01_ext : <<include>>
+API03 ..> SSN02_ext : <<include>>
+API04 ..> SSN01_ext : <<include>>
+API05 ..> SSN09_ext : <<include>>
+API06 ..> AGT01_ext : <<include>>
+API07 ..> SSN02_ext : <<include>>
+API08 ..> TL14_ext : <<include>>
+API09 ..> TL14_ext : <<include>>
+API10 ..> CFG01_ext : <<include>>
+API11 ..> CFG03_ext : <<include>>
 
 @enduml

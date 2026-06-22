@@ -4,16 +4,16 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Display approval prompt and collect developer decision
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CLI-06 Request Approval
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
+box "API Group (Entry Gate)" #E8F5E9
   participant "Renderer" as renderer
 end box
 box "Agent Layer" #E3F2FD
@@ -58,7 +58,7 @@ end
 deactivate renderer
 
 note over user, safety
-  Flow:    CLI-06 requestApproval: AgentOrchestrator → Renderer → display prompt → Developer → decision
+  Flow:    CLI-06 requestApproval: AgentOrchestrator → Renderer → display prompt → User → decision
   State:   PENDING → APPROVED | DENIED
   Success: Developer decision returned to agent
   Failure: Timeout → default deny

@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Load conversation history from disk
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -36,7 +36,7 @@ end note
 == SSN-02 Load Session ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 agent -> store : ssn02 READ Session(session_id)
 store -> dir : read session.jsonl
@@ -46,13 +46,13 @@ break Session file not found
     store --> agent : 404 NOT_FOUND
     agent -> agent : start fresh session
     agent --> repl : AgentEvent(Done)
-    repl --> user : result — no session found, starting fresh
+    result --> user : result — no session found, starting fresh
 end
 
 store -> store : deserialize JSON Lines -> messages
 store --> agent : 200 OK — Session(id, created_at, messages)
 agent --> repl : AgentEvent(Done)
-repl --> user : result — session restored
+result --> user : result — session restored
 
 note over user, dir
   Flow:    SSN-02 → read file → deserialize → Session

@@ -4,14 +4,14 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Retrieve message history for a session
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
 title nasim — SRV-07 LIST Messages
 
-actor "HTTPClient" as client
+actor "User" as user
 
 box "Server Layer" #E8EAF6
   participant "ServerRouter" as router

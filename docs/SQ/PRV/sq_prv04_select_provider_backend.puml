@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Map config.provider string to provider class
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — PRV-04 SELECT ProviderBackend
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -42,7 +42,7 @@ end note
 
 user -> repl : PRV-04 SELECT ProviderBackend(provider_name)
 activate repl
-repl -> agent : PRV-04 SELECT ProviderBackend(provider_name)
+router -> agent : PRV-04 SELECT ProviderBackend(provider_name)
 activate agent
 
 agent -> cfg : PRV-04 READ Config(provider_field)
@@ -58,7 +58,7 @@ break Provider not in registry
     factory -> factory : raise ConfigError("Unknown provider: X")
     factory --> agent : ConfigError
     agent --> repl : ConfigError
-    repl --> user : error message
+    result --> user : error message
 end
 
 factory --> agent : provider_class
@@ -66,11 +66,11 @@ deactivate factory
 
 agent --> repl : provider_class
 deactivate agent
-repl --> user : provider_class
+result --> user : provider_class
 deactivate repl
 
 note over user, factory
-  Flow:    PRV-04 → Developer → REPLSession → AgentOrchestrator → ConfigLoader → ProviderFactory → registry lookup → class
+  Flow:    PRV-04 → User → ServerRouter → AgentOrchestrator → ConfigLoader → ProviderFactory → registry lookup → class
   State:   No state change
   Success: Provider class reference for instantiation
   Failure: Unknown provider name -> ConfigError

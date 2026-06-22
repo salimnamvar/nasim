@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Monitor sandboxed process for timeout and resource usage
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-03 MONITOR Process
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -41,7 +41,7 @@ end note
 == SBX-03 MONITOR Process ==
 
 user -> repl : types input
-repl -> agent : SBX-03 PROCESS(user_input)
+router -> agent : SBX-03 PROCESS(user_input)
 
 agent -> executor : SBX-03 MONITOR Process(process_id, limits)
 activate executor
@@ -61,27 +61,27 @@ alt timeout exceeded
     monitor --> executor : watch_complete(stats)
     executor --> agent : Result(success=false, error="timeout_exceeded")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: process timeout exceeded
+    result --> user : error: process timeout exceeded
 else resource limit exceeded
     monitor -> executor : SBX-03 ENFORCE Limit(violation)
     executor --> monitor : limit_enforced
     monitor --> executor : watch_complete(stats)
     executor --> agent : Result(success=false, error="resource_limit_exceeded")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: resource limit exceeded
+    result --> user : error: resource limit exceeded
 else normal completion
     monitor -> monitor : SBX-03 RECORD FinalStats()
     monitor --> executor : watch_complete(stats)
     executor --> agent : Result(success=true, data={stats})
     agent --> repl : AgentEvent(Done)
-    repl --> user : result: process completed
+    result --> user : result: process completed
 end
 
 deactivate monitor
 deactivate executor
 
 note over user, monitor
-  Flow:    SBX-03 -> User -> REPLSession -> AgentOrchestrator -> SandboxExecutor -> SandboxMonitor -> poll -> enforce limits -> complete
+  Flow:    SBX-03 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> SandboxMonitor -> poll -> enforce limits -> complete
   State:   No state change
   Success: Result(success=true, data={stats})
   Failure: Result(success=false, error="timeout_exceeded") or Result(success=false, error="resource_limit_exceeded") — kill/enforce

@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Index current turn and persist checkpoint for resumption
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — WRL-05 CHECKPOINT Turn
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -41,7 +41,7 @@ end note
 == WRL-05 CHECKPOINT Turn ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 agent -> wl : wrl05 CHECKPOINT Turn(turn_data)
 activate wl
@@ -65,7 +65,7 @@ wl --> agent : 200 OK — CheckpointResult
 deactivate wl
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result — checkpoint persisted
+result --> user : result — checkpoint persisted
 
 note over participants
   Flow:    WRL-05 → index turn → persist checkpoint

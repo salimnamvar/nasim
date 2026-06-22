@@ -1,19 +1,21 @@
 @startuml uc_cli
 
 ' ============================================================
-' Title:     nasim — UC: CLI Group
-' Group:     CLI (CLI Layer)
+' Title:     nasim — UC: CLI Group (Interface Container)
+' Group:     CLI (CLI Interface)
 ' Boundary:  nasim code agent
-' Purpose:   REPL, argument parsing, slash commands, rich rendering
+' Purpose:   CLI-specific interface UCs: REPL, slash commands, rendering.
+'            ALL business operations delegate to the API (ServerRouter).
+'            No direct access to core library services.
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
 ' ============================================================
 
 left to right direction
 
-title nasim — CLI Use Cases
+title nasim — CLI Use Cases (Interface Container)
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -44,31 +46,25 @@ skinparam usecase<<extref>> {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
-actor "Agent" as Agent <<system>>
+actor "User" as User
 
 ' ============================================================
-' Cross-Group External References
+' Cross-Group External References (API Entry Gate)
 ' ============================================================
 
-usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
-usecase "RTG-04\nSWITCH Model\n[uc_router]" as RTG04_ext <<extref>>
-usecase "AGT-07\nQUEUE Plan\n[uc_agent]" as AGT07_ext <<extref>>
+usecase "API-01\nLIST Sessions\n[API Group]" as API01_ext <<extref>>
+usecase "API-06\nDISPATCH Message\n[API Group]" as API06_ext <<extref>>
+usecase "API-11\nUPDATE Config\n[API Group]" as API11_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
 
 rectangle "nasim" {
-  package "CLI Group (CLI)" {
-    usecase "**CLI-01 PROCESS User Input**\n--\nREPL loop, input handling, slash command dispatch" as CLI01
-    usecase "**CLI-02 DISPATCH Slash Command**\n--\nMap /cmd strings to agent actions" as CLI02
-    usecase "**CLI-03 STREAM Output**\n--\nRender AgentEvents to terminal" as CLI03
-    usecase "**CLI-04 READ CLI Arguments**\n--\nParse CLI args with layered config overrides" as CLI04
-    usecase "**CLI-05 ENABLE Plan Mode**\n--\nToggle plan mode on/off" as CLI05
-    usecase "**CLI-06 REQUEST Approval**\n--\nPrompt user for safety approval" as CLI06
-    usecase "**CLI-07 SWITCH Model**\n--\nSwitch model at runtime" as CLI07
-    usecase "**CLI-08 LIST Sessions**\n--\nList saved sessions" as CLI08
+  package "CLI Group (Interface Container)" {
+    usecase "**CLI-01 PROCESS User Input**\n--\nREPL loop, input handling.\nDelegates ALL business ops to API." as CLI01
+    usecase "**CLI-02 DISPATCH Slash Command**\n--\nMap /cmd strings to API calls.\n/sessions → API-01, /model → API-11" as CLI02
+    usecase "**CLI-03 STREAM Output**\n--\nRender AgentEvents from API SSE stream to terminal" as CLI03
   }
 }
 
@@ -76,24 +72,16 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> CLI01
-Developer --> CLI02
-Developer --> CLI05
-Developer --> CLI07
-Developer --> CLI08
-Agent --> CLI03
-Agent --> CLI04
-Agent --> CLI06
+User --> CLI01
+User --> CLI02
 
 ' ============================================================
 ' Relationships
 ' ============================================================
 
 CLI01 ..> CLI03 : <<include>>
-CLI01 ..> CLI04 : <<include>>
-CLI01 ..> CLI06 : <<extend>>
-CLI07 ..> RTG04_ext : <<include>>
-CLI05 ..> AGT07_ext : <<include>>
-CLI08 ..> SSN03_ext : <<include>>
+CLI01 ..> API06_ext : <<include>> : delegates to API
+CLI02 ..> API01_ext : <<include>> : /sessions → API-01
+CLI02 ..> API11_ext : <<include>> : /model → API-11
 
 @enduml

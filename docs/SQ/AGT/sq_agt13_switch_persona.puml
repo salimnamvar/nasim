@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Unload current persona and load a new one
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-13 SWITCH Persona
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -39,7 +39,7 @@ end note
 == AGT-13 SWITCH Persona ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 activate agent
 
 agent -> pm : agt13 SWITCH Persona({new_persona_name})
@@ -67,7 +67,7 @@ deactivate pm
 
 agent --> repl : AgentEvent(Done)
 deactivate agent
-repl --> user : result
+result --> user : result
 
 note over user, reg
   Flow:    AGT-13 → unload current → load new → apply

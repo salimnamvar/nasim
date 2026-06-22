@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Read and parse a plugin's manifest.yaml file
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -34,7 +34,7 @@ note over user, fs
 end note
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 == PLG-02 Load Manifest ==
 
@@ -49,7 +49,7 @@ break File not found
     loader --> agent : PluginSkipped(manifest_path, reason="not found")
     deactivate loader
     agent --> repl : AgentEvent(Done)
-    repl --> user : result
+    result --> user : result
     stop
 end
 
@@ -59,7 +59,7 @@ break YAML parse error
     loader --> agent : PluginSkipped(manifest_path, reason="invalid YAML")
     deactivate loader
     agent --> repl : AgentEvent(Done)
-    repl --> user : result
+    result --> user : result
     stop
 end
 
@@ -72,7 +72,7 @@ loader --> agent : PluginManifest
 deactivate loader
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, fs
   Flow:    PLG-02 AgentOrchestrator -> PluginLoader -> read manifest.yaml -> parse metadata -> return PluginManifest

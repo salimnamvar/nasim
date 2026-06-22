@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Apply inline patch with line-level precision
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — EDT-09 APPLY Inline Patch
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -41,7 +41,7 @@ end note
 == EDT-09 APPLY Inline Patch ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 agent -> esm : EDT-09 APPLY_INLINE_PATCH(file_path, patch)
 activate esm
@@ -78,7 +78,7 @@ esm --> agent : EditResult
 deactivate esm
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over participants
   Flow:    EDT-09 → parse patch → apply → validate

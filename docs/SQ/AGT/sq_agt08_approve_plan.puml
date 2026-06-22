@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Execute queued tool calls from plan mode
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-08 APPROVE Plan
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -39,7 +39,7 @@ end note
 == AGT-08 APPROVE Plan ==
 
 user -> repl : /approve
-repl -> agent : APPROVE_Plan()
+router -> agent : APPROVE_Plan()
 activate agent
 
 agent -> plan : agt08 APPROVE Plan()
@@ -60,7 +60,7 @@ deactivate plan
 
 agent --> repl : AgentEvent(Done)
 deactivate agent
-repl --> user : plan executed
+result --> user : plan executed
 
 note over user, registry
   Flow:    AGT-08 → approve → drain queue → execute sequentially → results

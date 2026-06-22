@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   File read tool execution
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -37,7 +37,7 @@ end note
 == TL-01 READ File ==
 
 user -> repl : types input
-repl -> agent : TL-01 PROCESS(user_input)
+router -> agent : TL-01 PROCESS(user_input)
 agent -> registry : TL-01 READ File(path, offset, limit)
 registry -> ft : TL-01 READ File(path, offset, limit)
 ft -> fs : Path(path).read_text()
@@ -47,7 +47,7 @@ break File not found or not a file
     ft --> registry : ToolResult(success=False, error="file not found")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="file not found")
+    result --> user : ToolResult(success=False, error="file not found")
 end
 
 break Read error (encoding, permissions)
@@ -55,7 +55,7 @@ break Read error (encoding, permissions)
     ft --> registry : ToolResult(success=False, error="Error reading path")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="Error reading path")
+    result --> user : ToolResult(success=False, error="Error reading path")
 end
 
 fs --> ft : file content
@@ -63,10 +63,10 @@ ft -> ft : add line numbers, apply offset/limit
 ft --> registry : ToolResult(success=True, content=numbered_content)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, fs
-  Flow:    TL-01: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> ReadFileTool -> Host Filesystem -> ToolResult
+  Flow:    TL-01: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> ReadFileTool -> Host Filesystem -> ToolResult
   State:   No state change
   Success: File content with line numbers
   Failure: File not found, permissions, encoding -> ToolResult(success=False)

@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Execute hooks before LLM call
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — HK-04 DISPATCH Pre-LLM Hook
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -44,7 +44,7 @@ end note
 
 user -> repl : invoke agent
 activate repl
-repl -> agent : hk04 DISPATCH Pre-LLM Hook(messages)
+router -> agent : hk04 DISPATCH Pre-LLM Hook(messages)
 activate agent
 agent -> hooks : hk04 DISPATCH Pre-LLM Hook(messages)
 activate hooks
@@ -59,7 +59,7 @@ loop for each hook in priority order
     break action == DENY
         hooks --> agent : HookResult(action=DENY, reason)
         agent --> repl : HookResult(action=DENY)
-        repl --> user : LLM call blocked by hook
+        result --> user : LLM call blocked by hook
     end
 end
 
@@ -67,7 +67,7 @@ hooks --> agent : HookResult(action=ALLOW, modified_messages?)
 deactivate hooks
 agent --> repl : HookResult(action=ALLOW)
 deactivate agent
-repl --> user : hook dispatched
+result --> user : hook dispatched
 deactivate repl
 
 note over user, provider

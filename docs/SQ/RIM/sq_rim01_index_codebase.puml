@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Build AST index and symbol graph from project source
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RIM-01 INDEX Codebase
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -45,7 +45,7 @@ end note
 
 user -> repl : RIM-01 INDEX Codebase(project_root)
 activate repl
-repl -> agent : RIM-01 INDEX Codebase(project_root)
+router -> agent : RIM-01 INDEX Codebase(project_root)
 activate agent
 
 agent -> rim : RIM-01 INDEX Codebase(project_root)
@@ -88,11 +88,11 @@ deactivate rim
 
 agent --> repl : IndexStats(files, symbols, edges)
 deactivate agent
-repl --> user : IndexStats(files, symbols, edges)
+result --> user : IndexStats(files, symbols, edges)
 deactivate repl
 
 note over user, fs
-  Flow:    RIM-01 → Developer → REPLSession → AgentOrchestrator → RepoIntelligenceManager → [FileSystem → ASTIndexAdapter → SymbolGraph]* → IndexStats
+  Flow:    RIM-01 → User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → [FileSystem → ASTIndexAdapter → SymbolGraph]* → IndexStats
   State:   No state change
   Success: IndexStats with file count, symbol count, edge count
   Failure: Parse error -> skip file; complete failure -> empty index

@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Replace an exact string in a file
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -37,7 +37,7 @@ end note
 == TL-03 EDIT File ==
 
 user -> repl : types input
-repl -> agent : TL-03 PROCESS(user_input)
+router -> agent : TL-03 PROCESS(user_input)
 agent -> registry : TL-03 EDIT File(path, old_string, new_string)
 registry -> ft : TL-03 EDIT File(path, old_string, new_string)
 ft -> fs : Path(path).read_text()
@@ -47,7 +47,7 @@ break File not found
     ft --> registry : ToolResult(success=False, error="Error: file not found")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="Error: file not found")
+    result --> user : ToolResult(success=False, error="Error: file not found")
 end
 
 ft -> ft : content.count(old_string)
@@ -56,23 +56,23 @@ alt count == 0
     ft --> registry : ToolResult(success=False, error="old_string not found")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="old_string not found")
+    result --> user : ToolResult(success=False, error="old_string not found")
 else count > 1
     ft --> registry : ToolResult(success=False, error="old_string found N times (ambiguous)")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="old_string found N times (ambiguous)")
+    result --> user : ToolResult(success=False, error="old_string found N times (ambiguous)")
 else count == 1
     ft -> ft : content.replace(old_string, new_string, 1)
     ft -> fs : Path(path).write_text(new_content)
     ft --> registry : ToolResult(success=True, content="Edited: replaced 1 occurrence")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Done)
-    repl --> user : result
+    result --> user : result
 end
 
 note over user, fs
-  Flow:    TL-03: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> EditFileTool -> Host Filesystem -> ToolResult
+  Flow:    TL-03: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> EditFileTool -> Host Filesystem -> ToolResult
   State:   No state change
   Success: Single replacement written
   Failure: Not found or ambiguous -> ToolResult(success=False)

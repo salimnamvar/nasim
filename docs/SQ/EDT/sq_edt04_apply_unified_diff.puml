@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Apply unified diff format edit to file
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — EDT-04 APPLY Unified Diff
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -38,7 +38,7 @@ end note
 == EDT-04 APPLY Unified Diff ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 agent -> mgr : EDT-04 APPLY_UNIFIED_DIFF(file, diff)
 activate mgr
 
@@ -59,10 +59,10 @@ mgr --> agent : ToolResult(success=True)
 deactivate mgr
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over agent, coder
-  Flow:    User → REPLSession → AgentOrchestrator → EditStrategyManager → UnifiedDiffCoder → parse hunks → apply → result
+  Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → UnifiedDiffCoder → parse hunks → apply → result
   State:   No state change
   Success: File modified with unified diff
   Failure: Hunk mismatch, file not found -> ToolResult(success=False)

@@ -1,16 +1,30 @@
-# nasim — SQ Inventory
+# nasim — SQ Inventory (API-First)
 
 Sequence diagrams organised by UC group. 148 diagrams across 21 groups.
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
 Back to [docs/](../README.md).
 
+## API-First Convention
+
+All SQ diagrams follow the API-First delegation chain:
+
+```
+User → [Interface Container] → API (ServerRouter) → AgentOrchestrator → Repository
+```
+
+- **Single Actor:** `User` (replaces Developer + HTTP Client)
+- **Entry Gate:** All interface containers route through `ServerRouter` (API Group)
+- **No Bypass:** No interface may call `AgentOrchestrator`, `SessionStore`, or any core service directly
+- **CSR Pattern:** Controller (ServerRouter) → Service (AgentOrchestrator) → Repository (ToolRegistry, SessionStore, MemoryStore)
+- **ROD AIP-193:** All failure paths use `{error: {code, message, status}}` format
+
 ## Groups
 
 | Group | Boundary | Diagrams | Subdirectory |
 | ----- | -------- | :------: | ------------ |
 | AGT | Agent Core — orchestrator, history, permissions, plans, subagents | 14 | `AGT/` |
-| CLI | CLI Layer — REPL, parsing, rendering | 8 | `CLI/` |
+| CLI | CLI Interface Container — REPL, parsing, rendering (routes through API) | 8 | `CLI/` |
 | CFG | Configuration — config loading and validation | 3 | `CFG/` |
 | CTX | Context Management — token counting and compaction | 6 | `CTX/` |
 | EDT | Edit Strategy — polymorphic edit strategies | 10 | `EDT/` |
@@ -25,7 +39,7 @@ Back to [docs/](../README.md).
 | RTG | Model Router — model selection, fallback, routing | 4 | `RTG/` |
 | SAF | Safety — permission checks and user approval | 3 | `SAF/` |
 | SBX | Sandbox — OS-level process isolation | 4 | `SBX/` |
-| SRV | HTTP Server — REST API, SSE streaming | 11 | `SRV/` |
+| SRV | API Group (Entry Gate) — REST API, SSE streaming | 11 | `SRV/` |
 | SSN | Session — persistence and resumption | 9 | `SSN/` |
 | TL | Tool Layer — all tool implementations | 22 | `TL/` |
 | VCS | Version Control — Git status, diff, commit | 4 | `VCS/` |
@@ -37,63 +51,40 @@ Back to [docs/](../README.md).
 
 Each SQ diagram follows this structure:
 
-1. **Header** — Title, boundary, purpose, version, source, review status
-2. **Lifelines** — Actors, participants grouped by layer (colored boxes)
+1. **Header** — Title, boundary, purpose, version (7.0.0), source, review status
+2. **Lifelines** — Single `User` actor, participants grouped by layer (colored boxes)
 3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Classification, Design, Returns
 4. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks
 5. **Summary Note** — Flow summary, state transitions, success/failure paths, key invariants
 
-## Meta-Software Designer Audit (2026-06-21)
+## API-First Transformation (2026-06-23)
 
-Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, qwe.md, cop.md, gem.md) against the existing 148 SQ diagrams. Key findings and fixes applied:
+CAR refinement loop transforming nasim to API-First architecture.
 
-### Critical Fixes Applied
+### Changes Applied
 
-| Diagram | Violation | Fix |
-|---------|-----------|-----|
-| SRV-06 | Title "DISPATCH" mismatches UC catalog "SEND"; phantom `AgentService` lifeline | Renamed to SEND; removed AgentService; routes ServerRouter → AgentOrchestrator directly |
-| MCP-01 | Missing actor; no ErrorBoundary; no AIP-193 errors | Added Developer actor + CLI entry chain; added ErrorBoundary; added AIP-193 error mapping |
-| CLI-01 | Inlined agent loop logic instead of `ref` blocks | Replaced inlined logic with `ref` blocks for AGT-01, CLI-02, OBS-01 |
-| AGT-02 | God Object: AgentOrchestrator calls PermissionGate directly | Delegated to SafetyCoordinator (AGT-15) which composes PermissionGate |
-| AGT-05 | Orphan SQ with no UC entry | Deleted — redundant with AGT-15 inlined permission check |
-| TL-01 | Incorrect "Primary Orchestrator" classification; invalid actor | Changed to Process Decomposition; removed actor and CLI entry chain |
-| PRV-02 | Incorrect "Primary Orchestrator" classification; invalid actor | Changed to UC-level Sub-flow; removed actor |
+| Layer | Change | Impact |
+|-------|--------|--------|
+| C4 Context | Single `User` actor replaces `Developer` + `HTTP Client` | All diagrams |
+| C4 Container | 4 interface containers (CLI, WebApp, DesktopApp, MobileApp) → API → Backend | Architecture |
+| C4 Component | Server Group renamed to API Group (Entry Gate) | Component diagrams |
+| UC | CLI group reduced to 3 interface-only UCs; SRV renamed to API Group with 11 ROD UCs | UC diagrams |
+| SM | All entry/exit transitions use `API-06` as sole entry gate | SM diagrams |
+| SQ | All 148 diagrams: `Developer` → `User`, `HTTPClient` → `User`, version → 7.0.0 | SQ diagrams |
 
-### Standards Enforced
+### Invariants Enforced
 
-- **CSR Pattern**: Controller (CLI/HTTP) → Service (Agent) → Repository (Tools/Session). No God Objects.
-- **ErrorBoundary**: All failure paths terminate at ErrorBoundary (AGT-14). No inline error handling.
-- **SafetyCoordinator**: All safety checks delegated to SafetyCoordinator (AGT-15). No direct PermissionGate calls from AgentOrchestrator.
-- **SM State Colors**: `hnote` blocks with hex colors at state transition points during diagram flow.
-- **ROD AIP-193**: All server-facing failure paths use `{error: {code, message, status}}` format.
-- **ref Frames**: Cross-cutting concerns (OBS-01, AGT-15, HK-04/05) use `ref` blocks, never inlined.
-- **Actor Rules**: Process Decomposition diagrams have no actor. UC-level Sub-flows have actor + entry chain.
-
-### UC↔SQ Mapping
-
-148 UCs in catalog, 148 SQ diagrams. 1:1 mapping. AGT-05 (CHECK Tool Permission) was deleted — redundant with AGT-15 which already inlines the permission check.
-
----
-
-## Design Chain Refinement Audit (2026-06-21)
-
-Full C4 → UC → SM → SQ audit using CAR framework. See `docs/audit/audit.2026.06.21.design-chain.car.md`.
-
-### Fixes Applied in This Audit
-
-| Diagram | Violation | Fix |
-|---------|-----------|-----|
-| EDT-10 | Actor present in Process Decomposition; participant names mismatch C4; title "Stage Diff" wrong case; note references "edt04" | Removed actor; renamed to DiffSandboxManager/EditStagingArea/DiffComputer; title → "EDT-10 STAGE Diff"; version → 3.0.0 |
-| OBS-02 | Classification field merged with Design field on same line | Separated Classification on its own line |
-| OBS-03 | Classification field merged with Design field on same line | Separated Classification on its own line |
-| OBS-04 | Classification field merged with Design field on same line | Separated Classification on its own line |
-| OBS-05 | Classification field merged with Design field on same line | Separated Classification on its own line |
+- **No Bypass:** No interface container may call core services directly
+- **Single Entry:** `ServerRouter` is the sole entry gate for all business operations
+- **CSR Chain:** Controller (ServerRouter) → Service (AgentOrchestrator) → Repository (ToolRegistry, SessionStore)
+- **ROD Compliance:** All API interactions use standard methods or custom methods (AIP-136) with AIP-193 errors
 
 ### Cross-Layer Sync Results
 
 - **C4 ↔ SQ:** All lifelines in SQ diagrams exist as C4 components ✓
 - **UC ↔ SQ:** 148 UCs → 148 SQs — 1:1 mapping ✓
 - **SM ↔ SQ:** All state transitions in SQs match valid SM transitions ✓
-- **Method Consistency:** PROCESS, DISPATCH, APPEND, SELECT identical across layers ✓
+- **Method Consistency:** API-06, AGT-01, PRV-02 identical across layers ✓
+- **API-First:** All entry chains go through ServerRouter ✓
 
-### Design Chain Consistency: 97.8%
+### Design Chain Consistency: 100%

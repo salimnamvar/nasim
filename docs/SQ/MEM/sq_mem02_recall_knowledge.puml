@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Retrieve previously stored knowledge
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -35,7 +35,7 @@ note over user, index
 end note
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 == MEM-02 RECALL Knowledge ==
 
@@ -60,7 +60,7 @@ store --> agent : recalled_entry
 deactivate store
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, index
   Flow:    MEM-02 AgentOrchestrator -> MemoryStore -> filter by scope -> lookup key -> return entry

@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Display approval prompt for unsafe tool execution
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
 title nasim — SAF-02 Prompt User Approval
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
   participant "Renderer" as renderer
 end box
 box "Agent Layer" #E3F2FD
@@ -38,7 +38,7 @@ end note
 == SAF-02 Prompt User Approval ==
 
 user -> repl : types input
-repl -> agent : SAF-02 PROCESS(user_input)
+router -> agent : SAF-02 PROCESS(user_input)
 
 agent -> gate : SAF-02 PROMPT UserApproval(tool_name, args)
 activate gate
@@ -54,19 +54,19 @@ alt user = y
     renderer --> gate : approved
     gate --> agent : approved
     agent --> repl : AgentEvent(Done)
-    repl --> user : result: tool approved
+    result --> user : result: tool approved
 else user = N
     renderer --> gate : rejected
     gate --> agent : rejected
     agent --> repl : AgentEvent(Done)
-    repl --> user : result: tool skipped
+    result --> user : result: tool skipped
 end
 
 deactivate gate
 deactivate renderer
 
 note over user, gate
-  Flow:    SAF-02 -> User -> REPLSession -> AgentOrchestrator -> PermissionGate -> Renderer -> user prompt -> choice -> gate
+  Flow:    SAF-02 -> User -> ServerRouter -> AgentOrchestrator -> PermissionGate -> Renderer -> user prompt -> choice -> gate
   State:   <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> -> <back:#F3E5F5>TOOL_EXEC</back> or <back:#ECEFF1>IDLE</back>
   Success: approved — tool executes
   Failure: rejected — tool skipped

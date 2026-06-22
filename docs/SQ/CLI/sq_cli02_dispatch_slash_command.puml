@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Slash command routing and execution
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
   participant "Renderer" as renderer
 end box
@@ -34,7 +34,7 @@ end note
 == CLI-02 Execute Slash Command ==
 
 user -> repl : /command
-repl -> cmd : dispatch("/command")
+result -> cmd : dispatch("/command")
 cmd -> cmd : parse command name and args
 
 alt /help
@@ -58,7 +58,7 @@ else /sessions
     renderer --> user : session list
 else /quit or /exit
     cmd -> repl : signal exit
-    repl --> user : "Bye."
+    result --> user : "Bye."
 else unknown command
     cmd -> renderer : displayError("Unknown command: /cmd")
     renderer --> user : error display

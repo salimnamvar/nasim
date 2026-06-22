@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Edit a single function via AST-aware replace
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — EDT-06 APPLY Function-Level
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -44,7 +44,7 @@ end note
 == EDT-06 APPLY Function-Level ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 agent -> esm : EDT-06 APPLY_FUNCTION_LEVEL(file_path, function_name, new_body)
 activate esm
 
@@ -79,10 +79,10 @@ esm --> agent : EditResult
 deactivate esm
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over participants
-  Flow:    User → REPLSession → AgentOrchestrator → EditStrategyManager → FunctionLevelCoder → AST parse → replace function → validate
+  Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → FunctionLevelCoder → AST parse → replace function → validate
   State:   <back:#ECEFF1>IDLE</back> → PARSING → REPLACING → VALIDATING → DONE
   Success: EditResult with modified file and function scope
   Failure: AST parse error → fallback to EDT-02/EDT-03; function not found → error

@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Apply fallback chain when primary model fails
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-02 APPLY Fallback
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -43,7 +43,7 @@ end note
 == RTG-02 APPLY Fallback ==
 
 user -> repl : types input
-repl -> agent : RTG-02 PROCESS(user_input)
+router -> agent : RTG-02 PROCESS(user_input)
 
 agent -> router : RTG-02 APPLY Fallback(primary_model, chain)
 activate router
@@ -70,17 +70,17 @@ break All models unavailable
     fallback --> router : FallbackError("all models unavailable")
     router --> agent : Result(success=false, error="all_models_unavailable")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: all models unavailable
+    result --> user : error: all models unavailable
 end
 
 router --> agent : Result(success=true, data=selected_model)
 deactivate router
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: selected model
+result --> user : result: selected model
 
 note over user, provider
-  Flow:    RTG-02 -> User -> REPLSession -> AgentOrchestrator -> ModelRouter -> FallbackChain -> check each model -> return first available
+  Flow:    RTG-02 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> FallbackChain -> check each model -> return first available
   State:   No state change
   Success: Result(success=true, data=selected_model)
   Failure: Result(success=false, error="all_models_unavailable") — all models unavailable

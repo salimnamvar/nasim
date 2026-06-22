@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Restore session to a previous snapshot or turn
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SSN-06 Revert Turn
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -38,7 +38,7 @@ end note
 == SSN-06 Revert Turn ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 agent -> ver : ssn06 REVERT Session(session_id, snapshot_id)
 activate ver
@@ -53,7 +53,7 @@ else snapshot not found
     deactivate snap
     ver --> agent : 404 NOT_FOUND — RevertError("snapshot not found")
     agent --> repl : AgentEvent(Error)
-    repl --> user : result — snapshot not found, retain current
+    result --> user : result — snapshot not found, retain current
 end
 
 ver -> ver : replace current messages with snapshot
@@ -63,13 +63,13 @@ ver --> agent : 200 OK — Reverted(snapshot_id, turn_count)
 deactivate ver
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result — session reverted to snapshot point
+result --> user : result — session reverted to snapshot point
 
 break Snapshot load error
     snap --> ver : IOError
     ver --> agent : 500 INTERNAL — RevertError("snapshot unreadable")
     agent --> repl : AgentEvent(Error)
-    repl --> user : result — snapshot unreadable, retain current
+    result --> user : result — snapshot unreadable, retain current
 end
 
 note over user, snap

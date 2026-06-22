@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Execute command in OS-level sandbox
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-01 ISOLATE Command
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -44,7 +44,7 @@ end note
 == SBX-01 ISOLATE Command ==
 
 user -> repl : types input
-repl -> agent : SBX-01 PROCESS(user_input)
+router -> agent : SBX-01 PROCESS(user_input)
 
 agent -> executor : SBX-01 ISOLATE Command(command, policy)
 activate executor
@@ -62,7 +62,7 @@ break Timeout or resource violation
     runtime --> executor : timeout/violation error
     executor --> agent : Result(success=false, error="timeout")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: sandbox timeout
+    result --> user : error: sandbox timeout
 end
 
 runtime --> executor : execution_result(output, exit_code)
@@ -72,10 +72,10 @@ executor --> agent : Result(success=true, data={output, exit_code})
 deactivate executor
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: command output
+result --> user : result: command output
 
 note over user, runtime
-  Flow:    SBX-01 -> User -> REPLSession -> AgentOrchestrator -> SandboxExecutor -> apply policy -> create sandbox -> execute -> return
+  Flow:    SBX-01 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> apply policy -> create sandbox -> execute -> return
   State:   <back:#F1F8E9>STAGING</back>
   Success: Result(success=true, data={output, exit_code})
   Failure: Result(success=false, error="timeout") — kill sandbox, return violation error

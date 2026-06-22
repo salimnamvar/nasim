@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Strip secrets before emission to structured logs or wire
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — OBS-04 REDACT SensitiveData
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -45,7 +45,7 @@ end note
 
 user -> repl : OBS-04 REDACT SensitiveData(record)
 activate repl
-repl -> agent : OBS-04 REDACT SensitiveData(record)
+router -> agent : OBS-04 REDACT SensitiveData(record)
 activate agent
 
 agent -> logger : OBS-04 REDACT SensitiveData(record)
@@ -90,11 +90,11 @@ deactivate redactor
 
 agent --> repl : None
 deactivate agent
-repl --> user : None
+result --> user : None
 deactivate repl
 
 note over user, config
-  Flow:    OBS-04 → Developer → REPLSession → AgentOrchestrator → StructuredLogger/WireAppender → LogRedactor → Config (rules) → sanitized record/payload
+  Flow:    OBS-04 → User → ServerRouter → AgentOrchestrator → StructuredLogger/WireAppender → LogRedactor → Config (rules) → sanitized record/payload
   State:   No state change
   Success: SanitizedRecord with redacted=true flag
   Failure: Rule load failure -> default rules only

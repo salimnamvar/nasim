@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Toggle plan mode via slash command
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CLI-05 Enable Plan Mode
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
 box "Agent Layer" #E3F2FD
@@ -23,7 +23,7 @@ end box
 
 note over user, agent
   Scope:          Toggle plan mode on/off via slash command
-  Preconditions:  REPLSession active, SlashCommandHandler registered
+  Preconditions:  ServerRouter active, SlashCommandHandler registered
   Contexts:       Invoked by Developer via /plan-mode command
   Excludes:       Plan execution (AGT-07/08), model switching (CLI-07)
   Rollback:       Toggle failure → display error, retain current state
@@ -35,7 +35,7 @@ end note
 == CLI-05 Enable Plan Mode ==
 
 user -> repl : "/plan-mode"
-repl -> cmd : dispatch("/plan-mode")
+result -> cmd : dispatch("/plan-mode")
 activate cmd
 
 cmd -> cmd : parse command arguments
@@ -49,15 +49,15 @@ deactivate agent
 cmd --> repl : CommandResult(confirmation)
 deactivate cmd
 
-repl --> user : "Plan mode: ON/OFF"
+result --> user : "Plan mode: ON/OFF"
 
 break Toggle error
     cmd --> repl : CommandError
-    repl --> user : "Failed to toggle plan mode"
+    result --> user : "Failed to toggle plan mode"
 end
 
 note over user, agent
-  Flow:    CLI-05 enablePlanMode: Developer → REPLSession → SlashCommandHandler → toggle → confirm
+  Flow:    CLI-05 enablePlanMode: User → ServerRouter → SlashCommandHandler → toggle → confirm
   State:   <back:#ECEFF1>IDLE</back> → TOGGLING → <back:#ECEFF1>IDLE</back>
   Success: Plan mode toggled, confirmation shown
   Failure: Toggle error → display error, retain state

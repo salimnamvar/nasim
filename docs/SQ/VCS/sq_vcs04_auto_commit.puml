@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Automatically commit changes after edit operations
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — VCS-04 AUTO-COMMIT
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -41,7 +41,7 @@ end note
 == VCS-04 AUTO-COMMIT ==
 
 user -> repl : types input
-repl -> agent : VCS-04 PROCESS(user_input)
+router -> agent : VCS-04 PROCESS(user_input)
 
 agent -> integration : VCS-04 AUTO-COMMIT(edit_context)
 activate integration
@@ -54,7 +54,7 @@ deactivate status
 break No changes detected
     integration --> agent : Result(success=false, error="no_changes")
     agent --> repl : AgentEvent(Done)
-    repl --> user : result: noop (no changes)
+    result --> user : result: noop (no changes)
 end
 
 integration -> commit : VCS-04 INSERT Commit(generated_message, files)
@@ -66,10 +66,10 @@ integration --> agent : Result(success=true, data={hash})
 deactivate integration
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: auto-commit hash
+result --> user : result: auto-commit hash
 
 note over user, commit
-  Flow:    VCS-04 -> User -> REPLSession -> AgentOrchestrator -> GitIntegration -> check dirty -> generate message -> commit -> return
+  Flow:    VCS-04 -> User -> ServerRouter -> AgentOrchestrator -> GitIntegration -> check dirty -> generate message -> commit -> return
   State:   No state change
   Success: Result(success=true, data={hash})
   Failure: Result(success=false, error="no_changes") — skip commit, return noop

@@ -6,9 +6,9 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Emit-only structured logging, metrics, trace correlation (tenas pattern)
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
 ' ============================================================
 
 left to right direction
@@ -43,7 +43,7 @@ skinparam actor<<system>> {
 ' Actors
 ' ============================================================
 
-actor "HTTP Client" as HTTPClient <<system>>
+actor "User" as User
 actor "Observability Platform" as Platform <<system>>
 actor "Agent" as Agent <<system>>
 
@@ -66,7 +66,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-HTTPClient --> OBS05
+User --> OBS05
 Platform --> OBS05
 Agent --> OBS01
 Agent --> OBS02

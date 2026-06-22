@@ -4,26 +4,37 @@
 
 
 ' ============================================================
-' Title:     nasim — Server Component Diagram
-' Boundary:  nasim HTTP API Server process
-' Purpose:   Server Layer components for HTTP interface
+' Title:     nasim — API Component Diagram (Entry Gate)
+' Boundary:  nasim Backend — API Group
+' Purpose:   API entry gate: sole entry point for all interface
+'            containers (CLI, WebApp, DesktopApp, MobileApp).
+'            No interface may bypass this component.
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Server Component Diagram
+title nasim — API Component Diagram (Entry Gate)
 
-Container_Boundary(server_boundary, "HTTP API Server Process") {
-    Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
-    Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints mapped to agent orchestrator")
-    Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for HTTP clients")
+Container_Boundary(api_boundary, "API Group (Entry Gate)") {
+    Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts. All interface containers connect here.")
+    Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate — no interface may bypass this to call internal services directly.")
+    Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
     Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
 }
 
+Container_Ext(cli, "CLI")
+Container_Ext(webapp, "WebApp")
+Container_Ext(desktop_app, "DesktopApp")
+Container_Ext(mobile_app, "MobileApp")
 Container_Ext(core_library, "Core Library")
+
+Rel(cli, server_router, "routes all calls through API")
+Rel(webapp, server_router, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(desktop_app, server_router, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(mobile_app, server_router, "routes all calls through API", "HTTP/JSON + SSE")
 
 Rel(server_app, server_router, "mounts routes")
 Rel(server_router, api_schema, "validates requests/responses")

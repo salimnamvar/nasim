@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   List files and directories at a path
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -37,7 +37,7 @@ end note
 == TL-04 LIST Directory ==
 
 user -> repl : types input
-repl -> agent : TL-04 PROCESS(user_input)
+router -> agent : TL-04 PROCESS(user_input)
 agent -> registry : TL-04 LIST Directory(path)
 registry -> dt : TL-04 LIST Directory(path)
 dt -> fs : Path(path).resolve()
@@ -47,14 +47,14 @@ break Path not found
     dt --> registry : ToolResult(success=False, error="path not found")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="path not found")
+    result --> user : ToolResult(success=False, error="path not found")
 end
 
 break Not a directory
     dt --> registry : ToolResult(success=False, error="not a directory")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="not a directory")
+    result --> user : ToolResult(success=False, error="not a directory")
 end
 
 dt -> fs : sorted(p.iterdir())
@@ -63,10 +63,10 @@ dt -> dt : format with d/ prefix for dirs
 dt --> registry : ToolResult(success=True, content=formatted_listing)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, fs
-  Flow:    TL-04: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> DirTool -> Host Filesystem -> ToolResult
+  Flow:    TL-04: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> DirTool -> Host Filesystem -> ToolResult
   State:   No state change
   Success: Directory listing with type prefixes
   Failure: Not found or not directory -> ToolResult(success=False)

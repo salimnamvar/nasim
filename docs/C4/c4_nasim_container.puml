@@ -3,35 +3,47 @@
 !theme plain
 
 ' ============================================================
-' Title: nasim — Container Diagram
+' Title: nasim — Container Diagram (API-First)
 ' Boundary: nasim code agent
-' Purpose: Show deployable units, technology choices, and observability pipeline
+' Purpose: Show API-First deployment: all interface containers
+'          connect exclusively to the API component within the
+'          Backend container. No interface may bypass the API.
 ' Milestone: v1.0
-' Version: 6.0.0
-' Source: docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Version: 7.0.0
+' Source: CAR refinement loop — API-First transformation
 ' Review: —
 ' ============================================================
 
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title nasim — Container Diagram
+title nasim — Container Diagram (API-First)
 
 ' ============================================================
 ' Actors
 ' ============================================================
 
-Person(dev, "Developer", "Terminal user")
-Person(http_client, "HTTP Client", "Web/mobile/desktop apps")
+Person(user, "User", "Interacts via CLI, WebApp, DesktopApp, or MobileApp")
 
 ' ============================================================
-' nasim Boundary
+' Interface Containers (separate deployable units)
 ' ============================================================
 
-System_Boundary(nasim, "nasim") {
-    Container(cli, "CLI", "Python click + rich", "Terminal interface: REPL, slash commands, rich rendering")
-    Container(server, "HTTP API Server", "Python FastAPI", "RESTful API + SSE streaming for web/mobile/desktop clients")
-    Container(core, "Core Library", "Python", "Agent orchestration, provider abstraction, tools, sessions, config, hooks, plugins, sandbox, observability, memory, git, MCP")
+Container_Boundary(interfaces, "Interface Containers") {
+    Container(cli, "CLI", "Python click + rich", "Terminal interface: REPL, slash commands, rich rendering. Routes all calls through API.")
+    Container(webapp, "WebApp", "JavaScript SPA", "Browser-based interface. Connects to API via HTTP/SSE.")
+    Container(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application. Connects to API via HTTP/SSE.")
+    Container(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application. Connects to API via HTTP/SSE.")
+}
+
+' ============================================================
+' Backend Container (single deployable unit with API entry gate)
+' ============================================================
+
+System_Boundary(backend, "nasim Backend") {
+    Container(api, "API", "Python FastAPI Router", "Sole entry gate for all interface containers. ROD-compliant REST endpoints. No interface may bypass this component to call internal services directly.")
+    Container(core, "Core Library", "Python", "Agent orchestration, provider abstraction, tools, sessions, config, hooks, plugins, sandbox, observability, memory, git, MCP, context graph, evaluation, edit strategy, wire log")
+    Container(mcp_server, "MCP Server", "stdio/SSE", "Exposes nasim tools to external MCP clients")
 }
 
 ' ============================================================
@@ -42,8 +54,8 @@ System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: 100+ providers
 System_Ext(host_fs, "Host Filesystem", "Project code files")
 System_Ext(host_shell, "Host Shell", "subprocess execution")
 System_Ext(web_ext, "Web", "Documentation and search")
-System_Ext(mcp_server, "MCP Server", "Extension tools")
-System_Ext(mcp_client, "MCP Client", "External tool consumers")
+System_Ext(mcp_ext_server, "MCP Server (External)", "Extension tools via Model Context Protocol")
+System_Ext(mcp_ext_client, "MCP Client (External)", "External tools connecting to nasim MCP server")
 System_Ext(git_repo, "Git Repository", "Version control")
 System_Ext(sandbox_rt, "Sandbox Runtime", "OS-level isolation")
 System_Ext(lsp_server, "LSP Server", "Code intelligence")
@@ -52,27 +64,39 @@ System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code")
 System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API)")
 System_Ext(vector_store, "Vector Store", "Persistent vector storage for similarity search")
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace/metric export")
-
-' ============================================================
-' Observability Platform (tenas pattern — external system, not expanded)
-' ============================================================
-
 System_Ext(obs_platform, "Observability Platform", "Agent-based collection, Loki logs, Prometheus metrics, Grafana dashboards. nasim emits only.")
 
 ' ============================================================
-' Relationships
+' Relationships: User → Interface → API (mandatory path)
 ' ============================================================
 
-Rel(dev, cli, "types input, reads output")
-Rel(http_client, server, "sends requests, receives SSE", "HTTP/JSON")
-Rel(cli, core, "delegates to core library")
-Rel(server, core, "delegates to core library")
+Rel(user, cli, "types input, reads output", "terminal")
+Rel(user, webapp, "interacts via browser", "HTTPS")
+Rel(user, desktop_app, "interacts via desktop app", "HTTPS")
+Rel(user, mobile_app, "interacts via mobile app", "HTTPS")
+
+' CRITICAL: All interfaces connect ONLY to API. No bypass.
+Rel(cli, api, "routes all calls through API", "in-process / HTTP")
+Rel(webapp, api, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(desktop_app, api, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(mobile_app, api, "routes all calls through API", "HTTP/JSON + SSE")
+
+' API → Core Library (internal delegation)
+Rel(api, core, "delegates to core library services", "in-process")
+
+' MCP Server → API (external clients go through API)
+Rel(mcp_ext_client, mcp_server, "invokes nasim tools via MCP protocol", "stdio/SSE")
+Rel(mcp_server, core, "accesses tool registry", "in-process")
+
+' ============================================================
+' Core Library → External Systems
+' ============================================================
+
 Rel(core, llm_backend, "HTTP POST", "JSON streaming")
 Rel(core, host_fs, "read/write/search files")
 Rel(core, host_shell, "execute commands via sandbox")
 Rel(core, web_ext, "fetch/search")
-Rel(core, mcp_server, "invoke extension tools")
-Rel(server, mcp_client, "serves MCP protocol", "stdio/SSE")
+Rel(core, mcp_ext_server, "invoke extension tools")
 Rel(core, git_repo, "git operations")
 Rel(core, sandbox_rt, "isolated execution")
 Rel(core, lsp_server, "code intelligence")

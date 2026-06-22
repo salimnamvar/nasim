@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Update status or content of an existing todo item
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -36,7 +36,7 @@ end note
 == TL-17 Update Todo ==
 
 user -> repl : types input
-repl -> agent : TL-17 PROCESS(user_input)
+router -> agent : TL-17 PROCESS(user_input)
 agent -> registry : TL-17 Update Todo(todo_id, status, description)
 registry -> tool : TL-17 Update Todo(todo_id, status, description)
 
@@ -44,24 +44,24 @@ break Todo not found
     tool --> registry : ToolResult(success=False, error="todo not found")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="todo not found")
+    result --> user : ToolResult(success=False, error="todo not found")
 end
 
 break Invalid status transition
     tool --> registry : ToolResult(success=False, error="invalid transition")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="invalid transition")
+    result --> user : ToolResult(success=False, error="invalid transition")
 end
 
 tool -> tool : update fields
 tool --> registry : ToolResult(success=True, todo)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, tool
-  Flow:    TL-17: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
+  Flow:    TL-17: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
   State:   Todo status/content updated
   Success: Updated todo returned
   Failure: Todo not found or invalid transition -> ToolResult(success=False)

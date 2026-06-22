@@ -4,14 +4,14 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Startup argument parsing and config initialization
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
+box "API Group (Entry Gate)" #E8F5E9
   participant "ArgParser" as parser
 end box
 box "Config Layer" #E0F7FA

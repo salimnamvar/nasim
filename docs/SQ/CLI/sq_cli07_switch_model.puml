@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Switch active model via slash command
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CLI-07 Switch Model
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
 box "Agent Layer" #E3F2FD
@@ -26,7 +26,7 @@ end box
 
 note over user, rtg
   Scope:          Switch active model via /model slash command
-  Preconditions:  REPLSession active, model registry available
+  Preconditions:  ServerRouter active, model registry available
   Contexts:       Invoked by Developer via /model command
   Excludes:       Provider registration (PRV-01), fallback logic (RTG-02)
   Rollback:       Model not found → display error, retain current model
@@ -38,7 +38,7 @@ end note
 == CLI-07 Switch Model ==
 
 user -> repl : "/model {model_name}"
-repl -> cmd : dispatch("/model {model_name}")
+result -> cmd : dispatch("/model {model_name}")
 activate cmd
 
 cmd -> cmd : parse model name
@@ -54,16 +54,16 @@ deactivate rtg
 cmd --> repl : CommandResult("Switched to {model_name}")
 deactivate cmd
 
-repl --> user : "Active model: {model_name}"
+result --> user : "Active model: {model_name}"
 
 break Model not found
     rtg --> cmd : ModelNotFoundError
     cmd --> repl : CommandError
-    repl --> user : "Model '{model_name}' not available"
+    result --> user : "Model '{model_name}' not available"
 end
 
 note over user, rtg
-  Flow:    CLI-07 switchModel: Developer → REPLSession → SlashCommandHandler → RTG-04 SWITCH Model → confirm
+  Flow:    CLI-07 switchModel: User → ServerRouter → SlashCommandHandler → RTG-04 SWITCH Model → confirm
   State:   <back:#ECEFF1>IDLE</back> → SWITCHING → <back:#ECEFF1>IDLE</back>
   Success: Model switched, confirmation shown
   Failure: Model not found → display error, retain current

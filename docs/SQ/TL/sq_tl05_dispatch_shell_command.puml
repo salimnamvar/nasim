@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Shell command execution with timeout
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -37,7 +37,7 @@ end note
 == TL-05 EXECUTE Shell Command ==
 
 user -> repl : types input
-repl -> agent : TL-05 PROCESS(user_input)
+router -> agent : TL-05 PROCESS(user_input)
 agent -> registry : TL-05 EXECUTE Shell Command(command, timeout)
 registry -> st : TL-05 EXECUTE Shell Command(command, timeout)
 st -> shell : subprocess.run(command, shell=True, timeout=timeout)
@@ -47,7 +47,7 @@ break Timeout
     st --> registry : ToolResult(success=False, error="command timed out after Ns")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="command timed out after Ns")
+    result --> user : ToolResult(success=False, error="command timed out after Ns")
 end
 
 break Execution error
@@ -55,7 +55,7 @@ break Execution error
     st --> registry : ToolResult(success=False, error="Error executing command")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="Error executing command")
+    result --> user : ToolResult(success=False, error="Error executing command")
 end
 
 shell --> st : CompletedProcess(stdout, stderr, returncode)
@@ -63,10 +63,10 @@ st -> st : format output (stdout + stderr + exit code)
 st --> registry : ToolResult(success=True, content=command_output)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, shell
-  Flow:    TL-05: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> ShellTool -> Host Shell -> ToolResult
+  Flow:    TL-05: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> ShellTool -> Host Shell -> ToolResult
   State:   No state change
   Success: Command output (stdout + stderr)
   Failure: Timeout, execution error -> ToolResult(success=False)

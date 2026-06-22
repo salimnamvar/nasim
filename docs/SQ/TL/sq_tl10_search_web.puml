@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Search the web for information
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -37,7 +37,7 @@ end note
 == TL-10 SEARCH Web ==
 
 user -> repl : types input
-repl -> agent : TL-10 PROCESS(user_input)
+router -> agent : TL-10 PROCESS(user_input)
 agent -> registry : TL-10 SEARCH Web(query, num_results)
 registry -> search : TL-10 SEARCH Web(query, num_results)
 search -> backend : search(query, num_results)
@@ -47,7 +47,7 @@ break Backend unavailable
     search --> registry : ToolResult(success=False, error="Error: search backend unavailable")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="Error: search backend unavailable")
+    result --> user : ToolResult(success=False, error="Error: search backend unavailable")
 end
 
 backend --> search : results [{title, url, snippet}, ...]
@@ -55,10 +55,10 @@ search -> search : format results
 search --> registry : ToolResult(success=True, content=formatted_results)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, backend
-  Flow:    TL-10: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> WebSearchTool -> Search Backend -> ToolResult
+  Flow:    TL-10: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WebSearchTool -> Search Backend -> ToolResult
   State:   No state change
   Success: Ranked search results with titles, URLs, snippets
   Failure: Backend unavailable -> ToolResult(success=False)

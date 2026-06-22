@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Synchronous LLM chat completion via provider abstraction
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — PRV-02 REQUEST Chat
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -43,7 +43,7 @@ end note
 
 user -> repl : PRV-02 REQUEST Chat(messages, tools)
 activate repl
-repl -> agent : PRV-02 REQUEST Chat(messages, tools)
+router -> agent : PRV-02 REQUEST Chat(messages, tools)
 activate agent
 
 hnote over provider #FFF3E0 : **State: THINKING**
@@ -70,11 +70,11 @@ deactivate provider
 
 agent --> repl : LLMResponse(content, tool_calls)
 deactivate agent
-repl --> user : LLMResponse(content, tool_calls)
+result --> user : LLMResponse(content, tool_calls)
 deactivate repl
 
 note over user, api
-  Flow:    PRV-02 → Developer → REPLSession → AgentOrchestrator → Provider → HTTP POST → JSON parse → LLMResponse
+  Flow:    PRV-02 → User → ServerRouter → AgentOrchestrator → Provider → HTTP POST → JSON parse → LLMResponse
   State:   <back:#FFF3E0>THINKING</back> → <back:#FFF3E0>THINKING</back> (no state change)
   Success: LLMResponse with content and/or tool_calls
   Failure: HTTP error or timeout -> ProviderError

@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   PageRank ranking with chat-personalization for symbol importance
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RIM-03 RANK Symbols
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -43,7 +43,7 @@ end note
 
 user -> repl : RIM-03 RANK Symbols(graph, chat_context)
 activate repl
-repl -> agent : RIM-03 RANK Symbols(graph, chat_context)
+router -> agent : RIM-03 RANK Symbols(graph, chat_context)
 activate agent
 
 agent -> ranker : RIM-03 RANK Symbols(graph, chat_context)
@@ -76,11 +76,11 @@ deactivate ranker
 
 agent --> repl : RankedSymbolList(symbols, scores)
 deactivate agent
-repl --> user : RankedSymbolList(symbols, scores)
+result --> user : RankedSymbolList(symbols, scores)
 deactivate repl
 
 note over user, history
-  Flow:    RIM-03 → Developer → REPLSession → AgentOrchestrator → SymbolRanker → SymbolGraph + ConversationHistory → RankedSymbolList
+  Flow:    RIM-03 → User → ServerRouter → AgentOrchestrator → SymbolRanker → SymbolGraph + ConversationHistory → RankedSymbolList
   State:   No state change
   Success: RankedSymbolList sorted by importance score
   Failure: Convergence failure -> fallback to degree centrality; empty graph -> empty ranking

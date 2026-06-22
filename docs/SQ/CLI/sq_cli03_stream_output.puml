@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Streaming token-by-token output with rich formatting
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
   participant "Renderer" as renderer
 end box
 
@@ -29,27 +29,27 @@ end note
 
 == CLI-03 STREAM Output ==
 
-repl -> renderer : subscribe to AgentEvent stream
+result -> renderer : subscribe to AgentEvent stream
 
 loop for each event
     alt TextChunk event
-        repl -> renderer : TextChunk(text)
+        result -> renderer : TextChunk(text)
         renderer -> renderer : colored output (green for nasim>)
         renderer --> user : streamed token
     else ToolStart event
-        repl -> renderer : ToolStart(name, args)
+        result -> renderer : ToolStart(name, args)
         renderer -> renderer : dimmed box with tool name + args
         renderer --> user : tool call display
     else ToolResult event
-        repl -> renderer : ToolResult(name, result, truncated)
+        result -> renderer : ToolResult(name, result, truncated)
         renderer -> renderer : truncated result (max 200 chars)
         renderer --> user : tool result preview
     else Error event
-        repl -> renderer : Error(message)
+        result -> renderer : Error(message)
         renderer -> renderer : red highlight
         renderer --> user : error display
     else Done event
-        repl -> renderer : Done()
+        result -> renderer : Done()
         renderer -> renderer : newline + reset
     end
 end

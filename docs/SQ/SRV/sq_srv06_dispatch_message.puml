@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Dispatch a user message through the agent and stream SSE response
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    Meta-Software Designer audit 2026-06-21
 ' Pattern:   Controller (ServerRouter) -> Service (AgentOrchestrator) -> Repository (SessionStore)
 ' ============================================================
 
 title nasim — SRV-06 SEND Message
 
-actor "HTTPClient" as client
+actor "User" as user
 
 box "Server Layer" #E8EAF6
   participant "APISchema" as schema

@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Orchestrate context processing pipeline stages
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CTX-01 PROCESS Context
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -40,7 +40,7 @@ end note
 == CTX-01 PROCESS Context ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 agent -> pipeline : CTX-01 PROCESS(graph, budget)
 activate pipeline
 
@@ -73,10 +73,10 @@ pipeline --> agent : ProcessedContext
 deactivate pipeline
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over agent, tracker
-  Flow:    User → REPLSession → AgentOrchestrator → PipelineOrchestrator → truncation → distillation → injection → compaction
+  Flow:    User → ServerRouter → AgentOrchestrator → PipelineOrchestrator → truncation → distillation → injection → compaction
   State:   No state change
   Success: Optimized context graph within budget
   Failure: Processor failure returns partial context

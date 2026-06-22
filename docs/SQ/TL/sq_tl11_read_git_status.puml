@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Git operations: status, diff, commit
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -37,7 +37,7 @@ end note
 == TL-11 READ Git Status ==
 
 user -> repl : types input
-repl -> agent : TL-11 PROCESS(user_input)
+router -> agent : TL-11 PROCESS(user_input)
 agent -> registry : TL-11 READ Git Status(action, args)
 registry -> git : TL-11 READ Git Status(action, args)
 
@@ -60,7 +60,7 @@ break Not a git repo
     git --> registry : ToolResult(success=False, error="Error: not a git repository")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="Error: not a git repository")
+    result --> user : ToolResult(success=False, error="Error: not a git repository")
 end
 
 break Nothing to commit
@@ -68,15 +68,15 @@ break Nothing to commit
     git --> registry : ToolResult(success=False, error="Nothing to commit")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="Nothing to commit")
+    result --> user : ToolResult(success=False, error="Nothing to commit")
 end
 
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, shell
-  Flow:    TL-11: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> GitTool -> Host Shell -> ToolResult
+  Flow:    TL-11: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GitTool -> Host Shell -> ToolResult
   State:   No state change
   Success: Git operation output
   Failure: Not a repo, nothing to commit -> ToolResult(success=False)

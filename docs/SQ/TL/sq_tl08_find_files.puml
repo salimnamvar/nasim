@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Find files by name pattern with depth limit
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -36,7 +36,7 @@ end note
 == TL-08 FIND Files ==
 
 user -> repl : types input
-repl -> agent : TL-08 PROCESS(user_input)
+router -> agent : TL-08 PROCESS(user_input)
 agent -> registry : TL-08 FIND Files(name_pattern, path, max_depth)
 registry -> find : TL-08 FIND Files(name_pattern, path, max_depth)
 find -> find : os.walk(path) with depth tracking
@@ -46,16 +46,16 @@ break Path not found
     find --> registry : ToolResult(success=False, error="Error: path not found: path")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="Error: path not found: path")
+    result --> user : ToolResult(success=False, error="Error: path not found: path")
 end
 
 find --> registry : ToolResult(success=True, content=matching_paths)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, find
-  Flow:    TL-08: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> FindFileTool -> os.walk -> ToolResult
+  Flow:    TL-08: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> FindFileTool -> os.walk -> ToolResult
   State:   No state change
   Success: List of matching file paths
   Failure: Path not found -> ToolResult(success=False)

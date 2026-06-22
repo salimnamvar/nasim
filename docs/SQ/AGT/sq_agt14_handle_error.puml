@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Classify errors and determine recovery action
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-14 HANDLE Error
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -39,7 +39,7 @@ end note
 == AGT-14 HANDLE Error ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 activate agent
 
 agent -> eb : agt14 HANDLE Error({error})
@@ -67,7 +67,7 @@ deactivate eb
 
 agent --> repl : AgentEvent(Error)
 deactivate agent
-repl --> user : error occurred
+result --> user : error occurred
 
 note over user, safety
   Flow:    AGT-14 → classify → determine recovery → return action

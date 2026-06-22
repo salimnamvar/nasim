@@ -6,9 +6,9 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Permission gates, user approval, safety modes
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
 ' ============================================================
 
 left to right direction
@@ -37,7 +37,7 @@ skinparam actor {
 ' Actors
 ' ============================================================
 
-actor "Developer" as Developer
+actor "User" as User
 actor "Agent" as Agent <<system>>
 
 ' ============================================================
@@ -56,7 +56,7 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Developer --> SAF02
+User --> SAF02
 Agent --> SAF01
 Agent --> SAF03
 

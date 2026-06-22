@@ -4,18 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Per-tool safety check before execution (internal step of AGT-15)
 ' Milestone: v1.0
-' Version:   4.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    Prompt audit 2026-06-21 (gro.md: God Object residual fixed)
 ' Note:      Process decomposition — internal step of AGT-15
 ' ============================================================
 
 title nasim — SAF-01 CHECK Permission
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -42,7 +42,7 @@ end note
 == SAF-01 CHECK Permission ==
 
 user -> repl : types input
-repl -> agent : SAF-01 PROCESS(user_input)
+router -> agent : SAF-01 PROCESS(user_input)
 
 agent -> safety : SAF-01 CHECK Permission(tool_name, safety_mode)
 activate safety
@@ -65,7 +65,7 @@ else tool.safe = False AND safety_mode = "ask"
     gate --> safety : SafetyViolation(permission_denied)
     safety --> agent : SafetyViolation(permission_denied)
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: permission denied
+    result --> user : error: permission denied
 else safety_mode = "off"
     gate --> safety : SafetyPassed
 end
@@ -76,10 +76,10 @@ safety --> agent : SafetyPassed
 deactivate safety
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: permission passed
+result --> user : result: permission passed
 
 note over user, registry
-  Flow:    SAF-01 -> User -> REPLSession -> AgentOrchestrator -> SafetyCoordinator -> PermissionGate -> ToolRegistry.READ -> check safe flag -> return
+  Flow:    SAF-01 -> User -> ServerRouter -> AgentOrchestrator -> SafetyCoordinator -> PermissionGate -> ToolRegistry.READ -> check safe flag -> return
   State:   No state change (delegated by AGT-15)
   Success: SafetyPassed — proceed to next pipeline stage
   Failure: SafetyViolation(permission_denied) — propagate back through entry chain

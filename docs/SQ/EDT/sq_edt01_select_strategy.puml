@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Choose optimal edit format for the target model
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — EDT-01 SELECT Strategy
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -41,7 +41,7 @@ end note
 == EDT-01 SELECT Strategy ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 agent -> selector : EDT-01 SELECT_STRATEGY(file_path, edit_description, model_id)
 activate selector
 
@@ -75,10 +75,10 @@ selector --> agent : EditStrategy(format, parameters, confidence)
 deactivate selector
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over agent, config
-  Flow:    User → REPLSession → AgentOrchestrator → StrategySelector → Config + EditStrategy → EditStrategy
+  Flow:    User → ServerRouter → AgentOrchestrator → StrategySelector → Config + EditStrategy → EditStrategy
   State:   <back:#ECEFF1>IDLE</back> -> <back:#FFF3E0>THINKING</back> -> <back:#ECEFF1>IDLE</back>
   Success: EditStrategy with chosen format and parameters
   Failure: No compatible format -> error + manual suggestion

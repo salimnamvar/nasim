@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Validate a HookResult for correctness and safety
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — HK-06 VALIDATE Hook Result
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -40,7 +40,7 @@ end note
 
 user -> repl : invoke agent
 activate repl
-repl -> agent : hk06 VALIDATE Hook Result(hook_result)
+router -> agent : hk06 VALIDATE Hook Result(hook_result)
 activate agent
 agent -> hooks : hk06 VALIDATE Hook Result(hook_result)
 activate hooks
@@ -49,20 +49,20 @@ hooks -> hooks : hk06 CHECK Schema(hook_result)
 break Result schema invalid
     hooks --> agent : HookResult(action=DENY)
     agent --> repl : HookResult(action=DENY)
-    repl --> user : hook result invalid
+    result --> user : hook result invalid
 end
 
 break action not in [ALLOW, DENY, MODIFY]
     hooks --> agent : HookResult(action=DENY)
     agent --> repl : HookResult(action=DENY)
-    repl --> user : hook result invalid
+    result --> user : hook result invalid
 end
 
 hooks --> agent : validated result
 deactivate hooks
 agent --> repl : validated result
 deactivate agent
-repl --> user : hook validated
+result --> user : hook validated
 deactivate repl
 
 note over user, hooks

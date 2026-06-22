@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Embedding-based code similarity search across repository
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RIM-06 SEARCH Semantic
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -45,7 +45,7 @@ end note
 
 user -> repl : RIM-06 SEARCH Semantic(query, top_k)
 activate repl
-repl -> agent : RIM-06 SEARCH Semantic(query, top_k)
+router -> agent : RIM-06 SEARCH Semantic(query, top_k)
 activate agent
 
 agent -> search : RIM-06 SEARCH Semantic(query, top_k)
@@ -70,11 +70,11 @@ deactivate search
 
 agent --> repl : SearchResultList(results, scores, snippets)
 deactivate agent
-repl --> user : SearchResultList(results, scores, snippets)
+result --> user : SearchResultList(results, scores, snippets)
 deactivate repl
 
 note over user, embeddings
-  Flow:    RIM-06 → Developer → REPLSession → AgentOrchestrator → SemanticSearch → Provider(embed) → EmbeddingStore → SearchResultList
+  Flow:    RIM-06 → User → ServerRouter → AgentOrchestrator → SemanticSearch → Provider(embed) → EmbeddingStore → SearchResultList
   State:   No state change
   Success: SearchResultList with similarity-scored snippets
   Failure: Embedding failure -> empty results + fallback flag; store unavailable -> keyword fallback

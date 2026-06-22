@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Clear conversation history
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — AGT-04 DELETE History
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -36,7 +36,7 @@ end note
 == AGT-04 DELETE History ==
 
 user -> repl : /reset
-repl -> agent : DELETE_History()
+router -> agent : DELETE_History()
 activate agent
 
 agent -> history : agt04 DELETE History()
@@ -48,7 +48,7 @@ deactivate history
 
 agent --> repl : AgentEvent(Done)
 deactivate agent
-repl --> user : history cleared
+result --> user : history cleared
 
 note over user, history
   Flow:    AGT-04 → reset → keep system prompt → clear rest

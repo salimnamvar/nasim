@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Merge overlapping context nodes to reduce token usage
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CTX-05 Compact Nodes
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -41,7 +41,7 @@ end note
 == CTX-05 Compact Nodes ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 agent -> pipe : CTX-05 COMPACT(graph, budget)
 activate comp
 
@@ -64,7 +64,7 @@ comp --> pipe : CompactionResult(nodes_removed, tokens_saved)
 deactivate comp
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 break Secondary LLM merge fails
     provider --> comp : ProviderError
@@ -73,7 +73,7 @@ break Secondary LLM merge fails
 end
 
 note over pipe, provider
-  Flow:    User → REPLSession → AgentOrchestrator → PipelineOrchestrator → CompactionProcessor → find overlapping nodes → merge → return
+  Flow:    User → ServerRouter → AgentOrchestrator → PipelineOrchestrator → CompactionProcessor → find overlapping nodes → merge → return
   State:   <back:#E0F2F1>COMPACTING</back> → READY
   Success: Nodes compacted, token count reduced
   Failure: LLM merge fails → drop lowest-ranked nodes

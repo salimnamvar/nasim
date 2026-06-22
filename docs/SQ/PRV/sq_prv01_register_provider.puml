@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Provider instantiation from config
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — PRV-01 REGISTER Provider
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -40,7 +40,7 @@ end note
 
 user -> repl : PRV-01 REGISTER Provider(ollama)
 activate repl
-repl -> agent : PRV-01 REGISTER Provider(config)
+router -> agent : PRV-01 REGISTER Provider(config)
 activate agent
 
 agent -> factory : PRV-01 REGISTER Provider(config)
@@ -59,7 +59,7 @@ break Unknown provider type
     factory -> factory : raise ConfigError("Unknown provider: X")
     factory --> agent : ConfigError
     agent --> repl : ConfigError
-    repl --> user : error message
+    result --> user : error message
 end
 
 factory --> agent : Provider instance
@@ -67,11 +67,11 @@ deactivate factory
 
 agent --> repl : Provider ready
 deactivate agent
-repl --> user : Provider ready
+result --> user : Provider ready
 deactivate repl
 
 note over user, proto
-  Flow:    PRV-01 → Developer → REPLSession → AgentOrchestrator → ProviderFactory → provider class lookup → instance
+  Flow:    PRV-01 → User → ServerRouter → AgentOrchestrator → ProviderFactory → provider class lookup → instance
   State:   No state change
   Success: Provider instance ready for chat/stream
   Failure: Unknown provider type -> ConfigError

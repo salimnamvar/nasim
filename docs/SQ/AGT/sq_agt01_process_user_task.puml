@@ -1,20 +1,21 @@
 @startuml sq_agt01_process_user_task
 ' ============================================================
-' Title:     AGT-01 — PROCESS User Task
+' Title:     AGT-01 — PROCESS User Task (API-First)
 ' Boundary:  nasim code agent
 ' Purpose:   Core agentic loop: LLM call -> tool dispatch -> repeat
+'            Entry via API (ServerRouter). No interface bypass.
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
 ' ============================================================
 
-title nasim — AGT-01 PROCESS User Task
+title nasim — AGT-01 PROCESS User Task (API-First)
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -32,21 +33,25 @@ box "Observability Layer" #E0F2F1
 end box
 
 note over user, trace
-  Scope:          AGT-01 PROCESS User Task
+  Scope:          AGT-01 PROCESS User Task (API-First)
   Preconditions:  Agent initialized with Provider, ToolRegistry, ConversationHistory
-  Contexts:       Called by CLI-01 (PROCESS User Input) after REPL input parsed; entry point for entire agentic loop
-  Excludes:       Slash command handling (CLI-02), streaming display (CLI-03), session save/load (SSN-01/02)
+  Contexts:       Called by API-06 (DISPATCH Message) via ServerRouter
+  Excludes:       Slash command handling (CLI-02), session CRUD (API-01..05)
   Rollback:       LLM call failure -> append error message -> ERROR state -> IDLE; Tool execution failure -> append error message -> ERROR state -> IDLE; Max iterations exceeded -> force Done event
-  Design:         AgentOrchestrator yields AgentEvent objects (no print()); Max iterations configurable; PermissionGate consulted before every tool execution; Recursive: after tool dispatch, re-calls Provider for next response
-  Classification: Primary Orchestrator
+  Design:         CSR: Controller(ServerRouter) → Service(AgentOrchestrator) → Repository(ToolRegistry, SessionStore).
+                  AgentOrchestrator yields AgentEvent objects (no print()); Max iterations configurable;
+                  SafetyCoordinator consulted before every tool execution; Recursive: after tool dispatch, re-calls Provider for next response
+  Classification: Primary Orchestrator (via API Entry Gate)
   Returns:        Success: AgentEvent(Done) with final text response
                   Failure: AgentEvent(Error) — LLM error or tool execution failure
 end note
 
-== AGT-01 PROCESS User Task ==
+== AGT-01 PROCESS User Task (API-First) ==
 
-user -> repl : types input
-repl -> agent : PROCESS(user_input)
+user -> router : API-06 DISPATCH Message(session_id, message)
+activate router
+
+router -> agent : dispatchMessage(session_id, message)
 activate agent
 
 ref over agent, trace
@@ -73,7 +78,7 @@ alt LLM returns text only
     ref over agent, history
       AGT-03: UPDATE Conversation (append assistant message)
     end ref
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
 else LLM returns tool calls
     ref over agent, history
       AGT-03: UPDATE Conversation (append assistant message with tool_calls)
@@ -89,23 +94,27 @@ else LLM returns tool calls
     ref over agent, history
       AGT-03: UPDATE Conversation (append assistant message)
     end ref
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
 end
 
 break LLM call fails or tool execution errors
     ref over agent, history
       AGT-03: UPDATE Conversation (append error message)
     end ref
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
 end
 
 deactivate agent
 
+router --> user : SSE stream (AgentEvents)
+deactivate router
+
 note over user, trace
-  Flow:    AGT-01 → [OBS-03] → [AGT-03] → [HK-04] → [PRV-02] → [HK-05] → [AGT-03] → (tool loop via AGT-02) → Done
-  State:   <back:#ECEFF1>IDLE</back> -> <back:#E8EAF6>LISTENING</back> -> <back:#FFF3E0>THINKING</back> -> [<back:#F3E5F5>TOOL_EXEC</back>]* -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
-  Success: AgentEvent(Done) — final text response streamed to user
+  Flow:    AGT-01 → User → API(ServerRouter) → AgentOrchestrator → [OBS-03] → [AGT-03] → [HK-04] → [PRV-02] → [HK-05] → [AGT-03] → (tool loop via AGT-02) → Done → SSE stream → User
+  State:   <back:#ECEFF1>IDLE</back> -> <back:#E0F7FA>SERVING</back> -> <back:#FFF3E0>THINKING</back> -> [<back:#F3E5F5>TOOL_EXEC</back>]* -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
+  Success: AgentEvent(Done) — final text response streamed to user via API SSE
   Failure: AgentEvent(Error) — LLM error or tool error; ERROR -> IDLE
+  Invariant: AgentOrchestrator is NEVER called directly by any interface. ALL calls go through API (ServerRouter).
 end note
 
 @enduml

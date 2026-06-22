@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Add a new todo item via TodoTool
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -36,17 +36,17 @@ end note
 == TL-16 Insert Todo ==
 
 user -> repl : types input
-repl -> agent : TL-16 PROCESS(user_input)
+router -> agent : TL-16 PROCESS(user_input)
 agent -> registry : TL-16 Insert Todo(title, description)
 registry -> tool : TL-16 Insert Todo(title, description)
 tool -> tool : generate ID, set status OPEN
 tool --> registry : ToolResult(success=True, todo_id)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, tool
-  Flow:    TL-16: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
+  Flow:    TL-16: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
   State:   New todo item created (OPEN)
   Success: Todo ID returned
   Failure: Invalid input -> ToolResult(success=False)

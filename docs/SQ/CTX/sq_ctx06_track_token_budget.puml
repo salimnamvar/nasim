@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Track token count as messages are added
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -33,7 +33,7 @@ end note
 == CTX-01 Track Token Count ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 agent -> history : CTX-06 ADD_MESSAGE(msg)
 history -> history : self.messages.append(msg)
 history -> history : self.token_count += estimate_tokens(msg)
@@ -46,10 +46,10 @@ else within budget
 end
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over agent, history
-  Flow:    User → REPLSession → AgentOrchestrator → message → append → estimate tokens → check budget
+  Flow:    User → ServerRouter → AgentOrchestrator → message → append → estimate tokens → check budget
   State:   No state change (or triggers COMPACTING)
   Success: Message added, token count updated
   Failure: N/A

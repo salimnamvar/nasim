@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Query LSP server for hover, definition, or references
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — TL-13 Read LSP
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -39,7 +39,7 @@ end note
 == TL-13 Read LSP ==
 
 user -> repl : types input
-repl -> agent : TL-13 PROCESS(user_input)
+router -> agent : TL-13 PROCESS(user_input)
 agent -> registry : TL-13 Read LSP(query, params)
 registry -> tool : TL-13 Read LSP(query, params)
 tool -> lsp : send request(query, params)
@@ -49,7 +49,7 @@ break LSP server unreachable or times out
     tool --> registry : ToolResult(success=False, error="LSP unavailable")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="LSP unavailable")
+    result --> user : ToolResult(success=False, error="LSP unavailable")
 end
 
 break Query returns no results
@@ -57,17 +57,17 @@ break Query returns no results
     tool --> registry : ToolResult(success=False, error="no results")
     registry --> agent : ToolResult
     agent --> repl : AgentEvent(Error)
-    repl --> user : ToolResult(success=False, error="no results")
+    result --> user : ToolResult(success=False, error="no results")
 end
 
 lsp --> tool : hover/definition/references result
 tool --> registry : ToolResult(success=True, result)
 registry --> agent : ToolResult
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, lsp
-  Flow:    TL-13: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> LspTool -> LSP Server -> ToolResult
+  Flow:    TL-13: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> LspTool -> LSP Server -> ToolResult
   State:   No state change
   Success: LSP query result returned
   Failure: LSP unavailable or no results -> ToolResult(success=False)

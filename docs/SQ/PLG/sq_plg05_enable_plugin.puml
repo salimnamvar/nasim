@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Load plugin and activate its tools and hooks
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -37,7 +37,7 @@ note over user, hm
 end note
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 
 == PLG-05 Enable Plugin ==
 
@@ -56,7 +56,7 @@ loader --> agent : plugin enabled
 deactivate loader
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over user, hm
   Flow:    PLG-05 AgentOrchestrator -> PluginLoader -> load plugin -> activate tools + hooks -> set state ENABLED

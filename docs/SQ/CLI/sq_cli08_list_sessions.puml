@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   List sessions via slash command
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CLI-08 List Sessions
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
 box "Session Layer" #F1F8E9
@@ -23,7 +23,7 @@ end box
 
 note over user, ssn
   Scope:          List available sessions via /sessions slash command
-  Preconditions:  REPLSession active, SessionStore initialized
+  Preconditions:  ServerRouter active, SessionStore initialized
   Contexts:       Invoked by Developer via /sessions command
   Excludes:       Session read (SSN-02), session persist (SSN-01)
   Rollback:       Read error → display error message
@@ -35,7 +35,7 @@ end note
 == CLI-08 List Sessions ==
 
 user -> repl : "/sessions"
-repl -> cmd : dispatch("/sessions")
+result -> cmd : dispatch("/sessions")
 activate cmd
 
 cmd -> ssn : listSessions()
@@ -50,16 +50,16 @@ cmd -> cmd : format session table
 cmd --> repl : CommandResult(formatted_table)
 deactivate cmd
 
-repl --> user : displayed session list
+result --> user : displayed session list
 
 break Session directory unreadable
     ssn --> cmd : IOError
     cmd --> repl : CommandError
-    repl --> user : "Failed to list sessions"
+    result --> user : "Failed to list sessions"
 end
 
 note over user, ssn
-  Flow:    CLI-08 listSessions: Developer → REPLSession → SlashCommandHandler → SSN-03 LIST Sessions → display
+  Flow:    CLI-08 listSessions: User → ServerRouter → SlashCommandHandler → SSN-03 LIST Sessions → display
   State:   <back:#ECEFF1>IDLE</back> → LISTING → <back:#ECEFF1>IDLE</back>
   Success: Session list formatted and displayed
   Failure: Directory error → display error

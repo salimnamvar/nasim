@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Classify task type and select optimal model
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-03 Classify Task
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -39,14 +39,14 @@ end note
 == RTG-03 Classify Task ==
 
 user -> repl : types input
-repl -> agent : RTG-03 PROCESS(user_input)
+router -> agent : RTG-03 PROCESS(user_input)
 
 agent -> router : RTG-03 CLASSIFY Task(task_description, context)
 
 break Classification fails (confidence < 0.6)
     router --> agent : default_model
     agent --> repl : AgentEvent(Done)
-    repl --> user : result: default model (classification failed)
+    result --> user : result: default model (classification failed)
 end
 
 router -> router : RTG-03 EXTRACT Signals(input_length, keywords, traceback, file_content)
@@ -60,16 +60,16 @@ break Model unavailable
     router -> router : RTG-03 RESOLVE NextModel(FallbackChain)
     router --> agent : Result(success=true, data={selected_model, task_type})
     agent --> repl : AgentEvent(Done)
-    repl --> user : result: fallback model selected
+    result --> user : result: fallback model selected
 end
 
 router --> agent : Result(success=true, data={selected_model, task_type})
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: optimal model selected
+result --> user : result: optimal model selected
 
 note over user, router
-  Flow:    RTG-03 -> User -> REPLSession -> AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model
+  Flow:    RTG-03 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model
   State:   No state change
   Success: Result(success=true, data={selected_model, task_type})
   Failure: Result(success=false, error="classification_failed") — default model returned

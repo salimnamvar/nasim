@@ -4,15 +4,15 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Summarize old message exchanges into compact form
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8EAF6
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -36,7 +36,7 @@ end note
 == CTX-03 Summarize Old Exchanges ==
 
 user -> repl : types input
-repl -> agent : PROCESS(user_input)
+router -> agent : PROCESS(user_input)
 agent -> compactor : CTX-03 DISTILL(messages)
 compactor -> compactor : build prompt: "Summarize these exchanges concisely"
 compactor -> provider : chat([summary_prompt + old_messages])
@@ -51,10 +51,10 @@ compactor -> compactor : create summary message {role: "system", content: summar
 compactor --> compactor : return summary message
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result
+result --> user : result
 
 note over compactor, provider
-  Flow:    User → REPLSession → AgentOrchestrator → select old → build prompt → LLM summarize → summary message
+  Flow:    User → ServerRouter → AgentOrchestrator → select old → build prompt → LLM summarize → summary message
   State:   <back:#E0F2F1>COMPACTING</back>
   Success: Summary message ready to replace old exchanges
   Failure: Empty summary -> truncated raw fallback

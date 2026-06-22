@@ -1,19 +1,22 @@
 @startuml sm_agent_lifecycle
 ' ============================================================
-' Title:     nasim — Agent Lifecycle State Machine
-' Boundary:  nasim code agent CLI + HTTP API
-' Purpose:   Process FSM showing all agent states and transitions
+' Title:     nasim — Agent Lifecycle State Machine (API-First)
+' Boundary:  nasim code agent
+' Purpose:   Process FSM showing all agent states and transitions.
+'            All entry points route through the API (API-06).
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
 '            do not apply (documented deviation).
 ' Convention: All transitions are triggered by the corresponding UC ID
 '            (e.g., EVL-01, EDT-10, AGT-07) as listed in docs/UC/README.md.
+'            Entry/exit transitions use API-06 (DISPATCH Message) as the
+'            sole entry gate for all interface containers.
 ' ============================================================
 
-title nasim — Agent Lifecycle
+title nasim — Agent Lifecycle (API-First)
 
 skinparam state {
   BackgroundColor #FFFFFF
@@ -29,7 +32,7 @@ IDLE : No active provider call.
 
 state "LISTENING" as LISTENING #E8EAF6
 LISTENING : Receiving and parsing user input.
-LISTENING : CLI-01 PROCESS User Input.
+LISTENING : API-06 DISPATCH Message (via any interface).
 
 state "THINKING" as THINKING #FFF3E0
 THINKING : LLM processing messages.
@@ -40,8 +43,8 @@ TOOL_EXEC : Executing a tool call.
 TOOL_EXEC : AGT-02 DISPATCH Tool Call.
 
 state "RESPONDING" as RESPONDING #E8F5E9
-RESPONDING : Streaming final text to user.
-RESPONDING : CLI-03 STREAM Output.
+RESPONDING : Streaming final text to user via API SSE.
+RESPONDING : API-06 DISPATCH Message (SSE response).
 
 state "ERROR" as ERROR #FFEBEE
 ERROR : Error occurred.
@@ -68,8 +71,8 @@ ROUTING : Model selection in progress.
 ROUTING : RTG-01 SELECT Model.
 
 state "SERVING" as SERVING #E0F7FA
-SERVING : HTTP server handling request.
-SERVING : SRV-06 DISPATCH Message.
+SERVING : API processing request from any interface.
+SERVING : API-06 DISPATCH Message.
 
 state "EVALUATING" as EVALUATING #F9FBE7
 EVALUATING : Evaluating task completion.
@@ -91,18 +94,22 @@ state "AWAITING_DIFF_APPROVAL" as AWAITING_DIFF_APPROVAL #FCE4EC
 AWAITING_DIFF_APPROVAL : Presenting diff to user.
 AWAITING_DIFF_APPROVAL : SAF-02 REQUEST Approval.
 
-IDLE --> LISTENING : CLI-01
-IDLE --> SERVING : SRV-06
-IDLE --> [*] : CLI-02
+' ============================================================
+' Entry transitions: ALL go through API-06 (sole entry gate)
+' ============================================================
 
-LISTENING --> THINKING : CLI-01
+IDLE --> LISTENING : API-06
+IDLE --> SERVING : API-06
+IDLE --> [*] : API-06
+
+LISTENING --> THINKING : API-06
 
 THINKING --> RESPONDING : PRV-02
 THINKING --> TOOL_EXEC : PRV-02
 THINKING --> COMPACTING : AGT-06
 THINKING --> ROUTING : RTG-01
 THINKING --> ERROR : PRV-02
-THINKING --> RESPONDING : SRV-06
+THINKING --> RESPONDING : API-06
 THINKING --> EVALUATING : EVL-01
 
 ROUTING --> THINKING : RTG-01
@@ -121,12 +128,16 @@ AWAITING_APPROVAL --> IDLE : SAF-02
 
 COMPACTING --> THINKING : AGT-06
 
-RESPONDING --> IDLE : CLI-03
+' ============================================================
+' Exit transitions: response flows back through API-06
+' ============================================================
+
+RESPONDING --> IDLE : API-06
 
 ERROR --> IDLE : AGT-14
 
-SERVING --> THINKING : SRV-06
-SERVING --> IDLE : SRV-06
+SERVING --> THINKING : API-06
+SERVING --> IDLE : API-06
 
 IDLE --> PLANNING : AGT-07
 PLANNING --> IDLE : AGT-07

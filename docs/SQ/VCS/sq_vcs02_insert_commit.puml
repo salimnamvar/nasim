@@ -4,17 +4,17 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Create a commit with conventional message
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — VCS-02 INSERT Commit
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E8F5E9
+  participant "ServerRouter" as router
 end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
@@ -44,7 +44,7 @@ end note
 == VCS-02 INSERT Commit ==
 
 user -> repl : types input
-repl -> agent : VCS-02 PROCESS(user_input)
+router -> agent : VCS-02 PROCESS(user_input)
 
 agent -> commit : VCS-02 INSERT Commit(message, files)
 activate commit
@@ -57,7 +57,7 @@ deactivate status
 break No staged files
     commit --> agent : Result(success=false, error="no_staged_files")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: no staged files
+    result --> user : error: no staged files
 end
 
 commit -> commit : VCS-02 VALIDATE Message(message)
@@ -65,7 +65,7 @@ commit -> commit : VCS-02 VALIDATE Message(message)
 break Invalid message format
     commit --> agent : Result(success=false, error="invalid_commit_message")
     agent --> repl : AgentEvent(Error)
-    repl --> user : error: invalid commit message
+    result --> user : error: invalid commit message
 end
 
 commit -> git : VCS-02 EXECUTE git_commit(message)
@@ -77,10 +77,10 @@ commit --> agent : Result(success=true, data={hash, files})
 deactivate commit
 
 agent --> repl : AgentEvent(Done)
-repl --> user : result: commit created
+result --> user : result: commit created
 
 note over user, git
-  Flow:    VCS-02 -> User -> REPLSession -> AgentOrchestrator -> GitCommit -> check staged -> validate message -> commit -> return hash
+  Flow:    VCS-02 -> User -> ServerRouter -> AgentOrchestrator -> GitCommit -> check staged -> validate message -> commit -> return hash
   State:   No state change
   Success: Result(success=true, data={hash, files})
   Failure: Result(success=false, error="no_staged_files") or Result(success=false, error="invalid_commit_message") — abort, return error

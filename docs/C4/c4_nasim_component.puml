@@ -3,12 +3,15 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — Component Overview
+' Title:     nasim — Component Overview (API-First)
 ' Boundary:  nasim core library
-' Purpose:   Cross-container view of all component groups and their interactions
+' Purpose:   Cross-container view of all component groups.
+'            API (ServerRouter) is the sole entry gate.
+'            All interface containers (CLI, WebApp, DesktopApp, MobileApp)
+'            connect exclusively through the API. No bypass allowed.
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Version:   7.0.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
 
@@ -76,10 +79,10 @@ Container_Boundary(core_library, "Core Library") {
         Component(session_fork, "SessionFork", "", "Branch conversations from any point")
     }
 
-    Container_Boundary(server_group, "Server Group") {
-        Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
-        Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints mapped to agent orchestrator")
-        Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for HTTP clients")
+    Container_Boundary(api_group, "API Group (Entry Gate)") {
+        Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts. All interface containers connect here.")
+        Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate — no interface may bypass this to call internal services directly.")
+        Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
         Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
     }
 
@@ -116,7 +119,7 @@ Container_Boundary(core_library, "Core Library") {
         Component(trace_correlator, "TraceCorrelator", "contextvars", "Generates root trace/span per CLI turn or HTTP request")
         Component(context_propagator, "ContextPropagator", "contextvars + threading", "Propagates trace context across Provider, Tool, Hook, Subagent, MCP boundaries")
         Component(log_redactor, "LogRedactor", "regex patterns", "Strips secrets before any emission. Always on")
-        Component(dual_output_adapter, "DualOutputAdapter", "tty detection", "CLI: JSON to stdout (machine) + rich Renderer when isatty (human)")
+        Component(dual_output_adapter, "DualOutputAdapter", "tty detection", "Interface adapter: writes JSON to stdout (machine) + delegates to Renderer when isatty (human). Used by CLI interface container.")
         Component(instrumentation_mw, "InstrumentationMiddleware", "ASGI middleware", "Outermost request handler for HTTP mode. Extracts/generates request_id; binds to contextvars for correlation via ContextPropagator")
         Component(otel_exporter, "OTelExporter", "opentelemetry-sdk (optional)", "Behind otel feature flag. Bridges spans to OTel SDK")
     }
@@ -194,26 +197,29 @@ Container_Boundary(core_library, "Core Library") {
 }
 
 ' ============================================================
-' External: CLI and Server (separate containers)
+' External: Interface Containers (all connect to API, no bypass)
 ' ============================================================
 
 Container_Ext(cli_container, "CLI")
-Container_Ext(server_container, "HTTP API Server")
+Container_Ext(webapp_container, "WebApp")
+Container_Ext(desktop_container, "DesktopApp")
+Container_Ext(mobile_container, "MobileApp")
 System_Ext(host_fs, "Host Filesystem")
 System_Ext(web, "Web")
 System_Ext(git_repo, "Git Repository")
 System_Ext(lsp_server, "LSP Server")
 
 ' ============================================================
-' Core Relationships
+' Interface → API wiring (ALL interfaces MUST go through ServerRouter)
 ' ============================================================
 
-' --- Container wiring (CLI/Server → Core) ---
-Rel(cli_container, server_router, "delegates REPL to core")
-Rel(server_container, server_app, "serves HTTP API")
+Rel(cli_container, server_router, "routes all calls through API")
+Rel(webapp_container, server_router, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(desktop_container, server_router, "routes all calls through API", "HTTP/JSON + SSE")
+Rel(mobile_container, server_router, "routes all calls through API", "HTTP/JSON + SSE")
 
 ' ============================================================
-' Core Relationships
+' Core Internal Relationships
 ' ============================================================
 
 ' --- AgentOrchestrator: 10 outgoing (No God Object compliant) ---
