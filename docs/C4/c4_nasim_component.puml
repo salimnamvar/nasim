@@ -12,6 +12,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Component Overview
 
 Container_Boundary(core_library, "Core Library") {

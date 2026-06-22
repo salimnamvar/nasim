@@ -9,8 +9,8 @@
 ' Review:    —
 ' ============================================================
 
-actor "StructuredLogger" as logger
-actor "WireAppender" as wire
+participant "StructuredLogger" as logger
+participant "WireAppender" as wire
 
 box "Observability Layer" #E3F2FD
   participant "LogRedactor" as redactor

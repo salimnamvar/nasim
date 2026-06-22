@@ -2,7 +2,6 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 
-
 ' ============================================================
 ' Title:     nasim — Agent Component Diagram
 ' Boundary:  nasim core library — Agent group
@@ -12,6 +11,8 @@
 ' Source:    docs/prompt/p1.md — corrective architecture review
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
+
+LAYOUT_WITH_LEGEND()
 
 title nasim — Agent Component Diagram
 

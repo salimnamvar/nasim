@@ -12,6 +12,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Safety Component Diagram
 
 Container_Boundary(safety_boundary, "Safety Group") {

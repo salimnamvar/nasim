@@ -13,6 +13,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Memory Component Diagram
 
 Container_Boundary(memory_boundary, "Memory Group") {

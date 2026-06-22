@@ -13,6 +13,7 @@
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — MCP Component Diagram
 
 Container_Boundary(mcp_boundary, "MCP Group") {
@@ -24,7 +25,7 @@ Container_Boundary(mcp_boundary, "MCP Group") {
 
 System_Ext(mcp_server, "MCP Server", "External extension tools")
 System_Ext(mcp_client, "MCP Client", "External tool consumers")
-System_Ext(tool_registry, "Tool Registry", "Instance-based tool registry")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group — instance-based registry")
 
 Rel(mcp_client_rt, mcp_server, "connects via stdio/SSE")
 Rel(mcp_client_rt, mcp_discovery, "discovers tools")

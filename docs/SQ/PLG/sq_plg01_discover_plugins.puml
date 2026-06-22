@@ -26,7 +26,7 @@ note over agent, fs
   Contexts:       Called during agent initialization
   Rollback:       Malformed plugins skipped with warning
   Design:         Scan plugin directory for manifest.yaml files
-  Classification: Primary Orchestrator
+  Classification: Process Decomposition
 end note
 
 == PLG-01 DISCOVER Plugins ==

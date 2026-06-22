@@ -29,7 +29,7 @@ note over agent, config
   Contexts:       Called before EDT-02 (APPLY Search-Replace); entry point for edit subsystem
   Rollback:       No valid strategy -> return error, suggest manual edit
   Design:         StrategySelector evaluates model capabilities vs edit requirements; format selected by diff size and model support
-  Classification: Primary Orchestrator
+  Classification: Process Decomposition
 end note
 
 == EDT-01 SELECT Strategy ==

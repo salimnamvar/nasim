@@ -13,6 +13,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Edit Strategy Component Diagram
 
 Container_Boundary(edit_strategy_boundary, "Edit Strategy Group") {

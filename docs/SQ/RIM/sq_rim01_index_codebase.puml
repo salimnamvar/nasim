@@ -30,7 +30,7 @@ note over agent, fs
   Contexts:       Called at session start or on-demand; prerequisite for RIM-02/03
   Rollback:       Parse error -> skip file, log warning; complete failure -> empty index
   Design:         RepoIntelligenceManager orchestrates pipeline; ASTParser extracts definitions; SymbolGraph builds relationships
-  Classification: Primary Orchestrator
+  Classification: Process Decomposition
 end note
 
 == RIM-01 INDEX Codebase ==

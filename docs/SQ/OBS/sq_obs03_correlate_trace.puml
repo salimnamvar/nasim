@@ -9,8 +9,8 @@
 ' Review:    —
 ' ============================================================
 
-actor "CLI" as cli
-actor "ServerApp" as http
+participant "CLI" as cli
+participant "ServerApp" as http
 
 box "Observability Layer" #E3F2FD
   participant "TraceCorrelator" as trace

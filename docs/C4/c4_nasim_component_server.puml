@@ -13,6 +13,7 @@
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Server Component Diagram
 
 Container_Boundary(server_boundary, "HTTP API Server Process") {

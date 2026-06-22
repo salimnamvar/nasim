@@ -492,5 +492,32 @@ additional verbs for its CLI agent domain:
 | REPLAY | Wire log | Replay session from wire log |
 | FORK | Wire log/wire_log | Fork session at any turn |
 | CLASSIFY | Model routing | Classify task type for model selection |
+| LIST | Enumerate items | List sessions, tools, directories |
+| SWITCH | Change mode | Switch model, persona, or mode |
+| REQUEST | Ask for something | Request approval, request chat |
+| LOAD | Bring in config/manifest | Load config, load manifest |
+| REGISTER | Add to registry | Register hook, register tools |
+| HANDLE | Process error/exception | Handle error with recovery |
+| QUEUE | Enqueue for later | Queue plan for approval |
+| APPROVE | Accept plan | Approve queued plan |
+| RECORD | Write metric/quality | Record metrics, record quality signal |
+| EXPOSE | Make available | Expose /metrics endpoint, expose tools |
+| BUILD | Construct graph/index | Build symbol graph |
+| TRUNCATE | Trim to budget | Truncate nodes to token budget |
+| TRACK | Monitor budget | Track token budget |
+| COORDINATE | Orchestrate retry | Coordinate retry with feedback |
+| DETECT | Identify pattern | Detect repetition loops |
+| MONITOR | Watch process | Monitor sandbox process |
+| LIMIT | Constrain resources | Limit resource usage |
+| CONNECT | Establish link | Connect to MCP server |
+| ADAPT | Transform format | Adapt MCP tool to nasim format |
+| SEND | Dispatch message | Send message via HTTP API |
+| SCOPE | Isolate knowledge | Scope knowledge by context |
+| CORRELATE | Link events | Correlate trace across request |
+| REDACT | Strip secrets | Redact sensitive data before emission |
+| EXPORT | Ship telemetry | Export traces via OTLP |
+| SEEK | Random access | Seek to turn in wire log |
+| CHECKPOINT | Persist state | Checkpoint turn to wire log |
+| REVERT | Undo to prior state | Revert session to prior turn |
 
 These extensions are documented here per `uc.md` — not silently diverging.

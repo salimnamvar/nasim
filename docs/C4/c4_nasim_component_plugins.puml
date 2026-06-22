@@ -22,8 +22,8 @@ Container_Boundary(plugins_boundary, "Plugins Group") {
 }
 
 System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
-System_Ext(tool_registry, "Tool Registry", "Instance-based tool registry")
-System_Ext(hook_manager, "Hook Manager", "Hook registration")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group — instance-based registry")
+System_Ext(hook_manager, "HookManager", "Hooks Group — hook registration")
 
 Rel(plugin_loader, plugin_dir, "discovers plugin manifests")
 Rel(plugin_loader, tool_registry, "registers plugin tools")

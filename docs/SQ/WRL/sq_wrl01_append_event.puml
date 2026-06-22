@@ -29,7 +29,7 @@ note over agent, fs
   Contexts:       Called on every significant agent event; prerequisite for WRL-02/03/04
   Rollback:       Write failure -> event lost, log warning
   Design:         WireAppender appends serialized events; append-only log; buffered writes with flush on session end
-  Classification: Primary Orchestrator
+  Classification: Process Decomposition
 end note
 
 == WRL-01 APPEND Event ==

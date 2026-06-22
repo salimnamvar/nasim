@@ -1,4 +1,4 @@
-@startuml sq_srv06_send_message
+@startuml sq_srv06_dispatch_message
 ' ============================================================
 ' Title:     SRV-06 — SEND Message
 ' Boundary:  nasim code agent HTTP API

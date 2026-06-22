@@ -9,9 +9,9 @@
 ' Review:    —
 ' ============================================================
 
-actor "AgentOrchestrator" as agent
-actor "Provider" as provider
-actor "ToolRegistry" as tools
+participant "AgentOrchestrator" as agent
+participant "Provider" as provider
+participant "ToolRegistry" as tools
 
 box "Observability Layer" #E3F2FD
   participant "MetricsCollector" as metrics

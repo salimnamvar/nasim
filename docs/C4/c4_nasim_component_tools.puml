@@ -13,6 +13,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Tools Component Diagram
 
 Container_Boundary(tool_boundary, "Tool Group") {

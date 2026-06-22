@@ -13,6 +13,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Context Graph Component Diagram
 
 Container_Boundary(context_graph_boundary, "Context Graph Group") {

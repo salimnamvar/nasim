@@ -13,6 +13,7 @@
 ' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Session Component Diagram
 
 Container_Boundary(session_boundary, "Session Group") {

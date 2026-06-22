@@ -12,6 +12,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Router Component Diagram
 
 Container_Boundary(router_boundary, "Router Group") {

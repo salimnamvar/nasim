@@ -13,6 +13,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Wire Log Component Diagram
 
 Container_Boundary(wire_log_boundary, "Wire Log Group") {

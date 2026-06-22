@@ -13,6 +13,7 @@
 ' Review:    —
 ' ============================================================
 
+LAYOUT_WITH_LEGEND()
 title nasim — Repo Intelligence Component Diagram
 
 Container_Boundary(repo_intel_boundary, "Repo Intelligence Group") {

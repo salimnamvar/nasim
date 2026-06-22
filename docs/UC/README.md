@@ -76,11 +76,11 @@
 | TL-21 | TL | INSERT Plan | PlanTool |
 | TL-22 | TL | UPDATE Plan | PlanTool |
 | SRV-01 | SRV | LIST Sessions | ServerRouter |
-| SRV-02 | SRV | CREATE Session | ServerRouter |
+| SRV-02 | SRV | INSERT Session | ServerRouter |
 | SRV-03 | SRV | READ Session | ServerRouter |
 | SRV-04 | SRV | UPDATE Session | ServerRouter |
 | SRV-05 | SRV | DELETE Session | ServerRouter |
-| SRV-06 | SRV | SEND Message | ServerRouter |
+| SRV-06 | SRV | DISPATCH Message | ServerRouter |
 | SRV-07 | SRV | LIST Messages | ServerRouter |
 | SRV-08 | SRV | LIST Tools | ServerRouter |
 | SRV-09 | SRV | READ Tool | ServerRouter |
