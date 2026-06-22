@@ -4,13 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Execute hooks after LLM call completes
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — HK-05 DISPATCH Post-LLM Hook
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -19,41 +24,54 @@ box "Hooks Layer" #FFFDE7
   participant "Hook" as hook
 end box
 
-note over agent, hook
-  Scope:          Execute hooks after LLM call completes
+note over user, hook
+  Scope:          HK-05 DISPATCH Post-LLM Hook
   Preconditions:  LLM call completed, hooks registered for PostLLMCall event
-  Excludes:       Pre-LLM hooks (HK-04), tool hooks (HK-02/03)
   Contexts:       Called by AGT-01 (PROCESS User Task) after PRV-02
+  Excludes:       Pre-LLM hooks (HK-04), tool hooks (HK-02/03)
   Rollback:       Hook failure logged; pipeline continues
   Design:         Priority-ordered execution; short-circuit on deny
   Classification: Process Decomposition
+  Returns:
+    - Success: HookResult(action=ALLOW, modified_data?) — pipeline continues
+    - Failure: HookResult(action=DENY, reason) — LLM result blocked
 end note
 
 == HK-05 DISPATCH Post-LLM Hook ==
 
-agent -> hooks : dispatch(PostLLMCall, llm_result)
+user -> repl : invoke agent
+activate repl
+repl -> agent : hk05 DISPATCH Post-LLM Hook(llm_result)
+activate agent
+agent -> hooks : hk05 DISPATCH Post-LLM Hook(llm_result)
 activate hooks
-hooks -> hooks : find hooks for PostLLMCall
+hooks -> hooks : hk05 FIND Hooks For Event(PostLLMCall)
 
 loop for each hook in priority order
-    hooks -> hook : execute(llm_result)
+    hooks -> hook : hk05 EXECUTE Hook(llm_result)
     activate hook
     hook --> hooks : HookResult(action, data?)
     deactivate hook
 
     break action == DENY
         hooks --> agent : HookResult(action=DENY, reason)
+        agent --> repl : HookResult(action=DENY)
+        repl --> user : LLM result blocked by hook
     end
 end
 
 hooks --> agent : HookResult(action=ALLOW, modified_data?)
 deactivate hooks
+agent --> repl : HookResult(action=ALLOW)
+deactivate agent
+repl --> user : hook dispatched
+deactivate repl
 
-note over agent, hook
-  Flow:    AgentOrchestrator -> HookManager -> find hooks -> execute in priority order -> return HookResult
-  State:   <back:#FFFDE7>HOOK_RUNNING</back>
-  Failure: Hook failure logged; remaining hooks still execute
-  Success: HookResult returned to agent
+note over user, hook
+  Flow:    HK-05 → HookManager → find hooks → execute in priority order → return HookResult
+  State:   No state change
+  Success: HookResult(action=ALLOW) — pipeline continues
+  Failure: HookResult(action=DENY) — LLM result blocked
 end note
 
 @enduml

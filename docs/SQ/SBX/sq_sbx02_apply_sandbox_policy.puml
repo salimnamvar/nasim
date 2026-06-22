@@ -4,55 +4,84 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Load and apply sandbox security policy
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-02 APPLY Sandbox Policy
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Sandbox Layer" #F1F8E9
   participant "SandboxExecutor" as executor
   participant "SandboxPolicy" as policy
 end box
 
-note over executor, policy
-  Scope:          Sandbox policy loading and application
+note over user, policy
+  Scope:          SBX-02 APPLY SandboxPolicy — sandbox policy loading and application
   Preconditions:  Policy file exists, SandboxPolicy initialized
-  Excludes:       Command execution (SBX-01), monitoring (SBX-03)
   Contexts:       Called by SBX-01 before command execution
+  Excludes:       Command execution (SBX-01), monitoring (SBX-03)
   Rollback:       Revert to default policy on validation failure
   Design:         Declarative policy with rule inheritance
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={rules_count})
+    - Failure: Result(success=false, error="policy_invalid") — reverted to defaults
 end note
 
 == SBX-02 APPLY Sandbox Policy ==
 
-executor -> policy : load_policy(policy_path)
+user -> repl : types input
+repl -> agent : SBX-02 PROCESS(user_input)
+
+agent -> executor : SBX-02 APPLY SandboxPolicy(policy_path)
+activate executor
+
+executor -> policy : SBX-02 LOAD Policy(policy_path)
 activate policy
 
-policy -> policy : read policy file
+policy -> policy : SBX-02 READ PolicyFile(policy_path)
 
 break Policy file not found
     policy --> executor : default policy applied
+    executor --> agent : Result(success=true, data={rules_count, fallback=true})
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result: default policy applied
 end
 
-policy -> policy : validate rules
+policy -> policy : SBX-02 VALIDATE Rules(rules)
 
 break Invalid policy rules
     policy --> executor : revert to defaults, log error
+    executor --> agent : Result(success=false, error="policy_invalid")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : error: invalid policy, reverted to defaults
 end
 
-policy -> policy : apply to sandbox instance
+policy -> policy : SBX-02 APPLY ToSandbox(instance)
 
-policy --> executor : policy_applied(rules_count)
+policy --> executor : Result(success=true, data={rules_count})
 deactivate policy
 
-note over executor, policy
-  Flow:    SandboxExecutor -> SandboxPolicy -> read policy -> validate -> apply -> confirm
+executor --> agent : Result(success=true, data={rules_count})
+deactivate executor
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result: policy applied
+
+note over user, policy
+  Flow:    SBX-02 -> User -> REPLSession -> AgentOrchestrator -> SandboxExecutor -> SandboxPolicy -> read policy -> validate -> apply -> confirm
   State:   No state change
-  Failure: Invalid policy -> revert to defaults, log error
-  Success: Executor receives policy application confirmation
+  Success: Result(success=true, data={rules_count})
+  Failure: Result(success=false, error="policy_invalid") — revert to defaults, log error
 end note
 
 @enduml

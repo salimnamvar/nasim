@@ -11,6 +11,11 @@
 
 title nasim — EDT-01 SELECT Strategy
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -25,16 +30,19 @@ end box
 note over agent, config
   Scope:          Choose optimal edit format for the target model
   Preconditions:  Agent has identified a file to edit, Config loaded
-  Excludes:       Edit execution (EDT-02..09), diff staging (EDT-10)
   Contexts:       Called before EDT-02 (APPLY Search-Replace); entry point for edit subsystem
+  Excludes:       Edit execution (EDT-02..09), diff staging (EDT-10)
   Rollback:       No valid strategy -> return error, suggest manual edit
   Design:         StrategySelector evaluates model capabilities vs edit requirements; format selected by diff size and model support
   Classification: Process Decomposition
+  Returns:        EditStrategy(format, parameters, confidence) on success; error with manual suggestion on failure
 end note
 
 == EDT-01 SELECT Strategy ==
 
-agent -> selector : SELECT_STRATEGY(file_path, edit_description, model_id)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> selector : EDT-01 SELECT_STRATEGY(file_path, edit_description, model_id)
 activate selector
 
 selector -> config : get_supported_formats(model_id)
@@ -66,11 +74,14 @@ selector -> selector : validate_format_compatibility(strategy, model_id)
 selector --> agent : EditStrategy(format, parameters, confidence)
 deactivate selector
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over agent, config
-  Flow:    AgentOrchestrator -> StrategySelector -> Config + EditStrategy -> EditStrategy
+  Flow:    User → REPLSession → AgentOrchestrator → StrategySelector → Config + EditStrategy → EditStrategy
   State:   <back:#ECEFF1>IDLE</back> -> <back:#FFF3E0>THINKING</back> -> <back:#ECEFF1>IDLE</back>
-  Failure: No compatible format -> error + manual suggestion
   Success: EditStrategy with chosen format and parameters
+  Failure: No compatible format -> error + manual suggestion
 end note
 
 @enduml

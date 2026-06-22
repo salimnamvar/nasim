@@ -1,47 +1,71 @@
 @startuml sq_cfg02_validate_config
 ' ============================================================
-' Title:     CFG-02 — Validate Config
+' Title:     CFG-02 — VALIDATE Config
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Config field validation
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
+title nasim — CFG-02 VALIDATE Config
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Config Layer" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
 
-note over cfg
-  Scope:          Validate Config fields against schema
+note over user, cfg
+  Scope:          CFG-02 VALIDATE Config
   Preconditions:  Config loaded from sources
-  Contexts:       Called by CFG-01 (Load Config) after merge
+  Contexts:       Called by CFG-01 (LOAD Config) after merge
   Excludes:       Config loading (CFG-01)
   Rollback:       Validation error -> ConfigError with details
   Design:         Typed dataclass with __post_init__ validation
   Classification: Process Decomposition
+  Returns:
+    - Success: Config(valid) — all fields pass schema checks
+    - Failure: ConfigError — invalid field value with details
 end note
 
-== CFG-02 Validate Config ==
+== CFG-02 VALIDATE Config ==
 
-cfg -> cfg : Config.__post_init__()
-cfg -> cfg : check provider in ["ollama", "openai", "anthropic"]
-cfg -> cfg : check safety_mode in ["ask", "auto", "off"]
-cfg -> cfg : check context_budget > 0
-cfg -> cfg : check timeout > 0
+user -> repl : invoke agent
+activate repl
+repl -> agent : cfg02 VALIDATE Config(config)
+activate agent
+agent -> cfg : cfg02 VALIDATE Config(config)
+activate cfg
+cfg -> cfg : cfg02 CHECK Provider(provider in ["ollama", "openai", "anthropic"])
+cfg -> cfg : cfg02 CHECK SafetyMode(safety_mode in ["ask", "auto", "off"])
+cfg -> cfg : cfg02 CHECK ContextBudget(context_budget > 0)
+cfg -> cfg : cfg02 CHECK Timeout(timeout > 0)
 
 break Validation fails
-    cfg -> cfg : raise ConfigError("field: message")
+    cfg --> agent : ConfigError("field: message")
+    agent --> repl : ConfigError
+    repl --> user : validation failed
 end
 
-cfg --> cfg : Config valid
+cfg --> agent : Config valid
+agent --> repl : Config valid
+deactivate agent
+repl --> user : config validated
+deactivate repl
 
-note over cfg
-  Flow:    Config dataclass -> field checks -> valid or ConfigError
+note over user, cfg
+  Flow:    CFG-02 → field checks → valid or ConfigError
   State:   No state change
-  Failure: Invalid field value -> ConfigError
-  Success: Config validated
+  Success: Config(valid) — all fields pass schema checks
+  Failure: ConfigError — invalid field value with details
 end note
 
 @enduml

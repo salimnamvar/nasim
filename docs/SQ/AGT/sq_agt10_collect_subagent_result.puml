@@ -1,6 +1,6 @@
 @startuml sq_agt10_collect_subagent_result
 ' ============================================================
-' Title:     AGT-10 — Collect Subagent Result
+' Title:     AGT-10 — COLLECT Subagent Result
 ' Boundary:  nasim code agent
 ' Purpose:   Wait for child agent completion and aggregate result
 ' Milestone: v1.0
@@ -9,8 +9,13 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — AGT-10 Collect Subagent Result
+title nasim — AGT-10 COLLECT Subagent Result
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "SubagentCoordinator" as coord
@@ -19,19 +24,25 @@ box "Session Layer" #F1F8E9
   participant "SessionStore" as store
 end box
 
-note over agent, store
-  Scope:          Collect and aggregate result from a completed child agent
+note over user, store
+  Scope:          AGT-10 COLLECT Subagent Result
   Preconditions:  Child agent spawned via AGT-09, child_id valid
-  Excludes:       Spawn logic (AGT-09), persona delegation (AGT-11)
   Contexts:       Called after AGT-09 when parent needs child result
+  Excludes:       Spawn logic (AGT-09), persona delegation (AGT-11)
   Rollback:       Timeout → cancel child, return partial result
   Design:         Blocking wait with configurable timeout; result aggregated into parent context
   Classification: Process Decomposition
+  Returns:        Success: aggregated result from child agent
+                  Failure: PartialResult(timeout) or ChildError
 end note
 
-== AGT-10 Collect Subagent Result ==
+== AGT-10 COLLECT Subagent Result ==
 
-agent -> coord : collect(child_id, timeout)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+activate agent
+
+agent -> coord : agt10 COLLECT Subagent Result({child_id}, {timeout})
 activate coord
 
 coord -> store : get child session status
@@ -65,11 +76,15 @@ end
 
 deactivate coord
 
-note over agent, store
-  Flow:    AgentOrchestrator → SubagentCoordinator → wait → collect → aggregate
-  State:   WAITING → COLLECTING → DONE
-  Failure: Timeout → cancel child → partial result; child error → propagate
-  Success: Aggregated result returned to parent
+agent --> repl : AgentEvent(Done)
+deactivate agent
+repl --> user : result
+
+note over user, store
+  Flow:    AGT-10 → wait → collect → aggregate
+  State:   WAITING -> COLLECTING -> DONE
+  Success: aggregated result returned to parent
+  Failure: timeout -> cancel child -> partial result; child error -> propagate
 end note
 
 @enduml

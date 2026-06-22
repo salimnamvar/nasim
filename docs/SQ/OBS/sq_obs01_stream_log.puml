@@ -4,13 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Emit structured JSON log record to stdout
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — OBS-01 STREAM Structured Log
+title nasim — OBS-01 STREAM StructuredLog
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -24,34 +29,41 @@ box "External" #F5F5F5
   participant "Stdout" as stdout
 end box
 
-note over agent, stdout
-  Scope:          Emit structured JSON log record to stdout
+note over user, stdout
+  Scope:          OBS-01 STREAM StructuredLog — emit structured JSON log record to stdout
   Preconditions:  StructuredLogger configured, LogRedactor available
-  Excludes:       Wire log append (WRL-01), Metrics recording (OBS-02)
   Contexts:       Called on every significant agent event (turn, LLM call, tool exec, error)
+  Excludes:       Wire log append (WRL-01), metrics recording (OBS-02)
   Rollback:       Write failure -> stderr warning, never raises to caller
   Design:         StructuredLogger constructs LogRecord with trace context; LogRedactor strips secrets; DualOutputAdapter writes JSON to stdout
-  Classification: Process Decomposition
+  Returns:
+    - Success: None (fire-and-forget)
+    - Failure: Write failure -> stderr warning, never raises
 end note
 
-== OBS-01 STREAM Structured Log ==
+== OBS-01 STREAM StructuredLog ==
 
-agent -> logger : emit(msg, level, **extra)
+user -> repl : OBS-01 STREAM StructuredLog(msg, level, extra)
+activate repl
+repl -> agent : OBS-01 STREAM StructuredLog(msg, level, extra)
+activate agent
+
+agent -> logger : OBS-01 STREAM StructuredLog(msg, level, extra)
 activate logger
 
-logger -> trace : current_span()
+logger -> trace : trace.current_span()
 activate trace
 trace --> logger : TraceContext(trace_id, span_id, parent_span_id)
 deactivate trace
 
 logger -> logger : build_record(msg, level, trace_ctx, extra)
 
-logger -> redactor : redact(record)
+logger -> redactor : OBS-04 REDACT SensitiveData(record)
 activate redactor
-redactor --> logger : sanitized_record
+redactor --> logger : SanitizedRecord
 deactivate redactor
 
-logger -> adapter : emit(sanitized_record)
+logger -> adapter : OBS-01 EMIT LogRecord(sanitized_record)
 activate adapter
 
 adapter -> adapter : serialize_json(record)
@@ -62,11 +74,16 @@ deactivate adapter
 
 deactivate logger
 
-note over agent, stdout
-  Flow:    AgentOrchestrator -> StructuredLogger -> TraceCorrelator + LogRedactor -> DualOutputAdapter -> Stdout
+agent --> repl : None
+deactivate agent
+repl --> user : None
+deactivate repl
+
+note over user, stdout
+  Flow:    OBS-01 → Developer → REPLSession → AgentOrchestrator → StructuredLogger → TraceCorrelator + LogRedactor → DualOutputAdapter → Stdout
   State:   No state change
-  Failure: Write failure -> stderr warning, never raises
   Success: JSON line written to stdout
+  Failure: Write failure -> stderr warning, never raises
 end note
 
 @enduml

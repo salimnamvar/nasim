@@ -4,38 +4,62 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Configure safety mode from config
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
+title nasim — SAF-03 Apply Safety Mode
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "PermissionGate" as gate
+end box
 box "Config Layer" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
-box "Agent Layer" #E3F2FD
-  participant "PermissionGate" as gate
-end box
 
-note over cfg, gate
-  Scope:          Apply safety mode from config to PermissionGate
+note over user, cfg
+  Scope:          SAF-03 APPLY SafetyMode — apply safety mode from config to PermissionGate
   Preconditions:  Config loaded with safety_mode field
   Contexts:       Called during AgentOrchestrator initialization
   Excludes:       Runtime permission checks (SAF-01)
   Rollback:       N/A — mode is always set
   Design:         ask | auto | off — set once at startup
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={safety_mode})
+    - Failure: N/A
 end note
 
 == SAF-03 Apply Safety Mode ==
 
-cfg -> gate : apply_mode(config.safety_mode)
-gate -> gate : self.mode = config.safety_mode
+user -> repl : types input
+repl -> agent : SAF-03 PROCESS(user_input)
 
-note over cfg, gate
-  Flow:    config.safety_mode -> PermissionGate.mode
+agent -> cfg : SAF-03 READ SafetyModeConfig()
+activate cfg
+cfg --> agent : config.safety_mode
+deactivate cfg
+
+agent -> gate : SAF-03 APPLY SafetyMode(config.safety_mode)
+gate -> gate : SAF-03 SET self.mode(config.safety_mode)
+
+gate --> agent : Result(success=true, data={safety_mode})
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result: safety mode configured
+
+note over user, cfg
+  Flow:    SAF-03 -> User -> REPLSession -> AgentOrchestrator -> ConfigLoader -> PermissionGate -> set mode
   State:   No state change
+  Success: Result(success=true, data={safety_mode})
   Failure: N/A
-  Success: Safety mode configured
 end note
 
 @enduml

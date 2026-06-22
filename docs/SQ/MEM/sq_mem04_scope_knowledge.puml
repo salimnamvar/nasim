@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — MEM-04 SCOPE Knowledge
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -19,19 +22,23 @@ box "Memory Layer" #E0F2F1
   participant "MemoryStore" as store
 end box
 
-note over agent, store
+note over user, store
   Scope:          Scope-based filtering of knowledge entries
   Preconditions:  MemoryStore with multi-scope entries
-  Excludes:       Search and recall (MEM-02, MEM-03)
   Contexts:       Called by MEM-01 and MEM-02 for scope validation
+  Excludes:       Search and recall (MEM-02, MEM-03)
   Rollback:       No rollback needed (read-only operation)
   Design:         Three-level scope hierarchy: global > project > session
   Classification: Process Decomposition
+  Returns:        scoped_entries[] or global scope entries (fallback)
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == MEM-04 SCOPE Knowledge ==
 
-agent -> scope : filter(query, scope)
+agent -> scope : MEM-04 FILTER(query, scope)
 activate scope
 
 scope -> scope : resolve_scope_hierarchy(scope)
@@ -50,11 +57,14 @@ end
 scope --> agent : scoped_entries
 deactivate scope
 
-note over agent, store
-  Flow:    AgentOrchestrator -> MemoryScope -> resolve hierarchy -> fetch entries -> apply mask -> return
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, store
+  Flow:    MEM-04 AgentOrchestrator -> MemoryScope -> resolve hierarchy -> fetch entries -> apply mask -> return
   State:   No state change
-  Failure: Invalid scope -> return global scope entries
   Success: Agent receives scope-filtered entries
+  Failure: Invalid scope -> return global scope entries
 end note
 
 @enduml

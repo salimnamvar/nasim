@@ -6,11 +6,14 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -25,40 +28,22 @@ box "Edit Layer" #FFF3E0
 end box
 
 note over user, fs
-  Scope:
-    - evl02 INVOKE LLM Reviewer — LLM-as-judge scoring for edit quality
-
-  Preconditions:
-    - Edit applied to file system
-    - Provider available for LLM calls
-    - Review prompt template configured
-
-  Contexts:
-    - Called after EVL-01 (Run Success Checks) as complementary evaluation
-    - Provides semantic quality assessment beyond exit codes
-
-  Excludes:
-    - Shell-based checks (handled by EVL-01)
-    - Retry coordination (handled by EVL-03)
-
-  Rollback:
-    - LLM call failure → skip review, proceed with exit code results only
-
-  Design:
+  Scope:          LLM-as-judge scoring for edit quality
+  Preconditions:  Edit applied to file system, Provider available, review prompt template configured
+  Contexts:       Called after EVL-01 (Run Success Checks) as complementary evaluation; provides semantic quality assessment beyond exit codes
+  Excludes:       Shell-based checks (handled by EVL-01), retry coordination (handled by EVL-06)
+  Rollback:       LLM call failure -> skip review, proceed with exit code results only
+  Design:         LLMReviewer sends original + edited file to Provider; prompt asks for quality score (1-10) and feedback; score below threshold triggers retry via EVL-06; review is non-blocking
   Classification: Primary Orchestrator
-    - LLMReviewer sends original + edited file to Provider
-    - Prompt asks for quality score (1-10) and feedback
-    - Score below threshold triggers retry via EVL-03
-    - Review is non-blocking (failure doesn't block flow)
-
-  Returns:
-    - Success: ReviewResult with score and feedback
-    - Failure: ReviewResult with skip flag
+  Returns:        ReviewResult(score, feedback, passed) or ReviewResult(skip=true) on failure
 end note
 
-== evl02 INVOKE LLM Reviewer ==
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
-agent -> reviewer : REVIEW_EDIT(original_file, edited_file)
+== EVL-04 Validate With LLM ==
+
+agent -> reviewer : EVL-04 REVIEW_EDIT(original_file, edited_file)
 activate reviewer
 
 reviewer -> fs : read_file(original_file)
@@ -85,24 +70,14 @@ reviewer -> reviewer : validate_score(score, min=1, max=10)
 reviewer --> agent : ReviewResult(score, feedback, passed)
 deactivate reviewer
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over user, fs
-  Flow:
-    - AgentOrchestrator → LLMReviewer → FileSystem + Provider → ReviewResult
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → READING → PROMPTING → SCORING → DONE
-
-  Failure:
-    - LLM call failure → skip review
-    - Parse failure → skip review
-
-  Success:
-    - ReviewResult with score and feedback
-
-  Key invariants:
-    - Review is non-blocking (failure doesn't stop flow)
-    - Score always in range 1-10
-    - Feedback always provided regardless of score
+  Flow:    EVL-04 AgentOrchestrator -> LLMReviewer -> FileSystem + Provider -> ReviewResult
+  State:   <back:#ECEFF1>IDLE</back> → READING → PROMPTING → SCORING → DONE
+  Success: ReviewResult with score and feedback
+  Failure: LLM call failure -> skip review; Parse failure -> skip review
 end note
 
 @enduml

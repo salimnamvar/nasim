@@ -9,24 +9,37 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — PLG-03 Register Plugin Tools
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Tool Layer" #F3E5F5
   participant "PluginLoader" as loader
   participant "ToolRegistry" as registry
 end box
 
-note over participants
+note over user, registry
   Scope:          Register plugin-declared tools into ToolRegistry
   Preconditions:  Valid PluginManifest loaded (PLG-02)
-  Excludes:       Hook registration, plugin activation
   Contexts:       Called during plugin enable (PLG-05)
+  Excludes:       Hook registration, plugin activation
   Rollback:       Registration failure logged; other tools still registered
   Design:         Namespaced tool names to avoid collisions
   Classification: Process Decomposition
+  Returns:        all tools registered or CollisionError with tool skipped
 end note
 
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
 == PLG-03 Register Plugin Tools ==
+
+agent -> loader : PLG-03 REGISTER_PLUGIN_TOOLS(manifest)
+activate loader
 
 loader -> loader : enumerate tools from PluginManifest
 
@@ -41,13 +54,17 @@ loop for each tool in manifest
     registry --> loader : registered
 end
 
-loader --> loader : all tools registered
+loader --> agent : all tools registered
+deactivate loader
 
-note over participants
-  Flow:    PluginLoader -> enumerate plugin tools -> register in ToolRegistry
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, registry
+  Flow:    PLG-03 AgentOrchestrator -> PluginLoader -> enumerate plugin tools -> register in ToolRegistry
   State:   Tools added to registry
-  Failure: Name collision -> tool skipped with warning
   Success: All plugin tools registered
+  Failure: Name collision -> tool skipped with warning
 end note
 
 @enduml

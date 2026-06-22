@@ -26,6 +26,7 @@ note over user, cfg
   Rollback:       Invalid args -> print usage -> exit(1)
   Design:         Args override config; layered resolution
   Classification: Primary Orchestrator
+  Returns:        Config object ready for REPL or single-shot execution
 end note
 
 == CLI-04 Parse CLI Arguments ==
@@ -54,10 +55,10 @@ end
 parser --> user : Config ready, start REPL or single-shot
 
 note over user, cfg
-  Flow:    argv -> ArgParser -> ConfigLoader -> layered merge -> Config
+  Flow:    CLI-04 readCliArguments: argv -> ArgParser -> ConfigLoader -> layered merge -> Config
   State:   No state change
-  Failure: Invalid args or config -> error + exit
   Success: Config object ready for component initialization
+  Failure: Invalid args or config -> error + exit
 end note
 
 @enduml

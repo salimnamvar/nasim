@@ -1,129 +1,89 @@
 @startuml sq_obs03_correlate_trace
 ' ============================================================
 ' Title:     OBS-03 — CORRELATE Trace
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Generate and propagate trace context across nasim surfaces
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-participant "CLI" as cli
-participant "ServerApp" as http
+title nasim — OBS-03 CORRELATE Trace
 
-box "Observability Layer" #E3F2FD
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Observability Layer" #E0F2F1
   participant "TraceCorrelator" as trace
   participant "ContextPropagator" as propagator
 end box
-
-box "Agent Layer" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "Provider Layer" #FFF3E0
   participant "Provider" as provider
+end box
+box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as tools
 end box
 
-box "External" #F3E5F5
-  participant "OTelCollector" as otel
-end box
-
-note over cli, otel
-  Scope:
-    - obs03 CORRELATE Trace — generate and propagate trace context
-
-  Preconditions:
-    - TraceCorrelator initialized (contextvars available)
-
-  Contexts:
-    - Called at entrypoint: CLI turn start or HTTP request
-    - Propagated across: Provider calls, tool dispatch, hook execution,
-      subagent spawn, MCP tool calls
-
-  Excludes:
-    - Structured logging (OBS-01, but consumes trace context)
-    - Metrics recording (OBS-02)
-    - Wire log (WRL, but receives correlation ids)
-
-  Classification: Process Decomposition
-
-  Design:
-    - TraceCorrelator generates root trace/span per entrypoint
-    - ContextPropagator ensures trace flows across boundaries
-    - Every LogRecord and WireEvent carries: trace_id, span_id, parent_span_id
-    - Optional: bridge to OTel SDK when otel feature enabled
-
+note over user, tools
+  Scope:          OBS-03 CORRELATE Trace — generate and propagate trace context
+  Preconditions:  TraceCorrelator initialized (contextvars available)
+  Contexts:       Called at entrypoint: CLI turn start or HTTP request
+  Excludes:       Structured logging (OBS-01), metrics recording (OBS-02), wire log (WRL)
+  Rollback:       Trace generation failure -> fallback to random ids
+  Design:         TraceCorrelator generates root trace/span per entrypoint. ContextPropagator ensures trace flows across boundaries
   Returns:
-    - new_trace: TraceContext (root)
-    - child_span: TraceContext (nested)
-
-  Invariants:
-    - Every log record has trace_id
-    - Every wire event has trace_id
-    - Trace flows across all nasim surfaces
+    - Success: TraceContext(trace_id, span_id)
+    - Failure: Fallback to random ids on generation failure
 end note
 
-== obs03 CORRELATE Trace (CLI turn) ==
+== OBS-03 CORRELATE Trace (CLI turn) ==
 
-cli -> trace : new_trace("cli.turn")
+user -> repl : OBS-03 CORRELATE Trace(cli_turn)
+activate repl
+repl -> agent : OBS-03 CORRELATE Trace(cli_turn)
+activate agent
+
+agent -> trace : OBS-03 NEW Trace(cli_turn)
 activate trace
 trace -> trace : generate trace_id (uuid4)
 trace -> trace : generate span_id (uuid4hex)
 trace -> trace : bind to contextvars
-trace --> cli : TraceContext(trace_id, span_id)
+trace --> agent : TraceContext(trace_id, span_id)
 deactivate trace
 
-cli -> agent : execute_turn(user_input, trace_ctx)
-activate agent
-
-agent -> propagator : propagate()
+agent -> propagator : propagator.propagate()
 activate propagator
-propagator --> agent : {trace_id, span_id, parent_span_id}
+propagator --> agent : TraceContext(trace_id, span_id, parent_span_id)
 deactivate propagator
 
-agent -> provider : chat_stream(messages, trace_ctx)
+agent -> provider : PRV-03 STREAM ProviderChat(messages, trace_ctx)
 activate provider
 provider -> provider : create child_span("llm.chat")
-provider --> agent : stream
+provider --> agent : Stream(TextChunk)
 deactivate provider
 
-agent -> tools : execute(tool_call, trace_ctx)
+agent -> tools : TL-02 DISPATCH ToolCall(tool_call, trace_ctx)
 activate tools
 tools -> tools : create child_span("tool.exec")
-tools --> agent : result
+tools --> agent : ToolResult(result)
 deactivate tools
 
-agent --> cli : AgentEvent stream
+agent --> repl : AgentEvent stream
 deactivate agent
+repl --> user : AgentEvent stream
+deactivate repl
 
-== obs03 CORRELATE Trace (subagent spawn) ==
-
-agent -> propagator : propagate()
-activate propagator
-propagator --> agent : trace_context
-deactivate propagator
-
-agent -> agent : spawn_subagent(task, trace_context)
-
-note over cli, otel
-  Flow:
-    - Entry → TraceCorrelator.new_trace → ContextPropagator.propagate
-    - → Provider/Tool receives trace context
-    - → Every child span links back to root trace_id
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → GENERATING → PROPAGATING → DONE
-
-  Failure:
-    - Trace generation failure → fallback to random ids
-
-  Success:
-    - End-to-end correlation across all surfaces
-
-  Key invariants:
-    - Root trace per CLI turn or HTTP request
-    - Parent-child span hierarchy
-    - trace_id propagated to wire events and structured logs
-    - Optional OTel bridge when feature enabled
+note over user, tools
+  Flow:    OBS-03 → Developer → REPLSession → AgentOrchestrator → TraceCorrelator → ContextPropagator → Provider + ToolRegistry
+  State:   No state change
+  Success: End-to-end correlation across all surfaces
+  Failure: Trace generation failure -> fallback to random ids
 end note
 
 @enduml

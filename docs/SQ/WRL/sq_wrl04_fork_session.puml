@@ -11,6 +11,9 @@
 
 actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -44,13 +47,14 @@ note over user, session
     - Fork failure → no new session created
 
   Design:
-  Classification: Primary Orchestrator
     - Storage-layer operation only: reads events up to fork_point, writes new JSONL file
     - SessionForker reads events up to fork_point from wire log
     - Creates new session with copied event history
     - New session gets unique session_id
     - Fork point marked in wire log for traceability
     - Does NOT create parent-child link or branch metadata — SSN-08 owns that
+
+  Classification: Primary Orchestrator
 
   Returns:
     - Success: ForkResult with new_session_id and fork_point
@@ -59,41 +63,47 @@ end note
 
 == wrl03 FORK Session ==
 
-agent -> forker : FORK_SESSION(source_session_id, fork_turn)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> forker : wrl04 FORK Session(source_session_id, fork_turn)
 activate forker
 
-forker -> logger : READ_LOG(source_session_id, up_to_turn=fork_turn)
+forker -> logger : wrl02 READ Log(source_session_id, up_to_turn=fork_turn)
 activate logger
-logger --> forker : events[]
+logger --> forker : 200 OK — events[]
 deactivate logger
 
-forker -> session : CREATE_SESSION(forked_from=source_session_id)
+forker -> session : wrl04 CREATE Session(forked_from=source_session_id)
 activate session
-session --> forker : new_session_id
+session --> forker : 200 OK — new_session_id
 deactivate session
 
 forker -> forker : copy_events_to_session(events, new_session_id)
 
-forker -> logger : APPEND_EVENT(ForkEvent(source, fork_point, new_session_id))
+forker -> logger : wrl01 APPEND Event(ForkEvent(source, fork_point, new_session_id))
 activate logger
-logger --> forker : append_success
+logger --> forker : 200 OK — append_success
 deactivate logger
 
-forker --> agent : ForkResult(new_session_id, fork_turn, event_count)
+forker --> agent : 200 OK — ForkResult(new_session_id, fork_turn, event_count)
 deactivate forker
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result — fork complete, new session created
 
 note over user, session
   Flow:
-    - AgentOrchestrator → SessionForker → WireLogger + SessionManager → ForkResult
+    - WRL-04 → read events → create session → copy events → append fork event
 
   State:
     - <back:#ECEFF1>IDLE</back> → READING → CREATING → COPYING → DONE
 
-  Failure:
-    - Fork failure → no session created
-
   Success:
-    - ForkResult with new session ID
+    - 200 OK — ForkResult with new session ID
+
+  Failure:
+    - 500 INTERNAL — Fork failure → no session created
 
   Key invariants:
     - Fork point always recorded in wire log

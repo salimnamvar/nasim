@@ -4,13 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Automatically commit changes after edit operations
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — VCS-04 AUTO-COMMIT
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -20,43 +25,54 @@ box "Git Layer" #E8EAF6
   participant "GitCommit" as commit
 end box
 
-note over agent, commit
-  Scope:          Automatic commit after file edits
+note over user, commit
+  Scope:          VCS-04 AUTO-COMMIT — automatic commit after file edits
   Preconditions:  File edits completed, working tree dirty
-  Excludes:       Manual commit (VCS-02)
   Contexts:       Post-edit hook, batch operation cleanup
+  Excludes:       Manual commit (VCS-02)
   Rollback:       Skip commit if no changes detected
   Design:         Debounced auto-commit with conventional message generation
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={hash})
+    - Failure: Result(success=false, error="no_changes") — noop
 end note
 
 == VCS-04 AUTO-COMMIT ==
 
-agent -> integration : auto_commit(edit_context)
+user -> repl : types input
+repl -> agent : VCS-04 PROCESS(user_input)
+
+agent -> integration : VCS-04 AUTO-COMMIT(edit_context)
 activate integration
 
-integration -> status : check_dirty()
+integration -> status : VCS-04 READ DirtyStatus()
 activate status
 status --> integration : is_dirty
 deactivate status
 
 break No changes detected
-    integration --> agent : auto_commit_complete(noop)
+    integration --> agent : Result(success=false, error="no_changes")
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result: noop (no changes)
 end
 
-integration -> commit : commit(generated_message, files)
+integration -> commit : VCS-04 INSERT Commit(generated_message, files)
 activate commit
-commit --> integration : commit_result(hash)
+commit --> integration : Result(success=true, data={hash})
 deactivate commit
 
-integration --> agent : auto_commit_complete(hash)
+integration --> agent : Result(success=true, data={hash})
 deactivate integration
 
-note over agent, commit
-  Flow:    AgentOrchestrator -> GitIntegration -> check dirty -> generate message -> commit -> return
+agent --> repl : AgentEvent(Done)
+repl --> user : result: auto-commit hash
+
+note over user, commit
+  Flow:    VCS-04 -> User -> REPLSession -> AgentOrchestrator -> GitIntegration -> check dirty -> generate message -> commit -> return
   State:   No state change
-  Failure: No changes -> skip commit, return noop
-  Success: Agent receives commit hash from auto-commit
+  Success: Result(success=true, data={hash})
+  Failure: Result(success=false, error="no_changes") — skip commit, return noop
 end note
 
 @enduml

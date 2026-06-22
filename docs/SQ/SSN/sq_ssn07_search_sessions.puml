@@ -11,6 +11,11 @@
 
 title nasim — SSN-07 Search Sessions
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -19,19 +24,23 @@ box "Session Layer" #F1F8E9
 end box
 database "FTS5 Index" as fts
 
-note over agent, fts
+note over user, fts
   Scope:          Full-text search across all session history
   Preconditions:  FTS5 index built on session messages
-  Excludes:       Session read (SSN-02), session persist (SSN-01)
   Contexts:       Called when user searches past conversations
+  Excludes:       Session read (SSN-02), session persist (SSN-01)
   Rollback:       Index missing → fallback to linear scan
   Design:         FTS5 for fast search; results ranked by relevance
   Classification: Process Decomposition
+  Returns:        Success: SearchResult[session_id, turn_id, snippet, score]; Failure: IndexError → linear scan
 end note
 
 == SSN-07 Search Sessions ==
 
-agent -> search : search(query, limit)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> search : ssn07 SEARCH Session History(query, limit)
 activate search
 
 search -> fts : FTS5 query(query)
@@ -42,20 +51,25 @@ deactivate fts
 search -> search : rank results by relevance
 search -> search : format snippets
 
-search --> agent : SearchResult[session_id, turn_id, snippet, score]
+search --> agent : 200 OK — SearchResult[session_id, turn_id, snippet, score]
 deactivate search
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result — ranked search results
 
 break Index not available
     fts --> search : IndexError
     search -> search : fallback: linear scan
-    search --> agent : SearchResult[linear_scan_results]
+    search --> agent : 200 OK — SearchResult[linear_scan_results]
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result — search results via linear scan
 end
 
-note over agent, fts
-  Flow:    AgentOrchestrator → SessionSearch → FTS5 query → rank → return
+note over user, fts
+  Flow:    SSN-07 → FTS5 query → rank → return
   State:   No state change (read-only query)
-  Failure: Index missing → linear scan fallback
-  Success: Ranked search results returned
+  Success: 200 OK — ranked search results returned
+  Failure: 500 INTERNAL — index missing, linear scan fallback
 end note
 
 @enduml

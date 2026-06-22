@@ -30,22 +30,24 @@ note over user, fs
   Excludes:       Read, write
   Rollback:       Error if old_string not found or ambiguous
   Design:         Fails if old_string appears 0 or >1 times
-  Classification: Primary Orchestrator
-  Safety:         Requires permission check (SAF-01)
+  Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content="Edited: replaced 1 occurrence") or ToolResult(success=False, error=str)
 end note
 
 == TL-03 EDIT File ==
 
-user -> repl : (entry via AGT-01)
-repl -> agent : (entry via AGT-01)
-agent -> registry : execute("edit_file", {path, old_string, new_string})
-registry -> ft : execute(path, old_string, new_string)
+user -> repl : types input
+repl -> agent : TL-03 PROCESS(user_input)
+agent -> registry : TL-03 EDIT File(path, old_string, new_string)
+registry -> ft : TL-03 EDIT File(path, old_string, new_string)
 ft -> fs : Path(path).read_text()
 
 break File not found
     fs --> ft : FileNotFoundError
     ft --> registry : ToolResult(success=False, error="Error: file not found")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error: file not found")
 end
 
 ft -> ft : content.count(old_string)
@@ -53,21 +55,27 @@ ft -> ft : content.count(old_string)
 alt count == 0
     ft --> registry : ToolResult(success=False, error="old_string not found")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="old_string not found")
 else count > 1
     ft --> registry : ToolResult(success=False, error="old_string found N times (ambiguous)")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="old_string found N times (ambiguous)")
 else count == 1
     ft -> ft : content.replace(old_string, new_string, 1)
     ft -> fs : Path(path).write_text(new_content)
     ft --> registry : ToolResult(success=True, content="Edited: replaced 1 occurrence")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result
 end
 
 note over user, fs
-  Flow:    read -> count -> replace -> write -> ToolResult
+  Flow:    TL-03: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> EditFileTool -> Host Filesystem -> ToolResult
   State:   No state change
-  Failure: Not found or ambiguous -> ToolResult(success=False)
   Success: Single replacement written
+  Failure: Not found or ambiguous -> ToolResult(success=False)
 end note
 
 @enduml

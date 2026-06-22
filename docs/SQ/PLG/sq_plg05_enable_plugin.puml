@@ -9,8 +9,14 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — PLG-05 Enable Plugin
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Tool Layer" #F3E5F5
   participant "PluginLoader" as loader
   participant "ToolRegistry" as registry
@@ -19,17 +25,24 @@ box "Hooks Layer" #FFFDE7
   participant "HookManager" as hm
 end box
 
-note over participants
+note over user, hm
   Scope:          Load plugin, register tools and hooks, set state ENABLED
   Preconditions:  Valid PluginManifest loaded (PLG-02)
-  Excludes:       Plugin discovery, disable
   Contexts:       Called by CLI or PluginLoader
+  Excludes:       Plugin discovery, disable
   Rollback:       Partial enable logged; state set to ERROR
   Design:         Atomic enable: tools + hooks + state
   Classification: Process Decomposition
+  Returns:        plugin enabled or state ERROR with partial enable logged
 end note
 
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
 == PLG-05 Enable Plugin ==
+
+agent -> loader : PLG-05 ENABLE_PLUGIN(plugin_id)
+activate loader
 
 loader -> loader : PLG-03 register_plugin_tools()
 loader -> loader : PLG-04 register_plugin_hooks()
@@ -39,13 +52,17 @@ break Tool or hook registration fails
     loader -> loader : set state ERROR, log failure
 end
 
-loader --> loader : plugin enabled
+loader --> agent : plugin enabled
+deactivate loader
 
-note over participants
-  Flow:    PluginLoader -> load plugin -> activate tools + hooks -> set state ENABLED
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, hm
+  Flow:    PLG-05 AgentOrchestrator -> PluginLoader -> load plugin -> activate tools + hooks -> set state ENABLED
   State:   Plugin state: DISABLED -> ENABLED (or ERROR)
-  Failure: Registration failure -> state ERROR, partial enable logged
   Success: Plugin enabled with tools and hooks active
+  Failure: Registration failure -> state ERROR, partial enable logged
 end note
 
 @enduml

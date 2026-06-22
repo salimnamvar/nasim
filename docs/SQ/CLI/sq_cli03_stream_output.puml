@@ -24,6 +24,7 @@ note over user, renderer
   Rollback:       N/A — renderer is passive consumer
   Design:         Uses Rich library for colors, diffs, formatting
   Classification: Primary Orchestrator
+  Returns:        Developer sees formatted terminal output
 end note
 
 == CLI-03 STREAM Output ==
@@ -54,10 +55,10 @@ loop for each event
 end
 
 note over user, renderer
-  Flow:    Event stream -> Renderer -> formatted terminal output
+  Flow:    CLI-03 streamOutput: Event stream -> Renderer -> formatted terminal output
   State:   No state change
-  Failure: N/A — renderer is passive
   Success: All events rendered with appropriate formatting
+  Failure: N/A — renderer is passive
 end note
 
 @enduml

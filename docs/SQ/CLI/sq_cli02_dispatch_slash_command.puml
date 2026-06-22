@@ -28,6 +28,7 @@ note over user, agent
   Rollback:       Unknown command -> error message
   Design:         Commands: /help, /reset, /model, /quit, /plan, /sessions
   Classification: Primary Orchestrator
+  Returns:        Developer sees command result or error message
 end note
 
 == CLI-02 Execute Slash Command ==
@@ -37,37 +38,37 @@ repl -> cmd : dispatch("/command")
 cmd -> cmd : parse command name and args
 
 alt /help
-    cmd -> renderer : display help text
+    cmd -> renderer : displayHelpText()
     renderer --> user : help menu
 else /reset
     cmd -> agent : reset()
     agent -> agent : clear conversation history
-    cmd -> renderer : "History cleared."
+    cmd -> renderer : displayConfirmation("History cleared.")
     renderer --> user : confirmation
 else /model
-    cmd -> renderer : display current model name
+    cmd -> renderer : displayModelInfo()
     renderer --> user : model info
 else /plan
-    cmd -> agent : toggle_plan_mode()
+    cmd -> agent : togglePlanMode()
     agent -> agent : toggle PLANNING state
-    cmd -> renderer : "Plan mode: ON/OFF"
+    cmd -> renderer : displayConfirmation("Plan mode: ON/OFF")
     renderer --> user : confirmation
 else /sessions
-    cmd -> renderer : list available sessions
+    cmd -> renderer : displaySessionList()
     renderer --> user : session list
 else /quit or /exit
     cmd -> repl : signal exit
     repl --> user : "Bye."
 else unknown command
-    cmd -> renderer : "Unknown command: /cmd"
+    cmd -> renderer : displayError("Unknown command: /cmd")
     renderer --> user : error display
 end
 
 note over user, agent
-  Flow:    /cmd -> SlashCommandHandler -> action -> Renderer -> User
+  Flow:    CLI-02 dispatchSlashCommand: /cmd -> SlashCommandHandler -> action -> Renderer -> User
   State:   No state change (except /plan toggles PLANNING, /reset clears history)
-  Failure: Unknown command -> error message
   Success: Command action completed
+  Failure: Unknown command -> error message
 end note
 
 @enduml

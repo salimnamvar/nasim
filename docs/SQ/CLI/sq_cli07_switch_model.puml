@@ -27,11 +27,12 @@ end box
 note over user, rtg
   Scope:          Switch active model via /model slash command
   Preconditions:  REPLSession active, model registry available
-  Excludes:       Provider registration (PRV-01), fallback logic (RTG-02)
   Contexts:       Invoked by Developer via /model command
+  Excludes:       Provider registration (PRV-01), fallback logic (RTG-02)
   Rollback:       Model not found → display error, retain current model
   Design:         Delegates to RTG-04 SWITCH Model for actual provider switch
   Classification: Primary Orchestrator
+  Returns:        Active model switched, confirmation shown
 end note
 
 == CLI-07 Switch Model ==
@@ -41,7 +42,7 @@ repl -> cmd : dispatch("/model {model_name}")
 activate cmd
 
 cmd -> cmd : parse model name
-cmd -> rtg : switch_model(model_name)
+cmd -> rtg : switchModel(model_name)
 activate rtg
 
 rtg -> rtg : validate model availability
@@ -62,10 +63,10 @@ break Model not found
 end
 
 note over user, rtg
-  Flow:    Developer → REPLSession → SlashCommandHandler → RTG-04 SWITCH Model → confirm
+  Flow:    CLI-07 switchModel: Developer → REPLSession → SlashCommandHandler → RTG-04 SWITCH Model → confirm
   State:   <back:#ECEFF1>IDLE</back> → SWITCHING → <back:#ECEFF1>IDLE</back>
-  Failure: Model not found → display error, retain current
   Success: Model switched, confirmation shown
+  Failure: Model not found → display error, retain current
 end note
 
 @enduml

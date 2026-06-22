@@ -9,7 +9,13 @@
 ' Review:    —
 ' ============================================================
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
   participant "ContextCompactor" as compactor
 end box
@@ -25,11 +31,14 @@ note over history, provider
   Rollback:       Secondary LLM fails -> truncate oldest messages
   Design:         Summarize oldest N exchanges via secondary LLM call
   Classification: Process Decomposition
+  Returns:        shortened messages on success; truncated messages on failure
 end note
 
 == CTX-02 TRUNCATE Nodes ==
 
-history -> compactor : compact(messages, budget)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> history : CTX-02 COMPACT(messages, budget)
 compactor -> compactor : query ContextPrioritizer for node importance scores
 compactor -> compactor : sort nodes by ascending importance (lowest first)
 compactor -> compactor : protect system prompt nodes (never truncated)
@@ -49,11 +58,14 @@ compactor -> compactor : create summary message
 compactor -> compactor : replace selected messages with summary
 compactor --> history : shortened messages (summarized)
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over history, provider
-  Flow:    budget exceeded -> select old -> summarize -> replace
+  Flow:    User → REPLSession → AgentOrchestrator → budget exceeded → select old → summarize → replace
   State:   <back:#E0F2F1>COMPACTING</back> -> <back:#FFF3E0>THINKING</back>
-  Failure: LLM fails -> truncate fallback
   Success: Messages shortened, token count reduced
+  Failure: LLM fails -> truncate fallback
 end note
 
 @enduml

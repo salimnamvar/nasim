@@ -42,10 +42,18 @@ Back to [docs/](../README.md).
 Each SQ diagram follows this structure:
 
 1. **Header** — Title, boundary, purpose, version, source, review status
-2. **Lifelines** — Actors, participants grouped by layer (colored boxes)
-3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Classification, Design, Returns
-4. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks
-5. **Summary Note** — Flow summary, state transitions, success/failure paths, key invariants
+2. **Lifelines** — Actor (Developer/HTTPClient/MCPClientRuntime) + full entry chain + participants grouped by layer (colored boxes)
+3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Design, Classification, Returns
+4. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks; all messages use RoD method names
+5. **Summary Note** — Flow (with UC_ID prefix), State transitions, Success (with HTTP codes), Failure (with HTTP codes and recovery)
+
+### Key Rules (updated 2026-06-22)
+
+- **ALL diagrams must have actors** — even Process Decomposition diagrams show who triggers the sequence
+- **Full entry chain required** — Actor → Interface → Core Component → Target
+- **RoD method names** — UC_ID METHOD ResourceName(params) format on all messages
+- **Returns section** — mandatory in intro note with success/failure response codes
+- **Failure propagation** — all failure paths propagate back through entry chain to actor
 
 ## Meta-Software Designer Audit (2026-06-21)
 
@@ -71,7 +79,10 @@ Cross-referencing all 6 reference agent prompt outputs (dee.md, mis.md, gro.md, 
 - **SM State Colors**: `hnote` blocks with hex colors at state transition points during diagram flow.
 - **ROD AIP-193**: All server-facing failure paths use `{error: {code, message, status}}` format.
 - **ref Frames**: Cross-cutting concerns (OBS-01, AGT-15, HK-04/05) use `ref` blocks, never inlined.
-- **Actor Rules**: Process Decomposition diagrams have no actor. UC-level Sub-flows have actor + entry chain.
+- **Actor Rules**: ALL diagrams (including Process Decomposition) require actor + full entry chain. The actor shows who triggers the sequence.
+- **RoD Method Names**: All message labels use UC_ID METHOD ResourceName(params) format.
+- **Returns Section**: All intro notes include Returns: field with success/failure response codes.
+- **Failure Propagation**: All failure paths propagate back through the full entry chain to the actor.
 
 ### UC↔SQ Mapping
 

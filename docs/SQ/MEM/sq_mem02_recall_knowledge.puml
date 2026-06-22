@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — MEM-02 RECALL Knowledge
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -20,19 +23,23 @@ box "Memory Layer" #E0F2F1
   participant "MemoryIndex" as index
 end box
 
-note over agent, index
+note over user, index
   Scope:          Knowledge retrieval by key or pattern
   Preconditions:  Knowledge entries exist in store
-  Excludes:       Full-text search (MEM-03), scope filtering (MEM-04)
   Contexts:       Called by TL-20 (RECALL Memory), session rebuild
+  Excludes:       Full-text search (MEM-03), scope filtering (MEM-04)
   Rollback:       No rollback needed (read-only operation)
   Design:         Key-based lookup with scope filtering
   Classification: Process Decomposition
+  Returns:        recalled_entry or null (key not found)
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == MEM-02 RECALL Knowledge ==
 
-agent -> store : recall(key, scope)
+agent -> store : MEM-02 RECALL(key, scope)
 activate store
 
 store -> scope : filter_by_scope(key, scope)
@@ -52,11 +59,14 @@ end
 store --> agent : recalled_entry
 deactivate store
 
-note over agent, index
-  Flow:    AgentOrchestrator -> MemoryStore -> filter by scope -> lookup key -> return entry
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, index
+  Flow:    MEM-02 AgentOrchestrator -> MemoryStore -> filter by scope -> lookup key -> return entry
   State:   No state change
-  Failure: Key not found -> return null, log miss
   Success: Agent receives knowledge entry
+  Failure: Key not found -> return null, log miss
 end note
 
 @enduml

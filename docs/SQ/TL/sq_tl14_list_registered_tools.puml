@@ -11,6 +11,11 @@
 
 title nasim — TL-14 List Registered Tools
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -18,27 +23,32 @@ box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
 end box
 
-note over participants
+note over user, registry
   Scope:          List all registered tools with names and descriptions
   Preconditions:  ToolRegistry initialized
   Excludes:       Tool execution, tool registration
-  Contexts:       Called by AGT-02
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Error string returned to LLM
   Design:         Read-only; no mutation
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, tools=[...])
 end note
 
 == TL-14 List Registered Tools ==
 
-agent -> registry : execute("list_tools", {})
+user -> repl : types input
+repl -> agent : TL-14 PROCESS(user_input)
+agent -> registry : TL-14 List Registered Tools({})
 registry -> registry : enumerate registered tools
 registry --> agent : ToolResult(success=True, tools=[...])
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over participants
-  Flow:    AgentOrchestrator -> ToolRegistry -> list all registered tools -> ToolResult
+note over user, registry
+  Flow:    TL-14: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> list all registered tools -> ToolResult
   State:   No state change
-  Failure: N/A (read-only query)
   Success: List of tool names and descriptions
+  Failure: N/A (read-only query)
 end note
 
 @enduml

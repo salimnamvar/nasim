@@ -11,6 +11,11 @@
 
 title nasim — SSN-08 Branch Session
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -19,22 +24,26 @@ box "Session Layer" #F1F8E9
 end box
 database "Session Store" as store
 
-note over agent, store
+note over user, store
   Scope:          Fork current session into a new branch
   Preconditions:  Active session with message history
-  Excludes:       Session revert (SSN-06), session search (SSN-07)
   Contexts:       Called when user requests to explore alternative path
+  Excludes:       Session revert (SSN-06), session search (SSN-07)
   Rollback:       Fork failure → display error, retain current session
   Design:         High-level domain operation. Calls WRL-04 (FORK Session) for
                   the low-level storage-layer fork (wire log slice + new file).
                   This UC owns session-level semantics (parent-child link,
                   branch metadata); WRL-04 owns event-log-level semantics.
   Classification: Process Decomposition
+  Returns:        Success: BranchCreated(branch_session_id, parent_id); Failure: BranchError → retain current
 end note
 
 == SSN-08 Branch Session ==
 
-agent -> fork : branch(session_id, from_turn)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> fork : ssn08 BRANCH Session(session_id, from_turn)
 activate fork
 
 fork -> store : load messages up to from_turn
@@ -52,20 +61,24 @@ fork -> fork : copy messages to branch
 fork -> fork : create parent-child link
 fork -> fork : call WRL-04 (FORK Session) for wire log fork
 
-fork --> agent : BranchCreated(branch_session_id, parent_id)
+fork --> agent : 200 OK — BranchCreated(branch_session_id, parent_id)
 deactivate fork
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result — branch session created
 
 break Copy failure
     store --> fork : IOError
-    fork --> agent : BranchError
-    agent -> agent : log error, retain current session
+    fork --> agent : 500 INTERNAL — BranchError
+    agent --> repl : AgentEvent(Error)
+    repl --> user : result — branch failed, retain current session
 end
 
-note over agent, store
-  Flow:    AgentOrchestrator → SessionFork → copy session → create branch
+note over user, store
+  Flow:    SSN-08 → copy session → create branch
   State:   <back:#2E7D32>ACTIVE</back> → BRANCHING → <back:#2E7D32>ACTIVE</back> (parent + child)
-  Failure: Copy error → display error, retain current
-  Success: Branch session created, new session_id returned
+  Success: 200 OK — branch session created, new session_id returned
+  Failure: 500 INTERNAL — copy error, display error, retain current
 end note
 
 @enduml

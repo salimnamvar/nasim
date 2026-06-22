@@ -18,6 +18,11 @@ end box
 box "RIM Layer" #F3E5F5
   participant "RepoIndex" as rim
 end box
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -25,16 +30,19 @@ end box
 note over pipe, agent
   Scope:          Retrieve relevant context and inject into reasoning graph
   Preconditions:  PipelineOrchestrator active, RepoIndex available
-  Excludes:       Context compaction (CTX-02/05), token tracking (CTX-06)
   Contexts:       Called before LLM call to enrich prompt context
+  Excludes:       Context compaction (CTX-02/05), token tracking (CTX-06)
   Rollback:       Injection failure → proceed with existing context
   Design:         InjectionProcessor queries RepoIndex for relevant code/docs
   Classification: Process Decomposition
+  Returns:        InjectionResult(nodes_added, tokens_used) on success; InjectionResult(0, 0) on failure
 end note
 
 == CTX-04 Inject Context ==
 
-pipe -> inj : inject(task_description, graph)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> pipe : CTX-04 INJECT(task_description, graph)
 activate inj
 
 inj -> rim : query_relevant(task_description)
@@ -49,6 +57,9 @@ inj -> inj : inject into reasoning graph
 inj --> pipe : InjectionResult(nodes_added, tokens_used)
 deactivate inj
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 break RepoIndex unavailable
     rim --> inj : IndexError
     inj -> inj : skip injection
@@ -56,10 +67,10 @@ break RepoIndex unavailable
 end
 
 note over pipe, agent
-  Flow:    PipelineOrchestrator → InjectionProcessor → retrieve context → inject into graph
+  Flow:    User → REPLSession → AgentOrchestrator → PipelineOrchestrator → InjectionProcessor → retrieve context → inject into graph
   State:   INJECTING → READY
-  Failure: Index unavailable → skip, proceed with existing context
   Success: Context nodes injected, token count updated
+  Failure: Index unavailable → skip, proceed with existing context
 end note
 
 @enduml

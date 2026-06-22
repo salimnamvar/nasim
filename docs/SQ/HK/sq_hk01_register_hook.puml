@@ -4,13 +4,21 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Register a hook in the HookManager
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — HK-01 REGISTER Hook
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Plugins Layer" #EDE7F6
   participant "PluginLoader" as loader
 end box
@@ -19,33 +27,55 @@ box "Hooks Layer" #FFFDE7
   participant "Hook" as hook
 end box
 
-note over loader, hook
-  Scope:          Register a hook in the HookManager
+note over user, hook
+  Scope:          HK-01 REGISTER Hook
   Preconditions:  HookManager initialized, PluginLoader active
-  Excludes:       Hook execution (HK-02..05), hook validation (HK-06)
   Contexts:       Called by PLG-04 (REGISTER Plugin Hooks)
+  Excludes:       Hook execution (HK-02..05), hook validation (HK-06)
   Rollback:       Registration failure logged, hook not added
   Design:         PluginLoader registers plugin-provided hooks at load time
   Classification: Process Decomposition
+  Returns:
+    - Success: Hook(registered) — hook instance appended to registry
+    - Failure: Warning logged — duplicate hook name skipped
 end note
 
 == HK-01 REGISTER Hook ==
 
-loader -> hooks : register(event, handler, priority)
+user -> repl : invoke agent
+activate repl
+repl -> agent : hk01 REGISTER Hook(hook_spec)
+activate agent
+agent -> loader : hk01 REGISTER Hook(hook_spec)
+activate loader
+loader -> hooks : hk01 REGISTER Hook(event, handler, priority)
 activate hooks
-hooks -> hook : Hook(name, event, handler, priority)
+hooks -> hook : hk01 CREATE Hook(name, event, handler, priority)
 activate hook
 hook --> hooks : hook instance
 deactivate hook
-hooks --> hooks : hooks[event].append(hook)
-hooks --> loader : registered
+
+alt Duplicate hook name
+    hooks --> loader : warning logged, skip
+    loader --> agent : warning logged
+else New hook
+    hooks --> hooks : hk01 APPEND To Registry(hook)
+    hooks --> loader : registered
+end
 deactivate hooks
 
-note over loader, hook
-  Flow:    PluginLoader -> HookManager -> Hook creation -> append to registry
+loader --> agent : registered
+deactivate loader
+agent --> repl : hook registered
+deactivate agent
+repl --> user : hook registered
+deactivate repl
+
+note over user, hook
+  Flow:    HK-01 → PluginLoader → HookManager → Hook creation → check duplicate → append to registry
   State:   No state change
-  Failure: Duplicate hook name -> log warning, skip
-  Success: Hook registered for event
+  Success: Hook(registered) — hook instance appended to registry
+  Failure: Warning logged — duplicate hook name skipped
 end note
 
 @enduml

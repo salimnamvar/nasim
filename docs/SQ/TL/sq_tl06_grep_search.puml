@@ -9,13 +9,21 @@
 ' Review:    —
 ' ============================================================
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
   participant "GrepTool" as grep
   participant "ShellTool" as shell
 end box
 
-note over registry, shell
+note over user, shell
   Scope:          Search file contents by regex pattern
   Preconditions:  Pattern and path provided by LLM
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
@@ -23,11 +31,15 @@ note over registry, shell
   Rollback:       Error string returned to LLM
   Design:         Prefers ripgrep; falls back to Python re
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content=formatted_matches) or ToolResult(success=False, error=str)
 end note
 
 == TL-06 GREP Search ==
 
-registry -> grep : execute(pattern, path, case_sensitive, include_glob)
+user -> repl : types input
+repl -> agent : TL-06 PROCESS(user_input)
+agent -> registry : TL-06 GREP Search(pattern, path, case_sensitive, include_glob)
+registry -> grep : TL-06 GREP Search(pattern, path, case_sensitive, include_glob)
 
 alt ripgrep available
     grep -> shell : subprocess: rg --json pattern path
@@ -38,20 +50,29 @@ else ripgrep not found
 end
 
 break No matches found
-    grep --> registry : "No matches found for pattern"
+    grep --> registry : ToolResult(success=False, error="No matches found for pattern")
+    registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="No matches found for pattern")
 end
 
 break Permission denied / path error
-    grep --> registry : "Error: permission denied / path not found"
+    grep --> registry : ToolResult(success=False, error="Error: permission denied / path not found")
+    registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error: permission denied / path not found")
 end
 
-grep --> registry : formatted matches string
+grep --> registry : ToolResult(success=True, content=formatted_matches)
+registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over registry, shell
-  Flow:    pattern -> ripgrep/Python -> matches -> formatted string
+note over user, shell
+  Flow:    TL-06: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> GrepTool -> ripgrep/Python -> ToolResult
   State:   No state change
-  Failure: No matches, permission error -> error string
   Success: List of matching file:line:content
+  Failure: No matches, permission error -> ToolResult(success=False)
 end note
 
 @enduml

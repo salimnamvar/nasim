@@ -23,11 +23,12 @@ end box
 note over client, registry
   Scope:          List all registered tools available to the agent
   Preconditions:  ToolRegistry initialized
-  Excludes:       Tool execution, tool registration
   Contexts:       Called by HTTPClient via GET /v1/tools
+  Excludes:       Tool execution, tool registration
   Rollback:       500 if registry read fails
   Design:         CSR: Controller(ServerRouter) -> Repository(ToolRegistry). ROD: standard list (AIP-136)
   Classification: Primary Orchestrator
+  Returns:        200 OK with tool list, or 500 INTERNAL error
 end note
 
 == SRV-08 LIST Tools ==
@@ -35,7 +36,7 @@ end note
 client -> router : GET /v1/tools
 activate router
 
-router -> registry : LIST tools
+router -> registry : listTools()
 activate registry
 
 break Registry read failure [500]
@@ -51,11 +52,10 @@ router --> client : 200 OK {tools: [...]}
 deactivate router
 
 note over client, registry
-  Flow:    HTTPClient -> ServerRouter -> ToolRegistry -> return list
+  Flow:    SRV-08 listTools: HTTPClient -> ServerRouter -> ToolRegistry -> return list
   State:   No state change
-  Failure: 500 INTERNAL on registry read failure
   Success: 200 OK with tool list
-  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
+  Failure: 500 INTERNAL on registry read failure
 end note
 
 @enduml

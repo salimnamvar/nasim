@@ -4,13 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Read working tree status and staged changes
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — VCS-01 READ Git Status
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -21,40 +26,51 @@ box "External" #F5F5F5
   participant "Git Repository" as git
 end box
 
-note over agent, git
-  Scope:          Git working tree status inspection
+note over user, git
+  Scope:          VCS-01 READ GitStatus — git working tree status inspection
   Preconditions:  Git repository initialized
-  Excludes:       Commit operations (VCS-02), diff (VCS-03)
   Contexts:       Called by TL-11 (READ Git Status), pre-commit validation
+  Excludes:       Commit operations (VCS-02), diff (VCS-03)
   Rollback:       No rollback needed (read-only operation)
   Design:         Cached status with file system watch invalidation
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={staged, modified, untracked})
+    - Failure: Result(success=false, error="not_a_git_repository")
 end note
 
 == VCS-01 READ Git Status ==
 
-agent -> status : get_status()
+user -> repl : types input
+repl -> agent : VCS-01 PROCESS(user_input)
+
+agent -> status : VCS-01 READ GitStatus()
 activate status
 
-status -> git : git status --porcelain
+status -> git : VCS-01 EXECUTE git_status_porouslain()
 activate git
 git --> status : raw_output
 deactivate git
 
-status -> status : parse status output
+status -> status : VCS-01 PARSE StatusOutput(raw_output)
 
 break Not a git repo
-    status --> agent : error_status("not a git repository")
+    status --> agent : Result(success=false, error="not_a_git_repository")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : error: not a git repository
 end
 
-status --> agent : status_summary(staged, modified, untracked)
+status --> agent : Result(success=true, data={staged, modified, untracked})
 deactivate status
 
-note over agent, git
-  Flow:    AgentOrchestrator -> GitStatus -> execute git status -> parse -> return summary
+agent --> repl : AgentEvent(Done)
+repl --> user : result: git status summary
+
+note over user, git
+  Flow:    VCS-01 -> User -> REPLSession -> AgentOrchestrator -> GitStatus -> execute git status -> parse -> return summary
   State:   No state change
-  Failure: Not a git repo -> return error status
-  Success: Agent receives staged/modified/untracked file lists
+  Success: Result(success=true, data={staged, modified, untracked})
+  Failure: Result(success=false, error="not_a_git_repository") — return error status
 end note
 
 @enduml

@@ -32,13 +32,15 @@ box "Observability Layer" #E0F2F1
 end box
 
 note over user, trace
-  Scope:          Core agentic loop — single complete task execution cycle
+  Scope:          AGT-01 PROCESS User Task
   Preconditions:  Agent initialized with Provider, ToolRegistry, ConversationHistory
-  Excludes:       Slash command handling (CLI-02), streaming display (CLI-03), session save/load (SSN-01/02)
   Contexts:       Called by CLI-01 (PROCESS User Input) after REPL input parsed; entry point for entire agentic loop
+  Excludes:       Slash command handling (CLI-02), streaming display (CLI-03), session save/load (SSN-01/02)
   Rollback:       LLM call failure -> append error message -> ERROR state -> IDLE; Tool execution failure -> append error message -> ERROR state -> IDLE; Max iterations exceeded -> force Done event
   Design:         AgentOrchestrator yields AgentEvent objects (no print()); Max iterations configurable; PermissionGate consulted before every tool execution; Recursive: after tool dispatch, re-calls Provider for next response
   Classification: Primary Orchestrator
+  Returns:        Success: AgentEvent(Done) with final text response
+                  Failure: AgentEvent(Error) — LLM error or tool execution failure
 end note
 
 == AGT-01 PROCESS User Task ==
@@ -100,10 +102,10 @@ end
 deactivate agent
 
 note over user, trace
-  Flow:    User -> REPLSession -> AgentOrchestrator -> [OBS-03] -> [AGT-03] -> [HK-04] -> Provider -> [HK-05] -> [AGT-03] -> (tool loop via AGT-02) -> Done
+  Flow:    AGT-01 → [OBS-03] → [AGT-03] → [HK-04] → [PRV-02] → [HK-05] → [AGT-03] → (tool loop via AGT-02) → Done
   State:   <back:#ECEFF1>IDLE</back> -> <back:#E8EAF6>LISTENING</back> -> <back:#FFF3E0>THINKING</back> -> [<back:#F3E5F5>TOOL_EXEC</back>]* -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
-  Failure: LLM error or tool error -> ERROR -> IDLE
-  Success: Done event with final text response
+  Success: AgentEvent(Done) — final text response streamed to user
+  Failure: AgentEvent(Error) — LLM error or tool error; ERROR -> IDLE
 end note
 
 @enduml

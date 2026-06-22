@@ -12,6 +12,11 @@
 
 title nasim — AGT-02 DISPATCH Tool Call
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "SafetyCoordinator" as safety
@@ -30,26 +35,32 @@ box "Observability Layer" #E0F2F1
   participant "StructuredLogger" as logger
 end box
 
-note over agent, logger
-  Scope:          Dispatch a single tool call with full safety pipeline
+note over user, logger
+  Scope:          AGT-02 DISPATCH Tool Call
   Preconditions:  Tool call from LLM, ToolRegistry populated, SafetyCoordinator initialized
-  Excludes:       LLM call logic (PRV-02), Permission prompt rendering (CLI-06), Tool result display (CLI-03)
   Contexts:       Called by AGT-01 (PROCESS User Task) for each tool_call in the inner loop
+  Excludes:       LLM call logic (PRV-02), Permission prompt rendering (CLI-06), Tool result display (CLI-03)
   Rollback:       Safety violation -> ToolResult(success=false); Tool error -> ErrorBoundary -> ToolResult(error)
   Design:         NO GOD OBJECT: AgentOrchestrator delegates safety to SafetyCoordinator (AGT-15).
                   SafetyCoordinator composes PermissionGate, InjectionScanner, EgressInspector.
                   ToolResult is always structured (success, content, error)
   Classification: UC-level Sub-flow
+  Returns:        Success: ToolResult(success=true, content={result})
+                  Failure: ToolResult(success=false, error="{error_type}") — safety violation, unknown tool, or execution error
 end note
 
 == AGT-02 DISPATCH Tool Call ==
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+activate agent
 
 agent -> agent : receive tool_call from LLM response
 
 hnote over agent #FFF9C4 : **State: AWAITING_APPROVAL** (if unsafe)
 
 ' --- NO GOD OBJECT: Delegate to SafetyCoordinator (AGT-15) ---
-agent -> safety : RUN_SAFETY_PIPELINE(tool_call)
+agent -> safety : agt15 DISPATCH Safety Pipeline({tool_call})
 activate safety
 ref over safety
   AGT-15: DISPATCH Safety Pipeline (injection, egress, permission)
@@ -91,12 +102,14 @@ agent -> agent : append ToolResult to messages
 
 hnote over agent #FFF3E0 : **State: THINKING**
 
-note over agent, logger
-  Flow:    AgentOrchestrator -> SafetyCoordinator (AGT-15) -> ToolRegistry -> Tool.execute()
+agent --> repl : AgentEvent(Done)
+deactivate agent
+
+note over user, logger
+  Flow:    AGT-02 → [AGT-15: Safety Pipeline] → [ToolRegistry.find] → [Tool.execute] → ToolResult
   State:   <back:#FFF3E0>THINKING</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> (if unsafe) -> <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF3E0>THINKING</back>
-  Failure: Safety violation -> ToolResult(error); Unknown tool -> ErrorBoundary -> ToolResult(error)
-  Success: ToolResult appended to ConversationHistory
-  Key invariants: Every tool goes through SafetyCoordinator. No direct PermissionGate call from AgentOrchestrator
+  Success: ToolResult(success=true, content={result}) appended to ConversationHistory
+  Failure: ToolResult(success=false, error="{safety_violation|unknown_tool|execution_error}")
 end note
 
 @enduml

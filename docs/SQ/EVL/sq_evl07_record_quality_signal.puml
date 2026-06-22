@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — EVL-07 RECORD Quality Signal
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -22,19 +25,23 @@ box "Storage Layer" #F3E5F5
   participant "SignalStore" as store
 end box
 
-note over participants
+note over user, store
   Scope:          Record accept/reject quality signal with feedback for future reference
   Preconditions:  Evaluation completed, decision made (accept or reject)
-  Excludes:       Evaluation logic, retry coordination
   Contexts:       Called after EVL-01..06 evaluation completes
-  Rollback:       Storage failure → signal lost, warning logged
+  Excludes:       Evaluation logic, retry coordination
+  Rollback:       Storage failure -> signal lost, warning logged
   Design:         QualitySignal persists accept/reject decision with contextual feedback
   Classification: Process Decomposition
+  Returns:        SignalRecorded(signal_id)
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == EVL-07 RECORD Quality Signal ==
 
-agent -> engine : RECORD_SIGNAL(task_id, decision, feedback?)
+agent -> engine : EVL-07 RECORD_SIGNAL(task_id, decision, feedback?)
 activate engine
 
 engine -> signal : record_quality_signal(task_id, decision, feedback)
@@ -53,11 +60,14 @@ deactivate signal
 engine --> agent : SignalRecorded
 deactivate engine
 
-note over participants
-  Flow:    EvaluationEngine -> QualitySignal -> record accept/reject + feedback
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, store
+  Flow:    EVL-07 AgentOrchestrator -> EvaluationEngine -> QualitySignal -> record accept/reject + feedback
   State:   <back:#ECEFF1>IDLE</back> → RECORDING → PERSISTED → DONE
-  Failure: Storage failure → signal lost, warning logged
   Success: SignalRecorded with signal_id for future reference
+  Failure: Storage failure -> signal lost, warning logged
 end note
 
 @enduml

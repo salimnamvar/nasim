@@ -7,11 +7,16 @@
 ' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    Meta-Software Designer audit 2026-06-21
-' Note:      Process decomposition — internal step of edit flow. No actor per sq.md rules.
+' Note:      Process decomposition — internal step of edit flow. Actor required per updated sq.md rules.
 ' ============================================================
 
 title nasim — EDT-10 STAGE Diff
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -21,19 +26,24 @@ box "Sandbox Layer" #F1F8E9
   participant "DiffComputer" as diff_comp
 end box
 
-note over agent, diff_comp
-  Scope:          Stage edit in DiffSandboxManager for review
+note over user, diff_comp
+  Scope:          EDT-10 STAGE Diff
   Preconditions:  Edit strategy applied, DiffSandboxManager initialized
-  Excludes:       Edit execution (EDT-02..09), user review (SAF-02), file system writes
   Contexts:       Called by EDT-01 (SELECT Strategy) when diff_sandbox mode selected
+  Excludes:       Edit execution (EDT-02..09), user review (SAF-02), file system writes
   Rollback:       Staging failure → discard from sandbox
   Design:         DiffSandboxManager holds pending edits in isolated staging area via EditStagingArea. DiffComputer computes diffs for review.
   Classification: Process Decomposition
+  Returns:        Success: StagedDiff(diff_id, diff_text) — diff staged for review
+                  Failure: StagingError — sandbox allocation or diff computation failed
 end note
 
 == EDT-10 STAGE Diff ==
 
-agent -> diff_mgr : STAGE_DIFF(edit_result)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> diff_mgr : EDT-10 STAGE_DIFF(edit_result)
 activate diff_mgr
 
 diff_mgr -> staging : allocate_edit_slot()
@@ -52,11 +62,14 @@ deactivate staging
 diff_mgr --> agent : StagedEdit(edit_id, diff_summary)
 deactivate diff_mgr
 
-note over agent, diff_comp
-  Flow:    AgentOrchestrator → DiffSandboxManager → EditStagingArea → DiffComputer → return
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, diff_comp
+  Flow:    User → REPLSession → AgentOrchestrator → DiffSandboxManager → EditStagingArea → DiffComputer → return
   State:   <back:#F1F8E9>STAGING</back>
-  Failure: Staging failure → discard edit
-  Success: StagedEdit with edit_id and diff summary for review
+  Success: StagedDiff(diff_id, diff_text) — diff staged for review
+  Failure: StagingError — sandbox allocation or diff computation failed
   Key invariants:
     - Each staged edit has unique ID
     - Sandbox is in-memory (no file system side effects)

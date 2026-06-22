@@ -9,6 +9,11 @@
 ' Review:    —
 ' ============================================================
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -18,44 +23,53 @@ box "Tool Layer" #F3E5F5
 end box
 participant "Host Filesystem" as fs
 
-note over agent, fs
+note over user, fs
   Scope:          Read file contents with line numbers
   Preconditions:  File path provided by LLM
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Excludes:       Write, edit, directory listing
   Rollback:       Error string returned to LLM
   Design:         Supports offset/limit for large files
-  Classification: Process Decomposition (called by AGT-02, no actor)
+  Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content=numbered_content) or ToolResult(success=False, error=str)
 end note
 
 == TL-01 READ File ==
 
-agent -> registry : execute("read_file", {path, offset, limit})
-registry -> ft : execute(path, offset, limit)
+user -> repl : types input
+repl -> agent : TL-01 PROCESS(user_input)
+agent -> registry : TL-01 READ File(path, offset, limit)
+registry -> ft : TL-01 READ File(path, offset, limit)
 ft -> fs : Path(path).read_text()
 
 break File not found or not a file
     fs --> ft : FileNotFoundError / IsADirectoryError
     ft --> registry : ToolResult(success=False, error="file not found")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="file not found")
 end
 
 break Read error (encoding, permissions)
     fs --> ft : PermissionError / UnicodeDecodeError
     ft --> registry : ToolResult(success=False, error="Error reading path")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error reading path")
 end
 
 fs --> ft : file content
 ft -> ft : add line numbers, apply offset/limit
 ft --> registry : ToolResult(success=True, content=numbered_content)
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over agent, fs
-  Flow:    AgentOrchestrator -> ToolRegistry -> ReadFileTool -> Host Filesystem -> ToolResult
+note over user, fs
+  Flow:    TL-01: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> ReadFileTool -> Host Filesystem -> ToolResult
   State:   No state change
-  Failure: File not found, permissions, encoding -> ToolResult(success=False)
   Success: File content with line numbers
+  Failure: File not found, permissions, encoding -> ToolResult(success=False)
 end note
 
 @enduml

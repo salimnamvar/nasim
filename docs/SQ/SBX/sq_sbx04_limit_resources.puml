@@ -4,51 +4,77 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Enforce CPU, memory, and disk quotas per sandbox instance
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-04 LIMIT Resources
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Sandbox Layer" #F1F8E9
   participant "SandboxExecutor" as executor
   participant "ResourceLimiter" as limiter
 end box
 
-note over executor, limiter
-  Scope:          Resource quota enforcement via cgroups
+note over user, limiter
+  Scope:          SBX-04 LIMIT Resources — resource quota enforcement via cgroups
   Preconditions:  Sandbox instance created, limits defined
-  Excludes:       Process monitoring (SBX-03)
   Contexts:       Called by SandboxExecutor during sandbox creation
+  Excludes:       Process monitoring (SBX-03)
   Rollback:       Remove cgroup on setup failure
   Design:         Linux cgroup v2 with CPU, memory, disk I/O limits
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={cgroup_id})
+    - Failure: Result(success=false, error="cgroup_setup_failed")
 end note
 
 == SBX-04 LIMIT Resources ==
 
-executor -> limiter : set_limits(cgroup_id, quotas)
+user -> repl : types input
+repl -> agent : SBX-04 PROCESS(user_input)
+
+agent -> executor : SBX-04 LIMIT Resources(cgroup_id, quotas)
+activate executor
+
+executor -> limiter : SBX-04 SET Limits(cgroup_id, quotas)
 activate limiter
 
-limiter -> limiter : create cgroup v2 hierarchy
+limiter -> limiter : SBX-04 CREATE CgroupHierarchy()
 
 break Cgroup setup fails
     limiter --> executor : CgroupError("setup failed")
+    executor --> agent : Result(success=false, error="cgroup_setup_failed")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : error: cgroup setup failed
 end
 
-limiter -> limiter : set cpu.max (CPU quota)
-limiter -> limiter : set memory.max (memory limit)
-limiter -> limiter : set io.max (disk I/O limit)
+limiter -> limiter : SBX-04 SET CpuMax(CPU quota)
+limiter -> limiter : SBX-04 SET MemoryMax(memory limit)
+limiter -> limiter : SBX-04 SET IoMax(disk I/O limit)
 
-limiter --> executor : limits_applied(cgroup_id)
+limiter --> executor : Result(success=true, data={cgroup_id})
 deactivate limiter
 
-note over executor, limiter
-  Flow:    SandboxExecutor -> ResourceLimiter -> create cgroup -> set CPU -> set memory -> set I/O -> confirm
+executor --> agent : Result(success=true, data={cgroup_id})
+deactivate executor
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result: resources limited
+
+note over user, limiter
+  Flow:    SBX-04 -> User -> REPLSession -> AgentOrchestrator -> SandboxExecutor -> ResourceLimiter -> create cgroup -> set CPU -> set memory -> set I/O -> confirm
   State:   No state change
-  Failure: Cgroup setup fails -> remove partial cgroup, return error
-  Success: Executor receives cgroup with enforced limits
+  Success: Result(success=true, data={cgroup_id})
+  Failure: Result(success=false, error="cgroup_setup_failed") — remove partial cgroup, return error
 end note
 
 @enduml

@@ -23,11 +23,12 @@ end box
 note over client, store
   Scope:          Retrieve message history for a session
   Preconditions:  Session exists, ServerRouter initialized
-  Excludes:       Session CRUD (SRV-01..05), Message dispatch (SRV-06)
   Contexts:       Called by HTTPClient via GET /v1/sessions/{id}/messages
+  Excludes:       Session CRUD (SRV-01..05), Message dispatch (SRV-06)
   Rollback:       404 if session not found
   Design:         CSR: Controller(ServerRouter) -> Repository(SessionStore). ROD: standard list (AIP-136)
   Classification: Primary Orchestrator
+  Returns:        200 OK with message list, or 404 NOT_FOUND error
 end note
 
 == SRV-07 LIST Messages ==
@@ -35,7 +36,7 @@ end note
 client -> router : GET /v1/sessions/{id}/messages
 activate router
 
-router -> store : READ session messages
+router -> store : readSessionMessages(sessionId)
 activate store
 
 alt Session exists
@@ -51,10 +52,10 @@ end
 deactivate router
 
 note over client, store
-  Flow:    HTTPClient -> ServerRouter -> SessionStore
+  Flow:    SRV-07 listMessages: HTTPClient -> ServerRouter -> SessionStore
   State:   <back:#2E7D32>ACTIVE</back>
-  Failure: 404 session not found
   Success: 200 OK with message list
+  Failure: 404 session not found
 end note
 
 @enduml

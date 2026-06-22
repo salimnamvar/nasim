@@ -11,6 +11,9 @@
 
 actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -25,16 +28,20 @@ end box
 note over user, tool
   Scope:          Evaluate task completion via success checks and quality signals
   Preconditions:  EDT-05 completed (edit applied and user-approved), shell environment available
-  Excludes:       LLM-based review (EVL-04), repetition detection (EVL-08)
   Contexts:       Called after edit application to verify correctness; feeds into EVL-06 (COORDINATE Retry) on failure
+  Excludes:       LLM-based review (EVL-04), repetition detection (EVL-08)
   Rollback:       Check failure -> report to EVL-06 for retry coordination
   Design:         SuccessChecker runs configured check commands with timeout; aggregate pass/fail across all checks
   Classification: Primary Orchestrator
+  Returns:        CheckResult(passed, results[])
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == EVL-01 EVALUATE Task ==
 
-agent -> checker : RUN_CHECKS(file_path, check_commands[])
+agent -> checker : EVL-01 RUN_CHECKS(file_path, check_commands[])
 activate checker
 
 loop for each check_command
@@ -55,11 +62,14 @@ checker -> checker : aggregate_results()
 checker --> agent : CheckResult(passed, results[])
 deactivate checker
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over user, tool
-  Flow:    AgentOrchestrator -> SuccessChecker -> [ShellRunner]* -> CheckResult
+  Flow:    EVL-01 AgentOrchestrator -> SuccessChecker -> [ShellRunner]* -> CheckResult
   State:   <back:#ECEFF1>IDLE</back> -> <back:#F9FBE7>EVALUATING</back> -> <back:#ECEFF1>IDLE</back>
-  Failure: Any check fails -> CheckResult(passed=false)
   Success: All checks pass -> CheckResult(passed=true)
+  Failure: Any check fails -> CheckResult(passed=false)
 end note
 
 @enduml

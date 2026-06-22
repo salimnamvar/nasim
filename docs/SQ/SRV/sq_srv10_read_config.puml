@@ -23,11 +23,12 @@ end box
 note over client, config
   Scope:          Read current agent configuration
   Preconditions:  ConfigLoader initialized
-  Excludes:       Config update, config validation
   Contexts:       Called by HTTPClient via GET /v1/config
+  Excludes:       Config update, config validation
   Rollback:       500 if config read fails
   Design:         CSR: Controller(ServerRouter) -> Repository(ConfigLoader). ROD: standard read (AIP-136). Returns sanitized config (no secrets).
   Classification: Primary Orchestrator
+  Returns:        200 OK with sanitized config, or 500 INTERNAL error
 end note
 
 == SRV-10 READ Config ==
@@ -35,7 +36,7 @@ end note
 client -> router : GET /v1/config
 activate router
 
-router -> config : READ config
+router -> config : readConfig()
 activate config
 
 break Config read failure [500]
@@ -51,11 +52,10 @@ router --> client : 200 OK {config: {provider: "...", model: "...", safety_mode:
 deactivate router
 
 note over client, config
-  Flow:    HTTPClient -> ServerRouter -> ConfigLoader -> return config
+  Flow:    SRV-10 readConfig: HTTPClient -> ServerRouter -> ConfigLoader -> return config
   State:   No state change
-  Failure: 500 INTERNAL on config read failure
   Success: 200 OK with sanitized config
-  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
+  Failure: 500 INTERNAL on config read failure
 end note
 
 @enduml

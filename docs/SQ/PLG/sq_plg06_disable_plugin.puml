@@ -9,8 +9,14 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — PLG-06 Disable Plugin
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Tool Layer" #F3E5F5
   participant "PluginLoader" as loader
   participant "ToolRegistry" as registry
@@ -19,17 +25,24 @@ box "Hooks Layer" #FFFDE7
   participant "HookManager" as hm
 end box
 
-note over participants
+note over user, hm
   Scope:          Deactivate plugin tools and hooks, set state DISABLED
   Preconditions:  Plugin is currently ENABLED
-  Excludes:       Plugin enable, discovery, removal
   Contexts:       Called by CLI or PluginLoader
+  Excludes:       Plugin enable, discovery, removal
   Rollback:       Partial disable logged; state set to ERROR
   Design:         Reverse of PLG-05; unregister tools then hooks
   Classification: Process Decomposition
+  Returns:        plugin disabled or state ERROR with partial disable logged
 end note
 
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
 == PLG-06 Disable Plugin ==
+
+agent -> loader : PLG-06 DISABLE_PLUGIN(plugin_id)
+activate loader
 
 loader -> registry : unregister plugin tools
 loader -> hm : unregister plugin hooks
@@ -39,13 +52,17 @@ break Unregister failure
     loader -> loader : set state ERROR, log failure
 end
 
-loader --> loader : plugin disabled
+loader --> agent : plugin disabled
+deactivate loader
 
-note over participants
-  Flow:    PluginLoader -> deactivate tools + hooks -> set state DISABLED
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, hm
+  Flow:    PLG-06 AgentOrchestrator -> PluginLoader -> deactivate tools + hooks -> set state DISABLED
   State:   Plugin state: ENABLED -> DISABLED (or ERROR)
-  Failure: Unregister failure -> state ERROR, partial disable logged
   Success: Plugin disabled with tools and hooks removed
+  Failure: Unregister failure -> state ERROR, partial disable logged
 end note
 
 @enduml

@@ -4,13 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Build AST index and symbol graph from project source
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RIM-01 INDEX Codebase
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -23,28 +28,36 @@ box "External" #F5F5F5
   participant "Host Filesystem" as fs
 end box
 
-note over agent, fs
-  Scope:          Build AST index and symbol graph from project source
+note over user, fs
+  Scope:          RIM-01 INDEX Codebase — build AST index and symbol graph from project source
   Preconditions:  Project root accessible, supported source files present
-  Excludes:       Embedding generation (RIM-05), semantic search (RIM-06)
   Contexts:       Called at session start or on-demand; prerequisite for RIM-02/03
+  Excludes:       Embedding generation (RIM-05), semantic search (RIM-06)
   Rollback:       Parse error -> skip file, log warning; complete failure -> empty index
   Design:         RepoIntelligenceManager orchestrates pipeline; ASTParser extracts definitions; SymbolGraph builds relationships
-  Classification: Process Decomposition
+  Returns:
+    - Success: IndexStats(files, symbols, edges)
+    - Failure: Partial index with skipped files
+    - Failure: Empty index on complete failure
 end note
 
 == RIM-01 INDEX Codebase ==
 
-agent -> rim : INDEX(project_root)
+user -> repl : RIM-01 INDEX Codebase(project_root)
+activate repl
+repl -> agent : RIM-01 INDEX Codebase(project_root)
+activate agent
+
+agent -> rim : RIM-01 INDEX Codebase(project_root)
 activate rim
 
-rim -> fs : list_source_files(project_root)
+rim -> fs : rim.list_source_files(project_root)
 activate fs
 fs --> rim : source_files[]
 deactivate fs
 
 loop for each source_file
-    rim -> ast : parse(source_file)
+    rim -> ast : ast.parse(source_file)
     activate ast
 
     break Parse error
@@ -54,18 +67,18 @@ loop for each source_file
     ast --> rim : ASTNode[]
     deactivate ast
 
-    rim -> graph : extract_symbols(ast_nodes)
+    rim -> graph : graph.extract_symbols(ast_nodes)
     activate graph
     graph --> rim : symbols[]
     deactivate graph
 
-    rim -> graph : link_relationships(symbols)
+    rim -> graph : graph.link_relationships(symbols)
     activate graph
     graph --> rim : edges[]
     deactivate graph
 end
 
-rim -> graph : build_adjacency_index()
+rim -> graph : graph.build_adjacency_index()
 activate graph
 graph --> rim : adjacency_map
 deactivate graph
@@ -73,11 +86,16 @@ deactivate graph
 rim --> agent : IndexStats(files, symbols, edges)
 deactivate rim
 
-note over agent, fs
-  Flow:    AgentOrchestrator -> RepoIntelligenceManager -> [FileSystem -> ASTIndexAdapter -> SymbolGraph]* -> IndexStats
+agent --> repl : IndexStats(files, symbols, edges)
+deactivate agent
+repl --> user : IndexStats(files, symbols, edges)
+deactivate repl
+
+note over user, fs
+  Flow:    RIM-01 → Developer → REPLSession → AgentOrchestrator → RepoIntelligenceManager → [FileSystem → ASTIndexAdapter → SymbolGraph]* → IndexStats
   State:   No state change
-  Failure: Parse error -> skip file; complete failure -> empty index + error
   Success: IndexStats with file count, symbol count, edge count
+  Failure: Parse error -> skip file; complete failure -> empty index
 end note
 
 @enduml

@@ -23,11 +23,12 @@ end box
 note over client, store
   Scope:          Mark a session as retired (soft delete)
   Preconditions:  Session exists on disk
-  Excludes:       Hard delete, message operations
   Contexts:       Called by HTTPClient via DELETE /v1/sessions/{id}
+  Excludes:       Hard delete, message operations
   Rollback:       404 if session not found
   Design:         ROD: standard delete. Soft delete (retired flag).
   Classification: Primary Orchestrator
+  Returns:        200 OK with retired status, or 404 NOT_FOUND error
 end note
 
 == SRV-05 RETIRE Session ==
@@ -35,7 +36,7 @@ end note
 client -> router : DELETE /v1/sessions/{id}
 activate router
 
-router -> store : READ session exists
+router -> store : readSessionExists(sessionId)
 activate store
 
 break Session not found
@@ -47,7 +48,7 @@ end
 store --> router : SessionStatus
 deactivate store
 
-router -> store : RETIRE session
+router -> store : retireSession(sessionId)
 activate store
 store --> router : retired
 deactivate store
@@ -56,10 +57,10 @@ router --> client : 200 OK {retired: true}
 deactivate router
 
 note over client, store
-  Flow:    HTTPClient -> ServerRouter -> SessionStore -> retire -> 200
+  Flow:    SRV-05 retireSession: HTTPClient -> ServerRouter -> SessionStore -> retire -> 200
   State:   <back:#2E7D32>ACTIVE</back> -> <back:#757575>CLOSED</back>
-  Failure: 404 not found
   Success: 200 OK with retired status
+  Failure: 404 not found
 end note
 
 @enduml

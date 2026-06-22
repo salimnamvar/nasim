@@ -4,13 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Read diff of staged or unstaged changes
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — VCS-03 READ Diff
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -21,40 +26,51 @@ box "External" #F5F5F5
   participant "Git Repository" as git
 end box
 
-note over agent, git
-  Scope:          Diff inspection for staged/unstaged changes
+note over user, git
+  Scope:          VCS-03 READ Diff — diff inspection for staged/unstaged changes
   Preconditions:  Git repository with changes
-  Excludes:       Commit operations (VCS-02)
   Contexts:       Pre-commit review, change inspection
+  Excludes:       Commit operations (VCS-02)
   Rollback:       No rollback needed (read-only operation)
   Design:         Unified diff format with context lines
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={files, hunks})
+    - Failure: Result(success=false, error="no_changes")
 end note
 
 == VCS-03 READ Diff ==
 
-agent -> status : get_diff(scope)
+user -> repl : types input
+repl -> agent : VCS-03 PROCESS(user_input)
+
+agent -> status : VCS-03 READ Diff(scope)
 activate status
 
-status -> git : git diff --cached (staged) or git diff (unstaged)
+status -> git : VCS-03 EXECUTE git_diff(scope)
 activate git
 git --> status : raw_diff
 deactivate git
 
-status -> status : parse diff output
+status -> status : VCS-03 PARSE DiffOutput(raw_diff)
 
 break No changes detected
-    status --> agent : empty_diff
+    status --> agent : Result(success=true, data={empty_diff})
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result: no changes detected
 end
 
-status --> agent : diff_content(files, hunks)
+status --> agent : Result(success=true, data={files, hunks})
 deactivate status
 
-note over agent, git
-  Flow:    AgentOrchestrator -> GitStatus -> determine scope -> execute git diff -> parse -> return
+agent --> repl : AgentEvent(Done)
+repl --> user : result: diff content
+
+note over user, git
+  Flow:    VCS-03 -> User -> REPLSession -> AgentOrchestrator -> GitStatus -> determine scope -> execute git diff -> parse -> return
   State:   No state change
-  Failure: No changes -> return empty diff
-  Success: Agent receives diff content with file/hunk structure
+  Success: Result(success=true, data={files, hunks})
+  Failure: Result(success=false, error="no_changes") — return empty diff
 end note
 
 @enduml

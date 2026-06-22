@@ -11,6 +11,11 @@
 
 title nasim — WRL-01 APPEND Event
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -22,19 +27,23 @@ box "External" #F5F5F5
   participant "Host Filesystem" as fs
 end box
 
-note over agent, fs
+note over user, fs
   Scope:          Append event to wire log
   Preconditions:  Wire log file path configured, write access available
-  Excludes:       Log reading (WRL-02), session forking (WRL-04)
   Contexts:       Called on every significant agent event; prerequisite for WRL-02/03/04
+  Excludes:       Log reading (WRL-02), session forking (WRL-04)
   Rollback:       Write failure -> event lost, log warning
   Design:         WireAppender appends serialized events; append-only log; buffered writes with flush on session end
   Classification: Process Decomposition
+  Returns:        Success: AppendResult(event_id, offset); Failure: AppendError("write failed")
 end note
 
 == WRL-01 APPEND Event ==
 
-agent -> wirelog : APPEND_EVENT(event)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> wirelog : wrl01 APPEND Event(event)
 activate wirelog
 
 wirelog -> appender : serialize(event)
@@ -49,20 +58,25 @@ activate fs
 
 break Write failure
     fs --> wirelog : IOError
-    wirelog --> agent : AppendError("write failed")
+    wirelog --> agent : 500 INTERNAL — AppendError("write failed")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : result — event write failed
 end
 
-fs --> wirelog : write_result
+fs --> wirelog : 200 OK — write_result
 deactivate fs
 
-wirelog --> agent : AppendResult(event_id, offset)
+wirelog --> agent : 200 OK — AppendResult(event_id, offset)
 deactivate wirelog
 
-note over agent, fs
-  Flow:    AgentOrchestrator -> WireLog -> WireAppender -> Host Filesystem -> AppendResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result — event appended
+
+note over user, fs
+  Flow:    WRL-01 → serialize → add metadata → append to file
   State:   No state change
-  Failure: Write failure -> event lost, warning logged
-  Success: AppendResult with event_id and offset
+  Success: 200 OK — AppendResult with event_id and offset
+  Failure: 500 INTERNAL — write failure, event lost, warning logged
 end note
 
 @enduml

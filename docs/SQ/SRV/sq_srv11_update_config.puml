@@ -24,11 +24,12 @@ end box
 note over client, config
   Scope:          Update agent configuration at runtime
   Preconditions:  ConfigLoader initialized
-  Excludes:       Config read, config validation
   Contexts:       Called by HTTPClient via PATCH /v1/config
+  Excludes:       Config read, config validation
   Rollback:       400 if invalid config values
   Design:         ROD: standard update. Partial config patch. Triggers CFG-03 APPLY.
   Classification: Primary Orchestrator
+  Returns:        200 OK with updated config, or 400 INVALID_ARGUMENT error
 end note
 
 == SRV-11 UPDATE Config ==
@@ -39,7 +40,7 @@ schema --> client : ValidatedConfigPatch
 client -> router : PATCH /v1/config
 activate router
 
-router -> config : APPLY config patch
+router -> config : updateConfig(patch)
 activate config
 
 break Invalid config
@@ -55,10 +56,10 @@ router --> client : 200 OK {config: {updated_fields: [...]}}
 deactivate router
 
 note over client, config
-  Flow:    HTTPClient -> validate -> ServerRouter -> ConfigLoader -> apply -> 200
+  Flow:    SRV-11 updateConfig: HTTPClient -> validate -> ServerRouter -> ConfigLoader -> apply -> 200
   State:   No state change
-  Failure: 400 invalid config values
   Success: 200 OK with updated config
+  Failure: 400 invalid config values
 end note
 
 @enduml

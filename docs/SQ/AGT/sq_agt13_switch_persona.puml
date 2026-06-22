@@ -1,6 +1,6 @@
 @startuml sq_agt13_switch_persona
 ' ============================================================
-' Title:     AGT-13 — Switch Persona
+' Title:     AGT-13 — SWITCH Persona
 ' Boundary:  nasim code agent
 ' Purpose:   Unload current persona and load a new one
 ' Milestone: v1.0
@@ -9,8 +9,13 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — AGT-13 Switch Persona
+title nasim — AGT-13 SWITCH Persona
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PersonaManager" as pm
@@ -19,19 +24,25 @@ box "Config Layer" #FCE4EC
   participant "PersonaRegistry" as reg
 end box
 
-note over agent, reg
-  Scope:          Unload current persona and load a new one in one operation
+note over user, reg
+  Scope:          AGT-13 SWITCH Persona
   Preconditions:  PersonaManager active with current persona loaded
-  Excludes:       Load only (AGT-12), delegation (AGT-11)
   Contexts:       Called when user or task requests persona change mid-session
+  Excludes:       Load only (AGT-12), delegation (AGT-11)
   Rollback:       New persona load fails → retain previous persona
   Design:         Atomic switch: unload current → load new; partial failure retains old
   Classification: Process Decomposition
+  Returns:        Success: PersonaSwitched(new_persona)
+                  Failure: PersonaSwitchFailed(retained previous)
 end note
 
-== AGT-13 Switch Persona ==
+== AGT-13 SWITCH Persona ==
 
-agent -> pm : switch(new_persona_name)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+activate agent
+
+agent -> pm : agt13 SWITCH Persona({new_persona_name})
 activate pm
 
 pm -> pm : unload current persona
@@ -46,19 +57,23 @@ deactivate reg
 alt new config valid
     pm -> pm : parse new system prompt
     pm -> pm : apply new config
-    pm -> agent : PersonaSwitched(new_persona)
+    pm --> agent : PersonaSwitched(new_persona)
 else new config invalid
     pm -> pm : reload previous persona config
-    pm -> agent : PersonaSwitchFailed(retained previous)
+    pm --> agent : PersonaSwitchFailed(retained previous)
 end
 
 deactivate pm
 
-note over agent, reg
-  Flow:    AgentOrchestrator → PersonaManager → unload current → load new → apply
-  State:   <back:#2E7D32>ACTIVE</back> → SWITCHING → <back:#2E7D32>ACTIVE</back>
-  Failure: New config invalid → retain previous persona
-  Success: Persona switched, new system prompt active
+agent --> repl : AgentEvent(Done)
+deactivate agent
+repl --> user : result
+
+note over user, reg
+  Flow:    AGT-13 → unload current → load new → apply
+  State:   <back:#2E7D32>ACTIVE</back> -> SWITCHING -> <back:#2E7D32>ACTIVE</back>
+  Success: persona switched, new system prompt active
+  Failure: new config invalid -> retain previous persona
 end note
 
 @enduml

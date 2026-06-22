@@ -4,46 +4,72 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Validate a HookResult for correctness and safety
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — HK-06 VALIDATE Hook Result
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Hooks Layer" #FFFDE7
   participant "HookManager" as hooks
 end box
 
-note over hooks
-  Scope:          Validate a HookResult for allow/deny/modify correctness
+note over user, hooks
+  Scope:          HK-06 VALIDATE Hook Result
   Preconditions:  HookResult produced by a hook
-  Excludes:       Hook execution, hook registration
   Contexts:       Called internally by HookManager after each hook execution
+  Excludes:       Hook execution, hook registration
   Rollback:       Invalid result treated as DENY
   Design:         Ensures result schema compliance
   Classification: Process Decomposition
+  Returns:
+    - Success: HookResult(validated) — action in [ALLOW, DENY, MODIFY]
+    - Failure: HookResult(action=DENY) — invalid schema or unknown action
 end note
 
 == HK-06 VALIDATE Hook Result ==
 
-hooks -> hooks : validate(hook_result)
+user -> repl : invoke agent
+activate repl
+repl -> agent : hk06 VALIDATE Hook Result(hook_result)
+activate agent
+agent -> hooks : hk06 VALIDATE Hook Result(hook_result)
+activate hooks
+hooks -> hooks : hk06 CHECK Schema(hook_result)
 
 break Result schema invalid
-    hooks --> hooks : treat as DENY
+    hooks --> agent : HookResult(action=DENY)
+    agent --> repl : HookResult(action=DENY)
+    repl --> user : hook result invalid
 end
 
 break action not in [ALLOW, DENY, MODIFY]
-    hooks --> hooks : treat as DENY
+    hooks --> agent : HookResult(action=DENY)
+    agent --> repl : HookResult(action=DENY)
+    repl --> user : hook result invalid
 end
 
-hooks --> hooks : validated result
+hooks --> agent : validated result
+deactivate hooks
+agent --> repl : validated result
+deactivate agent
+repl --> user : hook validated
+deactivate repl
 
-note over hooks
-  Flow:    HookManager -> validate HookResult -> allow/deny/modify -> return validated result
+note over user, hooks
+  Flow:    HK-06 → HookManager → validate HookResult → allow/deny/modify → return validated result
   State:   No state change
-  Failure: Invalid schema or unknown action -> treated as DENY
-  Success: Validated HookResult returned
+  Success: HookResult(validated) — action in [ALLOW, DENY, MODIFY]
+  Failure: HookResult(action=DENY) — invalid schema or unknown action
 end note
 
 @enduml

@@ -1,6 +1,6 @@
 @startuml sq_agt11_delegate_to_persona
 ' ============================================================
-' Title:     AGT-11 — Delegate to Persona
+' Title:     AGT-11 — DELEGATE to Persona
 ' Boundary:  nasim code agent
 ' Purpose:   Select and delegate task execution to a persona
 ' Milestone: v1.0
@@ -9,8 +9,13 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — AGT-11 Delegate to Persona
+title nasim — AGT-11 DELEGATE to Persona
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PersonaManager" as pm
@@ -19,19 +24,25 @@ box "Config Layer" #FCE4EC
   participant "PersonaRegistry" as reg
 end box
 
-note over agent, reg
-  Scope:          Select a persona and delegate task execution
+note over user, reg
+  Scope:          AGT-11 DELEGATE to Persona
   Preconditions:  PersonaManager initialized, at least one persona registered
-  Excludes:       Persona load/switch (AGT-12/13), subagent spawn (AGT-09)
   Contexts:       Called by AgentOrchestrator when task requires specialized behavior
+  Excludes:       Persona load/switch (AGT-12/13), subagent spawn (AGT-09)
   Rollback:       Persona not found → fallback to default persona
   Design:         Persona selection based on task tags or explicit request
   Classification: Process Decomposition
+  Returns:        Success: PersonaDelegated with persona context applied
+                  Failure: PersonaDelegated(default) — fallback to default
 end note
 
-== AGT-11 Delegate to Persona ==
+== AGT-11 DELEGATE to Persona ==
 
-agent -> pm : delegate(task, persona_hint)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+activate agent
+
+agent -> pm : agt11 DELEGATE to Persona({task}, {persona_hint})
 activate pm
 
 pm -> reg : lookup persona(hint)
@@ -50,11 +61,15 @@ end
 
 deactivate pm
 
-note over agent, reg
-  Flow:    AgentOrchestrator → PersonaManager → select persona → delegate task
-  State:   <back:#ECEFF1>IDLE</back> → DELEGATING → <back:#2E7D32>ACTIVE</back>
-  Failure: Persona not found → fallback to default
-  Success: Task delegated with persona context applied
+agent --> repl : AgentEvent(Done)
+deactivate agent
+repl --> user : result
+
+note over user, reg
+  Flow:    AGT-11 → select persona → delegate task
+  State:   <back:#ECEFF1>IDLE</back> -> DELEGATING -> <back:#2E7D32>ACTIVE</back>
+  Success: task delegated with persona context applied
+  Failure: persona not found -> fallback to default
 end note
 
 @enduml

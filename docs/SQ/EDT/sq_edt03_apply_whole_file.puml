@@ -11,6 +11,9 @@
 
 actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -43,11 +46,12 @@ note over user, tool
     - Validation failure → trigger revert via backup_path
 
   Design:
-  Classification: Primary Orchestrator
     - EditValidator reads edited file and compares with expected
     - Syntax check via language-specific linter (if available)
     - Diff verification ensures intended changes applied
     - Returns structured validation result
+
+  Classification: Primary Orchestrator
 
   Returns:
     - Success: ValidationResult with pass/fail details
@@ -56,7 +60,9 @@ end note
 
 == edt03 VALIDATE Edit ==
 
-agent -> validator : VALIDATE_EDIT(edit_result)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> validator : EDT-03 VALIDATE_EDIT(edit_result)
 activate validator
 
 validator -> fs : read_file(edit_result.file_path)
@@ -78,19 +84,22 @@ validator -> validator : verify_no_unintended_changes(actual_content, edit_resul
 validator --> agent : ValidationResult(passed, reasons[])
 deactivate validator
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over user, tool
   Flow:
-    - AgentOrchestrator → EditValidator → FileSystem + ToolRegistry → ValidationResult
+    - User → REPLSession → AgentOrchestrator → EditValidator → FileSystem + ToolRegistry → ValidationResult
 
   State:
     - <back:#ECEFF1>IDLE</back> → READING → CHECKING → LINTING → DONE
 
+  Success:
+    - ValidationResult with pass=true
+
   Failure:
     - Diff mismatch → validation fails
     - Syntax error → validation fails
-
-  Success:
-    - ValidationResult with pass=true
 
   Key invariants:
     - Edited file always read fresh for validation

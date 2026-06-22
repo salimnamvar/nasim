@@ -1,41 +1,66 @@
 @startuml sq_cfg03_apply_layered_config
 ' ============================================================
-' Title:     CFG-03 — Apply Layered Config
+' Title:     CFG-03 — APPLY Layered Config
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Config layer merge with precedence
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
+title nasim — CFG-03 APPLY Layered Config
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Config Layer" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
 
-note over cfg
-  Scope:          Merge 4 config layers with precedence
+note over user, cfg
+  Scope:          CFG-03 APPLY Layered Config
   Preconditions:  All sources loaded
-  Contexts:       Called by CFG-01 (Load Config)
+  Contexts:       Called by CFG-01 (LOAD Config)
   Excludes:       Validation (CFG-02)
   Rollback:       N/A — merge always produces a result
   Design:         Precedence: CLI > env > project > global
   Classification: Process Decomposition
+  Returns:
+    - Success: Config(merged) — correct precedence applied
+    - Failure: N/A — merge is always defined
 end note
 
-== CFG-03 Merge Layered Config ==
+== CFG-03 APPLY Layered Config ==
 
-cfg -> cfg : start with global_defaults
-cfg -> cfg : overlay project_overrides (skip None values)
-cfg -> cfg : overlay env_overrides (skip None values)
-cfg -> cfg : overlay cli_args (skip None values)
-cfg -> cfg : return merged Config
+user -> repl : invoke agent
+activate repl
+repl -> agent : cfg03 APPLY Layered Config(sources)
+activate agent
+agent -> cfg : cfg03 APPLY Layered Config(sources)
+activate cfg
+cfg -> cfg : cfg03 MERGE Global Defaults(start)
+cfg -> cfg : cfg03 MERGE Project Overrides(skip None)
+cfg -> cfg : cfg03 MERGE Env Overrides(skip None)
+cfg -> cfg : cfg03 MERGE CLI Args(skip None)
+cfg -> cfg : cfg03 RETURN Merged Config
 
-note over cfg
-  Flow:    global -> project -> env -> CLI -> merged Config
+cfg --> agent : Config merged
+agent --> repl : Config merged
+deactivate agent
+repl --> user : config applied
+deactivate repl
+
+note over user, cfg
+  Flow:    CFG-03 → global → project → env → CLI → merged Config
   State:   No state change
+  Success: Config(merged) — correct precedence applied
   Failure: N/A — merge is always defined
-  Success: Merged Config with correct precedence
 end note
 
 @enduml

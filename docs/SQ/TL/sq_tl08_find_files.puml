@@ -9,13 +9,20 @@
 ' Review:    —
 ' ============================================================
 
-participant "ToolRegistry" as registry
-participant "FindFileTool" as find
+actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "FindFileTool" as find
 end box
 
-note over find
+note over user, find
   Scope:          Find files by name pattern with max depth
   Preconditions:  Name pattern and path provided by LLM
   Excludes:       Content search, glob patterns
@@ -23,23 +30,35 @@ note over find
   Rollback:       Error string returned to LLM
   Design:         Uses os.walk with depth limit
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content=matching_paths) or ToolResult(success=False, error=str)
 end note
 
-registry -> find : execute(name_pattern, path, max_depth)
+== TL-08 FIND Files ==
+
+user -> repl : types input
+repl -> agent : TL-08 PROCESS(user_input)
+agent -> registry : TL-08 FIND Files(name_pattern, path, max_depth)
+registry -> find : TL-08 FIND Files(name_pattern, path, max_depth)
 find -> find : os.walk(path) with depth tracking
 find -> find : fnmatch.fnmatch(filename, pattern)
 
 break Path not found
-    find --> registry : "Error: path not found: path"
+    find --> registry : ToolResult(success=False, error="Error: path not found: path")
+    registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error: path not found: path")
 end
 
-find --> registry : matching file paths
+find --> registry : ToolResult(success=True, content=matching_paths)
+registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over find
-  Flow:    pattern -> os.walk(depth-limited) -> fnmatch -> paths
+note over user, find
+  Flow:    TL-08: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> FindFileTool -> os.walk -> ToolResult
   State:   No state change
-  Failure: Path not found -> error string
   Success: List of matching file paths
+  Failure: Path not found -> ToolResult(success=False)
 end note
 
 @enduml

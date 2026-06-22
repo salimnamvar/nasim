@@ -11,6 +11,11 @@
 
 title nasim — EDT-06 APPLY Function-Level
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -28,16 +33,19 @@ end box
 note over participants
   Scope:          Function-level edit via AST parse and targeted replace
   Preconditions:  File identified, function boundary determinable
-  Excludes:       Multi-file edits, whole-file rewrites
   Contexts:       EDT-01 SELECT Strategy selects this for function-scoped diffs
+  Excludes:       Multi-file edits, whole-file rewrites
   Rollback:       AST parse failure → fallback to EDT-02 or EDT-03
   Design:         FunctionLevelCoder locates function node, replaces body, validates AST integrity
   Classification: Process Decomposition
+  Returns:        EditResult(success, file_path, function_name) on success; fallback to EDT-02/EDT-03 on failure
 end note
 
 == EDT-06 APPLY Function-Level ==
 
-agent -> esm : APPLY_FUNCTION_LEVEL(file_path, function_name, new_body)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> esm : EDT-06 APPLY_FUNCTION_LEVEL(file_path, function_name, new_body)
 activate esm
 
 esm -> flc : code_function_edit(file_path, function_name, new_body)
@@ -70,11 +78,14 @@ deactivate flc
 esm --> agent : EditResult
 deactivate esm
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over participants
-  Flow:    AgentOrchestrator → EditStrategyManager → FunctionLevelCoder → AST parse → replace function → validate
+  Flow:    User → REPLSession → AgentOrchestrator → EditStrategyManager → FunctionLevelCoder → AST parse → replace function → validate
   State:   <back:#ECEFF1>IDLE</back> → PARSING → REPLACING → VALIDATING → DONE
-  Failure: AST parse error → fallback to EDT-02/EDT-03; function not found → error
   Success: EditResult with modified file and function scope
+  Failure: AST parse error → fallback to EDT-02/EDT-03; function not found → error
 end note
 
 @enduml

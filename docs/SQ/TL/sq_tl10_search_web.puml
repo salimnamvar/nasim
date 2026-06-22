@@ -9,14 +9,21 @@
 ' Review:    —
 ' ============================================================
 
-participant "ToolRegistry" as registry
-participant "WebSearchTool" as search
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "WebSearchTool" as search
+end box
 participant "Search Backend" as backend
 
-box "Tool Layer" #F3E5F5
-end box
-
-note over search
+note over user, backend
   Scope:          Web search with ranked results
   Preconditions:  Query provided by LLM
   Excludes:       URL fetching (TL-09)
@@ -24,25 +31,37 @@ note over search
   Rollback:       Backend error returned as error string
   Design:         Configurable backend: DuckDuckGo, Brave, SerpAPI
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content=formatted_results) or ToolResult(success=False, error=str)
 end note
 
-registry -> search : execute(query, num_results)
+== TL-10 SEARCH Web ==
+
+user -> repl : types input
+repl -> agent : TL-10 PROCESS(user_input)
+agent -> registry : TL-10 SEARCH Web(query, num_results)
+registry -> search : TL-10 SEARCH Web(query, num_results)
 search -> backend : search(query, num_results)
 
 break Backend unavailable
     backend --> search : ConnectionError
-    search --> registry : "Error: search backend unavailable"
+    search --> registry : ToolResult(success=False, error="Error: search backend unavailable")
+    registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error: search backend unavailable")
 end
 
 backend --> search : results [{title, url, snippet}, ...]
 search -> search : format results
-search --> registry : formatted results string
+search --> registry : ToolResult(success=True, content=formatted_results)
+registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over search
-  Flow:    query -> backend -> results -> formatted string
+note over user, backend
+  Flow:    TL-10: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> WebSearchTool -> Search Backend -> ToolResult
   State:   No state change
-  Failure: Backend unavailable -> error string
   Success: Ranked search results with titles, URLs, snippets
+  Failure: Backend unavailable -> ToolResult(success=False)
 end note
 
 @enduml

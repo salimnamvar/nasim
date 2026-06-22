@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — TL-21 Insert Plan
+actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -19,29 +22,34 @@ box "Tool Layer" #F3E5F5
   participant "PlanTool" as tool
 end box
 
-note over participants
+note over user, tool
   Scope:          Add a new step to the execution plan
   Preconditions:  PlanTool initialized
   Excludes:       Plan update, deletion, listing
-  Contexts:       Called by AGT-02
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Error string returned to LLM
   Design:         Auto-generates step ID; initial status PENDING
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, step_id=step_id) or ToolResult(success=False, error=str)
 end note
 
 == TL-21 Insert Plan ==
 
-agent -> registry : execute("insert_plan", {description, dependencies?})
-registry -> tool : execute(description, dependencies)
+user -> repl : types input
+repl -> agent : TL-21 PROCESS(user_input)
+agent -> registry : TL-21 Insert Plan(description, dependencies?)
+registry -> tool : TL-21 Insert Plan(description, dependencies)
 tool -> tool : generate step ID, set status PENDING
 tool --> registry : ToolResult(success=True, step_id)
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over participants
-  Flow:    AgentOrchestrator -> ToolRegistry -> PlanTool -> add plan step -> ToolResult
+note over user, tool
+  Flow:    TL-21: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> PlanTool -> ToolResult
   State:   New plan step created (PENDING)
-  Failure: Invalid input -> ToolResult(success=False)
   Success: Plan step ID returned
+  Failure: Invalid input -> ToolResult(success=False)
 end note
 
 @enduml

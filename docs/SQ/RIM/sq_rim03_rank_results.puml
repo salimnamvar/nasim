@@ -1,21 +1,25 @@
 @startuml sq_rim03_rank_results
 ' ============================================================
-' Title:     RIM-03 — Rank Results
+' Title:     RIM-03 — RANK Results
 ' Boundary:  nasim code agent CLI
 ' Purpose:   PageRank ranking with chat-personalization for symbol importance
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
+
+title nasim — RIM-03 RANK Symbols
 
 actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Index Layer" #FFF3E0
-  participant "RepoIndexer" as indexer
+box "Repo Intelligence Layer" #EDE7F6
   participant "SymbolRanker" as ranker
   participant "SymbolGraph" as graph
 end box
@@ -24,48 +28,33 @@ box "Chat Layer" #E8F5E9
 end box
 
 note over user, history
-  Scope:
-    - rim02 RANK Symbols — PageRank ranking with chat-personalization
-
-  Preconditions:
-    - RIM-01 completed successfully (SymbolGraph populated)
-    - ConversationHistory has chat context for personalization
-
-  Contexts:
-    - Called after RIM-01 or when user context shifts
-    - Output feeds into RIM-04 (Inject RepoMap)
-
-  Excludes:
-    - Embedding-based ranking (handled by RIM-03)
-    - File system traversal (handled by RIM-01)
-
-  Rollback:
-    - PageRank convergence failure → fall back to degree-centrality ranking
-    - Empty graph → return empty ranking
-
-  Design:
-  Classification: Primary Orchestrator
-    - SymbolRanker runs iterative PageRank on SymbolGraph
-    - Chat personalization boosts symbols mentioned in recent conversation
-    - Personalization weight is configurable (default 0.3)
-    - Ranking is re-computed when chat context changes significantly
-
+  Scope:          RIM-03 RANK Symbols — PageRank ranking with chat-personalization
+  Preconditions:  RIM-01 completed successfully (SymbolGraph populated), ConversationHistory has chat context
+  Contexts:       Called after RIM-01 or when user context shifts. Output feeds into RIM-04
+  Excludes:       Embedding-based ranking (RIM-06), file system traversal (RIM-01)
+  Rollback:       PageRank convergence failure -> fall back to degree-centrality ranking; empty graph -> empty ranking
+  Design:         SymbolRanker runs iterative PageRank on SymbolGraph. Chat personalization boosts symbols mentioned in recent conversation
   Returns:
-    - Success: RankedSymbolList with scores
+    - Success: RankedSymbolList(symbols, scores)
     - Failure: Empty list with fallback flag
 end note
 
-== rim02 RANK Symbols ==
+== RIM-03 RANK Symbols ==
 
-agent -> ranker : RANK_SYMBOLS(graph, chat_context)
+user -> repl : RIM-03 RANK Symbols(graph, chat_context)
+activate repl
+repl -> agent : RIM-03 RANK Symbols(graph, chat_context)
+activate agent
+
+agent -> ranker : RIM-03 RANK Symbols(graph, chat_context)
 activate ranker
 
-ranker -> graph : get_adjacency()
+ranker -> graph : graph.get_adjacency()
 activate graph
 graph --> ranker : adjacency_map
 deactivate graph
 
-ranker -> history : get_recent_tokens(last_n=50)
+ranker -> history : history.get_recent_tokens(last_n=50)
 activate history
 history --> ranker : recent_tokens
 deactivate history
@@ -85,24 +74,16 @@ ranker -> ranker : sort_by_score_desc()
 ranker --> agent : RankedSymbolList(symbols, scores)
 deactivate ranker
 
+agent --> repl : RankedSymbolList(symbols, scores)
+deactivate agent
+repl --> user : RankedSymbolList(symbols, scores)
+deactivate repl
+
 note over user, history
-  Flow:
-    - AgentOrchestrator → SymbolRanker → SymbolGraph + ConversationHistory → RankedSymbolList
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → COMPUTING → CONVERGING → BOOSTING → SORTED
-
-  Failure:
-    - Convergence failure → fallback to degree centrality
-    - Empty graph → empty ranking
-
-  Success:
-    - RankedSymbolList sorted by importance score
-
-  Key invariants:
-    - PageRank always converges for connected graphs
-    - Chat boost never exceeds max_score of base ranking
-    - Ranking is deterministic for same input
+  Flow:    RIM-03 → Developer → REPLSession → AgentOrchestrator → SymbolRanker → SymbolGraph + ConversationHistory → RankedSymbolList
+  State:   No state change
+  Success: RankedSymbolList sorted by importance score
+  Failure: Convergence failure -> fallback to degree centrality; empty graph -> empty ranking
 end note
 
 @enduml

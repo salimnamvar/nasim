@@ -4,33 +4,47 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Display approval prompt for unsafe tool execution
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    —
 ' ============================================================
 
+title nasim — SAF-02 Prompt User Approval
+
 actor "Developer" as user
 
-box "Agent Layer" #E3F2FD
-  participant "PermissionGate" as gate
-end box
 box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
   participant "Renderer" as renderer
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+  participant "PermissionGate" as gate
 end box
 
 note over user, gate
-  Scope:          Prompt user for approval of unsafe tool
+  Scope:          SAF-02 PROMPT User Approval — prompt user for approval of unsafe tool
   Preconditions:  safety_mode=ask AND tool.safe=False
   Contexts:       Called by SAF-01 (CHECK Tool Permission)
   Excludes:       Permission check logic (SAF-01)
   Rollback:       User rejects -> tool skipped
   Design:         Shows tool name + args, prompts [y/N]
   Classification: Primary Orchestrator
+  Returns:
+    - Success: approved (bool)
+    - Failure: rejected (bool)
 end note
 
 == SAF-02 Prompt User Approval ==
 
-gate -> renderer : display_approval(tool_name, args)
+user -> repl : types input
+repl -> agent : SAF-02 PROCESS(user_input)
+
+agent -> gate : SAF-02 PROMPT UserApproval(tool_name, args)
+activate gate
+
+gate -> renderer : SAF-02 DISPLAY Approval(tool_name, args)
+activate renderer
 renderer --> user : "Allow <tool_name>(<args>)? [y/N]"
 
 user -> renderer : y or N
@@ -38,15 +52,24 @@ renderer --> gate : choice (bool)
 
 alt user = y
     renderer --> gate : approved
+    gate --> agent : approved
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result: tool approved
 else user = N
     renderer --> gate : rejected
+    gate --> agent : rejected
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result: tool skipped
 end
 
+deactivate gate
+deactivate renderer
+
 note over user, gate
-  Flow:    gate -> Renderer -> user prompt -> choice -> gate
+  Flow:    SAF-02 -> User -> REPLSession -> AgentOrchestrator -> PermissionGate -> Renderer -> user prompt -> choice -> gate
   State:   <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> -> <back:#F3E5F5>TOOL_EXEC</back> or <back:#ECEFF1>IDLE</back>
-  Failure: User rejects -> tool skipped
-  Success: User approves -> tool executes
+  Success: approved — tool executes
+  Failure: rejected — tool skipped
 end note
 
 @enduml

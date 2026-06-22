@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — TL-15 Spawn Subagent
+actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -20,37 +23,44 @@ box "Tool Layer" #F3E5F5
 end box
 participant "SubagentCoordinator" as coord
 
-note over participants
+note over user, coord
   Scope:          Spawn a child subagent with a task prompt
   Preconditions:  SubagentCoordinator initialized
   Excludes:       Subagent result collection, cancellation
-  Contexts:       Called by AGT-02
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Error string returned to LLM
   Design:         Fire-and-forget spawn; child runs independently
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, child_id=child_id) or ToolResult(success=False, error=str)
 end note
 
 == TL-15 Spawn Subagent ==
 
-agent -> registry : execute("spawn_subagent", {prompt, subagent_type})
-registry -> tool : execute(prompt, subagent_type)
+user -> repl : types input
+repl -> agent : TL-15 PROCESS(user_input)
+agent -> registry : TL-15 Spawn Subagent(prompt, subagent_type)
+registry -> tool : TL-15 Spawn Subagent(prompt, subagent_type)
 tool -> coord : create_child(prompt, subagent_type)
 
 break Coordinator unavailable or limit reached
     coord --> tool : CapacityError
     tool --> registry : ToolResult(success=False, error="spawn limit reached")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="spawn limit reached")
 end
 
 coord --> tool : child_id
 tool --> registry : ToolResult(success=True, child_id=child_id)
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over participants
-  Flow:    AgentOrchestrator -> ToolRegistry -> SubagentTool -> SubagentCoordinator -> create child -> ToolResult(child_id)
+note over user, coord
+  Flow:    TL-15: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> SubagentTool -> SubagentCoordinator -> ToolResult
   State:   New child subagent spawned
-  Failure: Coordinator unavailable or spawn limit -> ToolResult(success=False)
   Success: Child subagent ID returned
+  Failure: Coordinator unavailable or spawn limit -> ToolResult(success=False)
 end note
 
 @enduml

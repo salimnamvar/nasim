@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — EVL-02 CHECK Task Completion
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -22,19 +25,23 @@ box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as tool
 end box
 
-note over participants
+note over user, tool
   Scope:          Check whether a task meets its completion criteria
   Preconditions:  Task defined with acceptance criteria, tool results available
-  Excludes:       Success check execution (EVL-03), retry coordination (EVL-04)
   Contexts:       EVL-01 EVALUATE Task delegates completion check here
+  Excludes:       Success check execution (EVL-03), retry coordination (EVL-06)
   Rollback:       No state change — read-only evaluation
   Design:         TaskEvaluator compares tool outputs against criteria predicates
   Classification: Process Decomposition
+  Returns:        CompletionStatus(completed, details[])
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == EVL-02 CHECK Task Completion ==
 
-agent -> engine : CHECK_TASK_COMPLETION(task_id, criteria[])
+agent -> engine : EVL-02 CHECK_TASK_COMPLETION(task_id, criteria[])
 activate engine
 
 engine -> evaluator : evaluate_completion(task_id, criteria)
@@ -58,11 +65,14 @@ deactivate evaluator
 engine --> agent : CompletionStatus
 deactivate engine
 
-note over participants
-  Flow:    EvaluationEngine -> TaskEvaluator -> evaluate against criteria -> return completion status
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, tool
+  Flow:    EVL-02 AgentOrchestrator -> EvaluationEngine -> TaskEvaluator -> evaluate against criteria -> return completion status
   State:   <back:#ECEFF1>IDLE</back> → <back:#F9FBE7>EVALUATING</back> → AGGREGATING → DONE
-  Failure: No state change on evaluation failure — returns partial status
   Success: CompletionStatus with per-criterion pass/fail
+  Failure: No state change on evaluation failure — returns partial status
 end note
 
 @enduml

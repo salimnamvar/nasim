@@ -1,43 +1,64 @@
 @startuml sq_agt07_queue_plan
 ' ============================================================
-' Title:     AGT-07 — Queue Plan
-' Boundary:  nasim code agent CLI
+' Title:     AGT-07 — QUEUE Plan
+' Boundary:  nasim code agent
 ' Purpose:   Queue tool calls in plan mode without executing
 ' Milestone: v1.0
 ' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
+title nasim — AGT-07 QUEUE Plan
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PlanSession" as plan
 end box
 
-note over agent, plan
-  Scope:          Queue tool calls in plan mode
+note over user, plan
+  Scope:          AGT-07 QUEUE Plan
   Preconditions:  Plan mode active (/plan toggled)
   Contexts:       Called by AGT-01 (PROCESS User Task) in plan mode
   Excludes:       Tool execution, permission checks
   Rollback:       N/A — queued calls are never executed until approved
   Design:         Tool calls displayed as plan, not executed
   Classification: Process Decomposition
+  Returns:        Success: formatted plan text with queued calls
+                  Failure: N/A (internal operation)
 end note
 
-== AGT-07 Queue Plan ==
+== AGT-07 QUEUE Plan ==
 
-agent -> plan : queue_tool_call(tool_name, args)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+activate agent
+
+agent -> plan : agt07 QUEUE Plan({tool_name}, {args})
+activate plan
 plan -> plan : append to pending_calls list
 plan --> agent : queued
+deactivate plan
 
-agent -> plan : display_plan()
+agent -> plan : agt07 DISPLAY Plan()
+activate plan
 plan --> agent : formatted plan text
+deactivate plan
 
-note over agent, plan
-  Flow:    tool call -> queue -> display as plan
+agent --> repl : AgentEvent(PlanDisplay)
+deactivate agent
+repl --> user : plan displayed
+
+note over user, plan
+  Flow:    AGT-07 → queue tool call → display as plan
   State:   <back:#FFF3E0>THINKING</back> -> <back:#F1F8E9>PLANNING</back>
-  Failure: N/A
-  Success: Tool calls queued and displayed as plan
+  Success: tool calls queued and displayed as plan
+  Failure: N/A (internal operation)
 end note
 
 @enduml

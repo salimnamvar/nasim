@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — TL-20 Recall Memory
+actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -20,37 +23,44 @@ box "Tool Layer" #F3E5F5
 end box
 participant "MemoryStore" as mem
 
-note over participants
+note over user, mem
   Scope:          Recall knowledge from the memory store by query
   Preconditions:  MemoryTool initialized, memory not empty
   Excludes:       Memory persist, search, scoping
-  Contexts:       Called by AGT-02; delegates to MEM-02
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call); delegates to MEM-02
   Rollback:       Error string returned to LLM
   Design:         Delegates to MEM-02 RECALL Knowledge
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, knowledge=knowledge) or ToolResult(success=False, error=str)
 end note
 
 == TL-20 Recall Memory ==
 
-agent -> registry : execute("recall_memory", {query, scope?})
-registry -> tool : execute(query, scope)
+user -> repl : types input
+repl -> agent : TL-20 PROCESS(user_input)
+agent -> registry : TL-20 Recall Memory(query, scope?)
+registry -> tool : TL-20 Recall Memory(query, scope)
 tool -> mem : MEM-02 recall(query, scope)
 
 break No matching knowledge
     mem --> tool : empty result
     tool --> registry : ToolResult(success=False, error="no match")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="no match")
 end
 
 mem --> tool : matching knowledge
 tool --> registry : ToolResult(success=True, knowledge)
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over participants
-  Flow:    AgentOrchestrator -> ToolRegistry -> MemoryTool -> MEM-02 RECALL Knowledge -> ToolResult
+note over user, mem
+  Flow:    TL-20: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> MemoryTool -> MemoryStore -> ToolResult
   State:   No state change
-  Failure: No matching knowledge -> ToolResult(success=False)
   Success: Recalled knowledge returned
+  Failure: No matching knowledge -> ToolResult(success=False)
 end note
 
 @enduml

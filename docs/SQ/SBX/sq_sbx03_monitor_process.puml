@@ -4,57 +4,87 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Monitor sandboxed process for timeout and resource usage
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — SBX-03 MONITOR Process
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Sandbox Layer" #F1F8E9
   participant "SandboxExecutor" as executor
   participant "SandboxMonitor" as monitor
 end box
 
-note over executor, monitor
-  Scope:          Process monitoring within sandbox
+note over user, monitor
+  Scope:          SBX-03 MONITOR Process — process monitoring within sandbox
   Preconditions:  Sandbox process running (SBX-01)
-  Excludes:       Resource limiting (SBX-04)
   Contexts:       Long-running commands, background processes
+  Excludes:       Resource limiting (SBX-04)
   Rollback:       Kill process on timeout, enforce resource limits
   Design:         Watchdog thread with configurable intervals
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={stats})
+    - Failure: Result(success=false, error="timeout_exceeded")
+    - Failure: Result(success=false, error="resource_limit_exceeded")
 end note
 
 == SBX-03 MONITOR Process ==
 
-executor -> monitor : start_watch(process_id, limits)
+user -> repl : types input
+repl -> agent : SBX-03 PROCESS(user_input)
+
+agent -> executor : SBX-03 MONITOR Process(process_id, limits)
+activate executor
+
+executor -> monitor : SBX-03 START Watch(process_id, limits)
 activate monitor
 
 loop while process running
-    monitor -> monitor : poll process status
-    monitor -> monitor : check timeout elapsed
-    monitor -> monitor : check resource usage (CPU, memory)
+    monitor -> monitor : SBX-03 POLL ProcessStatus()
+    monitor -> monitor : SBX-03 CHECK TimeoutElapsed()
+    monitor -> monitor : SBX-03 CHECK ResourceUsage(CPU, memory)
 end
 
 alt timeout exceeded
-    monitor -> executor : kill_process(SIGKILL)
+    monitor -> executor : SBX-03 KILL Process(SIGKILL)
     executor --> monitor : process_killed
+    monitor --> executor : watch_complete(stats)
+    executor --> agent : Result(success=false, error="timeout_exceeded")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : error: process timeout exceeded
 else resource limit exceeded
-    monitor -> executor : enforce_limit(violation)
+    monitor -> executor : SBX-03 ENFORCE Limit(violation)
     executor --> monitor : limit_enforced
+    monitor --> executor : watch_complete(stats)
+    executor --> agent : Result(success=false, error="resource_limit_exceeded")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : error: resource limit exceeded
 else normal completion
-    monitor -> monitor : record final stats
+    monitor -> monitor : SBX-03 RECORD FinalStats()
+    monitor --> executor : watch_complete(stats)
+    executor --> agent : Result(success=true, data={stats})
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result: process completed
 end
 
-monitor --> executor : watch_complete(stats)
 deactivate monitor
+deactivate executor
 
-note over executor, monitor
-  Flow:    SandboxExecutor -> SandboxMonitor -> poll -> enforce limits -> complete
+note over user, monitor
+  Flow:    SBX-03 -> User -> REPLSession -> AgentOrchestrator -> SandboxExecutor -> SandboxMonitor -> poll -> enforce limits -> complete
   State:   No state change
-  Failure: Timeout or resource violation -> kill/enforce
-  Success: Executor receives process stats and completion status
+  Success: Result(success=true, data={stats})
+  Failure: Result(success=false, error="timeout_exceeded") or Result(success=false, error="resource_limit_exceeded") — kill/enforce
 end note
 
 @enduml

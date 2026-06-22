@@ -23,11 +23,12 @@ end box
 note over client, store
   Scope:          Read a session's current state and messages
   Preconditions:  Session exists on disk
-  Excludes:       Session creation (SRV-02), message dispatch (SRV-06)
   Contexts:       Called by HTTPClient via GET /v1/sessions/{id}
+  Excludes:       Session creation (SRV-02), message dispatch (SRV-06)
   Rollback:       404 if session not found
   Design:         ROD: standard read. Returns full session state.
   Classification: Primary Orchestrator
+  Returns:        200 OK with session data, or 404 NOT_FOUND error
 end note
 
 == SRV-03 READ Session ==
@@ -35,7 +36,7 @@ end note
 client -> router : GET /v1/sessions/{id}
 activate router
 
-router -> store : READ session
+router -> store : readSession(sessionId)
 activate store
 
 break Session not found
@@ -51,10 +52,10 @@ router --> client : 200 OK {session: {id, messages, created_at, updated_at}}
 deactivate router
 
 note over client, store
-  Flow:    HTTPClient -> ServerRouter -> SessionStore -> return session
+  Flow:    SRV-03 readSession: HTTPClient -> ServerRouter -> SessionStore -> return session
   State:   No state change
-  Failure: 404 session not found
   Success: 200 OK with session data
+  Failure: 404 session not found
 end note
 
 @enduml

@@ -4,31 +4,49 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Build cross-file symbol reference graph
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — RIM-02 BUILD Symbol Graph
+title nasim — RIM-02 BUILD SymbolGraph
 
-box "Repo Intelligence Layer" #E0F2F1
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Repo Intelligence Layer" #EDE7F6
   participant "RepoIntelligenceManager" as rim
   participant "SymbolGraph" as graph
 end box
 
-note over rim, graph
-  Scope:          Build cross-file symbol reference graph
+note over user, graph
+  Scope:          RIM-02 BUILD SymbolGraph — build cross-file symbol reference graph
   Preconditions:  AST index available from RIM-01
-  Excludes:       AST parsing (RIM-01), search (RIM-06)
   Contexts:       Called after RIM-01 INDEX Codebase
+  Excludes:       AST parsing (RIM-01), search (RIM-06)
   Rollback:       Partial graph on parse errors
   Design:         Builds directed graph of symbols and their references
-  Classification: Process Decomposition
+  Returns:
+    - Success: SymbolGraph(symbols, edges)
+    - Failure: Partial graph with unresolved refs
 end note
 
-== RIM-02 BUILD Symbol Graph ==
+== RIM-02 BUILD SymbolGraph ==
 
-rim -> graph : BUILD from AST index
+user -> repl : RIM-02 BUILD SymbolGraph(ast_index)
+activate repl
+repl -> agent : RIM-02 BUILD SymbolGraph(ast_index)
+activate agent
+
+agent -> rim : RIM-02 BUILD SymbolGraph(ast_index)
+activate rim
+
+rim -> graph : RIM-02 BUILD SymbolGraph(ast_index)
 activate graph
 
 graph -> graph : extract symbols per file
@@ -36,17 +54,25 @@ graph -> graph : resolve cross-file references
 graph -> graph : build edges (defines, references, imports)
 
 break Reference resolution fails
-  graph --> rim : partial graph with unresolved refs
+  graph --> rim : PartialGraph(unresolved_refs)
 end
 
 graph --> rim : SymbolGraph(symbols, edges)
 deactivate graph
 
-note over rim, graph
-  Flow:    RepoIntelligenceManager -> SymbolGraph -> extract symbols -> resolve refs -> build graph
+rim --> agent : SymbolGraph(symbols, edges)
+deactivate rim
+
+agent --> repl : SymbolGraph(symbols, edges)
+deactivate agent
+repl --> user : SymbolGraph(symbols, edges)
+deactivate repl
+
+note over user, graph
+  Flow:    RIM-02 → Developer → REPLSession → AgentOrchestrator → RepoIntelligenceManager → SymbolGraph → extract symbols → resolve refs → build graph
   State:   No state change
-  Failure: Partial graph on unresolved references
   Success: Complete symbol reference graph
+  Failure: Partial graph on unresolved references
 end note
 
 @enduml

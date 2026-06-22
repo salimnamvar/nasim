@@ -11,6 +11,11 @@
 
 title nasim — EDT-09 APPLY Inline Patch
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -25,16 +30,20 @@ end box
 note over participants
   Scope:          Inline patch application with line-level precision
   Preconditions:  Patch generated with line offsets, target file readable
-  Excludes:       Whole-file rewrites, sandbox isolation, AST manipulation
   Contexts:       EDT-01 SELECT Strategy selects this for precise line-targeted edits
+  Excludes:       Whole-file rewrites, sandbox isolation, AST manipulation
   Rollback:       Patch context mismatch → reject patch, report conflict
   Design:         InlinePatchCoder parses patch format, validates context lines, applies at offset
   Classification: Process Decomposition
+  Returns:        EditResult(success, file_path, lines_changed) on success; patch rejected on failure
 end note
 
 == EDT-09 APPLY Inline Patch ==
 
-agent -> esm : APPLY_INLINE_PATCH(file_path, patch)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> esm : EDT-09 APPLY_INLINE_PATCH(file_path, patch)
 activate esm
 
 esm -> ipc : code_inline_patch(file_path, patch)
@@ -68,11 +77,14 @@ deactivate ipc
 esm --> agent : EditResult
 deactivate esm
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over participants
-  Flow:    AgentOrchestrator → EditStrategyManager → InlinePatchCoder → parse patch → apply → validate
+  Flow:    EDT-09 → parse patch → apply → validate
   State:   <back:#ECEFF1>IDLE</back> → PARSING → VALIDATING → APPLYING → DONE
-  Failure: Context mismatch → patch rejected, conflict reported
-  Success: EditResult with patched file and line change count
+  Success: EditResult(success=true, file_path, lines_changed) — patch applied
+  Failure: EditResult(success=false, error) — context mismatch, patch rejected
 end note
 
 @enduml

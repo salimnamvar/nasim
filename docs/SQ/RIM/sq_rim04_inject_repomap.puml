@@ -1,23 +1,27 @@
 @startuml sq_rim04_inject_repomap
 ' ============================================================
-' Title:     RIM-04 — INJECT RepoMap (Token-budgeted Context Injection)
+' Title:     RIM-04 — INJECT RepoMap
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Token-budgeted repo-map injection into LLM context
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
+
+title nasim — RIM-04 INJECT RepoMap
 
 actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Index Layer" #FFF3E0
-  participant "RepoIndexer" as indexer
-  participant "SymbolRanker" as ranker
+box "Repo Intelligence Layer" #EDE7F6
   participant "RepoMapInjector" as injector
+  participant "SymbolRanker" as ranker
 end box
 box "Context Layer" #E8F5E9
   participant "TokenBudget" as budget
@@ -25,56 +29,40 @@ box "Context Layer" #E8F5E9
 end box
 
 note over user, history
-  Scope:
-    - rim04 INJECT RepoMap — token-budgeted repo-map injection into context
-
-  Preconditions:
-    - RIM-01 completed (AST index available)
-    - RIM-02 completed (symbols ranked)
-    - TokenBudget initialized with model limits
-
-  Contexts:
-    - Called before each LLM call to provide repository context
-    - Output is prepended to conversation messages
-
-  Excludes:
-    - Full file content injection (handled by AGT-02)
-    - Embedding search results (handled by RIM-03)
-
-  Rollback:
-    - Budget exceeded → truncate to fit budget
-    - Empty index → inject empty map with warning
-
-  Design:
-  Classification: Primary Orchestrator
-    - RepoMapInjector selects top-ranked symbols within token budget
-    - Budget split: 60% structure overview, 25% relevant snippets, 15% reserves
-    - Output formatted as structured text for LLM consumption
-    - Injection point: system message or first user message
-
+  Scope:          RIM-04 INJECT RepoMap — token-budgeted repo-map injection into context
+  Preconditions:  RIM-01 completed (AST index available), RIM-02 completed (symbols ranked), TokenBudget initialized
+  Contexts:       Called before each LLM call to provide repository context
+  Excludes:       Full file content injection (AGT-02), embedding search results (RIM-06)
+  Rollback:       Budget exceeded -> truncate to fit budget; empty index -> inject empty map with warning
+  Design:         RepoMapInjector selects top-ranked symbols within token budget. Budget split: 60% structure, 25% snippets, 15% reserves
   Returns:
-    - Success: RepoMapContext with formatted text and token count
+    - Success: RepoMapContext(text, token_count)
     - Failure: Empty context with warning
 end note
 
-== rim04 INJECT RepoMap ==
+== RIM-04 INJECT RepoMap ==
 
-agent -> injector : INJECT_REPOMAP(budget_tokens, ranked_symbols)
+user -> repl : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
+activate repl
+repl -> agent : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
+activate agent
+
+agent -> injector : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
 activate injector
 
-injector -> budget : get_available_budget()
+injector -> budget : budget.get_available_budget()
 activate budget
 budget --> injector : available_tokens
 deactivate budget
 
 injector -> injector : split_budget(available_tokens, ratios=[0.6, 0.25, 0.15])
 
-injector -> ranker : get_top_symbols(structure_budget)
+injector -> ranker : ranker.get_top_symbols(structure_budget)
 activate ranker
 ranker --> injector : structure_symbols[]
 deactivate ranker
 
-injector -> ranker : get_relevant_snippets(snippet_budget)
+injector -> ranker : ranker.get_relevant_snippets(snippet_budget)
 activate ranker
 ranker --> injector : snippet_symbols[]
 deactivate ranker
@@ -83,7 +71,7 @@ injector -> injector : format_repo_map(structure_symbols, snippet_symbols)
 
 injector -> injector : truncate_to_budget(formatted_map, max_tokens)
 
-injector -> history : prepend_context(repo_map_text)
+injector -> history : history.prepend_context(repo_map_text)
 activate history
 history --> injector : context_injected
 deactivate history
@@ -91,24 +79,16 @@ deactivate history
 injector --> agent : RepoMapContext(text, token_count)
 deactivate injector
 
+agent --> repl : RepoMapContext(text, token_count)
+deactivate agent
+repl --> user : RepoMapContext(text, token_count)
+deactivate repl
+
 note over user, history
-  Flow:
-    - AgentOrchestrator → RepoMapInjector → TokenBudget + SymbolRanker + ConversationHistory → RepoMapContext
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → BUDGETING → SELECTING → FORMATTING → TRUNCATING → INJECTED
-
-  Failure:
-    - Budget exceeded → truncate to fit
-    - Empty index → empty map + warning
-
-  Success:
-    - RepoMapContext with formatted text within token budget
-
-  Key invariants:
-    - Total injected tokens never exceed budget
-    - Budget ratios ensure balanced coverage
-    - Injection is idempotent (replaces previous injection)
+  Flow:    RIM-04 → Developer → REPLSession → AgentOrchestrator → RepoMapInjector → TokenBudget + SymbolRanker + ConversationHistory → RepoMapContext
+  State:   No state change
+  Success: RepoMapContext with formatted text within token budget
+  Failure: Budget exceeded -> truncate to fit; empty index -> empty map + warning
 end note
 
 @enduml

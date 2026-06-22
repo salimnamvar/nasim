@@ -9,6 +9,11 @@
 ' Review:    —
 ' ============================================================
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -17,7 +22,7 @@ box "Session Layer" #F1F8E9
 end box
 database "Session Directory" as dir
 
-note over agent, dir
+note over user, dir
   Scope:          Save session messages to JSON Lines file
   Preconditions:  AgentOrchestrator has messages to save
   Contexts:       Called by AGT-01 after each task turn
@@ -25,26 +30,34 @@ note over agent, dir
   Rollback:       Write error -> log warning, session lost
   Design:         One file per session: ~/.nasim/sessions/<id>/session.jsonl
   Classification: Process Decomposition
+  Returns:        Success: Result(success=true, data={session_id}); Failure: Result(success=false, error="write_failed")
 end note
 
 == SSN-01 Save Session ==
 
-agent -> store : save(session_id, messages)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> store : ssn01 PERSIST Session(session_id, messages)
 store -> store : serialize messages to JSON Lines
 store -> dir : write session.jsonl
 
 break Disk write error
     dir --> store : IOError
-    store -> agent : log warning("Session save failed")
+    store --> agent : 500 INTERNAL — log warning("Session save failed")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : result — session save failed
 end
 
-store --> agent : save complete
+store --> agent : 200 OK — save complete
+agent --> repl : AgentEvent(Done)
+repl --> user : result — session persisted
 
-note over agent, dir
-  Flow:    messages -> serialize -> write JSON Lines
+note over user, dir
+  Flow:    SSN-01 → serialize → write JSON Lines
   State:   No state change
-  Failure: Disk error -> log warning, continue
-  Success: Session persisted to disk
+  Success: 200 OK — session persisted to disk
+  Failure: 500 INTERNAL — disk error, log warning, continue
 end note
 
 @enduml

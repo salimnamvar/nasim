@@ -11,6 +11,11 @@
 
 title nasim — EDT-04 APPLY Unified Diff
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -22,16 +27,19 @@ end box
 note over agent, coder
   Scope:          Apply unified diff format edit to file
   Preconditions:  EditStrategyManager initialized, file exists
-  Excludes:       Strategy selection (EDT-01), validation (EDT-03)
   Contexts:       Called by AGT-02 DISPATCH Tool Call
+  Excludes:       Strategy selection (EDT-01), validation (EDT-03)
   Rollback:       Diff application failure returns error
   Design:         Parses unified diff, applies hunks sequentially
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True) on success; ToolResult(success=False) on failure
 end note
 
 == EDT-04 APPLY Unified Diff ==
 
-agent -> mgr : APPLY_UNIFIED_DIFF(file, diff)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> mgr : EDT-04 APPLY_UNIFIED_DIFF(file, diff)
 activate mgr
 
 mgr -> coder : apply(diff, file_content)
@@ -50,11 +58,14 @@ deactivate coder
 mgr --> agent : ToolResult(success=True)
 deactivate mgr
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over agent, coder
-  Flow:    Agent -> EditStrategyManager -> UnifiedDiffCoder -> parse hunks -> apply -> result
+  Flow:    User → REPLSession → AgentOrchestrator → EditStrategyManager → UnifiedDiffCoder → parse hunks → apply → result
   State:   No state change
-  Failure: Hunk mismatch, file not found -> ToolResult(success=False)
   Success: File modified with unified diff
+  Failure: Hunk mismatch, file not found -> ToolResult(success=False)
 end note
 
 @enduml

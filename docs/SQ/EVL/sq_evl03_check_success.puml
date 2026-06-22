@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — EVL-03 CHECK Success
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -22,19 +25,23 @@ box "Tool Layer" #F3E5F5
   participant "ShellRunner" as shell
 end box
 
-note over participants
+note over user, shell
   Scope:          Run user-defined success checks and aggregate pass/fail
   Preconditions:  Success check commands configured, shell environment available
-  Excludes:       Task completion evaluation (EVL-02), retry coordination (EVL-04)
   Contexts:       EVL-01 EVALUATE Task delegates success checks here
+  Excludes:       Task completion evaluation (EVL-02), retry coordination (EVL-06)
   Rollback:       No state change — read-only execution
   Design:         SuccessCheckRunner executes each check, captures exit codes and output
   Classification: Process Decomposition
+  Returns:        SuccessCheckResult(passed, results[])
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == EVL-03 CHECK Success ==
 
-agent -> engine : CHECK_SUCCESS(check_commands[])
+agent -> engine : EVL-03 CHECK_SUCCESS(check_commands[])
 activate engine
 
 engine -> runner : run_checks(check_commands)
@@ -61,11 +68,14 @@ deactivate runner
 engine --> agent : SuccessCheckResult
 deactivate engine
 
-note over participants
-  Flow:    EvaluationEngine -> SuccessCheckRunner -> run user-defined checks -> return pass/fail
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, shell
+  Flow:    EVL-03 AgentOrchestrator -> EvaluationEngine -> SuccessCheckRunner -> run user-defined checks -> return pass/fail
   State:   <back:#ECEFF1>IDLE</back> → RUNNING → AGGREGATING → DONE
-  Failure: Any check fails → SuccessCheckResult(passed=false)
   Success: All checks pass → SuccessCheckResult(passed=true)
+  Failure: Any check fails → SuccessCheckResult(passed=false)
 end note
 
 @enduml

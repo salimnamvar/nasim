@@ -9,8 +9,14 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — PLG-04 Register Plugin Hooks
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Tool Layer" #F3E5F5
   participant "PluginLoader" as loader
 end box
@@ -18,17 +24,24 @@ box "Hooks Layer" #FFFDE7
   participant "HookManager" as hm
 end box
 
-note over participants
+note over user, hm
   Scope:          Register plugin-declared hooks into HookManager
   Preconditions:  Valid PluginManifest loaded (PLG-02)
-  Excludes:       Tool registration, plugin activation
   Contexts:       Called during plugin enable (PLG-05)
+  Excludes:       Tool registration, plugin activation
   Rollback:       Registration failure logged; other hooks still registered
   Design:         Plugin hooks prefixed with plugin name
   Classification: Process Decomposition
+  Returns:        all hooks registered or RegistrationError with hook skipped
 end note
 
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
 == PLG-04 Register Plugin Hooks ==
+
+agent -> loader : PLG-04 REGISTER_PLUGIN_HOOKS(manifest)
+activate loader
 
 loader -> loader : enumerate hooks from PluginManifest
 
@@ -43,13 +56,17 @@ loop for each hook in manifest
     hm --> loader : registered
 end
 
-loader --> loader : all hooks registered
+loader --> agent : all hooks registered
+deactivate loader
 
-note over participants
-  Flow:    PluginLoader -> enumerate plugin hooks -> register in HookManager
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, hm
+  Flow:    PLG-04 AgentOrchestrator -> PluginLoader -> enumerate plugin hooks -> register in HookManager
   State:   Hooks added to HookManager
-  Failure: Registration failure -> hook skipped with warning
   Success: All plugin hooks registered
+  Failure: Registration failure -> hook skipped with warning
 end note
 
 @enduml

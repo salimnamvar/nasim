@@ -9,12 +9,20 @@
 ' Review:    —
 ' ============================================================
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
   participant "GlobTool" as glob
 end box
 
-note over registry, glob
+note over user, glob
   Scope:          Find files matching glob pattern
   Preconditions:  Glob pattern provided by LLM
   Contexts:       Called by AGT-02 (DISPATCH Tool Call)
@@ -22,25 +30,35 @@ note over registry, glob
   Rollback:       Error string returned to LLM
   Design:         Uses pathlib.Path.glob()
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content=sorted_paths) or ToolResult(success=False, error=str)
 end note
 
 == TL-07 GLOB Files ==
 
-registry -> glob : execute(pattern, base_path)
+user -> repl : types input
+repl -> agent : TL-07 PROCESS(user_input)
+agent -> registry : TL-07 GLOB Files(pattern, base_path)
+registry -> glob : TL-07 GLOB Files(pattern, base_path)
 glob -> glob : Path(base_path).glob(pattern)
 glob -> glob : collect and sort matching paths
 
 break Permission denied
-    glob --> registry : "Error: permission denied: path"
+    glob --> registry : ToolResult(success=False, error="Error: permission denied: path")
+    registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error: permission denied: path")
 end
 
-glob --> registry : sorted list of matching file paths
+glob --> registry : ToolResult(success=True, content=sorted_paths)
+registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over registry, glob
-  Flow:    pattern -> pathlib.glob -> sorted paths
+note over user, glob
+  Flow:    TL-07: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> GlobTool -> pathlib.glob -> ToolResult
   State:   No state change
-  Failure: Permission denied -> error string
   Success: Sorted list of matching file paths
+  Failure: Permission denied -> ToolResult(success=False)
 end note
 
 @enduml

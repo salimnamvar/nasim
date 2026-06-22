@@ -4,13 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Model selection and fallback routing
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-01 SELECT Model
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -26,53 +31,65 @@ box "Provider Layer" #FFF3E0
   participant "LiteLLMProxy" as provider
 end box
 
-note over agent, provider
-  Scope:          Model selection and fallback routing
+note over user, provider
+  Scope:          RTG-01 SELECT Model — model selection and fallback routing
   Preconditions:  ModelRouter initialized, Config loaded
-  Excludes:       Model switching (RTG-04), task classification (RTG-03)
   Contexts:       Called by AGT-01 before PRV-02 REQUEST Chat
+  Excludes:       Model switching (RTG-04), task classification (RTG-03)
   Rollback:       Fallback to default model on selection failure
   Design:         Composite strategy: classify task -> select model -> fallback chain
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data=selected_model)
+    - Failure: Result(success=false, error="no_supported_model")
 end note
 
 == RTG-01 SELECT Model ==
 
-agent -> router : select_model(task_type)
+user -> repl : types input
+repl -> agent : RTG-01 PROCESS(user_input)
+
+agent -> router : RTG-01 SELECT Model(task_type)
 activate router
 
-router -> cfg : get_model_config()
+router -> cfg : RTG-01 READ ModelConfig()
 activate cfg
 cfg --> router : Config(model, fallback_chain)
 deactivate cfg
 
-router -> router : classify_task(input)
+router -> router : RTG-01 CLASSIFY Task(input)
 
-router -> caps : check_capabilities(model)
+router -> caps : RTG-01 READ Capabilities(model)
 activate caps
 caps --> router : supported_models
 deactivate caps
 
 break No supported model found
-    router -> fallback : get_default_model()
+    router -> fallback : RTG-01 READ DefaultModel()
     activate fallback
     fallback --> router : default_model
     deactivate fallback
+    router --> agent : Result(success=false, error="no_supported_model")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : error: no supported model
 end
 
-router -> fallback : resolve(primary_model, fallback_chain)
+router -> fallback : RTG-01 RESOLVE Model(primary_model, fallback_chain)
 activate fallback
 fallback --> router : selected_model
 deactivate fallback
 
-router --> agent : selected_model
+router --> agent : Result(success=true, data=selected_model)
 deactivate router
 
-note over agent, provider
-  Flow:    AgentOrchestrator -> ModelRouter -> classify -> check caps -> fallback chain -> return model
+agent --> repl : AgentEvent(Done)
+repl --> user : result: selected model
+
+note over user, provider
+  Flow:    RTG-01 -> User -> REPLSession -> AgentOrchestrator -> ModelRouter -> classify -> check caps -> fallback chain -> return model
   State:   <back:#EDE7F6>ROUTING</back>
-  Failure: No supported model -> fallback to default
-  Success: Selected model returned to agent
+  Success: Result(success=true, data=selected_model)
+  Failure: Result(success=false, error="no_supported_model") — fallback to default
 end note
 
 @enduml

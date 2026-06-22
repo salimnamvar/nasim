@@ -1,6 +1,6 @@
 @startuml sq_agt14_handle_error
 ' ============================================================
-' Title:     AGT-14 — Handle Error
+' Title:     AGT-14 — HANDLE Error
 ' Boundary:  nasim code agent
 ' Purpose:   Classify errors and determine recovery action
 ' Milestone: v1.0
@@ -9,8 +9,13 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — AGT-14 Handle Error
+title nasim — AGT-14 HANDLE Error
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ErrorBoundary" as eb
@@ -19,19 +24,25 @@ box "Safety Layer" #FFF9C4
   participant "SafetyCoordinator" as safety
 end box
 
-note over agent, safety
-  Scope:          Classify errors and determine recovery strategy
+note over user, safety
+  Scope:          AGT-14 HANDLE Error
   Preconditions:  Error occurred in agent loop (LLM, tool, or session)
-  Excludes:       Error display (CLI-03), error logging (OBS-01)
   Contexts:       Called by AGT-01 when LLM or tool call fails
+  Excludes:       Error display (CLI-03), error logging (OBS-01)
   Rollback:       Unrecoverable error → terminate task with error event
   Design:         Error classification drives retry, fallback, or abort decisions
   Classification: Process Decomposition
+  Returns:        Success: RecoveryAction(retry | fallback | abort)
+                  Failure: unrecoverable → abort with error event
 end note
 
-== AGT-14 Handle Error ==
+== AGT-14 HANDLE Error ==
 
-agent -> eb : handle(error)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+activate agent
+
+agent -> eb : agt14 HANDLE Error({error})
 activate eb
 
 eb -> eb : classify error type
@@ -54,11 +65,15 @@ end
 
 deactivate eb
 
-note over agent, safety
-  Flow:    AgentOrchestrator → ErrorBoundary → classify → determine recovery → return action
-  State:   <back:#FFEBEE>ERROR</back> → CLASSIFYING → <back:#FBE9E7>RETRY</back> | FALLBACK | ABORT
-  Failure: Unrecoverable → abort with error event
-  Success: Recovery action returned for agent to execute
+agent --> repl : AgentEvent(Error)
+deactivate agent
+repl --> user : error occurred
+
+note over user, safety
+  Flow:    AGT-14 → classify → determine recovery → return action
+  State:   <back:#FFEBEE>ERROR</back> -> CLASSIFYING -> <back:#FBE9E7>RETRY</back> | FALLBACK | ABORT
+  Success: recovery action returned for agent to execute
+  Failure: unrecoverable -> abort with error event
 end note
 
 @enduml

@@ -4,47 +4,59 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Generate vector embeddings for code fragments
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   2.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RIM-05 EMBED Code
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Layer" #F9FBE7
+box "Repo Intelligence Layer" #EDE7F6
   participant "RepoIntelligenceManager" as rim
   participant "EmbeddingAdapter" as embed
 end box
-box "External Layer" #F5F5F5
+box "External" #F5F5F5
   participant "EmbeddingProvider" as provider
 end box
 box "Storage Layer" #F3E5F5
   participant "VectorStore" as vstore
 end box
 
-note over participants
-  Scope:          Generate vector embeddings for code fragments and store them
+note over user, vstore
+  Scope:          RIM-05 EMBED Code — generate vector embeddings for code fragments
   Preconditions:  Embedding provider configured, code fragments identified
-  Excludes:       Semantic search (handled by RIM-06), AST indexing
   Contexts:       RIM-01 INDEX Codebase identifies fragments; RIM-06 SEARCH Semantic consumes embeddings
-  Rollback:       Provider failure → partial embeddings retained, error reported
+  Excludes:       Semantic search (RIM-06), AST indexing (RIM-01)
+  Rollback:       Provider failure -> partial embeddings retained, error reported
   Design:         EmbeddingAdapter batches fragments, calls provider, stores vectors
-  Classification: Process Decomposition
+  Returns:
+    - Success: EmbeddingResult(count, dimensions)
+    - Failure: Partial embeddings retained on provider failure
 end note
 
 == RIM-05 EMBED Code ==
 
-agent -> rim : EMBED_CODE(code_fragments[])
+user -> repl : RIM-05 EMBED Code(code_fragments)
+activate repl
+repl -> agent : RIM-05 EMBED Code(code_fragments)
+activate agent
+
+agent -> rim : RIM-05 EMBED Code(code_fragments)
 activate rim
 
-rim -> embed : generate_embeddings(code_fragments)
+rim -> embed : RIM-05 EMBED Code(code_fragments)
 activate embed
 
 loop for each batch of fragments
-    embed -> provider : embed(batch)
+    embed -> provider : provider.embed(batch)
     activate provider
     provider --> embed : vectors[]
     deactivate provider
@@ -52,7 +64,7 @@ loop for each batch of fragments
     embed -> embed : validate_dimensions(vectors)
 end
 
-embed -> vstore : store_vectors(code_fragments, vectors)
+embed -> vstore : vstore.store_vectors(code_fragments, vectors)
 activate vstore
 vstore --> embed : store_result
 deactivate vstore
@@ -60,14 +72,19 @@ deactivate vstore
 embed --> rim : EmbeddingResult(count, dimensions)
 deactivate embed
 
-rim --> agent : EmbeddingResult
+rim --> agent : EmbeddingResult(count, dimensions)
 deactivate rim
 
-note over participants
-  Flow:    RepoIntelligenceManager -> EmbeddingAdapter -> generate embeddings -> return vectors
-  State:   <back:#ECEFF1>IDLE</back> → BATCHING → EMBEDDING → STORING → DONE
-  Failure: Provider failure → partial embeddings retained
+agent --> repl : EmbeddingResult(count, dimensions)
+deactivate agent
+repl --> user : EmbeddingResult(count, dimensions)
+deactivate repl
+
+note over user, vstore
+  Flow:    RIM-05 → Developer → REPLSession → AgentOrchestrator → RepoIntelligenceManager → EmbeddingAdapter → generate embeddings → return vectors
+  State:   No state change
   Success: EmbeddingResult with fragment count and vector dimensions
+  Failure: Provider failure -> partial embeddings retained
 end note
 
 @enduml

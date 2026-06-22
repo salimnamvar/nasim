@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — MEM-01 PERSIST Knowledge
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -20,19 +23,23 @@ box "Memory Layer" #E0F2F1
   participant "MemoryIndex" as index
 end box
 
-note over agent, index
+note over user, index
   Scope:          Store cross-session knowledge entries
   Preconditions:  MemoryStore initialized, scope valid
-  Excludes:       Search and recall (MEM-02, MEM-03)
   Contexts:       Called by TL-19 (PERSIST Memory), session checkpoint
+  Excludes:       Search and recall (MEM-02, MEM-03)
   Rollback:       Transactional write with rollback on index failure
   Design:         Append-only store with index synchronization
   Classification: Process Decomposition
+  Returns:        persist_confirmed(key) or PersistError("write failed")
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == MEM-01 PERSIST Knowledge ==
 
-agent -> store : persist(key, value, scope)
+agent -> store : MEM-01 PERSIST(key, value, scope)
 activate store
 
 store -> scope : validate_scope(scope)
@@ -54,11 +61,14 @@ deactivate index
 store --> agent : persist_confirmed(key)
 deactivate store
 
-note over agent, index
-  Flow:    AgentOrchestrator -> MemoryStore -> validate scope -> write disk -> index -> confirm
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, index
+  Flow:    MEM-01 AgentOrchestrator -> MemoryStore -> validate scope -> write disk -> index -> confirm
   State:   No state change
-  Failure: Disk write fails -> rollback, no index update
   Success: Entry persisted and indexed for search
+  Failure: Disk write fails -> rollback, no index update
 end note
 
 @enduml

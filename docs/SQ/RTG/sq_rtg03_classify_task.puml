@@ -4,13 +4,18 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Classify task type and select optimal model
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-03 Classify Task
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -18,42 +23,56 @@ box "Router Layer" #EDE7F6
   participant "ModelRouter" as router
 end box
 
-note over participants
-  Scope:          Classify incoming task and select optimal model
+note over user, router
+  Scope:          RTG-03 CLASSIFY Task — classify task type and select optimal model
   Preconditions:  ModelRouter initialized with model catalog
-  Excludes:       Model switching, fallback application
   Contexts:       Called by AGT-01 or RTG-01
+  Excludes:       Model switching, fallback application
   Rollback:       Default model used on classification failure
   Design:         Heuristic or LLM-based classification
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={selected_model, task_type})
+    - Failure: Result(success=false, error="classification_failed")
 end note
 
 == RTG-03 Classify Task ==
 
-agent -> router : classify(task_description, context)
+user -> repl : types input
+repl -> agent : RTG-03 PROCESS(user_input)
+
+agent -> router : RTG-03 CLASSIFY Task(task_description, context)
 
 break Classification fails (confidence < 0.6)
     router --> agent : default_model
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result: default model (classification failed)
 end
 
-router -> router : extract_signals(input_length, keywords, traceback, file_content)
-router -> router : score each task type (keyword * 0.4 + context * 0.4 + length * 0.2)
-router -> router : select highest-scoring type
+router -> router : RTG-03 EXTRACT Signals(input_length, keywords, traceback, file_content)
+router -> router : RTG-03 SCORE TaskType(keyword * 0.4 + context * 0.4 + length * 0.2)
+router -> router : RTG-03 SELECT HighestScoring()
 
-router -> router : map task_type -> model tier via ModelCatalog
-router -> router : verify Provider.capabilities.supports_tools for selected model
+router -> router : RTG-03 MAP ModelTier(task_type, ModelCatalog)
+router -> router : RTG-03 VERIFY ProviderCapabilities(selected_model)
 
 break Model unavailable
-    router -> router : FallbackChain.next_model()
+    router -> router : RTG-03 RESOLVE NextModel(FallbackChain)
+    router --> agent : Result(success=true, data={selected_model, task_type})
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result: fallback model selected
 end
 
-router --> agent : selected_model + task_type
+router --> agent : Result(success=true, data={selected_model, task_type})
 
-note over participants
-  Flow:    AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model
+agent --> repl : AgentEvent(Done)
+repl --> user : result: optimal model selected
+
+note over user, router
+  Flow:    RTG-03 -> User -> REPLSession -> AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model
   State:   No state change
-  Failure: Classification failure -> default model returned
-  Success: Optimal model selected for task type
+  Success: Result(success=true, data={selected_model, task_type})
+  Failure: Result(success=false, error="classification_failed") — default model returned
 end note
 
 @enduml

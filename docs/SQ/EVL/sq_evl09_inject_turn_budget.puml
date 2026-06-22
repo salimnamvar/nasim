@@ -6,11 +6,14 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -23,39 +26,22 @@ box "Context Layer" #E8F5E9
 end box
 
 note over user, history
-  Scope:
-    - evl05 INJECT Turn Budget — turn budget injection per-turn
-
-  Preconditions:
-    - TurnBudget initialized with max_turns
-    - ConversationHistory tracks turn count
-
-  Contexts:
-    - Called at start of each agentic turn
-    - Injects budget status into context for LLM awareness
-
-  Excludes:
-    - Repetition detection (handled by EVL-04)
-    - Edit evaluation (handled by EVL-01/02)
-
-  Rollback:
-    - Budget exceeded → force task completion
-
-  Design:
+  Scope:          Turn budget injection per-turn
+  Preconditions:  TurnBudget initialized with max_turns, ConversationHistory tracks turn count
+  Contexts:       Called at start of each agentic turn; injects budget status into context for LLM awareness
+  Excludes:       Repetition detection (handled by EVL-08), edit evaluation (handled by EVL-01/02)
+  Rollback:       Budget exceeded -> force task completion
+  Design:         TurnBudgetInjector computes remaining budget; injects formatted status into system message; warns when budget drops below threshold (20%); forces completion at zero budget
   Classification: Primary Orchestrator
-    - TurnBudgetInjector computes remaining budget
-    - Injects formatted status into system message
-    - Warns when budget drops below threshold (20%)
-    - Forces completion at zero budget
-
-  Returns:
-    - Success: BudgetStatus with remaining turns and warning flag
-    - Failure: BudgetExhausted error
+  Returns:        BudgetStatus(remaining, warning, continue=true) or BudgetExhausted(current_turn, max_turns)
 end note
 
-== evl05 INJECT Turn Budget ==
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
-agent -> injector : INJECT_BUDGET(current_turn)
+== EVL-09 INJECT Turn Budget ==
+
+agent -> injector : EVL-09 INJECT_BUDGET(current_turn)
 activate injector
 
 injector -> budget : get_max_turns()
@@ -82,23 +68,14 @@ end
 
 deactivate injector
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over user, history
-  Flow:
-    - AgentOrchestrator → TurnBudgetInjector → TurnBudget + ConversationHistory → BudgetStatus
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → COMPUTING → CHECKING → INJECTING → DONE
-
-  Failure:
-    - Budget exhausted → BudgetExhausted error
-
-  Success:
-    - BudgetStatus with remaining turns
-
-  Key invariants:
-    - Budget message always injected before LLM call
-    - Warning triggered at 20% remaining
-    - Zero budget forces immediate completion
+  Flow:    EVL-09 AgentOrchestrator -> TurnBudgetInjector -> TurnBudget + ConversationHistory -> BudgetStatus
+  State:   <back:#ECEFF1>IDLE</back> → COMPUTING → CHECKING → INJECTING → DONE
+  Success: BudgetStatus with remaining turns
+  Failure: Budget exhausted -> BudgetExhausted error
 end note
 
 @enduml

@@ -1,14 +1,24 @@
 @startuml sq_prv04_select_provider_backend
 ' ============================================================
-' Title:     PRV-04 — Select Provider Backend
+' Title:     PRV-04 — SELECT Provider Backend
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Map config.provider string to provider class
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
+title nasim — PRV-04 SELECT ProviderBackend
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Config Layer" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
@@ -16,33 +26,54 @@ box "Provider Layer" #FFF3E0
   participant "ProviderFactory" as factory
 end box
 
-note over cfg, factory
-  Scope:          Provider backend selection from config
+note over user, factory
+  Scope:          PRV-04 SELECT ProviderBackend — provider backend selection from config
   Preconditions:  Config loaded with provider field
-  Contexts:       Called by PRV-01 (Initialize Provider)
+  Contexts:       Called by PRV-01 (REGISTER Provider)
   Excludes:       Provider instantiation (PRV-01)
   Rollback:       Unknown provider -> ConfigError
   Design:         Registry mapping: str -> class
-  Classification: Process Decomposition
+  Returns:
+    - Success: provider_class reference for instantiation
+    - Failure: ConfigError — unknown provider name
 end note
 
-== PRV-04 Select Provider Backend ==
+== PRV-04 SELECT ProviderBackend ==
 
-cfg -> factory : select_backend(config.provider)
+user -> repl : PRV-04 SELECT ProviderBackend(provider_name)
+activate repl
+repl -> agent : PRV-04 SELECT ProviderBackend(provider_name)
+activate agent
+
+agent -> cfg : PRV-04 READ Config(provider_field)
+activate cfg
+cfg --> agent : provider_string
+deactivate cfg
+
+agent -> factory : PRV-04 SELECT ProviderBackend(provider_string)
+activate factory
 factory -> factory : PROV_REGISTRY lookup
 
 break Provider not in registry
     factory -> factory : raise ConfigError("Unknown provider: X")
-    factory --> cfg : ConfigError
+    factory --> agent : ConfigError
+    agent --> repl : ConfigError
+    repl --> user : error message
 end
 
-factory --> cfg : provider_class
+factory --> agent : provider_class
+deactivate factory
 
-note over cfg, factory
-  Flow:    config.provider string -> registry lookup -> class
+agent --> repl : provider_class
+deactivate agent
+repl --> user : provider_class
+deactivate repl
+
+note over user, factory
+  Flow:    PRV-04 → Developer → REPLSession → AgentOrchestrator → ConfigLoader → ProviderFactory → registry lookup → class
   State:   No state change
-  Failure: Unknown provider name -> ConfigError
   Success: Provider class reference for instantiation
+  Failure: Unknown provider name -> ConfigError
 end note
 
 @enduml

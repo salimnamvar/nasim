@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — PLG-01 DISCOVER Plugins
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -19,19 +22,23 @@ box "Plugins Layer" #EDE7F6
 end box
 participant "Host Filesystem" as fs
 
-note over agent, fs
+note over user, fs
   Scope:          Discover plugins from plugin directory
   Preconditions:  Plugin directory configured (~/.nasim/plugins/)
-  Excludes:       Tool/hook registration (PLG-03/04), activation (PLG-05)
   Contexts:       Called during agent initialization
+  Excludes:       Tool/hook registration (PLG-03/04), activation (PLG-05)
   Rollback:       Malformed plugins skipped with warning
   Design:         Scan plugin directory for manifest.yaml files
   Classification: Process Decomposition
+  Returns:        list[PluginManifest] or empty list on failure
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == PLG-01 DISCOVER Plugins ==
 
-agent -> loader : discover(plugin_dir)
+agent -> loader : PLG-01 DISCOVER(plugin_dir)
 activate loader
 
 loader -> fs : scan(plugin_dir)
@@ -52,11 +59,14 @@ end
 loader --> agent : list[PluginManifest]
 deactivate loader
 
-note over agent, fs
-  Flow:    AgentOrchestrator -> PluginLoader -> scan directory -> load manifests -> return list
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, fs
+  Flow:    PLG-01 AgentOrchestrator -> PluginLoader -> scan directory -> load manifests -> return list
   State:   <back:#ECEFF1>DISCOVERED</back>
-  Failure: Malformed plugin skipped with warning
   Success: List of discovered PluginManifests returned
+  Failure: Malformed plugin skipped with warning
 end note
 
 @enduml

@@ -30,40 +30,46 @@ note over user, shell
   Excludes:       File operations
   Rollback:       Error string returned to LLM
   Design:         subprocess.run with shell=True, configurable timeout
-  Classification: Primary Orchestrator
-  Safety:         Unsafe tool — requires permission check (SAF-01)
+  Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content=command_output) or ToolResult(success=False, error=str)
 end note
 
 == TL-05 EXECUTE Shell Command ==
 
-user -> repl : (entry via AGT-01)
-repl -> agent : (entry via AGT-01)
-agent -> registry : execute("shell_exec", {command, timeout})
-registry -> st : execute(command, timeout)
+user -> repl : types input
+repl -> agent : TL-05 PROCESS(user_input)
+agent -> registry : TL-05 EXECUTE Shell Command(command, timeout)
+registry -> st : TL-05 EXECUTE Shell Command(command, timeout)
 st -> shell : subprocess.run(command, shell=True, timeout=timeout)
 
 break Timeout
     shell --> st : TimeoutExpired
     st --> registry : ToolResult(success=False, error="command timed out after Ns")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="command timed out after Ns")
 end
 
 break Execution error
     shell --> st : Exception
     st --> registry : ToolResult(success=False, error="Error executing command")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error executing command")
 end
 
 shell --> st : CompletedProcess(stdout, stderr, returncode)
 st -> st : format output (stdout + stderr + exit code)
 st --> registry : ToolResult(success=True, content=command_output)
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
 note over user, shell
-  Flow:    command -> subprocess.run -> format output -> ToolResult
+  Flow:    TL-05: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> ShellTool -> Host Shell -> ToolResult
   State:   No state change
-  Failure: Timeout, execution error -> ToolResult(success=False)
   Success: Command output (stdout + stderr)
+  Failure: Timeout, execution error -> ToolResult(success=False)
 end note
 
 @enduml

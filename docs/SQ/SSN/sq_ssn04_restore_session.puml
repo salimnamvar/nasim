@@ -14,11 +14,11 @@ actor "Developer" as user
 box "CLI Layer" #E8F5E9
   participant "REPLSession" as repl
 end box
-box "Session Layer" #F1F8E9
-  participant "SessionStore" as store
-end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
+end box
+box "Session Layer" #F1F8E9
+  participant "SessionStore" as store
 end box
 
 note over user, agent
@@ -29,32 +29,36 @@ note over user, agent
   Rollback:       No session found -> start fresh
   Design:         --continue loads latest; --session loads by ID
   Classification: Primary Orchestrator
+  Returns:        Success: Session(id, messages); Failure: FileNotFoundError -> start fresh
 end note
 
 == SSN-04 Resume Session ==
 
-user -> repl : nasim --continue (or --session <id>)
-repl -> store : load_latest() or load(session_id)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> store : ssn04 READ Session(session_id)
 ref over store
   SSN-02: Load Session
 end ref
 
 alt Session found
-    store --> repl : Session(id, messages)
-    repl -> agent : restore messages
-    agent -> agent : set self.messages = session.messages
-    repl --> user : "Resumed session <id> (<N> messages)"
+    store --> agent : 200 OK — Session(id, messages)
+    agent -> agent : ssn01 PERSIST Session(session_id, messages)
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result — resumed session <id> (<N> messages)
 else Session not found
-    store --> repl : FileNotFoundError
-    repl -> agent : start fresh
-    repl --> user : "No session found, starting fresh"
+    store --> agent : 404 NOT_FOUND
+    agent -> agent : start fresh
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result — no session found, starting fresh
 end
 
 note over user, agent
-  Flow:    --continue -> load_latest -> restore messages -> continue
+  Flow:    SSN-04 → load session → restore messages → continue
   State:   No state change
-  Failure: No session -> start fresh
-  Success: Conversation restored, ready for input
+  Success: 200 OK — conversation restored, ready for input
+  Failure: 404 NOT_FOUND — no session, start fresh
 end note
 
 @enduml

@@ -11,6 +11,9 @@
 
 actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -43,11 +46,12 @@ note over user, fs
     - Read failure → return partial events with error
 
   Design:
-  Classification: Primary Orchestrator
     - WireLogger reads log file sequentially
     - EventDeserializer parses each line into Event objects
     - Supports filtering by session_id and event type
     - Streaming read for memory efficiency
+
+  Classification: Primary Orchestrator
 
   Returns:
     - Success: EventStream with deserialized events
@@ -56,7 +60,10 @@ end note
 
 == wrl02 READ Log ==
 
-agent -> logger : READ_LOG(session_id, filter)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> logger : wrl02 READ Log(session_id, filter)
 activate logger
 
 logger -> fs : read_file(log_path)
@@ -75,21 +82,24 @@ end
 
 logger -> logger : collect_matching_events()
 
-logger --> agent : EventStream(events[], count, truncated)
+logger --> agent : 200 OK — EventStream(events[], count, truncated)
 deactivate logger
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result — event stream returned
 
 note over user, fs
   Flow:
-    - AgentOrchestrator → WireLogger → FileSystem + EventDeserializer → EventStream
+    - WRL-02 → WireLogger → FileSystem + EventDeserializer → EventStream
 
   State:
     - <back:#ECEFF1>IDLE</back> → READING → DESERIALIZING → FILTERING → DONE
 
-  Failure:
-    - Read failure → partial events + error
-
   Success:
-    - EventStream with matching events
+    - 200 OK — EventStream with matching events
+
+  Failure:
+    - 500 INTERNAL — Read failure → partial events + error
 
   Key invariants:
     - Sequential read (no random access)

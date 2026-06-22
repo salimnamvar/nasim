@@ -4,47 +4,64 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Change the active model at runtime
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-04 Switch Model
 
+actor "Developer" as user
+
 box "CLI Layer" #E8F5E9
-  participant "Developer" as dev
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 box "Router Layer" #EDE7F6
   participant "ModelRouter" as router
 end box
 
-note over participants
-  Scope:          Change active model via CLI or agent request
+note over user, router
+  Scope:          RTG-04 SWITCH Model — change active model via CLI or agent request
   Preconditions:  Target model available in catalog
-  Excludes:       Model classification, fallback
   Contexts:       Called by CLI-07 SWITCH Model or AGT-01
+  Excludes:       Model classification, fallback
   Rollback:       Previous model restored on switch failure
   Design:         Atomic config update; validates model availability
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data={previous_model, new_model})
+    - Failure: Result(success=false, error="model_not_available")
 end note
 
 == RTG-04 Switch Model ==
 
-dev -> router : switch_model(target_model)
+user -> repl : types input
+repl -> agent : RTG-04 PROCESS(user_input)
+
+agent -> router : RTG-04 SWITCH Model(target_model)
 
 break Model not in catalog
-    router --> dev : Error("model not available")
+    router --> agent : Error("model not available")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : error: model not available
 end
 
-router -> router : validate model availability
-router -> router : update active_model config
-router --> dev : switched to target_model
+router -> router : RTG-04 VALIDATE ModelAvailability(target_model)
+router -> router : RTG-04 UPDATE ActiveModelConfig(target_model)
 
-note over participants
-  Flow:    Developer/Agent -> ModelRouter -> change active model -> update config
+router --> agent : Result(success=true, data={previous_model, new_model})
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result: switched to target_model
+
+note over user, router
+  Flow:    RTG-04 -> User -> REPLSession -> AgentOrchestrator -> ModelRouter -> validate -> update config -> return
   State:   Active model updated
-  Failure: Model not available -> error returned
-  Success: Active model switched
+  Success: Result(success=true, data={previous_model, new_model})
+  Failure: Result(success=false, error="model_not_available") — error returned
 end note
 
 @enduml

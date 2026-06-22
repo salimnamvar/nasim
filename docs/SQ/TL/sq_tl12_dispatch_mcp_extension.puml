@@ -9,16 +9,21 @@
 ' Review:    —
 ' ============================================================
 
-participant "ToolRegistry" as registry
-participant "MCPToolAdapter" as mcp
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Layer" #F3E5F5
+  participant "ToolRegistry" as registry
+  participant "MCPToolAdapter" as mcp
+end box
 participant "MCP Server" as server
 
-box "Tool Layer" #F3E5F5
-end box
-box "External" #FFEBEE
-end box
-
-note over mcp
+note over user, server
   Scope:          Invoke MCP server extension tools
   Preconditions:  MCP server configured and running
   Excludes:       MCP server startup, tool discovery
@@ -26,30 +31,45 @@ note over mcp
   Rollback:       MCP error returned as error string
   Design:         Wraps MCP tools as nasim Tool instances
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content=result) or ToolResult(success=False, error=str)
 end note
 
-registry -> mcp : execute(tool_name, args)
+== TL-12 Dispatch MCP Extension ==
+
+user -> repl : types input
+repl -> agent : TL-12 PROCESS(user_input)
+agent -> registry : TL-12 Dispatch MCP Extension(tool_name, args)
+registry -> mcp : TL-12 Dispatch MCP Extension(tool_name, args)
 mcp -> server : MCP call(tool_name, args) via stdio/SSE
 
 break MCP server not running
     server --> mcp : ConnectionRefused
-    mcp --> registry : "Error: MCP server not reachable"
+    mcp --> registry : ToolResult(success=False, error="Error: MCP server not reachable")
+    registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error: MCP server not reachable")
 end
 
 break Tool not found on server
     server --> mcp : UnknownTool error
-    mcp --> registry : "Error: tool not found on MCP server"
+    mcp --> registry : ToolResult(success=False, error="Error: tool not found on MCP server")
+    registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error: tool not found on MCP server")
 end
 
 server --> mcp : result
 mcp -> mcp : wrap in ToolResult(success=True, content=result)
 mcp --> registry : ToolResult
+registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over mcp
-  Flow:    tool_name -> MCP server call -> result -> ToolResult
+note over user, server
+  Flow:    TL-12: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> MCPToolAdapter -> MCP Server -> ToolResult
   State:   No state change
-  Failure: Server down, tool not found -> error string
   Success: MCP tool result wrapped in ToolResult
+  Failure: Server down, tool not found -> ToolResult(success=False)
 end note
 
 @enduml

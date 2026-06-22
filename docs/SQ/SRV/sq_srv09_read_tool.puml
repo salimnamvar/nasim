@@ -23,11 +23,12 @@ end box
 note over client, registry
   Scope:          Read details of a specific registered tool
   Preconditions:  ToolRegistry initialized
-  Excludes:       Tool execution, tool listing
   Contexts:       Called by HTTPClient via GET /v1/tools/{name}
+  Excludes:       Tool execution, tool listing
   Rollback:       404 if tool not found
   Design:         ROD: standard read. Returns full tool metadata.
   Classification: Primary Orchestrator
+  Returns:        200 OK with tool metadata, or 404 NOT_FOUND error
 end note
 
 == SRV-09 READ Tool ==
@@ -35,7 +36,7 @@ end note
 client -> router : GET /v1/tools/{name}
 activate router
 
-router -> registry : GET tool(name)
+router -> registry : readTool(name)
 activate registry
 
 break Tool not found
@@ -51,10 +52,10 @@ router --> client : 200 OK {tool: {name, description, safe, parameters}}
 deactivate router
 
 note over client, registry
-  Flow:    HTTPClient -> ServerRouter -> ToolRegistry -> return tool
+  Flow:    SRV-09 readTool: HTTPClient -> ServerRouter -> ToolRegistry -> return tool
   State:   No state change
-  Failure: 404 tool not found
   Success: 200 OK with tool metadata
+  Failure: 404 tool not found
 end note
 
 @enduml

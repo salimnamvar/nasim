@@ -11,6 +11,11 @@
 
 title nasim — SSN-09 DELETE Session
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -21,48 +26,59 @@ box "External" #F5F5F5
   participant "Host Filesystem" as fs
 end box
 
-note over agent, fs
+note over user, fs
   Scope:          Permanently delete a session and its associated data
   Preconditions:  Session exists on disk
-  Excludes:       Soft delete/retire (SRV-05), session read (SSN-02)
   Contexts:       Called by SRV-05 (RETIRE Session) for hard delete
+  Excludes:       Soft delete/retire (SRV-05), session read (SSN-02)
   Rollback:       Deletion is irreversible; backup recommended
   Design:         Removes session directory and all associated files
   Classification: Process Decomposition
+  Returns:        Success: delete_confirmed(session_id); Failure: DeleteError(session not found | permission denied)
 end note
 
 == SSN-09 DELETE Session ==
 
-agent -> store : DELETE(session_id)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> store : ssn09 DELETE Session(session_id)
 activate store
 
 store -> store : validate_session_exists(session_id)
 
 break Session not found
-    store --> agent : DeleteError("session not found")
+    store --> agent : 404 NOT_FOUND — DeleteError("session not found")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : result — session not found
 end
 
-store -> fs : remove_directory(session_path)
+store -> fs : ssn09 REMOVE Directory(session_path)
 activate fs
 
 break Permission denied
     fs --> store : PermissionError
-    store --> agent : DeleteError("permission denied")
+    store --> agent : 403 FORBIDDEN — DeleteError("permission denied")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : result — permission denied
 end
 
-fs --> store : removed
+fs --> store : 200 OK — removed
 deactivate fs
 
 store -> store : clear_session_index(session_id)
 
-store --> agent : delete_confirmed(session_id)
+store --> agent : 200 OK — delete_confirmed(session_id)
 deactivate store
 
-note over agent, fs
-  Flow:    AgentOrchestrator -> SessionStore -> validate -> remove directory -> clear index -> confirm
+agent --> repl : AgentEvent(Done)
+repl --> user : result — session permanently deleted
+
+note over user, fs
+  Flow:    SSN-09 → validate → remove directory → clear index → confirm
   State:   <back:#757575>CLOSED</back>
-  Failure: Session not found or permission denied -> DeleteError
-  Success: Session permanently deleted
+  Success: 200 OK — session permanently deleted
+  Failure: 404 NOT_FOUND — session not found; 403 FORBIDDEN — permission denied
 end note
 
 @enduml

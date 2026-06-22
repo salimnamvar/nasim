@@ -1,6 +1,6 @@
 @startuml sq_agt12_load_persona
 ' ============================================================
-' Title:     AGT-12 — Load Persona
+' Title:     AGT-12 — LOAD Persona
 ' Boundary:  nasim code agent
 ' Purpose:   Load persona configuration and apply system prompt
 ' Milestone: v1.0
@@ -9,8 +9,13 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — AGT-12 Load Persona
+title nasim — AGT-12 LOAD Persona
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PersonaManager" as pm
@@ -19,19 +24,25 @@ box "Config Layer" #FCE4EC
   participant "PersonaRegistry" as reg
 end box
 
-note over agent, reg
-  Scope:          Load a persona configuration and apply its system prompt
+note over user, reg
+  Scope:          AGT-12 LOAD Persona
   Preconditions:  PersonaManager initialized, persona name provided
-  Excludes:       Persona switch (AGT-13), delegation (AGT-11)
   Contexts:       Called by AGT-11 or directly by AgentOrchestrator
+  Excludes:       Persona switch (AGT-13), delegation (AGT-11)
   Rollback:       Config parse error → log error, retain current persona
   Design:         Persona config includes system prompt, allowed tools, model override
   Classification: Process Decomposition
+  Returns:        Success: PersonaLoaded(config)
+                  Failure: PersonaLoadError — config parse error
 end note
 
-== AGT-12 Load Persona ==
+== AGT-12 LOAD Persona ==
 
-agent -> pm : load(persona_name)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+activate agent
+
+agent -> pm : agt12 LOAD Persona({persona_name})
 activate pm
 
 pm -> reg : get_persona_config(persona_name)
@@ -43,18 +54,22 @@ alt config valid
     pm -> pm : parse system prompt
     pm -> pm : extract tool allowlist
     pm -> pm : extract model override (if set)
-    pm -> agent : PersonaLoaded(config)
+    pm --> agent : PersonaLoaded(config)
 else config invalid
     pm -> agent : PersonaLoadError
 end
 
 deactivate pm
 
-note over agent, reg
-  Flow:    AgentOrchestrator → PersonaManager → load persona config → apply system prompt
-  State:   <back:#ECEFF1>IDLE</back> → LOADING → <back:#2E7D32>ACTIVE</back>
-  Failure: Config error → log, retain current persona
-  Success: Persona config loaded and applied
+agent --> repl : AgentEvent(Done)
+deactivate agent
+repl --> user : result
+
+note over user, reg
+  Flow:    AGT-12 → load persona config → apply system prompt
+  State:   <back:#ECEFF1>IDLE</back> -> LOADING -> <back:#2E7D32>ACTIVE</back>
+  Success: persona config loaded and applied
+  Failure: config error -> log, retain current persona
 end note
 
 @enduml

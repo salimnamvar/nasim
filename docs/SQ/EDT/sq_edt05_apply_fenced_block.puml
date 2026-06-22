@@ -11,6 +11,11 @@
 
 title nasim — EDT-05 APPLY Fenced Block
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -22,16 +27,19 @@ end box
 note over agent, coder
   Scope:          Apply fenced code block format edit
   Preconditions:  EditStrategyManager initialized, file exists
-  Excludes:       Strategy selection (EDT-01), validation (EDT-03)
   Contexts:       Called by AGT-02 DISPATCH Tool Call
+  Excludes:       Strategy selection (EDT-01), validation (EDT-03)
   Rollback:       Block extraction failure returns error
   Design:         Extracts fenced code block, replaces matching section
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True) on success; ToolResult(success=False) on failure
 end note
 
 == EDT-05 APPLY Fenced Block ==
 
-agent -> mgr : APPLY_FENCED_BLOCK(file, block)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> mgr : EDT-05 APPLY_FENCED_BLOCK(file, block)
 activate mgr
 
 mgr -> coder : apply(block, file_content)
@@ -51,11 +59,14 @@ deactivate coder
 mgr --> agent : ToolResult(success=True)
 deactivate mgr
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over agent, coder
-  Flow:    Agent -> EditStrategyManager -> FencedBlockCoder -> extract -> locate -> replace
+  Flow:    User → REPLSession → AgentOrchestrator → EditStrategyManager → FencedBlockCoder → extract → locate → replace
   State:   No state change
-  Failure: Section not found, ambiguous match -> ToolResult(success=False)
   Success: File modified with fenced block replacement
+  Failure: Section not found, ambiguous match -> ToolResult(success=False)
 end note
 
 @enduml

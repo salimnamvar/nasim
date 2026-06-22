@@ -4,13 +4,21 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Apply fallback chain when primary model fails
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — RTG-02 APPLY Fallback
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Router Layer" #EDE7F6
   participant "ModelRouter" as router
   participant "FallbackChain" as fallback
@@ -19,23 +27,32 @@ box "Provider Layer" #FFF3E0
   participant "LiteLLMProxy" as provider
 end box
 
-note over router, provider
-  Scope:          Apply fallback chain when primary model fails
+note over user, provider
+  Scope:          RTG-02 APPLY Fallback — apply fallback chain when primary model fails
   Preconditions:  FallbackChain initialized with model list
-  Excludes:       Model selection (RTG-01), task classification (RTG-03)
   Contexts:       Called by RTG-01 when primary model unavailable
+  Excludes:       Model selection (RTG-01), task classification (RTG-03)
   Rollback:       Return error if all models in chain fail
   Design:         Circuit breaker pattern with exponential backoff
   Classification: Process Decomposition
+  Returns:
+    - Success: Result(success=true, data=selected_model)
+    - Failure: Result(success=false, error="all_models_unavailable")
 end note
 
 == RTG-02 APPLY Fallback ==
 
-router -> fallback : apply(primary_model, chain)
+user -> repl : types input
+repl -> agent : RTG-02 PROCESS(user_input)
+
+agent -> router : RTG-02 APPLY Fallback(primary_model, chain)
+activate router
+
+router -> fallback : RTG-02 APPLY Fallback(primary_model, chain)
 activate fallback
 
 loop for each model in fallback_chain
-    fallback -> provider : check_availability(model)
+    fallback -> provider : RTG-02 CHECK Availability(model)
     activate provider
 
     alt provider available
@@ -51,13 +68,22 @@ end
 
 break All models unavailable
     fallback --> router : FallbackError("all models unavailable")
+    router --> agent : Result(success=false, error="all_models_unavailable")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : error: all models unavailable
 end
 
-note over router, provider
-  Flow:    ModelRouter -> FallbackChain -> check each model -> return first available
+router --> agent : Result(success=true, data=selected_model)
+deactivate router
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result: selected model
+
+note over user, provider
+  Flow:    RTG-02 -> User -> REPLSession -> AgentOrchestrator -> ModelRouter -> FallbackChain -> check each model -> return first available
   State:   No state change
-  Failure: All models unavailable -> FallbackError
-  Success: First available model returned
+  Success: Result(success=true, data=selected_model)
+  Failure: Result(success=false, error="all_models_unavailable") — all models unavailable
 end note
 
 @enduml

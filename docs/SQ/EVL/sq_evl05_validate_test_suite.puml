@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — EVL-05 VALIDATE Test Suite
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -22,19 +25,23 @@ box "Tool Layer" #F3E5F5
   participant "ShellRunner" as shell
 end box
 
-note over participants
+note over user, shell
   Scope:          Execute test suite and collect structured results
   Preconditions:  Test framework configured, test files present
-  Excludes:       LLM-based review, quality signal recording
   Contexts:       EVL-01 EVALUATE Task delegates test validation here
+  Excludes:       LLM-based review, quality signal recording
   Rollback:       No state change — read-only execution
   Design:         TestRunner invokes configured test framework, parses output into structured results
   Classification: Process Decomposition
+  Returns:        TestSuiteResult(total, passed, failed, skipped, errors[])
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == EVL-05 VALIDATE Test Suite ==
 
-agent -> engine : VALIDATE_TEST_SUITE(test_command, project_path)
+agent -> engine : EVL-05 VALIDATE_TEST_SUITE(test_command, project_path)
 activate engine
 
 engine -> runner : run_test_suite(test_command, project_path)
@@ -55,11 +62,14 @@ deactivate runner
 engine --> agent : TestSuiteResult
 deactivate engine
 
-note over participants
-  Flow:    EvaluationEngine -> TestRunner -> run test suite -> collect results -> return
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, shell
+  Flow:    EVL-05 AgentOrchestrator -> EvaluationEngine -> TestRunner -> run test suite -> collect results -> return
   State:   <back:#ECEFF1>IDLE</back> → RUNNING → PARSING → DONE
-  Failure: Test framework error → TestSuiteResult with error details
   Success: TestSuiteResult with counts and failure details
+  Failure: Test framework error -> TestSuiteResult with error details
 end note
 
 @enduml

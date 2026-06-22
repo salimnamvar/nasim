@@ -11,6 +11,11 @@
 
 title nasim — CTX-01 PROCESS Context
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PipelineOrchestrator" as pipeline
@@ -24,16 +29,19 @@ end box
 note over agent, tracker
   Scope:          Orchestrate context processing pipeline stages in order
   Preconditions:  ContextGraph initialized, budget set
-  Excludes:       Individual processor logic (CTX-02..05)
   Contexts:       Called by AGT-01 when context needs processing
+  Excludes:       Individual processor logic (CTX-02..05)
   Rollback:       Pipeline failure returns partial context
   Design:         Pipeline stages: truncation -> distillation -> injection -> compaction
   Classification: Process Decomposition
+  Returns:        ProcessedContext on success; partial context on failure
 end note
 
 == CTX-01 PROCESS Context ==
 
-agent -> pipeline : PROCESS(graph, budget)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> pipeline : CTX-01 PROCESS(graph, budget)
 activate pipeline
 
 pipeline -> tracker : CHECK budget
@@ -64,11 +72,14 @@ end ref
 pipeline --> agent : ProcessedContext
 deactivate pipeline
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over agent, tracker
-  Flow:    Agent -> PipelineOrchestrator -> truncation -> distillation -> injection -> compaction
+  Flow:    User → REPLSession → AgentOrchestrator → PipelineOrchestrator → truncation → distillation → injection → compaction
   State:   No state change
-  Failure: Processor failure returns partial context
   Success: Optimized context graph within budget
+  Failure: Processor failure returns partial context
 end note
 
 @enduml

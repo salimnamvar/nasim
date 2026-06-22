@@ -30,26 +30,31 @@ note over user, fs
   Excludes:       File read/write
   Rollback:       Error string returned to LLM
   Design:         Directories first, then files, alphabetical
-  Classification: Primary Orchestrator
+  Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content=formatted_listing) or ToolResult(success=False, error=str)
 end note
 
 == TL-04 LIST Directory ==
 
-user -> repl : (entry via AGT-01)
-repl -> agent : (entry via AGT-01)
-agent -> registry : execute("list_dir", {path})
-registry -> dt : execute(path)
+user -> repl : types input
+repl -> agent : TL-04 PROCESS(user_input)
+agent -> registry : TL-04 LIST Directory(path)
+registry -> dt : TL-04 LIST Directory(path)
 dt -> fs : Path(path).resolve()
 
 break Path not found
     fs --> dt : FileNotFoundError
     dt --> registry : ToolResult(success=False, error="path not found")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="path not found")
 end
 
 break Not a directory
     dt --> registry : ToolResult(success=False, error="not a directory")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="not a directory")
 end
 
 dt -> fs : sorted(p.iterdir())
@@ -57,12 +62,14 @@ fs --> dt : entries
 dt -> dt : format with d/ prefix for dirs
 dt --> registry : ToolResult(success=True, content=formatted_listing)
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
 note over user, fs
-  Flow:    resolve -> iterdir -> sort -> format -> ToolResult
+  Flow:    TL-04: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> DirTool -> Host Filesystem -> ToolResult
   State:   No state change
-  Failure: Not found or not directory -> ToolResult(success=False)
   Success: Directory listing with type prefixes
+  Failure: Not found or not directory -> ToolResult(success=False)
 end note
 
 @enduml

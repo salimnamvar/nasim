@@ -6,11 +6,14 @@
 ' Milestone: v1.0
 ' Version:   1.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
 actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -23,42 +26,23 @@ box "Sandbox Layer" #F1F8E9
   participant "FileSystem" as fs
 end box
 
-note over user, budget
-  Scope:
-    - evl03 COORDINATE Retry — retry with feedback on failure
-
-  Preconditions:
-    - EVL-01 or EVL-02 identified failure
-    - Backup file available for revert
-    - Turn budget not exhausted
-
-  Contexts:
-    - Called after evaluation failure (EVL-01 or EVL-02)
-    - Triggers new EDT cycle with injected feedback
-
-  Excludes:
-    - Evaluation logic (handled by EVL-01/02)
-    - Turn budget management (handled by EVL-05)
-
-  Rollback:
-    - Max retries exceeded → abort, report to user
-    - Turn budget exhausted → abort, report to user
-
-  Design:
+note over user, fs
+  Scope:          Retry with feedback on failure
+  Preconditions:  EVL-01 or EVL-02 identified failure, backup file available for revert, turn budget not exhausted
+  Contexts:       Called after evaluation failure (EVL-01 or EVL-02); triggers new EDT cycle with injected feedback
+  Excludes:       Evaluation logic (handled by EVL-01/02), turn budget management (handled by EVL-09)
+  Rollback:       Max retries exceeded -> abort, report to user; turn budget exhausted -> abort, report to user
+  Design:         RetryCoordinator manages retry count and limits; FeedbackInjector formats failure details for next LLM call; backup restored before retry attempt; max 3 retries per edit before escalating
   Classification: Primary Orchestrator
-    - RetryCoordinator manages retry count and limits
-    - FeedbackInjector formats failure details for next LLM call
-    - Backup restored before retry attempt
-    - Max 3 retries per edit before escalating
-
-  Returns:
-    - Success: RetryResult with retry_count and next_action
-    - Failure: RetryExhausted error
+  Returns:        RetryResult(retry_count, feedback_context, continue=true) or RetryExhausted(retry_count, final_error)
 end note
 
-== evl03 COORDINATE Retry ==
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
-agent -> retry : COORDINATE_RETRY(edit_result, check_result, review_result)
+== EVL-06 COORDINATE Retry ==
+
+agent -> retry : EVL-06 COORDINATE_RETRY(edit_result, check_result, review_result)
 activate retry
 
 retry -> retry : increment_retry_count()
@@ -83,23 +67,14 @@ end
 
 deactivate retry
 
-note over user, budget
-  Flow:
-    - AgentOrchestrator → RetryCoordinator → FileSystem + FeedbackInjector → RetryResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-  State:
-    - <back:#ECEFF1>IDLE</back> → CHECKING_LIMIT → RESTORING → INJECTING → DONE
-
-  Failure:
-    - Max retries exceeded → RetryExhausted error
-
-  Success:
-    - RetryResult with feedback for next attempt
-
-  Key invariants:
-    - Backup always restored before retry
-    - Retry count never exceeds max_retries
-    - Feedback always includes specific failure reasons
+note over user, fs
+  Flow:    EVL-06 AgentOrchestrator -> RetryCoordinator -> FileSystem + FeedbackInjector -> RetryResult
+  State:   <back:#ECEFF1>IDLE</back> → CHECKING_LIMIT → RESTORING → INJECTING → DONE
+  Success: RetryResult with feedback for next attempt
+  Failure: Max retries exceeded -> RetryExhausted error
 end note
 
 @enduml

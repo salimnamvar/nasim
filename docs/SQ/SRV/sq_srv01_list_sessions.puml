@@ -23,11 +23,12 @@ end box
 note over client, store
   Scope:          List all sessions with pagination
   Preconditions:  ServerRouter initialized, SessionStore available
-  Excludes:       Session CRUD (SRV-02..05), Message operations (SRV-06..07)
   Contexts:       Called by HTTPClient via GET /v1/sessions
+  Excludes:       Session CRUD (SRV-02..05), Message operations (SRV-06..07)
   Rollback:       None (read-only operation)
   Design:         CSR: Controller(ServerRouter) -> Repository(SessionStore). ROD: standard list (AIP-136)
   Classification: Primary Orchestrator
+  Returns:        200 OK with session list and pagination token, or 500 INTERNAL error
 end note
 
 == SRV-01 LIST Sessions ==
@@ -35,7 +36,7 @@ end note
 client -> router : GET /v1/sessions?page_size=10&page_token=abc
 activate router
 
-router -> store : LIST sessions(limit=10, cursor="abc")
+router -> store : listSessions(limit=10, cursor="abc")
 activate store
 
 break Store read failure [500]
@@ -57,11 +58,10 @@ end
 deactivate router
 
 note over client, store
-  Flow:    HTTPClient -> ServerRouter -> SessionStore
+  Flow:    SRV-01 listSessions: HTTPClient -> ServerRouter -> SessionStore
   State:   <back:#2E7D32>ACTIVE</back>
-  Failure: 500 INTERNAL on store read failure
   Success: 200 OK with session list and pagination token
-  ROD errors: AIP-193 {error: {code, message, status}} on failure paths
+  Failure: 500 INTERNAL on store read failure
 end note
 
 @enduml

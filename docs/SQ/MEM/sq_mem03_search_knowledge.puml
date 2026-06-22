@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — MEM-03 SEARCH Knowledge
+actor "Developer" as user
 
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -18,19 +21,23 @@ box "Memory Layer" #E0F2F1
   participant "MemoryIndex" as index
 end box
 
-note over agent, index
+note over user, index
   Scope:          Full-text search across all knowledge
   Preconditions:  MemoryIndex populated with entries
-  Excludes:       Direct key recall (MEM-02)
   Contexts:       Called by TL-20 (RECALL Memory), cross-project discovery
+  Excludes:       Direct key recall (MEM-02)
   Rollback:       No rollback needed (read-only operation)
   Design:         BM25 ranking with relevance scoring
   Classification: Process Decomposition
+  Returns:        ranked_results[] or empty list
 end note
+
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
 
 == MEM-03 SEARCH Knowledge ==
 
-agent -> index : search(query, filters)
+agent -> index : MEM-03 SEARCH(query, filters)
 activate index
 
 index -> index : tokenize query
@@ -45,11 +52,14 @@ end
 index --> agent : ranked_results
 deactivate index
 
-note over agent, index
-  Flow:    AgentOrchestrator -> MemoryIndex -> tokenize -> FTS5 query -> rank -> return
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
+note over user, index
+  Flow:    MEM-03 AgentOrchestrator -> MemoryIndex -> tokenize -> FTS5 query -> rank -> return
   State:   No state change
-  Failure: No results -> return empty list, log query
   Success: Agent receives ranked search results
+  Failure: No results -> return empty list, log query
 end note
 
 @enduml

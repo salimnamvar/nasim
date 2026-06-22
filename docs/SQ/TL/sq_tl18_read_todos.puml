@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — TL-18 Read Todos
+actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -19,29 +22,34 @@ box "Tool Layer" #F3E5F5
   participant "TodoTool" as tool
 end box
 
-note over participants
+note over user, tool
   Scope:          List todo items, optionally filtered by status
   Preconditions:  TodoTool initialized
   Excludes:       Todo creation, update, deletion
-  Contexts:       Called by AGT-02
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
   Rollback:       Error string returned to LLM
   Design:         Read-only; supports status filter
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True, todos=[...])
 end note
 
 == TL-18 Read Todos ==
 
-agent -> registry : execute("read_todos", {status_filter?})
-registry -> tool : execute(status_filter)
+user -> repl : types input
+repl -> agent : TL-18 PROCESS(user_input)
+agent -> registry : TL-18 Read Todos(status_filter?)
+registry -> tool : TL-18 Read Todos(status_filter)
 tool -> tool : query todos, apply filter
 tool --> registry : ToolResult(success=True, todos=[...])
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over participants
-  Flow:    AgentOrchestrator -> ToolRegistry -> TodoTool -> list todos -> ToolResult
+note over user, tool
+  Flow:    TL-18: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
   State:   No state change
-  Failure: N/A (read-only query)
   Success: List of todo items
+  Failure: N/A (read-only query)
 end note
 
 @enduml

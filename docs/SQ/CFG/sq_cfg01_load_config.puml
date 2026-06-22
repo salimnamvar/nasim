@@ -9,8 +9,13 @@
 ' Review:    —
 ' ============================================================
 
+actor "Developer" as user
+
 box "CLI Layer" #E8F5E9
-  participant "ArgParser" as parser
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 box "Config Layer" #E0F7FA
   participant "ConfigLoader" as cfg
@@ -19,40 +24,53 @@ database "Global YAML" as global_yaml
 database "Project YAML" as project_yaml
 database "Env Vars" as env_vars
 
-note over parser, cfg
-  Scope:          Load config from all sources and merge
+note over user, env_vars
+  Scope:          CFG-01 LOAD Config
   Preconditions:  CLI invoked
   Contexts:       Called by CLI-04 (Parse CLI Arguments)
   Excludes:       Runtime config changes
   Rollback:       Invalid YAML -> ConfigError
   Design:         4-layer merge: global < project < env < CLI
   Classification: Process Decomposition
+  Returns:
+    - Success: Config(dataclass) — typed configuration ready
+    - Failure: ConfigError — invalid YAML or missing required fields
 end note
 
 == CFG-01 Load Config ==
 
-parser -> cfg : load(cli_args=argv)
-cfg -> global_yaml : read ~/.nasim/config.yaml
+user -> repl : invoke agent
+activate repl
+repl -> agent : cfg01 LOAD Config(cli_args=argv)
+activate agent
+agent -> cfg : cfg01 LOAD Config(cli_args=argv)
+activate cfg
+cfg -> global_yaml : cfg01 READ Global Defaults(~/.nasim/config.yaml)
 global_yaml --> cfg : global_defaults
-cfg -> project_yaml : read .nasim/config.yaml
+cfg -> project_yaml : cfg01 READ Project Overrides(.nasim/config.yaml)
 project_yaml --> cfg : project_overrides
-cfg -> env_vars : read NASIM_* vars
+cfg -> env_vars : cfg01 READ Env Overrides(NASIM_*)
 env_vars --> cfg : env_overrides
-cfg -> cfg : merge(global_defaults, project_overrides, env_overrides, cli_args)
-cfg -> cfg : validate Config fields
+cfg -> cfg : cfg01 APPLY Layered Config(global, project, env, cli)
+cfg -> cfg : cfg02 VALIDATE Config(fields)
 
 break Invalid YAML or missing required fields
-    cfg -> cfg : raise ConfigError("details")
-    cfg --> parser : ConfigError
+    cfg --> agent : ConfigError("details")
+    agent --> repl : ConfigError
+    repl --> user : config load failed
 end
 
-cfg --> parser : Config object
+cfg --> agent : Config object
+agent --> repl : Config object
+deactivate agent
+repl --> user : config loaded
+deactivate repl
 
-note over parser, cfg
-  Flow:    4 sources -> merge -> validate -> Config
+note over user, env_vars
+  Flow:    CFG-01 → read global → read project → read env → merge → validate → Config
   State:   No state change
-  Failure: Invalid YAML or validation error -> ConfigError
-  Success: Typed Config dataclass ready
+  Success: Config(dataclass) — typed configuration ready
+  Failure: ConfigError — invalid YAML or missing required fields
 end note
 
 @enduml

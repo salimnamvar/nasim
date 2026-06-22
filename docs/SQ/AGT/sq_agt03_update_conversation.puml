@@ -1,32 +1,46 @@
 @startuml sq_agt03_update_conversation
 ' ============================================================
-' Title:     AGT-03 — Update Conversation
-' Boundary:  nasim code agent CLI
+' Title:     AGT-03 — UPDATE Conversation
+' Boundary:  nasim code agent
 ' Purpose:   Message list management and token tracking
 ' Milestone: v1.0
 ' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
+title nasim — AGT-03 UPDATE Conversation
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
 end box
 
-note over agent, history
-  Scope:          Message list management and token tracking
+note over user, history
+  Scope:          AGT-03 UPDATE Conversation
   Preconditions:  ConversationHistory initialized
   Contexts:       Called by AGT-01 (PROCESS User Task)
   Excludes:       Context compaction (CTX-02)
   Rollback:       N/A
   Design:         Owns messages + token_count; triggers compaction
   Classification: Process Decomposition
+  Returns:        Success: messages list
+                  Failure: N/A (internal operation)
 end note
 
-== AGT-03 Manage Conversation ==
+== AGT-03 UPDATE Conversation ==
 
-agent -> history : add_message(msg)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+activate agent
+
+agent -> history : agt03 ADD Message({msg})
+activate history
 history -> history : self.messages.append(msg)
 history -> history : self.token_count += estimate_tokens(msg)
 
@@ -39,14 +53,19 @@ else within budget
     history --> agent : ok
 end
 
-agent -> history : get_messages()
+agent -> history : agt03 GET Messages()
 history --> agent : messages list
+deactivate history
 
-note over agent, history
-  Flow:    add message -> track tokens -> check budget -> compact if needed
+agent --> repl : AgentEvent(Done)
+deactivate agent
+repl --> user : result
+
+note over user, history
+  Flow:    AGT-03 → add message → track tokens → check budget → compact if needed
   State:   No state change (or COMPACTING if budget exceeded)
-  Failure: N/A
-  Success: Messages managed, token count tracked
+  Success: messages list returned
+  Failure: N/A (internal operation)
 end note
 
 @enduml

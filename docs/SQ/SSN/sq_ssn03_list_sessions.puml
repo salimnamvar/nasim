@@ -14,6 +14,9 @@ actor "Developer" as user
 box "CLI Layer" #E8F5E9
   participant "REPLSession" as repl
 end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Session Layer" #F1F8E9
   participant "SessionStore" as store
 end box
@@ -27,28 +30,34 @@ note over user, dir
   Rollback:       No sessions -> empty list
   Design:         Scans ~/.nasim/sessions/ for session dirs
   Classification: Primary Orchestrator
+  Returns:        Success: [(id, created_at, message_count), ...]; Failure: [] (empty list)
 end note
 
 == SSN-03 List Sessions ==
 
-repl -> store : list_sessions()
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> store : ssn03 LIST Sessions()
 store -> dir : scan ~/.nasim/sessions/
 
 break No sessions directory
     dir --> store : FileNotFoundError
-    store --> repl : [] (empty list)
+    store --> agent : 404 NOT_FOUND — [] (empty list)
+    agent --> repl : AgentEvent(Done)
+    repl --> user : result — no sessions found
 end
 
 store -> store : read metadata from each session
-store --> repl : [(id, created_at, message_count), ...]
-repl -> repl : format session table
-repl --> user : session list display
+store --> agent : 200 OK — [(id, created_at, message_count), ...]
+agent --> repl : AgentEvent(Done)
+repl --> user : result — formatted session table
 
 note over user, dir
-  Flow:    scan directory -> read metadata -> list
+  Flow:    SSN-03 → scan directory → read metadata → list
   State:   No state change
-  Failure: No directory -> empty list
-  Success: Formatted list of sessions
+  Success: 200 OK — formatted list of sessions
+  Failure: 404 NOT_FOUND — no directory, empty list
 end note
 
 @enduml

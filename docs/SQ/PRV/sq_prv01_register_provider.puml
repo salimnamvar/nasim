@@ -1,18 +1,23 @@
 @startuml sq_prv01_register_provider
 ' ============================================================
-' Title:     PRV-01 — Register Provider
+' Title:     PRV-01 — REGISTER Provider
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Provider instantiation from config
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
+
+title nasim — PRV-01 REGISTER Provider
 
 actor "Developer" as user
 
 box "CLI Layer" #E8F5E9
-  participant "ArgParser" as parser
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 box "Provider Layer" #FFF3E0
   participant "ProviderFactory" as factory
@@ -20,20 +25,26 @@ box "Provider Layer" #FFF3E0
 end box
 
 note over user, proto
-  Scope:          Provider instantiation from configuration
+  Scope:          PRV-01 REGISTER Provider — provider instantiation from configuration
   Preconditions:  Config loaded with valid provider name
   Contexts:       Called by main() during startup
-  Excludes:       Provider chat/stream (PRV-02/03)
+  Excludes:       Provider chat/stream (PRV-02, PRV-03)
   Rollback:       Unknown provider -> ConfigError
   Design:         Factory pattern; one class per backend
-  Classification: Primary Orchestrator
+  Returns:
+    - Success: Provider instance ready for chat/stream
+    - Failure: ConfigError — unknown provider type
 end note
 
-== PRV-01 Initialize Provider ==
+== PRV-01 REGISTER Provider ==
 
-user -> parser : nasim --provider ollama
-parser -> parser : parse args -> Config
-parser -> factory : create_provider(config)
+user -> repl : PRV-01 REGISTER Provider(ollama)
+activate repl
+repl -> agent : PRV-01 REGISTER Provider(config)
+activate agent
+
+agent -> factory : PRV-01 REGISTER Provider(config)
+activate factory
 factory -> factory : lookup config.provider
 
 alt provider = "ollama"
@@ -46,18 +57,24 @@ end
 
 break Unknown provider type
     factory -> factory : raise ConfigError("Unknown provider: X")
-    factory --> parser : ConfigError
-    parser --> user : error message
+    factory --> agent : ConfigError
+    agent --> repl : ConfigError
+    repl --> user : error message
 end
 
-factory --> parser : Provider instance
-parser --> user : Provider ready
+factory --> agent : Provider instance
+deactivate factory
+
+agent --> repl : Provider ready
+deactivate agent
+repl --> user : Provider ready
+deactivate repl
 
 note over user, proto
-  Flow:    Config -> Factory -> provider class lookup -> instance
+  Flow:    PRV-01 → Developer → REPLSession → AgentOrchestrator → ProviderFactory → provider class lookup → instance
   State:   No state change
-  Failure: Unknown provider type -> ConfigError
   Success: Provider instance ready for chat/stream
+  Failure: Unknown provider type -> ConfigError
 end note
 
 @enduml

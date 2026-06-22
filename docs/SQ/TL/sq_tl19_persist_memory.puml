@@ -9,8 +9,11 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — TL-19 Persist Memory
+actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -20,37 +23,44 @@ box "Tool Layer" #F3E5F5
 end box
 participant "MemoryStore" as mem
 
-note over participants
+note over user, mem
   Scope:          Persist a knowledge item to the memory store
   Preconditions:  MemoryTool initialized
   Excludes:       Memory recall, search, scoping
-  Contexts:       Called by AGT-02; delegates to MEM-01
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call); delegates to MEM-01
   Rollback:       Error string returned to LLM
   Design:         Delegates to MEM-01 PERSIST Knowledge
   Classification: Process Decomposition
+  Returns:        ToolResult(success=True) or ToolResult(success=False, error=str)
 end note
 
 == TL-19 Persist Memory ==
 
-agent -> registry : execute("persist_memory", {key, value, scope})
-registry -> tool : execute(key, value, scope)
+user -> repl : types input
+repl -> agent : TL-19 PROCESS(user_input)
+agent -> registry : TL-19 Persist Memory(key, value, scope)
+registry -> tool : TL-19 Persist Memory(key, value, scope)
 tool -> mem : MEM-01 persist(key, value, scope)
 
 break Storage failure
     mem --> tool : StorageError
     tool --> registry : ToolResult(success=False, error="persist failed")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="persist failed")
 end
 
 mem --> tool : persisted
 tool --> registry : ToolResult(success=True)
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
-note over participants
-  Flow:    AgentOrchestrator -> ToolRegistry -> MemoryTool -> MEM-01 PERSIST Knowledge -> ToolResult
+note over user, mem
+  Flow:    TL-19: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> MemoryTool -> MemoryStore -> ToolResult
   State:   Knowledge item stored
-  Failure: Storage failure -> ToolResult(success=False)
   Success: Knowledge persisted
+  Failure: Storage failure -> ToolResult(success=False)
 end note
 
 @enduml

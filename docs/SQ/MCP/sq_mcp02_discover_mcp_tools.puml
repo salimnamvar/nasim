@@ -4,15 +4,16 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Discover and register tools from connected MCP server
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — MCP-02 DISCOVER MCP Tools
+title nasim — MCP-02 DISCOVER McpTools
+
+actor "MCPClientRuntime" as mcp
 
 box "MCP Layer" #EDE7F6
-  participant "MCPClientRuntime" as client
   participant "MCPDiscovery" as discovery
   participant "MCPToolAdapter" as adapter
 end box
@@ -23,46 +24,48 @@ box "External" #F5F5F5
   participant "MCP Server" as server
 end box
 
-note over client, server
-  Scope:          Tool discovery from connected MCP server
+note over mcp, server
+  Scope:          MCP-02 DISCOVER McpTools — tool discovery from connected MCP server
   Preconditions:  MCP server connected (MCP-01 complete)
-  Excludes:       Connection management, tool adaptation (MCP-03)
   Contexts:       Agent initialization, server reconnection
+  Excludes:       Connection management (MCP-01), tool adaptation (MCP-03)
   Rollback:       Clear partially discovered tools on failure
   Design:         Lazy discovery with caching
-  Classification: Process Decomposition
+  Returns:
+    - Success: 200 OK — DiscoveryComplete(count, tools[])
+    - Failure: 503 UNAVAILABLE — server disconnected during discovery
 end note
 
-== MCP-02 DISCOVER MCP Tools ==
+== MCP-02 DISCOVER McpTools ==
 
-client -> discovery : discover_tools(connection)
+mcp -> discovery : MCP-02 DISCOVER McpTools(connection)
 activate discovery
 
-discovery -> server : list_tools()
+discovery -> server : MCP-02 LIST McpTools(connection)
 activate server
-server --> discovery : tool_list (name, description, schema)
+server --> discovery : ToolList(tools[name, description, schema])
 deactivate server
 
 loop for each tool in tool_list
-    discovery -> adapter : adapt_tool(tool_definition)
+    discovery -> adapter : MCP-03 ADAPT McpTool(tool_definition)
     activate adapter
-    adapter --> discovery : wrapped_tool
+    adapter --> discovery : WrappedTool(name, schema)
     deactivate adapter
 
-    discovery -> registry : register(wrapped_tool)
+    discovery -> registry : MCP-02 REGISTER Tool(wrapped_tool)
     activate registry
-    registry --> discovery : registration_confirmed
+    registry --> discovery : RegistrationConfirmed(name)
     deactivate registry
 end
 
-discovery --> client : discovery_complete
+discovery --> mcp : DiscoveryComplete(count, tools[])
 deactivate discovery
 
-note over client, server
-  Flow:    MCPClientRuntime -> MCPDiscovery -> list tools -> wrap each -> register in registry
+note over mcp, server
+  Flow:    MCP-02 → list tools → wrap each → register → DiscoveryComplete
   State:   No state change
-  Failure: Partial discovery -> register available tools, log failures
-  Success: All tools available in ToolRegistry
+  Success: 200 OK — all tools available in ToolRegistry
+  Failure: 503 UNAVAILABLE — partial discovery, register available tools
 end note
 
 @enduml

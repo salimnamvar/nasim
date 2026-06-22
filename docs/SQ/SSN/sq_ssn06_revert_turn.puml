@@ -11,6 +11,11 @@
 
 title nasim — SSN-06 Revert Turn
 
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
@@ -19,48 +24,59 @@ box "Session Layer" #F1F8E9
 end box
 database "Snapshot Store" as snap
 
-note over agent, snap
+note over user, snap
   Scope:          Restore session to a previous snapshot or specific turn
   Preconditions:  Snapshot exists (created via SSN-05)
-  Excludes:       Snapshot creation (SSN-05), session persistence (SSN-01)
   Contexts:       Called when user requests undo or revert
+  Excludes:       Snapshot creation (SSN-05), session persistence (SSN-01)
   Rollback:       Snapshot not found → display error, retain current state
   Design:         Revert replaces current messages with snapshot copy
   Classification: Process Decomposition
+  Returns:        Success: Reverted(snapshot_id, turn_count); Failure: RevertError → retain current
 end note
 
 == SSN-06 Revert Turn ==
 
-agent -> ver : revert(session_id, snapshot_id)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+
+agent -> ver : ssn06 REVERT Session(session_id, snapshot_id)
 activate ver
 
-ver -> snap : load snapshot(snapshot_id)
+ver -> snap : ssn06 READ Snapshot(snapshot_id)
 activate snap
 alt snapshot found
-    snap --> ver : snapshot_messages
+    snap --> ver : 200 OK — snapshot_messages
     deactivate snap
 else snapshot not found
-    snap --> ver : NotFound
+    snap --> ver : 404 NOT_FOUND
     deactivate snap
-    ver --> agent : RevertError("snapshot not found")
+    ver --> agent : 404 NOT_FOUND — RevertError("snapshot not found")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : result — snapshot not found, retain current
 end
 
 ver -> ver : replace current messages with snapshot
 ver -> ver : truncate messages after snapshot point
 
-ver --> agent : Reverted(snapshot_id, turn_count)
+ver --> agent : 200 OK — Reverted(snapshot_id, turn_count)
 deactivate ver
+
+agent --> repl : AgentEvent(Done)
+repl --> user : result — session reverted to snapshot point
 
 break Snapshot load error
     snap --> ver : IOError
-    ver --> agent : RevertError("snapshot unreadable")
+    ver --> agent : 500 INTERNAL — RevertError("snapshot unreadable")
+    agent --> repl : AgentEvent(Error)
+    repl --> user : result — snapshot unreadable, retain current
 end
 
-note over agent, snap
-  Flow:    AgentOrchestrator → SessionVersioning → find snapshot → restore to turn
+note over user, snap
+  Flow:    SSN-06 → find snapshot → restore to turn
   State:   <back:#2E7D32>ACTIVE</back> → REVERTING → <back:#2E7D32>ACTIVE</back>
-  Failure: Snapshot not found → error, retain current
-  Success: Session restored to snapshot point
+  Success: 200 OK — session restored to snapshot point
+  Failure: 404 NOT_FOUND — snapshot not found, retain current
 end note
 
 @enduml

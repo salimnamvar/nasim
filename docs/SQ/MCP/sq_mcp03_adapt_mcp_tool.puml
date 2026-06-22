@@ -4,12 +4,14 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Wrap MCP server tool into nasim Tool format
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — MCP-03 ADAPT MCP Tool
+title nasim — MCP-03 ADAPT McpTool
+
+actor "MCPClientRuntime" as mcp
 
 box "MCP Layer" #EDE7F6
   participant "MCPToolAdapter" as adapter
@@ -18,37 +20,45 @@ box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
 end box
 
-note over adapter, registry
-  Scope:          Tool format adaptation from MCP to nasim
+note over mcp, registry
+  Scope:          MCP-03 ADAPT McpTool — tool format adaptation from MCP to nasim
   Preconditions:  Tool discovered from MCP server (MCP-02)
-  Excludes:       Discovery and registration logic
   Contexts:       Called by MCPDiscovery during tool registration
+  Excludes:       Discovery logic (MCP-02), registration logic
   Rollback:       Reject incompatible tool schemas
   Design:         Schema mapping with type coercion
-  Classification: Process Decomposition
+  Returns:
+    - Success: ToolRegistered(name, version)
+    - Failure: SchemaIncompatible — skip tool, log warning
 end note
 
-== MCP-03 ADAPT MCP Tool ==
+== MCP-03 ADAPT McpTool ==
+
+mcp -> adapter : MCP-03 ADAPT McpTool(tool_definition)
+activate adapter
 
 adapter -> adapter : parse MCP tool schema
 
 break Incompatible schema
-    adapter --> adapter : skip tool, log warning
+    adapter --> mcp : SchemaIncompatible(tool_name, reason)
 end
 
 adapter -> adapter : map types to nasim Tool format
 adapter -> adapter : create execution wrapper
 
-adapter -> registry : register(adapted_tool)
+adapter -> registry : MCP-03 REGISTER Tool(adapted_tool)
 activate registry
-registry --> adapter : tool_registered(name, version)
+registry --> adapter : ToolRegistered(name, version)
 deactivate registry
 
-note over adapter, registry
-  Flow:    MCPToolAdapter -> parse schema -> map types -> create wrapper -> register
+adapter --> mcp : ToolRegistered(name, version)
+deactivate adapter
+
+note over mcp, registry
+  Flow:    MCP-03 → parse schema → map types → create wrapper → register → ToolRegistered
   State:   No state change
-  Failure: Incompatible schema -> skip tool, log warning
-  Success: Tool available in nasim ToolRegistry with MCP backend
+  Success: ToolRegistered — tool available in nasim ToolRegistry with MCP backend
+  Failure: SchemaIncompatible — skip tool, log warning
 end note
 
 @enduml

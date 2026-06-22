@@ -28,11 +28,12 @@ end box
 note over user, logger
   Scope:          Single user input processing cycle
   Preconditions:  REPL initialized, AgentOrchestrator ready
-  Excludes:       Slash commands (CLI-02), session persistence (SSN-01/02)
   Contexts:       Called by main REPL loop
+  Excludes:       Slash commands (CLI-02), session persistence (SSN-01/02)
   Rollback:       Error -> display error via Renderer -> return to IDLE
   Design:         Events emitted by agent, rendered by Renderer. ErrorBoundary handles all agent failures
   Classification: Primary Orchestrator
+  Returns:        Developer sees rendered output or error display
 end note
 
 == CLI-01 PROCESS User Input ==
@@ -50,7 +51,7 @@ alt is slash command
       CLI-02: DISPATCH Slash Command
     end ref
 else normal input
-    repl -> agent : PROCESS(user_input)
+    repl -> agent : processUserInput(user_input)
     activate agent
 
     hnote over agent #FFF3E0 : **State: THINKING**
@@ -97,10 +98,10 @@ end
 hnote over repl #ECEFF1 : **State: IDLE**
 
 note over user, logger
-  Flow:    User -> REPLSession -> AgentOrchestrator -> [AGT-01] -> events -> Renderer -> User
+  Flow:    CLI-01 processUserInput: User -> REPLSession -> AgentOrchestrator -> [AGT-01] -> events -> Renderer -> User
   State:   <back:#ECEFF1>IDLE</back> -> <back:#E8EAF6>LISTENING</back> -> <back:#FFF3E0>THINKING</back> -> [<back:#F3E5F5>TOOL_EXEC</back>]* -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
-  Failure: Exception -> ErrorBoundary -> Error event -> IDLE
   Success: Final text rendered to user
+  Failure: Exception -> ErrorBoundary -> Error event -> IDLE
 end note
 
 @enduml

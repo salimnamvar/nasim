@@ -9,6 +9,11 @@
 ' Review:    —
 ' ============================================================
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
@@ -22,11 +27,14 @@ note over agent, history
   Rollback:       N/A — tracking is passive
   Design:         Heuristic: len(str) / 4 for estimation
   Classification: Process Decomposition
+  Returns:        ok on success; COMPACT_NEEDED when budget exceeded
 end note
 
 == CTX-01 Track Token Count ==
 
-agent -> history : add_message(msg)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> history : CTX-06 ADD_MESSAGE(msg)
 history -> history : self.messages.append(msg)
 history -> history : self.token_count += estimate_tokens(msg)
 
@@ -37,11 +45,14 @@ else within budget
     history --> agent : ok
 end
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 note over agent, history
-  Flow:    message -> append -> estimate tokens -> check budget
+  Flow:    User → REPLSession → AgentOrchestrator → message → append → estimate tokens → check budget
   State:   No state change (or triggers COMPACTING)
-  Failure: N/A
   Success: Message added, token count updated
+  Failure: N/A
 end note
 
 @enduml

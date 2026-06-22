@@ -1,14 +1,21 @@
 @startuml sq_agt08_approve_plan
 ' ============================================================
 ' Title:     AGT-08 — APPROVE Plan
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Execute queued tool calls from plan mode
 ' Milestone: v1.0
 ' Version:   2.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
 
+title nasim — AGT-08 APPROVE Plan
+
+actor "Developer" as user
+
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PlanSession" as plan
@@ -17,35 +24,49 @@ box "Tool Layer" #F3E5F5
   participant "ToolRegistry" as registry
 end box
 
-note over agent, registry
-  Scope:          Execute queued tool calls after plan approval
+note over user, registry
+  Scope:          AGT-08 APPROVE Plan
   Preconditions:  Plan mode active with queued calls
   Contexts:       Called by CLI-02 (/approve command)
   Excludes:       Plan queuing (AGT-07)
   Rollback:       Partial execution on failure
   Design:         Drains pending_calls queue sequentially
   Classification: Process Decomposition
+  Returns:        Success: all queued calls executed with results
+                  Failure: partial execution on tool failure
 end note
 
 == AGT-08 APPROVE Plan ==
 
-agent -> plan : approve_plan()
+user -> repl : /approve
+repl -> agent : APPROVE_Plan()
+activate agent
+
+agent -> plan : agt08 APPROVE Plan()
+activate plan
 plan -> plan : get pending_calls
 plan -> plan : clear pending_calls
 
 loop for each queued call
-    plan -> registry : execute(tool_name, args)
+    plan -> registry : agt02 DISPATCH Tool Call({tool_name}, {args})
+    activate registry
     registry --> plan : ToolResult
+    deactivate registry
     plan -> plan : collect results
 end
 
 plan --> agent : all results
+deactivate plan
 
-note over agent, registry
-  Flow:    approve -> drain queue -> execute sequentially -> results
+agent --> repl : AgentEvent(Done)
+deactivate agent
+repl --> user : plan executed
+
+note over user, registry
+  Flow:    AGT-08 → approve → drain queue → execute sequentially → results
   State:   <back:#F1F8E9>PLANNING</back> -> <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF3E0>THINKING</back>
-  Failure: Partial execution on tool failure
-  Success: All queued calls executed
+  Success: all queued calls executed with results
+  Failure: partial execution on tool failure
 end note
 
 @enduml

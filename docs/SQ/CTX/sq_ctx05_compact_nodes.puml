@@ -11,6 +11,14 @@
 
 title nasim — CTX-05 Compact Nodes
 
+actor "Developer" as user
+
+box "CLI Layer" #E8EAF6
+  participant "REPLSession" as repl
+end box
+box "Agent Layer" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
 box "Context Layer" #E8EAF6
   participant "PipelineOrchestrator" as pipe
   participant "CompactionProcessor" as comp
@@ -22,16 +30,19 @@ end box
 note over pipe, provider
   Scope:          Merge overlapping context nodes to reduce token usage
   Preconditions:  Context graph has overlapping or redundant nodes
-  Excludes:       Context injection (CTX-04), token tracking (CTX-06)
   Contexts:       Called when token budget is tight and nodes overlap
+  Excludes:       Context injection (CTX-04), token tracking (CTX-06)
   Rollback:       Merge failure → retain original nodes
   Design:         Identifies overlapping nodes and merges via secondary LLM or heuristics
   Classification: Process Decomposition
+  Returns:        CompactionResult(nodes_removed, tokens_saved) on success; CompactionResult(nodes_dropped, tokens_saved) on failure
 end note
 
 == CTX-05 Compact Nodes ==
 
-pipe -> comp : compact(graph, budget)
+user -> repl : types input
+repl -> agent : PROCESS(user_input)
+agent -> pipe : CTX-05 COMPACT(graph, budget)
 activate comp
 
 comp -> comp : identify overlapping nodes
@@ -52,6 +63,9 @@ end
 comp --> pipe : CompactionResult(nodes_removed, tokens_saved)
 deactivate comp
 
+agent --> repl : AgentEvent(Done)
+repl --> user : result
+
 break Secondary LLM merge fails
     provider --> comp : ProviderError
     comp -> comp : fallback: drop lowest-ranked nodes
@@ -59,10 +73,10 @@ break Secondary LLM merge fails
 end
 
 note over pipe, provider
-  Flow:    PipelineOrchestrator → CompactionProcessor → find overlapping nodes → merge → return
+  Flow:    User → REPLSession → AgentOrchestrator → PipelineOrchestrator → CompactionProcessor → find overlapping nodes → merge → return
   State:   <back:#E0F2F1>COMPACTING</back> → READY
-  Failure: LLM merge fails → drop lowest-ranked nodes
   Success: Nodes compacted, token count reduced
+  Failure: LLM merge fails → drop lowest-ranked nodes
 end note
 
 @enduml

@@ -4,36 +4,52 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Streaming LLM chat completion via provider abstraction
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/UC/README.md
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
+
+title nasim — PRV-03 STREAM ProviderChat
 
 actor "Developer" as user
 
+box "CLI Layer" #E8F5E9
+  participant "REPLSession" as repl
+end box
 box "Agent Layer" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
 box "Provider Layer" #FFF3E0
   participant "Provider" as provider
 end box
-participant "LLM Provider API" as api
+box "External" #F5F5F5
+  participant "LLM Provider API" as api
+end box
 
 note over user, api
-  Scope:          Streaming chat completion yielding chunks
+  Scope:          PRV-03 STREAM ProviderChat — streaming chat completion yielding chunks
   Preconditions:  Provider initialized and reachable
   Contexts:       Called by AGT-01 (Process User Task)
   Excludes:       Sync chat (PRV-02), tool execution
   Rollback:       Connection drop -> ProviderError
   Design:         Yields str | ToolCall chunks from HTTP stream
-  Classification: Primary Orchestrator
+  Returns:
+    - Success: Stream of TextChunk and ToolCall objects
+    - Failure: ProviderError — stream interrupted
 end note
 
-== PRV-03 STREAM Provider Chat ==
+== PRV-03 STREAM ProviderChat ==
 
-user -> agent : (entry via AGT-01)
-agent -> provider : chat_stream(messages, tools)
+user -> repl : PRV-03 STREAM ProviderChat(messages, tools)
+activate repl
+repl -> agent : PRV-03 STREAM ProviderChat(messages, tools)
+activate agent
+
+agent -> provider : PRV-03 STREAM ProviderChat(messages, tools)
+activate provider
+
 provider -> api : HTTP POST /api/chat {model, messages, tools, stream:true}
+activate api
 
 break Connection drops mid-stream
     api --> provider : broken pipe / timeout
@@ -45,20 +61,26 @@ loop for each chunk
     api --> provider : JSON chunk
     provider -> provider : parse chunk
     alt text content chunk
-        provider --> agent : yield str(token)
+        provider --> agent : yield TextChunk(token)
     else tool_call chunk
         provider -> provider : accumulate ToolCall by index
     end
 end
 
 provider -> provider : yield accumulated ToolCalls
-provider --> agent : stream complete
+provider --> agent : StreamComplete
+deactivate provider
+
+agent --> repl : StreamComplete
+deactivate agent
+repl --> user : StreamComplete
+deactivate repl
 
 note over user, api
-  Flow:    Messages -> HTTP stream -> parse chunks -> yield str | ToolCall
-  State:   <back:#FFF3E0>THINKING</back> -> <back:#FFF3E0>THINKING</back> (no state change)
-  Failure: Connection drop -> ProviderError
+  Flow:    PRV-03 → Developer → REPLSession → AgentOrchestrator → Provider → HTTP stream → parse chunks → yield str | ToolCall
+  State:   <back:#FFF3E0>THINKING</back> → <back:#FFF3E0>THINKING</back> (no state change)
   Success: Stream of text tokens and ToolCall objects
+  Failure: Connection drop -> ProviderError
 end note
 
 @enduml

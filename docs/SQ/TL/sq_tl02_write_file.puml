@@ -30,16 +30,16 @@ note over user, fs
   Excludes:       Read, edit
   Rollback:       Error string returned to LLM
   Design:         Creates parent directories automatically
-  Classification: Primary Orchestrator
-  Safety:         Requires permission check (SAF-01)
+  Classification: Process Decomposition
+  Returns:        ToolResult(success=True, content="Wrote N bytes") or ToolResult(success=False, error=str)
 end note
 
 == TL-02 WRITE File ==
 
-user -> repl : (entry via AGT-01)
-repl -> agent : (entry via AGT-01)
-agent -> registry : execute("write_file", {path, content})
-registry -> ft : execute(path, content)
+user -> repl : types input
+repl -> agent : TL-02 PROCESS(user_input)
+agent -> registry : TL-02 WRITE File(path, content)
+registry -> ft : TL-02 WRITE File(path, content)
 ft -> fs : Path(path).mkdir(parents=True)
 ft -> fs : Path(path).write_text(content)
 
@@ -47,17 +47,21 @@ break Write error (permissions, disk full)
     fs --> ft : PermissionError / OSError
     ft --> registry : ToolResult(success=False, error="Error writing path: exception")
     registry --> agent : ToolResult
+    agent --> repl : AgentEvent(Error)
+    repl --> user : ToolResult(success=False, error="Error writing path: exception")
 end
 
 fs --> ft : OK
 ft --> registry : ToolResult(success=True, content="Wrote N bytes to path")
 registry --> agent : ToolResult
+agent --> repl : AgentEvent(Done)
+repl --> user : result
 
 note over user, fs
-  Flow:    mkdir -> write_text -> ToolResult
+  Flow:    TL-02: Developer -> REPLSession -> AgentOrchestrator -> ToolRegistry -> WriteFileTool -> Host Filesystem -> ToolResult
   State:   No state change
-  Failure: Permissions, disk space -> ToolResult(success=False)
   Success: ToolResult(success=True, "Wrote N bytes")
+  Failure: Permissions, disk space -> ToolResult(success=False)
 end note
 
 @enduml
