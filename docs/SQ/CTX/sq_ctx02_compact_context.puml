@@ -27,10 +27,13 @@ note over history, provider
   Classification: Process Decomposition
 end note
 
-== CTX-02 COMPACT Context ==
+== CTX-02 TRUNCATE Nodes ==
 
 history -> compactor : compact(messages, budget)
-compactor -> compactor : select oldest exchanges (keep system prompt + recent)
+compactor -> compactor : query ContextPrioritizer for node importance scores
+compactor -> compactor : sort nodes by ascending importance (lowest first)
+compactor -> compactor : protect system prompt nodes (never truncated)
+compactor -> compactor : drop lowest-importance nodes until within budget
 compactor -> compactor : build summarization prompt
 
 compactor -> provider : chat([summary_prompt + selected_messages])

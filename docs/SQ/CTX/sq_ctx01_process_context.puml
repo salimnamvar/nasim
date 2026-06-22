@@ -17,6 +17,7 @@ box "Agent Layer" #E3F2FD
 end box
 box "Context Graph Group" #E0F2F1
   participant "ContextGraph" as graph
+  participant "ContextPrioritizer" as prioritizer
   participant "TokenBudgetTracker" as tracker
 end box
 
@@ -42,6 +43,10 @@ deactivate tracker
 
 ref over pipeline, graph
   CTX-05: COMPACT Nodes
+end ref
+
+ref over pipeline, prioritizer, graph
+  CTX-07: SCORE Nodes
 end ref
 
 ref over pipeline, graph

@@ -25,7 +25,10 @@ note over agent, store
   Excludes:       Session revert (SSN-06), session search (SSN-07)
   Contexts:       Called when user requests to explore alternative path
   Rollback:       Fork failure → display error, retain current session
-  Design:         Branch copies messages up to fork point; new session gets unique ID
+  Design:         High-level domain operation. Calls WRL-04 (FORK Session) for
+                  the low-level storage-layer fork (wire log slice + new file).
+                  This UC owns session-level semantics (parent-child link,
+                  branch metadata); WRL-04 owns event-log-level semantics.
   Classification: Process Decomposition
 end note
 
@@ -47,6 +50,7 @@ deactivate store
 
 fork -> fork : copy messages to branch
 fork -> fork : create parent-child link
+fork -> fork : call WRL-04 (FORK Session) for wire log fork
 
 fork --> agent : BranchCreated(branch_session_id, parent_id)
 deactivate fork

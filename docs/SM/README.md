@@ -20,6 +20,13 @@
 | REVIEWING | LLM review of results | success checks passed, optional review | #FFF8E1 |
 | RETRYING | Retrying with feedback | success checks failed or review rejected | #FBE9E7 |
 | STAGING | Diff sandbox staging | tool exec in diff_sandbox mode | #F1F8E9 |
+
+### Transitions from STAGING
+
+| From | To | UC ID | Condition |
+|------|----|-------|-----------|
+| STAGING | AWAITING_DIFF_APPROVAL | EDT-10 | Diff computed successfully |
+| STAGING | ERROR | EDT-10 | Diff computation failed (file deleted, conflict, algorithm error) |
 | AWAITING_DIFF_APPROVAL | Presenting diff to user | diff staged, awaiting user approval | #FCE4EC |
 
 ## Session Lifecycle States (Entity)

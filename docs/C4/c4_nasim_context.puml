@@ -48,6 +48,7 @@ System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code")
 System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API)")
 System_Ext(vector_store, "Vector Store", "Persistent vector storage for similarity search")
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace/metric export")
+System_Ext(a2a_server, "A2A Server", "Agent-to-Agent protocol for multi-agent delegation (Phase 2)")
 
 ' ============================================================
 ' Observability Platform (tenas pattern: emit-only app, platform-owned collection)
@@ -77,5 +78,6 @@ Rel(nasim, vector_store, "stores/retrieves embeddings", "SQLite + vector")
 
 Rel(nasim, obs_platform, "emits structured logs to stdout; exposes /metrics (collected via agents + scrape)", "stdout + HTTP scrape")
 Rel(nasim, otel_collector, "exports traces/metrics (optional)", "OTLP/gRPC")
+Rel(nasim, a2a_server, "registers as A2A agent, delegates tasks (Phase 2)", "A2A protocol")
 
 @enduml

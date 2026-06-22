@@ -34,8 +34,9 @@ agent -> index : search(query, filters)
 activate index
 
 index -> index : tokenize query
-index -> index : FTS5 query with BM25 ranking
-index -> index : rank results by relevance
+index -> index : FTS5 virtual table query (memory_fts) with BM25 ranking
+index -> index : rank results by relevance score
+index -> index : apply scope filters (global/project/session)
 
 break No results found
     index --> agent : empty list

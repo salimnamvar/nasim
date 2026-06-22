@@ -23,9 +23,11 @@ title nasim — Provider Components
 
 Container_Boundary(provider_boundary, "Provider Group") {
 
-    Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name. All providers route through litellm.")
+    Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name, capabilities. All providers route through litellm.")
 
     Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")
+
+    Component(provider_caps, "ProviderCapabilities", "Capability declaration", "Per-model capability metadata: supports_tools, supports_vision, supports_streaming, max_context, supports_prompt_caching. Owned by Provider, queried by Router.")
 }
 
 ' ============================================================
@@ -39,6 +41,7 @@ System_Ext(all_llm_backends, "100+ LLM Backends", "Unified via litellm. Includes
 ' ============================================================
 
 Rel(provider, litellm_proxy, "delegates all LLM calls")
+Rel(provider, provider_caps, "exposes capabilities")
 Rel(litellm_proxy, all_llm_backends, "routes via model string prefix", "HTTP/JSON")
 
 @enduml

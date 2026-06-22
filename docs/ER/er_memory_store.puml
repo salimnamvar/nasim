@@ -54,7 +54,16 @@ entity "memory_index" as mi {
     tfidf_weight : REAL
 }
 
-me ||--o{ mi : "indexed by"
+entity "memory_fts" as mfts {
+    * memory_entry_id : TEXT <<FK>>
+    --
+    * content : TEXT (FTS5 indexed)
+    * key : TEXT (FTS5 indexed)
+    scope : TEXT (FTS5 indexed)
+}
+
+me ||--o{ mfts : "content indexed by"
+me ||--o{ mi : "token indexed by"
 ee }o--|| me : "belongs to"
 se }o--|| me : "references"
 
@@ -64,6 +73,8 @@ note bottom of me
   Scope determines visibility and persistence level.
   TF-IDF keyword index enables hybrid retrieval
   (semantic similarity + keyword matching).
+  FTS5 virtual table (memory_fts) provides SQLite
+  full-text search with BM25 ranking for keyword queries.
 
   Notation:
     * prefix = Mandatory (NOT NULL)
@@ -73,6 +84,7 @@ note bottom of me
     TEXT (JSON) = JSON blob stored as TEXT
     BLOB = Binary vector embedding data
     REAL = Floating point value
+    FTS5 = SQLite full-text search virtual table
 end note
 
 note bottom of ee

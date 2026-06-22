@@ -5,6 +5,33 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 
 ---
 
+## Design Decisions
+
+### Provider Resolution (DGA-02, resolved 2026-06-22)
+
+**Decision:** LiteLLMProxy is the sole `Provider` implementation. Per-provider classes
+(OllamaProvider, OpenAIProvider, AnthropicProvider) are removed from the CL runtime model.
+Model routing is via litellm model string prefix only (e.g. `anthropic/claude-sonnet-4-20250514`,
+`openai/gpt-4o`, `ollama/qwen2.5-coder:7b`).
+
+**Rationale:** aider, SWE-agent, and goose all use litellm as the sole LLM call path with
+no per-provider classes. Per-provider classes are unnecessary when litellm handles all
+routing, auth, and response normalization. Provider-specific config (API keys, base URLs)
+is handled by litellm's own configuration, not by separate Python classes.
+
+**Impact:** `Provider.chat()` → `LiteLLMProxy.chat()` → `litellm.completion()` is the
+single code path. No switch/if-else on provider name in agent code.
+
+### Provider Capabilities Ownership (DGA-03, resolved 2026-06-22)
+
+**Decision:** `ProviderCapabilities` is a component in the Provider Group, owned by
+`Provider`. It exposes `supports_tools`, `supports_vision`, `supports_streaming`,
+`max_context`, and `supports_prompt_caching`. The `ModelRouter` queries
+`Provider.capabilities` for routing decisions; tool dispatch gates unsafe tools via
+`Provider.capabilities.supports_tool_calling`.
+
+---
+
 ## UC Group Codes
 
 | Code | Group | Scope |
@@ -66,6 +93,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | Embedding Model | HTTP/local | Vector embedding generation for semantic search |
 | Vector Store | SQLite + vector | Embedding storage and similarity search |
 | OTel Collector | OTLP/gRPC | OpenTelemetry trace and metric export |
+| A2A Server | A2A protocol | Agent-to-Agent delegation (Phase 2 optional). Defines how agents talk to agents; MCP defines how agents use tools. |
 
 ---
 
@@ -98,11 +126,11 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
-| Provider | `nasim/provider/base.py` | Unified Protocol: chat(), chat_stream(), model_name. All providers route through litellm |
-| LiteLLMProxy | `nasim/provider/litellm.py` | Universal LLM proxy: 100+ providers via model string prefix |
+| Provider | `nasim/provider/base.py` | Unified Protocol: chat(), chat_stream(), model_name, capabilities. All providers route through litellm |
+| LiteLLMProxy | `nasim/provider/litellm.py` | Sole Provider implementation: universal LLM proxy, 100+ providers via model string prefix |
+| ProviderCapabilities | `nasim/provider/caps.py` | Capability declaration per model: streaming, tools, vision, reasoning, context window, prompt caching. Owned by Provider; queried by ModelRouter |
 | ModelRouter | `nasim/provider/router.py` | Model selection: task classification, provider preference, context window matching |
 | FallbackChain | `nasim/provider/fallback.py` | Ordered provider failover chain with retry and exponential backoff |
-| ProviderCapabilities | `nasim/provider/caps.py` | Capability declaration: streaming, tools, vision, reasoning, context window per model |
 | ModelCatalog | `nasim/provider/catalog.py` | Model metadata: context limits, pricing, capabilities from litellm database |
 
 ### Tool Group
@@ -137,7 +165,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
 | MCPClientRuntime | `nasim/mcp/client.py` | Connects to external MCP servers via stdio/SSE transport |
-| MCPServerRuntime | `nasim/mcp/server.py` | Exposes nasim tools to external MCP clients via stdio/SSE |
+| MCPServerRuntime | `nasim/mcp/server.py` | Exposes nasim tools to external MCP clients via stdio/SSE. Phase 2: also exposes A2A task surface |
 | MCPToolAdapter | `nasim/mcp/adapter.py` | Wraps MCP server tools into nasim Tool ABC format |
 | MCPDiscovery | `nasim/mcp/discovery.py` | Discovers and registers MCP server tools at startup from config |
 
@@ -156,7 +184,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | Session | `nasim/session/model.py` | Session dataclass: id, created_at, messages |
 | SessionVersioning | `nasim/session/versioning.py` | Snapshots and undo for session state |
 | SessionSearch | `nasim/session/search.py` | Cross-session search via FTS5 index |
-| SessionFork | `nasim/session/fork.py` | Branch conversations from any point |
+| SessionFork | `nasim/session/fork.py` | Branch conversations from any point (domain-level: parent-child link, branch metadata. Calls WRL-04 for storage-layer fork) |
 
 ### Server Group (cross-cutting)
 
@@ -273,7 +301,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | WireAppender | `nasim/wire_log/appender.py` | Write-only interface (enforces append-only semantics) |
 | WireReader | `nasim/wire_log/reader.py` | Read-only with random seek via TurnIndex |
 | TurnIndex | `nasim/wire_log/turn_index.py` | Maps turn_number → byte_offset for O(1) seek |
-| SessionForkManager | `nasim/wire_log/fork.py` | `/fork` and `/undo` via turn enumeration from WireReader |
+| SessionForkManager | `nasim/wire_log/fork.py` | Low-level storage-layer fork: reads events up to turn N, writes new JSONL file. Called by SSN-08 only. Does not create parent-child link or branch metadata. |
 
 ### Context Graph Group (E-06)
 
@@ -283,7 +311,8 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | ContextNode | `nasim/context/node.py` | Typed nodes: SystemPrompt, UserMessage, ToolCall, ToolResult, Memory, RepoMap |
 | ContextEdge | `nasim/context/edge.py` | Typed edges: follows, calls, returns, summarizes, injects |
 | ContextProcessor | `nasim/context/processor.py` | ABC for pipeline processors |
-| TruncationProcessor | `nasim/context/truncation.py` | Removes old nodes respecting protection budget |
+| ContextPrioritizer | `nasim/context/prioritizer.py` | Assigns importance score to each node: recency * (1-age/max_age) + frequency * edit_count + type_weight. Enables priority-based truncation |
+| TruncationProcessor | `nasim/context/truncation.py` | Removes nodes in ascending importance order (via ContextPrioritizer), respecting protection budget |
 | DistillationProcessor | `nasim/context/distillation.py` | Secondary LLM call for massive tool outputs |
 | InjectionProcessor | `nasim/context/injection.py` | Injects RepoMap, Memory nodes at turn start |
 | CompactionProcessor | `nasim/context/compaction.py` | Replaces batch of nodes with summary node |
@@ -443,6 +472,7 @@ must appear identically across C4 → UC → SM → SQ → ERD → CL → Code l
 | `nasim/context/node.py` | context | ContextNode |
 | `nasim/context/edge.py` | context | ContextEdge |
 | `nasim/context/processor.py` | context | ContextProcessor ABC |
+| `nasim/context/prioritizer.py` | context | ContextPrioritizer |
 | `nasim/context/truncation.py` | context | TruncationProcessor |
 | `nasim/context/distillation.py` | context | DistillationProcessor |
 | `nasim/context/injection.py` | context | InjectionProcessor |
@@ -512,6 +542,8 @@ additional verbs for its CLI agent domain:
 | CONNECT | Establish link | Connect to MCP server |
 | ADAPT | Transform format | Adapt MCP tool to nasim format |
 | SEND | Dispatch message | Send message via HTTP API |
+| DELEGATE_A2A | Agent-to-agent delegation | Delegate task to external A2A agent (Phase 2) |
+| RECEIVE_A2A | Agent-to-agent result | Receive result from external A2A agent (Phase 2) |
 | SCOPE | Isolate knowledge | Scope knowledge by context |
 | CORRELATE | Link events | Correlate trace across request |
 | REDACT | Strip secrets | Redact sensitive data before emission |

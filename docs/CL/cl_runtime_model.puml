@@ -17,30 +17,24 @@ skinparam classAttributeIconSize 0
 package "Provider Layer" #FFF3E0 {
     interface Provider {
         + model_name : str
+        + capabilities : ProviderCapabilities
         + chat(messages, tools) : LLMResponse
         + chat_stream(messages, tools) : Iterator[str | ToolCall]
     }
 
-    class OllamaProvider {
-        + base_url : str
-        + model : str
-        + timeout : int
+    class LiteLLMProxy {
+        + model_name : str
+        + capabilities : ProviderCapabilities
         + chat(messages, tools) : LLMResponse
         + chat_stream(messages, tools) : Iterator
     }
 
-    class OpenAIProvider {
-        + api_key : str
-        + model : str
-        + chat(messages, tools) : LLMResponse
-        + chat_stream(messages, tools) : Iterator
-    }
-
-    class AnthropicProvider {
-        + api_key : str
-        + model : str
-        + chat(messages, tools) : LLMResponse
-        + chat_stream(messages, tools) : Iterator
+    class ProviderCapabilities {
+        + supports_tools : bool
+        + supports_vision : bool
+        + supports_streaming : bool
+        + max_context : int
+        + supports_prompt_caching : bool
     }
 
     class ProviderFactory {
@@ -562,13 +556,13 @@ package "Sandbox Layer" #FFF8E1 {
 }
 
 ' Relationships
-Provider <|.. OllamaProvider
-Provider <|.. OpenAIProvider
-Provider <|.. AnthropicProvider
+Provider <|.. LiteLLMProxy
 ProviderFactory --> Provider : creates
 Provider --> LLMResponse : returns
+Provider --> ProviderCapabilities : declares
 LLMResponse --> ToolCall : contains
 ModelRouter --> Provider : selects
+ModelRouter --> ProviderCapabilities : queries
 RoutingStrategy <|.. TaskClassifierStrategy
 RoutingStrategy <|.. CapabilityMatchStrategy
 RoutingStrategy <|.. CostOptimizationStrategy

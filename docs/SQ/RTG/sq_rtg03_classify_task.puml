@@ -32,13 +32,22 @@ end note
 
 agent -> router : classify(task_description, context)
 
-break Classification fails
+break Classification fails (confidence < 0.6)
     router --> agent : default_model
 end
 
-router -> router : analyze task type (code, research, refactor, etc.)
-router -> router : select model by capability match
-router --> agent : selected_model
+router -> router : extract_signals(input_length, keywords, traceback, file_content)
+router -> router : score each task type (keyword * 0.4 + context * 0.4 + length * 0.2)
+router -> router : select highest-scoring type
+
+router -> router : map task_type -> model tier via ModelCatalog
+router -> router : verify Provider.capabilities.supports_tools for selected model
+
+break Model unavailable
+    router -> router : FallbackChain.next_model()
+end
+
+router --> agent : selected_model + task_type
 
 note over participants
   Flow:    AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model

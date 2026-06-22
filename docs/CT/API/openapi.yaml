@@ -14,7 +14,7 @@ servers:
     description: Local development server
 
 paths:
-  /sessions:
+  /v1/sessions:
     get:
       operationId: listSessions
       summary: List sessions
@@ -109,7 +109,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /sessions/{session}:send:
+  /v1/sessions/{session}:send:
     parameters:
       - $ref: '#/components/parameters/sessionId'
     post:
@@ -137,7 +137,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /sessions/{session}/messages:
+  /v1/sessions/{session}/messages:
     parameters:
       - $ref: '#/components/parameters/sessionId'
     get:
@@ -158,7 +158,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /tools:
+  /v1/tools:
     get:
       operationId: listTools
       summary: List tools
@@ -172,7 +172,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ListToolsResponse'
 
-  /tools/{tool}:
+  /v1/tools/{tool}:
     parameters:
       - name: tool
         in: path
@@ -195,7 +195,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /config:
+  /v1/config:
     get:
       operationId: getConfig
       summary: Get config

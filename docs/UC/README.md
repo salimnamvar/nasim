@@ -14,6 +14,7 @@
 | AGT-02 | AGT | DISPATCH Tool Call | AgentOrchestrator |
 | AGT-03 | AGT | UPDATE Conversation | ConversationHistory |
 | AGT-04 | AGT | DELETE History | ConversationHistory |
+| AGT-05 | AGT | (DEPRECATED — never assigned) | — |
 | AGT-06 | AGT | COMPACT Context | ContextCompactor |
 | AGT-07 | AGT | QUEUE Plan | PlanSession |
 | AGT-08 | AGT | APPROVE Plan | PlanSession |
@@ -49,10 +50,13 @@
 | CTX-04 | CTX | INJECT Context | InjectionProcessor |
 | CTX-05 | CTX | COMPACT Nodes | CompactionProcessor |
 | CTX-06 | CTX | TRACK Token Budget | TokenBudgetTracker |
+| CTX-07 | CTX | SCORE Nodes | ContextPrioritizer |
 | MCP-01 | MCP | CONNECT MCP Server | MCPClientRuntime |
 | MCP-02 | MCP | DISCOVER MCP Tools | MCPDiscovery |
 | MCP-03 | MCP | ADAPT MCP Tool | MCPToolAdapter |
 | MCP-04 | MCP | EXPOSE nasim Tools | MCPServerRuntime |
+| MCP-05 | MCP | REGISTER A2A Task | MCPServerRuntime |
+| MCP-06 | MCP | RECEIVE A2A Result | MCPServerRuntime |
 | TL-01 | TL | READ File | ReadFileTool |
 | TL-02 | TL | INSERT File | WriteFileTool |
 | TL-03 | TL | UPDATE File | EditFileTool |
