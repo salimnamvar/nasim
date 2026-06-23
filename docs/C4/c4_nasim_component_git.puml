@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — Git Component Diagram
-' Boundary:  nasim (container) — Git Group
+' Title:     NASIM APPLICATION — Git Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Git Group
 ' Purpose:   Version control awareness: status, diff, commit
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -14,9 +14,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Git Component Diagram
+title NASIM APPLICATION — Git Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(git_group, "Git Group") {
         Component(git_integration, "GitIntegration", "", "Auto-commit after file edits, branch awareness, diff tracking")
         Component(git_status, "GitStatus", "", "Read working tree status, staged changes, branch info")

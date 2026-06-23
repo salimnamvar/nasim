@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — Hooks Component Diagram
-' Boundary:  nasim (container) — Hooks Group
+' Title:     NASIM APPLICATION — Hooks Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Hooks Group
 ' Purpose:   Pre/post hooks for tool use and LLM calls
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -14,9 +14,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Hooks Component Diagram
+title NASIM APPLICATION — Hooks Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(hooks_group, "Hooks Group") {
         Component(hook_manager, "HookManager", "nasim/hooks/manager.py", "Registers, discovers, and executes hooks in priority order")
     }

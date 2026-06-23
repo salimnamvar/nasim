@@ -3,8 +3,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — Plugins Component Diagram
-' Boundary:  nasim (container) — Plugins Group
+' Title:     NASIM APPLICATION — Plugins Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Plugins Group
 ' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -13,9 +13,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Plugins Component Diagram
+title NASIM APPLICATION — Plugins Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(plugins_group, "Plugins Group") {
         Component(plugin_loader, "PluginLoader", "nasim/plugins/loader.py", "Discovers and loads plugins from ~/.nasim/plugins/")
     }

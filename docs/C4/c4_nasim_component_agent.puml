@@ -3,8 +3,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — Agent Component Diagram
-' Boundary:  nasim (container) — Agent Group
+' Title:     NASIM APPLICATION — Agent Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Agent Group
 ' Purpose:   Agent Group: core agentic loop (Service layer).
 '            AgentOrchestrator is the single orchestrating
 '            component for the nasim Service layer.
@@ -16,9 +16,9 @@
 
 LAYOUT_WITH_LEGEND()
 
-title nasim — Agent Component Diagram
+title NASIM APPLICATION — Agent Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(agent_group, "Agent Group") {
         Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields structured events")
         Component(conv_history, "ConversationHistory", "", "Owns messages list and token count. Triggers compaction when budget exceeded")

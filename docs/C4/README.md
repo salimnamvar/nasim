@@ -1,16 +1,16 @@
-# nasim — C4 Diagram Inventory
+# NASIM APPLICATION — C4 Diagram Inventory
 
 ## C4 Diagram Set
 
 | Diagram | Level | Boundary | Description |
 |---------|-------|----------|-------------|
-| c4_nasim_context.puml | Context | System | nasim as a single system: User actor + external systems |
-| c4_nasim_container.puml | Container | System | nasim is one Container inside `System_Boundary(nasim_sys)`; external interface apps are `Container_Ext` |
-| c4_nasim_component.puml | Component | nasim (container) | Overview: all groups inside `Container_Boundary(nasim)` |
+| c4_nasim_context.puml | Context | System | NASIM SERVICE as a single system: User actor + external systems |
+| c4_nasim_container.puml | Container | System | NASIM APPLICATION is one Container inside `System_Boundary(nasim_service)`; external interface apps are `Container_Ext` |
+| c4_nasim_component.puml | Component | NASIM APPLICATION (container) | Overview: all groups inside `Container_Boundary(nasim_application, "NASIM APPLICATION")` |
 
 ## Per-Group Component Diagrams (21 diagrams)
 
-Each per-group diagram wraps its components with `Container_Boundary(nasim, "nasim") { Boundary(xxx_group, "XXX Group") { ... } }`.
+Each per-group diagram wraps its components with `Container_Boundary(nasim_application, "NASIM APPLICATION") { Boundary(xxx_group, "XXX Group") { ... } }`.
 Cross-group references use `Component_Ext(alias, "ComponentName", "Group Name")`.
 Genuinely external resources use `System_Ext(...)`.
 External interface apps (separate deployable units) use `Container_Ext(...)`.
@@ -44,10 +44,12 @@ External interface apps (separate deployable units) use `Container_Ext(...)`.
 ## C4 Hierarchy
 
 ```
-Context:   Person(User) → System(nasim) → System_Ext(...)
-Container: System_Boundary(nasim_sys) { Container(nasim) }
-           Container_Ext(WebApp, DesktopApp, MobileApp) → Container(nasim)
-Component: Container_Boundary(nasim) {
+Context:   Person(User) → System(NASIM SERVICE) → System_Ext(...)
+Container: System_Boundary(nasim_service, "NASIM SERVICE") {
+               Container(nasim_application, "NASIM APPLICATION")
+           }
+           Container_Ext(WebApp, DesktopApp, MobileApp) → Container(nasim_application)
+Component: Container_Boundary(nasim_application, "NASIM APPLICATION") {
                Boundary(api_group) { Component(ServerRouter) ... }
                Boundary(agent_group) { Component(AgentOrchestrator) ... }
                Boundary(cli_group) { Component(REPLSession) ... }
@@ -57,7 +59,7 @@ Component: Container_Boundary(nasim) {
            Person(User) → REPLSession (CLI mode)
 ```
 
-**Key distinction:** nasim is a **single Python process**. CLI Group (ArgParser, REPLSession, Renderer) and API Group (ServerRouter) are `Boundary` groups inside the same `Container_Boundary(nasim)`. CLI and API are not separate containers — they are logical boundaries within one deployable unit.
+**Key distinction:** NASIM APPLICATION is a **single Python process**. CLI Group (ArgParser, REPLSession, Renderer) and API Group (ServerRouter) are `Boundary` groups inside the same `Container_Boundary(nasim_application)`. CLI and API are not separate containers — they are logical boundaries within one deployable unit.
 
 ## Actors
 
@@ -67,13 +69,13 @@ Component: Container_Boundary(nasim) {
 
 ## Interface Containers (external, separate deployable units)
 
-| Container | Type | Connection to nasim |
-|-----------|------|---------------------|
+| Container | Type | Connection to NASIM APPLICATION |
+|-----------|------|---------------------------------|
 | WebApp | JavaScript SPA | HTTP/JSON + SSE to ServerRouter |
 | DesktopApp | Electron / Tauri | HTTP/JSON + SSE to ServerRouter |
 | MobileApp | React Native / Flutter | HTTP/JSON + SSE to ServerRouter |
 
-CLI mode is NOT a separate container — it is the CLI Group boundary inside nasim.
+CLI mode is NOT a separate container — it is the CLI Group boundary inside NASIM APPLICATION.
 
 ## External Systems
 
@@ -84,7 +86,7 @@ CLI mode is NOT a separate container — it is the CLI Group boundary inside nas
 | Host Shell | subprocess | Execute shell commands (via sandbox) |
 | Web | HTTP | Fetch documentation, search results |
 | MCP Server | stdio/SSE | Extension tools via Model Context Protocol |
-| MCP Client | stdio/SSE | External tools connecting to nasim MCP server |
+| MCP Client | stdio/SSE | External tools connecting to NASIM APPLICATION MCP server |
 | Git Repository | git CLI | Version control for project files |
 | Sandbox Runtime | OS primitives | OS-level process isolation (landlock, seccomp, bubblewrap) |
 | Memory Backend | read/write | Long-term knowledge persistence |
@@ -97,10 +99,10 @@ CLI mode is NOT a separate container — it is the CLI Group boundary inside nas
 
 ## Architecture Principles
 
-- **Single process:** nasim is one Python process; CLI and HTTP server modes share the same Container_Boundary.
+- **Single process:** NASIM APPLICATION is one Python process; CLI and HTTP server modes share the same Container_Boundary.
 - **CSR Pattern:** Controller (CLI Group / API Group) → Service (Agent Group, Router Group, etc.) → Repository (Session Group, Tool Group, Memory Group, Config Group). Strict delegation.
-- **One group, one Boundary:** Each component group is a `Boundary` inside `Container_Boundary(nasim)`. Groups are logical, not deployable.
-- **No Container_Ext for internals:** Cross-group references inside nasim use `Component_Ext(alias, "ComponentName", "Group Name")`, never `Container_Ext` or `System_Ext`.
+- **One group, one Boundary:** Each component group is a `Boundary` inside `Container_Boundary(nasim_application)`. Groups are logical, not deployable.
+- **No Container_Ext for internals:** Cross-group references inside NASIM APPLICATION use `Component_Ext(alias, "ComponentName", "Group Name")`, never `Container_Ext` or `System_Ext`.
 - **System_Ext for real externals only:** Filesystems, web, git repos, LLM backends, MCP servers, LSP servers — genuinely external infrastructure.
 - **Container_Ext for real external containers:** WebApp, DesktopApp, MobileApp — separate deployable units with their own processes.
 - **Version consistency:** All diagram headers use Version 9.0.0.

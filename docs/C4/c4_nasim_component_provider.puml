@@ -3,8 +3,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — Provider Component Diagram
-' Boundary:  nasim (container) — Provider Group
+' Title:     NASIM APPLICATION — Provider Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Provider Group
 ' Purpose:   Provider Group: universal LLM abstraction via litellm.
 '            Provider is a Protocol — all LLM calls route through
 '            LiteLLM Proxy to 100+ backends without per-provider code.
@@ -17,9 +17,9 @@
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title nasim — Provider Component Diagram
+title NASIM APPLICATION — Provider Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(provider_group, "Provider Group") {
         Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name, capabilities. All providers route through litellm.")
         Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")

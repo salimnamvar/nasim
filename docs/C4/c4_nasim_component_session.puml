@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — Session Component Diagram
-' Boundary:  nasim (container) — Session Group
+' Title:     NASIM APPLICATION — Session Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Session Group
 ' Purpose:   Session layer internal components
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -14,9 +14,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Session Component Diagram
+title NASIM APPLICATION — Session Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(session_group, "Session Group") {
         Component(session_store, "SessionStore", "", "Persists/loads message history to ~/.nasim/sessions/ as JSON Lines")
         Component(session_versioning, "SessionVersioning", "", "Snapshots and undo for session state")

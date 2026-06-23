@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — Evaluation Component Diagram
-' Boundary:  nasim (container) — Evaluation Group
+' Title:     NASIM APPLICATION — Evaluation Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Evaluation Group
 ' Purpose:   Task evaluation: success checks, LLM review, testing, retry coordination
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -14,9 +14,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Evaluation Component Diagram
+title NASIM APPLICATION — Evaluation Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(evaluation_group, "Evaluation Group") {
         Component(eval_engine, "EvaluationEngine", "", "Orchestrates task evaluation: runs checks, scores, retries")
         Component(task_evaluator, "TaskEvaluator", "", "Evaluates task completion against success criteria")

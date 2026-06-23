@@ -3,8 +3,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — Safety Component Diagram
-' Boundary:  nasim (container) — Safety Group
+' Title:     NASIM APPLICATION — Safety Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Safety Group
 ' Purpose:   Permission gating, injection scanning, egress inspection
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -13,9 +13,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Safety Component Diagram
+title NASIM APPLICATION — Safety Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(safety_group, "Safety Group") {
         Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
         Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")

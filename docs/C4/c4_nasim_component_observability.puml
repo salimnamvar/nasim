@@ -3,8 +3,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — Observability Component Diagram
-' Boundary:  nasim (container) — Observability Group
+' Title:     NASIM APPLICATION — Observability Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Observability Group
 ' Purpose:   Application-side logging and metrics emission (emit only)
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -15,13 +15,9 @@
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title nasim — Observability Component Diagram
+title NASIM APPLICATION — Observability Component Diagram
 
-System_Ext(container_runtime, "Container Runtime", "Docker / Kubernetes CRI. Passive: captures stdout/stderr.")
-System_Ext(prometheus, "Prometheus", "Pull-scrapes /metrics endpoint. Application never pushes metrics.")
-System_Ext(otel_collector, "OTel Collector", "Optional OTLP/gRPC endpoint. nasim never pulls from it.")
-
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(observability_group, "Observability Group") {
         Component(structured_logger, "StructuredLogger", "structlog + JSON formatter", "Writes structured JSON records to stdout only. Includes trace_id, span_id, session_id, turn_number. Never ships to Loki or log agent.")
         Component(metrics_collector, "MetricsCollector", "prometheus-client", "Owns application metrics: token usage, latency histograms, tool call counters, error rates. Exposes /metrics for pull scrape only.")

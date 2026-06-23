@@ -3,8 +3,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — API Component Diagram
-' Boundary:  nasim (container) — API Group
+' Title:     NASIM APPLICATION — API Component Diagram
+' Boundary:  NASIM APPLICATION (container) — API Group
 ' Purpose:   API component group inside nasim. Shows how
 '            interface containers connect to ServerRouter.
 '            API is a component, not a container.
@@ -15,9 +15,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — API Component Diagram
+title NASIM APPLICATION — API Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(api_group, "API Group") {
         Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
         Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate for all interface containers.")

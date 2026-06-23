@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — Tools Component Diagram
-' Boundary:  nasim (container) — Tool Group
+' Title:     NASIM APPLICATION — Tools Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Tool Group
 ' Purpose:   Tool layer: base ABC, registry, file/search/shell/web/git/lsp tools
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -14,9 +14,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Tools Component Diagram
+title NASIM APPLICATION — Tools Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(tool_group, "Tool Group") {
         Component(tool_abc, "Tool", "ABC", "Base tool: name, description, parameters, safe, execute")
         Component(tool_registry, "ToolRegistry", "", "Instance-based registry, dynamic registration for MCP")

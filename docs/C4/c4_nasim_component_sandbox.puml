@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — Sandbox Component Diagram
-' Boundary:  nasim (container) — Sandbox Group
+' Title:     NASIM APPLICATION — Sandbox Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Sandbox Group
 ' Purpose:   OS-level process isolation and diff staging for shell and edit operations
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -14,9 +14,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Sandbox Component Diagram
+title NASIM APPLICATION — Sandbox Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(sandbox_group, "Sandbox Group") {
         Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
         Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")

@@ -3,8 +3,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — Router Component Diagram
-' Boundary:  nasim (container) — Router Group
+' Title:     NASIM APPLICATION — Router Component Diagram
+' Boundary:  NASIM APPLICATION (container) — Router Group
 ' Purpose:   Model selection, fallback chains, capability queries
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -13,9 +13,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Router Component Diagram
+title NASIM APPLICATION — Router Component Diagram
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(router_group, "Router Group") {
         Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
         Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
