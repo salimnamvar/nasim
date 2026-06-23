@@ -96,7 +96,7 @@ CURRENT nasim:                    CORRECT nasim:
 | Dimension | nasim v0.1 | Target | Reference |
 |-----------|-----------|--------|-----------|
 | **Providers** | 1 (Ollama) | N providers via Protocol | opencode: 13 providers |
-| **Tools** | 5 (hardcoded) | Dynamic registry + MCP | gemini-cli: 20+ built-in + MCP |
+| **Tools** | 5 (hardcoded) | Dynamic registry + MCP | gemini-CLI: 20+ built-in + MCP |
 | **Interfaces** | CLI only | CLI + HTTP API + MCP server | opencode: TUI + web + desktop + server |
 | **Config** | None | Layered YAML + env + CLI | aider: 4-layer config |
 | **Sessions** | In-memory | Persistent JSON + resume | codex: SQLite-backed threads |
@@ -107,7 +107,7 @@ CURRENT nasim:                    CORRECT nasim:
 ### 1.7 Modular Design
 
 ```
-CURRENT: 4 modules (agent.py, cli.py, llm.py, tools.py)
+CURRENT: 4 modules (agent.py, CLI.py, llm.py, tools.py)
 TARGET:  6 packages, 30+ modules (see entities.md Python Modules table)
 ```
 
@@ -118,12 +118,12 @@ No module in nasim currently implements its designed responsibility.
 
 nasim's design chain `docs/software-design/csr.md` defines the CSR pattern.
 Current nasim has:
-- **Controller:** `cli.py` (REPL + args + output) — mixed responsibilities
+- **Controller:** `CLI.py` (REPL + args + output) — mixed responsibilities
 - **Service:** `agent.py` (orchestration + state + rendering) — SRP violation
 - **Repository:** None (no persistence layer)
 
 Target CSR mapping (from CL diagram):
-- **Controller:** `cli/` package (ArgParser, REPLSession, Renderer, SlashCommandHandler)
+- **Controller:** `CLI/` package (ArgParser, REPLSession, Renderer, SlashCommandHandler)
 - **Service:** `agent/` package (AgentOrchestrator, ConversationHistory, ContextCompactor, PermissionGate)
 - **Repository:** `session/` package (SessionStore, Session model)
 
@@ -154,7 +154,7 @@ For the HTTP API mode:
 | Gap | nasim v0.1 | Best Reference | Impact |
 |-----|-----------|---------------|--------|
 | No provider abstraction | `OllamaClient` hardcoded | opencode: 13 providers | Locked to one backend |
-| No search/grep/glob | `list_dir` only | gemini-cli: ripgrep + glob + find | Can't navigate codebases |
+| No search/grep/glob | `list_dir` only | gemini-CLI: ripgrep + glob + find | Can't navigate codebases |
 | No web access | None | opencode: web_fetch + web_search | Can't look up docs/APIs |
 | No config system | CLI args only | aider: 4-layer configargparse | Unusable in production |
 | No context management | Unbounded messages | aider: ChatSummary background thread | Long sessions crash |

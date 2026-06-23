@@ -268,7 +268,7 @@ Groups (from overview + dedicated files + ENTITIES):
 
 ### C4-CONTAINER-01 — Minor observability relationship wording
 **Condition:** One medium linter note on LogAgent edge.
-**Action:** Ensure explicit "tails stdout/stderr from Core/CLI/Server" relationship or accept as documentation artifact.
+**Action:** Ensure explicit "tails stdout/stderr from Corecli/Server" relationship or accept as documentation artifact.
 **Result:** Clean linter on container.
 
 ### C4-CONSISTENCY-01 — Cross-layer name drift risk (ongoing)
@@ -285,7 +285,7 @@ Groups (from overview + dedicated files + ENTITIES):
 
 ## 5. 2026 Best Practices Coverage (Agentic Systems)
 
-nasim C4 explicitly models or exceeds practices seen in top references (aider, claude-code, codex, gemini-cli, opencode, goose, plandex, etc.):
+nasim C4 explicitly models or exceeds practices seen in top references (aider, claude-code, codex, gemini-CLI, opencode, goose, plandex, etc.):
 
 - Multi-provider + router + fallback + capabilities: covered.
 - Event-sourced / event-driven agent core (no I/O in core): covered.

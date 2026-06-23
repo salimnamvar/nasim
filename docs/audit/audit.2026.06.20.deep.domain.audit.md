@@ -191,7 +191,7 @@ is assessed against the same dimensions. Gap = reference best − nasim score.
 
 ---
 
-### 4. gemini-cli (TypeScript/Node.js — Production)
+### 4. gemini-CLI (TypeScript/Node.js — Production)
 
 **CAR — Challenge:** Build the richest context management and multi-agent system for Google's Gemini with A2A protocol support.
 
@@ -238,7 +238,7 @@ is assessed against the same dimensions. Gap = reference best − nasim score.
 | D19 | **9** | Distillation + NLP pipeline + hot-start |
 | D20 | 9 | Async TypeScript + EventBus |
 
-**gemini-cli Overall: 7.4/10**
+**gemini-CLI Overall: 7.4/10**
 
 ---
 
@@ -250,7 +250,7 @@ is assessed against the same dimensions. Gap = reference best − nasim score.
 - **Effect-TS architecture** — Every operation is an `Effect<A, E, R>`. Services are `Layer<>` objects. Dependency injection via `Context<>`. This is the most type-safe agent runtime in the corpus.
 - **Event-sourced sessions** — `PartTable`, `SessionTable` backed by Drizzle ORM on SQLite. Every message part is immutable and appended; never updated. Full replay from part sequence.
 - **Precise compaction thresholds** — `PRUNE_MINIMUM=20,000` chars, `PRUNE_PROTECT=40,000` chars, `TOOL_OUTPUT_MAX_CHARS=2,000`, `MIN_PRESERVE_RECENT_TOKENS=2,000`, `MAX_PRESERVE_RECENT_TOKENS=8,000`, `DEFAULT_TAIL_TURNS=2`. These constants reflect careful calibration of context window economics.
-- **Multi-frontend** — `packages/tui/`, `packages/cli/`, `packages/web/`, `packages/desktop/` — all share the same agent core via `packages/opencode/`. The session/compaction.ts is UI-agnostic.
+- **Multi-frontend** — `packages/tui/`, `packagescli/`, `packages/web/`, `packages/desktop/` — all share the same agent core via `packages/opencode/`. The session/compaction.ts is UI-agnostic.
 - **EventV2Bridge** — Bridges EventV1 and EventV2 schemas for migration. All events are typed `SessionEvent` discriminated unions.
 - **Plugin system** — `packages/plugin/`: typed plugin API with Effect integration.
 - **Slack integration** — `packages/slack/`: session results posted to Slack.
@@ -350,7 +350,7 @@ is assessed against the same dimensions. Gap = reference best − nasim score.
 
 **CAR — Action:**
 - **VS Code extension architecture** — `apps/vscode/`: Full extension with sidebar, status bar, webview panel. Uses VS Code extension API for file system, editor, and terminal.
-- **SDK** — `apps/cli/` and SDK for headless use. Same agent core serves both VS Code and CLI.
+- **SDK** — `appscli/` and SDK for headless use. Same agent core serves both VS Code and CLI.
 - **Effect-TS** (from opencode fork) — Same functional programming model as opencode.
 - **Cline Hub** — `apps/cline-hub/`: Marketplace for community prompts, tools, and agents.
 - **Subscription model** — Cline's commercial model wraps free API access.
@@ -448,7 +448,7 @@ is assessed against the same dimensions. Gap = reference best − nasim score.
 - **9 specialized model roles** — `app/server/model/`: Each has its own prompts. Roles include: Planner, Builder, Namer, Summarizer, Describer, Validator, Commit-messager, AutoContinue, PlanningMode. Each role can use a different LLM optimized for its task.
 - **Plan versioning** — Plans are versioned objects. `tell.go` handles plan execution with streaming. `build.go` handles the build phase (applying plan to code). Plans can branch and merge.
 - **Diff sandbox** — All edits are applied to a sandboxed copy of the file tree first. User reviews the diff before applying to actual files. `apply_exec.go` manages this.
-- **Client-server architecture** — `app/cli/` is the thin client; `app/server/` is the stateful server with plan storage in SQLite.
+- **Client-server architecture** — `appcli/` is the thin client; `app/server/` is the stateful server with plan storage in SQLite.
 - **Plan execution stream** — Plan execution streams plan events (start, stop, edit, error) to the CLI via SSE.
 - **litellm proxy** — `app/server/litellm_proxy.py`: Python litellm wrapper called from Go server for provider-agnostic model access.
 
@@ -489,7 +489,7 @@ is assessed against the same dimensions. Gap = reference best − nasim score.
 
 ---
 
-### 10. kimi-cli (Python — Mid)
+### 10. kimi-CLI (Python — Mid)
 
 **CAR — Challenge:** Build a production CLI agent with Wire pub/sub persistence, Soul system for agent identity, and first-class session forking.
 
@@ -536,7 +536,7 @@ is assessed against the same dimensions. Gap = reference best − nasim score.
 | D19 | 6 | Token estimation + context pruning |
 | D20 | 9 | asyncio throughout |
 
-**kimi-cli Overall: 6.5/10**
+**kimi-CLI Overall: 6.5/10**
 
 ---
 
@@ -676,13 +676,13 @@ Note: `openinterpreter/` directory is structurally identical to `codex/codex-rs/
 
 ---
 
-### 16. amazon-q-developer-cli (Rust — Production)
+### 16. amazon-q-developer-CLI (Rust — Production)
 
 **CAR — Challenge:** Build an AWS-native code agent with semantic search and deep cloud integration.
 
 **CAR — Action:**
 - **Semantic search client** — `crates/semantic-search-client/`: Embedding-based semantic code search. Queries the local codebase using vector similarity. This is **RAG (Retrieval-Augmented Generation)** for code.
-- **TUI** — `crates/chat-cli-ui/`: Rich terminal UI in Rust.
+- **TUI** — `crates/chat-CLI-ui/`: Rich terminal UI in Rust.
 - **AWS-native adapters** — `crates/amzn-codewhisperer-client/`, `crates/amzn-consolas-client/`: AWS-specific API clients with streaming.
 - **Telemetry** — `crates/aws-toolkit-telemetry-definitions/`: AWS telemetry framework.
 
@@ -753,8 +753,8 @@ Note: `openinterpreter/` directory is structurally identical to `codex/codex-rs/
 
 **Differentiator:** Richest surface area — CLI + Desktop + 5 IM bots (Slack, Teams, Discord, WeChat, Feishu).
 
-- `packages/cli/`, `packages/desktop/` + bot integrations.
-- Same gemini-cli core with Qwen model substitution.
+- `packagescli/`, `packages/desktop/` + bot integrations.
+- Same gemini-CLI core with Qwen model substitution.
 
 **qwen-code Overall: 6.5/10**
 
@@ -994,7 +994,7 @@ EvaluationEngine
 
 ### Enhancement E-04 — Wire Event Log (fills D16 gap: +2 points)
 
-**Reference Pattern:** kimi-cli Wire.jsonl, opencode event-sourced parts  
+**Reference Pattern:** kimi-CLI Wire.jsonl, opencode event-sourced parts  
 **Gap:** nasim has SessionStore (JSON) but no append-only event log.
 
 **Design addition:**
@@ -1048,7 +1048,7 @@ MemoryStore (enhanced)
 
 ### Enhancement E-06 — Graph-based Context Pipeline (fills D03 gap: +3 points)
 
-**Reference Pattern:** gemini-cli ContextWorkingBuffer + PipelineOrchestrator  
+**Reference Pattern:** gemini-CLI ContextWorkingBuffer + PipelineOrchestrator  
 **Gap:** nasim has ConversationHistory (list) + ContextCompactor (summary). No graph structure.
 
 **Design addition:**
@@ -1148,13 +1148,13 @@ This is a safety feature AND an edit strategy: the `DiffSandboxCoder` applies to
 | aider | 8 | 4 | 9 | 3 | 5 | 3 | 4 | 2 | **10** | **10** | 5 | 4 | 3 | 3 | 2 | 4 | 2 | 2 | 8 | 4 | 5.4 |
 | claude-code | 7 | 8 | 6 | 5 | 9 | **9** | 7 | **10** | 5 | 4 | 5 | 5 | 8 | 6 | 7 | 8 | **10** | 2 | 5 | 8 | 6.6 |
 | codex | 8 | 9 | 8 | 4 | 8 | 7 | 9 | 9 | 4 | 5 | 6 | 4 | 6 | 9 | **10** | 9 | 9 | 3 | 5 | **10** | 7.1 |
-| gemini-cli | 3 | **10** | **10** | 8 | 8 | **9** | 8 | 9 | 5 | 4 | **10** | 5 | 9 | 7 | 6 | **10** | 7 | 3 | **9** | 9 | 7.4 |
+| gemini-CLI | 3 | **10** | **10** | 8 | 8 | **9** | 8 | 9 | 5 | 4 | **10** | 5 | 9 | 7 | 6 | **10** | 7 | 3 | **9** | 9 | 7.4 |
 | opencode | 8 | 8 | 9 | 4 | 7 | 7 | **10** | 7 | 3 | 4 | 6 | 4 | 7 | 7 | 5 | **10** | 8 | 3 | 5 | **10** | 6.6 |
 | goose | 8 | 8 | 8 | 5 | 8 | 8 | 7 | 9 | 3 | 3 | 6 | **10** | 7 | **10** | 7 | 9 | 8 | 3 | 4 | **10** | 7.1 |
 | cline | 8 | 8 | 8 | 4 | 7 | 6 | 9 | 7 | 4 | 5 | 7 | 4 | 8 | 6 | 5 | 9 | 8 | 2 | 7 | 9 | 6.6 |
 | SWE-agent | 5 | 4 | 5 | 2 | 3 | 3 | 3 | 3 | 3 | 3 | 4 | **10** | 2 | 4 | 6 | 4 | 2 | 3 | 5 | 5 | 3.8 |
 | plandex | 8 | 7 | 7 | 3 | 6 | 5 | 8 | 6 | 4 | 6 | **10** | 6 | 5 | 5 | 6 | 7 | 4 | 3 | 5 | 8 | 6.0 |
-| kimi-cli | 6 | 8 | 7 | 6 | 7 | 8 | **10** | 8 | 4 | 4 | 5 | 5 | 7 | 6 | 3 | 9 | 6 | 3 | 6 | 9 | 6.5 |
+| kimi-CLI | 6 | 8 | 7 | 6 | 7 | 8 | **10** | 8 | 4 | 4 | 5 | 5 | 7 | 6 | 3 | 9 | 6 | 3 | 6 | 9 | 6.5 |
 | hermes | **10** | **10** | 7 | 7 | 7 | 6 | 6 | 5 | 4 | 5 | 7 | 7 | 9 | 6 | 5 | 5 | 7 | 1 | 7 | 8 | 6.3 |
 | crush | 6 | 7 | 5 | 3 | 6 | 3 | 7 | 5 | 3 | 4 | 5 | 3 | 6 | 6 | 4 | 7 | 5 | 2 | **9** | 8 | 5.2 |
 | amazon-q | 3 | 7 | 6 | 5 | 7 | 5 | 7 | 5 | 6 | 4 | 5 | 4 | 7 | 9 | 5 | 7 | 5 | 2 | **10** | 9 | 5.9 |

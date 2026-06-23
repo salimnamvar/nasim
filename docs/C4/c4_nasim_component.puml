@@ -3,9 +3,9 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — Component Overview
-' Boundary:  nasim (container)
-' Purpose:   Internal structure of the nasim container. CLI Group
+' Title:     NASIM APPLICATION — Component Overview
+' Boundary:  NASIM APPLICATION (container)
+' Purpose:   Internal structure of the NASIM APPLICATION container. CLI Group
 '            (REPLSession, Renderer, ArgParser, SlashCommandHandler)
 '            is the Controller for terminal users. API Group
 '            (ServerRouter) is the Controller for HTTP + MCP clients.
@@ -19,9 +19,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title nasim — Component Overview
+title NASIM APPLICATION — Component Overview
 
-Container_Boundary(nasim, "nasim") {
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
 
     Boundary(cli_group, "CLI Group") {
         Component(arg_parser, "ArgParser", "", "CLI argument parsing with layered config overrides")
@@ -79,8 +79,8 @@ Container_Boundary(nasim, "nasim") {
 
     Boundary(mcp_group, "MCP Group") {
         Component(mcp_client_rt, "MCPClientRuntime", "", "Connects to external MCP servers via stdio/SSE")
-        Component(mcp_server_rt, "MCPServerRuntime", "", "Exposes nasim tools to external MCP clients")
-        Component(mcp_tool_adapter, "MCPToolAdapter", "", "Wraps MCP server tools into nasim Tool format")
+        Component(mcp_server_rt, "MCPServerRuntime", "", "Exposes NASIM APPLICATION tools to external MCP clients")
+        Component(mcp_tool_adapter, "MCPToolAdapter", "", "Wraps MCP server tools into NASIM APPLICATION Tool format")
         Component(mcp_discovery, "MCPDiscovery", "", "Discovers and registers MCP server tools at startup")
     }
 
@@ -90,7 +90,7 @@ Container_Boundary(nasim, "nasim") {
     }
 
     Boundary(session_group, "Session Group") {
-        Component(session_store, "SessionStore", "", "Persists/loads message history to ~/.nasim/sessions/")
+        Component(session_store, "SessionStore", "", "Persists/loads message history to ~/.NASIM APPLICATION/sessions/")
         Component(session_versioning, "SessionVersioning", "", "Snapshots and undo for session state")
         Component(session_search, "SessionSearch", "", "Cross-session search via FTS5 index")
         Component(session_fork, "SessionFork", "", "Branch conversations from any point")
@@ -101,7 +101,7 @@ Container_Boundary(nasim, "nasim") {
     }
 
     Boundary(plugins_group, "Plugins Group") {
-        Component(plugin_loader, "PluginLoader", "", "Discovers and loads plugins from ~/.nasim/plugins/")
+        Component(plugin_loader, "PluginLoader", "", "Discovers and loads plugins from ~/.NASIM APPLICATION/plugins/")
     }
 
     Boundary(sandbox_group, "Sandbox Group") {
@@ -206,7 +206,7 @@ Container_Boundary(nasim, "nasim") {
     }
 }
 
-Person(user, "User", "Developer using nasim as an AI coding assistant")
+Person(user, "User", "Developer using NASIM APPLICATION as an AI coding assistant")
 Container_Ext(webapp_container, "WebApp", "JavaScript SPA", "Browser interface")
 Container_Ext(desktop_container, "DesktopApp", "Electron / Tauri", "Desktop interface")
 Container_Ext(mobile_container, "MobileApp", "React Native / Flutter", "Mobile interface")

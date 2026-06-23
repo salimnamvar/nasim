@@ -35,7 +35,7 @@ Component: Container_Ext(CLI, WebApp, ...) → Boundary(nasim) → Boundary(API 
 | Invariant | Status | Evidence |
 |-----------|--------|----------|
 | API is component, not container | ✅ | Container diagram: `Container(nasim, ...)` — no separate API container |
-| Interface containers connect to nasim | ✅ | `Rel(cli, nasim, ...)` — all interfaces → nasim container |
+| Interface containers connect to nasim | ✅ | `Rel(CLI, nasim, ...)` — all interfaces → nasim container |
 | API Group is boundary inside nasim | ✅ | Component diagram: `Boundary(api_group, "API Group")` inside `Container_Boundary(nasim, ...)` |
 | No CLI bypass | ✅ | 0 `repl -> agent` patterns in SQ |
 | No God Objects | ✅ | AgentOrchestrator delegates to SafetyCoordinator, SubagentCoordinator, ErrorBoundary |

@@ -3,9 +3,9 @@
 !theme plain
 
 ' ============================================================
-' Title:     nasim — System Context
-' Boundary:  nasim code agent
-' Purpose:   Show nasim as a code-agent system with one User actor
+' Title:     NASIM SERVICE — System Context
+' Boundary:  NASIM SERVICE
+' Purpose:   Show NASIM SERVICE as a code-agent system with one User actor
 '            and all external systems it depends on or is consumed by.
 ' Milestone: v1.0
 ' Version:   9.0.0
@@ -16,11 +16,11 @@
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title nasim — System Context
+title NASIM SERVICE — System Context
 
-Person(user, "User", "Developer using nasim as an AI coding assistant")
+Person(user, "User", "Developer using NASIM SERVICE as an AI coding assistant")
 
-System(nasim, "nasim", "Code agent: assists developers with coding tasks via CLI or HTTP API. Integrates LLM providers, file tools, shell execution, web access, and MCP extensions.")
+System(nasim_service, "NASIM SERVICE", "Code agent: assists developers with coding tasks via CLI or HTTP API. Integrates LLM providers, file tools, shell execution, web access, and MCP extensions.")
 
 System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ via litellm")
 System_Ext(host_fs, "Host Filesystem", "Project files and directories read, written, and searched by nasim")
@@ -38,21 +38,21 @@ System_Ext(vector_store, "Vector Store", "Persistent vector storage for semantic
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
 System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana. nasim emits only — platform owns collection, storage, and visualization.")
 
-Rel(user, nasim, "runs coding tasks via CLI or HTTP API", "terminal / HTTP + SSE")
-Rel(nasim, llm_backend, "sends chat requests, receives completions", "HTTP/JSON")
-Rel(nasim, host_fs, "reads, writes, and searches project files", "path operations")
-Rel(nasim, host_shell, "executes shell commands via sandbox", "subprocess")
-Rel(nasim, web, "fetches documentation and search results", "HTTP")
-Rel(nasim, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
-Rel(mcp_client, nasim, "invokes nasim tools via MCP protocol", "stdio / SSE")
-Rel(nasim, git_repo, "reads status and creates commits", "git CLI")
-Rel(nasim, sandbox, "executes commands in isolated environment", "OS primitives")
-Rel(nasim, lsp_server, "queries code intelligence", "LSP protocol")
-Rel(nasim, plugin_dir, "discovers and loads plugins at startup", "filesystem")
-Rel(nasim, tree_sitter, "parses source code AST for indexing", "library / CLI")
-Rel(nasim, embedding_model, "generates code embeddings", "HTTP / local")
-Rel(nasim, vector_store, "stores and retrieves code embeddings", "SQLite + vector")
-Rel(nasim, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
-Rel(nasim, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
+Rel(user, nasim_service, "runs coding tasks via CLI or HTTP API", "terminal / HTTP + SSE")
+Rel(nasim_service, llm_backend, "sends chat requests, receives completions", "HTTP/JSON")
+Rel(nasim_service, host_fs, "reads, writes, and searches project files", "path operations")
+Rel(nasim_service, host_shell, "executes shell commands via sandbox", "subprocess")
+Rel(nasim_service, web, "fetches documentation and search results", "HTTP")
+Rel(nasim_service, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
+Rel(mcp_client, nasim_service, "invokes NASIM SERVICE tools via MCP protocol", "stdio / SSE")
+Rel(nasim_service, git_repo, "reads status and creates commits", "git CLI")
+Rel(nasim_service, sandbox, "executes commands in isolated environment", "OS primitives")
+Rel(nasim_service, lsp_server, "queries code intelligence", "LSP protocol")
+Rel(nasim_service, plugin_dir, "discovers and loads plugins at startup", "filesystem")
+Rel(nasim_service, tree_sitter, "parses source code AST for indexing", "library / CLI")
+Rel(nasim_service, embedding_model, "generates code embeddings", "HTTP / local")
+Rel(nasim_service, vector_store, "stores and retrieves code embeddings", "SQLite + vector")
+Rel(nasim_service, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
+Rel(nasim_service, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
 
 @enduml

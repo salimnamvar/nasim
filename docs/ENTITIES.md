@@ -103,10 +103,10 @@ single code path. No switch/if-else on provider name in agent code.
 
 | Component | Module | Responsibility |
 |-----------|--------|---------------|
-| ArgParser | `nasim/cli/args.py` | CLI argument parsing with layered overrides |
-| REPLSession | `nasim/cli/repl.py` | Interactive REPL loop, input handling |
-| Renderer | `nasim/cli/renderer.py` | All terminal output: colors, diffs, streaming, tool display |
-| SlashCommandHandler | `nasim/cli/commands.py` | Maps `/cmd` strings to actions |
+| ArgParser | `nasimcli/args.py` | CLI argument parsing with layered overrides |
+| REPLSession | `nasimcli/repl.py` | Interactive REPL loop, input handling |
+| Renderer | `nasimcli/renderer.py` | All terminal output: colors, diffs, streaming, tool display |
+| SlashCommandHandler | `nasimcli/commands.py` | Maps `/cmd` strings to actions |
 
 ### Agent Group
 
@@ -337,11 +337,11 @@ single code path. No switch/if-else on provider name in agent code.
 |--------|---------|---------|
 | `nasim/__init__.py` | root | Package init |
 | `nasim/__main__.py` | root | Entry point |
-| `nasim/cli/__init__.py` | cli | CLI package |
-| `nasim/cli/args.py` | cli | ArgParser |
-| `nasim/cli/repl.py` | cli | REPLSession |
-| `nasim/cli/renderer.py` | cli | Renderer |
-| `nasim/cli/commands.py` | cli | SlashCommandHandler |
+| `nasimcli/__init__.py` | CLI | CLI package |
+| `nasimcli/args.py` | CLI | ArgParser |
+| `nasimcli/repl.py` | CLI | REPLSession |
+| `nasimcli/renderer.py` | CLI | Renderer |
+| `nasimcli/commands.py` | CLI | SlashCommandHandler |
 | `nasim/agent/__init__.py` | agent | Agent package |
 | `nasim/agent/orchestrator.py` | agent | AgentOrchestrator |
 | `nasim/agent/history.py` | agent | ConversationHistory |

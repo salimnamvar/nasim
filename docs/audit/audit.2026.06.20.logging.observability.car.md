@@ -1,7 +1,7 @@
 # nasim — Logging & Observability Audit (CAR Framework)
 
 **Date:** 2026-06-20  
-**Scope:** Current nasim logging/observability/wirelog design + implementation vs tenas LOG draft + 28 reference agents (focus on goose, codex, SWE-agent, kimi-cli, gemini-cli, aider, opencode, claude-code, free-claude-code, plandex)  
+**Scope:** Current nasim logging/observability/wirelog design + implementation vs tenas LOG draft + 28 reference agents (focus on goose, codex, SWE-agent, kimi-CLI, gemini-CLI, aider, opencode, claude-code, free-claude-code, plandex)  
 **Purpose:** Measure current idea, compare, identify how to expand/enhance to best-in-class per nasim requirements, incorporate/improve in C4 layer.  
 **Framework:** Challenge–Action–Result per major dimension + overall synthesis.
 
@@ -88,8 +88,8 @@ Tenas is the reference implementation of "emit ends here". Nasim should document
 | goose | tracing + opentelemetry-otlp (logs/metrics/trace), tracing-subscriber | Yes (OTel) | Full OTel + custom | Partial (provider request_log) | Limited | Full OTel export; strong on provider instrumentation. No per-session immutable wire for fork. |
 | codex (Rust) | tracing + opentelemetry (otel crate), tracing-subscriber (json, env-filter) | Yes | OTel full | rollout / rollout-trace crates | Threads/sessions | Mature distributed tracing + OTLP. Event sourcing present but crate-oriented not agent-turn JSONL. |
 | SWE-agent | stdlib + rich.logging.RichHandler (emoji, TRACE level), custom get_logger + file handlers, thread-aware | Partial (rich) | Basic | Transcript logs | Resume via files | Console-first + optional files. Good Python pattern for TUI agents. No byte-offset index or semantic fork. |
-| kimi-cli | Custom Wire protocol (pub/sub for UI), telemetry debug server | Partial | Telemetry endpoint | Explicit "Wire" | Via wire replay? | Closest to nasim wire concept (decoupling). Telemetry separate from domain wire. |
-| gemini-cli | winston (server), traceId propagation, telemetry setting | Yes (winston) | Task metrics in evals | Event logs in evals | Graph history | TraceId correlation good. Graph context (not log) for branching. |
+| kimi-CLI | Custom Wire protocol (pub/sub for UI), telemetry debug server | Partial | Telemetry endpoint | Explicit "Wire" | Via wire replay? | Closest to nasim wire concept (decoupling). Telemetry separate from domain wire. |
+| gemini-CLI | winston (server), traceId propagation, telemetry setting | Yes (winston) | Task metrics in evals | Event logs in evals | Graph history | TraceId correlation good. Graph context (not log) for branching. |
 | aider | rich Console heavy; minimal logging | Low | Verbose flags, metrics UI | Markdown chat history | `--restore-chat-history` | UX output via console; history file for resume. No structured/JSON default. |
 | opencode | Effect-TS events, error typing | Yes (typed) | Event-sourced sessions | Strong event sourcing | Yes (from events) | Event-sourced is architectural. Nasim wire can match + add turn index. |
 | claude-code | Hooks emit events (Pre/PostToolUse etc.); transcripts | Partial | Session paths | Transcript paths | Resume + background | Hook events rich; no public structured logs exposed. |

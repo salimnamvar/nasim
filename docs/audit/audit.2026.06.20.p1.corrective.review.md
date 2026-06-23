@@ -24,7 +24,7 @@
 |----|-----------|-----|
 | M1 | Components incorrectly modeled as containers | Reclassified as component groups within Core Library |
 | M2 | Cross-container overview used Container_Boundary for components | Changed to System_Boundary for component groups |
-| M3 | System_Ext used for internal containers in Agent/CLI/Server diagrams | Replaced with Container_Ext for all internal references |
+| M3 | System_Ext used for internal containers in Agentcli/Server diagrams | Replaced with Container_Ext for all internal references |
 | M4 | Duplicate memory access from Agent and Tool layers | Memory access consolidated through MemoryTool via ToolRegistry |
 | M5 | SafetyPipeline subsumes PermissionGate — both called separately | Merged into SafetyCoordinator (composes PermissionGate internally) |
 | M6 | SubagentManager + SubagentTool duplicate spawning | SubagentTool delegates to SubagentCoordinator (single ownership) |

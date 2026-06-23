@@ -14,8 +14,8 @@ software-design rules.
 
 nasim v0.1 is a functional proof-of-concept: 4 modules (~450 LOC), 5 tools,
 Ollama-only, no configuration, no safety, no persistence. The reference corpus
-spans 25 agents (aider, codex, gemini-cli, goose, cline, opencode, SWE-agent,
-hermes-agent, kimi-cli, and 16 others). Against that corpus, nasim is missing
+spans 25 agents (aider, codex, gemini-CLI, goose, cline, opencode, SWE-agent,
+hermes-agent, kimi-CLI, and 16 others). Against that corpus, nasim is missing
 **every capability** that defines a production-grade code agent beyond the raw
 agentic loop. The source code has 11 architectural violations that compound as
 each new capability is added. The design chain (C4 → Code) must be fully rebuilt
@@ -46,10 +46,10 @@ found in 1–3 agents.
 #### CAP-01 — Multi-provider LLM abstraction
 
 **What reference agents do:** Every agent except the single-vendor binaries (amazon-q,
-copilot-cli, gemini-cli, warp) uses a provider abstraction layer.
+copilot-CLI, gemini-CLI, warp) uses a provider abstraction layer.
 - aider / SWE-agent / plandex → litellm (100+ providers in one call).
 - goose → 15 native provider crates + ACP backends.
-- kimi-cli / hermes-agent → adapter classes per provider.
+- kimi-CLI / hermes-agent → adapter classes per provider.
 - cline / opencode / kilocode → catalog of provider configs, runtime-selectable.
 
 **What nasim does:** `OllamaClient` is hardcoded. One URL, one model, no abstraction.
@@ -68,7 +68,7 @@ that reads config and instantiates the correct class. `OllamaProvider`,
 #### CAP-02 — Search / grep / glob tools
 
 **What reference agents do:** All agents have find-in-codebase tools.
-- codex, amazon-q, gemini-cli, opencode, kilocode → `grep` (ripgrep-backed),
+- codex, amazon-q, gemini-CLI, opencode, kilocode → `grep` (ripgrep-backed),
   `glob` (pattern matching), `find`.
 - aider → repo-map (tree-sitter ctags, symbol-level outline).
 - opencode / crush → LSP integration for semantic symbol search.
@@ -89,9 +89,9 @@ Optional: `ripgrep` wrapper for performance; tree-sitter repo-map for large repo
 
 #### CAP-03 — Web fetch / web search
 
-**What reference agents do:** gemini-cli, opencode, cline, kilocode, mistral-vibe,
-codex, kimi-cli, hermes-agent, and others all include `web_fetch(url)` and
-`web_search(query)` tools. Google Search grounding is built into gemini-cli.
+**What reference agents do:** gemini-CLI, opencode, cline, kilocode, mistral-vibe,
+codex, kimi-CLI, hermes-agent, and others all include `web_fetch(url)` and
+`web_search(query)` tools. Google Search grounding is built into gemini-CLI.
 
 **What nasim does:** No web access at all.
 
@@ -134,7 +134,7 @@ Config dataclass with typed fields; loaded once at startup; validated at load.
 - aider → chat history summarization via secondary LLM call when budget exceeded.
   Also a repo-map that compresses the whole codebase into a symbol outline.
 - codex → `compact.rs`, `token_budget.rs`; structured compaction with budget tracking.
-- gemini-cli → truncation utilities + omission placeholder detection.
+- gemini-CLI → truncation utilities + omission placeholder detection.
 - hermes-agent → `context_compressor.py`, `context_engine.py`,
   `conversation_compression.py`; prompt caching as a sacred constraint.
 - plandex → server-side context management across plan steps.
@@ -162,7 +162,7 @@ window is exceeded. The agent silently degrades.
 - codex → persistent sessions in state DB; `--continue` flag.
 - plandex → server-side named plans with history and branching.
 - opencode → SQLite sessions, snapshots, `opencode run --continue`.
-- kimi-cli → `~/.kimi/sessions/`, subagent instances by ID.
+- kimi-CLI → `~/.kimi/sessions/`, subagent instances by ID.
 - claude-code → `--continue` flag, session history.
 
 **What nasim does:** `self.messages` lives in RAM. Quitting the process loses all
@@ -183,11 +183,11 @@ history. No way to resume.
   exec policy, network policy, guardian process.
 - amazon-q → `tool_permission_checker.rs` per-tool checks.
 - cline / kilocode → `tool-policies.ts`: `enabled` + `autoApprove` per tool.
-- copilot-cli → "preview every action before execution".
+- copilot-CLI → "preview every action before execution".
 - aider → `y/n` confirmation on shell commands unless `--yes`.
 - SWE-agent → Docker sandboxing for benchmark runs.
 - hermes-agent → `file_safety.py`, `tool_guardrails.py`, iteration budget.
-- kimi-cli → `ApprovalRuntime`: approval queue projected to UI.
+- kimi-CLI → `ApprovalRuntime`: approval queue projected to UI.
 
 **What nasim does:** `shell_exec` runs any command immediately with no confirmation.
 `write_file` overwrites without asking. No safeguards at all.
@@ -230,7 +230,7 @@ Use `rich` library (already likely in the Python ecosystem).
 
 #### CAP-09 — Plan mode
 
-**What reference agents do:** gemini-cli, opencode, kilocode, mistral-vibe, kimi-cli
+**What reference agents do:** gemini-CLI, opencode, kilocode, mistral-vibe, kimi-CLI
 all implement a `plan_mode` — a first-class conversation state where the agent reasons
 about what to do without executing any tools. The user approves the plan before
 execution begins.
@@ -248,10 +248,10 @@ execution begins.
 
 #### CAP-10 — MCP client support
 
-**What reference agents do:** amazon-q, claude-code, codex, gemini-cli, goose,
-opencode, cline, kilocode, hermes-agent, kimi-cli, mistral-vibe, crush, claw-code,
+**What reference agents do:** amazon-q, claude-code, codex, gemini-CLI, goose,
+opencode, cline, kilocode, hermes-agent, kimi-CLI, mistral-vibe, crush, claw-code,
 warp — virtually all modern agents support MCP. Goose uses MCP as its primary
-extension mechanism (70+ MCP extensions). Gemini-cli has `list-mcp-resources`
+extension mechanism (70+ MCP extensions). Gemini-CLI has `list-mcp-resources`
 and `read-mcp-resource` as built-in tools.
 
 **What nasim does:** No MCP. Cannot consume any MCP server.
@@ -269,7 +269,7 @@ and `read-mcp-resource` as built-in tools.
 **What reference agents do:** All agents support more than one invocation mode.
 - `agent -c "..."` / `--print` — single-shot, non-interactive, stdout output.
 - `--headless` — no REPL; stdin/stdout pipe.
-- `serve` — HTTP+SSE server (opencode, kimi-cli ACP mode).
+- `serve` — HTTP+SSE server (opencode, kimi-CLI ACP mode).
 - Batch/benchmark mode (SWE-agent, aider).
 
 **What nasim does:** REPL or single-shot via `-c`. No headless/pipe mode. No
@@ -287,10 +287,10 @@ server mode. Single-shot doesn't handle stdin piping properly.
 | ID | Capability | Reference agents | Priority |
 |----|-----------|-----------------|----------|
 | CAP-12 | Repo-map (codebase symbol outline) | aider | High value for large codebases |
-| CAP-13 | Multi-agent / subagent spawning | claude-code, cline, codex, kimi-cli | Phase 3 |
+| CAP-13 | Multi-agent / subagent spawning | claude-code, cline, codex, kimi-CLI | Phase 3 |
 | CAP-14 | LSP integration for semantic context | opencode, crush | High quality |
 | CAP-15 | Session rewind / undo | plandex, mistral-vibe | Ergonomics |
-| CAP-16 | YAML agent harness / profiles | SWE-agent, kimi-cli | Configurability |
+| CAP-16 | YAML agent harness / profiles | SWE-agent, kimi-CLI | Configurability |
 | CAP-17 | Scheduler / background tasks | goose | Automation |
 | CAP-18 | Voice I/O (TTS + transcription) | hermes-agent, mistral-vibe | Accessibility |
 | CAP-19 | Browser / computer use | openinterpreter | Phase 4 |
@@ -405,7 +405,7 @@ There is no `logging` import anywhere. Debug information (LLM request/response,
 tool calls, latency) is only visible if you attach a debugger.
 
 **Correct design:** Per `rules/code/logging.md`: structured logging via stdlib
-`logging`. Logger hierarchy: `nasim.cli`, `nasim.agent`, `nasim.provider.*`,
+`logging`. Logger hierarchy: `nasim.CLI`, `nasim.agent`, `nasim.provider.*`,
 `nasim.tools.*`. Log LLM request/response at `DEBUG`, tool calls at `INFO`,
 errors at `ERROR`. Config: `--log-level`, `LOG_LEVEL` env var.
 
@@ -440,7 +440,7 @@ AND calls `print()` (rendering). Three distinct responsibilities in one class.
 
 ### ARCH-10 — CLI module has mixed responsibilities
 
-`cli.py` handles argument parsing, REPL loop, slash commands, output formatting, and
+`CLI.py` handles argument parsing, REPL loop, slash commands, output formatting, and
 `Agent` construction. All in 103 lines of procedural code.
 
 **Correct design:**
@@ -538,7 +538,7 @@ Session Layer (cross-cutting)
 nasim/
     __init__.py
     __main__.py
-    cli/
+    CLI/
         __init__.py
         args.py           ← ArgParser
         repl.py           ← Session (REPL loop)
@@ -685,7 +685,7 @@ or fixed. They are ordered by the design chain sequence.
 
 ## Appendix — Reference Feature Matrix
 
-| Feature | nasim v0.1 | aider | codex | goose | claude-code | gemini-cli | opencode | kimi-cli |
+| Feature | nasim v0.1 | aider | codex | goose | claude-code | gemini-CLI | opencode | kimi-CLI |
 |---------|-----------|-------|-------|-------|-------------|-----------|---------|---------|
 | Multi-provider | ✗ | ✓ (litellm) | ✗ | ✓ (15+) | ✗ | ✗ | ✓ | ✓ |
 | grep/glob/search | ✗ | repo-map | ✓ | via MCP | ✓ | ✓ | ✓ | ✓ |

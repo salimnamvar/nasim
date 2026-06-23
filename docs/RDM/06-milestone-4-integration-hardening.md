@@ -2,7 +2,7 @@
 
 Back to [docs/rdm/](./README.md).
 
-**Status:** Active · **Prerequisite:** [05-milestone-3-cli-session.md](05-milestone-3-cli-session.md)
+**Status:** Active · **Prerequisite:** [05-milestone-3-CLI-session.md](05-milestone-3-CLI-session.md)
 
 End-to-end integration testing, error handling hardening, edge cases, and performance.
 

@@ -61,12 +61,12 @@ Genuine design-level gaps (not implementation gaps):
 | Dimension | nasim Design Score | Frontier Best | Gap |
 |-----------|-------------------|---------------|-----|
 | Provider Abstraction | 9/10 | opencode (9/10) | None |
-| Tool System Design | 8/10 | gemini-cli (9/10) | Minor |
+| Tool System Design | 8/10 | gemini-CLI (9/10) | Minor |
 | Context Management Design | 7/10 | codex (9/10) | Moderate |
 | Safety & Permission Design | 8/10 | codex (8/10) | None |
 | Session Persistence Design | 8/10 | opencode (9/10) | Minor |
 | Multi-agent/Subagent Design | 7/10 | codex (8/10) | Minor |
-| MCP Integration Design | 8/10 | gemini-cli (8/10) | None |
+| MCP Integration Design | 8/10 | gemini-CLI (8/10) | None |
 | Edit Strategy Design | 9/10 | aider (9/10) | None |
 | Evaluation Harness Design | 8/10 | SWE-agent (7/10) | Ahead |
 | Observability Design | 8/10 | goose (7/10) | Ahead |
@@ -109,8 +109,8 @@ A score of 9-10 means the design is ahead of most reference agents in this dimen
    148 UC entries, 4 SM diagrams, 5 ERD files, `cl_runtime_model.puml`, 5 data contracts,
    `openapi.yaml`, `docs/ENTITIES.md`, `docs/README.md`, sprint and anti-patterns files.
 2. Direct code inspection of 28 reference agent repositories cloned at
-   `/home/salim/prj/salim/nasim/code/`: aider, codex, gemini-cli, opencode, goose,
-   SWE-agent, cline, plandex, OpenHands, kimi-cli, hermes-agent, and 17 others.
+   `/home/salim/prj/salim/nasim/code/`: aider, codex, gemini-CLI, opencode, goose,
+   SWE-agent, cline, plandex, OpenHands, kimi-CLI, hermes-agent, and 17 others.
 3. Web research: 2026 papers and standards including ESAA (arxiv:2602.23193),
    "The Log is the Agent" (arxiv:2605.21997), "Inside the Scaffold" (arxiv:2604.03515),
    "Architectural Design Decisions in AI Agent Harnesses" (arxiv:2604.18071), and MCP
@@ -191,7 +191,7 @@ This is validated by arxiv:2605.21997 ("The Log is the Agent"), the ESAA paper
 A frontier agent designs multi-agent behavior explicitly:
 - Spawning with isolated sessions and scoped tool registries
 - Result collection with structured handoff
-- Nesting limit (codex: 5, gemini-cli: configurable)
+- Nesting limit (codex: 5, gemini-CLI: configurable)
 - Failure propagation from child to parent
 - Role-based delegation (persona, specialist)
 - A2A or MCP as the inter-agent communication protocol
@@ -291,7 +291,7 @@ pipeline, Rust performance for the event loop.
 **Design weakness:** Rust creates a contribution barrier; limited provider abstraction
 (OpenAI-only at core); no HTTP API design.
 
-### gemini-cli (Google)
+### gemini-CLI (Google)
 
 **Language:** TypeScript. **Key design decisions:**
 
@@ -421,7 +421,7 @@ The component diagrams are decomposed to the correct granularity:
 - **Agent**: `AgentOrchestrator` + `ConversationHistory` + `ContextCompactor` +
   `PlanSession` + `SubagentCoordinator` + `ErrorBoundary` + `PersonaManager`. Well-decomposed.
 - **Context Graph**: `ContextGraph` + `PipelineOrchestrator` + 5 processors. The pipeline
-  pattern is sound and maps directly to what gemini-cli's `contextManager.ts` implements.
+  pattern is sound and maps directly to what gemini-CLI's `contextManager.ts` implements.
 - **Edit Strategy**: 9 named coders + `StrategySelector`. Matches aider's production design.
 - **Evaluation**: `EvaluationEngine` + 8 sub-components. No reference agent has this at
   the design level.
@@ -596,12 +596,12 @@ Scoring criteria as defined in Section: "2026 Frontier Standards".
 | # | Criterion | nasim Design | Frontier Best (agent) | Score |
 |---|-----------|-------------|----------------------|-------|
 | 1 | Universal Provider Abstraction | Protocol + LiteLLMProxy + ProviderFactory + ModelRouter | aider/SWE-agent (litellm), opencode (Effect-TS) | 9/10 |
-| 2 | Structured Tool System | Tool ABC + ToolRegistry + ToolResult + safe flag + dynamic MCP registration | gemini-cli, opencode | 8/10 |
-| 3 | Context Graph Pipeline | ContextGraph + 5 processors + TokenBudgetTracker | codex (context_manager pipeline), gemini-cli | 7/10 |
+| 2 | Structured Tool System | Tool ABC + ToolRegistry + ToolResult + safe flag + dynamic MCP registration | gemini-CLI, opencode | 8/10 |
+| 3 | Context Graph Pipeline | ContextGraph + 5 processors + TokenBudgetTracker | codex (context_manager pipeline), gemini-CLI | 7/10 |
 | 4 | Safety Pipeline | SafetyCoordinator + PermissionGate + InjectionScanner + EgressInspector | codex (sandbox + policy) | 8/10 |
 | 5 | Session Persistence | WireLog (append-only) + SessionStore + SessionVersioning + SessionFork | opencode (event-sourced), codex (dual-persistence) | 8/10 |
-| 6 | Multi-agent / Subagent | SubagentCoordinator + PersonaManager + AGT-09/10/11/12 | codex, gemini-cli (scheduler) | 7/10 |
-| 7 | Dual MCP (client + server) | MCPClientRuntime + MCPServerRuntime + MCPToolAdapter + MCPDiscovery | gemini-cli (client only) | 8/10 |
+| 6 | Multi-agent / Subagent | SubagentCoordinator + PersonaManager + AGT-09/10/11/12 | codex, gemini-CLI (scheduler) | 7/10 |
+| 7 | Dual MCP (client + server) | MCPClientRuntime + MCPServerRuntime + MCPToolAdapter + MCPDiscovery | gemini-CLI (client only) | 8/10 |
 | 8 | Edit Strategy Polymorphism | 9 coders + StrategySelector + DiffSandboxManager | aider (9+ coders, production) | 9/10 |
 | 9 | Evaluation Harness | EVL group: 9 UCs (SuccessChecker, LLMReviewer, RetryCoordinator, RepetitionDetector, TurnBudgetInjector) | SWE-agent (reviewer only) | 8/10 |
 | 10 | Observability | StructuredLogger + MetricsCollector + TraceCorrelator + LogRedactor + OTelExporter | goose (OTel), codex (structured logs) | 8/10 |
@@ -683,7 +683,7 @@ the `Router` group's C4 component diagram. But `Provider.chat()` does not expose
 tool dispatch (in the Tool group) cannot gate tool execution by capability without going
 through the Router — creating an indirect coupling.
 
-Gemini-cli resolves this by putting capability metadata on the model definition itself
+Gemini-CLI resolves this by putting capability metadata on the model definition itself
 (`availability/` module). Codex puts it in `goose-providers/src/formats/`. The 2026
 standard is: provider knows its own capabilities; router uses capability data for routing.
 
@@ -883,7 +883,7 @@ No reference agent in the 28-agent corpus has:
 - An OAS 3.1.0 API spec with ROD decisions documented
 
 Most have zero formal design. Aider has no architecture diagram. Codex has one AGENTS.md.
-Gemini-cli has no SQ diagrams. SWE-agent has no data contracts. opencode has no state
+Gemini-CLI has no SQ diagrams. SWE-agent has no data contracts. opencode has no state
 machines.
 
 The design chain is the primary competitive advantage of nasim's approach. It enables:
@@ -934,7 +934,7 @@ nasim's design at the SAF layer is ahead of most references in architectural rig
 The OAS 3.1.0 spec is ROD-compliant: 8 resources, standard methods, custom method
 `/sessions/{session}:send` with `:` separator, AIP-193 error model, `update_mask` on
 all PATCH operations, pagination on all List operations. This is the correct design;
-most agents that add an API layer (opencode, gemini-cli server) do not have formal ROD
+most agents that add an API layer (opencode, gemini-CLI server) do not have formal ROD
 compliance.
 
 ### Strength 7 — Dual MCP (client and server) at equal design depth
@@ -945,7 +945,7 @@ servers AND expose its own tools to other agents. In 2026, MCP has 97M monthly d
 and bidirectional MCP is a key interoperability standard.
 
 Among the reference agents, none have designed the MCP server runtime at the same level
-as the client. gemini-cli has a client; Claude Code has a server. nasim designs both.
+as the client. gemini-CLI has a client; Claude Code has a server. nasim designs both.
 
 ### Strength 8 — Observability designed as a separate group with OTel export
 

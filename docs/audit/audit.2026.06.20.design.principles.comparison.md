@@ -29,11 +29,11 @@ with 42 UCs, 9 UC groups, 42 SQ diagrams, 9-state SM, and a full CL diagram.
 |----------|-------------|---------------|-----|
 | **No ROD/API layer** | "No HTTP APIs needed" | opencode: full HTTP API | nasim can't serve web/mobile/desktop |
 | **No OpenAPI spec** | Not designed | opencode: Hono with typed routes | No machine-readable API contract |
-| **No hook system** | Not designed | gemini-cli: 9 hook events | No extensibility without code changes |
+| **No hook system** | Not designed | gemini-CLI: 9 hook events | No extensibility without code changes |
 | **No plugin architecture** | Not designed | claude-code: marketplace | No community extensions |
 | **No subagent model** | Not designed | claude-code: 5-level nesting | No parallel task execution |
 | **No LSP integration** | Not designed | opencode: hover/def/refs/symbols | No semantic code understanding |
-| **No model routing** | Single model per session | gemini-cli: composite strategy | Can't auto-select best model |
+| **No model routing** | Single model per session | gemini-CLI: composite strategy | Can't auto-select best model |
 | **SM is process FSM only** | Documented deviation | codex: full state machine | Less rigorous state management |
 
 ---
@@ -64,9 +64,9 @@ nasim target: CLI > env (NASIM_*) > .nasim/config.yaml (project) > ~/.nasim/conf
 **Why:** Persistent + project-specific + overridable.
 **How:** Already designed in Config layer. Implement in Phase 1.
 
-### Pattern 4: Event-Driven Agent Loop (gemini-cli + opencode)
+### Pattern 4: Event-Driven Agent Loop (gemini-CLI + opencode)
 ```
-gemini-cli: 9 hook events (BeforeModel, AfterModel, BeforeToolSelection, etc.)
+gemini-CLI: 9 hook events (BeforeModel, AfterModel, BeforeToolSelection, etc.)
 opencode: AgentEvent hierarchy (TextChunk, ToolStart, ToolResult, Error, Done)
 nasim target: AgentEvent hierarchy + Iterator[AgentEvent] from orchestrator
 ```
@@ -89,10 +89,10 @@ nasim target: PermissionGate with ask/auto/off modes (simpler but effective)
 **Why:** Defense in depth. nasim's approach is simpler but covers 90% of use cases.
 **How:** Already designed in SAF group UCs. Implement in Phase 1.
 
-### Pattern 7: Plan-Then-Build (opencode + gemini-cli)
+### Pattern 7: Plan-Then-Build (opencode + gemini-CLI)
 ```
 opencode: Dedicated plan agent that denies edits except .opencode/plans/
-gemini-cli: EnterPlanMode/ExitPlanMode tools, restricted to plans directory
+gemini-CLI: EnterPlanMode/ExitPlanMode tools, restricted to plans directory
 nasim target: PlanSession with queue_tool_call/approve_plan
 ```
 **Why:** Reduces wasted compute on wrong approaches.
@@ -216,7 +216,7 @@ Design:
 nasim/
     __init__.py
     __main__.py
-    cli/              ← CLI interface
+    CLI/              ← CLI interface
         __init__.py
         args.py
         repl.py

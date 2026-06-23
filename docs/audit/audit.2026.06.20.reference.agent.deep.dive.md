@@ -13,7 +13,7 @@
 client-server), and maturity levels from proof-of-concept to production. Key finding:
 **no single agent excels at everything** — the best design borrows patterns from multiple
 agents. The most architecturally sophisticated are **codex** (Rust, 124-crate workspace),
-**gemini-cli** (TypeScript, graph-based context), **opencode** (Effect-TS, event-sourced),
+**gemini-CLI** (TypeScript, graph-based context), **opencode** (Effect-TS, event-sourced),
 **goose** (Rust, security-hardened), and **plandex** (Go, plan-centric multi-role).
 
 ---
@@ -77,7 +77,7 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 - **Patterns:** Trait-object polymorphism, Layered config, Event-driven, Actor-like
   concurrency, Platform abstraction, Strict dependency boundaries.
 
-#### 4. gemini-cli
+#### 4. gemini-CLI
 - **Language:** TypeScript/Node.js | **Repo:** npm workspaces, 33+ core subdirs
 - **Architecture:** Monorepo: core engine + CLI + A2A server + SDK + VS Code companion.
   Graph-based context management.
@@ -188,7 +188,7 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 
 ### Tier 2 — Specialized / Mid-Maturity
 
-#### 10. kimi-cli
+#### 10. kimi-CLI
 - **Language:** Python | **Repo:** ~38 source modules
 - **Architecture:** Clean layers: CLI (Typer) → Runtime → KimiSoul (agent loop).
   Wire abstraction decouples soul from UI frontends.
@@ -224,7 +224,7 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 
 #### 12. openinterpreter
 - **Language:** Rust (forked from OpenAI Codex) | **Repo:** 114+ crates
-- **Architecture:** cli → core → model-provider → sandboxing → tools. SDK (Python/TS).
+- **Architecture:** CLI → core → model-provider → sandboxing → tools. SDK (Python/TS).
   ACP server for editor integration.
 - **LLM:** OpenAI Responses API + Bedrock. Provider capabilities declared.
 - **Tools:** Dynamic tool discovery, MCP, harness-specific tool sets (8+ agent personas).
@@ -280,8 +280,8 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 - **Differentiators:** Role-based "Modes" (Code, Architect, Ask, Debug, Custom). Community-driven.
 - **Patterns:** Mode/role polymorphism.
 
-#### 16. amazon-q-developer-cli
-- **Language:** Rust | **Repo:** chat-cli, agent, UI crates
+#### 16. amazon-q-developer-CLI
+- **Language:** Rust | **Repo:** chat-CLI, agent, UI crates
 - **Architecture:** TUI (crossterm + rustyline), tokio async, AWS SDK, SQLite, WebSocket.
 - **LLM:** AWS Bedrock (tightly coupled).
 - **Tools:** MCP client via `rmcp`. Semantic search client.
@@ -292,7 +292,7 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 - **Differentiators:** Deep AWS integration. Ships as CLI + GUI. Semantic search.
 - **Patterns:** AWS-native, Enterprise auth.
 
-#### 17. copilot-cli
+#### 17. copilot-CLI
 - **Language:** Closed-source binary (MIT repo)
 - **Architecture:** Pre-built binary via npm/Homebrew/WinGet.
 - **LLM:** Multi-model (Claude Sonnet default, `/model` to switch).
@@ -371,13 +371,13 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 - **Language:** Python (FastAPI) | **Repo:** Proxy middleware
 - **Not an agent.** Routes Claude Code/Codex traffic to 17+ alternative providers.
 
-#### 26. grok-cli
+#### 26. grok-CLI
 - **Language:** TypeScript/Bun | **Repo:** OpenTUI terminal
 - **Architecture:** Terminal coding agent connecting to xAI Grok API.
 - **Differentiators:** Real-time X/Twitter search, sub-agents, Telegram remote control,
   Batch API for cheap runs.
 
-#### 27. cli (Ampersand)
+#### 27. CLI (Ampersand)
 - **Language:** Go (Cobra/Viper) | **Repo:** B2B SaaS CLI
 - **Not an AI agent.** Traditional developer CLI for integrations platform.
 
@@ -385,7 +385,7 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 
 ## Cross-Agent Feature Matrix
 
-| Feature | nasim | aider | claude-code | codex | gemini-cli | opencode | goose | cline | SWE-agent | plandex | kimi-cli | hermes |
+| Feature | nasim | aider | claude-code | codex | gemini-CLI | opencode | goose | cline | SWE-agent | plandex | kimi-CLI | hermes |
 |---------|-------|-------|-------------|-------|-----------|---------|-------|-------|-----------|---------|---------|--------|
 | **Multi-provider LLM** | ✗ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **grep/glob/search** | ✗ | repo-map | ✓ | ✓ | ✓ | ✓ | ext | ✓ | ✗ | tree-sitter | ✓ | ✓ |
@@ -416,19 +416,19 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 | Pattern | Agents Using It | Best Example |
 |---------|----------------|--------------|
 | Provider abstraction (trait/protocol) | aider, codex, opencode, goose, cline, kimi, hermes | codex (`ModelProvider` trait) |
-| Tool ABC + registry | gemini-cli, opencode, goose, crush | opencode (`Tool.make()` + `ToolRegistry`) |
-| Event-driven agent loop | codex, gemini-cli, opencode, goose, claude-code | gemini-cli (9 hook events) |
+| Tool ABC + registry | gemini-CLI, opencode, goose, crush | opencode (`Tool.make()` + `ToolRegistry`) |
+| Event-driven agent loop | codex, gemini-CLI, opencode, goose, claude-code | gemini-CLI (9 hook events) |
 | Layered config (YAML/TOML + env + CLI) | aider, codex, opencode, goose, kimi, hermes | aider (4-layer) |
 | Session persistence (SQLite) | codex, opencode, goose, hermes, crush | opencode (event-sourced) |
 | Safety sandboxing (OS-level) | codex, openinterpreter | codex (landlock/seccomp/bubblewrap) |
-| Context compaction | aider, codex, gemini-cli, goose, kimi, hermes | aider (background thread) |
-| Plugin/extension system | claude-code, codex, gemini-cli, goose, cline, hermes | claude-code (marketplace) |
-| Plan mode | gemini-cli, opencode, plandex | opencode (dedicated plan agent) |
+| Context compaction | aider, codex, gemini-CLI, goose, kimi, hermes | aider (background thread) |
+| Plugin/extension system | claude-code, codex, gemini-CLI, goose, cline, hermes | claude-code (marketplace) |
+| Plan mode | gemini-CLI, opencode, plandex | opencode (dedicated plan agent) |
 | Multi-role orchestration | plandex | plandex (9 specialized roles) |
-| MCP integration | claude-code, codex, gemini-cli, opencode, goose, cline | goose (extensions ARE MCP) |
-| Subagent spawning | claude-code, codex, gemini-cli, opencode, goose, kimi | claude-code (5-level nesting) |
+| MCP integration | claude-code, codex, gemini-CLI, opencode, goose, cline | goose (extensions ARE MCP) |
+| Subagent spawning | claude-code, codex, gemini-CLI, opencode, goose, kimi | claude-code (5-level nesting) |
 | Harness/persona swapping | openinterpreter | openinterpreter (8+ personas) |
-| Graph-based context | gemini-cli | gemini-cli (`ContextWorkingBuffer`) |
+| Graph-based context | gemini-CLI | gemini-CLI (`ContextWorkingBuffer`) |
 | Effect-TS / algebraic effects | opencode, kilocode | opencode (Effect foundation) |
 | LSP as tool | opencode, crush | opencode (hover/def/refs/symbols) |
 
@@ -441,7 +441,7 @@ agents. The most architecturally sophisticated are **codex** (Rust, 124-crate wo
 3. **Safety is non-negotiable.** Even SWE-agent (research tool) has blocklists and timeouts.
 4. **Event-driven is the standard.** Direct `print()` in agent code is unique to nasim.
 5. **MCP is the extension standard.** 12/27 agents support it. nasim has none.
-6. **Plan mode is emerging.** gemini-cli, opencode, plandex show it works. nasim should plan for it.
+6. **Plan mode is emerging.** gemini-CLI, opencode, plandex show it works. nasim should plan for it.
 7. **Session persistence is expected.** In-memory-only is a toy pattern.
 8. **Context compaction prevents degradation.** Unbounded message growth breaks long sessions.
 9. **The best designs compose patterns from multiple agents** — no single agent covers everything.

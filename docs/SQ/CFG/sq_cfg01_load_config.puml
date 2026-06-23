@@ -51,7 +51,7 @@ cfg -> project_yaml : cfg01 READ Project Overrides(.nasim/config.yaml)
 project_yaml --> cfg : project_overrides
 cfg -> env_vars : cfg01 READ Env Overrides(NASIM_*)
 env_vars --> cfg : env_overrides
-cfg -> cfg : cfg01 APPLY Layered Config(global, project, env, cli)
+cfg -> cfg : cfg01 APPLY Layered Config(global, project, env, CLI)
 cfg -> cfg : cfg02 VALIDATE Config(fields)
 
 break Invalid YAML or missing required fields

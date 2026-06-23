@@ -39,22 +39,22 @@ improvement opportunities.
 | Dimension | nasim Coverage | Reference Best | Gap |
 |-----------|---------------|----------------|-----|
 | Multi-provider LLM | Context + Container + Component | opencode (13 providers) | Covered |
-| Tool system | Container + Component (7 tool types) | gemini-cli (20+ tools) | Covered |
+| Tool system | Container + Component (7 tool types) | gemini-CLI (20+ tools) | Covered |
 | Session persistence | Container + Component | opencode (SQLite event-sourced) | Covered |
 | Safety/permissions | Container + Component (3 modes) | codex (OS sandbox) | Design gap |
 | Context compaction | Container + Component | aider (background thread) | Covered |
 | MCP integration | Context + Container + Component | goose (extensions ARE MCP) | Covered |
 | HTTP API | Context + Container + Component (ROD) | opencode (Hono server) | Covered |
 | Plugin system | Container + Component | claude-code (marketplace) | Design gap |
-| Hook system | Container + Component (4 hook types) | gemini-cli (9 hook events) | Covered |
+| Hook system | Container + Component (4 hook types) | gemini-CLI (9 hook events) | Covered |
 | Model routing | Container + Component | plandex (9 specialized roles) | Design gap |
 | Subagent spawning | Not in C4 | claude-code (5-level nesting) | Missing |
 | LSP integration | Component (LspTool) | opencode (hover/def/refs) | Covered |
-| Event-driven core | Container + Component (AgentEvent) | gemini-cli (graph-based) | Covered |
+| Event-driven core | Container + Component (AgentEvent) | gemini-CLI (graph-based) | Covered |
 | Async architecture | Container | opencode (Effect-TS) | Design gap |
 | Structured logging | Not in C4 | goose (OpenTelemetry) | Missing |
 | OS-level sandbox | Not in C4 | codex (landlock/seccomp) | Missing |
-| Graph-based context | Not in C4 | gemini-cli (ContextWorkingBuffer) | Missing |
+| Graph-based context | Not in C4 | gemini-CLI (ContextWorkingBuffer) | Missing |
 | Plan branching | Not in C4 | plandex (plan versioning) | Missing |
 | Multi-role orchestration | Not in C4 | plandex (9 roles) | Missing |
 | Harness/persona swapping | Not in C4 | openinterpreter (8 personas) | Missing |
@@ -76,20 +76,20 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | 1 | aider | Python | Single-package CLI | Production | Edit-format polymorphism (14 strategies) |
 | 2 | claude-code | TypeScript/Bun | Plugin ecosystem | Production | Marketplace + hooks + enterprise MDM |
 | 3 | codex | Rust | 124-crate workspace | Production | OS-level sandboxing + trait polymorphism |
-| 4 | gemini-cli | TypeScript/Node | Monorepo (33+ subdirs) | Production | Graph-based context + A2A server |
+| 4 | gemini-CLI | TypeScript/Node | Monorepo (33+ subdirs) | Production | Graph-based context + A2A server |
 | 5 | opencode | TypeScript/Bun | Effect-TS monorepo | Production | Event-sourced sessions + multi-frontend |
 | 6 | goose | Rust | CLI + extension-based | Production | Extensions ARE MCP servers + ML safety |
 | 7 | cline | TypeScript/Bun | VS Code extension + SDK | Production | Deep VS Code integration + subscription |
 | 8 | SWE-agent | Python | Minimal Docker sandbox | Research | Retry-with-review loop |
 | 9 | plandex | Go | Client-server + plan branching | Production | 9 specialized model roles + diff sandbox |
-| 10 | kimi-cli | Python | Clean layered (Wire pub/sub) | Mid | Wire pub/sub + agent spec inheritance |
+| 10 | kimi-CLI | Python | Clean layered (Wire pub/sub) | Mid | Wire pub/sub + agent spec inheritance |
 | 11 | hermes-agent | Python | Monolithic + plugin edges | Mid | 20+ platform gateway + 40+ tools |
 | 12 | openinterpreter | Rust (forked) | CLI + core + SDK | Production | Harness persona swapping + OS sandbox |
 | 13 | crush | Go | agent → backend → TUI | Mid | LSP integration + Charm TUI |
 | 14 | kilocode | TypeScript/Bun | Effect-TS (OpenCode fork) | Mid | 500+ models + broadest IDE surface |
 | 15 | Roo-Code | TypeScript | VS Code extension | Mid | Role-based modes + community-driven |
-| 16 | amazon-q-developer-cli | Rust | TUI + agent + SQLite | Production | Deep AWS integration + semantic search |
-| 17 | copilot-cli | Closed-source | Pre-built binary | Production | Official GitHub + native auth |
+| 16 | amazon-q-developer-CLI | Rust | TUI + agent + SQLite | Production | Deep AWS integration + semantic search |
+| 17 | copilot-CLI | Closed-source | Pre-built binary | Production | Official GitHub + native auth |
 | 18 | MiMo-Code | TypeScript/Bun | TUI + Effect + multi-frontend | Mid | Persistent memory + self-improving loop |
 | 19 | mistral-vibe | Python | Textual TUI + ACP | Early | ACP protocol + voice input |
 | 20 | qwen-code | TypeScript/Node | IM bot architecture | Mid | Richest surface (CLI + Desktop + 5 IM bots) |
@@ -98,13 +98,13 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | 23 | ruflo | TypeScript/Node | Enterprise multi-agent | Early | 60+ agents + swarm coordination |
 | 24 | SkeletonAgent | Python (PyTorch) | Research project | Research | Action recognition (not a coding agent) |
 | 25 | free-claude-code | Python (FastAPI) | Proxy middleware | Early | Routes to 17+ providers |
-| 26 | grok-cli | TypeScript/Bun | OpenTUI terminal | Mid | Real-time X/Twitter search + Telegram |
-| 27 | cli (Ampersand) | Go (Cobra/Viper) | B2B SaaS CLI | Production | Traditional developer CLI (not AI) |
+| 26 | grok-CLI | TypeScript/Bun | OpenTUI terminal | Mid | Real-time X/Twitter search + Telegram |
+| 27 | CLI (Ampersand) | Go (Cobra/Viper) | B2B SaaS CLI | Production | Traditional developer CLI (not AI) |
 | 28 | MiMo-Code | TypeScript/Bun | Near-identical to Kilo Code | Mid | MiMo Auto free channel + Slack integration |
 
 ### 2.2 Feature Comparison Matrix
 
-| Feature | nasim | aider | claude-code | codex | gemini-cli | opencode | goose | cline | SWE-agent | plandex | kimi-cli | hermes |
+| Feature | nasim | aider | claude-code | codex | gemini-CLI | opencode | goose | cline | SWE-agent | plandex | kimi-CLI | hermes |
 |---------|-------|-------|-------------|-------|-----------|---------|-------|-------|-----------|---------|---------|--------|
 | Multi-provider LLM | ✗ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Tool ABC + Registry | ✗ | strategy | ✓ | ✓ | ✓ | ✓ | ext | ✓ | YAML | ✓ | ✓ | ✓ |
@@ -138,19 +138,19 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | Pattern | Agents Using It | Best Example | nasim Status |
 |---------|----------------|--------------|--------------|
 | Provider abstraction (trait/protocol) | aider, codex, opencode, goose, cline, kimi, hermes | codex (`ModelProvider` trait) | Design exists (Protocol), not implemented |
-| Tool ABC + registry | gemini-cli, opencode, goose, crush | opencode (`Tool.make()` + `ToolRegistry`) | Design exists (ABC), not implemented |
-| Event-driven agent loop | codex, gemini-cli, opencode, goose, claude-code | gemini-cli (9 hook events) | Design exists (AgentEvent), not implemented |
+| Tool ABC + registry | gemini-CLI, opencode, goose, crush | opencode (`Tool.make()` + `ToolRegistry`) | Design exists (ABC), not implemented |
+| Event-driven agent loop | codex, gemini-CLI, opencode, goose, claude-code | gemini-CLI (9 hook events) | Design exists (AgentEvent), not implemented |
 | Layered config (YAML/TOML + env + CLI) | aider, codex, opencode, goose, kimi, hermes | aider (4-layer) | Design exists (ConfigLoader), not implemented |
 | Session persistence (SQLite) | codex, opencode, goose, hermes, crush | opencode (event-sourced) | Design exists (JSON Lines), not implemented |
 | Safety sandboxing (OS-level) | codex, openinterpreter | codex (landlock/seccomp/bubblewrap) | Not designed |
-| Context compaction | aider, codex, gemini-cli, goose, kimi, hermes | aider (background thread) | Design exists (ContextCompactor), not implemented |
-| Plugin/extension system | claude-code, codex, gemini-cli, goose, cline, hermes | claude-code (marketplace) | Design exists (PluginLoader), not implemented |
-| Plan mode | gemini-cli, opencode, plandex | opencode (dedicated plan agent) | Design exists (PlanSession), not implemented |
+| Context compaction | aider, codex, gemini-CLI, goose, kimi, hermes | aider (background thread) | Design exists (ContextCompactor), not implemented |
+| Plugin/extension system | claude-code, codex, gemini-CLI, goose, cline, hermes | claude-code (marketplace) | Design exists (PluginLoader), not implemented |
+| Plan mode | gemini-CLI, opencode, plandex | opencode (dedicated plan agent) | Design exists (PlanSession), not implemented |
 | Multi-role orchestration | plandex | plandex (9 specialized roles) | Not designed |
-| MCP integration | claude-code, codex, gemini-cli, opencode, goose, cline | goose (extensions ARE MCP) | Design exists (MCPToolAdapter), not implemented |
-| Subagent spawning | claude-code, codex, gemini-cli, opencode, goose, kimi | claude-code (5-level nesting) | Not designed |
+| MCP integration | claude-code, codex, gemini-CLI, opencode, goose, cline | goose (extensions ARE MCP) | Design exists (MCPToolAdapter), not implemented |
+| Subagent spawning | claude-code, codex, gemini-CLI, opencode, goose, kimi | claude-code (5-level nesting) | Not designed |
 | Harness/persona swapping | openinterpreter | openinterpreter (8+ personas) | Not designed |
-| Graph-based context | gemini-cli | gemini-cli (`ContextWorkingBuffer`) | Not designed |
+| Graph-based context | gemini-CLI | gemini-CLI (`ContextWorkingBuffer`) | Not designed |
 | Effect-TS / algebraic effects | opencode, kilocode | opencode (Effect foundation) | Not applicable (Python) |
 | LSP as tool | opencode, crush | opencode (hover/def/refs/symbols) | Design exists (LspTool), not implemented |
 
@@ -203,7 +203,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | nasim → LLM Provider (HTTP/JSON) | ✓ | All agents | Covered |
 | nasim → Host Filesystem (path I/O) | ✓ | All agents | Covered |
 | nasim → Host Shell (subprocess) | ✓ | All agents | Covered |
-| nasim → Web (HTTP) | ✓ | gemini-cli, opencode | Covered |
+| nasim → Web (HTTP) | ✓ | gemini-CLI, opencode | Covered |
 | nasim → MCP Server (stdio/SSE) | ✓ | goose, claude-code | Covered |
 | nasim → Git Repository | Not shown | aider (auto-commit) | **GAP** |
 | nasim → Plugin Directory | Not shown | claude-code (marketplace) | **GAP** |
@@ -224,7 +224,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 
 | Reference Concern | nasim Container | Status |
 |-------------------|----------------|--------|
-| CLI interface | `Container(cli, "CLI")` | Covered |
+| CLI interface | `Container(CLI, "CLI")` | Covered |
 | Agent core | `Container(agent, "Agent Core")` | Covered |
 | Provider abstraction | `Container(provider, "Provider Layer")` | Covered |
 | Tool system | `Container(tools, "Tool Layer")` | Covered |
@@ -249,7 +249,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | Agent → Provider | ✓ | All agents | Covered |
 | Agent → Tools | ✓ | All agents | Covered |
 | Agent → Session | ✓ | codex, opencode | Covered |
-| Agent → Hooks | ✓ | gemini-cli (9 events) | Covered |
+| Agent → Hooks | ✓ | gemini-CLI (9 events) | Covered |
 | Hooks → Plugins | ✓ | claude-code (marketplace) | Covered |
 | Plugins → Tools | ✓ | goose (extensions) | Covered |
 | Config → Agent | ✓ | All agents | Covered |
@@ -264,7 +264,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 
 | Gap | Source Reference | Impact | Recommendation |
 |-----|-----------------|--------|----------------|
-| No ModelRouter container | plandex (9 roles), gemini-cli (model routing) | Model selection is implicit in Provider | Add `Container(router, "Model Router", "Python", "Model selection, fallback, task classification")` |
+| No ModelRouter container | plandex (9 roles), gemini-CLI (model routing) | Model selection is implicit in Provider | Add `Container(router, "Model Router", "Python", "Model selection, fallback, task classification")` |
 | No Subagent container | claude-code (5-level nesting), opencode (background agents) | Cannot express parallel task execution | Add `Container(subagent, "Subagent Spawner", "Python", "Spawn child agents with restricted tools")` |
 | No Git container | aider (auto-commit), codex (git-aware edits) | Git operations are tool-level only | Add `Container(git, "Git Integration", "Python", "Auto-commit, branch awareness, diff tracking")` |
 | No LSP container | opencode (hover/def/refs), crush (gopls) | LSP is tool-level only | Add `Container(lsp, "LSP Client", "Python", "Language server protocol: hover, definition, references")` |
@@ -284,7 +284,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | ContextCompactor | ✓ | aider (ChatSummary) | Covered |
 | PermissionGate | ✓ | codex (exec_policy) | Covered |
 | PlanSession | ✓ | opencode (PlanAgent) | Covered |
-| AgentEvent | ✓ | gemini-cli (EventBus) | Covered |
+| AgentEvent | ✓ | gemini-CLI (EventBus) | Covered |
 | SubagentManager | Not designed | claude-code (SubagentSpawner) | **GAP** |
 | TaskDispatcher | Not designed | plandex (9 roles) | **GAP** |
 | ErrorBoundary | Not designed | codex (SafetyCheck) | **GAP** |
@@ -300,25 +300,25 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | OpenAIProvider | ✓ | — | Covered |
 | AnthropicProvider | ✓ | — | Covered |
 | ProviderCapabilities | Not designed | codex (capabilities declared) | **GAP** |
-| FallbackChain | Not designed | gemini-cli (composite strategies) | **GAP** |
+| FallbackChain | Not designed | gemini-CLI (composite strategies) | **GAP** |
 
 ### 5.3 Tool Layer Component Coverage
 
 | Component | nasim | Reference Equivalent | Status |
 |-----------|-------|---------------------|--------|
 | Tool (ABC) | ✓ | opencode (Tool.make()) | Covered |
-| ToolRegistry | ✓ | gemini-cli (priority-sorted) | Covered |
+| ToolRegistry | ✓ | gemini-CLI (priority-sorted) | Covered |
 | ToolResult | ✓ | codex (SafetyCheck + result) | Covered |
 | FileTools (3) | ✓ | All agents | Covered |
-| SearchTools (3) | ✓ | gemini-cli (ripgrep) | Covered |
+| SearchTools (3) | ✓ | gemini-CLI (ripgrep) | Covered |
 | ShellTool | ✓ | All agents | Covered |
 | DirTool | ✓ | Most agents | Covered |
-| WebTools (2) | ✓ | opencode, gemini-cli | Covered |
+| WebTools (2) | ✓ | opencode, gemini-CLI | Covered |
 | GitTool | ✓ | aider (auto-commit) | Covered |
 | MCPToolAdapter | ✓ | goose (extensions) | Covered |
 | LspTool | ✓ | opencode, crush | Covered |
 | SubagentTool | Not designed | claude-code (SubagentTool) | **GAP** |
-| TodoTool | Not designed | gemini-cli (todos) | **GAP** |
+| TodoTool | Not designed | gemini-CLI (todos) | **GAP** |
 | MemoryTool | Not designed | goose (moim.rs) | **GAP** |
 | PlanTool | Not designed | opencode (plan agent) | **GAP** |
 
@@ -330,7 +330,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | Session | ✓ | opencode (Session model) | Covered |
 | SessionVersioning | Not designed | opencode (snapshots/undo) | **GAP** |
 | SessionSearch | Not designed | hermes (FTS5 search) | **GAP** |
-| SessionFork | Not designed | kimi-cli (fork support) | **GAP** |
+| SessionFork | Not designed | kimi-CLI (fork support) | **GAP** |
 
 ### 5.5 Server Layer Component Coverage
 
@@ -338,7 +338,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 |-----------|-------|---------------------|--------|
 | ServerApp | ✓ | opencode (Hono server) | Covered |
 | ServerRouter | ✓ | opencode (REST routes) | Covered |
-| SSEHandler | ✓ | gemini-cli (SSE streaming) | Covered |
+| SSEHandler | ✓ | gemini-CLI (SSE streaming) | Covered |
 | APISchema | ✓ | opencode (Effect Schema) | Covered |
 | WebSocketHandler | Not designed | warp (GraphQL) | **GAP** |
 | RateLimiter | Not designed | goose (egress inspector) | **GAP** |
@@ -354,12 +354,12 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 |---------------|----------------|-------------------|-----|
 | **Strategy** (provider abstraction) | codex (`ModelProvider` trait) | Provider Protocol in Component | Covered |
 | **Factory** (provider creation) | opencode (Route factory) | ProviderFactory in Component | Covered |
-| **Registry** (tool management) | gemini-cli (priority-sorted) | ToolRegistry in Component | Covered |
-| **Observer** (event system) | gemini-cli (9 hook events) | AgentEvent + HookManager | Covered |
+| **Registry** (tool management) | gemini-CLI (priority-sorted) | ToolRegistry in Component | Covered |
+| **Observer** (event system) | gemini-CLI (9 hook events) | AgentEvent + HookManager | Covered |
 | **Template Method** (agent loop) | aider (Coder subclasses) | AgentOrchestrator | Covered |
 | **Chain of Responsibility** (hooks) | aider (HistoryProcessor) | HookManager chain | Covered |
 | **Decorator** (MCP tools) | goose (extensions ARE MCP) | MCPToolAdapter | Covered |
-| **Adapter** (provider wrappers) | kimi-cli (kosong abstraction) | Provider implementations | Covered |
+| **Adapter** (provider wrappers) | kimi-CLI (kosong abstraction) | Provider implementations | Covered |
 | **Composite** (plugin tools) | claude-code (marketplace) | PluginLoader + ToolRegistry | Covered |
 | **State** (agent lifecycle) | SM layer (12 states) | SM diagram exists | Covered |
 | **Proxy** (sandbox) | codex (landlock/seccomp) | Not designed | **GAP** |
@@ -387,7 +387,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 
 ### 7.1 Capability Depth Comparison
 
-| Capability | nasim Design | aider | claude-code | codex | gemini-cli | opencode | goose | plandex |
+| Capability | nasim Design | aider | claude-code | codex | gemini-CLI | opencode | goose | plandex |
 |-----------|-------------|-------|-------------|-------|-----------|---------|-------|---------|
 | **Provider count** | 3 (Ollama, OpenAI, Anthropic) | 100+ (litellm) | 3+ (Anthropic, Bedrock, custom) | 2+ (OpenAI, Bedrock) | 1 (Gemini) | 13 | Multiple | 12+ (LiteLLM) |
 | **Tool count** | 16 designed | ~20 | 10+MCP | Rich framework | 20+ built-in | Core + app tools | Extension-based | 9 roles |
@@ -406,7 +406,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 
 ### 7.2 nasim Design Score vs References
 
-| Dimension (1-10) | nasim Design | aider | claude-code | codex | gemini-cli | opencode | goose | plandex |
+| Dimension (1-10) | nasim Design | aider | claude-code | codex | gemini-CLI | opencode | goose | plandex |
 |------------------|-------------|-------|-------------|-------|-----------|---------|-------|---------|
 | Provider abstraction | 8 | 9 | 8 | 9 | 3 | 10 | 8 | 9 |
 | Tool system | 8 | 7 | 8 | 9 | 9 | 9 | 8 | 7 |
@@ -450,7 +450,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | **Subagent orchestration** | claude-code (5-level nesting) | No subagent container | Add Subagent Spawner container |
 | **Plan versioning** | plandex (plan branching) | PlanSession is flat | Enhance PlanSession with version history |
 | **Multi-role** | plandex (9 specialized roles) | Single orchestrator | Add TaskDispatcher component for role-based delegation |
-| **Graph-based context** | gemini-cli (ContextWorkingBuffer) | Linear message list | Consider graph-based context model |
+| **Graph-based context** | gemini-CLI (ContextWorkingBuffer) | Linear message list | Consider graph-based context model |
 | **Harness swapping** | openinterpreter (8 personas) | Fixed agent persona | Add PersonaLoader component for runtime persona switching |
 
 ---
@@ -463,10 +463,10 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 |---------|-------------|----------------|-----|
 | Session shared across CLI + HTTP | SessionStore accessible from both | opencode (SQLite, multi-frontend) | Covered — same SessionStore |
 | Message history unified | ConversationHistory owns messages | codex (ThreadStore) | Covered — single history |
-| Event stream shared | AgentEvent consumed by CLI + Server | gemini-cli (EventBus) | Covered — same event types |
+| Event stream shared | AgentEvent consumed by CLI + Server | gemini-CLI (EventBus) | Covered — same event types |
 | Session resume across interfaces | Session ID + load from store | opencode (resume + rewind) | Covered — session ID persistence |
 | Config shared across interfaces | ConfigLoader loads once | aider (4-layer) | Covered — single config source |
-| Tool registry shared | ToolRegistry instance-based | gemini-cli (priority-sorted) | Covered — single registry |
+| Tool registry shared | ToolRegistry instance-based | gemini-CLI (priority-sorted) | Covered — single registry |
 
 ### 9.2 Knowledge Sync Gaps
 
@@ -474,7 +474,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 |-----|-----------------|--------|----------------|
 | No cross-session knowledge | hermes (SQLite FTS5 search) | Cannot search across sessions | Add SessionSearch component |
 | No session versioning | opencode (snapshots/undo) | Cannot revert to prior state | Add SessionVersioning component |
-| No session forking | kimi-cli (fork support) | Cannot branch conversation | Add SessionFork capability |
+| No session forking | kimi-CLI (fork support) | Cannot branch conversation | Add SessionFork capability |
 | No memory persistence | goose (moim.rs), MiMo-Code (persistent memory) | No long-term knowledge | Add MemoryStore component |
 | No cross-machine sync | ruflo (federated communication) | Single-machine only | Future: add sync protocol |
 
@@ -489,16 +489,16 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | aider | Edit-format polymorphism (14 strategies) | Not designed — single edit format |
 | claude-code | Plugin marketplace + hooks ecosystem | Plugin system designed, hooks designed |
 | codex | OS-level sandboxing (landlock/seccomp) | Not designed |
-| gemini-cli | Graph-based context management | Linear context designed |
+| gemini-CLI | Graph-based context management | Linear context designed |
 | opencode | Event-sourced sessions + multi-frontend | JSON Lines sessions, multi-interface designed |
 | goose | ML-based prompt injection detection | Basic PermissionGate designed |
 | plandex | 9 specialized model roles + plan branching | Single orchestrator, flat plan |
 | openinterpreter | Harness persona swapping | Fixed persona |
 | hermes | 20+ platform gateway | CLI + HTTP + MCP designed |
-| kimi-cli | Wire pub/sub for UI decoupling | AgentEvent pattern designed |
+| kimi-CLI | Wire pub/sub for UI decoupling | AgentEvent pattern designed |
 | crush | LSP integration as tool | LspTool designed |
 | claude-code | Background/daemon sessions | Not designed |
-| gemini-cli | Voice input (Whisper + Gemini Live) | Not designed |
+| gemini-CLI | Voice input (Whisper + Gemini Live) | Not designed |
 | opencode | Snapshot/undo for sessions | Not designed |
 | codex | Remote context compaction | Local compaction designed |
 
@@ -509,7 +509,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | aider | No MCP, no plugin system, no HTTP API | nasim has MCP, plugins, HTTP API in design |
 | claude-code | Closed-source runtime, enterprise-only | nasim is open-source, lightweight |
 | codex | 124-crate Rust complexity | nasim is Python, simpler |
-| gemini-cli | Single provider (Google only) | nasim has 3+ providers |
+| gemini-CLI | Single provider (Google only) | nasim has 3+ providers |
 | opencode | Effect-TS complexity, TypeScript-only | nasim is Python, simpler |
 | goose | Tightly coupled to extension model | nasim has clean separation |
 | cline | VS Code extension only | nasim has CLI + HTTP + MCP |
@@ -517,11 +517,11 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | plandex | No MCP, no plugins, no subagents | nasim has all three |
 | hermes | Monolithic 12k LOC agent loop | nasim has clean component decomposition |
 | openinterpreter | Forked from Codex, Rust complexity | nasim is Python, independent design |
-| kimi-cli | Limited tool ecosystem | nasim has 16+ tools designed |
+| kimi-CLI | Limited tool ecosystem | nasim has 16+ tools designed |
 | kilocode | Fork of OpenCode, no unique innovation | nasim has unique multi-interface design |
 | Roo-Code | VS Code extension only | nasim has CLI + HTTP + MCP |
 | amazon-q | AWS-only, tightly coupled | nasim is provider-agnostic |
-| copilot-cli | Closed-source, GitHub-only | nasim is open-source |
+| copilot-CLI | Closed-source, GitHub-only | nasim is open-source |
 | MiMo-Code | Near-identical to Kilo Code | nasim has unique design chain |
 | mistral-vibe | Mistral-only, limited features | nasim has multi-provider |
 | qwen-code | Chinese-market focus, IM-bot architecture | nasim has global focus |
@@ -547,7 +547,7 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 
 | Enhancement | Rationale | Source Reference |
 |-------------|-----------|-----------------|
-| Add `Container(router, "Model Router")` | Model selection + fallback + task classification | plandex, gemini-cli |
+| Add `Container(router, "Model Router")` | Model selection + fallback + task classification | plandex, gemini-CLI |
 | Add `Container(subagent, "Subagent Spawner")` | Parallel task execution | claude-code (5-level) |
 | Add `Container(sandbox, "Sandbox")` | OS-level process isolation | codex (landlock/seccomp) |
 | Add `Container(observability, "Observability")` | Structured logging + traces | goose (OpenTelemetry) |
@@ -561,16 +561,16 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | Add `SubagentManager` to Agent Layer | Parent-child agent orchestration | claude-code, opencode |
 | Add `TaskDispatcher` to Agent Layer | Role-based task delegation | plandex (9 roles) |
 | Add `ErrorBoundary` to Agent Layer | Structured error handling | codex (SafetyCheck) |
-| Add `ModelRouter` to Provider Layer | Model selection + fallback | plandex, gemini-cli |
+| Add `ModelRouter` to Provider Layer | Model selection + fallback | plandex, gemini-CLI |
 | Add `ProviderCapabilities` to Provider Layer | Capability declaration per provider | codex |
 | Add `FallbackChain` to Provider Layer | Circuit breaker + retry | goose (repetition monitoring) |
 | Add `SubagentTool` to Tool Layer | Spawn child agents as tool | claude-code, opencode |
-| Add `TodoTool` to Tool Layer | Task tracking within session | gemini-cli (todos) |
+| Add `TodoTool` to Tool Layer | Task tracking within session | gemini-CLI (todos) |
 | Add `MemoryTool` to Tool Layer | Persist/retrieve knowledge | goose (moim.rs) |
 | Add `PlanTool` to Tool Layer | Plan creation + management | opencode (plan agent) |
 | Add `SessionVersioning` to Session Layer | Snapshots + undo | opencode |
 | Add `SessionSearch` to Session Layer | Cross-session search | hermes (FTS5) |
-| Add `SessionFork` to Session Layer | Branch conversations | kimi-cli |
+| Add `SessionFork` to Session Layer | Branch conversations | kimi-CLI |
 | Add `SandboxExecutor` to Tool Layer | Sandboxed command execution | codex (landlock) |
 | Add `SafetyPipeline` to Agent Layer | Multi-stage safety checks | hermes (10+ modules) |
 | Add `PersonaLoader` to Agent Layer | Runtime persona switching | openinterpreter (8 personas) |
@@ -741,21 +741,21 @@ OS-level sandboxing, graph-based context, plan branching, and multi-role orchest
 | Agent | Repository |
 |-------|-----------|
 | aider | https://github.com/Aider-AI/aider |
-| amazon-q-developer-cli | https://github.com/aws/amazon-q-developer-cli |
+| amazon-q-developer-CLI | https://github.com/aws/amazon-q-developer-CLI |
 | claude-code | https://github.com/anthropics/claude-code |
 | claw-code | https://github.com/zed-industries/claw |
-| cli (OpenAI) | https://github.com/openai/openai-cli |
+| CLI (OpenAI) | https://github.com/openai/openai-CLI |
 | cline | https://github.com/cline/cline |
 | codex | https://github.com/openai/codex |
-| copilot-cli | https://github.com/github/gh-copilot |
+| copilot-CLI | https://github.com/github/gh-copilot |
 | crush | https://github.com/charmbracelet/crush |
 | free-claude-code | https://github.com/steiner385/free-claude-code |
-| gemini-cli | https://github.com/google-gemini/gemini-cli |
+| gemini-CLI | https://github.com/google-gemini/gemini-CLI |
 | goose | https://github.com/block/goose |
-| grok-cli | https://github.com/x-ai/grok-cli |
+| grok-CLI | https://github.com/x-ai/grok-CLI |
 | hermes-agent | https://github.com/harshit0209/hermes-agent |
 | kilocode | https://github.com/Kilo-Org/kilocode |
-| kimi-cli | https://github.com/MoonshotAI/kimi-cli |
+| kimi-CLI | https://github.com/MoonshotAI/kimi-CLI |
 | MiMo-Code | https://github.com/XiaomiMiMo/MiMo |
 | mistral-vibe | https://github.com/mistralai/mistral-vibe |
 | opencode | https://github.com/opencode-ai/opencode |

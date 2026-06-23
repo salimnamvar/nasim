@@ -22,17 +22,17 @@ nasim v0.1 has **zero CSR compliance** — it is a flat, functional codebase wit
 
 ### CSR-01: Controller Layer Entry Points
 
-**Condition:** No Controller layer exists. `cli.py` mixes argument parsing, REPL loop, slash commands, and output formatting in 103 lines of procedural code.
+**Condition:** No Controller layer exists. `CLI.py` mixes argument parsing, REPL loop, slash commands, and output formatting in 103 lines of procedural code.
 
 **Action:** Create dedicated Controller components per interface:
-- `nasim/cli/args.py` — ArgParser (transport-level input parsing)
-- `nasim/cli/commands.py` — SlashCommandHandler (maps /cmd to actions)
-- `nasim/cli/repl.py` — REPLSession (REPL loop, delegates to AgentOrchestrator)
+- `nasimcli/args.py` — ArgParser (transport-level input parsing)
+- `nasimcli/commands.py` — SlashCommandHandler (maps /cmd to actions)
+- `nasimcli/repl.py` — REPLSession (REPL loop, delegates to AgentOrchestrator)
 - `nasim/server/router.py` — ServerRouter (HTTP endpoints, request/response formatting)
 
 **Result:** Each Controller entrypoint delegates immediately to a Service method. No business logic in Controllers. Per CSR-01: "Every public backend operation exposed via HTTP has a corresponding Controller entrypoint that immediately delegates to a Service method."
 
-**Files touched:** `nasim/cli.py` → split into `nasim/cli/` package
+**Files touched:** `nasimcli.py` → split into `nasimcli/` package
 
 ---
 
@@ -292,7 +292,7 @@ Config (singleton)
 |---|------|-----|--------|----------|
 | 1.1 | Create `entities.md` canonical registry | C: No canonical names; A: Create registry; R: Consistent naming across layers | Low | Critical |
 | 1.2 | Split `nasim/agent.py` into `nasim/agent/` package | C: Mixed concerns; A: Extract Orchestrator, History, Compactor, Permission, Plan; R: Clean Service layer | Medium | Critical |
-| 1.3 | Split `nasim/cli.py` into `nasim/cli/` package | C: Mixed concerns; A: Extract Args, Commands, REPL, Renderer; R: Clean Controller layer | Medium | Critical |
+| 1.3 | Split `nasimcli.py` into `nasimcli/` package | C: Mixed concerns; A: Extract Args, Commands, REPL, Renderer; R: Clean Controller layer | Medium | Critical |
 | 1.4 | Create `nasim/tools/` package with Tool ABC + ToolRegistry | C: Module-level dict; A: Create Tool ABC, ToolRegistry class, ToolResult; R: Instance-based tool management | Low | Critical |
 | 1.5 | Create `nasim/config/` package with ConfigLoader | C: Hardcoded values; A: Create Config dataclass, ConfigLoader; R: Layered config system | Low | Critical |
 | 1.6 | Create `nasim/session/` package with SessionStore | C: No persistence; A: Create SessionStore; R: Atomic session writes | Medium | Critical |

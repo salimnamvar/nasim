@@ -20,7 +20,7 @@ Back to [docs/rdm/](./README.md).
 
 | Check | What | Command |
 | --- | --- | --- |
-| Layer boundaries | No agent→cli imports | `grep -r "from nasim.cli" src/nasim/agent/` |
+| Layer boundaries | No agent→CLI imports | `grep -r "from nasim.CLI" src/nasim/agent/` |
 | Layer boundaries | No tool→agent imports | `grep -r "from nasim.agent" src/nasim/tools/` |
 | C4 fidelity | Class names match C4 | Spot check against `docs/c4/README.md` |
 | UC coverage | Every UC has ≥1 test | Cross-reference `docs/uc/README.md` with test files |

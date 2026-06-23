@@ -74,7 +74,7 @@ No ABC, no instance state, no `ToolResult`, no `safe` flag. Can't add MCP tools 
 - Dynamic tool registration for MCP at runtime
 - Structured error handling (no more string errors)
 - Safety annotation per tool (`safe: bool`)
-- **Better than:** aider (no tool system), SWE-agent (bash-only), gemini-cli (no ABC)
+- **Better than:** aider (no tool system), SWE-agent (bash-only), gemini-CLI (no ABC)
 - **Best-in-class pattern:** opencode's `Tool.make()` with Effect Schema + `ToolRegistry`
 
 ---
@@ -130,7 +130,7 @@ Every reference agent uses events or callbacks.
 - Agent core is UI-agnostic (testable, serverable)
 - CLI, web, mobile, desktop all consume the same event stream
 - **Better than:** aider (print), SWE-agent (print), cline (no events)
-- **Best-in-class pattern:** gemini-cli (9 hook events) + opencode (Effect-TS events)
+- **Best-in-class pattern:** gemini-CLI (9 hook events) + opencode (Effect-TS events)
 
 ---
 
@@ -201,7 +201,7 @@ A confused LLM can delete files, run `rm -rf`, or run harmful commands.
 - Safe tools (read_file, list_dir) skip confirmation
 - Scriptable with `--yes` flag
 - **Better than:** aider (confirmation only), SWE-agent (blocklist only), cline (VS Code sandbox)
-- **Best-in-class pattern:** codex (OS sandbox) for production, gemini-cli (4 approval modes) for flexibility
+- **Best-in-class pattern:** codex (OS sandbox) for production, gemini-CLI (4 approval modes) for flexibility
 
 ---
 
@@ -212,7 +212,7 @@ Plain ASCII output. No colors, no diffs, no structured tool display.
 Every reference agent has rich output.
 
 ### Action
-1. `Renderer` class in `nasim/cli/renderer.py`:
+1. `Renderer` class in `nasimcli/renderer.py`:
    - Colored prompts (`you>` blue, `nasim>` green)
    - Tool call display: indented name + args + truncated result
    - Diff display for file edits (unified diff format)
@@ -226,7 +226,7 @@ Every reference agent has rich output.
 - Visual diff on file edits
 - Error highlighting
 - **Better than:** aider (Rich but ad-hoc), SWE-agent (plain), most TUI agents
-- **Best-in-class pattern:** aider's Rich streaming + gemini-cli's structured output
+- **Best-in-class pattern:** aider's Rich streaming + gemini-CLI's structured output
 
 ---
 
@@ -248,7 +248,7 @@ Users want to approve plans before execution.
 - Users review before execution
 - Reduces wasted compute on wrong approaches
 - **Better than:** most agents (don't have it)
-- **Best-in-class pattern:** opencode's dedicated plan agent + gemini-cli's PLAN mode
+- **Best-in-class pattern:** opencode's dedicated plan agent + gemini-CLI's PLAN mode
 
 ---
 
@@ -267,7 +267,7 @@ MCP server tools.
 ### Result
 - Access to 100+ community MCP servers
 - Extensible without code changes
-- **Better than:** aider (no MCP), SWE-agent (no MCP), kimi-cli (fastmcp only)
+- **Better than:** aider (no MCP), SWE-agent (no MCP), kimi-CLI (fastmcp only)
 - **Best-in-class pattern:** goose (extensions ARE MCP servers)
 
 ---
@@ -344,7 +344,7 @@ agent loop. Can't execute concurrent tool calls.
 - Non-blocking LLM calls
 - HTTP server alongside agent loop
 - **Better than:** aider (sync), SWE-agent (sync), most Python agents
-- **Best-in-class pattern:** opencode (Effect-TS), gemini-cli (async Node.js)
+- **Best-in-class pattern:** opencode (Effect-TS), gemini-CLI (async Node.js)
 
 ---
 
@@ -356,7 +356,7 @@ LLM requests, tool calls, or latency.
 
 ### Action
 1. Structured logging via stdlib `logging`
-2. Logger hierarchy: `nasim.cli`, `nasim.agent`, `nasim.provider.*`, `nasim.tools.*`
+2. Logger hierarchy: `nasim.CLI`, `nasim.agent`, `nasim.provider.*`, `nasim.tools.*`
 3. LLM request/response at `DEBUG`, tool calls at `INFO`, errors at `ERROR`
 4. Config: `--log-level`, `LOG_LEVEL` env var
 5. Optional: OpenTelemetry traces (Phase 3)
@@ -385,7 +385,7 @@ This is the #1 functional gap for a *code* agent. 20/27 agents have search.
 ### Result
 - Agent can navigate any codebase without user providing exact paths
 - **Better than:** aider (repo-map only), SWE-agent (none), plandex (tree-sitter only)
-- **Best-in-class pattern:** gemini-cli (ripgrep + glob + find + ls)
+- **Best-in-class pattern:** gemini-CLI (ripgrep + glob + find + ls)
 
 ---
 
@@ -423,7 +423,7 @@ No git awareness. Agent can't check status, view diffs, or create commits.
 ### Result
 - Agent understands version control state
 - Can create commits automatically
-- **Better than:** SWE-agent (ephemeral), kimi-cli (none)
+- **Better than:** SWE-agent (ephemeral), kimi-CLI (none)
 - **Best-in-class pattern:** aider (auto-commit + git-aware edits)
 
 ---
@@ -513,7 +513,7 @@ Makes nasim a multi-interface service.
 | Feature | nasim after CAR | Best reference agent |
 |---------|----------------|---------------------|
 | Multi-provider | ✓ (Protocol + 3 providers) | opencode (13 providers) |
-| Search/grep/glob | ✓ (ripgrep-backed) | gemini-cli (ripgrep + glob) |
+| Search/grep/glob | ✓ (ripgrep-backed) | gemini-CLI (ripgrep + glob) |
 | Web access | ✓ (fetch + search) | opencode (web_fetch + web_search) |
 | Config system | ✓ (4-layer YAML) | aider (4-layer configargparse) |
 | Context compaction | ✓ (background summarization) | aider (ChatSummary) |
@@ -523,7 +523,7 @@ Makes nasim a multi-interface service.
 | Plan mode | ✓ (queue + approve) | opencode (dedicated agent) |
 | MCP client | ✓ (stdio + sse) | goose (extensions ARE MCP) |
 | HTTP API | ✓ (REST + SSE, ROD) | opencode (Hono server) |
-| Event system | ✓ (AgentEvent hierarchy) | gemini-cli (9 hook events) |
+| Event system | ✓ (AgentEvent hierarchy) | gemini-CLI (9 hook events) |
 | Async | ✓ (httpx + asyncio) | opencode (Effect-TS) |
 | Logging | ✓ (structured) | goose (OpenTelemetry) |
 | Error handling | ✓ (ToolResult) | codex (SafetyCheck) |
@@ -531,8 +531,8 @@ Makes nasim a multi-interface service.
 | OOP/SOLID | ✓ (Protocol, ABC, SRP) | codex (124 crates, strict boundaries) |
 | DRY | ✓ (unified run loop) | opencode (single agent runner) |
 | SoC | ✓ (6 packages, clear boundaries) | opencode (25 packages) |
-| Modularity | ✓ (30+ modules) | gemini-cli (33+ subdirs) |
+| Modularity | ✓ (30+ modules) | gemini-CLI (33+ subdirs) |
 | Scalability | ✓ (async, multi-provider, API) | opencode (TUI + web + desktop + server) |
 
-**nasim after CAR would be comparable to opencode and gemini-cli in architecture,
+**nasim after CAR would be comparable to opencode and gemini-CLI in architecture,
 while maintaining the simplicity of a Python codebase (vs Rust/TypeScript complexity).**

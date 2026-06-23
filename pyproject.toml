@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = [
   "code-agent",
-  "cli",
+  "CLI",
   "llm",
   "ollama",
   "agent",
@@ -38,7 +38,7 @@ dev = [
 ]
 
 [project.scripts]
-nasim = "nasim.cli:main"
+nasim = "nasim.CLI:main"
 
 [project.urls]
 Homepage = "https://github.com/salimnamvar/nasim"

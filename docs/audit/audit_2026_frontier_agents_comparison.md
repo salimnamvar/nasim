@@ -26,13 +26,13 @@ what most agents have shipped. However, a design that cannot run is not an agent
 
 | Dimension | Score | Status | Leading Reference |
 |-----------|-------|--------|------------------|
-| Tooling & capabilities | 0 / 10 | No implementation | gemini-cli, opencode |
+| Tooling & capabilities | 0 / 10 | No implementation | gemini-CLI, opencode |
 | Provider abstraction | 1 / 10 | Designed, not built | opencode (13), aider (litellm) |
 | Context management | 0 / 10 | No implementation | aider, codex |
 | Safety & permissions | 0 / 10 | No implementation | codex (OS sandbox), goose (ML) |
 | Session continuity | 0 / 10 | No implementation | opencode (event-sourced) |
 | Planning & reasoning | 0 / 10 | No implementation | opencode, plandex |
-| Multi-agent orchestration | 1 / 10 | Designed only | codex, gemini-cli |
+| Multi-agent orchestration | 1 / 10 | Designed only | codex, gemini-CLI |
 | IDE integration | 0 / 10 | None designed | cline, Roo-Code |
 | Performance & efficiency | 2 / 10 | Design decisions made | codex (Rust) |
 | Observability | 0 / 10 | No implementation | goose (OTel), codex |
@@ -145,7 +145,7 @@ with merge semantics is the most complete config system in the corpus.
 Skills system maps YAML-defined capabilities to tool definitions. The app-server daemon
 mode allows the agent to pre-warm and accept connections without cold-start overhead.
 
-#### gemini-cli (Google)
+#### gemini-CLI (Google)
 
 **Language:** TypeScript/Node.js | **LOC:** ~33,000 | **Maturity:** Production (Google)
 
@@ -159,7 +159,7 @@ grounding, memory context manager, plan mode, skills, todos, tracker, shell (bac
 The hook system (BeforeModel, AfterModel, BeforeToolSelection) with composite routing strategy
 is the most configurable execution pipeline studied.
 
-The Agent-to-Agent (A2A) server makes gemini-cli the only agent that exposes an A2A endpoint
+The Agent-to-Agent (A2A) server makes gemini-CLI the only agent that exposes an A2A endpoint
 for multi-agent orchestration scenarios. Voice input via Whisper + Gemini Live is the most
 accessible multimodal feature in the corpus.
 
@@ -266,11 +266,11 @@ enables remote execution and plan sharing.
 
 ### Tier 2 — Specialized / Mid-Maturity
 
-#### kimi-cli (Moonshot AI)
+#### kimi-CLI (Moonshot AI)
 
-**Language:** Python (~38 modules) | **Maturity:** Mid | **GitHub:** moonshot-ai/kimi-cli
+**Language:** Python (~38 modules) | **Maturity:** Mid | **GitHub:** moonshot-ai/kimi-CLI
 
-The cleanest Python agent architecture in the corpus after nasim's design. kimi-cli
+The cleanest Python agent architecture in the corpus after nasim's design. kimi-CLI
 demonstrates the "Wire" pattern: the `Wire` abstraction fully decouples the agent soul
 (`KimiSoul`) from any specific UI. UI frontends subscribe to wire events; the soul produces
 only typed events. This maps exactly to nasim's `AgentEvent` generator pattern.
@@ -355,7 +355,7 @@ Relevant to nasim: ACP server implementation in `nasim/server/` (Phase 3) would 
 nasim an OpenHands-compatible backend. The Docker sandbox approach is a safer alternative
 to OS-level landlock for Python agents.
 
-#### amazon-q-developer-cli (now Kiro CLI)
+#### amazon-q-developer-CLI (now Kiro CLI)
 
 **Language:** Rust | **Maturity:** Deprecated as OSS
 
@@ -463,7 +463,7 @@ and why it matters operationally.
 - Todo/plan: structured task tracking
 - Subagent: spawn specialized sub-instances
 
-**Frontier examples:** gemini-cli (20+ built-in tools), opencode (core + app tool layers),
+**Frontier examples:** gemini-CLI (20+ built-in tools), opencode (core + app tool layers),
 codex (ToolDefinition + ToolSpec + ToolExecutor + plugin discovery).
 
 **Why it matters:** A coding agent that cannot search a codebase is useless on any
@@ -507,7 +507,7 @@ generations behind the frontier.
 - Context fragment injection for structured context additions
 
 **Frontier examples:** aider (ChatSummary + repo-map 867 LOC), codex (compact.rs + remote
-compaction + ContextFragment), gemini-cli (graph-based ContextWorkingBuffer + PipelineOrchestrator),
+compaction + ContextFragment), gemini-CLI (graph-based ContextWorkingBuffer + PipelineOrchestrator),
 opencode (event-sourced projector + compaction agent + snapshot/undo).
 
 **Why it matters:** Unbounded context growth crashes sessions silently. Token budget
@@ -530,7 +530,7 @@ completes a multi-hour refactoring job.
 
 **Frontier examples:** codex (OS-level sandbox multi-platform + exec_policy.rs), goose
 (ML injection scanner + SecurityInspector + AdversaryInspector + EgressInspector), opencode
-(rule-based permissions with always-remember per project), gemini-cli (4 approval modes +
+(rule-based permissions with always-remember per project), gemini-CLI (4 approval modes +
 policy engine + folder trust discovery).
 
 **Why it matters:** `rm -rf` executed by a confused LLM is unrecoverable. The safety
@@ -552,7 +552,7 @@ to any production codebase. Without it, nasim cannot be recommended for real use
 
 **Frontier examples:** opencode (event-sourced SQLite, snapshot/undo, location-scoped DBs),
 codex (SQLite ThreadStore with create/resume/archive/delete lifecycle), goose (session naming,
-diagnostics, search, Nostr sharing, moim for high-value message retention), kimi-cli
+diagnostics, search, Nostr sharing, moim for high-value message retention), kimi-CLI
 (fork support).
 
 **Why it matters:** "I already explained that yesterday" is a quality-of-life issue that
@@ -572,7 +572,7 @@ Without memory, the agent cannot accumulate project-specific knowledge.
 - Retry-with-review: when a step fails, analyze the failure before retrying
 
 **Frontier examples:** plandex (full plan branching + versioning, 9 roles), opencode
-(plan agent mode with edit permissions disabled), gemini-cli (PLAN approval mode),
+(plan agent mode with edit permissions disabled), gemini-CLI (PLAN approval mode),
 SWE-agent (retry-with-review loop via RetryAgent + reviewer), codex (planning mode flag).
 
 **Why it matters:** An agent that acts immediately without planning makes expensive,
@@ -592,8 +592,8 @@ to deliberate (propose → review → execute).
 - ACP support: agent-to-agent communication protocol
 
 **Frontier examples:** plandex (9 specialized roles with independent model + temperature),
-codex (subagent task dispatch), gemini-cli (A2A server), goose (orchestrator extension +
-summon tool), opencode (background subagents), kimi-cli (LaborMarket).
+codex (subagent task dispatch), gemini-CLI (A2A server), goose (orchestrator extension +
+summon tool), opencode (background subagents), kimi-CLI (LaborMarket).
 
 **Why it matters:** Single-agent architectures hit a ceiling on complex, multi-file
 refactorings where different concerns require different expertise. Multi-agent orchestration
@@ -612,7 +612,7 @@ is the path from "coding assistant" to "autonomous engineering team."
 - Terminal embedding (Warp)
 
 **Frontier examples:** cline (VS Code extension, webview, diff previews), Roo-Code (VS Code
-modes), vscode-ide-companion (gemini-cli's companion), warp (owns the entire terminal stack),
+modes), vscode-ide-companion (gemini-CLI's companion), warp (owns the entire terminal stack),
 claude-code (VS Code extension + MCP server for editors).
 
 **Why it matters:** Terminal-only agents lose the active editor context. IDE-integrated
@@ -656,7 +656,7 @@ in parallel) and HTTP server mode alongside the agent loop.
 
 **Frontier examples:** goose (OpenTelemetry trace/span, named spans per agent turn),
 codex (wire log transcript, token/cost tracking), aider (structured logging to file),
-gemini-cli (telemetry module, cost estimation).
+gemini-CLI (telemetry module, cost estimation).
 
 **Why it matters:** An agent running in production (or even daily development) that
 produces no telemetry is a black box. When something goes wrong, the developer has
@@ -677,7 +677,7 @@ debuggable.
 
 **Frontier examples:** claude-code (marketplace, 14 official plugins, SKILL.md auto-activation),
 codex (plugin installation tools, tool search/discovery, skills system), goose (extensions ARE
-MCP servers — cleanest model), gemini-cli (skills system, MCP client), cline (plugin registry
+MCP servers — cleanest model), gemini-CLI (skills system, MCP client), cline (plugin registry
 for host apps).
 
 **Why it matters:** No single agent team can implement every tool for every workflow.
@@ -760,7 +760,7 @@ Against C1–C12 criteria, nasim's design intends to address:
 Scores are operational (can the agent do this today?).
 nasim design points are noted separately where relevant.
 
-| Criterion | nasim | aider | claude-code | codex | gemini-cli | opencode | goose | cline | SWE-agent | plandex |
+| Criterion | nasim | aider | claude-code | codex | gemini-CLI | opencode | goose | cline | SWE-agent | plandex |
 |-----------|-------|-------|-------------|-------|------------|---------|-------|-------|-----------|---------|
 | C1 Tooling | 0 | 7 | 8 | 8 | 9 | 9 | 7 | 7 | 5 | 6 |
 | C2 Provider | 1 | 8 | 7 | 8 | 4 | 9 | 8 | 8 | 7 | 7 |
@@ -991,14 +991,14 @@ Without the event system, adding the HTTP server (Phase 3) requires rewriting th
    - On permission required in `ask` mode: yield `ApprovalRequest`; CLI renders prompt and
      returns user answer; agent waits for signal.
    - Zero `print()`, `input()`, or sys.stdout calls anywhere in agent/ package.
-3. Create `nasim/cli/renderer.py`: `Renderer` subscribes to `AgentEvent` generator and
+3. Create `nasimcli/renderer.py`: `Renderer` subscribes to `AgentEvent` generator and
    renders using `rich`. `TextChunk` → streaming markdown. `ToolStart` → dim status line.
    `ApprovalRequest` → `[y/N]` prompt with rich Panel.
 
 **Result:**
 - Agent core is UI-agnostic and testable (no stdout capture needed in tests).
 - Same agent serves CLI, HTTP SSE, and MCP by plugging in a different subscriber.
-- Matches: opencode (Effect-TS events), gemini-cli (9 hook events), codex (event structs).
+- Matches: opencode (Effect-TS events), gemini-CLI (9 hook events), codex (event structs).
 - Design-chain traceability: AGT-01 → AGT-15 → events.py → orchestrator.py.
 
 ---
@@ -1044,8 +1044,8 @@ old context) or an explicit API error. No reference agent ships without context 
 - Sessions of arbitrary length without degradation.
 - Token budget enforced per model's actual context window.
 - Compaction preserves task continuity without data loss.
-- Matches: aider (ChatSummary), codex (compact.rs), gemini-cli (compaction service),
-  kimi-cli (85% threshold auto-compaction).
+- Matches: aider (ChatSummary), codex (compact.rs), gemini-CLI (compaction service),
+  kimi-CLI (85% threshold auto-compaction).
 
 ---
 
@@ -1083,7 +1083,7 @@ debugging session must re-establish context from scratch.
 - Sessions survive process restart.
 - Resume any session by ID or load the most recent.
 - Multiple sessions per project, listed with creation time and title.
-- Matches: codex (SQLite ThreadStore), opencode (event-sourced SQLite), kimi-cli (fork support).
+- Matches: codex (SQLite ThreadStore), opencode (event-sourced SQLite), kimi-CLI (fork support).
 
 ---
 
@@ -1131,7 +1131,7 @@ delete files, run `git reset --hard`, or exfiltrate data.
 - No dangerous operation executes without user consent in `ask` mode.
 - `auto` mode enables scripted, CI/CD usage.
 - Injection scanner catches the most common tool-output injection patterns.
-- Matches: codex (exec_policy), gemini-cli (4 approval modes), opencode (rule-based).
+- Matches: codex (exec_policy), gemini-CLI (4 approval modes), opencode (rule-based).
 - Design-chain traceability: SAF-01 → SAF-03 → `sq_saf01.puml` → `PermissionGate`.
 
 ---
@@ -1144,22 +1144,22 @@ rich terminal rendering (markdown, syntax highlighting, progress indicators, dif
 Without rich output, the agent feels like a toy compared to aider or opencode.
 
 **Action:**
-1. Create `nasim/cli/renderer.py`: `Renderer` using `rich.Console` with:
+1. Create `nasimcli/renderer.py`: `Renderer` using `rich.Console` with:
    - `TextChunk` → `rich.Markdown` live streaming
    - `ToolStart` → `rich.Status` spinner with tool name
    - `ToolResultEvent` → collapsible panel (success = dim; failure = red)
    - `ApprovalRequest` → `rich.Prompt.ask` with formatted tool name and args
    - `Error` → `rich.Panel` with red border
    - `Done` → token count + cost estimate in dim footer
-2. Create `nasim/cli/repl.py`: `REPLSession` main loop using `click` for arg parsing.
+2. Create `nasimcli/repl.py`: `REPLSession` main loop using `click` for arg parsing.
    Use `prompt_toolkit` or `readline` for input history and multi-line editing.
-3. Add slash commands via `nasim/cli/commands.py`: `/help`, `/quit`, `/model <name>`,
+3. Add slash commands via `nasimcli/commands.py`: `/help`, `/quit`, `/model <name>`,
    `/sessions`, `/clear`, `/compact` (manual compaction trigger), `/safe <mode>`.
 4. Add `--one-shot "task"` flag for single-turn scripted use.
 
 **Result:**
 - Professional terminal experience on par with aider's Rich output.
-- Slash commands match claude-code and gemini-cli conventions.
+- Slash commands match claude-code and gemini-CLI conventions.
 - Renderer is fully decoupled from agent core (events only).
 
 ---
@@ -1236,8 +1236,8 @@ or any external information. Web fetch alone covers 80% of the "I don't know the
 
 **Result:**
 - Agent can look up any URL or search for documentation during a task.
-- Matches: gemini-cli (Google Search grounding), opencode (web fetch + search), codex,
-  cline, kimi-cli. Missing from: aider (notable gap), SWE-agent (intentionally excluded).
+- Matches: gemini-CLI (Google Search grounding), opencode (web fetch + search), codex,
+  cline, kimi-CLI. Missing from: aider (notable gap), SWE-agent (intentionally excluded).
 
 ---
 
@@ -1271,7 +1271,7 @@ Without git awareness, the agent has no safety net for file mutations.
 **Challenge:**
 Without plan mode, the agent starts executing immediately on complex tasks. For multi-file
 refactorings, users want to review the proposed approach before any files are touched.
-Plan mode is present in gemini-cli, opencode, and plandex — all three leading agents.
+Plan mode is present in gemini-CLI, opencode, and plandex — all three leading agents.
 
 **Action:**
 1. Create `nasim/agent/plan.py`: `PlanSession` dataclass with ordered list of steps.
@@ -1286,7 +1286,7 @@ Plan mode is present in gemini-cli, opencode, and plandex — all three leading 
 **Result:**
 - Users can review the complete proposed change set before any files are modified.
 - Matches: opencode (plan agent mode, edits disabled), plandex (full plan branching),
-  gemini-cli (PLAN approval mode).
+  gemini-CLI (PLAN approval mode).
 - Design-chain traceability: AGT-07 → AGT-08 → `PlanSession`.
 
 ---
@@ -1311,8 +1311,8 @@ The implementation must enforce the nesting limit to prevent runaway spawning.
 **Result:**
 - Complex tasks delegated to specialized sub-instances with constrained capabilities.
 - Nesting limit prevents infinite recursion.
-- Matches: codex (subagent dispatch), gemini-cli (A2A subagents), opencode (background
-  subagents), kimi-cli (LaborMarket), goose (summon tool).
+- Matches: codex (subagent dispatch), gemini-CLI (A2A subagents), opencode (background
+  subagents), kimi-CLI (LaborMarket), goose (summon tool).
 
 ---
 
@@ -1337,7 +1337,7 @@ Without MCP client support, nasim cannot consume any of the 1000+ existing MCP s
 **Result:**
 - Any MCP server's tools available to nasim without code changes.
 - nasim itself becomes an MCP server — composable into other agent systems.
-- Matches: goose (extensions are MCP servers), codex, gemini-cli, opencode, cline.
+- Matches: goose (extensions are MCP servers), codex, gemini-CLI, opencode, cline.
 - Design-chain traceability: MCP-01 → MCP-04 → `sq_mcp01.puml` → `MCPClientRuntime`.
 
 ---
@@ -1360,7 +1360,7 @@ pipelines to consume nasim without the CLI.
 **Result:**
 - Web clients, desktop apps, and external integrations consume nasim via HTTP.
 - Same agent core; same event system; different subscriber.
-- Matches: opencode (Hono server), gemini-cli (A2A server).
+- Matches: opencode (Hono server), gemini-CLI (A2A server).
 - Design-chain traceability: SRV-01 → SRV-11 → `sq_srv01.puml` → `ServerApp`.
 
 ---
@@ -1381,7 +1381,7 @@ session.
 
 **Result:**
 - Project conventions remembered across sessions.
-- Matches: gemini-cli (memory context manager), goose (moim), opencode (skills from markdown).
+- Matches: gemini-CLI (memory context manager), goose (moim), opencode (skills from markdown).
 - Design-chain traceability: MEM-01 → MEM-04 → `MemoryStore`.
 
 ---
@@ -1484,7 +1484,7 @@ Priorities are determined by: (1) blocking other capabilities, (2) operational i
 | # | Action | Rationale | Design Ref |
 |---|--------|-----------|-----------|
 | P2.1 | Implement `SessionVersioning` (snapshot/undo) | Matches opencode differentiator | SSN-05–06 |
-| P2.2 | Implement `PlanSession` + `/plan` slash command | Matches gemini-cli, opencode, plandex | AGT-07–08 |
+| P2.2 | Implement `PlanSession` + `/plan` slash command | Matches gemini-CLI, opencode, plandex | AGT-07–08 |
 | P2.3 | Implement `MemoryStore` (SQLite FTS5) + `MemoryTool` | Cross-session knowledge | MEM-01–04 |
 | P2.4 | Implement `SubagentCoordinator` + `SubagentTool` | Multi-agent capability | AGT-09–10 |
 | P2.5 | Implement `HookManager` (PreToolUse, PostToolUse, PreModel, PostModel) | Extensibility | HK-01–04 |
@@ -1600,7 +1600,7 @@ not exist.
 
 **Result:**
 - Custom validation, logging, and transformation without core code changes.
-- Matches: claude-code (9 hook points), gemini-cli (4 hook types), goose (extension hooks).
+- Matches: claude-code (9 hook points), gemini-CLI (4 hook types), goose (extension hooks).
 - Plugin authors can add hooks; users can configure per-project bash hooks.
 - Design-chain traceability: HK-01 → HK-04 → `HookManager` → `sq_hk01.puml`.
 
@@ -1700,7 +1700,7 @@ something is wrong. litellm provides per-call token counts; they must be aggrega
 - Users see cost in real time and can abort expensive sessions.
 - Budget enforcement prevents runaway loops from incurring large API costs.
 - Matches: codex (cost tracking per run), SWE-agent (cost per issue with limits),
-  gemini-cli (cost estimation in telemetry).
+  gemini-CLI (cost estimation in telemetry).
 
 ---
 
@@ -1724,7 +1724,7 @@ wastes 4x the time. Python's `asyncio` supports this natively.
 **Result:**
 - N independent tool calls execute in parallel; wall time ~ max(tool times) not sum.
 - For agents that fetch multiple URLs or read multiple files per turn: 3–10x speedup.
-- Matches: opencode (Effect-TS structured concurrency), gemini-cli (async Node.js),
+- Matches: opencode (Effect-TS structured concurrency), gemini-CLI (async Node.js),
   goose (Rust tokio async runtime), codex (Rust async).
 
 ---
@@ -1739,7 +1739,7 @@ The 28-agent reference corpus uses 5 architectural paradigms:
 |----------|--------|---------------|
 | Event loop + stdout print | aider, older Python agents | Explicitly rejected (AP-28) |
 | Event emitter / generator | nasim (design), opencode (Effect-TS), codex | Target paradigm |
-| Function calling orchestrator | gemini-cli, cline, claude-code | Subset of event emitter |
+| Function calling orchestrator | gemini-CLI, cline, claude-code | Subset of event emitter |
 | Multi-role orchestrator | plandex, OpenHands | Influences SubagentCoordinator design |
 | Declarative agent (YAML-driven) | SWE-agent (Bundle), mini-swe-agent | Influences PersonaManager design |
 
@@ -1751,8 +1751,8 @@ MCP (stream to MCP client), and testing (collect events in list).
 
 | Language | Agents | nasim assessment |
 |----------|--------|-----------------|
-| Python | nasim (target), aider, SWE-agent, kimi-cli, openinterpreter | Correct choice for ML/AI ecosystem |
-| TypeScript/Bun | opencode, claude-code, gemini-cli, cline, Roo-Code | JS ecosystem; Bun runtime is fast |
+| Python | nasim (target), aider, SWE-agent, kimi-CLI, openinterpreter | Correct choice for ML/AI ecosystem |
+| TypeScript/Bun | opencode, claude-code, gemini-CLI, cline, Roo-Code | JS ecosystem; Bun runtime is fast |
 | Rust | codex, goose, amazon-q, openinterpreter (core) | Maximum performance; complex build |
 | Go | plandex, crush | Fast, simple; good concurrency |
 
@@ -1791,7 +1791,7 @@ is straightforward given the design.
 |-------|----------------|------|
 | codex | OS sandbox (landlock/seccomp/seatbelt), exec_policy.rs prefix rules | No ML injection detection |
 | goose | ML injection scanner + SecurityInspector + EgressInspector + AdversaryInspector | No OS sandbox for shell |
-| gemini-cli | 4 modes + policy engine TOML rules + folder trust discovery | No OS sandbox |
+| gemini-CLI | 4 modes + policy engine TOML rules + folder trust discovery | No OS sandbox |
 | opencode | Rule-based permissions, always-remember per project | No injection detection |
 | cline | MCP tool approval, diff preview before apply | No injection detection, no OS sandbox |
 | nasim (design) | SafetyPipeline + PermissionGate + InjectionScanner + EgressInspector + SandboxExecutor | Not implemented |
@@ -1808,7 +1808,7 @@ safety system in the corpus — once built.
 | opencode | SQLite event-sourced WAL | Session resume by ID | Snapshot/undo |
 | codex | SQLite ThreadStore | `--continue` | Archive only |
 | goose | Session naming + search | Resume by name | No |
-| kimi-cli | Fork support | `--fork` | Session fork |
+| kimi-CLI | Fork support | `--fork` | Session fork |
 | aider | Git history (implicit) | Re-run with same dir | Via git revert |
 | nasim (design) | JSON Lines + SessionVersioning | `--continue`, `--session` | SessionFork |
 
@@ -1830,7 +1830,7 @@ aider's tools are module-level functions registered in a global dict at import t
 This prevents per-session tool configuration and makes testing require import-level
 mocking. **nasim fix:** `ToolRegistry` is an instance class injected via constructor.
 
-### APR-02 — Hardcoded provider URLs (kimi-cli v0.1, aider without litellm)
+### APR-02 — Hardcoded provider URLs (kimi-CLI v0.1, aider without litellm)
 
 Hardcoded `https://api.moonshot.cn/v1` base URL in source code. Cannot be overridden
 without patching. **nasim fix:** All provider config via layered `Config` dataclass.
@@ -1862,7 +1862,7 @@ code only sees the normalized type.
 
 ### APR-07 — Print() in agent core (violates AP-28)
 
-aider, kimi-cli v0.1, SWE-agent use `print()` in core agent logic. The symptom is
+aider, kimi-CLI v0.1, SWE-agent use `print()` in core agent logic. The symptom is
 that adding a second UI (web interface) requires a complete rewrite.
 **nasim fix:** `AgentOrchestrator.run()` yields `AgentEvent`; zero `print()`.
 
@@ -1926,7 +1926,7 @@ nasim/
         model.py                        # Session dataclass
         store.py                        # SessionStore (JSON Lines)
         memory_store.py                 # MemoryStore (SQLite FTS5)
-    cli/
+    CLI/
         __init__.py
         args.py                         # ArgParser (click)
         repl.py                         # REPLSession
@@ -1966,7 +1966,7 @@ tests/
         test_config_loader.py
     session/
         test_session_store.py
-    cli/
+    CLI/
         test_renderer.py
         test_repl.py
 ```

@@ -88,11 +88,11 @@ source code does not implement.
 
 ### R-1 — C4 component diagram spans 4 container boundaries (linter HIGH)
 - `c4_lint.py --strict` → `C4-C3-001`: a C3 diagram should belong to exactly one
-  container; `c4_nasim_component.puml` spans `cli`, `agent`, `llm`, `tool`.
+  container; `c4_nasim_component.puml` spans `CLI`, `agent`, `llm`, `tool`.
 - **Rule:** `c4.md` — "For each non-trivial layer, author a dedicated component
   diagram … A single monolithic component diagram hides cross-layer boundary
   violations."
-- **Fix:** split into `c4_nasim_component_{cli,agent,llm,tool}.puml`, or accept the
+- **Fix:** split into `c4_nasim_component_{CLI,agent,llm,tool}.puml`, or accept the
   single overview and document the deviation. (Context + Container pass clean.)
 
 ### R-2 — SQ folder names ≠ UC group codes
