@@ -1,4 +1,7 @@
-# Symlinks to global shared knowledge (synced separately)
+# Symlinks to global shared knowledge (inside global/ folder)
+global/
+
+# Root-level global symlinks (deprecated, kept for compatibility during migration)
 commands
 hooks
 machines
