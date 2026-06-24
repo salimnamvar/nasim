@@ -1,0 +1,1 @@
+/home/salim/.claude/shared/CORE-DIRECTIVE.md

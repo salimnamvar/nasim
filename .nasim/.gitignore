@@ -1,0 +1,15 @@
+# Symlinks to global shared knowledge (synced separately)
+commands
+hooks
+machines
+skills
+templates
+tools
+CORE-DIRECTIVE.md
+
+# Local docs (can be tracked)
+# docs/
+
+# Cache
+.cache
+*.tmp

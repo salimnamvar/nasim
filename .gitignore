@@ -45,8 +45,9 @@ TEST*.xml
 .cache/
 .eslintcache
 
-# Hidden directories
+# Hidden directories (except .nasim/ which contains project-specific rules)
 .*/
+!.nasim/
 
 # IDE non-hidden artifacts
 *.iml
