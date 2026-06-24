@@ -1,1 +1,1 @@
-/home/salim/.claude/shared/CORE-DIRECTIVE.md
+~/.agent-global/shared/CORE-DIRECTIVE.md
