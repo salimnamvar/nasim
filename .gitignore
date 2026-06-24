@@ -48,6 +48,7 @@ TEST*.xml
 # Hidden directories (except .nasim/ which contains project-specific rules)
 .*/
 !.nasim/
+!.nasim/**
 
 # IDE non-hidden artifacts
 *.iml

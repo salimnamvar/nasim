@@ -1,8 +1,8 @@
-# nasim — Unified Project Context
+# nasim — Project Knowledge Base
 
-> **Entry point for all agents (Claude, Grok, MiMo).** Replaces legacy `.claude/CLAUDE.md`, `.grok/AGENTS.md`, `.mimo/MEMORY.md`.
+> **Unified knowledge entry point for all registered agents.** This document defines project intent, design decisions, architectural patterns, and how agents should approach work in this project.
 
-## Project
+## Project Overview
 
 **Name:** nasim  
 **Description:** Research code agent. Original implementation built by investigating patterns across 25+ reference agents (aider, cline, SWE-agent, goose, OpenHands, plandex, opencode, codex, gemini-cli, kimi-cli, hermes-agent, and others) without copying any of them.  
@@ -10,23 +10,66 @@
 
 **Status:** v0.1 functional PoC + complete target design chain. Major capability gaps remain vs. reference corpus (see `docs/audit/`).
 
-## Repository
+## How This Document Works
 
-- Personal public GitHub now: `salimnamvar/nasim`
-- Planned move to company org (WAF Tech) later
-- License: Apache-2.0 (chosen for permissive OSS + explicit patent grant suitable for agent research that will live under a commercial services company)
+**NASIM.md is your entry point** — it loads in this order:
 
-## Python Environment
+1. **Project-specific knowledge** — This file, plus `rules/` and `docs/` folders
+2. **Global knowledge** — Via symlinks in `.nasim/global/` that point to the registered agent's shared knowledge
+3. **Sub-agent coordination** — For specialized analysis, invoked via skills like `/code-review`, `/security-review`, etc.
+
+### Knowledge Directory Structure
+
+```
+.nasim/
+├── NASIM.md                              ← You are here
+├── CORE-DIRECTIVE.md                     ← Symlink to agent's shared directive
+├── global/                               ← Symlinks to shared knowledge
+│   ├── rules → ~/.*/shared/rules/
+│   ├── skills → ~/.*/shared/skills/
+│   ├── commands → ~/.*/shared/commands/
+│   ├── hooks → ~/.*/shared/hooks/
+│   ├── docs → ~/.*/shared/docs/
+│   ├── machines → ~/.*/shared/machines/
+│   ├── templates → ~/.*/shared/templates/
+│   └── tools → ~/.*/shared/tools/
+├── rules/                                ← Project-specific rules
+│   ├── entities.md                       ← Canonical entity registry
+│   ├── anti-patterns.md                  ← Project-specific anti-patterns
+│   └── software-design/                  ← Design-specific rules
+├── docs/                                 ← Project documentation
+├── skills/                               ← Project-specific skills (optional)
+├── commands/                             ← Project-specific commands (optional)
+└── .gitignore                            ← Excludes symlinks from git
+```
+
+## Loading Global Knowledge
+
+When you see references like `@rules/code/python.md`, the agent loads them via `.nasim/global/`:
+
+```
+@rules/code/python.md → .nasim/global/rules/code/python.md → ~/.*/shared/rules/code/python.md
+```
+
+Symlinks automatically adjust to the running agent (Claude → ~/.claude/shared/, Grok → ~/.grok/shared/, etc.).
+
+## Repository & Setup
+
+- **URL:** Personal public GitHub: `salimnamvar/nasim`
+- **License:** Apache-2.0 (chosen for permissive OSS + explicit patent grant suitable for agent research under a commercial services company)
+- **Python Environment**
 
 ```
 requires-python = ">=3.10"
 ```
 
-No hard-coded conda env name. Use project setup scripts or any Python 3.10+.
+No hard-coded conda env name. Use project setup scripts:
 
 ```bash
 bash scripts/setup/setup_env.sh
 pip install -e ".[dev]"
+python -m nasim --help
+python run.py
 ```
 
 ## Design Chain
@@ -48,6 +91,28 @@ C4 → UC → SM → SQ → ERD (minimal) → CL (runtime) → Code
 ```
 
 No REST API, no CT contracts. Persistence is file-based (JSON sessions).
+
+## Sub-Agent Workflows
+
+This project may use specialized sub-agents for specific tasks:
+
+### When Sub-Agents Are Used
+
+- **Code Review:** Dedicated agents for reviewing changes against design contracts
+- **Security Analysis:** Specialized agents for auditing capabilities and threat models
+- **Research:** Agents for exploring dependencies, APIs, or architectural alternatives
+- **Parallel Refactoring:** Breaking down large refactors across multiple focused agents
+
+### Available Sub-Agent Commands
+
+```
+/code-review [level]          ← Spawn code review agent (low/medium/high/ultra)
+/security-review              ← Spawn security audit agent
+/explore <pattern>            ← Spawn code exploration agent
+/research <question>          ← Spawn research agent
+```
+
+All sub-agent findings feed back to the primary agent for decision-making.
 
 ## Key Architectural Decisions (do not regress)
 
@@ -111,6 +176,20 @@ When implementing or reviewing:
 - Keep the CLI thin; agent core must be testable and event-yielding.
 - Record deviations in sprint notes or a decision log.
 
+## Available Skills
+
+This project uses skills from both global knowledge and project-specific sources:
+
+### Global Skills (`@skills/`)
+- `/task` — Task creation and tracking
+- `/code-review` — Code review (low/medium/high/ultra)
+- `/security-review` — Security audit  
+- `/conventional-commit` — Commit message helper
+- `/simplify` — Code simplification suggestions
+
+### Project Skills (`.nasim/skills/`)
+- (None currently — add as needed)
+
 ## Development Commands
 
 ```bash
@@ -120,6 +199,15 @@ bash scripts/setup/setup_env.sh
 python -m nasim --help
 python run.py
 ```
+
+## For Agents New to This Project
+
+1. Read this NASIM.md top to bottom
+2. Check `.nasim/rules/entities.md` — understand the domain model
+3. Skim `docs/c4/` or `docs/architecture.md` — understand the design
+4. Check `.nasim/rules/anti-patterns.md` — learn from past gotchas
+5. Load relevant global rules for your task
+6. Check `docs/decisions.md` or design docs for *why* things are the way they are
 
 ## KB Update Policy
 
