@@ -24,7 +24,7 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 | Diagram | Level | Description |
 |---------|-------|-------------|
-| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 11 external systems (including Code Intelligence Services group and Host Shell) |
+| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 9 external systems |
 
 ### Level 2: Containers
 
@@ -228,14 +228,12 @@ These are separate deployable units that connect to NASIM Application's HTTP API
 |--------|---------|
 | LLM Backend | Multi-provider inference (Ollama, OpenAI, Anthropic, etc.) via litellm |
 | Host Filesystem | Project source code, configuration, documentation, and community plugin files |
-| Host Shell | OS-level subprocess execution for shell commands |
+| Sandbox Runtime | OS-level process isolation and shell execution: landlock, seccomp, bubblewrap |
 | Web | Documentation, search engines for live context retrieval |
 | MCP Server | Extension tools provided to NASIM Application via Model Context Protocol |
 | MCP Client | External tools and IDEs that consume NASIM Application's exposed capabilities via MCP |
 | Git Repository | Version-controlled project files: branch state, history, and commits |
-| Sandbox Runtime | OS-level process isolation: landlock, seccomp, bubblewrap |
-| LSP Server | Language server providing code intelligence: definitions, references, diagnostics |
-| Code Intelligence Services | Tree-sitter (AST parsing), Embedding Model (vector generation), Vector Store (similarity search) |
+| Repo Intelligence Backend | Tree-sitter (AST parsing), LSP Server (code intelligence), Embedding Model (vector generation), Vector Store (similarity search) |
 | Observability Platform | Log agent, Prometheus, Grafana, OTel Collector: NASIM Application emits; platform owns collection, storage, visualization |
 
 ## Architecture Principles
@@ -276,7 +274,7 @@ All diagrams are traceable to the design chain:
 | `c4_nasim_component_observability.puml` | 17 | 8 internal components + 9 externals. Observability concerns are tightly coupled (logger ↔ metrics ↔ correlator ↔ propagator). |
 | `c4_nasim_component_agent.puml` | 13 | 7 components + 6 externals. Core agent loop components are inseparable — orchestrator, history, compactor form a single processing pipeline. |
 | `c4_nasim_component_edit_strategy.puml` | 13 | 11 strategy implementations + 2 externals. Polymorphic strategy pattern requires all implementations visible together. |
-| `c4_nasim_context.puml` | 13 | All architecturally significant external systems must be visible at Context level. Grouped Plugin Dir under Host FS and Tree-sitter/Embedding/Vector under Code Intelligence Services to minimize count. |
+| `c4_nasim_context.puml` | 11 | All architecturally significant external systems visible. Grouped: Plugin Dir → Host FS, Host Shell → Sandbox Runtime, Tree-sitter/LSP/Embedding/Vector → Repo Intelligence Backend, OTel → Observability Platform. |
 
 ## SIM-03 Compliance (meaningful intent labels)
 

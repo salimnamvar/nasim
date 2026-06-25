@@ -13,19 +13,23 @@
 '            what it INTERACTS with — not how it works internally.
 '            No containers, no components, no protocols.
 '
-'            GROUPING DECISIONS:
+'            GROUPING DECISIONS (SIM-01 / SE-04):
 '            - Plugin Directory is grouped under Host Filesystem because
 '              plugins are accessed via filesystem reads at startup.
-'            - Tree-sitter, Embedding Model, and Vector Store are grouped
-'              as Code Intelligence services because they are all used by
-'              the Repo Intelligence subsystem for code understanding.
+'            - Host Shell is grouped under Sandbox Runtime because the
+'              sandbox mediates all shell execution; the shell is not a
+'              direct external dependency of NASIM Application.
+'            - Tree-sitter, Embedding Model, Vector Store, and LSP Server
+'              are grouped as Repo Intelligence Backend because they are
+'              all consumed by the Repo Intelligence subsystem (RIM) for
+'              code understanding.
 '            - OTel Collector is grouped under Observability Platform
 '              because it is part of the platform's collection pipeline.
 '
 ' Milestone: v1.0
-' Version:   9.1.0
+' Version:   9.1.2
 ' Source:    docs/entities.md, docs/C4/README.md
-' Review:    —
+' Review:    CAR audit 2026-06-25 – final polish
 ' ============================================================
 
 LAYOUT_LEFT_RIGHT()
@@ -35,31 +39,27 @@ title NASIM Application — System Context
 
 Person(user, "User", "Developer using NASIM Application as an AI coding assistant")
 
-System(nasim_application, "NASIM Application", "AI coding agent that interprets natural language tasks, orchestrates tools and LLM providers, and produces file-level changes with safety validation")
+System(nasim_application, "NASIM Application", "AI coding agent that translates natural language tasks into file-level changes across a codebase")
 
 System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ providers via litellm")
 System_Ext(host_fs, "Host Filesystem", "Project source code, configuration, documentation, and community plugin files")
-System_Ext(host_shell, "Host Shell", "OS-level subprocess execution for shell commands")
-System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation: landlock, seccomp, bubblewrap for untrusted commands")
+System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation and shell execution: landlock, seccomp, bubblewrap")
 System_Ext(web, "Web", "Documentation, package APIs, and search engines for live context retrieval")
 System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM Application via Model Context Protocol")
 System_Ext(mcp_client, "MCP Client", "External tools and IDEs that consume NASIM Application's exposed capabilities via MCP")
 System_Ext(git_repo, "Git Repository", "Version-controlled project files: branch state, history, and commits")
-System_Ext(lsp_server, "LSP Server", "Language server providing code intelligence: definitions, references, diagnostics")
-System_Ext(code_intel, "Code Intelligence Services", "Tree-sitter (AST parsing), Embedding Model (vector generation), Vector Store (similarity search)")
+System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter (AST parsing), LSP Server (code intelligence), Embedding Model (vector generation), Vector Store (similarity search)")
 System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana, OTel Collector: NASIM Application emits; platform owns collection, storage, visualization")
 
 Rel(user, nasim_application, "submits coding tasks and receives AI-generated changes, suggestions, and answers")
 Rel(nasim_application, llm_backend, "sends context and receives code completions")
 Rel(nasim_application, host_fs, "reads, writes, and searches project files and plugins")
-Rel(nasim_application, host_shell, "executes shell commands via sandbox isolation")
-Rel(nasim_application, sandbox, "runs untrusted commands within OS-level isolation boundaries")
+Rel(nasim_application, sandbox, "executes commands within OS-level isolation boundaries")
 Rel(nasim_application, web, "fetches documentation and search results for task context")
 Rel(nasim_application, mcp_server, "discovers and invokes extension tools")
 Rel(mcp_client, nasim_application, "invokes NASIM Application tools via MCP protocol")
 Rel(nasim_application, git_repo, "reads repository state and creates atomic commits")
-Rel(nasim_application, lsp_server, "queries code intelligence for definitions and references")
-Rel(nasim_application, code_intel, "parses ASTs, generates embeddings, and performs similarity search")
+Rel(nasim_application, repo_intel, "parses code, queries intelligence, and performs similarity search")
 Rel(nasim_application, obs_platform, "emits structured logs, traces, and metrics for collection")
 
 @enduml
