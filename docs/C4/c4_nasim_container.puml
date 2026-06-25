@@ -1,5 +1,6 @@
 @startuml c4_nasim_container
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
+!include common/c4_styles.puml
 !theme plain
 
 ' ============================================================
@@ -40,13 +41,19 @@
 '            The HTTP API Server is NOT a Component because it is a
 '            distinct entry point with its own lifecycle, not an internal
 '            module of the Core Engine.
+'
+'            EXTERNAL SYSTEM SCOPE:
+'            This diagram shows only the most architecturally significant
+'            external systems. For the complete inventory, see
+'            c4_nasim_context.puml (Level 1).
+' Date:      2026-06-25
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/entities.md
 ' Review:    —
 ' ============================================================
 
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 LAYOUT_WITH_LEGEND()
 
 title NASIM Application — Container Diagram
@@ -63,65 +70,42 @@ Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface conne
 Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application connecting to API Server via HTTP")
 Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application connecting to API Server via HTTP")
 
-System_Ext(mcp_client, "MCP Client", "External tool or IDE that invokes NASIM Application via MCP protocol")
+System_Ext(mcp_client, "MCP Client", "External tools and IDEs that consume NASIM Application's exposed capabilities via MCP")
 System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ via litellm")
-System_Ext(host_fs, "Host Filesystem", "Project code files and directories")
-System_Ext(host_shell, "Host Shell", "Shell execution via OS subprocess")
-System_Ext(web_ext, "Web", "Documentation pages and search engines")
+System_Ext(host_fs, "Host Filesystem", "Project source code, configuration, documentation, and community plugin files")
+System_Ext(host_shell, "Host Shell", "OS-level subprocess execution for shell commands")
 System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM Application via Model Context Protocol")
-System_Ext(git_repo, "Git Repository", "Version-controlled project files")
-System_Ext(sandbox_rt, "Sandbox Runtime", "OS-level process isolation (landlock, seccomp, bubblewrap)")
-System_Ext(lsp_server, "LSP Server", "Language server providing code intelligence")
-System_Ext(plugin_dir, "Plugin Directory", "Community plugins at ~/.nasim/plugins/")
-System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code indexing")
-System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API-based)")
-System_Ext(vector_store, "Vector Store", "Persistent vector storage for semantic code search")
-System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
-System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana. NASIM Application emits only — platform owns collection, storage, and visualization.")
 
-Rel(user, cli_process, "runs coding tasks (CLI mode)", "terminal REPL")
+Rel(user, cli_process, "runs coding tasks", "terminal REPL")
 Rel(user, webapp, "interacts via browser", "HTTPS")
 Rel(user, desktop_app, "interacts via desktop app", "local")
 Rel(user, mobile_app, "interacts via mobile app", "HTTPS")
 
-Rel(cli_process, core_engine, "delegates tasks", "Internal Call")
+Rel(cli_process, core_engine, "delegates tasks", "in-process call")
 Rel(webapp, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(desktop_app, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(mobile_app, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
-Rel(mcp_client, api_server, "invokes tools via MCP protocol", "stdio / SSE")
-Rel(api_server, core_engine, "delegates to core agent engine", "Internal Call")
+Rel(mcp_client, core_engine, "invokes NASIM Application tools via MCP protocol", "stdio / SSE")
+Rel(api_server, core_engine, "delegates to core agent engine", "in-process call")
 
-Rel(core_engine, llm_backend, "sends chat requests, receives completions", "HTTP/JSON streaming")
-Rel(core_engine, host_fs, "reads, writes, and searches project files")
-Rel(core_engine, host_shell, "executes shell commands via sandbox")
-Rel(core_engine, web_ext, "fetches documentation and search results", "HTTP")
+Rel(core_engine, llm_backend, "sends context and receives code completions", "HTTP/JSON streaming")
+Rel(core_engine, host_fs, "reads, writes, and searches project files", "path I/O")
+Rel(core_engine, host_shell, "executes shell commands", "subprocess")
 Rel(core_engine, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
-Rel(core_engine, git_repo, "reads status and creates commits", "git CLI")
-Rel(core_engine, sandbox_rt, "executes commands in isolated environment")
-Rel(core_engine, lsp_server, "queries code intelligence", "LSP protocol")
-Rel(core_engine, plugin_dir, "discovers and loads plugins at startup")
-Rel(core_engine, tree_sitter, "parses source code AST for indexing")
-Rel(core_engine, embedding_model, "generates code embeddings")
-Rel(core_engine, vector_store, "stores and retrieves code embeddings")
-Rel(core_engine, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
-Rel(core_engine, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
 
-' ============================================================
-' Note for Readers:
-' ============================================================
-' NASIM Application runs as a SINGLE Python process.
-' CLI Process and HTTP API Server are NOT separate deployments —
-' they are separate RUNTIME ENTRY POINTS within the same process.
-'
-' In C4, a Container models a unit with a distinct runtime
-' responsibility. CLI Process handles terminal interaction (REPL,
-' arg parsing, rendering). HTTP API Server handles HTTP requests
-' and SSE streaming. Both delegate to the shared Core Engine.
-'
-' WebApp, DesktopApp, and MobileApp are modeled as Container_Ext
-' because they are truly separate deployable units (browser SPA,
-' Electron app, mobile app) with their own processes. They are
-' clients of NASIM Application, not part of it.
-' ============================================================
+note right of core_engine
+  MCPServerRuntime lives inside
+  Core Engine (MCP Group).
+  MCP Client connects directly
+  here, not via API Server.
+end note
+
+note bottom of nasim_application
+  NASIM Application runs as a
+  SINGLE Python process. CLI
+  Process and HTTP API Server
+  are separate RUNTIME ENTRY
+  POINTS within the same process.
+end note
 
 @enduml
