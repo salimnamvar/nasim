@@ -9,12 +9,37 @@
 '            1. CLI Process (terminal interface)
 '            2. HTTP API Server (FastAPI + SSE)
 '            3. Core Engine (agent loop, tools, business logic)
-'            Note: NASIM Application runs as a single Python process.
-'            CLI and HTTP API are modeled as separate Containers because
-'            they represent distinct runtime entry points and responsibilities,
-'            not separate deployments.
-'            External interface apps (WebApp, DesktopApp, MobileApp) are
-'            separate deployable units that connect to the API Server.
+'
+'            WHY CLI AND HTTP ARE SEPARATE CONTAINERS:
+'            NASIM Application runs as a single Python process. However,
+'            CLI Process and HTTP API Server are modeled as separate
+'            Containers because they are distinct RUNTIME ENTRY POINTS —
+'            each with its own initialization, argument parsing, request
+'            handling, and lifecycle. In C4, a Container represents a
+'            separately runnable/deployable unit OR a distinct runtime
+'            responsibility. Here, the "responsibility" interpretation
+'            applies: they share a process boundary but serve different
+'            interaction models (terminal REPL vs HTTP+SSE).
+'
+'            WHY WEBAPP/DESKTOP/MOBILE ARE Container_Ext:
+'            WebApp, DesktopApp, and MobileApp are genuinely separate
+'            deployable units (browser SPA, Electron app, mobile app)
+'            with their own processes, codebases, and deployment pipelines.
+'            They are NOT part of NASIM Application — they are clients
+'            that communicate with it over HTTP. In C4, a Container_Ext
+'            represents a container outside the system boundary that
+'            interacts with it. This is the correct model for external
+'            client applications.
+'
+'            CONTAINER vs COMPONENT distinction:
+'            - Container: represents a separately runnable unit OR a
+'              distinct runtime entry point (CLI Process, HTTP API Server)
+'              OR the main application shell (Core Engine).
+'            - Component: represents an internal module/class within a
+'              Container (e.g., AgentOrchestrator, SafetyCoordinator).
+'            The HTTP API Server is NOT a Component because it is a
+'            distinct entry point with its own lifecycle, not an internal
+'            module of the Core Engine.
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/entities.md
@@ -80,5 +105,23 @@ Rel(core_engine, embedding_model, "generates code embeddings")
 Rel(core_engine, vector_store, "stores and retrieves code embeddings")
 Rel(core_engine, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
 Rel(core_engine, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
+
+' ============================================================
+' Note for Readers:
+' ============================================================
+' NASIM Application runs as a SINGLE Python process.
+' CLI Process and HTTP API Server are NOT separate deployments —
+' they are separate RUNTIME ENTRY POINTS within the same process.
+'
+' In C4, a Container models a unit with a distinct runtime
+' responsibility. CLI Process handles terminal interaction (REPL,
+' arg parsing, rendering). HTTP API Server handles HTTP requests
+' and SSE streaming. Both delegate to the shared Core Engine.
+'
+' WebApp, DesktopApp, and MobileApp are modeled as Container_Ext
+' because they are truly separate deployable units (browser SPA,
+' Electron app, mobile app) with their own processes. They are
+' clients of NASIM Application, not part of it.
+' ============================================================
 
 @enduml

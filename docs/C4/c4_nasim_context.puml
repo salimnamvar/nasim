@@ -23,11 +23,11 @@ Person(user, "User", "Developer using NASIM Application as an AI coding assistan
 System(nasim_application, "NASIM Application", "Code agent: assists developers with coding tasks via CLI or HTTP API. Integrates LLM providers, file tools, shell execution, web access, and MCP extensions.")
 
 System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ via litellm")
-System_Ext(host_fs, "Host Filesystem", "Project files and directories read, written, and searched by nasim")
+System_Ext(host_fs, "Host Filesystem", "Project files and directories read, written, and searched by NASIM Application")
 System_Ext(host_shell, "Host Shell", "Shell for executing commands via sandbox isolation")
 System_Ext(web, "Web", "Documentation pages, package APIs, and search engines")
-System_Ext(mcp_server, "MCP Server", "Extension tools provided to nasim via Model Context Protocol")
-System_Ext(mcp_client, "MCP Client", "External tools that invoke nasim as an MCP server")
+System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM Application via Model Context Protocol")
+System_Ext(mcp_client, "MCP Client", "External tools that invoke NASIM Application as an MCP server")
 System_Ext(git_repo, "Git Repository", "Version-controlled project files")
 System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation (landlock, seccomp, bubblewrap)")
 System_Ext(lsp_server, "LSP Server", "Language server providing code intelligence")
@@ -36,7 +36,7 @@ System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code i
 System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API-based)")
 System_Ext(vector_store, "Vector Store", "Persistent vector storage for semantic code search")
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
-System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana. nasim emits only — platform owns collection, storage, and visualization.")
+System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana. NASIM Application emits only — platform owns collection, storage, and visualization.")
 
 Rel(user, nasim_application, "runs coding tasks via CLI or HTTP API", "terminal / HTTP + SSE")
 Rel(nasim_application, llm_backend, "sends chat requests, receives completions", "HTTP/JSON")

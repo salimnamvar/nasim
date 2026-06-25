@@ -173,6 +173,45 @@ Component: Boundary(nasim_application, "NASIM Application") {
 |-------|-------------|
 | User | Human developer. Interacts via CLI (REPLSession) or via interface container apps (WebApp, DesktopApp, MobileApp → ServerRouter). |
 
+## Key C4 Modeling Decisions
+
+This section explains the C4 modeling choices that commonly confuse readers.
+
+### Why CLI Process and HTTP API Server are modeled as separate Containers
+
+NASIM Application runs as a **single Python process**. However, **CLI Process** and **HTTP API Server** are modeled as separate `Container` elements — not because they are separate deployments, but because they represent **distinct runtime entry points**.
+
+In C4, a Container models either:
+1. A separately deployable unit, OR
+2. A distinct runtime responsibility with its own lifecycle
+
+CLI Process and HTTP API Server fall into category 2. They share a process boundary but serve fundamentally different interaction models:
+- **CLI Process**: Terminal REPL with argument parsing, rendering, and slash commands
+- **HTTP API Server**: FastAPI server with HTTP endpoints and SSE streaming
+
+Each has its own initialization sequence, request handling, and lifecycle management. Modeling them as separate Containers makes the architecture's entry points visible and allows readers to understand the two distinct ways users interact with NASIM Application.
+
+### Why WebApp, DesktopApp, and MobileApp are modeled as Container_Ext
+
+**WebApp** (JavaScript SPA), **DesktopApp** (Electron/Tauri), and **MobileApp** (React Native/Flutter) are modeled as `Container_Ext` because they are **genuinely separate deployable units** — each with its own process, codebase, and deployment pipeline.
+
+These are **clients** of NASIM Application, not part of it. They communicate with NASIM Application over HTTP/SSE to the API Server. In C4:
+- `Container` = inside the system boundary (NASIM Application owns it)
+- `Container_Ext` = outside the system boundary but interacts with it
+
+Since WebApp/DesktopApp/MobileApp are not developed, deployed, or versioned as part of NASIM Application, they correctly belong outside the boundary as `Container_Ext`.
+
+### Container vs Component: When is something a Container?
+
+A **Container** represents a unit with a distinct runtime responsibility — either a separate deployment or a separate entry point. A **Component** represents an internal module within a Container.
+
+The **HTTP API Server** is a Container (not a Component) because:
+- It is a distinct entry point with its own lifecycle
+- It handles a fundamentally different interaction model (HTTP) than the CLI (terminal)
+- It is not an internal module of the Core Engine — it *delegates to* the Core Engine
+
+The **Core Engine** is a Container because it is the main application shell that contains all business logic components. Within it, components like `AgentOrchestrator`, `SafetyCoordinator`, and `ToolRegistry` are internal modules.
+
 ## Interface Containers (external, separate deployable units)
 
 | Container | Type | Connection to NASIM Application |
@@ -181,7 +220,7 @@ Component: Boundary(nasim_application, "NASIM Application") {
 | DesktopApp | Electron / Tauri | HTTP/JSON + SSE to ServerRouter |
 | MobileApp | React Native / Flutter | HTTP/JSON + SSE to ServerRouter |
 
-CLI mode is modeled as a Container (CLI Process) within NASIM Application because it represents a distinct runtime entry point with its own argument parsing and REPL loop, even though it runs in the same Python process as the HTTP API Server.
+These are separate deployable units that connect to NASIM Application's HTTP API Server. They are modeled as `Container_Ext` (outside the system boundary) because they are clients, not part of NASIM Application itself.
 
 ## External Systems
 
@@ -205,12 +244,13 @@ CLI mode is modeled as a Container (CLI Process) within NASIM Application becaus
 
 ## Architecture Principles
 
-- **Single process:** NASIM Application runs as one Python process. CLI and HTTP server modes share the same process boundary. However, they are modeled as separate Containers because they represent distinct runtime entry points and responsibilities.
+- **Single process:** NASIM Application runs as one Python process. CLI and HTTP API Server share the same process boundary but are modeled as separate Containers because they are distinct runtime entry points with different responsibilities (terminal REPL vs HTTP+SSE). This is a C4 modeling choice, not a deployment choice.
+- **Container = runtime entry point OR separate deployment:** In C4, a Container does not always mean a separate process. It can also mean a distinct runtime responsibility within a shared process. CLI Process and HTTP API Server use this interpretation.
+- **Container_Ext = separate deployable unit outside the system boundary:** WebApp, DesktopApp, and MobileApp are truly separate applications with their own processes. They are clients of NASIM Application, not part of it.
 - **CSR Pattern:** Controller (CLI Group / API Group) → Service (Agent Group, Router Group, etc.) → Repository (Session Group, Tool Group, Memory Group, Config Group). Strict delegation.
 - **One group, one Boundary:** Each component group is a `Boundary` inside `Boundary(nasim_application, "NASIM Application")`. Groups are logical, not deployable.
 - **No Container_Ext for internals:** Cross-group references inside NASIM Application use `Component_Ext(alias, "ComponentName", "Group Name")`, never `Container_Ext` or `System_Ext`.
 - **System_Ext for real externals only:** Filesystems, web, git repos, LLM backends, MCP servers, LSP servers — genuinely external infrastructure.
-- **Container_Ext for real external containers:** WebApp, DesktopApp, MobileApp — separate deployable units with their own processes.
 - **Version consistency:** All diagram headers use Version 9.0.0.
 - **Pin C4-PlantUML:** All diagrams reference v2.10.0 — never `master`.
 

@@ -170,5 +170,6 @@ Rel(repo_intel_mgr, vector_store, "similarity search")
 
 ' Infrastructure
 Rel(structured_logger, obs_platform, "emits logs")
+Rel(mcp_server, mcp_client_rt, "provides extension tools via MCP", "stdio / SSE")
 
 @enduml
