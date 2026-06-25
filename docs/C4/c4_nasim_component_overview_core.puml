@@ -1,0 +1,185 @@
+@startuml c4_nasim_component_overview_core
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+!include common/c4_styles.puml
+
+' ============================================================
+' Title:     NASIM Application — Core Layer Overview
+' Boundary:  NASIM Application (container)
+' Purpose:   All groups with CSR stereotype <<service>> or
+'            <<repository>> shown as single components.
+'            Groups: Agent, Router, Safety, Context Graph,
+'            Edit Strategy, Evaluation, Provider, Config,
+'            Session, Tool, Memory, Repo Intelligence, Git.
+'            Shows inter-group connections, connections to
+'            external entities. Detailed sub-components are
+'            in per-group diagrams.
+'            CSR Pattern:
+'            - Controller: CLI Group, API Group
+'            - Service: Agent Group, Router Group, Safety Group,
+'                       Context Graph Group, Edit Strategy Group,
+'                       Evaluation Group, Provider Group
+'            - Repository: Config Group, Session Group, Tool Group,
+'                          Memory Group, Repo Intelligence Group, Git Group
+' Milestone: v1.0
+' Version:   17.0.0
+' Source:    docs/entities.md, docs/UC.md
+' Review:    —
+' Date:      2026-06-25
+' ============================================================
+
+LAYOUT_LEFT_RIGHT()
+title NASIM Application — Core Layer Overview
+
+Person(user, "User", "Developer using NASIM")
+
+Boundary(nasim_application, "NASIM Application") {
+
+    Boundary(cli_group, "CLI Group") <<controller>> {
+        Component(repl_session, "REPLSession", "", "Terminal REPL entry point")
+    }
+
+    Boundary(api_group, "API Group") <<controller>> {
+        Component(server_router, "ServerRouter", "FastAPI", "HTTP + SSE entry gate")
+    }
+
+    Boundary(agent_group, "Agent Group") <<service>> {
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat")
+    }
+
+    Boundary(router_group, "Router Group") <<service>> {
+        Component(model_router, "ModelRouter", "", "Model selection, fallback, capability matching")
+    }
+
+    Boundary(safety_group, "Safety Group") <<service>> {
+        Component(safety_coord, "SafetyCoordinator", "", "Permission gating, injection scanning, egress inspection")
+    }
+
+    Boundary(context_graph_group, "Context Graph Group") <<service>> {
+        Component(pipeline_orch, "PipelineOrchestrator", "", "Context pipeline: graph construction, truncation, distillation")
+    }
+
+    Boundary(edit_strategy_group, "Edit Strategy Group") <<service>> {
+        Component(edit_strategy_mgr, "EditStrategyManager", "", "Manages and selects edit strategy based on edit type")
+    }
+
+    Boundary(evaluation_group, "Evaluation Group") <<service>> {
+        Component(eval_engine, "EvaluationEngine", "", "Task evaluation, success checks, retry coordination")
+    }
+
+    Boundary(provider_group, "Provider Group") <<service>> {
+        Component(provider, "Provider", "Protocol", "Unified LLM interface via litellm")
+    }
+
+    Boundary(config_group, "Config Group") <<repository>> {
+        Component(config_loader, "ConfigLoader", "pydantic", "Loads YAML, env vars, CLI flags; validates at load")
+    }
+
+    Boundary(session_group, "Session Group") <<repository>> {
+        Component(session_store, "SessionStore", "", "Message persistence and session lifecycle")
+    }
+
+    Boundary(tool_group, "Tool Group") <<repository>> {
+        Component(tool_registry, "ToolRegistry", "", "Tool instance management and dispatch")
+    }
+
+    Boundary(memory_group, "Memory Group") <<repository>> {
+        Component(memory_store, "MemoryStore", "", "Cross-session knowledge persistence and retrieval")
+    }
+
+    Boundary(repo_intel_group, "Repo Intelligence Group") <<repository>> {
+        Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Codebase intelligence: AST indexing, search, repo mapping")
+    }
+
+    Boundary(git_group, "Git Group") <<repository>> {
+        Component(git_integration, "GitIntegration", "", "Auto-commit, branch awareness, diff tracking")
+    }
+}
+
+System_Ext(llm_backend, "LLM Backend", "Unified via litellm: OpenAI, Anthropic, Google, DeepSeek, 100+ providers")
+System_Ext(session_dir, "Session Directory", "~/.nasim/sessions/<session-id>/")
+System_Ext(host_fs, "Host Filesystem", "Project source code files")
+System_Ext(web, "Web", "Documentation and search engines")
+System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
+System_Ext(git_repo, "Git Repository", "Version-controlled project files")
+System_Ext(lsp_server, "LSP Server", "Language server for code intelligence")
+System_Ext(memory_backend, "Memory Backend", "Persistent storage for knowledge entries")
+System_Ext(tree_sitter, "Tree-sitter", "Incremental parser for source code AST")
+System_Ext(embedding_model, "Embedding Model", "Code embedding model (local or API)")
+System_Ext(vector_store, "Vector Store", "Persistent vector storage for code embeddings")
+System_Ext(global_config, "Global Config", "~/.nasim/config.yaml")
+System_Ext(project_config, "Project Config", ".nasim/config.yaml")
+System_Ext(env_vars, "Environment Variables", "NASIM_* env vars")
+
+' Entry points
+Rel(user, repl_session, "types commands", "terminal REPL")
+Rel(user, server_router, "sends requests", "HTTP/JSON + SSE")
+Rel(repl_session, agent_orch, "delegates user tasks", "UC AGT-01")
+Rel(server_router, agent_orch, "delegates HTTP tasks", "UC AGT-01")
+
+' Agent → Service groups
+Rel(agent_orch, safety_coord, "validates before tool dispatch", "UC EDT-01")
+Rel(agent_orch, model_router, "selects model for inference", "UC AGT-02")
+Rel(agent_orch, pipeline_orch, "processes context pipeline", "UC EDT-02")
+Rel(agent_orch, provider, "invokes LLM chat and streaming", "UC AGT-02")
+Rel(agent_orch, eval_engine, "triggers evaluation after task completion", "UC EVL-01")
+Rel(agent_orch, edit_strategy_mgr, "delegates file edit operations", "UC EDT-01")
+
+' Service → Service
+Rel(model_router, provider, "queries capabilities and routes calls", "UC AGT-02")
+Rel(eval_engine, provider, "LLM-based review and scoring", "UC EVL-01")
+
+' Agent → Repository groups
+Rel(agent_orch, session_store, "saves and loads conversation", "UC AGT-01")
+Rel(agent_orch, tool_registry, "dispatches tool execution", "UC EDT-01")
+Rel(agent_orch, memory_store, "persist and retrieve knowledge")
+Rel(agent_orch, repo_intel_mgr, "queries repo intelligence")
+Rel(agent_orch, git_integration, "reads git state and creates commits")
+
+' Config → core services
+Rel(config_loader, agent_orch, "configures orchestrator behavior")
+Rel(config_loader, model_router, "provides model config")
+Rel(config_loader, safety_coord, "configures safety mode")
+
+' Context Graph → Repository groups
+Rel(pipeline_orch, memory_store, "injects memory context")
+Rel(pipeline_orch, repo_intel_mgr, "injects repo map context")
+
+' Config external
+Rel(config_loader, global_config, "reads defaults")
+Rel(config_loader, project_config, "reads project overrides")
+Rel(config_loader, env_vars, "reads env overrides")
+
+' Provider → External
+Rel(provider, llm_backend, "routes LLM API calls via litellm", "HTTP/JSON")
+
+' Session external
+Rel(session_store, session_dir, "reads/writes JSON Lines files")
+
+' Tool → External
+Rel(tool_registry, mcp_server, "discovers and registers MCP tools")
+Rel(tool_registry, host_fs, "file I/O operations")
+Rel(tool_registry, web, "web fetch and search")
+Rel(tool_registry, git_repo, "git operations")
+Rel(tool_registry, lsp_server, "code intelligence requests")
+
+' Memory external
+Rel(memory_store, memory_backend, "read/write persistence")
+
+' Repo Intelligence external
+Rel(repo_intel_mgr, tree_sitter, "parses AST")
+Rel(repo_intel_mgr, embedding_model, "API call for vectors")
+Rel(repo_intel_mgr, vector_store, "query/store vectors")
+Rel(repo_intel_mgr, host_fs, "reads source files")
+
+' Git external
+Rel(git_integration, git_repo, "version control operations")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Safety, Context Graph, Edit Strategy, Evaluation, Provider |
+    |<#E8F5E9>  **Repository** | Config, Session, Tool, Memory, Repo Intelligence, Git |
+    |<#F3E5F5>  **Infrastructure** | — (see infrastructure diagram) |
+end legend
+
+@enduml
