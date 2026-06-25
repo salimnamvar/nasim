@@ -1,0 +1,94 @@
+@startuml c4_nasim_component_overview_infra
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+!include common/c4_styles.puml
+
+' ============================================================
+' Title:     NASIM Application — Supporting Infrastructure Overview
+' Boundary:  NASIM Application (container)
+' Purpose:   Infrastructure and supporting services: context graph
+'            pipeline internals, evaluation engine internals, MCP
+'            extension protocol, sandbox isolation, observability
+'            (structured logging + wire log), and hook lifecycle.
+'            Core agent orchestration flow is in the companion
+'            diagram c4_nasim_component_overview.puml.
+'            CSR Pattern:
+'            - Service: Context Graph Group, Evaluation Group
+'            - Infrastructure: MCP Group, Sandbox Group, Observability Group,
+'                              Wire Log Group, Hooks Group
+' Milestone: v1.0
+' Version:   13.0.0
+' Source:    docs/entities.md, docs/UC.md
+' Review:    —
+' Date:      2026-06-25
+' ============================================================
+
+LAYOUT_LEFT_RIGHT()
+title NASIM Application — Supporting Infrastructure Overview
+
+Boundary(nasim_application, "NASIM Application") {
+
+    Boundary(context_graph_group, "Context Graph Group") <<service>> {
+        Component(pipeline_orch, "PipelineOrchestrator", "", "Orchestrates context pipeline stages and token budget")
+    }
+
+    Boundary(evaluation_group, "Evaluation Group") <<service>> {
+        Component(eval_engine, "EvaluationEngine", "", "Task evaluation: success checks, LLM review, retry coordination")
+    }
+
+    Boundary(mcp_group, "MCP Group") <<infrastructure>> {
+        Component(mcp_client_rt, "MCPClientRuntime", "", "External MCP server connections and tool discovery")
+    }
+
+    Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
+        Component(sandbox_executor, "SandboxExecutor", "", "OS-level command isolation and execution")
+    }
+
+    Boundary(observability_group, "Observability Group") <<infrastructure>> {
+        Component(structured_logger, "StructuredLogger", "", "Structured logging with request correlation")
+    }
+
+    Boundary(wire_log_group, "Wire Log Group") <<infrastructure>> {
+        Component(wire_log, "WireLog", "", "Event recording for debugging and audit")
+    }
+
+    Boundary(hooks_group, "Hooks Group") <<infrastructure>> {
+        Component(hook_manager, "HookManager", "", "Pre/post hook lifecycle management")
+    }
+}
+
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(edit_strategy_mgr, "EditStrategyManager", "Edit Strategy Group")
+Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
+
+System_Ext(llm_backend, "LLM Backend")
+System_Ext(mcp_server, "MCP Server")
+
+' Context Graph pipeline
+Rel(pipeline_orch, eval_engine, "triggers evaluation on context completion", "UC EVL-01")
+Rel(eval_engine, llm_backend, "LLM-based quality review", "HTTP/JSON")
+
+' MCP: client runtime connects to external MCP servers
+Rel(mcp_client_rt, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
+
+' Sandbox: executor runs commands
+Rel(sandbox_executor, agent_orch, "receives tool dispatch from orchestrator", "UC EDT-01")
+
+' Observability: emit-only path
+Rel(structured_logger, agent_orch, "emits structured logs from agent loop")
+Rel(wire_log, agent_orch, "records agent events for audit")
+
+' Hooks: lifecycle triggers
+Rel(agent_orch, hook_manager, "triggers pre/post hooks", "UC AGT-01")
+
+' Edit Strategy: manager dispatches through tool registry
+Rel(edit_strategy_mgr, tool_registry, "dispatches edit via selected strategy", "UC EDT-03")
+
+legend right
+    |<#E3F2FD>  **Controller** | — |
+    |<#FFF3E0>  **Service**    | Context Graph, Evaluation, Edit Strategy |
+    |<#E8F5E9>  **Repository** | — |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks |
+end legend
+
+@enduml

@@ -50,8 +50,20 @@ skinparam rectangle<<deployable>> {
     FontColor<<deployable>> #1A237E
 }
 
-' --- Legend Macro ---
-' Usage: !include common/c4_styles.puml
-' Then: Legend("CSR Layer", "Controller", "#E3F2FD", "Service", "#FFF3E0", "Repository", "#E8F5E9", "Infrastructure", "#F3E5F5")
+' --- Usage ---
+' !include common/c4_styles.puml
+' Provides CSR layer color palette via stereotypes:
+'   <<controller>>   — blue (#E3F2FD)   — CLI Group, API Group
+'   <<service>>      — orange (#FFF3E0)  — Agent, Router, Safety, Context Graph,
+'                                          Edit Strategy, Evaluation, Provider
+'   <<repository>>   — green (#E8F5E9)   — Session, Tool, Memory, Config, Git,
+'                                          Repo Intelligence
+'   <<infrastructure>> — purple (#F3E5F5) — MCP, Sandbox, Observability,
+'                                          Wire Log, Hooks, Plugins
+'
+' Each diagram should include a standalone 'legend' block explaining
+' these colors. Do NOT use LAYOUT_WITH_LEGEND() with this file — it
+' produces an empty auto-generated legend when no AddElementTag calls
+' are present. Use a manual 'legend right' block instead.
 
 @enduml
