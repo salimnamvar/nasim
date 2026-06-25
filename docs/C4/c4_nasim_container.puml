@@ -6,51 +6,16 @@
 ' ============================================================
 ' Title:     NASIM Application — Container Diagram
 ' Boundary:  NASIM Application
-' Purpose:   Show the 3 runtime entry points within NASIM Application:
-'            1. CLI Process (terminal interface)
-'            2. HTTP API Server (FastAPI + SSE)
-'            3. Core Engine (agent loop, tools, business logic)
-'
-'            WHY CLI AND HTTP ARE SEPARATE CONTAINERS:
-'            NASIM Application runs as a single Python process. However,
-'            CLI Process and HTTP API Server are modeled as separate
-'            Containers because they are distinct RUNTIME ENTRY POINTS —
-'            each with its own initialization, argument parsing, request
-'            handling, and lifecycle. In C4, a Container represents a
-'            separately runnable/deployable unit OR a distinct runtime
-'            responsibility. Here, the "responsibility" interpretation
-'            applies: they share a process boundary but serve different
-'            interaction models (terminal REPL vs HTTP+SSE).
-'
-'            WHY WEBAPP/DESKTOP/MOBILE ARE Container_Ext:
-'            WebApp, DesktopApp, and MobileApp are genuinely separate
-'            deployable units (browser SPA, Electron app, mobile app)
-'            with their own processes, codebases, and deployment pipelines.
-'            They are NOT part of NASIM Application — they are clients
-'            that communicate with it over HTTP. In C4, a Container_Ext
-'            represents a container outside the system boundary that
-'            interacts with it. This is the correct model for external
-'            client applications.
-'
-'            CONTAINER vs COMPONENT distinction:
-'            - Container: represents a separately runnable unit OR a
-'              distinct runtime entry point (CLI Process, HTTP API Server)
-'              OR the main application shell (Core Engine).
-'            - Component: represents an internal module/class within a
-'              Container (e.g., AgentOrchestrator, SafetyCoordinator).
-'            The HTTP API Server is NOT a Component because it is a
-'            distinct entry point with its own lifecycle, not an internal
-'            module of the Core Engine.
-'
-'            EXTERNAL SYSTEM SCOPE:
-'            This diagram shows only the most architecturally significant
-'            external systems. For the complete inventory, see
-'            c4_nasim_context.puml (Level 1).
-' Date:      2026-06-25
+' Purpose:   Show the 3 runtime entry points (CLI Process, HTTP
+'            API Server, Core Engine) and architecturally
+'            significant external systems they depend on.
+'            CLI and HTTP are separate entry points within a
+'            single Python process.
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/entities.md
 ' Review:    —
+' Date:      2026-06-25
 ' ============================================================
 
 LAYOUT_TOP_DOWN()
@@ -92,20 +57,5 @@ Rel(core_engine, llm_backend, "sends context and receives code completions", "HT
 Rel(core_engine, host_fs, "reads, writes, and searches project files", "path I/O")
 Rel(core_engine, host_shell, "executes shell commands", "subprocess")
 Rel(core_engine, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
-
-note right of core_engine
-  MCPServerRuntime lives inside
-  Core Engine (MCP Group).
-  MCP Client connects directly
-  here, not via API Server.
-end note
-
-note bottom of nasim_application
-  NASIM Application runs as a
-  SINGLE Python process. CLI
-  Process and HTTP API Server
-  are separate RUNTIME ENTRY
-  POINTS within the same process.
-end note
 
 @enduml
