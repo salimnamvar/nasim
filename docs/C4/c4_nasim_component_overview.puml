@@ -101,7 +101,7 @@ legend right
     |<#E3F2FD>  **Controller** | CLI Group, API Group |
     |<#FFF3E0>  **Service**    | Agent, Router, Safety, Context Graph, Evaluation, Provider |
     |<#E8F5E9>  **Repository** | Session, Tool |
-    |<#F3E5F5>  **Infrastructure** | — (see companion diagram) |
+    |<#F3E5F5>  **Infrastructure** | — (see per-group diagrams) |
 end legend
 
 @enduml
