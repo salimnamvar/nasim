@@ -24,7 +24,7 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 | Diagram | Level | Description |
 |---------|-------|-------------|
-| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 11 external systems |
+| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 11 external systems (including Code Intelligence Services group and Host Shell) |
 
 ### Level 2: Containers
 
@@ -224,23 +224,19 @@ These are separate deployable units that connect to NASIM Application's HTTP API
 
 ## External Systems
 
-| System | Protocol | Purpose |
-|--------|----------|---------|
-| LLM Backend | HTTP/JSON | Multi-provider inference (Ollama, OpenAI, Anthropic, etc.) via litellm |
-| Host Filesystem | path I/O | Read/write/search project files |
-| Host Shell | subprocess | Execute shell commands (via sandbox) |
-| Web | HTTP | Fetch documentation, search results |
-| MCP Server | stdio/SSE | Extension tools via Model Context Protocol |
-| MCP Client | stdio/SSE | External tools connecting to NASIM Application MCP server |
-| Git Repository | git CLI | Version control for project files |
-| Sandbox Runtime | OS primitives | OS-level process isolation (landlock, seccomp, bubblewrap) |
-| Memory Backend | read/write | Long-term knowledge persistence |
-| LSP Server | LSP protocol | Language server for code intelligence |
-| Plugin Directory | filesystem | ~/.nasim/plugins/ — community extensions |
-| Tree-sitter | tree-sitter CLI/lib | AST extraction for code intelligence |
-| Embedding Model | HTTP/local | Vector embedding generation for semantic search |
-| Vector Store | SQLite + vector | Embedding storage and similarity search |
-| OTel Collector | OTLP/gRPC | OpenTelemetry trace and metric export (optional) |
+| System | Purpose |
+|--------|---------|
+| LLM Backend | Multi-provider inference (Ollama, OpenAI, Anthropic, etc.) via litellm |
+| Host Filesystem | Project source code, configuration, documentation, and community plugin files |
+| Host Shell | OS-level subprocess execution for shell commands |
+| Web | Documentation, search engines for live context retrieval |
+| MCP Server | Extension tools provided to NASIM Application via Model Context Protocol |
+| MCP Client | External tools and IDEs that consume NASIM Application's exposed capabilities via MCP |
+| Git Repository | Version-controlled project files: branch state, history, and commits |
+| Sandbox Runtime | OS-level process isolation: landlock, seccomp, bubblewrap |
+| LSP Server | Language server providing code intelligence: definitions, references, diagnostics |
+| Code Intelligence Services | Tree-sitter (AST parsing), Embedding Model (vector generation), Vector Store (similarity search) |
+| Observability Platform | Log agent, Prometheus, Grafana, OTel Collector: NASIM Application emits; platform owns collection, storage, visualization |
 
 ## Architecture Principles
 
@@ -280,6 +276,7 @@ All diagrams are traceable to the design chain:
 | `c4_nasim_component_observability.puml` | 17 | 8 internal components + 9 externals. Observability concerns are tightly coupled (logger ↔ metrics ↔ correlator ↔ propagator). |
 | `c4_nasim_component_agent.puml` | 13 | 7 components + 6 externals. Core agent loop components are inseparable — orchestrator, history, compactor form a single processing pipeline. |
 | `c4_nasim_component_edit_strategy.puml` | 13 | 11 strategy implementations + 2 externals. Polymorphic strategy pattern requires all implementations visible together. |
+| `c4_nasim_context.puml` | 13 | All architecturally significant external systems must be visible at Context level. Grouped Plugin Dir under Host FS and Tree-sitter/Embedding/Vector under Code Intelligence Services to minimize count. |
 
 ## SIM-03 Compliance (meaningful intent labels)
 
