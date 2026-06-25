@@ -212,6 +212,19 @@ The **HTTP API Server** is a Container (not a Component) because:
 
 The **Core Engine** is a Container because it is the main application shell that contains all business logic components. Within it, components like `AgentOrchestrator`, `SafetyCoordinator`, and `ToolRegistry` are internal modules.
 
+### Context-level grouping for SIM-01 compliance
+
+The System Context diagram (`c4_nasim_context.puml`) groups several external systems under composite names to stay within the 12-element limit (SIM-01):
+
+| Context Name | Grouped Systems | Rationale |
+|--------------|-----------------|-----------|
+| Host Filesystem | Host FS + Plugin Directory | Plugins are accessed via filesystem reads at startup |
+| Sandbox Runtime | Sandbox + Host Shell | Sandbox mediates all shell execution; shell is not a direct dependency |
+| Repo Intelligence Backend | Tree-sitter + LSP Server + Embedding Model + Vector Store | All consumed by the Repo Intelligence subsystem (RIM) for code understanding |
+| Observability Platform | Log agent + Prometheus + Grafana + OTel Collector | OTel is part of the platform's collection pipeline |
+
+These groupings are **Context-level simplifications only**. The distinct responsibilities of each external system are visible in the corresponding Component diagrams (e.g., `c4_nasim_component_repo_intelligence.puml` shows Tree-sitter, Embedding Model, and Vector Store as separate `System_Ext` elements).
+
 ## Interface Containers (external, separate deployable units)
 
 | Container | Type | Connection to NASIM Application |
