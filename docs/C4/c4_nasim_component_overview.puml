@@ -9,21 +9,16 @@
 ' Purpose:   Primary agent execution flow: user input through CLI/API,
 '            agent orchestration, model routing, safety gating, context
 '            processing, tool execution, session persistence, and task
-'            evaluation. Covers Controller → Service → Repository →
-'            Infrastructure layers. Supporting infrastructure (MCP,
-'            observability, hooks, plugins, wire log) is in the
-'            companion diagram c4_nasim_component_overview_infra.puml.
-'            CSR Pattern:
+'            evaluation. Covers Controller → Service → Repository layers.
+'            Infrastructure detail (MCP, sandbox, observability, hooks)
+'            is in the companion diagram c4_nasim_component_overview_infra.puml.
+'            CSR Pattern (this diagram):
 '            - Controller: CLI Group, API Group
 '            - Service: Agent Group, Router Group, Safety Group,
-'                       Context Graph Group, Edit Strategy Group,
-'                       Evaluation Group, Provider Group
-'            - Repository: Session Group, Tool Group, Memory Group,
-'                          Config Group, Git Group, Repo Intelligence Group
-'            - Infrastructure: MCP Group, Sandbox Group, Observability Group,
-'                              Wire Log Group, Hooks Group, Plugins Group
+'                       Context Graph Group, Evaluation Group, Provider Group
+'            - Repository: Session Group, Tool Group
 ' Milestone: v1.0
-' Version:   13.0.0
+' Version:   14.0.0
 ' Source:    docs/entities.md, docs/UC.md
 ' Review:    —
 ' Date:      2026-06-25
@@ -73,10 +68,6 @@ Boundary(nasim_application, "NASIM Application") {
     Boundary(provider_group, "Provider Group") <<service>> {
         Component(provider, "Provider", "Protocol", "Unified LLM interface via litellm")
     }
-
-    Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
-        Component(sandbox_executor, "SandboxExecutor", "", "OS-level command isolation")
-    }
 }
 
 Person(user, "User", "Developer using NASIM")
@@ -103,17 +94,14 @@ Rel(eval_engine, provider, "LLM-based review and scoring", "UC EVL-01")
 Rel(agent_orch, session_store, "saves and loads conversation", "UC AGT-01")
 Rel(agent_orch, tool_registry, "dispatches tool execution", "UC EDT-01")
 
-' Repository → Infrastructure: sandboxed execution
-Rel(tool_registry, sandbox_executor, "executes tools in isolated sandbox", "UC EDT-01")
-
-' Infrastructure → External: LLM routing
+' Repository → External: LLM routing (all LLM calls via Provider abstraction)
 Rel(provider, llm_backend, "routes LLM API calls via litellm", "HTTP/JSON")
 
 legend right
     |<#E3F2FD>  **Controller** | CLI Group, API Group |
     |<#FFF3E0>  **Service**    | Agent, Router, Safety, Context Graph, Evaluation, Provider |
     |<#E8F5E9>  **Repository** | Session, Tool |
-    |<#F3E5F5>  **Infrastructure** | Sandbox |
+    |<#F3E5F5>  **Infrastructure** | — (see companion diagram) |
 end legend
 
 @enduml

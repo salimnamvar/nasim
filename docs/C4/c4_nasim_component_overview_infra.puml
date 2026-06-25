@@ -7,17 +7,16 @@
 ' Title:     NASIM Application — Supporting Infrastructure Overview
 ' Boundary:  NASIM Application (container)
 ' Purpose:   Infrastructure and supporting services: context graph
-'            pipeline internals, evaluation engine internals, MCP
-'            extension protocol, sandbox isolation, observability
-'            (structured logging + wire log), and hook lifecycle.
-'            Core agent orchestration flow is in the companion
-'            diagram c4_nasim_component_overview.puml.
-'            CSR Pattern:
-'            - Service: Context Graph Group, Evaluation Group
+'            pipeline internals, MCP extension protocol, sandbox
+'            isolation, observability (structured logging + wire log),
+'            and hook lifecycle. Core agent orchestration flow is in
+'            the companion diagram c4_nasim_component_overview.puml.
+'            CSR Pattern (this diagram):
+'            - Service: Context Graph Group (PipelineOrchestrator)
 '            - Infrastructure: MCP Group, Sandbox Group, Observability Group,
 '                              Wire Log Group, Hooks Group
 ' Milestone: v1.0
-' Version:   13.0.0
+' Version:   14.0.0
 ' Source:    docs/entities.md, docs/UC.md
 ' Review:    —
 ' Date:      2026-06-25
@@ -30,10 +29,6 @@ Boundary(nasim_application, "NASIM Application") {
 
     Boundary(context_graph_group, "Context Graph Group") <<service>> {
         Component(pipeline_orch, "PipelineOrchestrator", "", "Orchestrates context pipeline stages and token budget")
-    }
-
-    Boundary(evaluation_group, "Evaluation Group") <<service>> {
-        Component(eval_engine, "EvaluationEngine", "", "Task evaluation: success checks, LLM review, retry coordination")
     }
 
     Boundary(mcp_group, "MCP Group") <<infrastructure>> {
@@ -58,21 +53,23 @@ Boundary(nasim_application, "NASIM Application") {
 }
 
 Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
-Component_Ext(edit_strategy_mgr, "EditStrategyManager", "Edit Strategy Group")
+Component_Ext(context_graph, "ContextGraph", "Context Graph Group")
+Component_Ext(eval_engine, "EvaluationEngine", "Evaluation Group")
 Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
 System_Ext(llm_backend, "LLM Backend")
 System_Ext(mcp_server, "MCP Server")
 
-' Context Graph pipeline
+' Context Graph pipeline: orchestrator → cross-group refs
+Rel(pipeline_orch, context_graph, "operates on context graph and tracks token budget")
 Rel(pipeline_orch, eval_engine, "triggers evaluation on context completion", "UC EVL-01")
 Rel(eval_engine, llm_backend, "LLM-based quality review", "HTTP/JSON")
 
+' Sandbox: ToolRegistry calls SandboxExecutor (caller → callee)
+Rel(tool_registry, sandbox_executor, "executes tools in isolated sandbox", "UC EDT-01")
+
 ' MCP: client runtime connects to external MCP servers
 Rel(mcp_client_rt, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
-
-' Sandbox: executor runs commands
-Rel(sandbox_executor, agent_orch, "receives tool dispatch from orchestrator", "UC EDT-01")
 
 ' Observability: emit-only path
 Rel(structured_logger, agent_orch, "emits structured logs from agent loop")
@@ -81,13 +78,10 @@ Rel(wire_log, agent_orch, "records agent events for audit")
 ' Hooks: lifecycle triggers
 Rel(agent_orch, hook_manager, "triggers pre/post hooks", "UC AGT-01")
 
-' Edit Strategy: manager dispatches through tool registry
-Rel(edit_strategy_mgr, tool_registry, "dispatches edit via selected strategy", "UC EDT-03")
-
 legend right
-    |<#E3F2FD>  **Controller** | — |
-    |<#FFF3E0>  **Service**    | Context Graph, Evaluation, Edit Strategy |
-    |<#E8F5E9>  **Repository** | — |
+    |<#E3F2FD>  **Controller** | — (see core diagram) |
+    |<#FFF3E0>  **Service**    | Context Graph |
+    |<#E8F5E9>  **Repository** | — (see core diagram) |
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks |
 end legend
 
