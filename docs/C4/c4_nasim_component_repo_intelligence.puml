@@ -9,6 +9,13 @@
 ' Boundary:  NASIM Application (container) — Repo Intelligence Group
 ' Purpose:   Codebase intelligence: AST indexing, symbol graph, semantic search, repo mapping
 '            CSR Layer: Repository
+'
+'            CONTEXT-LEVEL NOTE:
+'            At Context level (c4_nasim_context.puml), Tree-sitter,
+'            Embedding Model, Vector Store, and LSP Server are grouped
+'            under "Repo Intelligence Backend" for visual simplicity.
+'            This Component diagram shows their distinct responsibilities
+'            and the internal components that consume them.
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
