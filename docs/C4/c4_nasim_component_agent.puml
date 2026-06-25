@@ -20,7 +20,7 @@ LAYOUT_WITH_LEGEND()
 
 title NASIM APPLICATION — Agent Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(agent_group, "Agent Group") <<service>> {
         Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat. Yields structured events")
         Component(conv_history, "ConversationHistory", "", "Owns messages list and token count. Triggers compaction when budget exceeded")

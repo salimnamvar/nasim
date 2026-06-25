@@ -18,7 +18,7 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Evaluation Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(evaluation_group, "Evaluation Group") <<service>> {
         Component(eval_engine, "EvaluationEngine", "", "Orchestrates task evaluation: runs checks, scores, retries")
         Component(task_evaluator, "TaskEvaluator", "", "Evaluates task completion against success criteria")

@@ -40,7 +40,7 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 ## Per-Group Component Diagrams (21 diagrams)
 
-Each per-group diagram shows internal components within `Container_Boundary(nasim_application)` and `Boundary(group_name)`. Cross-group references use `Component_Ext(alias, "ComponentName", "Group Name")`.
+Each per-group diagram shows internal components within `Boundary(nasim_application)` and `Boundary(group_name)`. Cross-group references use `Component_Ext(alias, "ComponentName", "Group Name")`.
 
 ### Controller Layer (Blue)
 
@@ -140,7 +140,7 @@ Container: System_Boundary(nasim_service, "NASIM SERVICE") {
                Container(core_library, "Core Library")
            }
            Container_Ext(WebApp, DesktopApp, MobileApp) → Container(api_server)
-Component: Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Component: Boundary(nasim_application, "NASIM APPLICATION") {
                Boundary(cli_group) <<controller>> { ... }
                Boundary(api_group) <<controller>> { ... }
                Boundary(agent_group) <<service>> { ... }
@@ -205,9 +205,9 @@ CLI mode is NOT a separate container — it is the CLI Group boundary inside NAS
 
 ## Architecture Principles
 
-- **Single process:** NASIM APPLICATION is one Python process; CLI and HTTP server modes share the same Container_Boundary.
+- **Single process:** NASIM APPLICATION is one Python process; CLI and HTTP server modes share the same process boundary.
 - **CSR Pattern:** Controller (CLI Group / API Group) → Service (Agent Group, Router Group, etc.) → Repository (Session Group, Tool Group, Memory Group, Config Group). Strict delegation.
-- **One group, one Boundary:** Each component group is a `Boundary` inside `Container_Boundary(nasim_application)`. Groups are logical, not deployable.
+- **One group, one Boundary:** Each component group is a `Boundary` inside `Boundary(nasim_application)`. Groups are logical, not deployable.
 - **No Container_Ext for internals:** Cross-group references inside NASIM APPLICATION use `Component_Ext(alias, "ComponentName", "Group Name")`, never `Container_Ext` or `System_Ext`.
 - **System_Ext for real externals only:** Filesystems, web, git repos, LLM backends, MCP servers, LSP servers — genuinely external infrastructure.
 - **Container_Ext for real external containers:** WebApp, DesktopApp, MobileApp — separate deployable units with their own processes.

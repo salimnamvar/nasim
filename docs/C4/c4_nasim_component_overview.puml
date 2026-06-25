@@ -28,7 +28,7 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Component Overview
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
 
     Boundary(cli_group, "CLI Group") <<controller>> {
         Component(repl_session, "REPLSession", "", "Terminal REPL entry point")
@@ -170,6 +170,5 @@ Rel(repo_intel_mgr, vector_store, "similarity search")
 
 ' Infrastructure
 Rel(structured_logger, obs_platform, "emits logs")
-Rel(otel_collector, otel_collector, "exports traces")
 
 @enduml

@@ -17,7 +17,7 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Safety Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(safety_group, "Safety Group") <<service>> {
         Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
         Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")

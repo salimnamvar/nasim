@@ -17,7 +17,7 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Config Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(config_group, "Config Group") <<repository>> {
         Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags; validates at load")
         Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety_mode, context_budget, mcp_servers")

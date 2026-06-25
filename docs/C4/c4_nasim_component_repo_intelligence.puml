@@ -18,7 +18,7 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Repo Intelligence Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(repo_intel_group, "Repo Intelligence Group") <<repository>> {
         Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Orchestrates codebase intelligence: indexing, search, ranking, repo mapping")
         Component(ast_index_adapter, "ASTIndexAdapter", "", "Tree-sitter based AST indexing for symbol extraction")

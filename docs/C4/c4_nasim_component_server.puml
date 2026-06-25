@@ -19,18 +19,16 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — API Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(api_group, "API Group") <<controller>> {
         Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
         Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate for all interface containers.")
         Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
         Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
     }
-
-    Boundary(agent_group, "Agent Group") <<service>> {
-        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop")
-    }
 }
+
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 
 Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
 Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application")

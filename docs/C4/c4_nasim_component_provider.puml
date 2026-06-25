@@ -21,7 +21,7 @@ LAYOUT_WITH_LEGEND()
 
 title NASIM APPLICATION — Provider Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(provider_group, "Provider Group") <<service>> {
         Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name, capabilities. All providers route through litellm.")
         Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")

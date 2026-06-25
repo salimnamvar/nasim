@@ -17,7 +17,7 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Plugins Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(plugins_group, "Plugins Group") <<infrastructure>> {
         Component(plugin_loader, "PluginLoader", "nasim/plugins/loader.py", "Discovers and loads plugins from ~/.nasim/plugins/")
     }

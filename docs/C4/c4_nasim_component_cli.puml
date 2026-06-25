@@ -20,7 +20,9 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — CLI Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Person(user, "User", "Developer using NASIM SERVICE")
+
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(cli_group, "CLI Group") <<controller>> {
         Component(arg_parser, "ArgParser", "", "CLI argument parsing with layered config overrides")
         Component(repl_session, "REPLSession", "", "Interactive REPL loop, input handling, slash command dispatch")

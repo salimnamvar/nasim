@@ -17,7 +17,7 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Sandbox Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
         Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
         Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")

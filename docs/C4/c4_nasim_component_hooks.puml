@@ -18,7 +18,7 @@
 LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Hooks Component Diagram
 
-Container_Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM APPLICATION") {
     Boundary(hooks_group, "Hooks Group") <<infrastructure>> {
         Component(hook_manager, "HookManager", "nasim/hooks/manager.py", "Registers, discovers, and executes hooks in priority order")
     }
