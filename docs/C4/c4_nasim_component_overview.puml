@@ -11,7 +11,7 @@
 '            processing, tool execution, session persistence, and task
 '            evaluation. Covers Controller → Service → Repository layers.
 '            Infrastructure detail (MCP, sandbox, observability, hooks)
-'            is in the companion diagram c4_nasim_component_overview_infra.puml.
+'            is in the per-group diagrams: c4_nasim_component_{group}.puml.
 '            CSR Pattern (this diagram):
 '            - Controller: CLI Group, API Group
 '            - Service: Agent Group, Router Group, Safety Group,
