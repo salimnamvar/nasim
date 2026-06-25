@@ -33,6 +33,7 @@
 ' Version:   9.1.3
 ' Source:    docs/entities.md, docs/C4/README.md
 ' Review:    Final sign-off – design chain consistent
+' Date:      2026-06-25
 ' ============================================================
 
 LAYOUT_LEFT_RIGHT()

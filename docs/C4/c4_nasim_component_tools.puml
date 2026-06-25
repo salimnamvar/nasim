@@ -13,6 +13,7 @@
 ' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
 ' Review:    —
+' Date:      2026-06-25
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
@@ -42,11 +43,11 @@ Boundary(nasim_application, "NASIM Application") {
 Component_Ext(sandbox_executor, "SandboxExecutor", "Sandbox Group")
 Component_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
 Component_Ext(provider, "Provider", "Provider Group")
-System_Ext(host_fs, "Host Filesystem")
-System_Ext(web, "Web")
-System_Ext(mcp_server, "MCP Server")
-System_Ext(git_repo, "Git Repository")
-System_Ext(lsp_server, "LSP Server")
+System_Ext(host_fs, "Host Filesystem", "Project source code files")
+System_Ext(web, "Web", "Documentation and search engines")
+System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
+System_Ext(git_repo, "Git Repository", "Version-controlled project files")
+System_Ext(lsp_server, "LSP Server", "Language server for code intelligence")
 
 Rel(tool_registry, tool_abc, "manages instances")
 Rel(file_tools, tool_abc, "extends")

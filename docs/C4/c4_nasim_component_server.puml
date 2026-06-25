@@ -14,6 +14,7 @@
 ' Version:   9.0.0
 ' Source:    CAR refinement loop — C4 correction
 ' Review:    —
+' Date:      2026-06-25
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
@@ -29,6 +30,7 @@ Boundary(nasim_application, "NASIM Application") {
 }
 
 Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(core_engine, "Core Engine", "Core Engine Container")
 
 Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
 Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application")
@@ -38,7 +40,7 @@ System_Ext(mcp_client_ext, "MCP Client", "External tool or IDE connecting via MC
 Rel(webapp, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(desktop_app, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(mobile_app, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
-Rel(mcp_client_ext, server_router, "invokes tools via MCP protocol", "stdio / SSE")
+Rel(mcp_client_ext, core_engine, "invokes NASIM Application tools via MCP protocol", "stdio / SSE")
 
 Rel(server_app, server_router, "mounts routes")
 Rel(server_router, api_schema, "validates requests/responses")
