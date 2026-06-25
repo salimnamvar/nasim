@@ -6,20 +6,19 @@
 ' ============================================================
 ' Title:     NASIM Application — Infrastructure Layer Overview
 ' Boundary:  NASIM Application (container)
-' Purpose:   All groups with CSR stereotype <<infrastructure>> shown
-'            as single components. Groups: MCP, Sandbox, Observability,
-'            Wire Log, Hooks, Plugins. Core entry points (CLI/API)
-'            and AgentOrchestrator shown inside NASIM Application
-'            to illustrate the correct User → CLI/API → Agent → Infra
-'            flow. Shows inter-group connections and external entities.
+' Purpose:   High-level map of all infrastructure groups shown as
+'            single components. Shows how the core orchestration
+'            path (User → CLI/API → AgentOrchestrator) flows into
+'            infrastructure services. Core groups (CLI, API, Agent)
+'            are inside the NASIM Application boundary.
 '            Detailed sub-components are in per-group diagrams.
 '            CSR Pattern:
-'            - Controller: CLI Group, API Group
-'            - Service: Agent Group
-'            - Infrastructure: MCP Group, Sandbox Group, Observability Group,
-'                              Wire Log Group, Hooks Group, Plugins Group
+'            - Controller:       CLI Group, API Group
+'            - Service:          Agent Group
+'            - Infrastructure:   MCP Group, Sandbox Group, Observability Group,
+'                                Wire Log Group, Hooks Group, Plugins Group
 ' Milestone: v1.0
-' Version:   23.0.0
+' Version:   24.0.0
 ' Source:    docs/entities.md, docs/UC.md
 ' Review:    —
 ' Date:      2026-06-25
@@ -49,13 +48,11 @@ Boundary(nasim_application, "NASIM Application") {
     }
 
     Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
-        Component(sandbox_executor, "SandboxExecutor", "", "OS-level command isolation and execution")
-        Component(diff_sandbox_mgr, "DiffSandboxManager", "", "Sandboxed diff staging and application")
+        Component(sandbox_executor, "SandboxExecutor", "", "OS-level command isolation and sandboxed diff staging")
     }
 
     Boundary(observability_group, "Observability Group") <<infrastructure>> {
-        Component(structured_logger, "StructuredLogger", "", "Structured logging with request correlation")
-        Component(metrics_collector, "MetricsCollector", "", "Application metrics and /metrics endpoint")
+        Component(observability_mgr, "ObservabilityManager", "", "Structured logging, metrics collection, trace correlation")
     }
 
     Boundary(wire_log_group, "Wire Log Group") <<infrastructure>> {
@@ -85,44 +82,39 @@ Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 Component_Ext(session_store, "SessionStore", "Session Group")
 Component_Ext(config_loader, "ConfigLoader", "Config Group")
 
-' Entry points: user always goes through CLI/API
+' ── Entry points ──
 Rel(user, repl_session, "types commands", "terminal REPL")
 Rel(user, server_router, "sends requests", "HTTP/JSON + SSE")
 Rel(repl_session, agent_orch, "delegates user tasks", "UC AGT-01")
 Rel(server_router, agent_orch, "delegates HTTP tasks", "UC AGT-01")
 
-' MCP Group
+' ── MCP Group ──
 Rel(mcp_client_rt, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
 Rel(mcp_client_rt, mcp_client, "exposes NASIM Application capabilities")
 Rel(mcp_client_rt, tool_registry, "registers discovered tools")
 
-' Sandbox Group
+' ── Sandbox Group ──
 Rel(tool_registry, sandbox_executor, "executes tools in isolated sandbox", "UC EDT-01")
 Rel(sandbox_executor, host_shell, "runs isolated subprocess", "stdio")
 Rel(sandbox_executor, host_fs, "restricted file access", "posix")
-Rel(tool_registry, diff_sandbox_mgr, "stages file edits for sandbox validation")
-Rel(diff_sandbox_mgr, sandbox_executor, "validates edits in sandbox")
-Rel(diff_sandbox_mgr, host_fs, "reads and writes files")
 
-' Observability Group
-Rel(agent_orch, structured_logger, "logs agent lifecycle events")
-Rel(agent_orch, metrics_collector, "records token usage, latency, tool call counts")
-Rel(structured_logger, stdout, "writes structured JSON logs to stdout")
-Rel(metrics_collector, prometheus, "exposes /metrics for pull scrape", "HTTP GET")
-Rel(metrics_collector, otel_collector, "exports metrics (when otel enabled)", "OTLP/gRPC")
-Rel(config_loader, structured_logger, "configures log level and format")
-Rel(config_loader, metrics_collector, "enables/disables metrics emission")
+' ── Observability Group ──
+Rel(agent_orch, observability_mgr, "logs lifecycle events and records metrics")
+Rel(observability_mgr, stdout, "writes structured JSON logs to stdout")
+Rel(observability_mgr, prometheus, "exposes /metrics for pull scrape", "HTTP GET")
+Rel(observability_mgr, otel_collector, "exports metrics (when otel enabled)", "OTLP/gRPC")
+Rel(config_loader, observability_mgr, "configures log level, format, and metrics emission")
 
-' Wire Log Group
+' ── Wire Log Group ──
 Rel(agent_orch, wire_log, "records agent-provider-tool interactions")
 Rel(wire_log, wire_log_dir, "writes log files")
-Rel(wire_log, session_store, "enables session forking from wire log replay")
+Rel(wire_log, session_store, "enables session replay from wire logs")
 
-' Hooks Group
+' ── Hooks Group ──
 Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall")
 Rel(hook_manager, tool_registry, "queries tool metadata for hook dispatch")
 
-' Plugins Group
+' ── Plugins Group ──
 Rel(plugin_loader, plugin_dir, "discovers plugin manifests")
 Rel(plugin_loader, tool_registry, "registers plugin tools")
 Rel(plugin_loader, hook_manager, "registers plugin hooks")
