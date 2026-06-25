@@ -4,8 +4,8 @@
 !include common/c4_styles.puml
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Observability Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Observability Group
+' Title:     NASIM Application — Observability Component Diagram
+' Boundary:  NASIM Application (container) — Observability Group
 ' Purpose:   Application-side logging and metrics emission (emit only)
 '            CSR Layer: Infrastructure
 ' Milestone: v1.0
@@ -17,9 +17,9 @@
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title NASIM APPLICATION — Observability Component Diagram
+title NASIM Application — Observability Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(observability_group, "Observability Group") <<infrastructure>> {
         Component(structured_logger, "StructuredLogger", "structlog + JSON formatter", "Writes structured JSON records to stdout only. Includes trace_id, span_id, session_id, turn_number. Never ships to Loki or log agent.")
         Component(metrics_collector, "MetricsCollector", "prometheus-client", "Owns application metrics: token usage, latency histograms, tool call counters, error rates. Exposes /metrics for pull scrape only.")

@@ -4,8 +4,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Safety Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Safety Group
+' Title:     NASIM Application — Safety Component Diagram
+' Boundary:  NASIM Application (container) — Safety Group
 ' Purpose:   Permission gating, injection scanning, egress inspection
 '            CSR Layer: Service
 ' Milestone: v1.0
@@ -15,9 +15,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Safety Component Diagram
+title NASIM Application — Safety Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(safety_group, "Safety Group") <<service>> {
         Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
         Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")

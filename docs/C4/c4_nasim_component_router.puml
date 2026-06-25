@@ -4,8 +4,8 @@
 !include common/c4_styles.puml
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Router Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Router Group
+' Title:     NASIM Application — Router Component Diagram
+' Boundary:  NASIM Application (container) — Router Group
 ' Purpose:   Model selection, fallback chains, capability queries
 '            CSR Layer: Service
 ' Milestone: v1.0
@@ -15,9 +15,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Router Component Diagram
+title NASIM Application — Router Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(router_group, "Router Group") <<service>> {
         Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
         Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")

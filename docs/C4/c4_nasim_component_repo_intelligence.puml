@@ -5,8 +5,8 @@
 
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Repo Intelligence Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Repo Intelligence Group
+' Title:     NASIM Application — Repo Intelligence Component Diagram
+' Boundary:  NASIM Application (container) — Repo Intelligence Group
 ' Purpose:   Codebase intelligence: AST indexing, symbol graph, semantic search, repo mapping
 '            CSR Layer: Repository
 ' Milestone: v1.0
@@ -16,9 +16,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Repo Intelligence Component Diagram
+title NASIM Application — Repo Intelligence Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(repo_intel_group, "Repo Intelligence Group") <<repository>> {
         Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Orchestrates codebase intelligence: indexing, search, ranking, repo mapping")
         Component(ast_index_adapter, "ASTIndexAdapter", "", "Tree-sitter based AST indexing for symbol extraction")

@@ -5,8 +5,8 @@
 
 
 ' ============================================================
-' Title:     NASIM APPLICATION — MCP Component Diagram
-' Boundary:  NASIM APPLICATION (container) — MCP Group
+' Title:     NASIM Application — MCP Component Diagram
+' Boundary:  NASIM Application (container) — MCP Group
 ' Purpose:   Model Context Protocol as first-class subsystem
 '            CSR Layer: Infrastructure
 ' Milestone: v1.0
@@ -16,13 +16,13 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — MCP Component Diagram
+title NASIM Application — MCP Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(mcp_group, "MCP Group") <<infrastructure>> {
         Component(mcp_client_rt, "MCPClientRuntime", "nasim/mcp/client.py", "Connects to external MCP servers via stdio/SSE transport")
-        Component(mcp_server_rt, "MCPServerRuntime", "nasim/mcp/server.py", "Exposes NASIM APPLICATION tools to external MCP clients via stdio/SSE")
-        Component(mcp_tool_adapter, "MCPToolAdapter", "nasim/mcp/adapter.py", "Wraps MCP server tools into NASIM APPLICATION Tool ABC format")
+        Component(mcp_server_rt, "MCPServerRuntime", "nasim/mcp/server.py", "Exposes NASIM Application tools to external MCP clients via stdio/SSE")
+        Component(mcp_tool_adapter, "MCPToolAdapter", "nasim/mcp/adapter.py", "Wraps MCP server tools into NASIM Application Tool ABC format")
         Component(mcp_discovery, "MCPDiscovery", "nasim/mcp/discovery.py", "Discovers and registers MCP server tools at startup from config")
     }
 }
@@ -34,7 +34,7 @@ Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 Rel(mcp_client_rt, mcp_server, "connects via stdio/SSE")
 Rel(mcp_client_rt, mcp_discovery, "discovers tools")
 Rel(mcp_discovery, mcp_tool_adapter, "registers discovered tools")
-Rel(mcp_tool_adapter, tool_registry, "registers as NASIM APPLICATION tools")
+Rel(mcp_tool_adapter, tool_registry, "registers as NASIM Application tools")
 Rel(mcp_server_rt, tool_registry, "exposes nasim tools to external clients")
 Rel(mcp_server_rt, mcp_client, "serves MCP protocol via stdio/SSE")
 

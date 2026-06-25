@@ -5,8 +5,8 @@
 
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Edit Strategy Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Edit Strategy Group
+' Title:     NASIM Application — Edit Strategy Component Diagram
+' Boundary:  NASIM Application (container) — Edit Strategy Group
 ' Purpose:   Pluggable edit strategies: search-replace, whole-file, diff, sandbox, architect
 '            CSR Layer: Service
 ' Milestone: v1.0
@@ -16,9 +16,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Edit Strategy Component Diagram
+title NASIM Application — Edit Strategy Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(edit_strategy_group, "Edit Strategy Group") <<service>> {
         Component(edit_strategy_mgr, "EditStrategyManager", "", "Manages and selects edit strategy based on edit type and context")
         Component(edit_strategy, "EditStrategy", "ABC", "Base strategy interface: plan_edit, apply_edit, validate_edit")

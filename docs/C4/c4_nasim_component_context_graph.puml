@@ -4,8 +4,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Context Graph Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Context Graph Group
+' Title:     NASIM Application — Context Graph Component Diagram
+' Boundary:  NASIM Application (container) — Context Graph Group
 ' Purpose:   Context pipeline: graph construction, truncation, distillation, injection, compaction
 '            CSR Layer: Service
 ' Milestone: v1.0
@@ -15,9 +15,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Context Graph Component Diagram
+title NASIM Application — Context Graph Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(context_graph_group, "Context Graph Group") <<service>> {
         Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
         Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")

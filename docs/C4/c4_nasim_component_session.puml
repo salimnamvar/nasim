@@ -5,8 +5,8 @@
 
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Session Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Session Group
+' Title:     NASIM Application — Session Component Diagram
+' Boundary:  NASIM Application (container) — Session Group
 ' Purpose:   Session layer internal components
 '            CSR Layer: Repository
 ' Milestone: v1.0
@@ -16,9 +16,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Session Component Diagram
+title NASIM Application — Session Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(session_group, "Session Group") <<repository>> {
         Component(session_store, "SessionStore", "", "Persists/loads message history to ~/.nasim/sessions/ as JSON Lines")
         Component(session_versioning, "SessionVersioning", "", "Snapshots and undo for session state")

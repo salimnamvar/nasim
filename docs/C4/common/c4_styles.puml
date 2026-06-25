@@ -43,7 +43,7 @@ skinparam rectangle<<external_container>> {
     FontColor<<external_container>> #212121
 }
 
-' Deployable Container (CLI Process, API Server Process, Core Library)
+' Deployable Container (CLI Process, API Server Process, Core Engine)
 skinparam rectangle<<deployable>> {
     BackgroundColor<<deployable>> #E8EAF6
     BorderColor<<deployable>> #283593

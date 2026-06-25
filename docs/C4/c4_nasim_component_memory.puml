@@ -5,8 +5,8 @@
 
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Memory Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Memory Group
+' Title:     NASIM Application — Memory Component Diagram
+' Boundary:  NASIM Application (container) — Memory Group
 ' Purpose:   Cross-session knowledge persistence, retrieval, and RAG adapters
 '            CSR Layer: Repository
 ' Milestone: v1.0
@@ -16,9 +16,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Memory Component Diagram
+title NASIM Application — Memory Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(memory_group, "Memory Group") <<repository>> {
         Component(memory_store, "MemoryStore", "", "Persists knowledge entries with scope, key, content, timestamps")
         Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search across stored knowledge")

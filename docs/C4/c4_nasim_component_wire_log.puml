@@ -5,8 +5,8 @@
 
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Wire Log Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Wire Log Group
+' Title:     NASIM Application — Wire Log Component Diagram
+' Boundary:  NASIM Application (container) — Wire Log Group
 ' Purpose:   Agent-provider-tool interaction logging, replay, and session forking
 '            CSR Layer: Infrastructure
 ' Milestone: v1.0
@@ -16,9 +16,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Wire Log Component Diagram
+title NASIM Application — Wire Log Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(wire_log_group, "Wire Log Group") <<infrastructure>> {
         Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
         Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")

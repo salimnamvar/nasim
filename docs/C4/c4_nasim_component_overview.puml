@@ -4,10 +4,10 @@
 !include common/c4_styles.puml
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Component Overview
-' Boundary:  NASIM APPLICATION (container)
+' Title:     NASIM Application — Component Overview
+' Boundary:  NASIM Application (container)
 ' Purpose:   High-level view of all 21 component groups inside
-'            the Core Library Container. Shows key cross-group
+'            the Core Engine. Shows key cross-group
 '            relationships and CSR layering. Internal details
 '            are in per-group diagrams.
 '            CSR Pattern:
@@ -26,9 +26,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Component Overview
+title NASIM Application — Component Overview
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
 
     Boundary(cli_group, "CLI Group") <<controller>> {
         Component(repl_session, "REPLSession", "", "Terminal REPL entry point")
@@ -115,7 +115,7 @@ Boundary(nasim_application, "NASIM APPLICATION") {
     }
 }
 
-Person(user, "User", "Developer using NASIM SERVICE")
+Person(user, "User", "Developer using NASIM Application")
 Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser interface")
 Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop interface")
 Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile interface")

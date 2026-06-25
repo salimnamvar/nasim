@@ -1,8 +1,8 @@
-# NASIM APPLICATION — C4 Diagram Inventory
+# NASIM Application — C4 Diagram Inventory
 
 ## How to Read These Diagrams
 
-The C4 model provides a hierarchical way to understand software architecture at different zoom levels. Nasim's diagram set follows this hierarchy:
+The C4 model provides a hierarchical way to understand software architecture at different zoom levels. NASIM Application's diagram set follows this hierarchy:
 
 ```
 Level 1: Context    →  c4_nasim_context.puml
@@ -13,9 +13,9 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 ### Reading Path
 
-1. **Start with Context** (`c4_nasim_context.puml`): Understand what nasim is and what external systems it interacts with.
-2. **Move to Container** (`c4_nasim_container.puml`): See the 3 deployable units: CLI Process, HTTP API Server, and Core Library.
-3. **Explore Overview** (`c4_nasim_component_overview.puml`): See all 21 component groups inside the Core Library, color-coded by CSR layer.
+1. **Start with Context** (`c4_nasim_context.puml`): Understand what NASIM Application is and what external systems it interacts with.
+2. **Move to Container** (`c4_nasim_container.puml`): See the 3 runtime entry points: CLI Process, HTTP API Server, and Core Engine. Note: NASIM Application runs as a single Python process — CLI and HTTP are modeled as separate Containers because they represent distinct runtime entry points and responsibilities.
+3. **Explore Overview** (`c4_nasim_component_overview.puml`): See all 21 component groups inside the Core Engine, color-coded by CSR layer.
 4. **Dive into Details** (`c4_nasim_component_*.puml`): Each per-group diagram shows internal components, relationships, and external dependencies.
 
 ## C4 Diagram Set
@@ -24,13 +24,13 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 | Diagram | Level | Description |
 |---------|-------|-------------|
-| `c4_nasim_context.puml` | Context | NASIM SERVICE as a single system with User actor and 15 external systems |
+| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 15 external systems |
 
 ### Level 2: Containers
 
 | Diagram | Level | Description |
 |---------|-------|-------------|
-| `c4_nasim_container.puml` | Container | 3 deployable units: CLI Process, HTTP API Server, Core Library + 4 external interface containers |
+| `c4_nasim_container.puml` | Container | 3 runtime entry points: CLI Process, HTTP API Server, Core Engine + 4 external interface containers |
 
 ### Level 3: Components
 
@@ -40,7 +40,7 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 ## Per-Group Component Diagrams (21 diagrams)
 
-Each per-group diagram shows internal components within `Boundary(nasim_application)` and `Boundary(group_name)`. Cross-group references use `Component_Ext(alias, "ComponentName", "Group Name")`.
+Each per-group diagram shows internal components within `Boundary(nasim_application, "NASIM Application")` and `Boundary(group_name)`. Cross-group references use `Component_Ext(alias, "ComponentName", "Group Name")`.
 
 ### Controller Layer (Blue)
 
@@ -126,21 +126,21 @@ User → Controller (CLI/API) → Service (Agent/Router/Safety/...) → Reposito
 - **Observability**: Dedicated StructuredLogger, MetricsCollector, TraceCorrelator with OTel support. Claude Code has minimal observability.
 
 ### vs Roo-Code
-- **Container clarity**: nasim's 3-deployable-unit model (CLI, API Server, Core Library) is cleaner than Roo-Code's architecture.
+- **Container clarity**: nasim's 3-runtime-entry-point model (CLI, API Server, Core Engine) is cleaner than Roo-Code's architecture.
 - **MCP integration**: nasim treats MCP as first-class with dedicated runtime, adapter, and discovery components.
 - **Memory system**: nasim has 8 memory components (store, index, scope, adapters, retriever, indexer) vs Roo-Code's simpler approach.
 
 ## C4 Hierarchy
 
 ```
-Context:   Person(User) → System(NASIM SERVICE) → System_Ext(...)
-Container: System_Boundary(nasim_service, "NASIM SERVICE") {
+Context:   Person(User) → System(NASIM Application) → System_Ext(...)
+Container: System_Boundary(nasim_application, "NASIM Application") {
                Container(cli_process, "CLI Process")
                Container(api_server, "HTTP API Server")
-               Container(core_library, "Core Library")
+               Container(core_engine, "Core Engine")
            }
            Container_Ext(WebApp, DesktopApp, MobileApp) → Container(api_server)
-Component: Boundary(nasim_application, "NASIM APPLICATION") {
+Component: Boundary(nasim_application, "NASIM Application") {
                Boundary(cli_group) <<controller>> { ... }
                Boundary(api_group) <<controller>> { ... }
                Boundary(agent_group) <<service>> { ... }
@@ -175,13 +175,13 @@ Component: Boundary(nasim_application, "NASIM APPLICATION") {
 
 ## Interface Containers (external, separate deployable units)
 
-| Container | Type | Connection to NASIM APPLICATION |
+| Container | Type | Connection to NASIM Application |
 |-----------|------|---------------------------------|
 | WebApp | JavaScript SPA | HTTP/JSON + SSE to ServerRouter |
 | DesktopApp | Electron / Tauri | HTTP/JSON + SSE to ServerRouter |
 | MobileApp | React Native / Flutter | HTTP/JSON + SSE to ServerRouter |
 
-CLI mode is NOT a separate container — it is the CLI Group boundary inside NASIM APPLICATION.
+CLI mode is modeled as a Container (CLI Process) within NASIM Application because it represents a distinct runtime entry point with its own argument parsing and REPL loop, even though it runs in the same Python process as the HTTP API Server.
 
 ## External Systems
 
@@ -192,7 +192,7 @@ CLI mode is NOT a separate container — it is the CLI Group boundary inside NAS
 | Host Shell | subprocess | Execute shell commands (via sandbox) |
 | Web | HTTP | Fetch documentation, search results |
 | MCP Server | stdio/SSE | Extension tools via Model Context Protocol |
-| MCP Client | stdio/SSE | External tools connecting to NASIM APPLICATION MCP server |
+| MCP Client | stdio/SSE | External tools connecting to NASIM Application MCP server |
 | Git Repository | git CLI | Version control for project files |
 | Sandbox Runtime | OS primitives | OS-level process isolation (landlock, seccomp, bubblewrap) |
 | Memory Backend | read/write | Long-term knowledge persistence |
@@ -205,10 +205,10 @@ CLI mode is NOT a separate container — it is the CLI Group boundary inside NAS
 
 ## Architecture Principles
 
-- **Single process:** NASIM APPLICATION is one Python process; CLI and HTTP server modes share the same process boundary.
+- **Single process:** NASIM Application runs as one Python process. CLI and HTTP server modes share the same process boundary. However, they are modeled as separate Containers because they represent distinct runtime entry points and responsibilities.
 - **CSR Pattern:** Controller (CLI Group / API Group) → Service (Agent Group, Router Group, etc.) → Repository (Session Group, Tool Group, Memory Group, Config Group). Strict delegation.
-- **One group, one Boundary:** Each component group is a `Boundary` inside `Boundary(nasim_application)`. Groups are logical, not deployable.
-- **No Container_Ext for internals:** Cross-group references inside NASIM APPLICATION use `Component_Ext(alias, "ComponentName", "Group Name")`, never `Container_Ext` or `System_Ext`.
+- **One group, one Boundary:** Each component group is a `Boundary` inside `Boundary(nasim_application, "NASIM Application")`. Groups are logical, not deployable.
+- **No Container_Ext for internals:** Cross-group references inside NASIM Application use `Component_Ext(alias, "ComponentName", "Group Name")`, never `Container_Ext` or `System_Ext`.
 - **System_Ext for real externals only:** Filesystems, web, git repos, LLM backends, MCP servers, LSP servers — genuinely external infrastructure.
 - **Container_Ext for real external containers:** WebApp, DesktopApp, MobileApp — separate deployable units with their own processes.
 - **Version consistency:** All diagram headers use Version 9.0.0.

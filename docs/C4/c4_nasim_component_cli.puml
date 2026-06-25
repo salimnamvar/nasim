@@ -4,8 +4,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     NASIM APPLICATION — CLI Component Diagram
-' Boundary:  NASIM APPLICATION (container) — CLI Group
+' Title:     NASIM Application — CLI Component Diagram
+' Boundary:  NASIM Application (container) — CLI Group
 ' Purpose:   CLI Group: Controller layer for terminal users.
 '            REPLSession is the entry point; it delegates to
 '            AgentOrchestrator (Service layer) and renders
@@ -18,11 +18,11 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — CLI Component Diagram
+title NASIM Application — CLI Component Diagram
 
-Person(user, "User", "Developer using NASIM SERVICE")
+Person(user, "User", "Developer using NASIM Application")
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(cli_group, "CLI Group") <<controller>> {
         Component(arg_parser, "ArgParser", "", "CLI argument parsing with layered config overrides")
         Component(repl_session, "REPLSession", "", "Interactive REPL loop, input handling, slash command dispatch")

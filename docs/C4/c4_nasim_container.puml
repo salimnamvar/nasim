@@ -3,12 +3,16 @@
 !theme plain
 
 ' ============================================================
-' Title:     NASIM SERVICE — Container Diagram
-' Boundary:  NASIM SERVICE
-' Purpose:   Show exactly 3 deployable units within NASIM SERVICE:
-'            1. CLI Process Container (terminal interface)
-'            2. HTTP API Server Process Container (FastAPI + SSE)
-'            3. Core Library Container (agent engine, tools, business logic)
+' Title:     NASIM Application — Container Diagram
+' Boundary:  NASIM Application
+' Purpose:   Show the 3 runtime entry points within NASIM Application:
+'            1. CLI Process (terminal interface)
+'            2. HTTP API Server (FastAPI + SSE)
+'            3. Core Engine (agent loop, tools, business logic)
+'            Note: NASIM Application runs as a single Python process.
+'            CLI and HTTP API are modeled as separate Containers because
+'            they represent distinct runtime entry points and responsibilities,
+'            not separate deployments.
 '            External interface apps (WebApp, DesktopApp, MobileApp) are
 '            separate deployable units that connect to the API Server.
 ' Milestone: v1.0
@@ -20,26 +24,26 @@
 LAYOUT_LEFT_RIGHT()
 LAYOUT_WITH_LEGEND()
 
-title NASIM SERVICE — Container Diagram
+title NASIM Application — Container Diagram
 
-Person(user, "User", "Developer using NASIM SERVICE as an AI coding assistant")
+Person(user, "User", "Developer using NASIM Application as an AI coding assistant")
 
-System_Boundary(nasim_service, "NASIM SERVICE") {
-    Container(cli_process, "CLI Process", "Python 3.10+", "Terminal interface: REPL, arg parsing, rendering. Delegates to Core Library.")
+System_Boundary(nasim_application, "NASIM Application") {
+    Container(cli_process, "CLI Process", "Python 3.10+", "Terminal interface: REPL, arg parsing, rendering. Delegates to Core Engine.")
     Container(api_server, "HTTP API Server", "FastAPI + SSE", "REST API with Server-Sent Events streaming. Entry gate for all interface containers.")
-    Container(core_library, "Core Library", "Python 3.10+", "Unified agent engine: agentic loop, tool orchestration, safety, context management, business logic")
+    Container(core_engine, "Core Engine", "Python 3.10+", "Unified agent engine: agentic loop, tool orchestration, safety, context management, business logic")
 }
 
 Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface connecting to API Server via HTTP")
 Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application connecting to API Server via HTTP")
 Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application connecting to API Server via HTTP")
 
-System_Ext(mcp_client, "MCP Client", "External tool or IDE that invokes NASIM SERVICE via MCP protocol")
+System_Ext(mcp_client, "MCP Client", "External tool or IDE that invokes NASIM Application via MCP protocol")
 System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ via litellm")
 System_Ext(host_fs, "Host Filesystem", "Project code files and directories")
 System_Ext(host_shell, "Host Shell", "Shell execution via OS subprocess")
 System_Ext(web_ext, "Web", "Documentation pages and search engines")
-System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM SERVICE via Model Context Protocol")
+System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM Application via Model Context Protocol")
 System_Ext(git_repo, "Git Repository", "Version-controlled project files")
 System_Ext(sandbox_rt, "Sandbox Runtime", "OS-level process isolation (landlock, seccomp, bubblewrap)")
 System_Ext(lsp_server, "LSP Server", "Language server providing code intelligence")
@@ -48,33 +52,33 @@ System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code i
 System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API-based)")
 System_Ext(vector_store, "Vector Store", "Persistent vector storage for semantic code search")
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
-System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana. NASIM SERVICE emits only — platform owns collection, storage, and visualization.")
+System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana. NASIM Application emits only — platform owns collection, storage, and visualization.")
 
 Rel(user, cli_process, "runs coding tasks (CLI mode)", "terminal REPL")
 Rel(user, webapp, "interacts via browser", "HTTPS")
 Rel(user, desktop_app, "interacts via desktop app", "local")
 Rel(user, mobile_app, "interacts via mobile app", "HTTPS")
 
-Rel(cli_process, core_library, "delegates tasks", "Internal Call")
+Rel(cli_process, core_engine, "delegates tasks", "Internal Call")
 Rel(webapp, api_server, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
 Rel(desktop_app, api_server, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
 Rel(mobile_app, api_server, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
 Rel(mcp_client, api_server, "invokes tools via MCP protocol", "stdio / SSE")
-Rel(api_server, core_library, "delegates to core agent engine", "Internal Call")
+Rel(api_server, core_engine, "delegates to core agent engine", "Internal Call")
 
-Rel(core_library, llm_backend, "sends chat requests, receives completions", "HTTP/JSON streaming")
-Rel(core_library, host_fs, "reads, writes, and searches project files")
-Rel(core_library, host_shell, "executes shell commands via sandbox")
-Rel(core_library, web_ext, "fetches documentation and search results", "HTTP")
-Rel(core_library, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
-Rel(core_library, git_repo, "reads status and creates commits", "git CLI")
-Rel(core_library, sandbox_rt, "executes commands in isolated environment")
-Rel(core_library, lsp_server, "queries code intelligence", "LSP protocol")
-Rel(core_library, plugin_dir, "discovers and loads plugins at startup")
-Rel(core_library, tree_sitter, "parses source code AST for indexing")
-Rel(core_library, embedding_model, "generates code embeddings")
-Rel(core_library, vector_store, "stores and retrieves code embeddings")
-Rel(core_library, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
-Rel(core_library, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
+Rel(core_engine, llm_backend, "sends chat requests, receives completions", "HTTP/JSON streaming")
+Rel(core_engine, host_fs, "reads, writes, and searches project files")
+Rel(core_engine, host_shell, "executes shell commands via sandbox")
+Rel(core_engine, web_ext, "fetches documentation and search results", "HTTP")
+Rel(core_engine, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
+Rel(core_engine, git_repo, "reads status and creates commits", "git CLI")
+Rel(core_engine, sandbox_rt, "executes commands in isolated environment")
+Rel(core_engine, lsp_server, "queries code intelligence", "LSP protocol")
+Rel(core_engine, plugin_dir, "discovers and loads plugins at startup")
+Rel(core_engine, tree_sitter, "parses source code AST for indexing")
+Rel(core_engine, embedding_model, "generates code embeddings")
+Rel(core_engine, vector_store, "stores and retrieves code embeddings")
+Rel(core_engine, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
+Rel(core_engine, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
 
 @enduml

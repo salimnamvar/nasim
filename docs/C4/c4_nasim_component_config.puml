@@ -4,8 +4,8 @@
 !theme plain
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Config Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Config Group
+' Title:     NASIM Application — Config Component Diagram
+' Boundary:  NASIM Application (container) — Config Group
 ' Purpose:   Config layer internal components
 '            CSR Layer: Repository
 ' Milestone: v1.0
@@ -15,9 +15,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Config Component Diagram
+title NASIM Application — Config Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(config_group, "Config Group") <<repository>> {
         Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags; validates at load")
         Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety_mode, context_budget, mcp_servers")

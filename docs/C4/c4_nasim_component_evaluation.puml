@@ -5,8 +5,8 @@
 
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Evaluation Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Evaluation Group
+' Title:     NASIM Application — Evaluation Component Diagram
+' Boundary:  NASIM Application (container) — Evaluation Group
 ' Purpose:   Task evaluation: success checks, LLM review, testing, retry coordination
 '            CSR Layer: Service
 ' Milestone: v1.0
@@ -16,9 +16,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Evaluation Component Diagram
+title NASIM Application — Evaluation Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(evaluation_group, "Evaluation Group") <<service>> {
         Component(eval_engine, "EvaluationEngine", "", "Orchestrates task evaluation: runs checks, scores, retries")
         Component(task_evaluator, "TaskEvaluator", "", "Evaluates task completion against success criteria")

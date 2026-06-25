@@ -5,8 +5,8 @@
 
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Tools Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Tool Group
+' Title:     NASIM Application — Tools Component Diagram
+' Boundary:  NASIM Application (container) — Tool Group
 ' Purpose:   Tool layer: base ABC, registry, file/search/shell/web/git/lsp tools
 '            CSR Layer: Repository
 ' Milestone: v1.0
@@ -16,9 +16,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Tools Component Diagram
+title NASIM Application — Tools Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(tool_group, "Tool Group") <<repository>> {
         Component(tool_abc, "Tool", "ABC", "Base tool: name, description, parameters, safe, execute")
         Component(tool_registry, "ToolRegistry", "", "Instance-based registry, dynamic registration for MCP")

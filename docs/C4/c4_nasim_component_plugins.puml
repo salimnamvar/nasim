@@ -4,8 +4,8 @@
 !include common/c4_styles.puml
 
 ' ============================================================
-' Title:     NASIM APPLICATION — Plugins Component Diagram
-' Boundary:  NASIM APPLICATION (container) — Plugins Group
+' Title:     NASIM Application — Plugins Component Diagram
+' Boundary:  NASIM Application (container) — Plugins Group
 ' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
 '            CSR Layer: Infrastructure
 ' Milestone: v1.0
@@ -15,9 +15,9 @@
 ' ============================================================
 
 LAYOUT_WITH_LEGEND()
-title NASIM APPLICATION — Plugins Component Diagram
+title NASIM Application — Plugins Component Diagram
 
-Boundary(nasim_application, "NASIM APPLICATION") {
+Boundary(nasim_application, "NASIM Application") {
     Boundary(plugins_group, "Plugins Group") <<infrastructure>> {
         Component(plugin_loader, "PluginLoader", "nasim/plugins/loader.py", "Discovers and loads plugins from ~/.nasim/plugins/")
     }
