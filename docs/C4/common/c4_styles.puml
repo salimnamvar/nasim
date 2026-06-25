@@ -1,0 +1,57 @@
+@startuml c4_styles
+' ============================================================
+' Title:     NASIM C4 — Shared Styles
+' Purpose:   Common color palette, skinparam, and macros
+'            for all nasim C4 diagrams.
+' Version:   9.0.0
+' Source:    docs/C4/common/c4_styles.puml
+' ============================================================
+
+' --- Color Palette (CSR Layers) ---
+' Controller Layer (CLI, API)
+skinparam rectangle<<controller>> {
+    BackgroundColor<<controller>> #E3F2FD
+    BorderColor<<controller>> #1565C0
+    FontColor<<controller>> #0D47A1
+}
+
+' Service Layer (Agent, Router, Safety, Context Graph, Edit Strategy, Evaluation)
+skinparam rectangle<<service>> {
+    BackgroundColor<<service>> #FFF3E0
+    BorderColor<<service>> #E65100
+    FontColor<<service>> #BF360C
+}
+
+' Repository Layer (Session, Tool, Memory, Config, Git, Repo Intelligence)
+skinparam rectangle<<repository>> {
+    BackgroundColor<<repository>> #E8F5E9
+    BorderColor<<repository>> #2E7D32
+    FontColor<<repository>> #1B5E20
+}
+
+' Infrastructure Layer (MCP, Sandbox, Observability, Wire Log, Hooks, Plugins)
+skinparam rectangle<<infrastructure>> {
+    BackgroundColor<<infrastructure>> #F3E5F5
+    BorderColor<<infrastructure>> #7B1FA2
+    FontColor<<infrastructure>> #4A148C
+}
+
+' External Container (WebApp, DesktopApp, MobileApp)
+skinparam rectangle<<external_container>> {
+    BackgroundColor<<external_container>> #FAFAFA
+    BorderColor<<external_container>> #616161
+    FontColor<<external_container>> #212121
+}
+
+' Deployable Container (CLI Process, API Server Process, Core Library)
+skinparam rectangle<<deployable>> {
+    BackgroundColor<<deployable>> #E8EAF6
+    BorderColor<<deployable>> #283593
+    FontColor<<deployable>> #1A237E
+}
+
+' --- Legend Macro ---
+' Usage: !include common/c4_styles.puml
+' Then: Legend("CSR Layer", "Controller", "#E3F2FD", "Service", "#FFF3E0", "Repository", "#E8F5E9", "Infrastructure", "#F3E5F5")
+
+@enduml

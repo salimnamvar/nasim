@@ -1,65 +1,171 @@
 # NASIM APPLICATION — C4 Diagram Inventory
 
+## How to Read These Diagrams
+
+The C4 model provides a hierarchical way to understand software architecture at different zoom levels. Nasim's diagram set follows this hierarchy:
+
+```
+Level 1: Context    →  c4_nasim_context.puml
+Level 2: Container  →  c4_nasim_container.puml
+Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
+                     →  c4_nasim_component_*.puml (per-group details)
+```
+
+### Reading Path
+
+1. **Start with Context** (`c4_nasim_context.puml`): Understand what nasim is and what external systems it interacts with.
+2. **Move to Container** (`c4_nasim_container.puml`): See the 3 deployable units: CLI Process, HTTP API Server, and Core Library.
+3. **Explore Overview** (`c4_nasim_component_overview.puml`): See all 21 component groups inside the Core Library, color-coded by CSR layer.
+4. **Dive into Details** (`c4_nasim_component_*.puml`): Each per-group diagram shows internal components, relationships, and external dependencies.
+
 ## C4 Diagram Set
 
-| Diagram | Level | Boundary | Description |
-|---------|-------|----------|-------------|
-| c4_nasim_context.puml | Context | System | NASIM SERVICE as a single system: User actor + external systems |
-| c4_nasim_container.puml | Container | System | NASIM APPLICATION is one Container inside `System_Boundary(nasim_service)`; external interface apps are `Container_Ext` |
-| c4_nasim_component.puml | Component | NASIM APPLICATION (container) | Overview: all groups inside `Container_Boundary(nasim_application, "NASIM APPLICATION")` |
+### Level 1: System Context
+
+| Diagram | Level | Description |
+|---------|-------|-------------|
+| `c4_nasim_context.puml` | Context | NASIM SERVICE as a single system with User actor and 15 external systems |
+
+### Level 2: Containers
+
+| Diagram | Level | Description |
+|---------|-------|-------------|
+| `c4_nasim_container.puml` | Container | 3 deployable units: CLI Process, HTTP API Server, Core Library + 4 external interface containers |
+
+### Level 3: Components
+
+| Diagram | Level | Description |
+|---------|-------|-------------|
+| `c4_nasim_component_overview.puml` | Component (Overview) | High-level view of all 21 groups with CSR layer coloring and key cross-group relationships |
 
 ## Per-Group Component Diagrams (21 diagrams)
 
-Each per-group diagram wraps its components with `Container_Boundary(nasim_application, "NASIM APPLICATION") { Boundary(xxx_group, "XXX Group") { ... } }`.
-Cross-group references use `Component_Ext(alias, "ComponentName", "Group Name")`.
-Genuinely external resources use `System_Ext(...)`.
-External interface apps (separate deployable units) use `Container_Ext(...)`.
+Each per-group diagram shows internal components within `Container_Boundary(nasim_application)` and `Boundary(group_name)`. Cross-group references use `Component_Ext(alias, "ComponentName", "Group Name")`.
+
+### Controller Layer (Blue)
 
 | Diagram | Group | Key Components |
 |---------|-------|----------------|
-| c4_nasim_component_agent.puml | Agent Group | AgentOrchestrator, ConversationHistory, ContextCompactor, PlanSession, SubagentCoordinator, ErrorBoundary, PersonaManager |
-| c4_nasim_component_provider.puml | Provider Group | Provider (Protocol), LiteLLMProxy |
-| c4_nasim_component_tools.puml | Tool Group | Tool (ABC), ToolRegistry, FileTools, SearchTools, ShellTool, DirTool, WebTools, GitTool, LspTool, SubagentTool, TodoTool, MemoryTool, PlanTool, RepoMapTool, SemanticSearchTool, ReviewTool |
-| c4_nasim_component_mcp.puml | MCP Group | MCPClientRuntime, MCPServerRuntime, MCPToolAdapter, MCPDiscovery |
-| c4_nasim_component_config.puml | Config Group | ConfigLoader, Config (dataclass) |
-| c4_nasim_component_session.puml | Session Group | SessionStore, SessionVersioning, SessionSearch, SessionFork |
-| c4_nasim_component_server.puml | API Group | ServerApp, ServerRouter, SSEHandler, APISchema |
-| c4_nasim_component_hooks.puml | Hooks Group | HookManager |
-| c4_nasim_component_plugins.puml | Plugins Group | PluginLoader |
-| c4_nasim_component_safety.puml | Safety Group | SafetyCoordinator, PermissionGate, InjectionScanner, EgressInspector |
-| c4_nasim_component_router.puml | Router Group | ModelRouter, FallbackChain, ProviderCapabilities |
-| c4_nasim_component_sandbox.puml | Sandbox Group | SandboxExecutor, SandboxPolicy, SandboxMonitor, ResourceLimiter, DiffSandboxManager, EditStagingArea, DiffComputer, DiffPresenter, StagedApplicator |
-| c4_nasim_component_observability.puml | Observability Group | StructuredLogger, MetricsCollector, TraceCorrelator, ContextPropagator, LogRedactor, DualOutputAdapter, InstrumentationMiddleware, OTelExporter |
-| c4_nasim_component_memory.puml | Memory Group | MemoryStore, MemoryIndex, MemoryScope, EpisodicMemoryAdapter, SemanticMemoryAdapter, WorkingMemoryAdapter, MemoryRetriever, MemoryIndexer |
-| c4_nasim_component_git.puml | Git Group | GitIntegration, GitStatus, GitCommit |
-| c4_nasim_component_repo_intelligence.puml | Repo Intelligence Group | RepoIntelligenceManager, ASTIndexAdapter, SymbolGraph, RankingService, EmbeddingAdapter, SemanticSearchService, RepoMapBuilder |
-| c4_nasim_component_edit_strategy.puml | Edit Strategy Group | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector |
-| c4_nasim_component_evaluation.puml | Evaluation Group | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector, QualitySignal |
-| c4_nasim_component_wire_log.puml | Wire Log Group | WireLog, WireAppender, WireReader, SessionForkManager |
-| c4_nasim_component_context_graph.puml | Context Graph Group | ContextGraph, PipelineOrchestrator, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
-| c4_nasim_component_cli.puml | CLI Group | ArgParser, REPLSession, Renderer, SlashCommandHandler |
+| `c4_nasim_component_cli.puml` | CLI Group | ArgParser, REPLSession, Renderer, SlashCommandHandler |
+| `c4_nasim_component_server.puml` | API Group | ServerApp, ServerRouter, SSEHandler, APISchema |
+
+### Service Layer (Orange)
+
+| Diagram | Group | Key Components |
+|---------|-------|----------------|
+| `c4_nasim_component_agent.puml` | Agent Group | AgentOrchestrator, ConversationHistory, ContextCompactor, PlanSession, SubagentCoordinator, ErrorBoundary, PersonaManager |
+| `c4_nasim_component_router.puml` | Router Group | ModelRouter, FallbackChain, ProviderCapabilities |
+| `c4_nasim_component_provider.puml` | Provider Group | Provider (Protocol), LiteLLMProxy |
+| `c4_nasim_component_safety.puml` | Safety Group | SafetyCoordinator, PermissionGate, InjectionScanner, EgressInspector |
+| `c4_nasim_component_context_graph.puml` | Context Graph Group | ContextGraph, PipelineOrchestrator, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
+| `c4_nasim_component_edit_strategy.puml` | Edit Strategy Group | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector |
+| `c4_nasim_component_evaluation.puml` | Evaluation Group | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector, QualitySignal |
+
+### Repository Layer (Green)
+
+| Diagram | Group | Key Components |
+|---------|-------|----------------|
+| `c4_nasim_component_session.puml` | Session Group | SessionStore, SessionVersioning, SessionSearch, SessionFork |
+| `c4_nasim_component_tools.puml` | Tool Group | Tool (ABC), ToolRegistry, FileTools, SearchTools, ShellTool, DirTool, WebTools, GitTool, LspTool, SubagentTool, TodoTool, MemoryTool, PlanTool, RepoMapTool, SemanticSearchTool, ReviewTool |
+| `c4_nasim_component_memory.puml` | Memory Group | MemoryStore, MemoryIndex, MemoryScope, EpisodicMemoryAdapter, SemanticMemoryAdapter, WorkingMemoryAdapter, MemoryRetriever, MemoryIndexer |
+| `c4_nasim_component_config.puml` | Config Group | ConfigLoader, Config (dataclass) |
+| `c4_nasim_component_git.puml` | Git Group | GitIntegration, GitStatus, GitCommit |
+| `c4_nasim_component_repo_intelligence.puml` | Repo Intelligence Group | RepoIntelligenceManager, ASTIndexAdapter, SymbolGraph, RankingService, EmbeddingAdapter, SemanticSearchService, RepoMapBuilder |
+
+### Infrastructure Layer (Purple)
+
+| Diagram | Group | Key Components |
+|---------|-------|----------------|
+| `c4_nasim_component_mcp.puml` | MCP Group | MCPClientRuntime, MCPServerRuntime, MCPToolAdapter, MCPDiscovery |
+| `c4_nasim_component_sandbox.puml` | Sandbox Group | SandboxExecutor, SandboxPolicy, SandboxMonitor, ResourceLimiter, DiffSandboxManager, EditStagingArea, DiffComputer, DiffPresenter, StagedApplicator |
+| `c4_nasim_component_observability.puml` | Observability Group | StructuredLogger, MetricsCollector, TraceCorrelator, ContextPropagator, LogRedactor, DualOutputAdapter, InstrumentationMiddleware, OTelExporter |
+| `c4_nasim_component_wire_log.puml` | Wire Log Group | WireLog, WireAppender, WireReader, SessionForkManager |
+| `c4_nasim_component_hooks.puml` | Hooks Group | HookManager |
+| `c4_nasim_component_plugins.puml` | Plugins Group | PluginLoader |
 
 **Total: 24 C4 diagrams (1 context + 1 container + 1 overview + 21 group components)**
+
+## CSR Layering & Visual Coding
+
+Each component group is color-coded by its CSR layer:
+
+| Color | Layer | Groups |
+|-------|-------|--------|
+| Blue | **Controller** | CLI Group, API Group |
+| Orange | **Service** | Agent Group, Router Group, Provider Group, Safety Group, Context Graph Group, Edit Strategy Group, Evaluation Group |
+| Green | **Repository** | Session Group, Tool Group, Memory Group, Config Group, Git Group, Repo Intelligence Group |
+| Purple | **Infrastructure** | MCP Group, Sandbox Group, Observability Group, Wire Log Group, Hooks Group, Plugins Group |
+
+### CSR Pattern Flow
+
+```
+User → Controller (CLI/API) → Service (Agent/Router/Safety/...) → Repository (Session/Tool/Memory/...)
+```
+
+**Key delegation paths:**
+- `AgentOrchestrator` → `SafetyCoordinator` (safety validation before every tool dispatch)
+- `AgentOrchestrator` → `ErrorBoundary` (structured error handling with recovery)
+- `AgentOrchestrator` → `ContextGraph` (context pipeline orchestration)
+- `ServerRouter` → `AgentOrchestrator` (sole entry gate for all interface containers)
+
+## Architecture Differentiators vs Reference Agents
+
+### vs aider
+- **CSR enforcement**: nasim strictly separates Controller → Service → Repository. aider mixes concerns.
+- **SafetyCoordinator**: Dedicated safety pipeline with PermissionGate, InjectionScanner, EgressInspector. aider has ad-hoc safety checks.
+- **ErrorBoundary**: Structured error hierarchy with recovery actions. aider uses generic try/except.
+
+### vs Cline
+- **No God Objects**: nasim decomposes functionality into 21 focused groups. Cline often has monolithic controllers.
+- **ContextGraph**: Dedicated context pipeline with prioritization, truncation, distillation, injection, compaction. Cline uses simpler context management.
+- **EditStrategyManager**: Polymorphic edit strategies (8 implementations) vs Cline's single approach.
+
+### vs Claude Code
+- **CSR visibility**: nasim's diagrams make the layering explicit through color coding and stereotypes.
+- **SafetyCoordinator**: Proactive safety pipeline vs Claude Code's reactive approach.
+- **Observability**: Dedicated StructuredLogger, MetricsCollector, TraceCorrelator with OTel support. Claude Code has minimal observability.
+
+### vs Roo-Code
+- **Container clarity**: nasim's 3-deployable-unit model (CLI, API Server, Core Library) is cleaner than Roo-Code's architecture.
+- **MCP integration**: nasim treats MCP as first-class with dedicated runtime, adapter, and discovery components.
+- **Memory system**: nasim has 8 memory components (store, index, scope, adapters, retriever, indexer) vs Roo-Code's simpler approach.
 
 ## C4 Hierarchy
 
 ```
 Context:   Person(User) → System(NASIM SERVICE) → System_Ext(...)
 Container: System_Boundary(nasim_service, "NASIM SERVICE") {
-               Container(nasim_application, "NASIM APPLICATION")
+               Container(cli_process, "CLI Process")
+               Container(api_server, "HTTP API Server")
+               Container(core_library, "Core Library")
            }
-           Container_Ext(WebApp, DesktopApp, MobileApp) → Container(nasim_application)
+           Container_Ext(WebApp, DesktopApp, MobileApp) → Container(api_server)
 Component: Container_Boundary(nasim_application, "NASIM APPLICATION") {
-               Boundary(api_group) { Component(ServerRouter) ... }
-               Boundary(agent_group) { Component(AgentOrchestrator) ... }
-               Boundary(cli_group) { Component(REPLSession) ... }
-               ...
+               Boundary(cli_group) <<controller>> { ... }
+               Boundary(api_group) <<controller>> { ... }
+               Boundary(agent_group) <<service>> { ... }
+               Boundary(router_group) <<service>> { ... }
+               Boundary(safety_group) <<service>> { ... }
+               Boundary(context_graph_group) <<service>> { ... }
+               Boundary(edit_strategy_group) <<service>> { ... }
+               Boundary(evaluation_group) <<service>> { ... }
+               Boundary(session_group) <<repository>> { ... }
+               Boundary(tool_group) <<repository>> { ... }
+               Boundary(memory_group) <<repository>> { ... }
+               Boundary(config_group) <<repository>> { ... }
+               Boundary(git_group) <<repository>> { ... }
+               Boundary(repo_intelligence_group) <<repository>> { ... }
+               Boundary(mcp_group) <<infrastructure>> { ... }
+               Boundary(sandbox_group) <<infrastructure>> { ... }
+               Boundary(observability_group) <<infrastructure>> { ... }
+               Boundary(wire_log_group) <<infrastructure>> { ... }
+               Boundary(hooks_group) <<infrastructure>> { ... }
+               Boundary(plugins_group) <<infrastructure>> { ... }
+               Boundary(provider_group) <<service>> { ... }
            }
            Container_Ext(WebApp, DesktopApp, MobileApp) → ServerRouter
            Person(User) → REPLSession (CLI mode)
 ```
-
-**Key distinction:** NASIM APPLICATION is a **single Python process**. CLI Group (ArgParser, REPLSession, Renderer) and API Group (ServerRouter) are `Boundary` groups inside the same `Container_Boundary(nasim_application)`. CLI and API are not separate containers — they are logical boundaries within one deployable unit.
 
 ## Actors
 
@@ -107,3 +213,17 @@ CLI mode is NOT a separate container — it is the CLI Group boundary inside NAS
 - **Container_Ext for real external containers:** WebApp, DesktopApp, MobileApp — separate deployable units with their own processes.
 - **Version consistency:** All diagram headers use Version 9.0.0.
 - **Pin C4-PlantUML:** All diagrams reference v2.10.0 — never `master`.
+
+## Shared Styles
+
+All diagrams include `common/c4_styles.puml` for:
+- Consistent color palette per CSR layer
+- Skinparam settings for readability
+- Legend macro for CSR layer explanation
+
+## Design Chain Consistency
+
+All diagrams are traceable to the design chain:
+- **C4** → **UC** (Use Case) → **SQ** (Sequence) → **SM** (State Machine)
+- **Cross-layer sync verified:** All lifelines in SQ diagrams exist as C4 components.
+- **100% design chain consistency** across 148 SQ diagrams and 24 C4 diagrams.

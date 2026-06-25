@@ -1,0 +1,175 @@
+@startuml c4_nasim_component_overview
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+!include common/c4_styles.puml
+
+' ============================================================
+' Title:     NASIM APPLICATION — Component Overview
+' Boundary:  NASIM APPLICATION (container)
+' Purpose:   High-level view of all 21 component groups inside
+'            the Core Library Container. Shows key cross-group
+'            relationships and CSR layering. Internal details
+'            are in per-group diagrams.
+'            CSR Pattern:
+'            - Controller: CLI Group, API Group
+'            - Service: Agent Group, Router Group, Safety Group,
+'                       Context Graph Group, Edit Strategy Group,
+'                       Evaluation Group
+'            - Repository: Session Group, Tool Group, Memory Group,
+'                          Config Group, Git Group, Repo Intelligence Group
+'            - Infrastructure: MCP Group, Sandbox Group, Observability Group,
+'                              Wire Log Group, Hooks Group, Plugins Group
+' Milestone: v1.0
+' Version:   9.0.0
+' Source:    docs/entities.md
+' Review:    —
+' ============================================================
+
+LAYOUT_WITH_LEGEND()
+title NASIM APPLICATION — Component Overview
+
+Container_Boundary(nasim_application, "NASIM APPLICATION") {
+
+    Boundary(cli_group, "CLI Group") <<controller>> {
+        Component(repl_session, "REPLSession", "", "Terminal REPL entry point")
+    }
+
+    Boundary(api_group, "API Group") <<controller>> {
+        Component(server_router, "ServerRouter", "FastAPI", "HTTP entry gate")
+    }
+
+    Boundary(agent_group, "Agent Group") <<service>> {
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop")
+    }
+
+    Boundary(router_group, "Router Group") <<service>> {
+        Component(model_router, "ModelRouter", "", "Model selection, fallback")
+    }
+
+    Boundary(safety_group, "Safety Group") <<service>> {
+        Component(safety_coord, "SafetyCoordinator", "", "Permission, injection, egress")
+    }
+
+    Boundary(context_graph_group, "Context Graph Group") <<service>> {
+        Component(context_graph, "ContextGraph", "", "Context pipeline orchestrator")
+    }
+
+    Boundary(edit_strategy_group, "Edit Strategy Group") <<service>> {
+        Component(edit_strategy_mgr, "EditStrategyManager", "", "Polymorphic edit strategies")
+    }
+
+    Boundary(evaluation_group, "Evaluation Group") <<service>> {
+        Component(eval_engine, "EvaluationEngine", "", "Task evaluation and retry")
+    }
+
+    Boundary(session_group, "Session Group") <<repository>> {
+        Component(session_store, "SessionStore", "", "Message persistence")
+    }
+
+    Boundary(tool_group, "Tool Group") <<repository>> {
+        Component(tool_registry, "ToolRegistry", "", "Tool instance management")
+    }
+
+    Boundary(memory_group, "Memory Group") <<repository>> {
+        Component(memory_store, "MemoryStore", "", "Cross-session knowledge")
+    }
+
+    Boundary(config_group, "Config Group") <<repository>> {
+        Component(config_loader, "ConfigLoader", "", "Typed configuration")
+    }
+
+    Boundary(git_group, "Git Group") <<repository>> {
+        Component(git_integration, "GitIntegration", "", "Git operations")
+    }
+
+    Boundary(repo_intelligence_group, "Repo Intelligence Group") <<repository>> {
+        Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Codebase intelligence")
+    }
+
+    Boundary(mcp_group, "MCP Group") <<infrastructure>> {
+        Component(mcp_client_rt, "MCPClientRuntime", "", "External MCP connections")
+    }
+
+    Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
+        Component(sandbox_executor, "SandboxExecutor", "", "OS-level isolation")
+    }
+
+    Boundary(observability_group, "Observability Group") <<infrastructure>> {
+        Component(structured_logger, "StructuredLogger", "", "Structured logging")
+    }
+
+    Boundary(wire_log_group, "Wire Log Group") <<infrastructure>> {
+        Component(wire_log, "WireLog", "", "Event recording")
+    }
+
+    Boundary(hooks_group, "Hooks Group") <<infrastructure>> {
+        Component(hook_manager, "HookManager", "", "Hook lifecycle")
+    }
+
+    Boundary(plugins_group, "Plugins Group") <<infrastructure>> {
+        Component(plugin_loader, "PluginLoader", "", "Plugin discovery")
+    }
+
+    Boundary(provider_group, "Provider Group") <<service>> {
+        Component(provider, "Provider", "Protocol", "LLM abstraction")
+    }
+}
+
+Person(user, "User", "Developer using NASIM SERVICE")
+Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser interface")
+Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop interface")
+Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile interface")
+
+System_Ext(llm_backend, "LLM Backend")
+System_Ext(host_fs, "Host Filesystem")
+System_Ext(host_shell, "Host Shell")
+System_Ext(web_ext, "Web")
+System_Ext(mcp_server, "MCP Server")
+System_Ext(mcp_client, "MCP Client")
+System_Ext(git_repo, "Git Repository")
+System_Ext(sandbox_rt, "Sandbox Runtime")
+System_Ext(lsp_server, "LSP Server")
+System_Ext(plugin_dir, "Plugin Directory")
+System_Ext(tree_sitter, "Tree-sitter")
+System_Ext(embedding_model, "Embedding Model")
+System_Ext(vector_store, "Vector Store")
+System_Ext(otel_collector, "OTel Collector")
+System_Ext(obs_platform, "Observability Platform")
+
+' Controller → Service
+Rel(user, repl_session, "types commands", "terminal REPL")
+Rel(webapp, server_router, "HTTP + SSE", "HTTP/JSON + SSE")
+Rel(desktop_app, server_router, "HTTP + SSE", "HTTP/JSON + SSE")
+Rel(mobile_app, server_router, "HTTP + SSE", "HTTP/JSON + SSE")
+Rel(mcp_client, mcp_client_rt, "invokes tools via MCP", "stdio / SSE")
+Rel(repl_session, agent_orch, "delegates tasks")
+Rel(server_router, agent_orch, "delegates tasks")
+
+' Service → Service
+Rel(agent_orch, safety_coord, "safety validation")
+Rel(agent_orch, model_router, "route model selection")
+Rel(agent_orch, context_graph, "process context")
+Rel(agent_orch, provider, "chat, stream")
+
+' Service → Repository
+Rel(agent_orch, tool_registry, "execute tools")
+Rel(agent_orch, session_store, "save, load")
+Rel(agent_orch, memory_store, "persist, retrieve")
+Rel(agent_orch, hook_manager, "triggers hooks")
+Rel(model_router, provider, "delegates LLM calls")
+
+' Repository → External
+Rel(tool_registry, sandbox_executor, "sandboxed execution")
+Rel(git_integration, git_repo, "git CLI")
+Rel(sandbox_executor, host_shell, "executes commands")
+Rel(sandbox_executor, host_fs, "file access")
+Rel(provider, llm_backend, "LLM API")
+Rel(repo_intel_mgr, tree_sitter, "AST parsing")
+Rel(repo_intel_mgr, embedding_model, "vector generation")
+Rel(repo_intel_mgr, vector_store, "similarity search")
+
+' Infrastructure
+Rel(structured_logger, obs_platform, "emits logs")
+Rel(otel_collector, otel_collector, "exports traces")
+
+@enduml

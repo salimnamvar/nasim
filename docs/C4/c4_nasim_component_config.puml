@@ -1,12 +1,13 @@
 @startuml c4_nasim_component_config
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
 !theme plain
-
 
 ' ============================================================
 ' Title:     NASIM APPLICATION — Config Component Diagram
 ' Boundary:  NASIM APPLICATION (container) — Config Group
 ' Purpose:   Config layer internal components
+'            CSR Layer: Repository
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
@@ -17,7 +18,7 @@ LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Config Component Diagram
 
 Container_Boundary(nasim_application, "NASIM APPLICATION") {
-    Boundary(config_group, "Config Group") {
+    Boundary(config_group, "Config Group") <<repository>> {
         Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags; validates at load")
         Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety_mode, context_budget, mcp_servers")
     }

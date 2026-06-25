@@ -1,12 +1,13 @@
 @startuml c4_nasim_component_sandbox
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
 !theme plain
-
 
 ' ============================================================
 ' Title:     NASIM APPLICATION — Sandbox Component Diagram
 ' Boundary:  NASIM APPLICATION (container) — Sandbox Group
 ' Purpose:   OS-level process isolation and diff staging for shell and edit operations
+'            CSR Layer: Infrastructure
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
@@ -17,7 +18,7 @@ LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Sandbox Component Diagram
 
 Container_Boundary(nasim_application, "NASIM APPLICATION") {
-    Boundary(sandbox_group, "Sandbox Group") {
+    Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
         Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
         Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")
         Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement, resource limits")

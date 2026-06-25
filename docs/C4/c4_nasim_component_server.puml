@@ -1,5 +1,6 @@
 @startuml c4_nasim_component_server
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
 !theme plain
 
 ' ============================================================
@@ -8,6 +9,7 @@
 ' Purpose:   API component group inside nasim. Shows how
 '            interface containers connect to ServerRouter.
 '            API is a component, not a container.
+'            CSR Layer: Controller
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    CAR refinement loop — C4 correction
@@ -18,14 +20,14 @@ LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — API Component Diagram
 
 Container_Boundary(nasim_application, "NASIM APPLICATION") {
-    Boundary(api_group, "API Group") {
+    Boundary(api_group, "API Group") <<controller>> {
         Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
         Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate for all interface containers.")
         Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
         Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
     }
 
-    Boundary(agent_group, "Agent Group") {
+    Boundary(agent_group, "Agent Group") <<service>> {
         Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop")
     }
 }

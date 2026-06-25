@@ -1,12 +1,14 @@
 @startuml c4_nasim_component_evaluation
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
 
 ' ============================================================
 ' Title:     NASIM APPLICATION — Evaluation Component Diagram
 ' Boundary:  NASIM APPLICATION (container) — Evaluation Group
 ' Purpose:   Task evaluation: success checks, LLM review, testing, retry coordination
+'            CSR Layer: Service
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
@@ -17,7 +19,7 @@ LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Evaluation Component Diagram
 
 Container_Boundary(nasim_application, "NASIM APPLICATION") {
-    Boundary(evaluation_group, "Evaluation Group") {
+    Boundary(evaluation_group, "Evaluation Group") <<service>> {
         Component(eval_engine, "EvaluationEngine", "", "Orchestrates task evaluation: runs checks, scores, retries")
         Component(task_evaluator, "TaskEvaluator", "", "Evaluates task completion against success criteria")
         Component(success_check_runner, "SuccessCheckRunner", "", "Runs user-defined success checks and assertions")

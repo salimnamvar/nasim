@@ -1,12 +1,14 @@
 @startuml c4_nasim_component_hooks
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
 
 ' ============================================================
 ' Title:     NASIM APPLICATION — Hooks Component Diagram
 ' Boundary:  NASIM APPLICATION (container) — Hooks Group
 ' Purpose:   Pre/post hooks for tool use and LLM calls
+'            CSR Layer: Infrastructure
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
@@ -17,7 +19,7 @@ LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Hooks Component Diagram
 
 Container_Boundary(nasim_application, "NASIM APPLICATION") {
-    Boundary(hooks_group, "Hooks Group") {
+    Boundary(hooks_group, "Hooks Group") <<infrastructure>> {
         Component(hook_manager, "HookManager", "nasim/hooks/manager.py", "Registers, discovers, and executes hooks in priority order")
     }
 }

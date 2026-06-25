@@ -1,5 +1,6 @@
 @startuml c4_nasim_component_cli
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
 !theme plain
 
 ' ============================================================
@@ -9,6 +10,7 @@
 '            REPLSession is the entry point; it delegates to
 '            AgentOrchestrator (Service layer) and renders
 '            AgentEvents to terminal via Renderer.
+'            CSR Layer: Controller
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/entities.md
@@ -19,7 +21,7 @@ LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — CLI Component Diagram
 
 Container_Boundary(nasim_application, "NASIM APPLICATION") {
-    Boundary(cli_group, "CLI Group") {
+    Boundary(cli_group, "CLI Group") <<controller>> {
         Component(arg_parser, "ArgParser", "", "CLI argument parsing with layered config overrides")
         Component(repl_session, "REPLSession", "", "Interactive REPL loop, input handling, slash command dispatch")
         Component(renderer, "Renderer", "", "Terminal output: colors, diffs, streaming tokens, tool display")

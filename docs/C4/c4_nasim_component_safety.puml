@@ -1,11 +1,13 @@
 @startuml c4_nasim_component_safety
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
 !theme plain
 
 ' ============================================================
 ' Title:     NASIM APPLICATION — Safety Component Diagram
 ' Boundary:  NASIM APPLICATION (container) — Safety Group
 ' Purpose:   Permission gating, injection scanning, egress inspection
+'            CSR Layer: Service
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
@@ -16,7 +18,7 @@ LAYOUT_WITH_LEGEND()
 title NASIM APPLICATION — Safety Component Diagram
 
 Container_Boundary(nasim_application, "NASIM APPLICATION") {
-    Boundary(safety_group, "Safety Group") {
+    Boundary(safety_group, "Safety Group") <<service>> {
         Component(safety_coord, "SafetyCoordinator", "", "Composes PermissionGate, injection scanner, egress inspector into pipeline")
         Component(permission_gate, "PermissionGate", "", "Evaluates tool safety flags against session safety mode")
         Component(injection_scanner, "InjectionScanner", "", "Detects prompt injection patterns in tool outputs")
