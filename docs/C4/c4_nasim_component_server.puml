@@ -35,15 +35,15 @@ Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop applicatio
 Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application")
 System_Ext(mcp_client_ext, "MCP Client", "External tool or IDE connecting via MCP")
 
-Rel(webapp, server_router, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
-Rel(desktop_app, server_router, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
-Rel(mobile_app, server_router, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
+Rel(webapp, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
+Rel(desktop_app, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
+Rel(mobile_app, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(mcp_client_ext, server_router, "invokes tools via MCP protocol", "stdio / SSE")
 
 Rel(server_app, server_router, "mounts routes")
 Rel(server_router, api_schema, "validates requests/responses")
 Rel(server_router, agent_orch, "delegates to agent orchestrator")
-Rel(server_router, sse_handler, "streams via")
+Rel(server_router, sse_handler, "converts agent events to streaming format")
 Rel(sse_handler, agent_orch, "consumes AgentEvents")
 
 @enduml

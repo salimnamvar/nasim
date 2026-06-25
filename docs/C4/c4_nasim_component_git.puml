@@ -30,7 +30,7 @@ System_Ext(git_repo, "Git Repository", "Version control for project files")
 
 Rel(git_integration, git_status, "reads current state")
 Rel(git_integration, git_commit, "creates commits")
-Rel(git_status, git_repo, "git status, git diff")
-Rel(git_commit, git_repo, "git commit, git add")
+Rel(git_status, git_repo, "reads working tree state and staged changes")
+Rel(git_commit, git_repo, "creates versioned snapshots of project changes")
 
 @enduml

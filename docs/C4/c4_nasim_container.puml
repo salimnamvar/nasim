@@ -85,9 +85,9 @@ Rel(user, desktop_app, "interacts via desktop app", "local")
 Rel(user, mobile_app, "interacts via mobile app", "HTTPS")
 
 Rel(cli_process, core_engine, "delegates tasks", "Internal Call")
-Rel(webapp, api_server, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
-Rel(desktop_app, api_server, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
-Rel(mobile_app, api_server, "HTTP requests + SSE streaming", "HTTP/JSON + SSE")
+Rel(webapp, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
+Rel(desktop_app, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
+Rel(mobile_app, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(mcp_client, api_server, "invokes tools via MCP protocol", "stdio / SSE")
 Rel(api_server, core_engine, "delegates to core agent engine", "Internal Call")
 

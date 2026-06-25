@@ -24,7 +24,7 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 | Diagram | Level | Description |
 |---------|-------|-------------|
-| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 12 external systems |
+| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 11 external systems |
 
 ### Level 2: Containers
 
@@ -36,7 +36,7 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 | Diagram | Level | Description |
 |---------|-------|-------------|
-| `c4_nasim_component_overview.puml` | Component (Overview) | High-level view of all 21 groups with CSR layer coloring and key cross-group relationships |
+| `c4_nasim_component_overview.puml` | Component (Overview) | High-level view of all 21 groups with CSR layer coloring and key cross-group relationships. **SIM-01 exception:** 62 elements — intentionally exceeds 12-element limit as a full-system overview map. Detailed views are in per-group diagrams. |
 
 ## Per-Group Component Diagrams (21 diagrams)
 
@@ -57,9 +57,9 @@ Each per-group diagram shows internal components within `Boundary(nasim_applicat
 | `c4_nasim_component_router.puml` | Router Group | ModelRouter, FallbackChain, ProviderCapabilities |
 | `c4_nasim_component_provider.puml` | Provider Group | Provider (Protocol), LiteLLMProxy |
 | `c4_nasim_component_safety.puml` | Safety Group | SafetyCoordinator, PermissionGate, InjectionScanner, EgressInspector |
-| `c4_nasim_component_context_graph.puml` | Context Graph Group | ContextGraph, PipelineOrchestrator, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, TokenBudgetTracker |
+| `c4_nasim_component_context_graph.puml` | Context Graph Group | ContextGraph, PipelineOrchestrator, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor |
 | `c4_nasim_component_edit_strategy.puml` | Edit Strategy Group | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector |
-| `c4_nasim_component_evaluation.puml` | Evaluation Group | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector, QualitySignal |
+| `c4_nasim_component_evaluation.puml` | Evaluation Group | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector |
 
 ### Repository Layer (Green)
 
@@ -70,14 +70,14 @@ Each per-group diagram shows internal components within `Boundary(nasim_applicat
 | `c4_nasim_component_memory.puml` | Memory Group | MemoryStore, MemoryIndex, MemoryScope, EpisodicMemoryAdapter, SemanticMemoryAdapter, WorkingMemoryAdapter, MemoryRetriever, MemoryIndexer |
 | `c4_nasim_component_config.puml` | Config Group | ConfigLoader, Config (dataclass) |
 | `c4_nasim_component_git.puml` | Git Group | GitIntegration, GitStatus, GitCommit |
-| `c4_nasim_component_repo_intelligence.puml` | Repo Intelligence Group | RepoIntelligenceManager, ASTIndexAdapter, SymbolGraph, RankingService, EmbeddingAdapter, SemanticSearchService, RepoMapBuilder |
+| `c4_nasim_component_repo_intelligence.puml` | Repo Intelligence Group | RepoIntelligenceManager, ASTIndexAdapter, SymbolGraph, EmbeddingAdapter, SemanticSearchService, RepoMapBuilder |
 
 ### Infrastructure Layer (Purple)
 
 | Diagram | Group | Key Components |
 |---------|-------|----------------|
 | `c4_nasim_component_mcp.puml` | MCP Group | MCPClientRuntime, MCPServerRuntime, MCPToolAdapter, MCPDiscovery |
-| `c4_nasim_component_sandbox.puml` | Sandbox Group | SandboxExecutor, SandboxPolicy, SandboxMonitor, ResourceLimiter, DiffSandboxManager, EditStagingArea, DiffComputer, DiffPresenter, StagedApplicator |
+| `c4_nasim_component_sandbox.puml` | Sandbox Group | SandboxExecutor, SandboxPolicy, SandboxMonitor, ResourceLimiter, DiffSandboxManager, EditStagingArea, DiffComputer, StagedApplicator |
 | `c4_nasim_component_observability.puml` | Observability Group | StructuredLogger, MetricsCollector, TraceCorrelator, ContextPropagator, LogRedactor, DualOutputAdapter, InstrumentationMiddleware, OTelExporter |
 | `c4_nasim_component_wire_log.puml` | Wire Log Group | WireLog, WireAppender, WireReader, SessionForkManager |
 | `c4_nasim_component_hooks.puml` | Hooks Group | HookManager |
@@ -267,3 +267,20 @@ All diagrams are traceable to the design chain:
 - **C4** → **UC** (Use Case) → **SQ** (Sequence) → **SM** (State Machine)
 - **Cross-layer sync verified:** All lifelines in SQ diagrams exist as C4 components.
 - **100% design chain consistency** across 148 SQ diagrams and 24 C4 diagrams.
+
+## SIM-01 Compliance (5–12 elements per diagram)
+
+18 of 24 per-group component diagrams comply with SIM-01 (≤12 elements). Six diagrams are documented exceptions:
+
+| Diagram | Elements | Exception Rationale |
+|---------|----------|---------------------|
+| `c4_nasim_component_overview.puml` | 40 | Intentional full-system overview map. Splitting defeats its purpose as a navigation aid. |
+| `c4_nasim_container.puml` | 22 | Container-level view showing all external system integrations. Splitting would break the "system boundary" model. |
+| `c4_nasim_component_tools.puml` | 24 | 16 tool implementations + 8 externals. All tools share the same ABC interface and registry — splitting obscures the polymorphic pattern. |
+| `c4_nasim_component_observability.puml` | 17 | 8 internal components + 9 externals. Observability concerns are tightly coupled (logger ↔ metrics ↔ correlator ↔ propagator). |
+| `c4_nasim_component_agent.puml` | 13 | 7 components + 6 externals. Core agent loop components are inseparable — orchestrator, history, compactor form a single processing pipeline. |
+| `c4_nasim_component_edit_strategy.puml` | 13 | 11 strategy implementations + 2 externals. Polymorphic strategy pattern requires all implementations visible together. |
+
+## SIM-03 Compliance (meaningful intent labels)
+
+All `Rel()` lines use meaningful intent labels (what the relationship accomplishes), not protocol or technology names. Protocol information is placed in the optional technology slot.

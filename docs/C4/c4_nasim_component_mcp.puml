@@ -31,11 +31,11 @@ System_Ext(mcp_server, "MCP Server", "External extension tools")
 System_Ext(mcp_client, "MCP Client", "External tool consumers")
 Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
-Rel(mcp_client_rt, mcp_server, "connects via stdio/SSE")
+Rel(mcp_client_rt, mcp_server, "invokes extension tool operations")
 Rel(mcp_client_rt, mcp_discovery, "discovers tools")
 Rel(mcp_discovery, mcp_tool_adapter, "registers discovered tools")
 Rel(mcp_tool_adapter, tool_registry, "registers as NASIM Application tools")
 Rel(mcp_server_rt, tool_registry, "exposes nasim tools to external clients")
-Rel(mcp_server_rt, mcp_client, "serves MCP protocol via stdio/SSE")
+Rel(mcp_server_rt, mcp_client, "exposes NASIM Application capabilities to external consumers")
 
 @enduml

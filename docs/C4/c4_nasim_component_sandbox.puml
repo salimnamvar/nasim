@@ -23,10 +23,9 @@ Boundary(nasim_application, "NASIM Application") {
         Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")
         Component(sandbox_monitor, "SandboxMonitor", "", "Process monitoring, timeout enforcement, resource limits")
         Component(resource_limiter, "ResourceLimiter", "", "Enforces CPU, memory, and disk quotas per sandbox instance")
-        Component(diff_sandbox_mgr, "DiffSandboxManager", "", "Manages sandboxed diff staging and application")
+        Component(diff_sandbox_mgr, "DiffSandboxManager", "", "Manages sandboxed diff staging, presentation, and application")
         Component(edit_staging_area, "EditStagingArea", "", "Stages file edits before sandbox-validated application")
         Component(diff_computer, "DiffComputer", "", "Computes diffs between original and staged content")
-        Component(diff_presenter, "DiffPresenter", "", "Formats diffs for human review and approval")
         Component(staged_applicator, "StagedApplicator", "", "Applies approved staged diffs to filesystem")
     }
 }
@@ -45,12 +44,10 @@ Rel(sandbox_executor, host_fs, "restricted file access")
 Rel(diff_sandbox_mgr, edit_staging_area, "stages edits")
 Rel(diff_sandbox_mgr, sandbox_executor, "validates in sandbox")
 Rel(edit_staging_area, diff_computer, "computes diff")
-Rel(edit_staging_area, diff_presenter, "presents for review")
 Rel(diff_computer, host_fs, "reads original files")
 Rel(staged_applicator, edit_staging_area, "reads approved edits")
 Rel(staged_applicator, sandbox_executor, "applies in sandbox")
 Rel(staged_applicator, host_fs, "writes final files")
-Rel(diff_presenter, diff_sandbox_mgr, "notifies approval")
 Rel(diff_sandbox_mgr, staged_applicator, "applies approved diffs")
 
 @enduml

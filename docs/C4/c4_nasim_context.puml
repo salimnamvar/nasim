@@ -39,8 +39,7 @@ System_Ext(mcp_client, "MCP Client", "External tools and IDEs that consume NASIM
 System_Ext(git_repo, "Git Repository", "Version-controlled project files — branch state, history, and commits")
 System_Ext(lsp_server, "LSP Server", "Language server providing code intelligence (definitions, references, diagnostics)")
 System_Ext(plugin_dir, "Plugin Directory", "Community plugins installed at ~/.nasim/plugins/")
-System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
-System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana — NASIM Application emits; platform owns collection, storage, and visualization")
+System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana, OTel Collector — NASIM Application emits; platform owns collection, storage, and visualization")
 
 Rel(user, nasim_application, "submits coding tasks and receives AI-generated changes, suggestions, and answers")
 Rel(nasim_application, llm_backend, "sends context and receives code completions", "HTTP/JSON")
@@ -52,7 +51,6 @@ Rel(mcp_client, nasim_application, "invokes NASIM Application tools via MCP prot
 Rel(nasim_application, git_repo, "reads repository state and creates atomic commits", "git CLI")
 Rel(nasim_application, lsp_server, "queries code intelligence for definitions and references", "LSP protocol")
 Rel(nasim_application, plugin_dir, "discovers and loads community plugins at startup", "filesystem")
-Rel(nasim_application, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
-Rel(nasim_application, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
+Rel(nasim_application, obs_platform, "emits structured logs, traces, and metrics for collection", "stdout + HTTP + OTLP/gRPC")
 
 @enduml

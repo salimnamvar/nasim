@@ -20,13 +20,12 @@ title NASIM Application — Context Graph Component Diagram
 Boundary(nasim_application, "NASIM Application") {
     Boundary(context_graph_group, "Context Graph Group") <<service>> {
         Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
-        Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
+        Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages and tracks token budget")
         Component(context_prioritizer, "ContextPrioritizer", "", "Assigns importance score to each ContextNode: recency_weight * (1 - age/max_age) + frequency_weight * edit_count + type_weight. Enables priority-based truncation (lowest importance dropped first).")
         Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget. Drops nodes in ascending importance order (via ContextPrioritizer).")
         Component(distillation_processor, "DistillationProcessor", "", "Summarizes and distills long context nodes")
         Component(injection_processor, "InjectionProcessor", "", "Injects retrieved context (memory, repo map) into context graph")
         Component(compaction_processor, "CompactionProcessor", "", "Merges redundant or overlapping context nodes")
-        Component(token_budget_tracker, "TokenBudgetTracker", "", "Tracks cumulative token usage across context pipeline stages")
     }
 }
 
@@ -39,15 +38,13 @@ Rel(pipeline_orchestrator, truncation_processor, "truncation stage")
 Rel(pipeline_orchestrator, distillation_processor, "distillation stage")
 Rel(pipeline_orchestrator, injection_processor, "injection stage")
 Rel(pipeline_orchestrator, compaction_processor, "compaction stage")
-Rel(pipeline_orchestrator, token_budget_tracker, "track budget")
-Rel(pipeline_orchestrator, context_graph, "operates on graph")
+Rel(pipeline_orchestrator, context_graph, "operates on graph and tracks token budget")
 Rel(context_prioritizer, context_graph, "scores nodes by importance")
 Rel(distillation_processor, llm_backend, "summarization call")
 Rel(injection_processor, memory_store, "injects memory")
 Rel(injection_processor, repo_intel_mgr, "injects repo map")
 Rel(truncation_processor, context_prioritizer, "queries node priorities")
-Rel(truncation_processor, token_budget_tracker, "queries remaining budget")
+Rel(truncation_processor, context_graph, "queries remaining budget")
 Rel(compaction_processor, context_graph, "merges nodes")
-Rel(token_budget_tracker, context_graph, "reads node costs")
 
 @enduml
