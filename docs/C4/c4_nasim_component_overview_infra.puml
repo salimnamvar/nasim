@@ -4,35 +4,57 @@
 !include common/c4_styles.puml
 
 ' ============================================================
-' Title:     NASIM Application — Supporting Infrastructure Overview
+' Title:     NASIM Application — Infrastructure Layer Overview
 ' Boundary:  NASIM Application (container)
-' Purpose:   Cross-cutting infrastructure and supporting services:
-'            MCP extension protocol (bidirectional), sandbox isolation
-'            with host OS dependencies, observability (structured
-'            logging + wire log), hook lifecycle, and context graph
-'            pipeline orchestration. Shows how core orchestration
-'            depends on infrastructure and how infrastructure
-'            connects to external systems.
-'            Core agent orchestration flow is in the companion
+' Purpose:   Infrastructure-focused view showing how the core
+'            entry points (CLI/API) flow through AgentOrchestrator
+'            to infrastructure services: sandbox isolation, MCP
+'            extension protocol, observability (structured logging
+'            + wire log), hook lifecycle, and context graph pipeline.
+'            Shows infrastructure components interacting with
+'            external systems (Host Shell, Host Filesystem, MCP Server).
+'            Core orchestration details (model routing, safety,
+'            evaluation, session, provider) are in the companion
 '            diagram c4_nasim_component_overview.puml.
 '            CSR Pattern (this diagram):
-'            - Service: Context Graph Group (PipelineOrchestrator)
+'            - Controller: CLI Group (REPLSession), API Group (ServerRouter)
+'            - Service: Agent Group (AgentOrchestrator),
+'                       Context Graph Group (PipelineOrchestrator),
+'                       Tool Group (ToolRegistry)
 '            - Infrastructure: MCP Group, Sandbox Group, Observability Group,
 '                              Wire Log Group, Hooks Group
 ' Milestone: v1.0
-' Version:   16.0.0
+' Version:   18.0.0
 ' Source:    docs/entities.md, docs/UC.md
 ' Review:    —
 ' Date:      2026-06-25
 ' ============================================================
 
 LAYOUT_LEFT_RIGHT()
-title NASIM Application — Supporting Infrastructure Overview
+title NASIM Application — Infrastructure Layer Overview
+
+Person(user, "User", "Developer using NASIM")
 
 Boundary(nasim_application, "NASIM Application") {
 
+    Boundary(cli_group, "CLI Group") <<controller>> {
+        Component(repl_session, "REPLSession", "", "Terminal REPL entry point")
+    }
+
+    Boundary(api_group, "API Group") <<controller>> {
+        Component(server_router, "ServerRouter", "FastAPI", "HTTP + SSE entry gate")
+    }
+
+    Boundary(agent_group, "Agent Group") <<service>> {
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat")
+    }
+
     Boundary(context_graph_group, "Context Graph Group") <<service>> {
         Component(pipeline_orch, "PipelineOrchestrator", "", "Orchestrates context pipeline stages and token budget")
+    }
+
+    Boundary(tool_group, "Tool Group") <<repository>> {
+        Component(tool_registry, "ToolRegistry", "", "Tool instance management and dispatch")
     }
 
     Boundary(mcp_group, "MCP Group") <<infrastructure>> {
@@ -56,16 +78,23 @@ Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
-Component_Ext(context_graph, "ContextGraph", "Context Graph Group")
-Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
-
 System_Ext(mcp_server, "MCP Server")
 System_Ext(host_shell, "Host Shell")
 System_Ext(host_fs, "Host Filesystem")
 
+' Entry points: user interacts via CLI and API
+Rel(user, repl_session, "types commands", "terminal REPL")
+Rel(user, server_router, "sends requests", "HTTP/JSON + SSE")
+Rel(repl_session, agent_orch, "delegates user tasks", "UC AGT-01")
+Rel(server_router, agent_orch, "delegates HTTP tasks", "UC AGT-01")
+
+' Core → Infrastructure: orchestrator writes logs and triggers hooks
+Rel(agent_orch, structured_logger, "writes structured logs", "JSON stdout")
+Rel(agent_orch, wire_log, "records agent events for audit")
+Rel(agent_orch, hook_manager, "triggers pre/post hooks", "UC AGT-01")
+
 ' Context Graph pipeline: orchestrator operates on graph
-Rel(pipeline_orch, context_graph, "operates on context graph and tracks token budget")
+Rel(agent_orch, pipeline_orch, "processes context pipeline", "UC EDT-02")
 
 ' Sandbox: ToolRegistry calls SandboxExecutor; executor runs on host
 Rel(tool_registry, sandbox_executor, "executes tools in isolated sandbox", "UC EDT-01")
@@ -75,16 +104,9 @@ Rel(sandbox_executor, host_fs, "reads and writes files", "posix")
 ' MCP: client runtime connects to external MCP servers
 Rel(mcp_client_rt, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
 
-' Observability: core writes to loggers (emit-only path to stdout)
-Rel(agent_orch, structured_logger, "writes structured logs", "JSON stdout")
-Rel(agent_orch, wire_log, "records agent events for audit")
-
-' Hooks: core triggers lifecycle hooks
-Rel(agent_orch, hook_manager, "triggers pre/post hooks", "UC AGT-01")
-
 legend right
-    |<#E3F2FD>  **Controller** | — (see core diagram) |
-    |<#FFF3E0>  **Service**    | Context Graph |
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Context Graph, Tool |
     |<#E8F5E9>  **Repository** | — (see core diagram) |
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks |
 end legend
