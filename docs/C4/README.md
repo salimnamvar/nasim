@@ -24,7 +24,7 @@ Level 3: Component  →  c4_nasim_component_overview.puml (high-level)
 
 | Diagram | Level | Description |
 |---------|-------|-------------|
-| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 15 external systems |
+| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 12 external systems |
 
 ### Level 2: Containers
 

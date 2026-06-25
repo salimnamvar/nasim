@@ -7,6 +7,14 @@
 ' Boundary:  NASIM Application
 ' Purpose:   Show NASIM Application as a code-agent system with one User actor
 '            and all external systems it depends on or is consumed by.
+'
+'            ABSTRACTION LEVEL NOTES:
+'            This is Level 1 (Context). It shows what the system IS and
+'            what it INTERACTS with — not how it works internally.
+'            Internal implementation details (tree_sitter, embedding_model,
+'            vector_store, CLI vs HTTP entry points) belong in Container
+'            or Component diagrams and are intentionally omitted here.
+'
 ' Milestone: v1.0
 ' Version:   9.0.0
 ' Source:    docs/entities.md
@@ -20,38 +28,30 @@ title NASIM Application — System Context
 
 Person(user, "User", "Developer using NASIM Application as an AI coding assistant")
 
-System(nasim_application, "NASIM Application", "Code agent: assists developers with coding tasks via CLI or HTTP API. Integrates LLM providers, file tools, shell execution, web access, and MCP extensions.")
+System(nasim_application, "NASIM Application", "AI-powered coding assistant that understands codebases, executes tasks, and delivers production-ready changes across files, tests, and documentation.")
 
-System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ via litellm")
-System_Ext(host_fs, "Host Filesystem", "Project files and directories read, written, and searched by NASIM Application")
-System_Ext(host_shell, "Host Shell", "Shell for executing commands via sandbox isolation")
-System_Ext(web, "Web", "Documentation pages, package APIs, and search engines")
+System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ providers via litellm")
+System_Ext(host_fs, "Host Filesystem", "Project source code, configuration, and documentation files")
+System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation (landlock, seccomp, bubblewrap) — untrusted commands execute here, not on the bare host")
+System_Ext(web, "Web", "Documentation, package APIs, and search engines for live context retrieval")
 System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM Application via Model Context Protocol")
-System_Ext(mcp_client, "MCP Client", "External tools that invoke NASIM Application as an MCP server")
-System_Ext(git_repo, "Git Repository", "Version-controlled project files")
-System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation (landlock, seccomp, bubblewrap)")
-System_Ext(lsp_server, "LSP Server", "Language server providing code intelligence")
+System_Ext(mcp_client, "MCP Client", "External tools and IDEs that consume NASIM Application's exposed capabilities via MCP")
+System_Ext(git_repo, "Git Repository", "Version-controlled project files — branch state, history, and commits")
+System_Ext(lsp_server, "LSP Server", "Language server providing code intelligence (definitions, references, diagnostics)")
 System_Ext(plugin_dir, "Plugin Directory", "Community plugins installed at ~/.nasim/plugins/")
-System_Ext(tree_sitter, "Tree-sitter", "Incremental AST parser for source code indexing")
-System_Ext(embedding_model, "Embedding Model", "Code embedding generation (local or API-based)")
-System_Ext(vector_store, "Vector Store", "Persistent vector storage for semantic code search")
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
-System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana. NASIM Application emits only — platform owns collection, storage, and visualization.")
+System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana — NASIM Application emits; platform owns collection, storage, and visualization")
 
-Rel(user, nasim_application, "runs coding tasks via CLI or HTTP API", "terminal / HTTP + SSE")
-Rel(nasim_application, llm_backend, "sends chat requests, receives completions", "HTTP/JSON")
+Rel(user, nasim_application, "submits coding tasks and receives AI-generated changes, suggestions, and answers")
+Rel(nasim_application, llm_backend, "sends context and receives code completions", "HTTP/JSON")
 Rel(nasim_application, host_fs, "reads, writes, and searches project files", "path operations")
-Rel(nasim_application, host_shell, "executes shell commands via sandbox", "subprocess")
-Rel(nasim_application, web, "fetches documentation and search results", "HTTP")
+Rel(nasim_application, sandbox, "executes untrusted shell commands within OS-level isolation boundaries", "subprocess + OS primitives")
+Rel(nasim_application, web, "fetches documentation and search results for task context", "HTTP")
 Rel(nasim_application, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
 Rel(mcp_client, nasim_application, "invokes NASIM Application tools via MCP protocol", "stdio / SSE")
-Rel(nasim_application, git_repo, "reads status and creates commits", "git CLI")
-Rel(nasim_application, sandbox, "executes commands in isolated environment", "OS primitives")
-Rel(nasim_application, lsp_server, "queries code intelligence", "LSP protocol")
-Rel(nasim_application, plugin_dir, "discovers and loads plugins at startup", "filesystem")
-Rel(nasim_application, tree_sitter, "parses source code AST for indexing", "library / CLI")
-Rel(nasim_application, embedding_model, "generates code embeddings", "HTTP / local")
-Rel(nasim_application, vector_store, "stores and retrieves code embeddings", "SQLite + vector")
+Rel(nasim_application, git_repo, "reads repository state and creates atomic commits", "git CLI")
+Rel(nasim_application, lsp_server, "queries code intelligence for definitions and references", "LSP protocol")
+Rel(nasim_application, plugin_dir, "discovers and loads community plugins at startup", "filesystem")
 Rel(nasim_application, obs_platform, "emits structured logs to stdout; exposes /metrics for pull-scrape", "stdout + HTTP")
 Rel(nasim_application, otel_collector, "exports traces and metrics (optional)", "OTLP/gRPC")
 
