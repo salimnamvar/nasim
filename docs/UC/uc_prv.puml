@@ -1,5 +1,6 @@
 @startuml uc_prv
 
+
 ' ============================================================
 ' Title:     nasim — UC: Provider Group
 ' Group:     PRV (Provider Layer)
@@ -14,12 +15,16 @@
 ' SQ:        sq_prv01..sq_prv04
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Provider Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -29,6 +34,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -36,35 +42,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ============================================================
 ' Actors
 ' ============================================================
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          PRV-01..PRV-04 — LLM provider registration, chat request/stream, backend selection
-  Preconditions:  LiteLLM proxy configured, provider credentials available
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call); sq_prv01..sq_prv04
-  Excludes:       Provider backend lifecycle (outside scope)
-  Rollback:       N/A — transient stateless operations
-  Design:         LiteLLMProxy wraps litellm for provider abstraction; Provider is the callable handle
-  Returns:
-    - Success: ChatResponse or ProviderHandle
-    - Failure: ProviderError with reason
-end note
+
+
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
+
 
 rectangle "nasim" {
   package "Provider Group (PRV)" {
@@ -75,36 +76,38 @@ rectangle "nasim" {
   }
 }
 
+
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
+
 
 User --> PRV01
 User --> PRV02
 User --> PRV03
 User --> PRV04
 
+
 Router --> PRV01 : dispatches
 Router --> PRV02 : dispatches
 Router --> PRV03 : dispatches
 Router --> PRV04 : dispatches
+
 
 Agent --> PRV01 : calls
 Agent --> PRV02 : calls
 Agent --> PRV03 : calls
 Agent --> PRV04 : calls
 
+
 ' ============================================================
 ' Relationships
 ' ============================================================
 
+
 PRV04 ..> PRV01 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls Provider
-  State:  PRV-01..PRV-04 — each returns ProviderResponse or streams ChatChunk
-  Success: Provider returns chat response / streaming completes
-  Failure: ProviderError with retry handled upstream by AGT-14
-end note
+
+
 
 @enduml

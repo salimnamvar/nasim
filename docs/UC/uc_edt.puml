@@ -1,5 +1,6 @@
 @startuml uc_edt
 
+
 ' ============================================================
 ' Title:     nasim — UC: Edit Strategy Group
 ' Group:     EDT (Edit Strategy)
@@ -12,12 +13,16 @@
 ' SQ:        sq_edt01..sq_edt10
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Edit Strategy Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          EDT-01..EDT-10 — Select edit strategy, apply various strategies, stage diff
-  Preconditions:  StrategySelector initialized, edit strategies registered
-  Contexts:       Called by AGT-01 (PROCESS User Task); sq_edt01..sq_edt10
-  Excludes:       File I/O (see TL-02, TL-03)
-  Rollback:       EDT-07/10 diff sandbox allows undo; EDT-02..06 applied directly (reversible via VCS-02)
-  Design:         StrategySelector picks optimal strategy per model; each strategy implements EditCoder ABC
-  Returns:
-    - Success: EditResult(changes_applied, diff=...)
-    - Failure: EditError with details
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Edit Strategy Group (EDT)" {
@@ -79,9 +80,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> EDT01
 User --> EDT02
@@ -94,6 +97,7 @@ User --> EDT08
 User --> EDT09
 User --> EDT10
 
+
 Router --> EDT01 : dispatches
 Router --> EDT02 : dispatches
 Router --> EDT03 : dispatches
@@ -104,6 +108,7 @@ Router --> EDT07 : dispatches
 Router --> EDT08 : dispatches
 Router --> EDT09 : dispatches
 Router --> EDT10 : dispatches
+
 
 Agent --> EDT01 : calls
 Agent --> EDT02 : calls
@@ -116,9 +121,11 @@ Agent --> EDT08 : calls
 Agent --> EDT09 : calls
 Agent --> EDT10 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
+
 
 EDT01 ..> EDT02 : <<include>>
 EDT01 ..> EDT03 : <<include>>
@@ -130,11 +137,7 @@ EDT01 ..> EDT08 : <<include>>
 EDT01 ..> EDT09 : <<include>>
 EDT07 ..> EDT10 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls StrategySelector
-  State:  EDT-01..EDT-10 — each returns edit result or staged diff
-  Success: Edit applied or staged for review
-  Failure: EditError; strategy selector falls back to next strategy
-end note
+
+
 
 @enduml

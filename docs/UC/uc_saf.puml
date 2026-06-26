@@ -1,5 +1,6 @@
 @startuml uc_saf
 
+
 ' ============================================================
 ' Title:     nasim — UC: Safety Group
 ' Group:     SAF (Safety Layer)
@@ -13,12 +14,16 @@
 ' SQ:        sq_saf01..sq_saf03
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Safety Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -28,6 +33,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -35,35 +41,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ============================================================
 ' Actors
 ' ============================================================
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          SAF-01..SAF-03 — Permission check, user approval, safety mode enforcement
-  Preconditions:  SafetyCoordinator initialized, permission rules loaded
-  Contexts:       Called by AGT-15 (DISPATCH Safety Pipeline); sq_saf01..sq_saf03
-  Excludes:       Safety policy definitions (outside scope)
-  Rollback:       SAF-02 approval request aborts on timeout or rejection
-  Design:         SafetyCoordinator checks permissions before tool dispatch; modes control strictness
-  Returns:
-    - Success: PermissionGranted or ApprovalConfirmed
-    - Failure: PermissionDenied or ApprovalRejected
-end note
+
+
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
+
 
 rectangle "nasim" {
   package "Safety Group (SAF)" {
@@ -73,33 +74,35 @@ rectangle "nasim" {
   }
 }
 
+
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
+
 
 User --> SAF01
 User --> SAF02
 User --> SAF03
 
+
 Router --> SAF01 : dispatches
 Router --> SAF02 : dispatches
 Router --> SAF03 : dispatches
+
 
 Agent --> SAF01 : calls
 Agent --> SAF02 : calls
 Agent --> SAF03 : calls
 
+
 ' ============================================================
 ' Relationships
 ' ============================================================
 
+
 SAF02 ..> SAF01 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls SafetyCoordinator
-  State:  SAF-01..SAF-03 — each returns safety verdict or approval status
-  Success: Permission granted / approval confirmed / mode applied
-  Failure: Permission denied / approval rejected; operation blocked upstream
-end note
+
+
 
 @enduml

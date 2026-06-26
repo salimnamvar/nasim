@@ -1,5 +1,6 @@
 @startuml uc_wrl
 
+
 ' ============================================================
 ' Title:     nasim — UC: Wire Log Group
 ' Group:     WRL (Wire Log)
@@ -12,12 +13,16 @@
 ' SQ:        sq_wrl01..sq_wrl05
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Wire Log Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          WRL-01..WRL-05 — Append, read, seek, fork, checkpoint wire events
-  Preconditions:  WireLog initialized, storage available
-  Contexts:       Called by AGT-03 (UPDATE Conversation); sq_wrl01..sq_wrl05
-  Excludes:       Session persistence (see SSN group)
-  Rollback:       N/A — append-only; checkpoint allows replay from known point
-  Design:         WireLog is append-only event store; TurnIndex enables O(log n) seek
-  Returns:
-    - Success: WireEvent or log position
-    - Failure: WireLogError
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Wire Log Group (WRL)" {
@@ -74,9 +75,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> WRL01
 User --> WRL02
@@ -84,11 +87,13 @@ User --> WRL03
 User --> WRL04
 User --> WRL05
 
+
 Router --> WRL01 : dispatches
 Router --> WRL02 : dispatches
 Router --> WRL03 : dispatches
 Router --> WRL04 : dispatches
 Router --> WRL05 : dispatches
+
 
 Agent --> WRL01 : calls
 Agent --> WRL02 : calls
@@ -96,18 +101,16 @@ Agent --> WRL03 : calls
 Agent --> WRL04 : calls
 Agent --> WRL05 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
 
+
 WRL02 ..> WRL03 : <<include>>
 WRL04 ..> WRL02 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls WireLog
-  State:  WRL-01..WRL-05 — each returns event or log position
-  Success: Event appended / log read / turn seeked / session forked / checkpoint created
-  Failure: WireLogError; upstream retries or falls back
-end note
+
+
 
 @enduml

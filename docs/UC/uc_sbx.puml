@@ -1,5 +1,6 @@
 @startuml uc_sbx
 
+
 ' ============================================================
 ' Title:     nasim — UC: Sandbox Group
 ' Group:     SBX (Sandbox)
@@ -12,12 +13,16 @@
 ' SQ:        sq_sbx01..sq_sbx04
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Sandbox Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          SBX-01..SBX-04 — Isolate, policy, monitor, resource limits
-  Preconditions:  SandboxExecutor initialized, OS sandbox capabilities available
-  Contexts:       Called by TL-05 (DISPATCH Shell Command); sq_sbx01..sq_sbx04
-  Excludes:       Shell command execution itself (see TL-05)
-  Rollback:       SBX-01 process killed on timeout; resources reclaimed
-  Design:         SandboxExecutor wraps nsjail/docker for isolation; policies control permissions
-  Returns:
-    - Success: SandboxResult(stdout, stderr, exit_code)
-    - Failure: SandboxError (timeout, resource exceeded, policy denied)
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Sandbox Group (SBX)" {
@@ -73,38 +74,40 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> SBX01
 User --> SBX02
 User --> SBX03
 User --> SBX04
 
+
 Router --> SBX01 : dispatches
 Router --> SBX02 : dispatches
 Router --> SBX03 : dispatches
 Router --> SBX04 : dispatches
+
 
 Agent --> SBX01 : calls
 Agent --> SBX02 : calls
 Agent --> SBX03 : calls
 Agent --> SBX04 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
+
 
 SBX01 ..> SBX02 : <<include>>
 SBX01 ..> SBX03 : <<include>>
 SBX01 ..> SBX04 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls SandboxExecutor
-  State:  SBX-01..SBX-04 — each returns sandbox verdict or execution result
-  Success: Command isolated, executed, and result collected
-  Failure: SandboxError; upstream blocks the operation
-end note
+
+
 
 @enduml

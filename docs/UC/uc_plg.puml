@@ -1,5 +1,6 @@
 @startuml uc_plg
 
+
 ' ============================================================
 ' Title:     nasim — UC: Plugins Group
 ' Group:     PLG (Plugins)
@@ -12,12 +13,16 @@
 ' SQ:        sq_plg01..sq_plg06
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Plugins Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          PLG-01..PLG-06 — Discover, load, register tools/hooks, enable/disable plugins
-  Preconditions:  PluginLoader initialized, plugin directory exists
-  Contexts:       Called at startup by ConfigLoader; sq_plg01..sq_plg06
-  Excludes:       Plugin authoring (external to nasim)
-  Rollback:       PLG-05/06 enable/disable are reversible
-  Design:         PluginLoader scans ~/.nasim/plugins/; loads manifests; registers with ToolRegistry and HookManager
-  Returns:
-    - Success: PluginManifest or registration confirmation
-    - Failure: PluginError with details
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Plugins Group (PLG)" {
@@ -75,9 +76,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> PLG01
 User --> PLG02
@@ -86,12 +89,14 @@ User --> PLG04
 User --> PLG05
 User --> PLG06
 
+
 Router --> PLG01 : dispatches
 Router --> PLG02 : dispatches
 Router --> PLG03 : dispatches
 Router --> PLG04 : dispatches
 Router --> PLG05 : dispatches
 Router --> PLG06 : dispatches
+
 
 Agent --> PLG01 : calls
 Agent --> PLG02 : calls
@@ -100,19 +105,17 @@ Agent --> PLG04 : calls
 Agent --> PLG05 : calls
 Agent --> PLG06 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
+
 
 PLG01 ..> PLG02 : <<include>>
 PLG02 ..> PLG03 : <<include>>
 PLG02 ..> PLG04 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls PluginLoader
-  State:  PLG-01..PLG-06 — each returns manifest or registration/enablement status
-  Success: Plugin discovered, loaded, registered, enabled/disabled
-  Failure: PluginError; plugin skipped, system continues
-end note
+
+
 
 @enduml

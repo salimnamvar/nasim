@@ -1,5 +1,6 @@
 @startuml uc_vcs
 
+
 ' ============================================================
 ' Title:     nasim — UC: Git Group
 ' Group:     VCS (Git Integration)
@@ -12,12 +13,16 @@
 ' SQ:        sq_vcs01..sq_vcs04
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Git Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          VCS-01..VCS-04 — Git status, diff, commit, auto-commit
-  Preconditions:  Git repository initialized, GitTool configured
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call); sq_vcs01..sq_vcs04
-  Excludes:       Remote operations (push/pull/fetch)
-  Rollback:       VCS-02 commit rollback via git reset; VCS-04 skips on failure
-  Design:         GitTool wraps libgit2 or git CLI; auto-commit triggered by post-edit hook
-  Returns:
-    - Success: GitStatus, DiffOutput, or CommitHash
-    - Failure: GitError with reason
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Git Group (VCS)" {
@@ -73,36 +74,38 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> VCS01
 User --> VCS02
 User --> VCS03
 User --> VCS04
 
+
 Router --> VCS01 : dispatches
 Router --> VCS02 : dispatches
 Router --> VCS03 : dispatches
 Router --> VCS04 : dispatches
+
 
 Agent --> VCS01 : calls
 Agent --> VCS02 : calls
 Agent --> VCS03 : calls
 Agent --> VCS04 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
 
+
 VCS04 ..> VCS02 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls GitTool
-  State:  VCS-01..VCS-04 — each returns status/diff/commit result
-  Success: Git operation completes successfully
-  Failure: GitError; retry handled upstream by AGT-14
-end note
+
+
 
 @enduml

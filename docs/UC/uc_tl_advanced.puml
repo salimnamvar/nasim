@@ -1,5 +1,6 @@
 @startuml uc_tl_advanced
 
+
 ' ============================================================
 ' Title:     nasim — UC: Tool Group — Advanced & Integration Tools
 ' Group:     TL (Tool Layer)
@@ -15,12 +16,16 @@
 ' SQ:        sq_tl11..sq_tl22
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Tool Use Cases — Advanced Tools
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -30,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -37,35 +43,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ============================================================
 ' Actors
 ' ============================================================
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          TL-11..TL-22 — Git, MCP, LSP, registry, subagent, todo, memory, plan tools
-  Preconditions:  ToolRegistry initialized, AgentOrchestrator active
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call); sq_tl11..sq_tl22
-  Excludes:       Core file/shell/search/web tools (see uc_tl.puml)
-  Rollback:       TL-15 spawn rolls back via subagent teardown; TL-16..22 roll back via reverse op
-  Design:         Each tool registered in ToolRegistry; dispatched via AgentOrchestrator
-  Returns:
-    - Success: ToolResult(success=true, data=...)
-    - Failure: ToolResult(success=false, error=...)
-end note
+
+
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
+
 
 rectangle "nasim" {
   package "Integration Tools" as INT_PKG {
@@ -92,9 +93,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
+
 
 User --> TL11
 User --> TL12
@@ -109,6 +112,7 @@ User --> TL20
 User --> TL21
 User --> TL22
 
+
 Router --> TL11 : dispatches
 Router --> TL12 : dispatches
 Router --> TL13 : dispatches
@@ -121,6 +125,7 @@ Router --> TL19 : dispatches
 Router --> TL20 : dispatches
 Router --> TL21 : dispatches
 Router --> TL22 : dispatches
+
 
 Agent --> TL11 : calls
 Agent --> TL12 : calls
@@ -135,11 +140,7 @@ Agent --> TL20 : calls
 Agent --> TL21 : calls
 Agent --> TL22 : calls
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls tool
-  State:  TL-11..TL-22 — each returns ToolResult(success=bool, data|error)
-  Success: Tool executes, returns expected data or confirmation
-  Failure: Tool returns error; caller handles per AGT-14 (HANDLE Error)
-end note
+
+
 
 @enduml

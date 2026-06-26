@@ -1,5 +1,6 @@
 @startuml uc_evl
 
+
 ' ============================================================
 ' Title:     nasim — UC: Evaluation Group
 ' Group:     EVL (Evaluation)
@@ -12,12 +13,16 @@
 ' SQ:        sq_evl01..sq_evl09
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Evaluation Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          EVL-01..EVL-09 — Evaluate task, check completion/success, LLM review, test suite, retry, quality signal, repetition, turn budget
-  Preconditions:  EvaluationEngine initialized
-  Contexts:       Called by AGT-01 (PROCESS User Task); sq_evl01..sq_evl09
-  Excludes:       Edit application (see EDT group)
-  Rollback:       EVL-06 retry is incremental; EVL-09 budget resets per turn
-  Design:         EvaluationEngine orchestrates checks: task completion → success check → LLM review → test suite → retry coordination
-  Returns:
-    - Success: EvaluationVerdict(accepted=true/false, feedback=...)
-    - Failure: EvaluationError
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Evaluation Group (EVL)" {
@@ -78,9 +79,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> EVL01
 User --> EVL02
@@ -92,6 +95,7 @@ User --> EVL07
 User --> EVL08
 User --> EVL09
 
+
 Router --> EVL01 : dispatches
 Router --> EVL02 : dispatches
 Router --> EVL03 : dispatches
@@ -101,6 +105,7 @@ Router --> EVL06 : dispatches
 Router --> EVL07 : dispatches
 Router --> EVL08 : dispatches
 Router --> EVL09 : dispatches
+
 
 Agent --> EVL01 : calls
 Agent --> EVL02 : calls
@@ -112,9 +117,11 @@ Agent --> EVL07 : calls
 Agent --> EVL08 : calls
 Agent --> EVL09 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
+
 
 EVL01 ..> EVL02 : <<include>>
 EVL01 ..> EVL03 : <<include>>
@@ -122,11 +129,7 @@ EVL01 ..> EVL04 : <<include>>
 EVL01 ..> EVL05 : <<include>>
 EVL01 ..> EVL06 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls EvaluationEngine
-  State:  EVL-01..EVL-09 — each returns evaluation verdict or check result
-  Success: Task accepted or feedback provided for revision
-  Failure: EvaluationError; upstream retries or escalates
-end note
+
+
 
 @enduml

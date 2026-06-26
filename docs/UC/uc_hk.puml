@@ -1,5 +1,6 @@
 @startuml uc_hk
 
+
 ' ============================================================
 ' Title:     nasim — UC: Hooks Group
 ' Group:     HK (Hooks)
@@ -12,12 +13,16 @@
 ' SQ:        sq_hk01..sq_hk06
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Hooks Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          HK-01..HK-06 — Register hooks, dispatch pre/post tool/LLM, validate results
-  Preconditions:  HookManager initialized
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call), PRV-02 (REQUEST Chat); sq_hk01..sq_hk06
-  Excludes:       Hook handler implementations (provided by plugins)
-  Rollback:       N/A — hooks are fire-and-observe; validation result determines allow/deny
-  Design:         HookManager maintains priority-ordered registry; dispatches before/after events
-  Returns:
-    - Success: HookResult(action=allow|deny|modify, data=...)
-    - Failure: HookError logged; default allow unless critical
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Hooks Group (HK)" {
@@ -75,9 +76,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> HK01
 User --> HK02
@@ -86,12 +89,14 @@ User --> HK04
 User --> HK05
 User --> HK06
 
+
 Router --> HK01 : dispatches
 Router --> HK02 : dispatches
 Router --> HK03 : dispatches
 Router --> HK04 : dispatches
 Router --> HK05 : dispatches
 Router --> HK06 : dispatches
+
 
 Agent --> HK01 : calls
 Agent --> HK02 : calls
@@ -100,20 +105,18 @@ Agent --> HK04 : calls
 Agent --> HK05 : calls
 Agent --> HK06 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
+
 
 HK02 ..> HK06 : <<include>>
 HK03 ..> HK06 : <<include>>
 HK04 ..> HK06 : <<include>>
 HK05 ..> HK06 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls HookManager
-  State:  HK-01..HK-06 — each returns registration confirmation or hook verdict
-  Success: Hook registered / dispatched / validated
-  Failure: HookError logged; default allow policy applied
-end note
+
+
 
 @enduml

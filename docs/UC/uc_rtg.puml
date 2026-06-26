@@ -1,5 +1,6 @@
 @startuml uc_rtg
 
+
 ' ============================================================
 ' Title:     nasim — UC: Router Group
 ' Group:     RTG (Router Layer)
@@ -14,12 +15,16 @@
 ' SQ:        sq_rtg01..sq_rtg04
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Router Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -29,6 +34,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -36,35 +42,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ============================================================
 ' Actors
 ' ============================================================
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          RTG-01..RTG-04 — Select model, apply fallback, classify task, switch model at runtime
-  Preconditions:  ModelRouter initialized, provider backends registered
-  Contexts:       Called by AGT-01 (PROCESS User Task); sq_rtg01..sq_rtg04
-  Excludes:       Provider registration (see PRV-01)
-  Rollback:       N/A — stateless routing decisions
-  Design:         ModelRouter selects model based on task class; fallback chain ensures availability
-  Returns:
-    - Success: ModelSelection or TaskClass
-    - Failure: NoSuitableModel with retry advice
-end note
+
+
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
+
 
 rectangle "nasim" {
   package "Router Group (RTG)" {
@@ -75,37 +76,39 @@ rectangle "nasim" {
   }
 }
 
+
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
+
 
 User --> RTG01
 User --> RTG02
 User --> RTG03
 User --> RTG04
 
+
 Router --> RTG01 : dispatches
 Router --> RTG02 : dispatches
 Router --> RTG03 : dispatches
 Router --> RTG04 : dispatches
+
 
 Agent --> RTG01 : calls
 Agent --> RTG02 : calls
 Agent --> RTG03 : calls
 Agent --> RTG04 : calls
 
+
 ' ============================================================
 ' Relationships
 ' ============================================================
 
+
 RTG01 ..> RTG03 : <<include>>
 RTG01 ..> RTG02 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls ModelRouter
-  State:  RTG-01..RTG-04 — each returns routing decision or switch confirmation
-  Success: Model selected / fallback applied / task classified / model switched
-  Failure: NoSuitableModel; upstream uses fallback chain or raises error
-end note
+
+
 
 @enduml

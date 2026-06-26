@@ -1,5 +1,6 @@
 @startuml uc_agt
 
+
 ' ============================================================
 ' Title:     nasim — UC: Agent Group
 ' Group:     AGT (Agent Core)
@@ -15,12 +16,16 @@
 ' SQ:        sq_agt01..sq_agt15
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Agent Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -30,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -37,11 +43,13 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
+
 
 skinparam usecase<<extref>> {
   BackgroundColor #FFF9C4
@@ -50,37 +58,33 @@ skinparam usecase<<extref>> {
   BorderStyle dashed
 }
 
+
 ' ============================================================
 ' Actors
 ' ============================================================
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          AGT-01..AGT-15 — Core agentic loop, tool dispatch, conversation, plans, subagents, personas, errors, safety
-  Preconditions:  AgentOrchestrator initialized, LLM provider available
-  Contexts:       Called by API-06 (DISPATCH Message); sq_agt01..sq_agt15
-  Excludes:       Tool implementations (see TL group)
-  Rollback:       AGT-14 handles errors; AGT-08 drains plan queue; AGT-10 collects subagent results
-  Design:         AgentOrchestrator runs agentic loop: provider call → tool dispatch → evaluation → context update
-  Returns:
-    - Success: TaskResult or streaming AgentEvents
-    - Failure: AgentError with recovery path
-end note
+
+
 
 ' ============================================================
 ' Cross-Group External References
 ' ============================================================
 
+
 usecase "SAF-01\nCHECK Permission\n[uc_saf]" as SAF01_ext <<extref>>
 usecase "PRV-02\nREQUEST Chat\n[uc_prv]" as PRV02_ext <<extref>>
 usecase "PRV-03\nSTREAM Chat\n[uc_prv]" as PRV03_ext <<extref>>
 
+
 ' ============================================================
 ' System Boundary
 ' ============================================================
+
 
 rectangle "nasim" {
   package "Agent Group (AGT)" {
@@ -101,17 +105,21 @@ rectangle "nasim" {
   }
 }
 
+
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
+
 
 User --> AGT01 : via API-06 :dispatch
 Router --> AGT01 : delegates
 Agent --> AGT01 : orchestrates
 
+
 ' ============================================================
 ' Relationships (downward <<include>> only)
 ' ============================================================
+
 
 AGT01 ..> AGT02 : <<include>>
 AGT01 ..> AGT03 : <<include>>
@@ -122,19 +130,18 @@ AGT01 ..> AGT11 : <<extend>>
 AGT01 ..> AGT14 : <<extend>>
 AGT01 ..> AGT15 : <<include>>
 
+
 AGT02 ..> SAF01_ext : <<include>>
 AGT02 ..> PRV02_ext : <<include>>
 AGT02 ..> PRV03_ext : <<extend>>
 
+
 AGT07 ..> AGT08 : <<extend>>
+
 
 AGT09 ..> AGT10 : <<include>>
 
-note bottom of Agent
-  Flow:   User → ServerRouter dispatches → AgentOrchestrator runs agentic loop → dispatched to tools/providers
-  State:  AGT-01..AGT-15 — each returns TaskResult, AgentEvent, or confirmation
-  Success: User request processed, tool calls dispatched, response streamed
-  Failure: AgentError; recovery via AGT-14 (HANDLE Error) or retry
-end note
+
+
 
 @enduml

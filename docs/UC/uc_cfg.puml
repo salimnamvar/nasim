@@ -1,5 +1,6 @@
 @startuml uc_cfg
 
+
 ' ============================================================
 ' Title:     nasim — UC: Config Group
 ' Group:     CFG (Configuration)
@@ -12,12 +13,16 @@
 ' SQ:        sq_cfg01..sq_cfg03
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Config Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          CFG-01..CFG-03 — Load, validate, and merge layered config
-  Preconditions:  ConfigLoader initialized, config sources available
-  Contexts:       Called by API-10, API-11; sq_cfg01..sq_cfg03
-  Excludes:       Provider registration (see PRV-01)
-  Rollback:       N/A — config applied atomically at load time
-  Design:         Loads global YAML, project YAML, env vars, CLI flags with precedence
-  Returns:
-    - Success: Config object
-    - Failure: ConfigError with details
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Config Group (CFG)" {
@@ -72,34 +73,36 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> CFG01
 User --> CFG02
 User --> CFG03
 
+
 Router --> CFG01 : dispatches
 Router --> CFG02 : dispatches
 Router --> CFG03 : dispatches
+
 
 Agent --> CFG01 : calls
 Agent --> CFG02 : calls
 Agent --> CFG03 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
 
+
 CFG01 ..> CFG03 : <<include>>
 CFG03 ..> CFG02 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls ConfigLoader
-  State:  CFG-01..CFG-03 — each returns loaded/validated/merged config
-  Success: Config loaded, validated, and applied
-  Failure: ConfigError with source location details
-end note
+
+
 
 @enduml

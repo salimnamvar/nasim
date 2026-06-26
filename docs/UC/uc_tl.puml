@@ -1,5 +1,6 @@
 @startuml uc_tl
 
+
 ' ============================================================
 ' Title:     nasim — UC: Tool Group — Core Tools
 ' Group:     TL (Tool Layer)
@@ -14,12 +15,16 @@
 ' SQ:        sq_tl01..sq_tl10
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Tool Use Cases — Core Tools
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -29,6 +34,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -36,35 +42,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ============================================================
 ' Actors
 ' ============================================================
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          TL-01..TL-10 — Core file, shell, search and web tools
-  Preconditions:  ToolRegistry initialized, AgentOrchestrator active
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call); sq_tl01..sq_tl10
-  Excludes:       Advanced/integration tools (see uc_tl_advanced.puml)
-  Rollback:       N/A — read-only or sandboxed operations
-  Design:         Each tool registered in ToolRegistry; dispatched via AgentOrchestrator
-  Returns:
-    - Success: ToolResult(success=true, data=...)
-    - Failure: ToolResult(success=false, error=...)
-end note
+
+
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
+
 
 rectangle "nasim" {
   package "File Operations" as FILE_PKG {
@@ -87,9 +88,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
+
 
 User --> TL01
 User --> TL02
@@ -102,6 +105,7 @@ User --> TL08
 User --> TL09
 User --> TL10
 
+
 Router --> TL01 : dispatches
 Router --> TL02 : dispatches
 Router --> TL03 : dispatches
@@ -112,6 +116,7 @@ Router --> TL07 : dispatches
 Router --> TL08 : dispatches
 Router --> TL09 : dispatches
 Router --> TL10 : dispatches
+
 
 Agent --> TL01 : calls
 Agent --> TL02 : calls
@@ -124,11 +129,7 @@ Agent --> TL08 : calls
 Agent --> TL09 : calls
 Agent --> TL10 : calls
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls tool
-  State:  TL-01..TL-10 — each returns ToolResult(success=bool, data|error)
-  Success: Tool executes, returns expected data or confirmation
-  Failure: Tool returns error; caller handles per AGT-14 (HANDLE Error)
-end note
+
+
 
 @enduml

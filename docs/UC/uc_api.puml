@@ -1,5 +1,6 @@
 @startuml uc_api
 
+
 ' ============================================================
 ' Title:     nasim — UC: API Group (Entry Gate)
 ' Group:     API (API Entry Gate)
@@ -16,12 +17,16 @@
 ' SQ:        sq_srv01..sq_srv11
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — API Use Cases (Entry Gate)
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -31,6 +36,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -38,11 +44,13 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
+
 
 skinparam usecase<<extref>> {
   BackgroundColor #FFF9C4
@@ -51,45 +59,44 @@ skinparam usecase<<extref>> {
   BorderStyle dashed
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          API-01..API-11 — Session CRUD, message dispatch, tool discovery, config management
-  Preconditions:  ServerRouter initialized, downstream groups registered
-  Contexts:       Called by interface containers (CLI, WebApp); sq_srv01..sq_srv11
-  Excludes:       Direct core access (all requests route through API)
-  Rollback:       API-06 dispatch is stateless; API-04/05/11 modify state and are reversible
-  Design:         ServerRouter maps REST endpoints to downstream group operations; SSE for streaming
-  Returns:
-    - Success: JSON response or SSE stream
-    - Failure: HTTP error with structured error body
-end note
+
+
 
 ' ------------------------------------------------------------
 ' Cross-Group External References
 ' ------------------------------------------------------------
+
 
 usecase "SSN-03\nLIST Sessions\n[uc_ssn]" as SSN03_ext <<extref>>
 usecase "SSN-01\nPERSIST Session\n[uc_ssn]" as SSN01_ext <<extref>>
 usecase "SSN-02\nREAD Session\n[uc_ssn]" as SSN02_ext <<extref>>
 usecase "SSN-09\nDELETE Session\n[uc_ssn]" as SSN09_ext <<extref>>
 
+
 usecase "AGT-01\nPROCESS User Task\n[uc_agt]" as AGT01_ext <<extref>>
+
 
 usecase "CFG-01\nLOAD Config\n[uc_cfg]" as CFG01_ext <<extref>>
 usecase "CFG-03\nAPPLY Layered Config\n[uc_cfg]" as CFG03_ext <<extref>>
 
+
 usecase "TL-14\nLIST Registered Tools\n[uc_tl_advanced]" as TL14_ext <<extref>>
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "API Group (Entry Gate)" {
@@ -107,9 +114,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> API01
 User --> API02
@@ -123,6 +132,7 @@ User --> API09
 User --> API10
 User --> API11
 
+
 Router --> API01 : dispatches
 Router --> API02 : dispatches
 Router --> API03 : dispatches
@@ -135,11 +145,14 @@ Router --> API09 : dispatches
 Router --> API10 : dispatches
 Router --> API11 : dispatches
 
+
 Agent --> API06 : delegates
+
 
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
+
 
 API01 ..> SSN03_ext : <<include>>
 API02 ..> SSN01_ext : <<include>>
@@ -153,11 +166,7 @@ API09 ..> TL14_ext : <<include>>
 API10 ..> CFG01_ext : <<include>>
 API11 ..> CFG03_ext : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter routes → downstream group handler
-  State:  API-01..API-11 — each returns JSON response or SSE stream
-  Success: HTTP 200 with response body
-  Failure: HTTP error (4xx/5xx) with structured error body
-end note
+
+
 
 @enduml

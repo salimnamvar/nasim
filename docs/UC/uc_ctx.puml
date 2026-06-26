@@ -1,5 +1,6 @@
 @startuml uc_ctx
 
+
 ' ============================================================
 ' Title:     nasim — UC: Context Graph Group
 ' Group:     CTX (Context Management)
@@ -12,12 +13,16 @@
 ' SQ:        sq_ctx01..sq_ctx06
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Context Graph Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          CTX-01..CTX-06 — Process context pipeline: truncate, distill, inject, compact, track budget
-  Preconditions:  PipelineOrchestrator initialized, context graph exists
-  Contexts:       Called by AGT-01 (PROCESS User Task); sq_ctx01..sq_ctx06
-  Excludes:       Memory retrieval (see MEM group) and repo-map injection (see RIM-04)
-  Rollback:       N/A — context pipeline is per-turn; previous turn unaffected
-  Design:         PipelineOrchestrator runs stages: truncate → distill → inject → compact; budget tracked
-  Returns:
-    - Success: ContextGraph (pruned, enriched)
-    - Failure: ContextError
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Context Graph Group (CTX)" {
@@ -75,19 +76,25 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
 
+
 User --> CTX01
+
 
 Router --> CTX01 : dispatches
 
+
 Agent --> CTX01 : calls
+
 
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
+
 
 CTX01 ..> CTX02 : <<include>>
 CTX01 ..> CTX03 : <<include>>
@@ -95,11 +102,7 @@ CTX01 ..> CTX04 : <<include>>
 CTX01 ..> CTX05 : <<include>>
 CTX01 ..> CTX06 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls PipelineOrchestrator
-  State:  CTX-01..CTX-06 — pipeline stages return processed context graph
-  Success: Context processed and ready for LLM
-  Failure: ContextError; pipeline aborts, previous context preserved
-end note
+
+
 
 @enduml

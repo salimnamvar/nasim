@@ -1,5 +1,6 @@
 @startuml uc_ssn
 
+
 ' ============================================================
 ' Title:     nasim — UC: Session Group
 ' Group:     SSN (Session)
@@ -12,12 +13,16 @@
 ' SQ:        sq_ssn01..sq_ssn09
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — Session Use Cases
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -27,6 +32,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -34,35 +40,30 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          SSN-01..SSN-09 — Persist, read, list, restore, snapshot, revert, search, branch, delete
-  Preconditions:  SessionStore initialized, storage backend available
-  Contexts:       Called by API group (ServerRouter); sq_ssn01..sq_ssn09
-  Excludes:       Wire log events (see WRL group)
-  Rollback:       SSN-06 revert is itself reversible; SSN-09 delete is permanent
-  Design:         SessionStore uses SQLite; SessionVersioning creates snapshots for revert
-  Returns:
-    - Success: Session or list of sessions
-    - Failure: SessionError
-end note
+
+
 
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Session Group (SSN)" {
@@ -78,9 +79,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> SSN01
 User --> SSN02
@@ -92,6 +95,7 @@ User --> SSN07
 User --> SSN08
 User --> SSN09
 
+
 Router --> SSN01 : dispatches
 Router --> SSN02 : dispatches
 Router --> SSN03 : dispatches
@@ -101,6 +105,7 @@ Router --> SSN06 : dispatches
 Router --> SSN07 : dispatches
 Router --> SSN08 : dispatches
 Router --> SSN09 : dispatches
+
 
 Agent --> SSN01 : calls
 Agent --> SSN02 : calls
@@ -112,20 +117,18 @@ Agent --> SSN07 : calls
 Agent --> SSN08 : calls
 Agent --> SSN09 : calls
 
+
 ' ------------------------------------------------------------
 ' Relationships
 ' ------------------------------------------------------------
+
 
 SSN04 ..> SSN02 : <<include>>
 SSN05 ..> SSN01 : <<include>>
 SSN06 ..> SSN02 : <<include>>
 SSN08 ..> SSN01 : <<include>>
 
-note bottom of Agent
-  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls SessionStore
-  State:  SSN-01..SSN-09 — each returns session data or operation confirmation
-  Success: Session persisted, read, listed, restored, snapshotted, reverted, searched, branched, or deleted
-  Failure: SessionError; upstream returns error to caller
-end note
+
+
 
 @enduml

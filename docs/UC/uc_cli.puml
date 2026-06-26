@@ -1,5 +1,6 @@
 @startuml uc_cli
 
+
 ' ============================================================
 ' Title:     nasim — UC: CLI Group (Interface Container)
 ' Group:     CLI (CLI Interface)
@@ -14,12 +15,16 @@
 ' SQ:        sq_cli01..sq_cli08
 ' ============================================================
 
+
 left to right direction
+
 
 title nasim — CLI Use Cases (Interface Container)
 
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -29,6 +34,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -36,11 +42,13 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
+
 
 skinparam usecase<<extref>> {
   BackgroundColor #FFF9C4
@@ -49,37 +57,33 @@ skinparam usecase<<extref>> {
   BorderStyle dashed
 }
 
+
 ' ------------------------------------------------------------
 ' Actors
 ' ------------------------------------------------------------
+
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
-note top of User
-  Scope:          CLI-01..CLI-08 — REPL loop, slash commands, streaming, args, plan mode, approval, model switch, sessions
-  Preconditions:  REPLSession initialized, CLI arguments parsed
-  Contexts:       Called by User at startup; sq_cli01..sq_cli08
-  Excludes:       Business logic (all delegated to API group)
-  Rollback:       N/A — CLI is a transient interface; no persistent state
-  Design:         All business operations delegate through API group; no direct core access
-  Returns:
-    - Success: Rendered output to terminal
-    - Failure: Error message displayed to user
-end note
+
+
 
 ' ------------------------------------------------------------
 ' Cross-Group External References
 ' ------------------------------------------------------------
 
+
 usecase "API-01\nLIST Sessions\n[uc_api]" as API01_ext <<extref>>
 usecase "API-06\nDISPATCH Message\n[uc_api]" as API06_ext <<extref>>
 usecase "API-11\nUPDATE Config\n[uc_api]" as API11_ext <<extref>>
 
+
 ' ------------------------------------------------------------
 ' System Boundary
 ' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "CLI Group (Interface Container)" {
@@ -94,9 +98,11 @@ rectangle "nasim" {
   }
 }
 
+
 ' ------------------------------------------------------------
 ' Actor -> Use Case Associations
 ' ------------------------------------------------------------
+
 
 User --> CLI01
 User --> CLI02
@@ -106,24 +112,24 @@ User --> CLI06
 User --> CLI07
 User --> CLI08
 
+
 Router --> CLI01 : delegates
 
+
 Agent --> CLI01 : orchestrates
+
 
 ' ------------------------------------------------------------
 ' Relationships (downward <<include>> only)
 ' ------------------------------------------------------------
+
 
 CLI01 ..> CLI03 : <<include>>
 CLI01 ..> API06_ext : <<include>>
 CLI02 ..> API01_ext : <<include>>
 CLI02 ..> API11_ext : <<include>>
 
-note bottom of Router
-  Flow:   User types input → CLI processes → delegates to API → ServerRouter → AgentOrchestrator
-  State:  CLI-01..CLI-08 — each renders output to terminal via SSE stream
-  Success: Command processed, output rendered
-  Failure: Error message displayed; user may retry with different input
-end note
+
+
 
 @enduml
