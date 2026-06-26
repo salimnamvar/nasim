@@ -1,4 +1,4 @@
-@startuml uc_tl_advanced
+@startuml uc_tool_advanced
 
 !include common/uc_styles.puml
 

@@ -1,4 +1,4 @@
-@startuml uc_plg
+@startuml uc_plugins
 
 !include common/uc_styles.puml
 

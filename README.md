@@ -97,7 +97,7 @@ nasim/
 
 Layered config (global → project → env → CLI) is designed but not implemented.
 
-See `docs/UC/uc_cfg.puml` and `docs/C4/c4_nasim_component_config.puml`.
+See `docs/UC/uc_config.puml` and `docs/C4/c4_nasim_component_config.puml`.
 
 ## License
 

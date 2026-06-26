@@ -1,4 +1,4 @@
-@startuml uc_mem
+@startuml uc_memory
 
 !include common/uc_styles.puml
 

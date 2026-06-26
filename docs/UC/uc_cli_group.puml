@@ -1,4 +1,4 @@
-@startuml uc_cli
+@startuml uc_cli_group
 
 !include common/uc_styles.puml
 
@@ -77,9 +77,9 @@ actor "AgentOrchestrator" as Agent <<system>>
 ' ------------------------------------------------------------
 
 
-usecase "API-01\nLIST Sessions\n[uc_api]" as API01_ext <<extref>>
-usecase "API-06\nDISPATCH Message\n[uc_api]" as API06_ext <<extref>>
-usecase "API-11\nUPDATE Config\n[uc_api]" as API11_ext <<extref>>
+usecase "API-01\nLIST Sessions\n[uc_api_group]" as API01_ext <<extref>>
+usecase "API-06\nDISPATCH Message\n[uc_api_group]" as API06_ext <<extref>>
+usecase "API-11\nUPDATE Config\n[uc_api_group]" as API11_ext <<extref>>
 
 
 ' ------------------------------------------------------------

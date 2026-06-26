@@ -1,4 +1,4 @@
-@startuml uc_obs
+@startuml uc_observability
 
 !include common/uc_styles.puml
 

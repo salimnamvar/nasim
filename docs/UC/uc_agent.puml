@@ -1,4 +1,4 @@
-@startuml uc_agt
+@startuml uc_agent
 
 !include common/uc_styles.puml
 
@@ -78,9 +78,9 @@ actor "AgentOrchestrator" as Agent <<system>>
 ' ============================================================
 
 
-usecase "SAF-01\nCHECK Permission\n[uc_saf]" as SAF01_ext <<extref>>
-usecase "PRV-02\nREQUEST Chat\n[uc_prv]" as PRV02_ext <<extref>>
-usecase "PRV-03\nSTREAM Chat\n[uc_prv]" as PRV03_ext <<extref>>
+usecase "SAF-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>>
+usecase "PRV-02\nREQUEST Chat\n[uc_provider]" as PRV02_ext <<extref>>
+usecase "PRV-03\nSTREAM Chat\n[uc_provider]" as PRV03_ext <<extref>>
 
 
 ' ============================================================

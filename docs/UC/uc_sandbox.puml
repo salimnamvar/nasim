@@ -1,4 +1,4 @@
-@startuml uc_sbx
+@startuml uc_sandbox
 
 !include common/uc_styles.puml
 

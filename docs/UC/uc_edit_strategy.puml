@@ -1,4 +1,4 @@
-@startuml uc_edt
+@startuml uc_edit_strategy
 
 !include common/uc_styles.puml
 

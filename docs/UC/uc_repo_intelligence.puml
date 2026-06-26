@@ -1,4 +1,4 @@
-@startuml uc_rim
+@startuml uc_repo_intelligence
 
 !include common/uc_styles.puml
 

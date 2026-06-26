@@ -1,4 +1,4 @@
-@startuml uc_rtg
+@startuml uc_router
 
 !include common/uc_styles.puml
 

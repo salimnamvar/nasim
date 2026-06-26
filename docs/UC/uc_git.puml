@@ -1,4 +1,4 @@
-@startuml uc_vcs
+@startuml uc_git
 
 !include common/uc_styles.puml
 

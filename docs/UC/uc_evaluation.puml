@@ -1,4 +1,4 @@
-@startuml uc_evl
+@startuml uc_evaluation
 
 !include common/uc_styles.puml
 
