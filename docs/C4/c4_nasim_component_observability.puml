@@ -37,6 +37,10 @@ Component_Ext(wire_log, "WireLog", "Wire Log Group")
 Component_Ext(config_loader, "ConfigLoader", "Config Group")
 Component_Ext(renderer, "Renderer", "CLI Group")
 
+System_Ext(stdout, "stdout", "Standard output stream")
+System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
+System_Ext(prometheus, "Prometheus", "Metrics collection and storage")
+
 Rel(agent_orch, structured_logger, "emits agent lifecycle events to structured log")
 Rel(agent_orch, metrics_collector, "records token usage, latency, and tool call metrics")
 Rel(agent_orch, context_propagator, "obtains trace context for event correlation")
@@ -65,10 +69,6 @@ Rel(config_loader, structured_logger, "configures log level and format")
 Rel(config_loader, metrics_collector, "enables or disables metrics emission")
 Rel(config_loader, log_redactor, "configures redaction rules")
 Rel(config_loader, otel_exporter, "enables or disables OTel feature")
-
-System_Ext(stdout, "stdout", "Standard output stream")
-System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
-System_Ext(prometheus, "Prometheus", "Metrics collection and storage")
 
 Rel(structured_logger, stdout, "writes structured JSON logs to stdout", "stdout — emit path ends here")
 Rel(metrics_collector, prometheus, "exposes /metrics for pull scrape", "HTTP GET — pull model only")
