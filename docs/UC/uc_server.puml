@@ -8,15 +8,29 @@
 '            Sole entry point for all interface containers
 '            (CLI, WebApp, DesktopApp, MobileApp).
 '            ROD-compliant REST endpoints (AIP-136/193).
+'            Entry chain: User → ServerRouter → downstream groups
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    —
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_srv01..sq_srv11
 ' ============================================================
 
 left to right direction
 
 title nasim — API Use Cases (Entry Gate)
+
+note top of User
+  Scope:          API-01..API-11 — Session CRUD, message dispatch, tool discovery, config management
+  Preconditions:  ServerRouter initialized, downstream groups registered
+  Contexts:       Called by interface containers (CLI, WebApp); sq_srv01..sq_srv11
+  Excludes:       Direct core access (all requests route through API)
+  Rollback:       API-06 dispatch is stateless; API-04/05/11 modify state and are reversible
+  Design:         ServerRouter maps REST endpoints to downstream group operations; SSE for streaming
+  Returns:
+    - Success: JSON response or SSE stream
+    - Failure: HTTP error with structured error body
+end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -49,15 +63,17 @@ skinparam usecase<<extref>> {
   BorderStyle dashed
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
 actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' Cross-Group External References
-' ============================================================
+' ------------------------------------------------------------
 
 usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
 usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
@@ -69,11 +85,11 @@ usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
 usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
 usecase "CFG-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
 
-usecase "TL-14\nLIST Registered Tools\n[uc_tools]" as TL14_ext <<extref>>
+usecase "TL-14\nLIST Registered Tools\n[uc_tl_advanced]" as TL14_ext <<extref>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
 
 rectangle "nasim" {
   package "API Group (Entry Gate)" {
@@ -91,9 +107,9 @@ rectangle "nasim" {
   }
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
 User --> API01
 User --> API02
@@ -107,9 +123,23 @@ User --> API09
 User --> API10
 User --> API11
 
-' ============================================================
-' Relationships (API -> Core UC traceability)
-' ============================================================
+Router --> API01 : dispatches
+Router --> API02 : dispatches
+Router --> API03 : dispatches
+Router --> API04 : dispatches
+Router --> API05 : dispatches
+Router --> API06 : dispatches
+Router --> API07 : dispatches
+Router --> API08 : dispatches
+Router --> API09 : dispatches
+Router --> API10 : dispatches
+Router --> API11 : dispatches
+
+Agent --> API06 : delegates
+
+' ------------------------------------------------------------
+' Relationships
+' ------------------------------------------------------------
 
 API01 ..> SSN03_ext : <<include>>
 API02 ..> SSN01_ext : <<include>>
@@ -122,5 +152,12 @@ API08 ..> TL14_ext : <<include>>
 API09 ..> TL14_ext : <<include>>
 API10 ..> CFG01_ext : <<include>>
 API11 ..> CFG03_ext : <<include>>
+
+note bottom of Agent
+  Flow:   User request → ServerRouter routes → downstream group handler
+  State:  API-01..API-11 — each returns JSON response or SSE stream
+  Success: HTTP 200 with response body
+  Failure: HTTP error (4xx/5xx) with structured error body
+end note
 
 @enduml

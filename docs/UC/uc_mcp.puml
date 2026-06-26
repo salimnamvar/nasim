@@ -7,13 +7,26 @@
 ' Purpose:   MCP as first-class subsystem: client/server runtime, tool adapter, discovery
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_mcp01..sq_mcp04
 ' ============================================================
 
 left to right direction
 
 title nasim — MCP Use Cases
+
+note top of User
+  Scope:          MCP-01..MCP-04 — Connect MCP server, discover tools, adapt tools, expose nasim tools
+  Preconditions:  MCPClientRuntime initialized
+  Contexts:       Called by TL-12 (DISPATCH MCP Extension); sq_mcp01..sq_mcp04
+  Excludes:       External MCP server implementations (outside scope)
+  Rollback:       MCP-01 connection closes on disconnect; MCP-04 exposure is reversible
+  Design:         MCPClientRuntime manages stdio/SSE connections; MCPToolAdapter wraps tools as MCP tools
+  Returns:
+    - Success: MCPConnection, ToolList, AdaptedTool, ExposureStatus
+    - Failure: MCPError
+end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -39,16 +52,18 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
+actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 actor "MCP Client" as MCPClient <<system>>
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
 
 rectangle "nasim" {
   package "MCP Group (MCP)" {
@@ -59,20 +74,39 @@ rectangle "nasim" {
   }
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-MCPClient --> MCP04
-Agent --> MCP01
-Agent --> MCP02
-Agent --> MCP03
+User --> MCP01
+User --> MCP02
+User --> MCP03
+User --> MCP04
 
-' ============================================================
+MCPClient --> MCP04 : calls
+
+Router --> MCP01 : dispatches
+Router --> MCP02 : dispatches
+Router --> MCP03 : dispatches
+Router --> MCP04 : dispatches
+
+Agent --> MCP01 : calls
+Agent --> MCP02 : calls
+Agent --> MCP03 : calls
+Agent --> MCP04 : calls
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
 
 MCP01 ..> MCP02 : <<include>>
 MCP02 ..> MCP03 : <<include>>
+
+note bottom of Agent
+  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls MCP components
+  State:  MCP-01..MCP-04 — each returns connection, tools, or exposure status
+  Success: MCP server connected, tools discovered/adapted/exposed
+  Failure: MCPError; upstream retries or falls back
+end note
 
 @enduml

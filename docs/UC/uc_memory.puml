@@ -4,16 +4,29 @@
 ' Title:     nasim — UC: Memory Group
 ' Group:     MEM (Memory)
 ' Boundary:  nasim code agent
-' Purpose:   Cross-session knowledge persistence, retrieval, and RAG adapters
+' Purpose:   Cross-session knowledge persistence, retrieval, search, scoping
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_mem01..sq_mem04
 ' ============================================================
 
 left to right direction
 
 title nasim — Memory Use Cases
+
+note top of User
+  Scope:          MEM-01..MEM-04 — Persist, recall, search, scope knowledge entries
+  Preconditions:  MemoryStore initialized, storage backend available
+  Contexts:       Called by TL-19 (PERSIST Memory), TL-20 (RECALL Memory); sq_mem01..sq_mem04
+  Excludes:       Memory tool implementation (see TL-19, TL-20)
+  Rollback:       MEM-01 is idempotent; no rollback needed
+  Design:         MemoryStore uses SQLite with FTS5; scoping isolates by global/project/session
+  Returns:
+    - Success: KnowledgeEntry or list of entries
+    - Failure: MemoryError
+end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -39,15 +52,17 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "Agent" as Agent <<system>>
+actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
 
 rectangle "nasim" {
   package "Memory Group (MEM)" {
@@ -58,20 +73,37 @@ rectangle "nasim" {
   }
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-Agent --> MEM01
-Agent --> MEM02
-Agent --> MEM03
-Agent --> MEM04
+User --> MEM01
+User --> MEM02
+User --> MEM03
+User --> MEM04
 
-' ============================================================
+Router --> MEM01 : dispatches
+Router --> MEM02 : dispatches
+Router --> MEM03 : dispatches
+Router --> MEM04 : dispatches
+
+Agent --> MEM01 : calls
+Agent --> MEM02 : calls
+Agent --> MEM03 : calls
+Agent --> MEM04 : calls
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
 
 MEM01 ..> MEM04 : <<include>>
 MEM02 ..> MEM03 : <<include>>
+
+note bottom of Agent
+  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls MemoryStore
+  State:  MEM-01..MEM-04 — each returns stored/retrieved knowledge or search results
+  Success: Knowledge persisted / recalled / searched / scoped
+  Failure: MemoryError; upstream retries or falls back
+end note
 
 @enduml

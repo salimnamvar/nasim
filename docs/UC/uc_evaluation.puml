@@ -7,13 +7,26 @@
 ' Purpose:   Task evaluation: success checks, LLM review, retry coordination
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_evl01..sq_evl09
 ' ============================================================
 
 left to right direction
 
 title nasim — Evaluation Use Cases
+
+note top of User
+  Scope:          EVL-01..EVL-09 — Evaluate task, check completion/success, LLM review, test suite, retry, quality signal, repetition, turn budget
+  Preconditions:  EvaluationEngine initialized
+  Contexts:       Called by AGT-01 (PROCESS User Task); sq_evl01..sq_evl09
+  Excludes:       Edit application (see EDT group)
+  Rollback:       EVL-06 retry is incremental; EVL-09 budget resets per turn
+  Design:         EvaluationEngine orchestrates checks: task completion → success check → LLM review → test suite → retry coordination
+  Returns:
+    - Success: EvaluationVerdict(accepted=true/false, feedback=...)
+    - Failure: EvaluationError
+end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -39,52 +52,81 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "Agent" as Agent <<system>>
+actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
 
 rectangle "nasim" {
   package "Evaluation Group (EVL)" {
-    usecase "**EVL-01 EVALUATE Task**\n--\nOrchestrate task evaluation: checks, scores, retries" as EVL01
-    usecase "**EVL-02 CHECK Task Completion**\n--\nEvaluate task completion against success criteria" as EVL02
+    usecase "**EVL-01 EVALUATE Task**\n--\nOrchestrate task evaluation:\nchecks, scores, retries" as EVL01
+    usecase "**EVL-02 CHECK Task Completion**\n--\nEvaluate task completion\nagainst success criteria" as EVL02
     usecase "**EVL-03 CHECK Success**\n--\nRun user-defined success checks" as EVL03
-    usecase "**EVL-04 VALIDATE With LLM**\n--\nLLM-based code review and quality assessment" as EVL04
+    usecase "**EVL-04 VALIDATE With LLM**\n--\nLLM-based code review\nand quality assessment" as EVL04
     usecase "**EVL-05 VALIDATE Test Suite**\n--\nRun project test suites" as EVL05
-    usecase "**EVL-06 COORDINATE Retry**\n--\nCoordinate retry with backoff and escalation" as EVL06
-    usecase "**EVL-07 RECORD Quality Signal**\n--\nProduce accept/reject with feedback" as EVL07
-    usecase "**EVL-08 DETECT Repetition**\n--\nDetect repeated failures or loops" as EVL08
-    usecase "**EVL-09 INJECT Turn Budget**\n--\nInject turn budget limits into context" as EVL09
+    usecase "**EVL-06 COORDINATE Retry**\n--\nCoordinate retry with\nbackoff and escalation" as EVL06
+    usecase "**EVL-07 RECORD Quality Signal**\n--\nProduce accept/reject\nwith feedback" as EVL07
+    usecase "**EVL-08 DETECT Repetition**\n--\nDetect repeated failures\nor loops" as EVL08
+    usecase "**EVL-09 INJECT Turn Budget**\n--\nInject turn budget limits\ninto context" as EVL09
   }
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-Agent --> EVL01
-Agent --> EVL02
-Agent --> EVL03
-Agent --> EVL04
-Agent --> EVL05
-Agent --> EVL06
-Agent --> EVL07
-Agent --> EVL08
-Agent --> EVL09
+User --> EVL01
+User --> EVL02
+User --> EVL03
+User --> EVL04
+User --> EVL05
+User --> EVL06
+User --> EVL07
+User --> EVL08
+User --> EVL09
 
-' ============================================================
+Router --> EVL01 : dispatches
+Router --> EVL02 : dispatches
+Router --> EVL03 : dispatches
+Router --> EVL04 : dispatches
+Router --> EVL05 : dispatches
+Router --> EVL06 : dispatches
+Router --> EVL07 : dispatches
+Router --> EVL08 : dispatches
+Router --> EVL09 : dispatches
+
+Agent --> EVL01 : calls
+Agent --> EVL02 : calls
+Agent --> EVL03 : calls
+Agent --> EVL04 : calls
+Agent --> EVL05 : calls
+Agent --> EVL06 : calls
+Agent --> EVL07 : calls
+Agent --> EVL08 : calls
+Agent --> EVL09 : calls
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
 
 EVL01 ..> EVL02 : <<include>>
 EVL01 ..> EVL03 : <<include>>
 EVL01 ..> EVL04 : <<include>>
 EVL01 ..> EVL05 : <<include>>
 EVL01 ..> EVL06 : <<include>>
+
+note bottom of Agent
+  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls EvaluationEngine
+  State:  EVL-01..EVL-09 — each returns evaluation verdict or check result
+  Success: Task accepted or feedback provided for revision
+  Failure: EvaluationError; upstream retries or escalates
+end note
 
 @enduml

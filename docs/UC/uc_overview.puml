@@ -7,15 +7,29 @@
 ' Purpose:   Cross-cutting view of all UC groups.
 '            Single User actor. All business operations route
 '            through the API Group (Entry Gate).
+'            Entry chain: User → ServerRouter → AgentOrchestrator → tools
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
-' Review:    —
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        All sq_*.puml diagrams (cross-cutting reference)
 ' ============================================================
 
 left to right direction
 
 title nasim — UC Overview (API-First)
+
+note top of User
+  Scope:          All 21 UC groups — cross-cutting view of system capabilities
+  Preconditions:  All groups registered, system initialized
+  Contexts:       All sq_*.puml diagrams; 148 UCs total
+  Excludes:       Detailed UC relationships (see per-group diagrams)
+  Rollback:       N/A — overview diagram; no operational state
+  Design:         All interface containers route through API group; Agent group orchestrates tools
+  Returns:
+    - Success: UC group summary
+    - Failure: N/A
+end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -48,18 +62,19 @@ skinparam usecase<<extref>> {
   BorderStyle dashed
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
 actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 actor "MCP Client" as MCPClient <<system>>
 actor "Observability Platform" as Platform <<system>>
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
 
 rectangle "nasim" {
 
@@ -151,25 +166,22 @@ rectangle "nasim" {
   }
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
 User --> cli_group
 User --> webapp_group
 User --> desktop_group
 User --> mobile_group
 
-cli_group ..> api_group : <<include>> : all routes through API
-webapp_group ..> api_group : <<include>> : all routes through API
-desktop_group ..> api_group : <<include>> : all routes through API
-mobile_group ..> api_group : <<include>> : all routes through API
-
 MCPClient --> mcp_group
 
 Platform --> observability_group
 
-Agent --> agent_group
+Router --> api_group : entry gate
+
+Agent --> agent_group : orchestrates
 Agent --> provider_group
 Agent --> router_group
 Agent --> tool_group
@@ -189,9 +201,14 @@ Agent --> evaluation_group
 Agent --> wire_log_group
 Agent --> context_graph_group
 
-' ============================================================
+' ------------------------------------------------------------
 ' Key Relationships
-' ============================================================
+' ------------------------------------------------------------
+
+cli_group ..> api_group : <<include>> : all routes through API
+webapp_group ..> api_group : <<include>> : all routes through API
+desktop_group ..> api_group : <<include>> : all routes through API
+mobile_group ..> api_group : <<include>> : all routes through API
 
 api_group ..> agent_group : <<include>>
 api_group ..> session_group : <<include>>
@@ -202,5 +219,12 @@ agent_group ..> router_group : <<include>>
 agent_group ..> context_graph_group : <<include>>
 agent_group ..> edit_strategy_group : <<extend>>
 agent_group ..> evaluation_group : <<extend>>
+
+note bottom of Agent
+  Flow:   User → Interface Container → API Group (ServerRouter) → Agent Group → Tools / Providers
+  State:  148 UCs across 21 groups; all routed through API entry gate
+  Success: All groups registered and discoverable
+  Failure: N/A — overview diagram
+end note
 
 @enduml

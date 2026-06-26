@@ -5,17 +5,30 @@
 ' Group:     CLI (CLI Interface)
 ' Boundary:  nasim code agent
 ' Purpose:   CLI-specific interface UCs: REPL, slash commands, rendering.
-'            ALL business operations delegate to the API (ServerRouter).
-'            No direct access to core library services.
+'            ALL business operations delegate to API (ServerRouter).
+'            Entry chain: User → ServerRouter → AgentOrchestrator
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    —
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_cli01..sq_cli08
 ' ============================================================
 
 left to right direction
 
 title nasim — CLI Use Cases (Interface Container)
+
+note top of User
+  Scope:          CLI-01..CLI-08 — REPL loop, slash commands, streaming, args, plan mode, approval, model switch, sessions
+  Preconditions:  REPLSession initialized, CLI arguments parsed
+  Contexts:       Called by User at startup; sq_cli01..sq_cli08
+  Excludes:       Business logic (all delegated to API group)
+  Rollback:       N/A — CLI is a transient interface; no persistent state
+  Design:         All business operations delegate through API group; no direct core access
+  Returns:
+    - Success: Rendered output to terminal
+    - Failure: Error message displayed to user
+end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -35,6 +48,12 @@ skinparam actor {
   FontSize 12
 }
 
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
 skinparam usecase<<extref>> {
   BackgroundColor #FFF9C4
   BorderColor #F9A825
@@ -42,46 +61,69 @@ skinparam usecase<<extref>> {
   BorderStyle dashed
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
 actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 
-' ============================================================
-' Cross-Group External References (API Entry Gate)
-' ============================================================
+' ------------------------------------------------------------
+' Cross-Group External References
+' ------------------------------------------------------------
 
-usecase "API-01\nLIST Sessions\n[API Group]" as API01_ext <<extref>>
-usecase "API-06\nDISPATCH Message\n[API Group]" as API06_ext <<extref>>
-usecase "API-11\nUPDATE Config\n[API Group]" as API11_ext <<extref>>
+usecase "API-01\nLIST Sessions\n[uc_server]" as API01_ext <<extref>>
+usecase "API-06\nDISPATCH Message\n[uc_server]" as API06_ext <<extref>>
+usecase "API-11\nUPDATE Config\n[uc_server]" as API11_ext <<extref>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
 
 rectangle "nasim" {
   package "CLI Group (Interface Container)" {
     usecase "**CLI-01 PROCESS User Input**\n--\nREPL loop, input handling.\nDelegates ALL business ops to API." as CLI01
     usecase "**CLI-02 DISPATCH Slash Command**\n--\nMap /cmd strings to API calls.\n/sessions → API-01, /model → API-11" as CLI02
     usecase "**CLI-03 STREAM Output**\n--\nRender AgentEvents from API SSE stream to terminal" as CLI03
+    usecase "**CLI-04 READ CLI Arguments**\n--\nParse startup CLI arguments.\n<<include>> CFG-01" as CLI04
+    usecase "**CLI-05 ENABLE Plan Mode**\n--\n/plan command.\n<<include>> AGT-07" as CLI05
+    usecase "**CLI-06 REQUEST Approval**\n--\nSafety approval prompt.\n<<include>> SAF-02" as CLI06
+    usecase "**CLI-07 SWITCH Model**\n--\n/model command.\n<<include>> RTG-04" as CLI07
+    usecase "**CLI-08 LIST Sessions**\n--\n/sessions command.\n<<include>> API-01" as CLI08
   }
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
 User --> CLI01
 User --> CLI02
+User --> CLI04
+User --> CLI05
+User --> CLI06
+User --> CLI07
+User --> CLI08
 
-' ============================================================
-' Relationships
-' ============================================================
+Router --> CLI01 : delegates
+
+Agent --> CLI01 : orchestrates
+
+' ------------------------------------------------------------
+' Relationships (downward <<include>> only)
+' ------------------------------------------------------------
 
 CLI01 ..> CLI03 : <<include>>
-CLI01 ..> API06_ext : <<include>> : delegates to API
-CLI02 ..> API01_ext : <<include>> : /sessions → API-01
-CLI02 ..> API11_ext : <<include>> : /model → API-11
+CLI01 ..> API06_ext : <<include>>
+CLI02 ..> API01_ext : <<include>>
+CLI02 ..> API11_ext : <<include>>
+
+note bottom of Router
+  Flow:   User types input → CLI processes → delegates to API → ServerRouter → AgentOrchestrator
+  State:  CLI-01..CLI-08 — each renders output to terminal via SSE stream
+  Success: Command processed, output rendered
+  Failure: Error message displayed; user may retry with different input
+end note
 
 @enduml

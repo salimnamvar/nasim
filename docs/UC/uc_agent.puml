@@ -19,6 +19,18 @@ left to right direction
 
 title nasim — Agent Use Cases
 
+note top of User
+  Scope:          AGT-01..AGT-15 — Core agentic loop, tool dispatch, conversation, plans, subagents, personas, errors, safety
+  Preconditions:  AgentOrchestrator initialized, LLM provider available
+  Contexts:       Called by API-06 (DISPATCH Message); sq_agt01..sq_agt15
+  Excludes:       Tool implementations (see TL group)
+  Rollback:       AGT-14 handles errors; AGT-08 drains plan queue; AGT-10 collects subagent results
+  Design:         AgentOrchestrator runs agentic loop: provider call → tool dispatch → evaluation → context update
+  Returns:
+    - Success: TaskResult or streaming AgentEvents
+    - Failure: AgentError with recovery path
+end note
+
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
@@ -56,6 +68,7 @@ skinparam usecase<<extref>> {
 
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 
 ' ============================================================
 ' Cross-Group External References
@@ -94,6 +107,7 @@ rectangle "nasim" {
 
 User --> AGT01 : via API-06 :dispatch
 Router --> AGT01 : delegates
+Agent --> AGT01 : orchestrates
 
 ' ============================================================
 ' Relationships (downward <<include>> only)
@@ -115,5 +129,12 @@ AGT02 ..> PRV03_ext : <<extend>>
 AGT07 ..> AGT08 : <<extend>>
 
 AGT09 ..> AGT10 : <<include>>
+
+note bottom of Agent
+  Flow:   User → ServerRouter dispatches → AgentOrchestrator runs agentic loop → dispatched to tools/providers
+  State:  AGT-01..AGT-15 — each returns TaskResult, AgentEvent, or confirmation
+  Success: User request processed, tool calls dispatched, response streamed
+  Failure: AgentError; recovery via AGT-14 (HANDLE Error) or retry
+end note
 
 @enduml

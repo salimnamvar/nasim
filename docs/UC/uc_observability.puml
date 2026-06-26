@@ -7,13 +7,26 @@
 ' Purpose:   Emit-only structured logging, metrics, trace correlation (tenas pattern)
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    —
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_obs01..sq_obs06
 ' ============================================================
 
 left to right direction
 
 title nasim — Observability Use Cases
+
+note top of User
+  Scope:          OBS-01..OBS-06 — Log, metrics, trace correlation, redact, /metrics endpoint, OTLP export
+  Preconditions:  StructuredLogger initialized
+  Contexts:       Called by all system components; sq_obs01..sq_obs06
+  Excludes:       Log storage/rotation (outside scope)
+  Rollback:       N/A — emit-only; no side effects to roll back
+  Design:         StructuredLogger writes JSON to stdout; MetricsCollector serves /metrics; OTel export optional
+  Returns:
+    - Success: LogEntry written or metric recorded
+    - Failure: LogError (non-fatal, logged internally)
+end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -39,17 +52,18 @@ skinparam actor<<system>> {
   FontColor #0D47A1
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
 actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 actor "Observability Platform" as Platform <<system>>
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
 
 rectangle "nasim" {
   package "Observability Group (OBS)" {
@@ -62,24 +76,40 @@ rectangle "nasim" {
   }
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
 User --> OBS05
-Platform --> OBS05
-Agent --> OBS01
-Agent --> OBS02
-Agent --> OBS03
-Agent --> OBS04
-Agent --> OBS06
+Platform --> OBS05 : scrapes
 
-' ============================================================
+Router --> OBS05 : dispatches
+Router --> OBS01 : dispatches
+Router --> OBS02 : dispatches
+Router --> OBS03 : dispatches
+Router --> OBS04 : dispatches
+Router --> OBS06 : dispatches
+
+Agent --> OBS01 : calls
+Agent --> OBS02 : calls
+Agent --> OBS03 : calls
+Agent --> OBS04 : calls
+Agent --> OBS05 : calls
+Agent --> OBS06 : calls
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
 
 OBS02 ..> OBS03 : <<include>>
 OBS04 ..> OBS01 : <<extend>>
 OBS04 ..> OBS02 : <<extend>>
+
+note bottom of Agent
+  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls Observability components
+  State:  OBS-01..OBS-06 — each returns emission confirmation or metric data
+  Success: Log written, metric recorded, trace correlated, /metrics served, OTLP exported
+  Failure: LogError (non-fatal); system continues
+end note
 
 @enduml

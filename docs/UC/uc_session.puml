@@ -7,13 +7,26 @@
 ' Purpose:   Session persistence, versioning, search, fork
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_ssn01..sq_ssn09
 ' ============================================================
 
 left to right direction
 
 title nasim — Session Use Cases
+
+note top of User
+  Scope:          SSN-01..SSN-09 — Persist, read, list, restore, snapshot, revert, search, branch, delete
+  Preconditions:  SessionStore initialized, storage backend available
+  Contexts:       Called by API group (ServerRouter); sq_ssn01..sq_ssn09
+  Excludes:       Wire log events (see WRL group)
+  Rollback:       SSN-06 revert is itself reversible; SSN-09 delete is permanent
+  Design:         SessionStore uses SQLite; SessionVersioning creates snapshots for revert
+  Returns:
+    - Success: Session or list of sessions
+    - Failure: SessionError
+end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -33,15 +46,23 @@ skinparam actor {
   FontSize 12
 }
 
-' ============================================================
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "Agent" as Agent <<system>>
+actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
 
-' ============================================================
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
 
 rectangle "nasim" {
   package "Session Group (SSN)" {
@@ -57,27 +78,54 @@ rectangle "nasim" {
   }
 }
 
-' ============================================================
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-Agent --> SSN01
-Agent --> SSN02
-Agent --> SSN03
-Agent --> SSN04
-Agent --> SSN05
-Agent --> SSN06
-Agent --> SSN07
-Agent --> SSN08
-Agent --> SSN09
+User --> SSN01
+User --> SSN02
+User --> SSN03
+User --> SSN04
+User --> SSN05
+User --> SSN06
+User --> SSN07
+User --> SSN08
+User --> SSN09
 
-' ============================================================
+Router --> SSN01 : dispatches
+Router --> SSN02 : dispatches
+Router --> SSN03 : dispatches
+Router --> SSN04 : dispatches
+Router --> SSN05 : dispatches
+Router --> SSN06 : dispatches
+Router --> SSN07 : dispatches
+Router --> SSN08 : dispatches
+Router --> SSN09 : dispatches
+
+Agent --> SSN01 : calls
+Agent --> SSN02 : calls
+Agent --> SSN03 : calls
+Agent --> SSN04 : calls
+Agent --> SSN05 : calls
+Agent --> SSN06 : calls
+Agent --> SSN07 : calls
+Agent --> SSN08 : calls
+Agent --> SSN09 : calls
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
 
 SSN04 ..> SSN02 : <<include>>
 SSN05 ..> SSN01 : <<include>>
 SSN06 ..> SSN02 : <<include>>
 SSN08 ..> SSN01 : <<include>>
+
+note bottom of Agent
+  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls SessionStore
+  State:  SSN-01..SSN-09 — each returns session data or operation confirmation
+  Success: Session persisted, read, listed, restored, snapshotted, reverted, searched, branched, or deleted
+  Failure: SessionError; upstream returns error to caller
+end note
 
 @enduml
