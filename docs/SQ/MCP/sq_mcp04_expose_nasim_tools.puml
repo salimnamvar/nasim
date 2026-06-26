@@ -6,13 +6,18 @@
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Review:    CAR audit 2026-06-26 (refactored to API-First entry chain)
 ' ============================================================
 
 title nasim — MCP-04 EXPOSE NasimTools
 
-actor "MCPClientRuntime" as mcp
+actor "User" as user
 
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #E3F2FD
+  participant "AgentOrchestrator" as agent
 end box
 box "MCP Group" #EDE7F6
   participant "MCPServerRuntime" as server
@@ -20,27 +25,30 @@ end box
 box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
 end box
-box "Repository Group" #E8F5E9
-  participant "MCPRepository" as mcp_repo
+box "External" #F5F5F5
+  participant "MCP Client" as client
 end box
 
-note over mcp, registry
+note over user, client
   Scope:          MCP-04 EXPOSE NasimTools — serving nasim tools via MCP server interface
   Preconditions:  MCPServerRuntime initialized, tools registered
   Contexts:       External MCP client connection lifecycle
   Excludes:       Tool discovery (MCP-02), tool adaptation (MCP-03)
   Rollback:       Disconnect client on tool execution failure
   Design:         Request validation and rate limiting
+  Classification: Process Decomposition
   Returns:
-    - Success: 200 OK — ToolDefinitions(tools[])
-    - Success: 200 OK — ToolResult(result)
+    - Success: ToolDefinitions(tools[])
+    - Success: ToolResult(result)
     - Failure: 404 NOT_FOUND — tool not found
     - Failure: 500 INTERNAL — execution failed
 end note
 
 == MCP-04 EXPOSE NasimTools ==
 
-mcp -> server : MCP-04 LIST NasimTools()
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> server : MCP-04 EXPOSE NasimTools()
 activate server
 
 server -> registry : MCP-04 READ ToolRegistry()
@@ -48,14 +56,17 @@ activate registry
 registry --> server : ToolDefinitions(tools[])
 deactivate registry
 
-server --> mcp : 200 OK — ToolDefinitions(tools[])
+server --> client : 200 OK — ToolDefinitions(tools[])
 deactivate server
 
-mcp -> server : MCP-04 EXECUTE NasimTool(name, args)
+client -> server : MCP-04 EXECUTE NasimTool(name, args)
 activate server
 
 break Tool not found
-    server --> mcp : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "tool not found"}}
+    server --> client : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "tool not found"}}
+    server --> agent : ToolResult(success=false, error="tool not found")
+    agent --> router : AgentEvent(Error)
+    result --> user : ToolResult(success=false, error="404 NOT_FOUND")
 end
 
 server -> registry : MCP-04 EXECUTE Tool(name, args)
@@ -64,16 +75,23 @@ registry --> server : ToolResult(result)
 deactivate registry
 
 break Execution failure
-    server --> mcp : 500 INTERNAL {error: {code: "INTERNAL", message: "execution failed"}}
+    server --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "execution failed"}}
+    server --> agent : ToolResult(success=false, error="execution failed")
+    agent --> router : AgentEvent(Error)
+    result --> user : ToolResult(success=false, error="500 INTERNAL")
 end
 
-server --> mcp : 200 OK — ToolResult(result)
+server --> client : 200 OK — ToolResult(result)
 deactivate server
 
-note over mcp, registry
-  Flow:    MCP-04 → list tools → get from registry → execute → return result
+server --> agent : ToolResult(success=true, content="ToolResult")
+agent --> router : AgentEvent(Done)
+result --> user : result
+
+note over user, client
+  Flow:    User → ServerRouter → AgentOrchestrator → MCPServerRuntime → ToolRegistry → MCP Client
   State:   No state change
-  Success: 200 OK — ToolResult with execution result
+  Success: ToolResult with execution result
   Failure: 404 NOT_FOUND — tool not found; 500 INTERNAL — execution failed
 end note
 

@@ -6,35 +6,50 @@
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Review:    CAR audit 2026-06-26 (refactored to API-First entry chain)
 ' ============================================================
 
-title nasim — MCP-02 LIST McpTools
+title nasim — MCP-02 DISCOVER McpTools
 
-actor "MCPClientRuntime" as mcp
+actor "User" as user
 
+box "API Group (Entry Gate)" #E8EAF6
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #E3F2FD
+  participant "AgentOrchestrator" as agent
+end box
+box "MCP Group" #EDE7F6
+  participant "MCPClientRuntime" as mcp
+  participant "MCPDiscovery" as discovery
   participant "MCPToolAdapter" as adapter
 end box
-box "Repository Group" #E8F5E9
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
 end box
 box "External" #F5F5F5
   participant "MCP Server" as server
 end box
 
-note over mcp, server
+note over user, server
   Scope:          MCP-02 DISCOVER McpTools — tool discovery from connected MCP server
   Preconditions:  MCP server connected (MCP-01 complete)
   Contexts:       Agent initialization, server reconnection
   Excludes:       Connection management (MCP-01), tool adaptation (MCP-03)
   Rollback:       Clear partially discovered tools on failure
   Design:         Lazy discovery with caching
+  Classification: Process Decomposition
   Returns:
-    - Success: 200 OK — DiscoveryComplete(count, tools[])
+    - Success: DiscoveryComplete(count, tools[])
     - Failure: 503 UNAVAILABLE — server disconnected during discovery
 end note
 
 == MCP-02 DISCOVER McpTools ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> mcp : MCP-02 DISCOVER McpTools(connection)
+activate mcp
 
 mcp -> discovery : MCP-02 DISCOVER McpTools(connection)
 activate discovery
@@ -59,10 +74,16 @@ end
 discovery --> mcp : DiscoveryComplete(count, tools[])
 deactivate discovery
 
-note over mcp, server
-  Flow:    MCP-02 → list tools → wrap each → register → DiscoveryComplete
+mcp --> agent : ToolResult(success=true, content="DiscoveryComplete")
+deactivate mcp
+
+agent --> router : AgentEvent(Done)
+result --> user : result
+
+note over user, server
+  Flow:    User → ServerRouter → AgentOrchestrator → MCPClientRuntime → MCPDiscovery → list tools → wrap each → register → DiscoveryComplete
   State:   No state change
-  Success: 200 OK — all tools available in ToolRegistry
+  Success: all tools available in ToolRegistry
   Failure: 503 UNAVAILABLE — partial discovery, register available tools
 end note
 
