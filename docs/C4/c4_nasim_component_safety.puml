@@ -9,13 +9,12 @@
 ' Purpose:   Permission gating, injection scanning, egress inspection
 '            CSR Layer: Service
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Safety Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -31,9 +30,16 @@ Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
 Rel(agent_orch, safety_coord, "validates before tool dispatch")
-Rel(safety_coord, permission_gate, "evaluates permissions")
-Rel(safety_coord, injection_scanner, "scans for injection")
-Rel(safety_coord, egress_inspector, "inspects outbound data")
-Rel(tool_registry, safety_coord, "triggers safety checks")
+Rel(safety_coord, permission_gate, "evaluates tool safety flags against session policy")
+Rel(safety_coord, injection_scanner, "scans tool outputs for prompt injection patterns")
+Rel(safety_coord, egress_inspector, "inspects outbound data for policy violations")
+Rel(tool_registry, safety_coord, "triggers safety checks before tool execution")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

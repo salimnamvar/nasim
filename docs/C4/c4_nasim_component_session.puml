@@ -3,20 +3,18 @@
 !theme plain
 !include common/c4_styles.puml
 
-
 ' ============================================================
 ' Title:     NASIM Application — Session Component Diagram
 ' Boundary:  NASIM Application (container) — Session Group
 ' Purpose:   Session layer internal components
 '            CSR Layer: Repository
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Session Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -30,9 +28,16 @@ Boundary(nasim_application, "NASIM Application") {
 
 System_Ext(session_dir, "Session Directory", "~/.nasim/sessions/<session-id>/")
 
-Rel(session_store, session_dir, "reads/writes JSON Lines files")
-Rel(session_versioning, session_store, "creates snapshots, restores state")
+Rel(session_store, session_dir, "reads and writes JSON Lines files")
+Rel(session_versioning, session_store, "creates snapshots and restores state")
 Rel(session_search, session_store, "indexes and queries session content")
 Rel(session_fork, session_store, "copies session state for branching")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

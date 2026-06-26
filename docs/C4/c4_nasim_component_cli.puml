@@ -12,13 +12,12 @@
 '            AgentEvents to terminal via Renderer.
 '            CSR Layer: Controller
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/entities.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — CLI Component Diagram
 
 Person(user, "User", "Developer using NASIM Application")
@@ -36,10 +35,17 @@ Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 Component_Ext(config_loader, "ConfigLoader", "Config Group")
 
 Rel(user, repl_session, "types commands", "terminal REPL")
-Rel(repl_session, agent_orch, "delegates agent tasks")
-Rel(repl_session, renderer, "AgentEvents to terminal output")
-Rel(repl_session, slash_handler, "/cmd dispatch")
-Rel(slash_handler, agent_orch, "agent action")
+Rel(repl_session, agent_orch, "delegates agent tasks to orchestrator")
+Rel(repl_session, renderer, "converts AgentEvents to terminal output")
+Rel(repl_session, slash_handler, "forwards parsed /cmd to dispatch handler")
+Rel(slash_handler, agent_orch, "dispatches slash command as agent task")
 Rel(arg_parser, config_loader, "CLI flags override config")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

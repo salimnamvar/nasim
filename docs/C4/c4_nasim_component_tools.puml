@@ -3,20 +3,18 @@
 !theme plain
 !include common/c4_styles.puml
 
-
 ' ============================================================
 ' Title:     NASIM Application — Tools Component Diagram
 ' Boundary:  NASIM Application (container) — Tool Group
 ' Purpose:   Tool layer: base ABC, registry, file/search/shell/web/git/lsp tools
 '            CSR Layer: Repository
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Tools Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -49,7 +47,7 @@ System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
 System_Ext(git_repo, "Git Repository", "Version-controlled project files")
 System_Ext(lsp_server, "LSP Server", "Language server for code intelligence")
 
-Rel(tool_registry, tool_abc, "manages instances")
+Rel(tool_registry, tool_abc, "manages tool instances via ABC interface")
 Rel(file_tools, tool_abc, "extends")
 Rel(search_tools, tool_abc, "extends")
 Rel(shell_tool, tool_abc, "extends")
@@ -64,16 +62,23 @@ Rel(plan_tool, tool_abc, "extends")
 Rel(repo_map_tool, tool_abc, "extends")
 Rel(semantic_search_tool, tool_abc, "extends")
 Rel(review_tool, tool_abc, "extends")
-Rel(shell_tool, sandbox_executor, "executes via sandbox")
-Rel(file_tools, host_fs, "path I/O")
-Rel(search_tools, host_fs, "search files")
-Rel(dir_tool, host_fs, "directory listing")
+Rel(shell_tool, sandbox_executor, "executes commands in sandboxed environment")
+Rel(file_tools, host_fs, "reads and writes project files")
+Rel(search_tools, host_fs, "searches project files by pattern")
+Rel(dir_tool, host_fs, "lists directory contents")
 Rel(web_tools, web, "fetches documentation and search results")
 Rel(git_tool, git_repo, "queries repository state and creates commits")
 Rel(lsp_tool, lsp_server, "requests code intelligence data")
-Rel(repo_map_tool, repo_intel_mgr, "queries repo map")
-Rel(semantic_search_tool, repo_intel_mgr, "vector search")
-Rel(review_tool, provider, "LLM review call")
-Rel(tool_registry, mcp_server, "discovers and registers MCP tools")
+Rel(repo_map_tool, repo_intel_mgr, "queries repository map summaries")
+Rel(semantic_search_tool, repo_intel_mgr, "performs vector similarity search")
+Rel(review_tool, provider, "invokes LLM for code review")
+Rel(tool_registry, mcp_server, "discovers and registers MCP extension tools")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

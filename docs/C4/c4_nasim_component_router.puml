@@ -9,13 +9,12 @@
 ' Purpose:   Model selection, fallback chains, capability queries
 '            CSR Layer: Service
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Router Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -32,5 +31,12 @@ Rel(agent_orch, model_router, "route model selection")
 Rel(model_router, provider, "route to provider")
 Rel(model_router, fallback_chain, "trigger failover")
 Rel(fallback_chain, provider, "failover to next provider")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

@@ -9,13 +9,12 @@
 ' Purpose:   Context pipeline: graph construction, truncation, distillation, injection, compaction
 '            CSR Layer: Service
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Context Graph Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -34,18 +33,25 @@ Component_Ext(memory_store, "MemoryStore", "Memory Group")
 Component_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
 System_Ext(llm_backend, "LLM Backend", "Used for distillation and summarization calls")
 
-Rel(pipeline_orchestrator, context_prioritizer, "priority scoring stage")
-Rel(pipeline_orchestrator, truncation_processor, "truncation stage")
-Rel(pipeline_orchestrator, distillation_processor, "distillation stage")
-Rel(pipeline_orchestrator, injection_processor, "injection stage")
-Rel(pipeline_orchestrator, compaction_processor, "compaction stage")
+Rel(pipeline_orchestrator, context_prioritizer, "runs priority scoring stage")
+Rel(pipeline_orchestrator, truncation_processor, "runs truncation stage")
+Rel(pipeline_orchestrator, distillation_processor, "runs distillation stage")
+Rel(pipeline_orchestrator, injection_processor, "runs injection stage")
+Rel(pipeline_orchestrator, compaction_processor, "runs compaction stage")
 Rel(pipeline_orchestrator, context_graph, "operates on graph and tracks token budget")
 Rel(context_prioritizer, context_graph, "scores nodes by importance")
-Rel(distillation_processor, llm_backend, "summarization call")
-Rel(injection_processor, memory_store, "injects memory")
-Rel(injection_processor, repo_intel_mgr, "injects repo map")
-Rel(truncation_processor, context_prioritizer, "queries node priorities")
-Rel(truncation_processor, context_graph, "queries remaining budget")
-Rel(compaction_processor, context_graph, "merges nodes")
+Rel(distillation_processor, llm_backend, "invokes LLM for context summarization")
+Rel(injection_processor, memory_store, "injects retrieved memory into graph")
+Rel(injection_processor, repo_intel_mgr, "injects repo map into graph")
+Rel(truncation_processor, context_prioritizer, "queries node priorities for drop order")
+Rel(truncation_processor, context_graph, "queries remaining token budget")
+Rel(compaction_processor, context_graph, "merges redundant nodes")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

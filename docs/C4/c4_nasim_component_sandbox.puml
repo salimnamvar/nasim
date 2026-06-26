@@ -9,13 +9,12 @@
 ' Purpose:   OS-level process isolation and diff staging for shell and edit operations
 '            CSR Layer: Infrastructure
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Sandbox Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -34,21 +33,28 @@ Boundary(nasim_application, "NASIM Application") {
 System_Ext(host_shell, "Host Shell", "subprocess execution")
 System_Ext(host_fs, "Host Filesystem", "restricted mount points")
 
-Rel(sandbox_executor, sandbox_policy, "applies policy before exec")
-Rel(sandbox_executor, sandbox_monitor, "monitors running process")
-Rel(sandbox_executor, resource_limiter, "configures limits before exec")
-Rel(sandbox_policy, resource_limiter, "defines quota rules")
-Rel(resource_limiter, host_fs, "enforces disk quotas")
-Rel(resource_limiter, host_shell, "enforces CPU/memory via cgroups/rlimits")
-Rel(sandbox_executor, host_shell, "runs isolated subprocess")
-Rel(sandbox_executor, host_fs, "restricted file access")
-Rel(diff_sandbox_mgr, edit_staging_area, "stages edits")
-Rel(diff_sandbox_mgr, sandbox_executor, "validates in sandbox")
-Rel(edit_staging_area, diff_computer, "computes diff")
-Rel(diff_computer, host_fs, "reads original files")
-Rel(staged_applicator, edit_staging_area, "reads approved edits")
-Rel(staged_applicator, sandbox_executor, "applies in sandbox")
-Rel(staged_applicator, host_fs, "writes final files")
-Rel(diff_sandbox_mgr, staged_applicator, "applies approved diffs")
+Rel(sandbox_executor, sandbox_policy, "applies policy constraints before execution")
+Rel(sandbox_executor, sandbox_monitor, "monitors running process for timeout and resources")
+Rel(sandbox_executor, resource_limiter, "configures resource limits before execution")
+Rel(sandbox_policy, resource_limiter, "defines quota rules for resource enforcement")
+Rel(resource_limiter, host_fs, "enforces disk quotas on filesystem access")
+Rel(resource_limiter, host_shell, "enforces CPU and memory limits via cgroups/rlimits")
+Rel(sandbox_executor, host_shell, "runs isolated subprocess in sandbox")
+Rel(sandbox_executor, host_fs, "provides restricted file access within sandbox")
+Rel(diff_sandbox_mgr, edit_staging_area, "stages edits for sandbox validation")
+Rel(diff_sandbox_mgr, sandbox_executor, "validates diffs within sandboxed environment")
+Rel(edit_staging_area, diff_computer, "computes diff between original and staged content")
+Rel(diff_computer, host_fs, "reads original files for diff computation")
+Rel(staged_applicator, edit_staging_area, "reads approved edits for application")
+Rel(staged_applicator, sandbox_executor, "applies diffs within sandboxed environment")
+Rel(staged_applicator, host_fs, "writes final files to filesystem")
+Rel(diff_sandbox_mgr, staged_applicator, "applies approved diffs to filesystem")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

@@ -11,14 +11,11 @@
 '            LiteLLM Proxy to 100+ backends without per-provider code.
 '            CSR Layer: Service
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/entities.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
-
-LAYOUT_LEFT_RIGHT()
-LAYOUT_WITH_LEGEND()
 
 title NASIM Application — Provider Component Diagram
 
@@ -34,10 +31,17 @@ Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 Component_Ext(model_router, "ModelRouter", "Router Group")
 System_Ext(all_llm_backends, "LLM Backends", "Unified via litellm: OpenAI, Anthropic, Google, DeepSeek, Ollama, vLLM, and 100+ providers via model string prefix")
 
-Rel(agent_orch, provider, "chat, chat_stream")
-Rel(model_router, provider_caps, "queries capabilities")
-Rel(provider, litellm_proxy, "delegates all LLM calls")
-Rel(provider, provider_caps, "exposes capabilities")
+Rel(agent_orch, provider, "invokes LLM inference via provider protocol")
+Rel(model_router, provider_caps, "queries capabilities for model selection")
+Rel(provider, litellm_proxy, "delegates all LLM calls to universal proxy")
+Rel(provider, provider_caps, "exposes capability metadata to callers")
 Rel(litellm_proxy, all_llm_backends, "routes via model string prefix", "HTTP/JSON")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

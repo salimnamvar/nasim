@@ -43,7 +43,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Merge directory contents into one MD file.")
 
     # Define a default path based on a likely location
-    default_input = ["/home/salim/prj/aidirs/tenas/code/tenas_infrastructure/services/model_management/src"]
+    default_input = ["/home/salim/prj/salim/nasim/code/nasim/docs/C4"]
 
     parser.add_argument(
         "inputs",
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         "-o",
         "--output",
         help="Path to the output master .md file",
-        default="/home/salim/prj/aidirs/tenas/code/tenas_infrastructure/services/model_management/src.md",
+        default="/home/salim/prj/salim/nasim/code/nasim/C4.md",
     )
 
     args = parser.parse_args()

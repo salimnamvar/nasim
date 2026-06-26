@@ -11,13 +11,11 @@
 '            component for the nasim Service layer.
 '            CSR Layer: Service
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/entities.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
-
-LAYOUT_WITH_LEGEND()
 
 title NASIM Application — Agent Component Diagram
 
@@ -40,19 +38,26 @@ Component_Ext(memory_store, "MemoryStore", "Memory Group")
 Component_Ext(structured_logger, "StructuredLogger", "Observability Group")
 Component_Ext(safety_coord, "SafetyCoordinator", "Safety Group")
 
-Rel(agent_orch, provider, "chat, chat_stream")
-Rel(agent_orch, tool_registry, "execute tool calls")
-Rel(agent_orch, conv_history, "reads/writes messages")
-Rel(agent_orch, safety_coord, "safety validation before tool exec")
-Rel(agent_orch, subagent_coord, "spawn, collect child agents")
-Rel(agent_orch, error_boundary, "handle structured errors")
-Rel(agent_orch, persona_mgr, "load, switch persona")
-Rel(agent_orch, memory_store, "persist, retrieve knowledge")
-Rel(agent_orch, session_store, "save, load session")
-Rel(agent_orch, structured_logger, "emit structured logs, metrics")
-Rel(agent_orch, plan_session, "queue, approve plan")
-Rel(conv_history, compactor, "triggers compaction")
-Rel(compactor, provider, "secondary LLM call for summarization")
-Rel(subagent_coord, agent_orch, "child agent inherits core")
+Rel(agent_orch, provider, "invokes LLM inference for task completion")
+Rel(agent_orch, tool_registry, "dispatches tool calls for execution")
+Rel(agent_orch, conv_history, "persists and retrieves conversation messages")
+Rel(agent_orch, safety_coord, "validates before tool dispatch")
+Rel(agent_orch, subagent_coord, "spawns and aggregates child agent results")
+Rel(agent_orch, error_boundary, "delegates structured error handling with recovery")
+Rel(agent_orch, persona_mgr, "loads and switches agent persona at runtime")
+Rel(agent_orch, memory_store, "persists and retrieves cross-session knowledge")
+Rel(agent_orch, session_store, "saves and loads session state")
+Rel(agent_orch, structured_logger, "emits structured logs and metrics")
+Rel(agent_orch, plan_session, "queues tool calls in plan mode for batch approval")
+Rel(conv_history, compactor, "triggers compaction when token budget exceeded")
+Rel(compactor, provider, "invokes secondary LLM for context summarization")
+Rel(subagent_coord, agent_orch, "child agent inherits core orchestration loop")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent Group |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

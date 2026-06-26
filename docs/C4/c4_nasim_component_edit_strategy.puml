@@ -3,20 +3,18 @@
 !theme plain
 !include common/c4_styles.puml
 
-
 ' ============================================================
 ' Title:     NASIM Application — Edit Strategy Component Diagram
 ' Boundary:  NASIM Application (container) — Edit Strategy Group
 ' Purpose:   Pluggable edit strategies: search-replace, whole-file, diff, sandbox, architect
 '            CSR Layer: Service
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Edit Strategy Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -38,8 +36,8 @@ Boundary(nasim_application, "NASIM Application") {
 Component_Ext(diff_sandbox_mgr, "DiffSandboxManager", "Sandbox Group")
 System_Ext(host_fs, "Host Filesystem", "Target files for editing")
 
-Rel(edit_strategy_mgr, strategy_selector, "selects strategy")
-Rel(edit_strategy_mgr, edit_strategy, "delegates to")
+Rel(edit_strategy_mgr, strategy_selector, "queries optimal strategy for edit context")
+Rel(edit_strategy_mgr, edit_strategy, "delegates edit execution to selected strategy ABC")
 Rel(search_replace_coder, edit_strategy, "extends")
 Rel(whole_file_coder, edit_strategy, "extends")
 Rel(unified_diff_coder, edit_strategy, "extends")
@@ -48,14 +46,21 @@ Rel(architect_coder, edit_strategy, "extends")
 Rel(fenced_block_coder, edit_strategy, "extends")
 Rel(function_level_coder, edit_strategy, "extends")
 Rel(inline_patch_coder, edit_strategy, "extends")
-Rel(strategy_selector, edit_strategy_mgr, "returns strategy choice")
-Rel(search_replace_coder, host_fs, "applies edits")
-Rel(whole_file_coder, host_fs, "rewrites files")
-Rel(unified_diff_coder, host_fs, "applies diffs")
-Rel(diff_sandbox_coder, diff_sandbox_mgr, "stages diffs for sandbox-validated apply")
-Rel(architect_coder, host_fs, "multi-file edits")
-Rel(fenced_block_coder, host_fs, "applies edits")
-Rel(function_level_coder, host_fs, "AST-aware edits")
-Rel(inline_patch_coder, host_fs, "applies patch")
+Rel(strategy_selector, edit_strategy_mgr, "returns selected strategy instance")
+Rel(search_replace_coder, host_fs, "applies edits to files")
+Rel(whole_file_coder, host_fs, "rewrites entire files")
+Rel(unified_diff_coder, host_fs, "applies unified diffs to files")
+Rel(diff_sandbox_coder, diff_sandbox_mgr, "stages diffs for sandbox-validated application")
+Rel(architect_coder, host_fs, "applies multi-file architectural edits")
+Rel(fenced_block_coder, host_fs, "applies fenced block edits to files")
+Rel(function_level_coder, host_fs, "applies AST-aware function replacements")
+Rel(inline_patch_coder, host_fs, "applies inline patches to files")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

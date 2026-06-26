@@ -9,14 +9,11 @@
 ' Purpose:   Application-side logging and metrics emission (emit only)
 '            CSR Layer: Infrastructure
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
-
-LAYOUT_LEFT_RIGHT()
-LAYOUT_WITH_LEGEND()
 
 title NASIM Application — Observability Component Diagram
 
@@ -40,43 +37,51 @@ Component_Ext(wire_log, "WireLog", "Wire Log Group")
 Component_Ext(config_loader, "ConfigLoader", "Config Group")
 Component_Ext(renderer, "Renderer", "CLI Group")
 
-Rel(agent_orch, structured_logger, "logs agent lifecycle events")
-Rel(agent_orch, metrics_collector, "records token usage, latency, tool call counts")
-Rel(agent_orch, context_propagator, "obtains trace context for events")
-Rel(agent_orch, wire_log, "appends domain events")
+Rel(agent_orch, structured_logger, "emits agent lifecycle events to structured log")
+Rel(agent_orch, metrics_collector, "records token usage, latency, and tool call metrics")
+Rel(agent_orch, context_propagator, "obtains trace context for event correlation")
+Rel(agent_orch, wire_log, "appends domain events to wire log")
 
-Rel(provider, structured_logger, "logs LLM request/response metadata")
-Rel(provider, metrics_collector, "records LLM latency and token consumption")
-Rel(provider, context_propagator, "propagates trace across LLM calls")
+Rel(provider, structured_logger, "emits LLM request/response metadata to log")
+Rel(provider, metrics_collector, "records LLM latency and token consumption metrics")
+Rel(provider, context_propagator, "propagates trace context across LLM calls")
 
-Rel(tool_registry, structured_logger, "logs tool execution events")
-Rel(tool_registry, metrics_collector, "records tool call counts and duration")
-Rel(tool_registry, context_propagator, "propagates trace across tool dispatch")
+Rel(tool_registry, structured_logger, "emits tool execution events to log")
+Rel(tool_registry, metrics_collector, "records tool call counts and duration metrics")
+Rel(tool_registry, context_propagator, "propagates trace context across tool dispatch")
 
-Rel(trace_correlator, context_propagator, "provides root trace/span context")
-Rel(context_propagator, structured_logger, "injects trace_id, span_id into log records")
-Rel(context_propagator, wire_log, "injects correlation ids into wire events")
+Rel(trace_correlator, context_propagator, "provides root trace and span context")
+Rel(context_propagator, structured_logger, "injects trace_id and span_id into log records")
+Rel(context_propagator, wire_log, "injects correlation IDs into wire events")
 Rel(log_redactor, structured_logger, "sanitizes log records before emission")
 Rel(log_redactor, wire_log, "sanitizes wire events before append")
-Rel(dual_output_adapter, structured_logger, "delegates structured JSON emission")
-System_Ext(stdout, "stdout", "Standard output stream")
+Rel(dual_output_adapter, structured_logger, "delegates structured JSON emission to logger")
 Rel(dual_output_adapter, stdout, "writes JSON to stdout", "stdout only — emit path ends here")
 Rel(dual_output_adapter, renderer, "delegates human-readable output when isatty")
-Rel(instrumentation_mw, context_propagator, "generates and binds request_id")
+Rel(instrumentation_mw, context_propagator, "generates and binds request_id to context")
 Rel(instrumentation_mw, metrics_collector, "records HTTP request duration and status")
-Rel(instrumentation_mw, structured_logger, "logs HTTP request lifecycle")
+Rel(instrumentation_mw, structured_logger, "emits HTTP request lifecycle events")
 Rel(config_loader, structured_logger, "configures log level and format")
-Rel(config_loader, metrics_collector, "enables/disables metrics emission")
+Rel(config_loader, metrics_collector, "enables or disables metrics emission")
 Rel(config_loader, log_redactor, "configures redaction rules")
-Rel(config_loader, otel_exporter, "enables/disables OTel feature")
+Rel(config_loader, otel_exporter, "enables or disables OTel feature")
 
+System_Ext(stdout, "stdout", "Standard output stream")
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
-Rel(structured_logger, stdout, "writes structured JSON logs to stdout", "stdout — emit path ends here")
 System_Ext(prometheus, "Prometheus", "Metrics collection and storage")
+
+Rel(structured_logger, stdout, "writes structured JSON logs to stdout", "stdout — emit path ends here")
 Rel(metrics_collector, prometheus, "exposes /metrics for pull scrape", "HTTP GET — pull model only")
-Rel(otel_exporter, otel_collector, "exports traces/metrics", "OTLP/gRPC — only when otel enabled")
+Rel(otel_exporter, otel_collector, "exports traces and metrics", "OTLP/gRPC — only when otel enabled")
 Rel(trace_correlator, otel_exporter, "bridges spans to OTel SDK (optional)")
 Rel(metrics_collector, otel_exporter, "bridges metrics to OTel SDK (optional)")
-Rel(wire_log, structured_logger, "optional: project domain events as structured (configurable)")
+Rel(wire_log, structured_logger, "optionally projects domain events as structured log records")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

@@ -3,7 +3,6 @@
 !theme plain
 !include common/c4_styles.puml
 
-
 ' ============================================================
 ' Title:     NASIM Application — Repo Intelligence Component Diagram
 ' Boundary:  NASIM Application (container) — Repo Intelligence Group
@@ -17,13 +16,12 @@
 '            This Component diagram shows their distinct responsibilities
 '            and the internal components that consume them.
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Repo Intelligence Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -42,19 +40,26 @@ System_Ext(embedding_model, "Embedding Model", "Code embedding model (local or A
 System_Ext(vector_store, "Vector Store", "Persistent vector storage for code embeddings")
 System_Ext(host_fs, "Host Filesystem", "Source code files to index")
 
-Rel(repo_intel_mgr, ast_index_adapter, "indexes source files")
-Rel(repo_intel_mgr, symbol_graph, "builds reference graph")
-Rel(repo_intel_mgr, embedding_adapter, "generates embeddings")
-Rel(repo_intel_mgr, semantic_search_svc, "performs vector search with ranking")
-Rel(repo_intel_mgr, repo_map_builder, "builds repo map")
-Rel(ast_index_adapter, tree_sitter, "parses AST")
-Rel(ast_index_adapter, symbol_graph, "feeds symbol data")
-Rel(ast_index_adapter, host_fs, "reads source files")
-Rel(embedding_adapter, embedding_model, "API call for vectors")
-Rel(embedding_adapter, vector_store, "stores vectors")
-Rel(semantic_search_svc, vector_store, "query vectors")
-Rel(semantic_search_svc, symbol_graph, "ranks by relevance and recency")
-Rel(repo_map_builder, symbol_graph, "reads structure")
-Rel(repo_map_builder, host_fs, "traverses directories")
+Rel(repo_intel_mgr, ast_index_adapter, "indexes source files for symbol extraction")
+Rel(repo_intel_mgr, symbol_graph, "builds cross-file reference graph")
+Rel(repo_intel_mgr, embedding_adapter, "generates code embeddings for vectors")
+Rel(repo_intel_mgr, semantic_search_svc, "performs vector search with relevance ranking")
+Rel(repo_intel_mgr, repo_map_builder, "builds hierarchical repo map summaries")
+Rel(ast_index_adapter, tree_sitter, "parses source code into AST")
+Rel(ast_index_adapter, symbol_graph, "feeds extracted symbols into graph")
+Rel(ast_index_adapter, host_fs, "reads source files for indexing")
+Rel(embedding_adapter, embedding_model, "invokes embedding model API for vector generation")
+Rel(embedding_adapter, vector_store, "stores generated vectors persistently")
+Rel(semantic_search_svc, vector_store, "queries vectors for similarity search")
+Rel(semantic_search_svc, symbol_graph, "ranks results by relevance and recency")
+Rel(repo_map_builder, symbol_graph, "reads symbol structure for map generation")
+Rel(repo_map_builder, host_fs, "traverses directory structure")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

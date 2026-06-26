@@ -3,20 +3,18 @@
 !theme plain
 !include common/c4_styles.puml
 
-
 ' ============================================================
 ' Title:     NASIM Application — Evaluation Component Diagram
 ' Boundary:  NASIM Application (container) — Evaluation Group
 ' Purpose:   Task evaluation: success checks, LLM review, testing, retry coordination
 '            CSR Layer: Service
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Evaluation Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -35,14 +33,19 @@ Boundary(nasim_application, "NASIM Application") {
 Component_Ext(provider, "Provider", "Provider Group")
 Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
-Rel(eval_engine, task_evaluator, "evaluate completion")
-Rel(eval_engine, success_check_runner, "run success checks")
-Rel(eval_engine, llm_reviewer, "LLM review call")
-Rel(eval_engine, test_runner, "run test suites")
-Rel(eval_engine, retry_coordinator, "coordinate retry")
-Rel(eval_engine, repetition_detector, "detect loops")
-Rel(eval_engine, turn_budget_injector, "inject budget limits")
-Rel(llm_reviewer, provider, "LLM review call")
-Rel(test_runner, tool_registry, "executes test commands")
+Rel(eval_engine, task_evaluator, "evaluates task completion against success criteria")
+Rel(eval_engine, success_check_runner, "runs user-defined success checks")
+Rel(eval_engine, llm_reviewer, "invokes LLM for code review and quality assessment")
+Rel(eval_engine, test_runner, "runs project test suites to validate changes")
+Rel(eval_engine, retry_coordinator, "coordinates retry attempts with backoff")
+Rel(eval_engine, repetition_detector, "detects repeated failures and loops")
+Rel(eval_engine, turn_budget_injector, "injects turn budget limits into context")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

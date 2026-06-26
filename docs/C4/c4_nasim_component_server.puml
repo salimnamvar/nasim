@@ -11,13 +11,12 @@
 '            API is a component, not a container.
 '            CSR Layer: Controller
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — C4 correction
-' Review:    —
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — API Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -30,22 +29,26 @@ Boundary(nasim_application, "NASIM Application") {
 }
 
 Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
-Component_Ext(core_engine, "Core Engine", "Core Engine Container")
 
 Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
 Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application")
 Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application")
-System_Ext(mcp_client_ext, "MCP Client", "External tool or IDE connecting via MCP")
 
 Rel(webapp, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(desktop_app, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(mobile_app, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
-Rel(mcp_client_ext, core_engine, "invokes NASIM Application tools via MCP protocol", "stdio / SSE")
 
-Rel(server_app, server_router, "mounts routes")
-Rel(server_router, api_schema, "validates requests/responses")
-Rel(server_router, agent_orch, "delegates to agent orchestrator")
-Rel(server_router, sse_handler, "converts agent events to streaming format")
-Rel(sse_handler, agent_orch, "consumes AgentEvents")
+Rel(server_app, server_router, "configures and exposes REST endpoints")
+Rel(server_router, api_schema, "validates requests and responses against schema")
+Rel(server_router, agent_orch, "delegates all requests to agent orchestrator")
+Rel(server_router, sse_handler, "streams agent events to connected clients")
+Rel(sse_handler, agent_orch, "consumes AgentEvent stream from orchestrator")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

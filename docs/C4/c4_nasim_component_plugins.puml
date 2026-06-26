@@ -9,13 +9,12 @@
 ' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
 '            CSR Layer: Infrastructure
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — Plugins Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -28,8 +27,15 @@ System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
 Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 Component_Ext(hook_manager, "HookManager", "Hooks Group")
 
-Rel(plugin_loader, plugin_dir, "discovers plugin manifests")
-Rel(plugin_loader, tool_registry, "registers plugin tools")
-Rel(plugin_loader, hook_manager, "registers plugin hooks")
+Rel(plugin_loader, plugin_dir, "discovers plugin manifests at startup")
+Rel(plugin_loader, tool_registry, "registers plugin tools into Tool Registry")
+Rel(plugin_loader, hook_manager, "registers plugin hooks into Hook Manager")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

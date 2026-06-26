@@ -3,20 +3,18 @@
 !theme plain
 !include common/c4_styles.puml
 
-
 ' ============================================================
 ' Title:     NASIM Application — MCP Component Diagram
 ' Boundary:  NASIM Application (container) — MCP Group
 ' Purpose:   Model Context Protocol as first-class subsystem
 '            CSR Layer: Infrastructure
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   9.1.0
 ' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
-' Date:      2026-06-25
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
-LAYOUT_WITH_LEGEND()
 title NASIM Application — MCP Component Diagram
 
 Boundary(nasim_application, "NASIM Application") {
@@ -32,11 +30,18 @@ System_Ext(mcp_server, "MCP Server", "External extension tools")
 System_Ext(mcp_client, "MCP Client", "External tool consumers")
 Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
-Rel(mcp_client_rt, mcp_server, "invokes extension tool operations")
-Rel(mcp_client_rt, mcp_discovery, "discovers tools")
-Rel(mcp_discovery, mcp_tool_adapter, "registers discovered tools")
-Rel(mcp_tool_adapter, tool_registry, "registers as NASIM Application tools")
-Rel(mcp_server_rt, tool_registry, "exposes nasim tools to external clients")
-Rel(mcp_server_rt, mcp_client, "exposes NASIM Application capabilities to external consumers")
+Rel(mcp_client_rt, mcp_server, "invokes extension tool operations on external MCP servers")
+Rel(mcp_client_rt, mcp_discovery, "discovers available tools at startup")
+Rel(mcp_discovery, mcp_tool_adapter, "registers discovered tools for adaptation")
+Rel(mcp_tool_adapter, tool_registry, "registers adapted tools into Tool Registry")
+Rel(mcp_server_rt, tool_registry, "exposes NASIM tools to external MCP clients")
+Rel(mcp_server_rt, mcp_client, "serves NASIM capabilities to external consumers")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml
