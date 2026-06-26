@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Provider instantiation from config
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,12 +19,9 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Provider Layer" #FFF3E0
+box "Provider Group" #FFF3E0
   participant "ProviderFactory" as factory
   participant "Provider" as proto
-end box
-box "Repository Layer" #E8F5E9
-  participant "ProviderRepository" as prov_repo
 end box
 
 note over user, proto
@@ -41,8 +38,8 @@ end note
 
 == PRV-01 REGISTER Provider ==
 
-user -> repl : PRV-01 REGISTER Provider(ollama)
-activate repl
+user -> router : PRV-01 REGISTER Provider(ollama)
+activate router
 router -> agent : PRV-01 REGISTER Provider(config)
 activate agent
 
@@ -61,17 +58,17 @@ end
 break Unknown provider type
     factory -> factory : raise ConfigError("Unknown provider: X")
     factory --> agent : ConfigError
-    agent --> repl : ConfigError
+    agent --> router : ConfigError
     result --> user : error message
 end
 
 factory --> agent : Provider instance
 deactivate factory
 
-agent --> repl : Provider ready
+agent --> router : Provider ready
 deactivate agent
 result --> user : Provider ready
-deactivate repl
+deactivate router
 
 note over user, proto
   Flow:    PRV-01 → User → ServerRouter → AgentOrchestrator → ProviderFactory → provider class lookup → instance

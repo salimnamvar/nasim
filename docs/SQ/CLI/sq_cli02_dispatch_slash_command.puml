@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Slash command routing and execution
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "SessionRepository" as session_repo
 end box
 

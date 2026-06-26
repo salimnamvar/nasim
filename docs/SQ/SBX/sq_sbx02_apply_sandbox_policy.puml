@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Load and apply sandbox security policy
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Sandbox Layer" #F1F8E9
+box "Sandbox Group" #F1F8E9
   participant "SandboxExecutor" as executor
   participant "SandboxPolicy" as policy
 end box
@@ -39,7 +39,7 @@ end note
 
 == SBX-02 APPLY Sandbox Policy ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : SBX-02 PROCESS(user_input)
 
 agent -> executor : SBX-02 APPLY SandboxPolicy(policy_path)
@@ -53,7 +53,7 @@ policy -> policy : SBX-02 READ PolicyFile(policy_path)
 break Policy file not found
     policy --> executor : default policy applied
     executor --> agent : Result(success=true, data={rules_count, fallback=true})
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
     result --> user : result: default policy applied
 end
 
@@ -62,7 +62,7 @@ policy -> policy : SBX-02 VALIDATE Rules(rules)
 break Invalid policy rules
     policy --> executor : revert to defaults, log error
     executor --> agent : Result(success=false, error="policy_invalid")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : error: invalid policy, reverted to defaults
 end
 
@@ -74,7 +74,7 @@ deactivate policy
 executor --> agent : Result(success=true, data={rules_count})
 deactivate executor
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result: policy applied
 
 note over user, policy

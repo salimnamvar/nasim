@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Enforce CPU, memory, and disk quotas per sandbox instance
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Sandbox Layer" #F1F8E9
+box "Sandbox Group" #F1F8E9
   participant "SandboxExecutor" as executor
   participant "ResourceLimiter" as limiter
 end box
@@ -39,7 +39,7 @@ end note
 
 == SBX-04 LIMIT Resources ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : SBX-04 PROCESS(user_input)
 
 agent -> executor : SBX-04 LIMIT Resources(cgroup_id, quotas)
@@ -53,7 +53,7 @@ limiter -> limiter : SBX-04 CREATE CgroupHierarchy()
 break Cgroup setup fails
     limiter --> executor : CgroupError("setup failed")
     executor --> agent : Result(success=false, error="cgroup_setup_failed")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : error: cgroup setup failed
 end
 
@@ -67,7 +67,7 @@ deactivate limiter
 executor --> agent : Result(success=true, data={cgroup_id})
 deactivate executor
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result: resources limited
 
 note over user, limiter

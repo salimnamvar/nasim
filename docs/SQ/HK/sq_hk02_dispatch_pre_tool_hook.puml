@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Execute hooks before tool execution
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,14 +19,14 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Hooks Layer" #FFFDE7
+box "Hooks Group" #FFFDE7
   participant "HookManager" as hooks
   participant "Hook" as hook
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as tools
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
@@ -45,8 +45,8 @@ end note
 
 == HK-02 DISPATCH Pre-Tool Hook ==
 
-user -> repl : invoke agent
-activate repl
+user -> router : invoke agent
+activate router
 router -> agent : hk02 DISPATCH Pre-Tool Hook(tool_name, args)
 activate agent
 agent -> hooks : hk02 DISPATCH Pre-Tool Hook(tool_name, args)
@@ -61,17 +61,17 @@ loop for each hook in priority order
 
     break action == DENY
         hooks --> agent : HookResult(action=DENY, reason)
-        agent --> repl : HookResult(action=DENY)
+        agent --> router : HookResult(action=DENY)
         result --> user : tool blocked by hook
     end
 end
 
 hooks --> agent : HookResult(action=ALLOW, modified_args?)
 deactivate hooks
-agent --> repl : HookResult(action=ALLOW)
+agent --> router : HookResult(action=ALLOW)
 deactivate agent
 result --> user : hook dispatched
-deactivate repl
+deactivate router
 
 note over user, tools
   Flow:    HK-02 → HookManager → find hooks → execute in priority order → return HookResult

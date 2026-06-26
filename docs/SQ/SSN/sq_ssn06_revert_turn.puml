@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Restore session to a previous snapshot or turn
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Session Layer" #F1F8E9
+box "Session Group" #F1F8E9
   participant "SessionVersioning" as ver
 end box
 database "Snapshot Store" as snap
@@ -37,7 +37,7 @@ end note
 
 == SSN-06 Revert Turn ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> ver : ssn06 REVERT Session(session_id, snapshot_id)
@@ -52,7 +52,7 @@ else snapshot not found
     snap --> ver : 404 NOT_FOUND
     deactivate snap
     ver --> agent : 404 NOT_FOUND — RevertError("snapshot not found")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : result — snapshot not found, retain current
 end
 
@@ -62,13 +62,13 @@ ver -> ver : truncate messages after snapshot point
 ver --> agent : 200 OK — Reverted(snapshot_id, turn_count)
 deactivate ver
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — session reverted to snapshot point
 
 break Snapshot load error
     snap --> ver : IOError
     ver --> agent : 500 INTERNAL — RevertError("snapshot unreadable")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : result — snapshot unreadable, retain current
 end
 

@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Fork session at any turn
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,15 +17,12 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Wire Log Layer" #FFF3E0
+box "Wire Log Group" #FFF3E0
   participant "WireLogger" as logger
   participant "SessionForker" as forker
 end box
-box "Session Layer" #E8F5E9
+box "Session Group" #E8F5E9
   participant "SessionManager" as session
-end box
-box "Repository Layer" #E8F5E9
-  participant "LogRepository" as log_repo
 end box
 
 note over user, session
@@ -66,7 +63,7 @@ end note
 
 == wrl03 FORK Session ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> forker : wrl04 FORK Session(source_session_id, fork_turn)
@@ -92,7 +89,7 @@ deactivate logger
 forker --> agent : 200 OK — ForkResult(new_session_id, fork_turn, event_count)
 deactivate forker
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — fork complete, new session created
 
 note over user, session

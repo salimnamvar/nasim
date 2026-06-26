@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Query LSP server for hover, definition, or references
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,12 +19,9 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
   participant "LspTool" as tool
-end box
-box "Repository Layer" #E8F5E9
-  participant "ToolRepository" as tool_repo
 end box
 participant "LSP Server" as lsp
 
@@ -41,7 +38,7 @@ end note
 
 == TL-13 Read LSP ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : TL-13 PROCESS(user_input)
 agent -> registry : TL-13 Read LSP(query, params)
 registry -> tool : TL-13 Read LSP(query, params)
@@ -51,7 +48,7 @@ break LSP server unreachable or times out
     lsp --> tool : ConnectionError / TimeoutError
     tool --> registry : ToolResult(success=False, error="LSP unavailable")
     registry --> agent : ToolResult
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : ToolResult(success=False, error="LSP unavailable")
 end
 
@@ -59,14 +56,14 @@ break Query returns no results
     lsp --> tool : empty result
     tool --> registry : ToolResult(success=False, error="no results")
     registry --> agent : ToolResult
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : ToolResult(success=False, error="no results")
 end
 
 lsp --> tool : hover/definition/references result
 tool --> registry : ToolResult(success=True, result)
 registry --> agent : ToolResult
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, lsp

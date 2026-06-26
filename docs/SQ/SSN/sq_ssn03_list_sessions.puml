@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   List available saved sessions
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,7 +17,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Session Layer" #F1F8E9
+box "Session Group" #F1F8E9
   participant "SessionStore" as store
 end box
 database "Session Directory" as dir
@@ -35,7 +35,7 @@ end note
 
 == SSN-03 List Sessions ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> store : ssn03 LIST Sessions()
@@ -44,13 +44,13 @@ store -> dir : scan ~/.nasim/sessions/
 break No sessions directory
     dir --> store : FileNotFoundError
     store --> agent : 404 NOT_FOUND — [] (empty list)
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
     result --> user : result — no sessions found
 end
 
 store -> store : read metadata from each session
 store --> agent : 200 OK — [(id, created_at, message_count), ...]
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — formatted session table
 
 note over user, dir

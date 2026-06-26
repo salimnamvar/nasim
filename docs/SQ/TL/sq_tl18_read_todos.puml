@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   List all todo items or filter by status
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,12 +17,9 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
   participant "TodoTool" as tool
-end box
-box "Repository Layer" #E8F5E9
-  participant "ToolRepository" as tool_repo
 end box
 
 note over user, tool
@@ -38,14 +35,14 @@ end note
 
 == TL-18 Read Todos ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : TL-18 PROCESS(user_input)
 agent -> registry : TL-18 Read Todos(status_filter?)
 registry -> tool : TL-18 Read Todos(status_filter)
 tool -> tool : query todos, apply filter
 tool --> registry : ToolResult(success=True, todos=[...])
 registry --> agent : ToolResult
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, tool

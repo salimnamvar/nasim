@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Persist conversation history to disk
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,7 +17,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Session Layer" #F1F8E9
+box "Session Group" #F1F8E9
   participant "SessionStore" as store
 end box
 database "Session Directory" as dir
@@ -35,7 +35,7 @@ end note
 
 == SSN-01 Save Session ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> store : ssn01 PERSIST Session(session_id, messages)
@@ -45,12 +45,12 @@ store -> dir : write session.jsonl
 break Disk write error
     dir --> store : IOError
     store --> agent : 500 INTERNAL — log warning("Session save failed")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : result — session save failed
 end
 
 store --> agent : 200 OK — save complete
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — session persisted
 
 note over user, dir

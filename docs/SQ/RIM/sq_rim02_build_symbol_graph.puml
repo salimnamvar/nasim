@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Build cross-file symbol reference graph
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Layer" #EDE7F6
+box "Repo Intelligence Group" #EDE7F6
   participant "RepoIntelligenceManager" as rim
   participant "SymbolGraph" as graph
 end box
@@ -38,8 +38,8 @@ end note
 
 == RIM-02 BUILD SymbolGraph ==
 
-user -> repl : RIM-02 BUILD SymbolGraph(ast_index)
-activate repl
+user -> router : RIM-02 BUILD SymbolGraph(ast_index)
+activate router
 router -> agent : RIM-02 BUILD SymbolGraph(ast_index)
 activate agent
 
@@ -63,10 +63,10 @@ deactivate graph
 rim --> agent : SymbolGraph(symbols, edges)
 deactivate rim
 
-agent --> repl : SymbolGraph(symbols, edges)
+agent --> router : SymbolGraph(symbols, edges)
 deactivate agent
 result --> user : SymbolGraph(symbols, edges)
-deactivate repl
+deactivate router
 
 note over user, graph
   Flow:    RIM-02 → User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → SymbolGraph → extract symbols → resolve refs → build graph

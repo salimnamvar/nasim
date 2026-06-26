@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Config field validation
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,10 +19,10 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Config Layer" #E0F7FA
+box "Config Group" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "ConfigRepository" as cfg_repo
 end box
 
@@ -41,8 +41,8 @@ end note
 
 == CFG-02 VALIDATE Config ==
 
-user -> repl : invoke agent
-activate repl
+user -> router : invoke agent
+activate router
 router -> agent : cfg02 VALIDATE Config(config)
 activate agent
 agent -> cfg : cfg02 VALIDATE Config(config)
@@ -54,15 +54,15 @@ cfg -> cfg : cfg02 CHECK Timeout(timeout > 0)
 
 break Validation fails
     cfg --> agent : ConfigError("field: message")
-    agent --> repl : ConfigError
+    agent --> router : ConfigError
     result --> user : validation failed
 end
 
 cfg --> agent : Config valid
-agent --> repl : Config valid
+agent --> router : Config valid
 deactivate agent
 result --> user : config validated
-deactivate repl
+deactivate router
 
 note over user, cfg
   Flow:    CFG-02 → field checks → valid or ConfigError

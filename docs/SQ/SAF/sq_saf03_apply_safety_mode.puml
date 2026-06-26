@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Configure safety mode from config
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -20,10 +20,10 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PermissionGate" as gate
 end box
-box "Config Layer" #E0F7FA
+box "Config Group" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "PolicyRepository" as policy_repo
 end box
 
@@ -42,7 +42,7 @@ end note
 
 == SAF-03 Apply Safety Mode ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : SAF-03 PROCESS(user_input)
 
 agent -> cfg : SAF-03 READ SafetyModeConfig()
@@ -55,7 +55,7 @@ gate -> gate : SAF-03 SET self.mode(config.safety_mode)
 
 gate --> agent : Result(success=true, data={safety_mode})
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result: safety mode configured
 
 note over user, cfg

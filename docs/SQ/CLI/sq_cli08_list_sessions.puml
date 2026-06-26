@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   List sessions via slash command
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -13,14 +13,13 @@ title nasim — CLI-08 LIST Sessions
 
 actor "User" as user
 
-box "Controller Layer" #E3F2FD
+box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
-box "Service Layer" #F3E5F5
-  participant "SessionService" as ssn_svc
+box "Service Group" #F3E5F5
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "SessionStore" as ssn
 end box
 

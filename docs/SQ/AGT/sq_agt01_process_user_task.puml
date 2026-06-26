@@ -5,7 +5,7 @@
 ' Purpose:   Core agentic loop: LLM call -> tool dispatch -> repeat
 '            Entry via API (ServerRouter). No interface bypass.
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -20,15 +20,17 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
-  participant "SafetyCoordinator" as safety
 end box
-box "Provider Layer" #FFF3E0
+box "Provider Group" #FFF3E0
   participant "LiteLLMProxy" as provider
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as tool
 end box
-box "Observability Layer" #E0F2F1
+box "Safety Group" #FFF9C4
+  participant "SafetyCoordinator" as safety
+end box
+box "Observability Group" #E0F2F1
   participant "TraceCorrelator" as trace
 end box
 

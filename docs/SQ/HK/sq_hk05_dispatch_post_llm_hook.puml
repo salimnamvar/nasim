@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Execute hooks after LLM call completes
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,11 +19,11 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Hooks Layer" #FFFDE7
+box "Hooks Group" #FFFDE7
   participant "HookManager" as hooks
   participant "Hook" as hook
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
@@ -42,8 +42,8 @@ end note
 
 == HK-05 DISPATCH Post-LLM Hook ==
 
-user -> repl : invoke agent
-activate repl
+user -> router : invoke agent
+activate router
 router -> agent : hk05 DISPATCH Post-LLM Hook(llm_result)
 activate agent
 agent -> hooks : hk05 DISPATCH Post-LLM Hook(llm_result)
@@ -58,17 +58,17 @@ loop for each hook in priority order
 
     break action == DENY
         hooks --> agent : HookResult(action=DENY, reason)
-        agent --> repl : HookResult(action=DENY)
+        agent --> router : HookResult(action=DENY)
         result --> user : LLM result blocked by hook
     end
 end
 
 hooks --> agent : HookResult(action=ALLOW, modified_data?)
 deactivate hooks
-agent --> repl : HookResult(action=ALLOW)
+agent --> router : HookResult(action=ALLOW)
 deactivate agent
 result --> user : hook dispatched
-deactivate repl
+deactivate router
 
 note over user, hook
   Flow:    HK-05 → HookManager → find hooks → execute in priority order → return HookResult

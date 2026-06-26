@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Tool dispatch with Safety Pipeline (no God Object)
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    Meta-Software Designer audit 2026-06-21
 ' Pattern:   Service (AgentOrchestrator) -> Safety (SafetyCoordinator) -> Repository (ToolRegistry)
@@ -19,19 +19,19 @@ box "API Group (Entry Gate)" #E8F5E9
 end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
-  participant "SafetyCoordinator" as safety
   participant "ErrorBoundary" as eb
 end box
-box "Safety Layer" #FFF9C4
+box "Safety Group" #FFF9C4
+  participant "SafetyCoordinator" as safety
   participant "PermissionGate" as gate
   participant "InjectionScanner" as inj
   participant "EgressInspector" as egr
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
   participant "Tool" as tool
 end box
-box "Observability Layer" #E0F2F1
+box "Observability Group" #E0F2F1
   participant "StructuredLogger" as logger
 end box
 
@@ -51,7 +51,7 @@ end note
 
 == AGT-02 DISPATCH Tool Call ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 activate agent
 
@@ -102,7 +102,7 @@ agent -> agent : append ToolResult to messages
 
 hnote over agent #FFF3E0 : **State: THINKING**
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 deactivate agent
 
 note over user, logger

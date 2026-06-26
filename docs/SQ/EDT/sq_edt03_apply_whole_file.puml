@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Verify edit applied correctly
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,15 +17,12 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
+box "Edit Strategy Group" #FFF3E0
   participant "EditValidator" as validator
   participant "FileSystem" as fs
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as tool
-end box
-box "Repository Layer" #E8F5E9
-  participant "FileRepository" as file_repo
 end box
 
 note over user, tool
@@ -63,7 +60,7 @@ end note
 
 == edt03 VALIDATE Edit ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 agent -> validator : EDT-03 VALIDATE_EDIT(edit_result)
 activate validator
@@ -87,7 +84,7 @@ validator -> validator : verify_no_unintended_changes(actual_content, edit_resul
 validator --> agent : ValidationResult(passed, reasons[])
 deactivate validator
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, tool

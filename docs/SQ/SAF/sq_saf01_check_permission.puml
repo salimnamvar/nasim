@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Per-tool safety check before execution (internal step of AGT-15)
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    Prompt audit 2026-06-21 (gro.md: God Object residual fixed)
 ' Note:      Process decomposition — internal step of AGT-15
@@ -19,13 +19,15 @@ box "API Group (Entry Gate)" #E8F5E9
 end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
-  participant "SafetyCoordinator" as safety
-  participant "PermissionGate" as gate
 end box
-box "Tool Layer" #F3E5F5
+box "Safety Group" #FFF9C4
+  participant "PermissionGate" as gate
+  participant "SafetyCoordinator" as safety
+end box
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "PolicyRepository" as policy_repo
 end box
 
@@ -44,7 +46,7 @@ end note
 
 == SAF-01 CHECK Permission ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : SAF-01 PROCESS(user_input)
 
 agent -> safety : SAF-01 CHECK Permission(tool_name, safety_mode)
@@ -67,7 +69,7 @@ else tool.safe = False AND safety_mode = "auto"
 else tool.safe = False AND safety_mode = "ask"
     gate --> safety : SafetyViolation(permission_denied)
     safety --> agent : SafetyViolation(permission_denied)
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : error: permission denied
 else safety_mode = "off"
     gate --> safety : SafetyPassed
@@ -78,7 +80,7 @@ deactivate gate
 safety --> agent : SafetyPassed
 deactivate safety
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result: permission passed
 
 note over user, registry

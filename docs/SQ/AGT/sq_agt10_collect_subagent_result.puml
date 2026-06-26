@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Wait for child agent completion and aggregate result
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -20,7 +20,7 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "SubagentCoordinator" as coord
 end box
-box "Session Layer" #F1F8E9
+box "Session Group" #F1F8E9
   participant "SessionStore" as store
 end box
 
@@ -38,7 +38,7 @@ end note
 
 == AGT-10 COLLECT Subagent Result ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 activate agent
 
@@ -76,7 +76,7 @@ end
 
 deactivate coord
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 deactivate agent
 result --> user : result
 

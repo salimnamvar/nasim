@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Read working tree status and staged changes
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Git Layer" #E8EAF6
+box "Git Group" #E8EAF6
   participant "GitStatus" as status
 end box
 box "External" #F5F5F5
@@ -41,7 +41,7 @@ end note
 
 == VCS-01 READ Git Status ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : VCS-01 PROCESS(user_input)
 
 agent -> status : VCS-01 READ GitStatus()
@@ -56,14 +56,14 @@ status -> status : VCS-01 PARSE StatusOutput(raw_output)
 
 break Not a git repo
     status --> agent : Result(success=false, error="not_a_git_repository")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : error: not a git repository
 end
 
 status --> agent : Result(success=true, data={staged, modified, untracked})
 deactivate status
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result: git status summary
 
 note over user, git

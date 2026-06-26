@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Persist knowledge to memory via MemoryTool
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,7 +17,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
   participant "MemoryTool" as tool
 end box
@@ -36,7 +36,7 @@ end note
 
 == TL-19 Persist Memory ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : TL-19 PROCESS(user_input)
 agent -> registry : TL-19 Persist Memory(key, value, scope)
 registry -> tool : TL-19 Persist Memory(key, value, scope)
@@ -46,14 +46,14 @@ break Storage failure
     mem --> tool : StorageError
     tool --> registry : ToolResult(success=False, error="persist failed")
     registry --> agent : ToolResult
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : ToolResult(success=False, error="persist failed")
 end
 
 mem --> tool : persisted
 tool --> registry : ToolResult(success=True)
 registry --> agent : ToolResult
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, mem

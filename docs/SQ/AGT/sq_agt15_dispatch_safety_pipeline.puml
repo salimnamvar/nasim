@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Run injection scan, egress inspect, and permission check
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -18,9 +18,9 @@ box "API Group (Entry Gate)" #E8F5E9
 end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
-  participant "SafetyCoordinator" as safety
 end box
-box "Safety Layer" #FFF9C4
+box "Safety Group" #FFF9C4
+  participant "SafetyCoordinator" as safety
   participant "InjectionScanner" as inj
   participant "EgressInspector" as egr
   participant "PermissionGate" as perm
@@ -40,7 +40,7 @@ end note
 
 == AGT-15 DISPATCH Safety Pipeline ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 activate agent
 
@@ -77,7 +77,7 @@ end
 safety --> agent : SafetyPassed
 deactivate safety
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 deactivate agent
 result --> user : result
 

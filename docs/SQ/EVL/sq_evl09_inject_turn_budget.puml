@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Turn budget injection per-turn
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,14 +17,14 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Evaluation Layer" #FFF3E0
+box "Evaluation Group" #FFF3E0
   participant "TurnBudgetInjector" as injector
   participant "TurnBudget" as budget
 end box
-box "Context Layer" #E8F5E9
+box "Context Group" #E8F5E9
   participant "ConversationHistory" as history
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "EvaluationRepository" as eval_repo
 end box
 
@@ -39,7 +39,7 @@ note over user, history
   Returns:        BudgetStatus(remaining, warning, continue=true) or BudgetExhausted(current_turn, max_turns)
 end note
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 == EVL-09 INJECT Turn Budget ==
@@ -71,7 +71,7 @@ end
 
 deactivate injector
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, history

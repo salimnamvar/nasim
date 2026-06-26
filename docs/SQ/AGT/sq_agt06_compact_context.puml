@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Context compaction when token budget exceeded
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -21,7 +21,7 @@ box "Agent Group" #E3F2FD
   participant "ConversationHistory" as history
   participant "ContextCompactor" as compactor
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
@@ -39,7 +39,7 @@ end note
 
 == AGT-06 COMPACT Context ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 activate agent
 
@@ -63,7 +63,7 @@ history -> history : replace messages with shortened list
 history --> agent : ok
 deactivate history
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 deactivate agent
 result --> user : result
 

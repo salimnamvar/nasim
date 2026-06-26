@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Fetch URL content and convert to markdown
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,12 +17,9 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
   participant "WebFetchTool" as fetch
-end box
-box "Repository Layer" #E8F5E9
-  participant "ToolRepository" as tool_repo
 end box
 participant "Web" as web
 
@@ -39,7 +36,7 @@ end note
 
 == TL-09 FETCH Web Content ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : TL-09 PROCESS(user_input)
 agent -> registry : TL-09 FETCH Web Content(url, timeout)
 registry -> fetch : TL-09 FETCH Web Content(url, timeout)
@@ -49,7 +46,7 @@ break HTTP error (4xx, 5xx)
     web --> fetch : HTTPError
     fetch --> registry : ToolResult(success=False, error="Error: HTTP {status_code} for {url}")
     registry --> agent : ToolResult
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : ToolResult(success=False, error="Error: HTTP {status_code} for {url}")
 end
 
@@ -57,7 +54,7 @@ break Timeout
     web --> fetch : TimeoutException
     fetch --> registry : ToolResult(success=False, error="Error: timeout fetching {url}")
     registry --> agent : ToolResult
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : ToolResult(success=False, error="Error: timeout fetching {url}")
 end
 
@@ -65,7 +62,7 @@ web --> fetch : HTML content
 fetch -> fetch : html2text.convert(html) -> markdown
 fetch --> registry : ToolResult(success=True, content=markdown)
 registry --> agent : ToolResult
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, web

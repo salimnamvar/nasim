@@ -4,7 +4,7 @@
 ' Boundary:  nasim CLI Interface Container
 ' Purpose:   REPL input loop routes through API, renders SSE output
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -25,7 +25,7 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ErrorBoundary" as eb
 end box
-box "Observability Layer" #E0F2F1
+box "Observability Group" #E0F2F1
   participant "StructuredLogger" as logger
 end box
 

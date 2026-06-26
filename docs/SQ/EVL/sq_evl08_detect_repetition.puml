@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Tool-call loop detection
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,11 +17,11 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Evaluation Layer" #FFF3E0
+box "Evaluation Group" #FFF3E0
   participant "RepetitionDetector" as detector
   participant "ToolCallHistory" as history
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "EvaluationRepository" as eval_repo
 end box
 
@@ -36,7 +36,7 @@ note over user, history
   Returns:        LoopDetected(pattern, repeat_count) or RepetitionResult(detected=false, confidence)
 end note
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 == EVL-08 DETECT Repetition ==
@@ -65,7 +65,7 @@ end
 
 deactivate detector
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, history

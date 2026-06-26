@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   LLM-as-judge scoring for edit quality
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,13 +17,13 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Evaluation Layer" #FFF3E0
+box "Evaluation Group" #FFF3E0
   participant "LLMReviewer" as reviewer
 end box
-box "Provider Layer" #E3F2FD
+box "Provider Group" #E3F2FD
   participant "Provider" as provider
 end box
-box "Edit Layer" #FFF3E0
+box "Edit Group" #FFF3E0
   participant "FileSystem" as fs
 end box
 
@@ -38,7 +38,7 @@ note over user, fs
   Returns:        ReviewResult(score, feedback, passed) or ReviewResult(skip=true) on failure
 end note
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 == EVL-04 Validate With LLM ==
@@ -70,7 +70,7 @@ reviewer -> reviewer : validate_score(score, min=1, max=10)
 reviewer --> agent : ReviewResult(score, feedback, passed)
 deactivate reviewer
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, fs

@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Apply fenced code block format edit
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
+box "Edit Strategy Group" #FFF3E0
   participant "EditStrategyManager" as mgr
   participant "FencedBlockCoder" as coder
 end box
@@ -37,7 +37,7 @@ end note
 
 == EDT-05 APPLY Fenced Block ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 agent -> mgr : EDT-05 APPLY_FENCED_BLOCK(file, block)
 activate mgr
@@ -59,7 +59,7 @@ deactivate coder
 mgr --> agent : ToolResult(success=True)
 deactivate mgr
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over agent, coder

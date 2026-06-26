@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Synchronous LLM chat completion via provider abstraction
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,14 +19,11 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Provider Layer" #FFF3E0
+box "Provider Group" #FFF3E0
   participant "Provider" as provider
 end box
 box "External" #F5F5F5
   participant "LLM Provider API" as api
-end box
-box "Repository Layer" #E8F5E9
-  participant "ProviderRepository" as prov_repo
 end box
 
 note over user, api
@@ -44,8 +41,8 @@ end note
 
 == PRV-02 REQUEST Chat ==
 
-user -> repl : PRV-02 REQUEST Chat(messages, tools)
-activate repl
+user -> router : PRV-02 REQUEST Chat(messages, tools)
+activate router
 router -> agent : PRV-02 REQUEST Chat(messages, tools)
 activate agent
 
@@ -71,10 +68,10 @@ provider -> provider : parse response -> LLMResponse
 provider --> agent : LLMResponse(content, tool_calls)
 deactivate provider
 
-agent --> repl : LLMResponse(content, tool_calls)
+agent --> router : LLMResponse(content, tool_calls)
 deactivate agent
 result --> user : LLMResponse(content, tool_calls)
-deactivate repl
+deactivate router
 
 note over user, api
   Flow:    PRV-02 → User → ServerRouter → AgentOrchestrator → Provider → HTTP POST → JSON parse → LLMResponse

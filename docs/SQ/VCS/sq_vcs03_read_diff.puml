@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Read diff of staged or unstaged changes
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Git Layer" #E8EAF6
+box "Git Group" #E8EAF6
   participant "GitStatus" as status
 end box
 box "External" #F5F5F5
@@ -41,7 +41,7 @@ end note
 
 == VCS-03 READ Diff ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : VCS-03 PROCESS(user_input)
 
 agent -> status : VCS-03 READ Diff(scope)
@@ -56,14 +56,14 @@ status -> status : VCS-03 PARSE DiffOutput(raw_diff)
 
 break No changes detected
     status --> agent : Result(success=true, data={empty_diff})
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
     result --> user : result: no changes detected
 end
 
 status --> agent : Result(success=true, data={files, hunks})
 deactivate status
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result: diff content
 
 note over user, git

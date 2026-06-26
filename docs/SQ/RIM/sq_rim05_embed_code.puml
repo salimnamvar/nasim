@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Generate vector embeddings for code fragments
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,14 +19,14 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Layer" #EDE7F6
+box "Repo Intelligence Group" #EDE7F6
   participant "RepoIntelligenceManager" as rim
   participant "EmbeddingAdapter" as embed
 end box
 box "External" #F5F5F5
   participant "EmbeddingProvider" as provider
 end box
-box "Storage Layer" #F3E5F5
+box "Storage Group" #F3E5F5
   participant "VectorStore" as vstore
 end box
 
@@ -44,8 +44,8 @@ end note
 
 == RIM-05 EMBED Code ==
 
-user -> repl : RIM-05 EMBED Code(code_fragments)
-activate repl
+user -> router : RIM-05 EMBED Code(code_fragments)
+activate router
 router -> agent : RIM-05 EMBED Code(code_fragments)
 activate agent
 
@@ -75,10 +75,10 @@ deactivate embed
 rim --> agent : EmbeddingResult(count, dimensions)
 deactivate rim
 
-agent --> repl : EmbeddingResult(count, dimensions)
+agent --> router : EmbeddingResult(count, dimensions)
 deactivate agent
 result --> user : EmbeddingResult(count, dimensions)
-deactivate repl
+deactivate router
 
 note over user, vstore
   Flow:    RIM-05 → User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → EmbeddingAdapter → generate embeddings → return vectors

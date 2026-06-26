@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Append event to wire log
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,15 +19,12 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Wire Log Layer" #E0F2F1
+box "Wire Log Group" #E0F2F1
   participant "WireLog" as wirelog
   participant "WireAppender" as appender
 end box
 box "External" #F5F5F5
   participant "Host Filesystem" as fs
-end box
-box "Repository Layer" #E8F5E9
-  participant "LogRepository" as log_repo
 end box
 
 note over user, fs
@@ -43,7 +40,7 @@ end note
 
 == WRL-01 APPEND Event ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> wirelog : wrl01 APPEND Event(event)
@@ -62,7 +59,7 @@ activate fs
 break Write failure
     fs --> wirelog : IOError
     wirelog --> agent : 500 INTERNAL — AppendError("write failed")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : result — event write failed
 end
 
@@ -72,7 +69,7 @@ deactivate fs
 wirelog --> agent : 200 OK — AppendResult(event_id, offset)
 deactivate wirelog
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — event appended
 
 note over user, fs

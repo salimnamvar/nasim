@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Full-text search across knowledge store
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,7 +17,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Memory Layer" #E0F2F1
+box "Memory Group" #E0F2F1
   participant "MemoryIndex" as index
 end box
 
@@ -32,7 +32,7 @@ note over user, index
   Returns:        ranked_results[] or empty list
 end note
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 == MEM-03 SEARCH Knowledge ==
@@ -52,7 +52,7 @@ end
 index --> agent : ranked_results
 deactivate index
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, index

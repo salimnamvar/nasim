@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Return list of all tools registered in the ToolRegistry
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,11 +19,8 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
-end box
-box "Repository Layer" #E8F5E9
-  participant "ToolRepository" as tool_repo
 end box
 
 note over user, registry
@@ -39,12 +36,12 @@ end note
 
 == TL-14 List Registered Tools ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : TL-14 PROCESS(user_input)
 agent -> registry : TL-14 List Registered Tools({})
 registry -> registry : enumerate registered tools
 registry --> agent : ToolResult(success=True, tools=[...])
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, registry

@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Apply diff in isolated sandbox before committing to real file
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,14 +19,14 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
+box "Edit Strategy Group" #FFF3E0
   participant "EditStrategyManager" as esm
   participant "DiffSandboxCoder" as dsc
 end box
-box "Sandbox Layer" #B3E5FC
+box "Sandbox Group" #B3E5FC
   participant "DiffSandboxManager" as dsm
 end box
-box "FileSystem Layer" #F3E5F5
+box "FileSystem Group" #F3E5F5
   participant "FileSystem" as fs
 end box
 
@@ -43,7 +43,7 @@ end note
 
 == EDT-07 APPLY Diff Sandbox ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> esm : EDT-07 APPLY_DIFF_SANDBOX(file_path, diff_patch)
@@ -99,7 +99,7 @@ deactivate dsc
 esm --> agent : EditResult
 deactivate esm
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over participants

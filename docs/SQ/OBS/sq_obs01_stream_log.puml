@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Emit structured JSON log record to stdout
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Observability Layer" #E0F2F1
+box "Observability Group" #E0F2F1
   participant "StructuredLogger" as logger
   participant "LogRedactor" as redactor
   participant "TraceCorrelator" as trace
@@ -43,8 +43,8 @@ end note
 
 == OBS-01 STREAM StructuredLog ==
 
-user -> repl : OBS-01 STREAM StructuredLog(msg, level, extra)
-activate repl
+user -> router : OBS-01 STREAM StructuredLog(msg, level, extra)
+activate router
 router -> agent : OBS-01 STREAM StructuredLog(msg, level, extra)
 activate agent
 
@@ -74,10 +74,10 @@ deactivate adapter
 
 deactivate logger
 
-agent --> repl : None
+agent --> router : None
 deactivate agent
 result --> user : None
-deactivate repl
+deactivate router
 
 note over user, stdout
   Flow:    OBS-01 → User → ServerRouter → AgentOrchestrator → StructuredLogger → TraceCorrelator + LogRedactor → DualOutputAdapter → Stdout

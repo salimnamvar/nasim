@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Dispatch a user message through the agent and stream SSE response
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    Meta-Software Designer audit 2026-06-21
 ' Pattern:   Controller (ServerRouter) -> Service (AgentOrchestrator) -> Repository (SessionStore)
@@ -14,17 +14,17 @@ title nasim — SRV-06 SEND Message
 
 actor "User" as user
 
-box "Controller Layer" #E3F2FD
+box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Layer" #E3F2FD
+box "Service Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ErrorBoundary" as eb
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
-box "Observability Layer" #E0F2F1
+box "Observability Group" #E0F2F1
   participant "SSEHandler" as sse
   participant "TraceCorrelator" as trace
 end box

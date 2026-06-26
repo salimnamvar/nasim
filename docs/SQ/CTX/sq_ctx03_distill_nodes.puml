@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Summarize old message exchanges into compact form
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -18,11 +18,8 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ContextCompactor" as compactor
 end box
-box "Provider Layer" #FFF3E0
+box "Provider Group" #FFF3E0
   participant "Provider" as provider
-end box
-box "Repository Layer" #E8F5E9
-  participant "ContextRepository" as ctx_repo
 end box
 
 note over compactor, provider
@@ -38,7 +35,7 @@ end note
 
 == CTX-03 Summarize Old Exchanges ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 agent -> compactor : CTX-03 DISTILL(messages)
 compactor -> compactor : build prompt: "Summarize these exchanges concisely"
@@ -53,7 +50,7 @@ provider --> compactor : summary text
 compactor -> compactor : create summary message {role: "system", content: summary}
 compactor --> compactor : return summary message
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over compactor, provider

@@ -40,6 +40,8 @@ Rel(eval_engine, test_runner, "runs project test suites to validate changes")
 Rel(eval_engine, retry_coordinator, "coordinates retry attempts with backoff")
 Rel(eval_engine, repetition_detector, "detects repeated failures and loops")
 Rel(eval_engine, turn_budget_injector, "injects turn budget limits into context")
+Rel(llm_reviewer, provider, "invokes LLM for code review and quality assessment")
+Rel(test_runner, tool_registry, "executes project test suites via tool dispatch")
 
 legend right
     |<#E3F2FD>  **Controller** | CLI Group, API Group |

@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Invoke tools from MCP server extensions
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,7 +17,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as registry
   participant "MCPToolAdapter" as mcp
 end box
@@ -36,7 +36,7 @@ end note
 
 == TL-12 Dispatch MCP Extension ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : TL-12 PROCESS(user_input)
 agent -> registry : TL-12 Dispatch MCP Extension(tool_name, args)
 registry -> mcp : TL-12 Dispatch MCP Extension(tool_name, args)
@@ -46,7 +46,7 @@ break MCP server not running
     server --> mcp : ConnectionRefused
     mcp --> registry : ToolResult(success=False, error="Error: MCP server not reachable")
     registry --> agent : ToolResult
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : ToolResult(success=False, error="Error: MCP server not reachable")
 end
 
@@ -54,7 +54,7 @@ break Tool not found on server
     server --> mcp : UnknownTool error
     mcp --> registry : ToolResult(success=False, error="Error: tool not found on MCP server")
     registry --> agent : ToolResult
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : ToolResult(success=False, error="Error: tool not found on MCP server")
 end
 
@@ -62,7 +62,7 @@ server --> mcp : result
 mcp -> mcp : wrap in ToolResult(success=True, content=result)
 mcp --> registry : ToolResult
 registry --> agent : ToolResult
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, server

@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Record metric points for token usage, latency, tool calls
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,17 +19,17 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Provider Layer" #FFF3E0
+box "Provider Group" #FFF3E0
   participant "Provider" as provider
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as tools
 end box
-box "Observability Layer" #E0F2F1
+box "Observability Group" #E0F2F1
   participant "MetricsCollector" as metrics
   participant "TraceCorrelator" as trace
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
@@ -47,8 +47,8 @@ end note
 
 == OBS-02 RECORD Metrics (LLM Request) ==
 
-user -> repl : OBS-02 RECORD Metrics(llm_request)
-activate repl
+user -> router : OBS-02 RECORD Metrics(llm_request)
+activate router
 router -> agent : OBS-02 RECORD Metrics(llm_request)
 activate agent
 
@@ -83,10 +83,10 @@ metrics -> metrics : errors_total.labels(type=error_type).inc()
 metrics --> agent : None
 deactivate metrics
 
-agent --> repl : None
+agent --> router : None
 deactivate agent
 result --> user : None
-deactivate repl
+deactivate router
 
 note over user, trace
   Flow:    OBS-02 → User → ServerRouter → AgentOrchestrator/ToolRegistry → MetricsCollector → in-memory metrics

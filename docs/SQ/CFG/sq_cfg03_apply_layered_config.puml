@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Config layer merge with precedence
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,10 +19,10 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Config Layer" #E0F7FA
+box "Config Group" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "ConfigRepository" as cfg_repo
 end box
 
@@ -41,8 +41,8 @@ end note
 
 == CFG-03 APPLY Layered Config ==
 
-user -> repl : invoke agent
-activate repl
+user -> router : invoke agent
+activate router
 router -> agent : cfg03 APPLY Layered Config(sources)
 activate agent
 agent -> cfg : cfg03 APPLY Layered Config(sources)
@@ -54,10 +54,10 @@ cfg -> cfg : cfg03 MERGE CLI Args(skip None)
 cfg -> cfg : cfg03 RETURN Merged Config
 
 cfg --> agent : Config merged
-agent --> repl : Config merged
+agent --> router : Config merged
 deactivate agent
 result --> user : config applied
-deactivate repl
+deactivate router
 
 note over user, cfg
   Flow:    CFG-03 → global → project → env → CLI → merged Config

@@ -6,7 +6,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Emit-only structured logging, metrics, trace correlation (tenas pattern)
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================

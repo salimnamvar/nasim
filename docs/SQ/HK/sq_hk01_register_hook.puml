@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Register a hook in the HookManager
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,14 +19,14 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Plugins Layer" #EDE7F6
+box "Plugins Group" #EDE7F6
   participant "PluginLoader" as loader
 end box
-box "Hooks Layer" #FFFDE7
+box "Hooks Group" #FFFDE7
   participant "HookManager" as hooks
   participant "Hook" as hook
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
@@ -45,8 +45,8 @@ end note
 
 == HK-01 REGISTER Hook ==
 
-user -> repl : invoke agent
-activate repl
+user -> router : invoke agent
+activate router
 router -> agent : hk01 REGISTER Hook(hook_spec)
 activate agent
 agent -> loader : hk01 REGISTER Hook(hook_spec)
@@ -69,10 +69,10 @@ deactivate hooks
 
 loader --> agent : registered
 deactivate loader
-agent --> repl : hook registered
+agent --> router : hook registered
 deactivate agent
 result --> user : hook registered
-deactivate repl
+deactivate router
 
 note over user, hook
   Flow:    HK-01 → PluginLoader → HookManager → Hook creation → check duplicate → append to registry

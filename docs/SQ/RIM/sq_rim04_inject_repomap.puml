@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Token-budgeted repo-map injection into LLM context
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,11 +19,11 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Layer" #EDE7F6
+box "Repo Intelligence Group" #EDE7F6
   participant "RepoMapInjector" as injector
   participant "SymbolRanker" as ranker
 end box
-box "Context Layer" #E8F5E9
+box "Context Group" #E8F5E9
   participant "TokenBudget" as budget
   participant "ConversationHistory" as history
 end box
@@ -42,8 +42,8 @@ end note
 
 == RIM-04 INJECT RepoMap ==
 
-user -> repl : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
-activate repl
+user -> router : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
+activate router
 router -> agent : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
 activate agent
 
@@ -79,10 +79,10 @@ deactivate history
 injector --> agent : RepoMapContext(text, token_count)
 deactivate injector
 
-agent --> repl : RepoMapContext(text, token_count)
+agent --> router : RepoMapContext(text, token_count)
 deactivate agent
 result --> user : RepoMapContext(text, token_count)
-deactivate repl
+deactivate router
 
 note over user, history
   Flow:    RIM-04 → User → ServerRouter → AgentOrchestrator → RepoMapInjector → TokenBudget + SymbolRanker + ConversationHistory → RepoMapContext

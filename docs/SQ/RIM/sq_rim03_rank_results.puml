@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   PageRank ranking with chat-personalization for symbol importance
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,11 +19,11 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Layer" #EDE7F6
+box "Repo Intelligence Group" #EDE7F6
   participant "SymbolRanker" as ranker
   participant "SymbolGraph" as graph
 end box
-box "Chat Layer" #E8F5E9
+box "Chat Group" #E8F5E9
   participant "ConversationHistory" as history
 end box
 
@@ -41,8 +41,8 @@ end note
 
 == RIM-03 RANK Symbols ==
 
-user -> repl : RIM-03 RANK Symbols(graph, chat_context)
-activate repl
+user -> router : RIM-03 RANK Symbols(graph, chat_context)
+activate router
 router -> agent : RIM-03 RANK Symbols(graph, chat_context)
 activate agent
 
@@ -74,10 +74,10 @@ ranker -> ranker : sort_by_score_desc()
 ranker --> agent : RankedSymbolList(symbols, scores)
 deactivate ranker
 
-agent --> repl : RankedSymbolList(symbols, scores)
+agent --> router : RankedSymbolList(symbols, scores)
 deactivate agent
 result --> user : RankedSymbolList(symbols, scores)
-deactivate repl
+deactivate router
 
 note over user, history
   Flow:    RIM-03 → User → ServerRouter → AgentOrchestrator → SymbolRanker → SymbolGraph + ConversationHistory → RankedSymbolList

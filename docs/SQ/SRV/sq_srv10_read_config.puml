@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Read current agent configuration
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
@@ -13,13 +13,13 @@ title nasim — SRV-10 READ Config
 
 actor "User" as user
 
-box "Controller Layer" #E3F2FD
+box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Layer" #FCE4EC
+box "Service Group" #FCE4EC
   participant "ConfigService" as svc
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "ConfigLoader" as config
 end box
 

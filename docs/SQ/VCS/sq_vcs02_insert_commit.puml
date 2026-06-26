@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Create a commit with conventional message
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Git Layer" #E8EAF6
+box "Git Group" #E8EAF6
   participant "GitCommit" as commit
   participant "GitStatus" as status
 end box
@@ -43,7 +43,7 @@ end note
 
 == VCS-02 INSERT Commit ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : VCS-02 PROCESS(user_input)
 
 agent -> commit : VCS-02 INSERT Commit(message, files)
@@ -56,7 +56,7 @@ deactivate status
 
 break No staged files
     commit --> agent : Result(success=false, error="no_staged_files")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : error: no staged files
 end
 
@@ -64,7 +64,7 @@ commit -> commit : VCS-02 VALIDATE Message(message)
 
 break Invalid message format
     commit --> agent : Result(success=false, error="invalid_commit_message")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : error: invalid commit message
 end
 
@@ -76,7 +76,7 @@ deactivate git
 commit --> agent : Result(success=true, data={hash, files})
 deactivate commit
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result: commit created
 
 note over user, git

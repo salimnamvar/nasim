@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Build AST index and symbol graph from project source
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Layer" #EDE7F6
+box "Repo Intelligence Group" #EDE7F6
   participant "RepoIntelligenceManager" as rim
   participant "ASTIndexAdapter" as ast
   participant "SymbolGraph" as graph
@@ -43,8 +43,8 @@ end note
 
 == RIM-01 INDEX Codebase ==
 
-user -> repl : RIM-01 INDEX Codebase(project_root)
-activate repl
+user -> router : RIM-01 INDEX Codebase(project_root)
+activate router
 router -> agent : RIM-01 INDEX Codebase(project_root)
 activate agent
 
@@ -86,10 +86,10 @@ deactivate graph
 rim --> agent : IndexStats(files, symbols, edges)
 deactivate rim
 
-agent --> repl : IndexStats(files, symbols, edges)
+agent --> router : IndexStats(files, symbols, edges)
 deactivate agent
 result --> user : IndexStats(files, symbols, edges)
-deactivate repl
+deactivate router
 
 note over user, fs
   Flow:    RIM-01 → User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → [FileSystem → ASTIndexAdapter → SymbolGraph]* → IndexStats

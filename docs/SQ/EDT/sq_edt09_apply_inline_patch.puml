@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Apply inline patch with line-level precision
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,11 +19,11 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
+box "Edit Strategy Group" #FFF3E0
   participant "EditStrategyManager" as esm
   participant "InlinePatchCoder" as ipc
 end box
-box "FileSystem Layer" #F3E5F5
+box "FileSystem Group" #F3E5F5
   participant "FileSystem" as fs
 end box
 
@@ -40,7 +40,7 @@ end note
 
 == EDT-09 APPLY Inline Patch ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> esm : EDT-09 APPLY_INLINE_PATCH(file_path, patch)
@@ -77,7 +77,7 @@ deactivate ipc
 esm --> agent : EditResult
 deactivate esm
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over participants

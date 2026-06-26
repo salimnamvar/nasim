@@ -119,7 +119,7 @@
 | CTX-03 | DISTILL Nodes | DistillationProcessor |
 | CTX-04 | INJECT Context | InjectionProcessor |
 | CTX-05 | COMPACT Nodes | CompactionProcessor |
-| CTX-06 | TRACK Token Budget | TokenBudgetTracker |
+| CTX-06 | TRACK Token Budget | PipelineOrchestrator |
 | CTX-07 | SCORE Nodes | ContextPrioritizer |
 
 ## MCP Group (MCP)
@@ -159,6 +159,9 @@
 | TL-20 | RECALL Memory | MemoryTool |
 | TL-21 | INSERT Plan | PlanTool |
 | TL-22 | UPDATE Plan | PlanTool |
+| TL-23 | QUERY Repo Map | RepoMapTool |
+| TL-24 | SEARCH Semantic | SemanticSearchTool |
+| TL-25 | REVIEW Code | ReviewTool |
 
 ## Hooks Group (HK)
 

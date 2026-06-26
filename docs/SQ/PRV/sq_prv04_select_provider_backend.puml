@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Map config.provider string to provider class
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,14 +19,11 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Config Layer" #E0F7FA
+box "Config Group" #E0F7FA
   participant "ConfigLoader" as cfg
 end box
-box "Provider Layer" #FFF3E0
+box "Provider Group" #FFF3E0
   participant "ProviderFactory" as factory
-end box
-box "Repository Layer" #E8F5E9
-  participant "ProviderRepository" as prov_repo
 end box
 
 note over user, factory
@@ -43,8 +40,8 @@ end note
 
 == PRV-04 SELECT ProviderBackend ==
 
-user -> repl : PRV-04 SELECT ProviderBackend(provider_name)
-activate repl
+user -> router : PRV-04 SELECT ProviderBackend(provider_name)
+activate router
 router -> agent : PRV-04 SELECT ProviderBackend(provider_name)
 activate agent
 
@@ -60,17 +57,17 @@ factory -> factory : PROV_REGISTRY lookup
 break Provider not in registry
     factory -> factory : raise ConfigError("Unknown provider: X")
     factory --> agent : ConfigError
-    agent --> repl : ConfigError
+    agent --> router : ConfigError
     result --> user : error message
 end
 
 factory --> agent : provider_class
 deactivate factory
 
-agent --> repl : provider_class
+agent --> router : provider_class
 deactivate agent
 result --> user : provider_class
-deactivate repl
+deactivate router
 
 note over user, factory
   Flow:    PRV-04 → User → ServerRouter → AgentOrchestrator → ConfigLoader → ProviderFactory → registry lookup → class

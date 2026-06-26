@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Queue tool calls in plan mode without executing
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -20,7 +20,7 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PlanSession" as plan
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
@@ -38,7 +38,7 @@ end note
 
 == AGT-07 QUEUE Plan ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 activate agent
 
@@ -53,7 +53,7 @@ activate plan
 plan --> agent : formatted plan text
 deactivate plan
 
-agent --> repl : AgentEvent(PlanDisplay)
+agent --> router : AgentEvent(PlanDisplay)
 deactivate agent
 result --> user : plan displayed
 

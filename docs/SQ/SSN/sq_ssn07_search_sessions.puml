@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Full-text search across session history
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Session Layer" #F1F8E9
+box "Session Group" #F1F8E9
   participant "SessionSearch" as search
 end box
 database "FTS5 Index" as fts
@@ -37,7 +37,7 @@ end note
 
 == SSN-07 Search Sessions ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> search : ssn07 SEARCH Session History(query, limit)
@@ -54,14 +54,14 @@ search -> search : format snippets
 search --> agent : 200 OK — SearchResult[session_id, turn_id, snippet, score]
 deactivate search
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — ranked search results
 
 break Index not available
     fts --> search : IndexError
     search -> search : fallback: linear scan
     search --> agent : 200 OK — SearchResult[linear_scan_results]
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
     result --> user : result — search results via linear scan
 end
 

@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Embedding-based code similarity search across repository
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,13 +19,13 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Layer" #EDE7F6
+box "Repo Intelligence Group" #EDE7F6
   participant "SemanticSearch" as search
 end box
-box "Provider Layer" #FFF3E0
+box "Provider Group" #FFF3E0
   participant "Provider" as provider
 end box
-box "Storage Layer" #F3E5F5
+box "Storage Group" #F3E5F5
   participant "EmbeddingStore" as embeddings
 end box
 
@@ -43,8 +43,8 @@ end note
 
 == RIM-06 SEARCH Semantic ==
 
-user -> repl : RIM-06 SEARCH Semantic(query, top_k)
-activate repl
+user -> router : RIM-06 SEARCH Semantic(query, top_k)
+activate router
 router -> agent : RIM-06 SEARCH Semantic(query, top_k)
 activate agent
 
@@ -68,10 +68,10 @@ search -> search : format_snippets(filtered_results)
 search --> agent : SearchResultList(results, scores, snippets)
 deactivate search
 
-agent --> repl : SearchResultList(results, scores, snippets)
+agent --> router : SearchResultList(results, scores, snippets)
 deactivate agent
 result --> user : SearchResultList(results, scores, snippets)
-deactivate repl
+deactivate router
 
 note over user, embeddings
   Flow:    RIM-06 → User → ServerRouter → AgentOrchestrator → SemanticSearch → Provider(embed) → EmbeddingStore → SearchResultList

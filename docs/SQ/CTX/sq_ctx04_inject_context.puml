@@ -4,18 +4,18 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Retrieve and inject context into the reasoning graph
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
 title nasim — CTX-04 INJECT Context
 
-box "Context Layer" #E8EAF6
+box "Context Group" #E8EAF6
   participant "PipelineOrchestrator" as pipe
   participant "InjectionProcessor" as inj
 end box
-box "RIM Layer" #F3E5F5
+box "RIM Group" #F3E5F5
   participant "RepoIndex" as rim
 end box
 actor "User" as user
@@ -40,7 +40,7 @@ end note
 
 == CTX-04 Inject Context ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 agent -> pipe : CTX-04 INJECT(task_description, graph)
 activate inj
@@ -57,7 +57,7 @@ inj -> inj : inject into reasoning graph
 inj --> pipe : InjectionResult(nodes_added, tokens_used)
 deactivate inj
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 break RepoIndex unavailable

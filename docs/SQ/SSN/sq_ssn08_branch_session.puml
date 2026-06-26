@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Fork session into a new branch for parallel exploration
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Session Layer" #F1F8E9
+box "Session Group" #F1F8E9
   participant "SessionFork" as fork
 end box
 database "Session Store" as store
@@ -40,7 +40,7 @@ end note
 
 == SSN-08 Branch Session ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> fork : ssn08 BRANCH Session(session_id, from_turn)
@@ -64,13 +64,13 @@ fork -> fork : call WRL-04 (FORK Session) for wire log fork
 fork --> agent : 200 OK — BranchCreated(branch_session_id, parent_id)
 deactivate fork
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — branch session created
 
 break Copy failure
     store --> fork : IOError
     fork --> agent : 500 INTERNAL — BranchError
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : result — branch failed, retain current session
 end
 

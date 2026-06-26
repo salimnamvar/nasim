@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Display approval prompt for unsafe tool execution
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -21,7 +21,7 @@ box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "PermissionGate" as gate
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "PolicyRepository" as policy_repo
 end box
 
@@ -40,7 +40,7 @@ end note
 
 == SAF-02 Prompt User Approval ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : SAF-02 PROCESS(user_input)
 
 agent -> gate : SAF-02 PROMPT UserApproval(tool_name, args)
@@ -56,12 +56,12 @@ renderer --> gate : choice (bool)
 alt user = y
     renderer --> gate : approved
     gate --> agent : approved
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
     result --> user : result: tool approved
 else user = N
     renderer --> gate : rejected
     gate --> agent : rejected
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
     result --> user : result: tool skipped
 end
 

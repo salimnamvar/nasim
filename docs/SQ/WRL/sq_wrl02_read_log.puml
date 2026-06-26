@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Sequential scan for replay
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,15 +17,12 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Wire Log Layer" #FFF3E0
+box "Wire Log Group" #FFF3E0
   participant "WireLogger" as logger
   participant "EventDeserializer" as deserializer
 end box
-box "FileSystem Layer" #F3E5F5
+box "FileSystem Group" #F3E5F5
   participant "FileSystem" as fs
-end box
-box "Repository Layer" #E8F5E9
-  participant "LogRepository" as log_repo
 end box
 
 note over user, fs
@@ -63,7 +60,7 @@ end note
 
 == wrl02 READ Log ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> logger : wrl02 READ Log(session_id, filter)
@@ -88,7 +85,7 @@ logger -> logger : collect_matching_events()
 logger --> agent : 200 OK — EventStream(events[], count, truncated)
 deactivate logger
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — event stream returned
 
 note over user, fs

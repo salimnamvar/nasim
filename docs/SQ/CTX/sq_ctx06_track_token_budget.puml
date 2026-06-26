@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Track token count as messages are added
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,9 +17,6 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
-end box
-box "Repository Layer" #E8F5E9
-  participant "ContextRepository" as ctx_repo
 end box
 
 note over agent, history
@@ -35,7 +32,7 @@ end note
 
 == CTX-01 Track Token Count ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 agent -> history : CTX-06 ADD_MESSAGE(msg)
 history -> history : self.messages.append(msg)
@@ -48,7 +45,7 @@ else within budget
     history --> agent : ok
 end
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over agent, history

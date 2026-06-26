@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Filter knowledge by scope (global, project, session)
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,7 +17,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Memory Layer" #E0F2F1
+box "Memory Group" #E0F2F1
   participant "MemoryScope" as scope
   participant "MemoryStore" as store
 end box
@@ -33,7 +33,7 @@ note over user, store
   Returns:        scoped_entries[] or global scope entries (fallback)
 end note
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 == MEM-04 SCOPE Knowledge ==
@@ -57,7 +57,7 @@ end
 scope --> agent : scoped_entries
 deactivate scope
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, store

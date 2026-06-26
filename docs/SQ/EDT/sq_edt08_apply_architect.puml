@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Plan and apply multi-file edits via architectural decomposition
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,14 +19,14 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
+box "Edit Strategy Group" #FFF3E0
   participant "EditStrategyManager" as esm
   participant "ArchitectCoder" as arch
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ASTParser" as ast
 end box
-box "FileSystem Layer" #F3E5F5
+box "FileSystem Group" #F3E5F5
   participant "FileSystem" as fs
 end box
 
@@ -43,7 +43,7 @@ end note
 
 == EDT-08 APPLY Architect ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> esm : EDT-08 APPLY_ARCHITECT(edit_plan[])
@@ -85,7 +85,7 @@ deactivate arch
 esm --> agent : EditResult
 deactivate esm
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over participants

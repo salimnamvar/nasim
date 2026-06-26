@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Permanently delete a session and its associated data
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Session Layer" #F3E5F5
+box "Session Group" #F3E5F5
   participant "SessionStore" as store
 end box
 box "External" #F5F5F5
@@ -39,7 +39,7 @@ end note
 
 == SSN-09 DELETE Session ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> store : ssn09 DELETE Session(session_id)
@@ -49,7 +49,7 @@ store -> store : validate_session_exists(session_id)
 
 break Session not found
     store --> agent : 404 NOT_FOUND — DeleteError("session not found")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : result — session not found
 end
 
@@ -59,7 +59,7 @@ activate fs
 break Permission denied
     fs --> store : PermissionError
     store --> agent : 403 FORBIDDEN — DeleteError("permission denied")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : result — permission denied
 end
 
@@ -71,7 +71,7 @@ store -> store : clear_session_index(session_id)
 store --> agent : 200 OK — delete_confirmed(session_id)
 deactivate store
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result — session permanently deleted
 
 note over user, fs

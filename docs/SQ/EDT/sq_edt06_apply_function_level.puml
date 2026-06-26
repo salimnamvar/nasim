@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Edit a single function via AST-aware replace
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,18 +19,15 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
+box "Edit Strategy Group" #FFF3E0
   participant "EditStrategyManager" as esm
   participant "FunctionLevelCoder" as flc
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ASTParser" as ast
 end box
-box "FileSystem Layer" #F3E5F5
+box "FileSystem Group" #F3E5F5
   participant "FileSystem" as fs
-end box
-box "Repository Layer" #E8F5E9
-  participant "FileRepository" as file_repo
 end box
 
 note over participants
@@ -46,7 +43,7 @@ end note
 
 == EDT-06 APPLY Function-Level ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 agent -> esm : EDT-06 APPLY_FUNCTION_LEVEL(file_path, function_name, new_body)
 activate esm
@@ -81,7 +78,7 @@ deactivate flc
 esm --> agent : EditResult
 deactivate esm
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over participants

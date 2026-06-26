@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Retry with feedback on failure
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,12 +17,12 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Evaluation Layer" #FFF3E0
+box "Evaluation Group" #FFF3E0
   participant "RetryCoordinator" as retry
   participant "FeedbackInjector" as feedback
   participant "TurnBudgetInjector" as budget
 end box
-box "Sandbox Layer" #F1F8E9
+box "Sandbox Group" #F1F8E9
   participant "FileSystem" as fs
 end box
 
@@ -37,7 +37,7 @@ note over user, fs
   Returns:        RetryResult(retry_count, feedback_context, continue=true) or RetryExhausted(retry_count, final_error)
 end note
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 == EVL-06 COORDINATE Retry ==
@@ -67,7 +67,7 @@ end
 
 deactivate retry
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, fs

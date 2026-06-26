@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Export traces and metrics to OTel-compatible backend
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Observability Layer" #E0F2F1
+box "Observability Group" #E0F2F1
   participant "OTelExporter" as otel
   participant "TraceCorrelator" as trace
   participant "MetricsCollector" as metrics
@@ -27,7 +27,7 @@ end box
 box "External" #F5F5F5
   participant "OTel Backend" as backend
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
@@ -45,8 +45,8 @@ end note
 
 == OBS-06 EXPORT Otlp ==
 
-user -> repl : OBS-06 EXPORT Otlp()
-activate repl
+user -> router : OBS-06 EXPORT Otlp()
+activate router
 router -> agent : OBS-06 EXPORT Otlp()
 activate agent
 
@@ -77,10 +77,10 @@ deactivate backend
 otel --> agent : OtlpExportResult(traces, metrics)
 deactivate otel
 
-agent --> repl : None
+agent --> router : None
 deactivate agent
 result --> user : None
-deactivate repl
+deactivate router
 
 note over user, backend
   Flow:    OBS-06 → User → ServerRouter → AgentOrchestrator → OTelExporter → TraceCorrelator + MetricsCollector → POST to backend

@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Change the active model at runtime
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,7 +19,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Router Layer" #EDE7F6
+box "Router Group" #EDE7F6
   participant "ModelRouter" as router
 end box
 
@@ -38,14 +38,14 @@ end note
 
 == RTG-04 Switch Model ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : RTG-04 PROCESS(user_input)
 
 agent -> router : RTG-04 SWITCH Model(target_model)
 
 break Model not in catalog
     router --> agent : Error("model not available")
-    agent --> repl : AgentEvent(Error)
+    agent --> router : AgentEvent(Error)
     result --> user : error: model not available
 end
 
@@ -54,7 +54,7 @@ router -> router : RTG-04 UPDATE ActiveModelConfig(target_model)
 
 router --> agent : Result(success=true, data={previous_model, new_model})
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result: switched to target_model
 
 note over user, router

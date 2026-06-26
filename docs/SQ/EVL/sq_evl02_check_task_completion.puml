@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Evaluate task completion against defined criteria
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -17,14 +17,14 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Evaluation Layer" #F9FBE7
+box "Evaluation Group" #F9FBE7
   participant "EvaluationEngine" as engine
   participant "TaskEvaluator" as evaluator
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #F3E5F5
   participant "ToolRegistry" as tool
 end box
-box "Repository Layer" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "EvaluationRepository" as eval_repo
 end box
 
@@ -39,7 +39,7 @@ note over user, tool
   Returns:        CompletionStatus(completed, details[])
 end note
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 == EVL-02 CHECK Task Completion ==
@@ -68,7 +68,7 @@ deactivate evaluator
 engine --> agent : CompletionStatus
 deactivate engine
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over user, tool

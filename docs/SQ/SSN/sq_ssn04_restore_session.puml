@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Resume a previous session by loading its history
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    —
 ' ============================================================
@@ -17,7 +17,7 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Session Layer" #F1F8E9
+box "Session Group" #F1F8E9
   participant "SessionStore" as store
 end box
 
@@ -34,7 +34,7 @@ end note
 
 == SSN-04 Resume Session ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 
 agent -> store : ssn04 READ Session(session_id)
@@ -45,12 +45,12 @@ end ref
 alt Session found
     store --> agent : 200 OK — Session(id, messages)
     agent -> agent : ssn01 PERSIST Session(session_id, messages)
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
     result --> user : result — resumed session <id> (<N> messages)
 else Session not found
     store --> agent : 404 NOT_FOUND
     agent -> agent : start fresh
-    agent --> repl : AgentEvent(Done)
+    agent --> router : AgentEvent(Done)
     result --> user : result — no session found, starting fresh
 end
 

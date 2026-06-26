@@ -4,12 +4,12 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Execute edit via search-replace strategy
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
-' Review:    Prompt audit 2026-06-21 (cop.md: PermissionGate removed, safety at AGT-15 level)
+' Review:    CAR audit 2026-06-26 (removed EditApplier phantom, fixed box naming)
 ' ============================================================
 
-title nasim — EDT-02 UPDATE Search-Replace
+title nasim — EDT-02 APPLY Search-Replace
 
 actor "User" as user
 
@@ -19,13 +19,10 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Layer" #FFF3E0
-  participant "EditApplier" as applier
+box "Edit Strategy Group" #FFF3E0
   participant "SearchReplaceCoder" as strategy
 end box
-box "Sandbox Layer" #F1F8E9
-  participant "FileSystem" as fs
-end box
+participant "Host Filesystem" as fs
 
 note over agent, fs
   Scope:          Execute edit via search-replace strategy
@@ -33,48 +30,43 @@ note over agent, fs
   Contexts:       Called by AgentOrchestrator after EDT-01
   Excludes:       Strategy selection (EDT-01), post-edit validation (EDT-03), diff staging (EDT-10)
   Rollback:       Write failure -> restore original file from backup
-  Design:         EditApplier reads original, applies SearchReplaceCoder strategy, writes result. Backup created before modification.
+  Design:         AgentOrchestrator reads original, applies SearchReplaceCoder strategy, writes result. Backup created before modification.
   Classification: Process Decomposition
   Returns:        EditResult(diff, file_path, backup_path) on success; restored original on failure
 end note
 
 == EDT-02 APPLY Search-Replace ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
-agent -> applier : EDT-02 APPLY_EDIT(strategy, file_path)
-activate applier
 
-applier -> fs : read_file(file_path)
+agent -> fs : read_file(file_path)
 activate fs
-fs --> applier : original_content
+fs --> agent : original_content
 deactivate fs
 
-applier -> fs : create_backup(file_path)
+agent -> fs : create_backup(file_path)
 activate fs
-fs --> applier : backup_path
+fs --> agent : backup_path
 deactivate fs
 
-applier -> strategy : apply(original_content)
+agent -> strategy : apply(original_content)
 activate strategy
-strategy --> applier : modified_content
+strategy --> agent : modified_content
 deactivate strategy
 
-applier -> fs : write_file(file_path, modified_content)
+agent -> fs : write_file(file_path, modified_content)
 activate fs
-fs --> applier : write_success
+fs --> agent : write_success
 deactivate fs
 
-applier -> applier : compute_diff(original_content, modified_content)
+agent -> agent : compute_diff(original_content, modified_content)
 
-applier --> agent : EditResult(diff, file_path, backup_path)
-deactivate applier
-
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over agent, fs
-  Flow:    User → ServerRouter → AgentOrchestrator → EditApplier → SearchReplaceCoder + FileSystem → EditResult
+  Flow:    User → ServerRouter → AgentOrchestrator → SearchReplaceCoder + Host Filesystem → EditResult
   State:   <back:#ECEFF1>IDLE</back> -> READING -> BACKING_UP -> WRITING -> DIFFING -> DONE
   Success: EditResult with diff and backup path
   Failure: Write failure -> restore from backup

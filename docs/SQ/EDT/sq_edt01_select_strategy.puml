@@ -4,7 +4,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Choose optimal edit format for the target model
 ' Milestone: v1.0
-' Version:   8.0.0
+' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
@@ -19,15 +19,12 @@ end box
 box "Agent Group" #E3F2FD
   participant "AgentOrchestrator" as agent
 end box
-box "Edit Strategy Layer" #FFF3E0
+box "Edit Strategy Group" #FFF3E0
   participant "StrategySelector" as selector
   participant "EditStrategy" as strategy
 end box
-box "Config Layer" #FCE4EC
+box "Config Group" #FCE4EC
   participant "ConfigLoader" as config
-end box
-box "Repository Layer" #E8F5E9
-  participant "FileRepository" as file_repo
 end box
 
 note over agent, config
@@ -43,7 +40,7 @@ end note
 
 == EDT-01 SELECT Strategy ==
 
-user -> repl : types input
+user -> router : types input
 router -> agent : PROCESS(user_input)
 agent -> selector : EDT-01 SELECT_STRATEGY(file_path, edit_description, model_id)
 activate selector
@@ -77,7 +74,7 @@ selector -> selector : validate_format_compatibility(strategy, model_id)
 selector --> agent : EditStrategy(format, parameters, confidence)
 deactivate selector
 
-agent --> repl : AgentEvent(Done)
+agent --> router : AgentEvent(Done)
 result --> user : result
 
 note over agent, config
