@@ -66,4 +66,4 @@ ERD bridges the logical session model and the physical JSON Lines implementation
 | ----- | ---- |
 | Class diagram (source) | `docs/CL/cl_runtime_model.puml` |
 | Lifecycle states | `docs/SM/sm_agent_lifecycle.puml` |
-| Session UCs | `docs/UC/uc_session.puml` |
+| Session UCs | `docs/UC/uc_ssn.puml` |

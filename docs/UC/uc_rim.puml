@@ -1,4 +1,4 @@
-@startuml uc_repo_intelligence
+@startuml uc_rim
 
 ' ============================================================
 ' Title:     nasim — UC: Repo Intelligence Group
@@ -15,18 +15,6 @@
 left to right direction
 
 title nasim — Repo Intelligence Use Cases
-
-note top of User
-  Scope:          RIM-01..RIM-06 — Index, build symbol graph, rank, inject repo-map, embed, semantic search
-  Preconditions:  RepoIntelligenceManager initialized, tree-sitter parsers available
-  Contexts:       Called by AGT-01 (PROCESS User Task); sq_rim01..sq_rim06
-  Excludes:       File search (see TL-06..TL-08)
-  Rollback:       N/A — index is rebuilt incrementally
-  Design:         AST indexing via tree-sitter; symbol graph cross-references files; embeddings for semantic search
-  Returns:
-    - Success: IndexStats, SymbolGraph, RepoMap, EmbeddingVector, SearchResults
-    - Failure: RepoIntelligenceError
-end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -59,6 +47,18 @@ skinparam actor<<system>> {
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
+
+note top of User
+  Scope:          RIM-01..RIM-06 — Index, build symbol graph, rank, inject repo-map, embed, semantic search
+  Preconditions:  RepoIntelligenceManager initialized, tree-sitter parsers available
+  Contexts:       Called by AGT-01 (PROCESS User Task); sq_rim01..sq_rim06
+  Excludes:       File search (see TL-06..TL-08)
+  Rollback:       N/A — index is rebuilt incrementally
+  Design:         AST indexing via tree-sitter; symbol graph cross-references files; embeddings for semantic search
+  Returns:
+    - Success: IndexStats, SymbolGraph, RepoMap, EmbeddingVector, SearchResults
+    - Failure: RepoIntelligenceError
+end note
 
 ' ------------------------------------------------------------
 ' System Boundary

@@ -18,18 +18,6 @@ left to right direction
 
 title nasim — Provider Use Cases
 
-note top of User
-  Scope:          PRV-01..PRV-04 — LLM provider registration, chat request/stream, backend selection
-  Preconditions:  LiteLLM proxy configured, provider credentials available
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call); sq_prv01..sq_prv04
-  Excludes:       Provider backend lifecycle (outside scope)
-  Rollback:       N/A — transient stateless operations
-  Design:         LiteLLMProxy wraps litellm for provider abstraction; Provider is the callable handle
-  Returns:
-    - Success: ChatResponse or ProviderHandle
-    - Failure: ProviderError with reason
-end note
-
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
@@ -61,6 +49,18 @@ skinparam actor<<system>> {
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
+
+note top of User
+  Scope:          PRV-01..PRV-04 — LLM provider registration, chat request/stream, backend selection
+  Preconditions:  LiteLLM proxy configured, provider credentials available
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call); sq_prv01..sq_prv04
+  Excludes:       Provider backend lifecycle (outside scope)
+  Rollback:       N/A — transient stateless operations
+  Design:         LiteLLMProxy wraps litellm for provider abstraction; Provider is the callable handle
+  Returns:
+    - Success: ChatResponse or ProviderHandle
+    - Failure: ProviderError with reason
+end note
 
 ' ============================================================
 ' System Boundary

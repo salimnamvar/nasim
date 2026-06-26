@@ -1,4 +1,4 @@
-@startuml uc_memory
+@startuml uc_mem
 
 ' ============================================================
 ' Title:     nasim — UC: Memory Group
@@ -15,18 +15,6 @@
 left to right direction
 
 title nasim — Memory Use Cases
-
-note top of User
-  Scope:          MEM-01..MEM-04 — Persist, recall, search, scope knowledge entries
-  Preconditions:  MemoryStore initialized, storage backend available
-  Contexts:       Called by TL-19 (PERSIST Memory), TL-20 (RECALL Memory); sq_mem01..sq_mem04
-  Excludes:       Memory tool implementation (see TL-19, TL-20)
-  Rollback:       MEM-01 is idempotent; no rollback needed
-  Design:         MemoryStore uses SQLite with FTS5; scoping isolates by global/project/session
-  Returns:
-    - Success: KnowledgeEntry or list of entries
-    - Failure: MemoryError
-end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -59,6 +47,18 @@ skinparam actor<<system>> {
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
+
+note top of User
+  Scope:          MEM-01..MEM-04 — Persist, recall, search, scope knowledge entries
+  Preconditions:  MemoryStore initialized, storage backend available
+  Contexts:       Called by TL-19 (PERSIST Memory), TL-20 (RECALL Memory); sq_mem01..sq_mem04
+  Excludes:       Memory tool implementation (see TL-19, TL-20)
+  Rollback:       MEM-01 is idempotent; no rollback needed
+  Design:         MemoryStore uses SQLite with FTS5; scoping isolates by global/project/session
+  Returns:
+    - Success: KnowledgeEntry or list of entries
+    - Failure: MemoryError
+end note
 
 ' ------------------------------------------------------------
 ' System Boundary

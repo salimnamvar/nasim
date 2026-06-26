@@ -1,4 +1,4 @@
-@startuml uc_server
+@startuml uc_api
 
 ' ============================================================
 ' Title:     nasim — UC: API Group (Entry Gate)
@@ -19,18 +19,6 @@
 left to right direction
 
 title nasim — API Use Cases (Entry Gate)
-
-note top of User
-  Scope:          API-01..API-11 — Session CRUD, message dispatch, tool discovery, config management
-  Preconditions:  ServerRouter initialized, downstream groups registered
-  Contexts:       Called by interface containers (CLI, WebApp); sq_srv01..sq_srv11
-  Excludes:       Direct core access (all requests route through API)
-  Rollback:       API-06 dispatch is stateless; API-04/05/11 modify state and are reversible
-  Design:         ServerRouter maps REST endpoints to downstream group operations; SSE for streaming
-  Returns:
-    - Success: JSON response or SSE stream
-    - Failure: HTTP error with structured error body
-end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -71,19 +59,31 @@ actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
+note top of User
+  Scope:          API-01..API-11 — Session CRUD, message dispatch, tool discovery, config management
+  Preconditions:  ServerRouter initialized, downstream groups registered
+  Contexts:       Called by interface containers (CLI, WebApp); sq_srv01..sq_srv11
+  Excludes:       Direct core access (all requests route through API)
+  Rollback:       API-06 dispatch is stateless; API-04/05/11 modify state and are reversible
+  Design:         ServerRouter maps REST endpoints to downstream group operations; SSE for streaming
+  Returns:
+    - Success: JSON response or SSE stream
+    - Failure: HTTP error with structured error body
+end note
+
 ' ------------------------------------------------------------
 ' Cross-Group External References
 ' ------------------------------------------------------------
 
-usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
-usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
-usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
-usecase "SSN-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
+usecase "SSN-03\nLIST Sessions\n[uc_ssn]" as SSN03_ext <<extref>>
+usecase "SSN-01\nPERSIST Session\n[uc_ssn]" as SSN01_ext <<extref>>
+usecase "SSN-02\nREAD Session\n[uc_ssn]" as SSN02_ext <<extref>>
+usecase "SSN-09\nDELETE Session\n[uc_ssn]" as SSN09_ext <<extref>>
 
-usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
+usecase "AGT-01\nPROCESS User Task\n[uc_agt]" as AGT01_ext <<extref>>
 
-usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
-usecase "CFG-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
+usecase "CFG-01\nLOAD Config\n[uc_cfg]" as CFG01_ext <<extref>>
+usecase "CFG-03\nAPPLY Layered Config\n[uc_cfg]" as CFG03_ext <<extref>>
 
 usecase "TL-14\nLIST Registered Tools\n[uc_tl_advanced]" as TL14_ext <<extref>>
 

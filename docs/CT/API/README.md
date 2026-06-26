@@ -80,7 +80,7 @@ and UC (operation definitions), and outputs to Code (route handlers, schemas).
 
 | Layer | Path |
 | ----- | ---- |
-| UC (source) | `docs/UC/uc_server.puml` |
+| UC (source) | `docs/UC/uc_api.puml` |
 | SQ (source) | `docs/SQ/SRV/` |
 | CL (source) | `docs/CL/cl_runtime_model.puml` |
 | CT/DATA (sibling) | `docs/CT/DATA/nasim_session_store.datacontract.yaml` |

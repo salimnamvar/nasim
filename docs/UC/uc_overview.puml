@@ -19,18 +19,6 @@ left to right direction
 
 title nasim — UC Overview (API-First)
 
-note top of User
-  Scope:          All 21 UC groups — cross-cutting view of system capabilities
-  Preconditions:  All groups registered, system initialized
-  Contexts:       All sq_*.puml diagrams; 148 UCs total
-  Excludes:       Detailed UC relationships (see per-group diagrams)
-  Rollback:       N/A — overview diagram; no operational state
-  Design:         All interface containers route through API group; Agent group orchestrates tools
-  Returns:
-    - Success: UC group summary
-    - Failure: N/A
-end note
-
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
@@ -69,6 +57,18 @@ skinparam usecase<<extref>> {
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
+note top of User
+  Scope:          All 21 UC groups — cross-cutting view of system capabilities
+  Preconditions:  All groups registered, system initialized
+  Contexts:       All sq_*.puml diagrams; 148 UCs total
+  Excludes:       Detailed UC relationships (see per-group diagrams)
+  Rollback:       N/A — overview diagram; no operational state
+  Design:         All interface containers route through API group; Agent group orchestrates tools
+  Returns:
+    - Success: UC group summary
+    - Failure: N/A
+end note
+
 actor "MCP Client" as MCPClient <<system>>
 actor "Observability Platform" as Platform <<system>>
 

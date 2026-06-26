@@ -1,4 +1,4 @@
-@startuml uc_edit_strategy
+@startuml uc_edt
 
 ' ============================================================
 ' Title:     nasim — UC: Edit Strategy Group
@@ -15,18 +15,6 @@
 left to right direction
 
 title nasim — Edit Strategy Use Cases
-
-note top of User
-  Scope:          EDT-01..EDT-10 — Select edit strategy, apply various strategies, stage diff
-  Preconditions:  StrategySelector initialized, edit strategies registered
-  Contexts:       Called by AGT-01 (PROCESS User Task); sq_edt01..sq_edt10
-  Excludes:       File I/O (see TL-02, TL-03)
-  Rollback:       EDT-07/10 diff sandbox allows undo; EDT-02..06 applied directly (reversible via VCS-02)
-  Design:         StrategySelector picks optimal strategy per model; each strategy implements EditCoder ABC
-  Returns:
-    - Success: EditResult(changes_applied, diff=...)
-    - Failure: EditError with details
-end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -59,6 +47,18 @@ skinparam actor<<system>> {
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
+
+note top of User
+  Scope:          EDT-01..EDT-10 — Select edit strategy, apply various strategies, stage diff
+  Preconditions:  StrategySelector initialized, edit strategies registered
+  Contexts:       Called by AGT-01 (PROCESS User Task); sq_edt01..sq_edt10
+  Excludes:       File I/O (see TL-02, TL-03)
+  Rollback:       EDT-07/10 diff sandbox allows undo; EDT-02..06 applied directly (reversible via VCS-02)
+  Design:         StrategySelector picks optimal strategy per model; each strategy implements EditCoder ABC
+  Returns:
+    - Success: EditResult(changes_applied, diff=...)
+    - Failure: EditError with details
+end note
 
 ' ------------------------------------------------------------
 ' System Boundary

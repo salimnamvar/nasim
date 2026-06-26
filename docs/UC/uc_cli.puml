@@ -18,18 +18,6 @@ left to right direction
 
 title nasim — CLI Use Cases (Interface Container)
 
-note top of User
-  Scope:          CLI-01..CLI-08 — REPL loop, slash commands, streaming, args, plan mode, approval, model switch, sessions
-  Preconditions:  REPLSession initialized, CLI arguments parsed
-  Contexts:       Called by User at startup; sq_cli01..sq_cli08
-  Excludes:       Business logic (all delegated to API group)
-  Rollback:       N/A — CLI is a transient interface; no persistent state
-  Design:         All business operations delegate through API group; no direct core access
-  Returns:
-    - Success: Rendered output to terminal
-    - Failure: Error message displayed to user
-end note
-
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
 
@@ -69,13 +57,25 @@ actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
 
+note top of User
+  Scope:          CLI-01..CLI-08 — REPL loop, slash commands, streaming, args, plan mode, approval, model switch, sessions
+  Preconditions:  REPLSession initialized, CLI arguments parsed
+  Contexts:       Called by User at startup; sq_cli01..sq_cli08
+  Excludes:       Business logic (all delegated to API group)
+  Rollback:       N/A — CLI is a transient interface; no persistent state
+  Design:         All business operations delegate through API group; no direct core access
+  Returns:
+    - Success: Rendered output to terminal
+    - Failure: Error message displayed to user
+end note
+
 ' ------------------------------------------------------------
 ' Cross-Group External References
 ' ------------------------------------------------------------
 
-usecase "API-01\nLIST Sessions\n[uc_server]" as API01_ext <<extref>>
-usecase "API-06\nDISPATCH Message\n[uc_server]" as API06_ext <<extref>>
-usecase "API-11\nUPDATE Config\n[uc_server]" as API11_ext <<extref>>
+usecase "API-01\nLIST Sessions\n[uc_api]" as API01_ext <<extref>>
+usecase "API-06\nDISPATCH Message\n[uc_api]" as API06_ext <<extref>>
+usecase "API-11\nUPDATE Config\n[uc_api]" as API11_ext <<extref>>
 
 ' ------------------------------------------------------------
 ' System Boundary

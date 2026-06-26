@@ -1,4 +1,4 @@
-@startuml uc_wire_log
+@startuml uc_wrl
 
 ' ============================================================
 ' Title:     nasim — UC: Wire Log Group
@@ -15,18 +15,6 @@
 left to right direction
 
 title nasim — Wire Log Use Cases
-
-note top of User
-  Scope:          WRL-01..WRL-05 — Append, read, seek, fork, checkpoint wire events
-  Preconditions:  WireLog initialized, storage available
-  Contexts:       Called by AGT-03 (UPDATE Conversation); sq_wrl01..sq_wrl05
-  Excludes:       Session persistence (see SSN group)
-  Rollback:       N/A — append-only; checkpoint allows replay from known point
-  Design:         WireLog is append-only event store; TurnIndex enables O(log n) seek
-  Returns:
-    - Success: WireEvent or log position
-    - Failure: WireLogError
-end note
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -59,6 +47,18 @@ skinparam actor<<system>> {
 actor "User" as User
 actor "ServerRouter" as Router <<system>>
 actor "AgentOrchestrator" as Agent <<system>>
+
+note top of User
+  Scope:          WRL-01..WRL-05 — Append, read, seek, fork, checkpoint wire events
+  Preconditions:  WireLog initialized, storage available
+  Contexts:       Called by AGT-03 (UPDATE Conversation); sq_wrl01..sq_wrl05
+  Excludes:       Session persistence (see SSN group)
+  Rollback:       N/A — append-only; checkpoint allows replay from known point
+  Design:         WireLog is append-only event store; TurnIndex enables O(log n) seek
+  Returns:
+    - Success: WireEvent or log position
+    - Failure: WireLogError
+end note
 
 ' ------------------------------------------------------------
 ' System Boundary
