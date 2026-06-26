@@ -1,5 +1,7 @@
 @startuml uc_cfg
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Config Group
@@ -80,19 +82,10 @@ rectangle "nasim" {
 
 
 User --> CFG01
-User --> CFG02
-User --> CFG03
-
 
 Router --> CFG01 : dispatches
-Router --> CFG02 : dispatches
-Router --> CFG03 : dispatches
-
 
 Agent --> CFG01 : calls
-Agent --> CFG02 : calls
-Agent --> CFG03 : calls
-
 
 ' ------------------------------------------------------------
 ' Relationships

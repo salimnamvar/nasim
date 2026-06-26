@@ -1,5 +1,7 @@
 @startuml uc_evl
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Evaluation Group
@@ -86,33 +88,18 @@ rectangle "nasim" {
 
 
 User --> EVL01
-User --> EVL02
-User --> EVL03
-User --> EVL04
-User --> EVL05
-User --> EVL06
 User --> EVL07
 User --> EVL08
 User --> EVL09
 
 
 Router --> EVL01 : dispatches
-Router --> EVL02 : dispatches
-Router --> EVL03 : dispatches
-Router --> EVL04 : dispatches
-Router --> EVL05 : dispatches
-Router --> EVL06 : dispatches
 Router --> EVL07 : dispatches
 Router --> EVL08 : dispatches
 Router --> EVL09 : dispatches
 
 
 Agent --> EVL01 : calls
-Agent --> EVL02 : calls
-Agent --> EVL03 : calls
-Agent --> EVL04 : calls
-Agent --> EVL05 : calls
-Agent --> EVL06 : calls
 Agent --> EVL07 : calls
 Agent --> EVL08 : calls
 Agent --> EVL09 : calls

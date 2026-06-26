@@ -1,5 +1,7 @@
 @startuml uc_cli
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: CLI Group (Interface Container)
@@ -114,11 +116,7 @@ User --> CLI08
 
 
 Router --> CLI01 : delegates
-Router --> CLI03 : dispatches
-
 Agent --> CLI01 : orchestrates
-Agent --> CLI03 : calls
-
 
 ' ------------------------------------------------------------
 ' Relationships (downward <<include>> only)

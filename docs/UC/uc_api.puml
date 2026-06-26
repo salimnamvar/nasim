@@ -1,5 +1,7 @@
 @startuml uc_api
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: API Group (Entry Gate)

@@ -1,5 +1,7 @@
 @startuml uc_prv
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Provider Group
@@ -82,19 +84,16 @@ rectangle "nasim" {
 ' ============================================================
 
 
-User --> PRV01
 User --> PRV02
 User --> PRV03
 User --> PRV04
 
 
-Router --> PRV01 : dispatches
 Router --> PRV02 : dispatches
 Router --> PRV03 : dispatches
 Router --> PRV04 : dispatches
 
 
-Agent --> PRV01 : calls
 Agent --> PRV02 : calls
 Agent --> PRV03 : calls
 Agent --> PRV04 : calls

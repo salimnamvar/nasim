@@ -1,5 +1,7 @@
 @startuml uc_edt
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Edit Strategy Group
@@ -87,40 +89,10 @@ rectangle "nasim" {
 
 
 User --> EDT01
-User --> EDT02
-User --> EDT03
-User --> EDT04
-User --> EDT05
-User --> EDT06
-User --> EDT07
-User --> EDT08
-User --> EDT09
-User --> EDT10
-
 
 Router --> EDT01 : dispatches
-Router --> EDT02 : dispatches
-Router --> EDT03 : dispatches
-Router --> EDT04 : dispatches
-Router --> EDT05 : dispatches
-Router --> EDT06 : dispatches
-Router --> EDT07 : dispatches
-Router --> EDT08 : dispatches
-Router --> EDT09 : dispatches
-Router --> EDT10 : dispatches
-
 
 Agent --> EDT01 : calls
-Agent --> EDT02 : calls
-Agent --> EDT03 : calls
-Agent --> EDT04 : calls
-Agent --> EDT05 : calls
-Agent --> EDT06 : calls
-Agent --> EDT07 : calls
-Agent --> EDT08 : calls
-Agent --> EDT09 : calls
-Agent --> EDT10 : calls
-
 
 ' ------------------------------------------------------------
 ' Relationships

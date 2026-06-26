@@ -1,5 +1,7 @@
 @startuml uc_wrl
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Wire Log Group
@@ -82,22 +84,16 @@ rectangle "nasim" {
 
 
 User --> WRL01
-User --> WRL02
-User --> WRL03
 User --> WRL04
 User --> WRL05
 
 
 Router --> WRL01 : dispatches
-Router --> WRL02 : dispatches
-Router --> WRL03 : dispatches
 Router --> WRL04 : dispatches
 Router --> WRL05 : dispatches
 
 
 Agent --> WRL01 : calls
-Agent --> WRL02 : calls
-Agent --> WRL03 : calls
 Agent --> WRL04 : calls
 Agent --> WRL05 : calls
 

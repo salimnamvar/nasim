@@ -1,5 +1,7 @@
 @startuml uc_saf
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Safety Group
@@ -80,17 +82,14 @@ rectangle "nasim" {
 ' ============================================================
 
 
-User --> SAF01
 User --> SAF02
 User --> SAF03
 
 
-Router --> SAF01 : dispatches
 Router --> SAF02 : dispatches
 Router --> SAF03 : dispatches
 
 
-Agent --> SAF01 : calls
 Agent --> SAF02 : calls
 Agent --> SAF03 : calls
 

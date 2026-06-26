@@ -1,5 +1,7 @@
 @startuml uc_plg
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Plugins Group
@@ -83,25 +85,16 @@ rectangle "nasim" {
 
 
 User --> PLG01
-User --> PLG02
-User --> PLG03
-User --> PLG04
 User --> PLG05
 User --> PLG06
 
 
 Router --> PLG01 : dispatches
-Router --> PLG02 : dispatches
-Router --> PLG03 : dispatches
-Router --> PLG04 : dispatches
 Router --> PLG05 : dispatches
 Router --> PLG06 : dispatches
 
 
 Agent --> PLG01 : calls
-Agent --> PLG02 : calls
-Agent --> PLG03 : calls
-Agent --> PLG04 : calls
 Agent --> PLG05 : calls
 Agent --> PLG06 : calls
 

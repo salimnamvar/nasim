@@ -1,5 +1,7 @@
 @startuml uc_vcs
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Git Group
@@ -81,19 +83,16 @@ rectangle "nasim" {
 
 
 User --> VCS01
-User --> VCS02
 User --> VCS03
 User --> VCS04
 
 
 Router --> VCS01 : dispatches
-Router --> VCS02 : dispatches
 Router --> VCS03 : dispatches
 Router --> VCS04 : dispatches
 
 
 Agent --> VCS01 : calls
-Agent --> VCS02 : calls
 Agent --> VCS03 : calls
 Agent --> VCS04 : calls
 

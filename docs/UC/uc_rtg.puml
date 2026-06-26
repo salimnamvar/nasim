@@ -1,5 +1,7 @@
 @startuml uc_rtg
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Router Group
@@ -83,20 +85,14 @@ rectangle "nasim" {
 
 
 User --> RTG01
-User --> RTG02
-User --> RTG03
 User --> RTG04
 
 
 Router --> RTG01 : dispatches
-Router --> RTG02 : dispatches
-Router --> RTG03 : dispatches
 Router --> RTG04 : dispatches
 
 
 Agent --> RTG01 : calls
-Agent --> RTG02 : calls
-Agent --> RTG03 : calls
 Agent --> RTG04 : calls
 
 

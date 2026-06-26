@@ -1,5 +1,7 @@
 @startuml uc_rim
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Repo Intelligence Group
@@ -83,28 +85,16 @@ rectangle "nasim" {
 
 
 User --> RIM01
-User --> RIM02
-User --> RIM03
 User --> RIM04
 User --> RIM05
-User --> RIM06
-
 
 Router --> RIM01 : dispatches
-Router --> RIM02 : dispatches
-Router --> RIM03 : dispatches
 Router --> RIM04 : dispatches
 Router --> RIM05 : dispatches
-Router --> RIM06 : dispatches
-
 
 Agent --> RIM01 : calls
-Agent --> RIM02 : calls
-Agent --> RIM03 : calls
 Agent --> RIM04 : calls
 Agent --> RIM05 : calls
-Agent --> RIM06 : calls
-
 
 ' ------------------------------------------------------------
 ' Relationships

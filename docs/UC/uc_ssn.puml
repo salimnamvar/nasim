@@ -1,5 +1,7 @@
 @startuml uc_ssn
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Session Group
@@ -85,8 +87,6 @@ rectangle "nasim" {
 ' ------------------------------------------------------------
 
 
-User --> SSN01
-User --> SSN02
 User --> SSN03
 User --> SSN04
 User --> SSN05
@@ -96,8 +96,6 @@ User --> SSN08
 User --> SSN09
 
 
-Router --> SSN01 : dispatches
-Router --> SSN02 : dispatches
 Router --> SSN03 : dispatches
 Router --> SSN04 : dispatches
 Router --> SSN05 : dispatches
@@ -107,8 +105,6 @@ Router --> SSN08 : dispatches
 Router --> SSN09 : dispatches
 
 
-Agent --> SSN01 : calls
-Agent --> SSN02 : calls
 Agent --> SSN03 : calls
 Agent --> SSN04 : calls
 Agent --> SSN05 : calls

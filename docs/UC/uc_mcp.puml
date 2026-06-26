@@ -1,5 +1,7 @@
 @startuml uc_mcp
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: MCP Group
@@ -82,8 +84,6 @@ rectangle "nasim" {
 
 
 User --> MCP01
-User --> MCP02
-User --> MCP03
 User --> MCP04
 
 
@@ -91,14 +91,10 @@ MCPClient --> MCP04 : calls
 
 
 Router --> MCP01 : dispatches
-Router --> MCP02 : dispatches
-Router --> MCP03 : dispatches
 Router --> MCP04 : dispatches
 
 
 Agent --> MCP01 : calls
-Agent --> MCP02 : calls
-Agent --> MCP03 : calls
 Agent --> MCP04 : calls
 
 

@@ -1,5 +1,7 @@
 @startuml uc_sbx
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Sandbox Group
@@ -81,22 +83,10 @@ rectangle "nasim" {
 
 
 User --> SBX01
-User --> SBX02
-User --> SBX03
-User --> SBX04
-
 
 Router --> SBX01 : dispatches
-Router --> SBX02 : dispatches
-Router --> SBX03 : dispatches
-Router --> SBX04 : dispatches
-
 
 Agent --> SBX01 : calls
-Agent --> SBX02 : calls
-Agent --> SBX03 : calls
-Agent --> SBX04 : calls
-
 
 ' ------------------------------------------------------------
 ' Relationships

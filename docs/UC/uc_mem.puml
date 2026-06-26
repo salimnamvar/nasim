@@ -1,5 +1,7 @@
 @startuml uc_mem
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Memory Group
@@ -82,21 +84,12 @@ rectangle "nasim" {
 
 User --> MEM01
 User --> MEM02
-User --> MEM03
-User --> MEM04
-
 
 Router --> MEM01 : dispatches
 Router --> MEM02 : dispatches
-Router --> MEM03 : dispatches
-Router --> MEM04 : dispatches
-
 
 Agent --> MEM01 : calls
 Agent --> MEM02 : calls
-Agent --> MEM03 : calls
-Agent --> MEM04 : calls
-
 
 ' ------------------------------------------------------------
 ' Relationships

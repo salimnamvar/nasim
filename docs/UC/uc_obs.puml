@@ -1,5 +1,7 @@
 @startuml uc_obs
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Observability Group
@@ -88,16 +90,10 @@ Platform --> OBS05 : scrapes
 
 
 Router --> OBS05 : dispatches
-Router --> OBS01 : dispatches
-Router --> OBS02 : dispatches
-Router --> OBS03 : dispatches
 Router --> OBS04 : dispatches
 Router --> OBS06 : dispatches
 
 
-Agent --> OBS01 : calls
-Agent --> OBS02 : calls
-Agent --> OBS03 : calls
 Agent --> OBS04 : calls
 Agent --> OBS05 : calls
 Agent --> OBS06 : calls

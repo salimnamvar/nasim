@@ -1,5 +1,7 @@
 @startuml uc_hk
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Hooks Group
@@ -87,24 +89,18 @@ User --> HK02
 User --> HK03
 User --> HK04
 User --> HK05
-User --> HK06
-
 
 Router --> HK01 : dispatches
 Router --> HK02 : dispatches
 Router --> HK03 : dispatches
 Router --> HK04 : dispatches
 Router --> HK05 : dispatches
-Router --> HK06 : dispatches
-
 
 Agent --> HK01 : calls
 Agent --> HK02 : calls
 Agent --> HK03 : calls
 Agent --> HK04 : calls
 Agent --> HK05 : calls
-Agent --> HK06 : calls
-
 
 ' ------------------------------------------------------------
 ' Relationships

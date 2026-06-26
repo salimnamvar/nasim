@@ -1,5 +1,7 @@
 @startuml uc_agt
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Agent Group
@@ -113,35 +115,13 @@ rectangle "nasim" {
 
 User --> AGT01 : via API-06 :dispatch
 Router --> AGT01 : delegates
-Router --> AGT02 : dispatches
-Router --> AGT03 : dispatches
 Router --> AGT04 : dispatches
-Router --> AGT06 : dispatches
-Router --> AGT07 : dispatches
-Router --> AGT08 : dispatches
-Router --> AGT09 : dispatches
-Router --> AGT10 : dispatches
-Router --> AGT11 : dispatches
 Router --> AGT12 : dispatches
 Router --> AGT13 : dispatches
-Router --> AGT14 : dispatches
-Router --> AGT15 : dispatches
-
 Agent --> AGT01 : orchestrates
-Agent --> AGT02 : calls
-Agent --> AGT03 : calls
 Agent --> AGT04 : calls
-Agent --> AGT06 : calls
-Agent --> AGT07 : calls
-Agent --> AGT08 : calls
-Agent --> AGT09 : calls
-Agent --> AGT10 : calls
-Agent --> AGT11 : calls
 Agent --> AGT12 : calls
 Agent --> AGT13 : calls
-Agent --> AGT14 : calls
-Agent --> AGT15 : calls
-
 
 ' ============================================================
 ' Relationships (downward <<include>> only)

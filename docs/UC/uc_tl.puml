@@ -1,5 +1,7 @@
 @startuml uc_tl
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
 ' Title:     nasim — UC: Tool Group — Core Tools
