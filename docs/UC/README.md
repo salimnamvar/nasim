@@ -238,7 +238,7 @@
 |-------|-----------|----------------|
 | RIM-01 | INDEX Codebase | RepoIntelligenceManager |
 | RIM-02 | BUILD Symbol Graph | SymbolGraph |
-| RIM-03 | RANK Results | RankingService |
+| RIM-03 | RANK Results | SymbolGraph |
 | RIM-04 | INJECT RepoMap | RepoMapBuilder |
 | RIM-05 | EMBED Code | EmbeddingAdapter |
 | RIM-06 | SEARCH Semantic | SemanticSearchService |

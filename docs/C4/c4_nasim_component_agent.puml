@@ -55,7 +55,7 @@ Rel(subagent_coord, agent_orch, "child agent inherits core orchestration loop")
 
 legend right
     |<#E3F2FD>  **Controller** | CLI Group, API Group |
-    |<#FFF3E0>  **Service**    | Agent Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
     |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend

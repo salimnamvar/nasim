@@ -67,7 +67,7 @@ result --> user : plan executed
 
 note over user, registry
   Flow:    AGT-08 → approve → drain queue → execute sequentially → results
-  State:   <back:#F1F8E9>PLANNING</back> -> <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF3E0>THINKING</back>
+  State:   <back:#E3F2FD>PLANNING</back> -> <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF3E0>THINKING</back>
   Success: all queued calls executed with results
   Failure: partial execution on tool failure
 end note

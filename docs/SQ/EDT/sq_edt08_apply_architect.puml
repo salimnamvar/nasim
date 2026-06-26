@@ -90,7 +90,7 @@ result --> user : result
 
 note over participants
   Flow:    EDT-08 → plan multi-file edit → apply across files → validate
-  State:   <back:#ECEFF1>IDLE</back> → <back:#F1F8E9>PLANNING</back> → EDITING → VALIDATING → DONE
+  State:   <back:#ECEFF1>IDLE</back> → <back:#E3F2FD>PLANNING</back> → EDITING → VALIDATING → DONE
   Success: EditResult(success=true, files_modified[]) — all files edited
   Failure: EditResult(success=false, error) — cross-file validation failed, all reverted
 end note

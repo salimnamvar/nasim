@@ -59,7 +59,7 @@ result --> user : plan displayed
 
 note over user, plan
   Flow:    AGT-07 → queue tool call → display as plan
-  State:   <back:#FFF3E0>THINKING</back> -> <back:#F1F8E9>PLANNING</back>
+  State:   <back:#FFF3E0>THINKING</back> -> <back:#E3F2FD>PLANNING</back>
   Success: tool calls queued and displayed as plan
   Failure: N/A (internal operation)
 end note
