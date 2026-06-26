@@ -90,20 +90,20 @@ usecase "PRV-03\nSTREAM Chat\n[uc_prv]" as PRV03_ext <<extref>>
 
 rectangle "nasim" {
   package "Agent Group (AGT)" {
-    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop:\nprovider call, tool dispatch" as AGT01
-    usecase "**AGT-02 DISPATCH Tool Call**\n--\nRoute tool call to registry" as AGT02
-    usecase "**AGT-03 UPDATE Conversation**\n--\nManage message list and token count" as AGT03
-    usecase "**AGT-04 DELETE History**\n--\nReset conversation history" as AGT04
-    usecase "**AGT-06 COMPACT Context**\n--\nSummarize old exchanges\nvia secondary LLM" as AGT06
-    usecase "**AGT-07 QUEUE Plan**\n--\nHold queued tool calls in plan mode" as AGT07
-    usecase "**AGT-08 APPROVE Plan**\n--\nDrain queued plan calls" as AGT08
-    usecase "**AGT-09 SPAWN Subagent**\n--\nCreate child agent\nwith restricted tools" as AGT09
-    usecase "**AGT-10 COLLECT Subagent Result**\n--\nGather results from\ncompleted child agents" as AGT10
-    usecase "**AGT-11 DELEGATE to Persona**\n--\nAssign tasks to\nspecialized persona roles" as AGT11
-    usecase "**AGT-12 LOAD Persona**\n--\nLoad persona configuration" as AGT12
-    usecase "**AGT-13 SWITCH Persona**\n--\nSwitch to different persona at runtime" as AGT13
-    usecase "**AGT-14 HANDLE Error**\n--\nStructured error handling with recovery" as AGT14
-    usecase "**AGT-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection,\negress checks" as AGT15
+    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop:\nprovider call, tool dispatch" <<extend>> as AGT01
+    usecase "**AGT-02 DISPATCH Tool Call**\n--\nRoute tool call to registry" <<include>> as AGT02
+    usecase "**AGT-03 UPDATE Conversation**\n--\nManage message list and token count" <<include>> as AGT03
+    usecase "**AGT-04 DELETE History**\n--\nReset conversation history" <<master>> as AGT04
+    usecase "**AGT-06 COMPACT Context**\n--\nSummarize old exchanges\nvia secondary LLM" <<master>> as AGT06
+    usecase "**AGT-07 QUEUE Plan**\n--\nHold queued tool calls in plan mode" <<extend>> as AGT07
+    usecase "**AGT-08 APPROVE Plan**\n--\nDrain queued plan calls" <<master>> as AGT08
+    usecase "**AGT-09 SPAWN Subagent**\n--\nCreate child agent\nwith restricted tools" <<master>> as AGT09
+    usecase "**AGT-10 COLLECT Subagent Result**\n--\nGather results from\ncompleted child agents" <<include>> as AGT10
+    usecase "**AGT-11 DELEGATE to Persona**\n--\nAssign tasks to\nspecialized persona roles" <<master>> as AGT11
+    usecase "**AGT-12 LOAD Persona**\n--\nLoad persona configuration" <<master>> as AGT12
+    usecase "**AGT-13 SWITCH Persona**\n--\nSwitch to different persona at runtime" <<master>> as AGT13
+    usecase "**AGT-14 HANDLE Error**\n--\nStructured error handling with recovery" <<master>> as AGT14
+    usecase "**AGT-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection,\negress checks" <<include>> as AGT15
   }
 }
 
@@ -113,15 +113,23 @@ rectangle "nasim" {
 ' ============================================================
 
 
-User --> AGT01 : via API-06 :dispatch
-Router --> AGT01 : delegates
 Router --> AGT04 : dispatches
 Router --> AGT12 : dispatches
 Router --> AGT13 : dispatches
-Agent --> AGT01 : orchestrates
 Agent --> AGT04 : calls
 Agent --> AGT12 : calls
 Agent --> AGT13 : calls
+
+Router --> AGT06 : dispatches
+Agent --> AGT06 : calls
+Router --> AGT08 : dispatches
+Agent --> AGT08 : calls
+Router --> AGT09 : dispatches
+Agent --> AGT09 : calls
+Router --> AGT11 : dispatches
+Agent --> AGT11 : calls
+Router --> AGT14 : dispatches
+Agent --> AGT14 : calls
 
 ' ============================================================
 ' Relationships (downward <<include>> only)

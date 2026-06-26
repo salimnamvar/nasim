@@ -69,12 +69,12 @@ actor "AgentOrchestrator" as Agent <<system>>
 
 rectangle "nasim" {
   package "Hooks Group (HK)" {
-    usecase "**HK-01 REGISTER Hook**\n--\nRegister hook with name, event type, handler, priority" as HK01
-    usecase "**HK-02 DISPATCH Pre-Tool Hook**\n--\nExecute hook before tool use" as HK02
-    usecase "**HK-03 DISPATCH Post-Tool Hook**\n--\nExecute hook after tool use" as HK03
-    usecase "**HK-04 DISPATCH Pre-LLM Hook**\n--\nExecute hook before LLM call" as HK04
-    usecase "**HK-05 DISPATCH Post-LLM Hook**\n--\nExecute hook after LLM call" as HK05
-    usecase "**HK-06 VALIDATE Hook Result**\n--\nValidate hook result: allow, deny, modify" as HK06
+    usecase "**HK-01 REGISTER Hook**\n--\nRegister hook with name, event type, handler, priority" <<master>> as HK01
+    usecase "**HK-02 DISPATCH Pre-Tool Hook**\n--\nExecute hook before tool use" <<master>> as HK02
+    usecase "**HK-03 DISPATCH Post-Tool Hook**\n--\nExecute hook after tool use" <<master>> as HK03
+    usecase "**HK-04 DISPATCH Pre-LLM Hook**\n--\nExecute hook before LLM call" <<master>> as HK04
+    usecase "**HK-05 DISPATCH Post-LLM Hook**\n--\nExecute hook after LLM call" <<master>> as HK05
+    usecase "**HK-06 VALIDATE Hook Result**\n--\nValidate hook result: allow, deny, modify" <<include>> as HK06
   }
 }
 

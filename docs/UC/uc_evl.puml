@@ -69,15 +69,15 @@ actor "AgentOrchestrator" as Agent <<system>>
 
 rectangle "nasim" {
   package "Evaluation Group (EVL)" {
-    usecase "**EVL-01 EVALUATE Task**\n--\nOrchestrate task evaluation:\nchecks, scores, retries" as EVL01
-    usecase "**EVL-02 CHECK Task Completion**\n--\nEvaluate task completion\nagainst success criteria" as EVL02
-    usecase "**EVL-03 CHECK Success**\n--\nRun user-defined success checks" as EVL03
-    usecase "**EVL-04 VALIDATE With LLM**\n--\nLLM-based code review\nand quality assessment" as EVL04
-    usecase "**EVL-05 VALIDATE Test Suite**\n--\nRun project test suites" as EVL05
-    usecase "**EVL-06 COORDINATE Retry**\n--\nCoordinate retry with\nbackoff and escalation" as EVL06
-    usecase "**EVL-07 RECORD Quality Signal**\n--\nProduce accept/reject\nwith feedback" as EVL07
-    usecase "**EVL-08 DETECT Repetition**\n--\nDetect repeated failures\nor loops" as EVL08
-    usecase "**EVL-09 INJECT Turn Budget**\n--\nInject turn budget limits\ninto context" as EVL09
+    usecase "**EVL-01 EVALUATE Task**\n--\nOrchestrate task evaluation:\nchecks, scores, retries" <<master>> as EVL01
+    usecase "**EVL-02 CHECK Task Completion**\n--\nEvaluate task completion\nagainst success criteria" <<include>> as EVL02
+    usecase "**EVL-03 CHECK Success**\n--\nRun user-defined success checks" <<include>> as EVL03
+    usecase "**EVL-04 VALIDATE With LLM**\n--\nLLM-based code review\nand quality assessment" <<include>> as EVL04
+    usecase "**EVL-05 VALIDATE Test Suite**\n--\nRun project test suites" <<include>> as EVL05
+    usecase "**EVL-06 COORDINATE Retry**\n--\nCoordinate retry with\nbackoff and escalation" <<include>> as EVL06
+    usecase "**EVL-07 RECORD Quality Signal**\n--\nProduce accept/reject\nwith feedback" <<master>> as EVL07
+    usecase "**EVL-08 DETECT Repetition**\n--\nDetect repeated failures\nor loops" <<master>> as EVL08
+    usecase "**EVL-09 INJECT Turn Budget**\n--\nInject turn budget limits\ninto context" <<master>> as EVL09
   }
 }
 

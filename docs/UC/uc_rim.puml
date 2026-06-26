@@ -69,12 +69,12 @@ actor "AgentOrchestrator" as Agent <<system>>
 
 rectangle "nasim" {
   package "Repo Intelligence Group (RIM)" {
-    usecase "**RIM-01 INDEX Codebase**\n--\nAST indexing via tree-sitter" as RIM01
-    usecase "**RIM-02 BUILD Symbol Graph**\n--\nCross-file symbol reference graph" as RIM02
-    usecase "**RIM-03 RANK Results**\n--\nPageRank ranking of code symbols" as RIM03
-    usecase "**RIM-04 INJECT RepoMap**\n--\nGenerate token-budgeted repo-map" as RIM04
-    usecase "**RIM-05 EMBED Code**\n--\nGenerate vector embeddings for code" as RIM05
-    usecase "**RIM-06 SEARCH Semantic**\n--\nVector similarity search over embeddings" as RIM06
+    usecase "**RIM-01 INDEX Codebase**\n--\nAST indexing via tree-sitter" <<master>> as RIM01
+    usecase "**RIM-02 BUILD Symbol Graph**\n--\nCross-file symbol reference graph" <<include>> as RIM02
+    usecase "**RIM-03 RANK Results**\n--\nPageRank ranking of code symbols" <<include>> as RIM03
+    usecase "**RIM-04 INJECT RepoMap**\n--\nGenerate token-budgeted repo-map" <<master>> as RIM04
+    usecase "**RIM-05 EMBED Code**\n--\nGenerate vector embeddings for code" <<master>> as RIM05
+    usecase "**RIM-06 SEARCH Semantic**\n--\nVector similarity search over embeddings" <<include>> as RIM06
   }
 }
 

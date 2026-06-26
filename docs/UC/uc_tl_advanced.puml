@@ -72,26 +72,26 @@ actor "AgentOrchestrator" as Agent <<system>>
 
 rectangle "nasim" {
   package "Integration Tools" as INT_PKG {
-    usecase "**TL-11 READ Git Status**\n--\nGit status, diff, commit operations" as TL11
-    usecase "**TL-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" as TL12
-    usecase "**TL-13 READ LSP**\n--\nLSP ops: hover, definition, references" as TL13
-    usecase "**TL-14 LIST Registered Tools**\n--\nList all registered tools" as TL14
+    usecase "**TL-11 READ Git Status**\n--\nGit status, diff, commit operations" <<master>> as TL11
+    usecase "**TL-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" <<master>> as TL12
+    usecase "**TL-13 READ LSP**\n--\nLSP ops: hover, definition, references" <<master>> as TL13
+    usecase "**TL-14 LIST Registered Tools**\n--\nList all registered tools" <<master>> as TL14
   }
   package "Agent Tools" as AGT_PKG {
-    usecase "**TL-15 SPAWN Subagent**\n--\nSpawn child agent via SubagentCoordinator" as TL15
+    usecase "**TL-15 SPAWN Subagent**\n--\nSpawn child agent via SubagentCoordinator" <<master>> as TL15
   }
   package "Task Tracking" as TODO_PKG {
-    usecase "**TL-16 INSERT Todo**\n--\nCreate task tracking entry" as TL16
-    usecase "**TL-17 UPDATE Todo**\n--\nUpdate task tracking entry" as TL17
-    usecase "**TL-18 READ Todos**\n--\nList task tracking entries" as TL18
+    usecase "**TL-16 INSERT Todo**\n--\nCreate task tracking entry" <<master>> as TL16
+    usecase "**TL-17 UPDATE Todo**\n--\nUpdate task tracking entry" <<master>> as TL17
+    usecase "**TL-18 READ Todos**\n--\nList task tracking entries" <<master>> as TL18
   }
   package "Memory" as MEM_PKG {
-    usecase "**TL-19 PERSIST Memory**\n--\nStore cross-session knowledge" as TL19
-    usecase "**TL-20 RECALL Memory**\n--\nRetrieve cross-session knowledge" as TL20
+    usecase "**TL-19 PERSIST Memory**\n--\nStore cross-session knowledge" <<master>> as TL19
+    usecase "**TL-20 RECALL Memory**\n--\nRetrieve cross-session knowledge" <<master>> as TL20
   }
   package "Planning" as PLAN_PKG {
-    usecase "**TL-21 INSERT Plan**\n--\nCreate plan entry" as TL21
-    usecase "**TL-22 UPDATE Plan**\n--\nUpdate plan entry" as TL22
+    usecase "**TL-21 INSERT Plan**\n--\nCreate plan entry" <<master>> as TL21
+    usecase "**TL-22 UPDATE Plan**\n--\nUpdate plan entry" <<master>> as TL22
   }
 }
 

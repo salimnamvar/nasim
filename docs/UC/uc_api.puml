@@ -102,17 +102,17 @@ usecase "TL-14\nLIST Registered Tools\n[uc_tl_advanced]" as TL14_ext <<extref>>
 
 rectangle "nasim" {
   package "API Group (Entry Gate)" {
-    usecase "**API-01 LIST Sessions**\n--\nList all sessions with pagination\nGET /v1/sessions" as API01
-    usecase "**API-02 CREATE Session**\n--\nCreate a new session\nPOST /v1/sessions" as API02
-    usecase "**API-03 GET Session**\n--\nGet session details by ID\nGET /v1/sessions/{id}" as API03
-    usecase "**API-04 UPDATE Session**\n--\nUpdate session metadata\nPATCH /v1/sessions/{id}" as API04
-    usecase "**API-05 DELETE Session**\n--\nDelete a session\nDELETE /v1/sessions/{id}" as API05
-    usecase "**API-06 DISPATCH Message**\n--\nSend message, receive SSE stream\nPOST /v1/sessions/{id}:dispatch" as API06
-    usecase "**API-07 LIST Messages**\n--\nList messages in a session\nGET /v1/sessions/{id}/messages" as API07
-    usecase "**API-08 LIST Tools**\n--\nList registered tools\nGET /v1/tools" as API08
-    usecase "**API-09 GET Tool**\n--\nGet tool definition\nGET /v1/tools/{name}" as API09
-    usecase "**API-10 GET Config**\n--\nGet current configuration\nGET /v1/config" as API10
-    usecase "**API-11 UPDATE Config**\n--\nUpdate configuration at runtime\nPATCH /v1/config" as API11
+    usecase "**API-01 LIST Sessions**\n--\nList all sessions with pagination\nGET /v1/sessions" <<master>> as API01
+    usecase "**API-02 CREATE Session**\n--\nCreate a new session\nPOST /v1/sessions" <<master>> as API02
+    usecase "**API-03 GET Session**\n--\nGet session details by ID\nGET /v1/sessions/{id}" <<master>> as API03
+    usecase "**API-04 UPDATE Session**\n--\nUpdate session metadata\nPATCH /v1/sessions/{id}" <<master>> as API04
+    usecase "**API-05 DELETE Session**\n--\nDelete a session\nDELETE /v1/sessions/{id}" <<master>> as API05
+    usecase "**API-06 DISPATCH Message**\n--\nSend message, receive SSE stream\nPOST /v1/sessions/{id}:dispatch" <<master>> as API06
+    usecase "**API-07 LIST Messages**\n--\nList messages in a session\nGET /v1/sessions/{id}/messages" <<master>> as API07
+    usecase "**API-08 LIST Tools**\n--\nList registered tools\nGET /v1/tools" <<master>> as API08
+    usecase "**API-09 GET Tool**\n--\nGet tool definition\nGET /v1/tools/{name}" <<master>> as API09
+    usecase "**API-10 GET Config**\n--\nGet current configuration\nGET /v1/config" <<master>> as API10
+    usecase "**API-11 UPDATE Config**\n--\nUpdate configuration at runtime\nPATCH /v1/config" <<master>> as API11
   }
 }
 

@@ -70,12 +70,12 @@ actor "Observability Platform" as Platform <<system>>
 
 rectangle "nasim" {
   package "Observability Group (OBS)" {
-    usecase "**OBS-01 STREAM Structured Log**\n--\nWrite structured JSON records to stdout" as OBS01
-    usecase "**OBS-02 RECORD Metrics**\n--\nIncrement counters and observe histograms" as OBS02
-    usecase "**OBS-03 CORRELATE Trace**\n--\nGenerate and bind trace/span ids per entrypoint" as OBS03
-    usecase "**OBS-04 REDACT Sensitive**\n--\nStrip secrets before any emission" as OBS04
-    usecase "**OBS-05 EXPOSE /metrics**\n--\nServe /metrics endpoint for pull scrape" as OBS05
-    usecase "**OBS-06 EXPORT OTLP**\n--\nExport traces/metrics via OTLP (optional)" as OBS06
+    usecase "**OBS-01 STREAM Structured Log**\n--\nWrite structured JSON records to stdout" <<master>> as OBS01
+    usecase "**OBS-02 RECORD Metrics**\n--\nIncrement counters and observe histograms" <<master>> as OBS02
+    usecase "**OBS-03 CORRELATE Trace**\n--\nGenerate and bind trace/span ids per entrypoint" <<include>> as OBS03
+    usecase "**OBS-04 REDACT Sensitive**\n--\nStrip secrets before any emission" <<extend>> as OBS04
+    usecase "**OBS-05 EXPOSE /metrics**\n--\nServe /metrics endpoint for pull scrape" <<master>> as OBS05
+    usecase "**OBS-06 EXPORT OTLP**\n--\nExport traces/metrics via OTLP (optional)" <<master>> as OBS06
   }
 }
 
@@ -90,13 +90,16 @@ Platform --> OBS05 : scrapes
 
 
 Router --> OBS05 : dispatches
-Router --> OBS04 : dispatches
 Router --> OBS06 : dispatches
 
 
-Agent --> OBS04 : calls
 Agent --> OBS05 : calls
 Agent --> OBS06 : calls
+
+Router --> OBS01 : dispatches
+Agent --> OBS01 : calls
+Router --> OBS02 : dispatches
+Agent --> OBS02 : calls
 
 
 ' ------------------------------------------------------------

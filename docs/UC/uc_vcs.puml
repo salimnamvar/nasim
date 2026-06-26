@@ -69,10 +69,10 @@ actor "AgentOrchestrator" as Agent <<system>>
 
 rectangle "nasim" {
   package "Git Group (VCS)" {
-    usecase "**VCS-01 READ Git Status**\n--\nRead working tree status and staged changes" as VCS01
-    usecase "**VCS-02 INSERT Commit**\n--\nCreate commits with conventional messages" as VCS02
-    usecase "**VCS-03 READ Diff**\n--\nRead diff between working tree and HEAD" as VCS03
-    usecase "**VCS-04 AUTO-COMMIT**\n--\nAuto-commit after file edits" as VCS04
+    usecase "**VCS-01 READ Git Status**\n--\nRead working tree status and staged changes" <<master>> as VCS01
+    usecase "**VCS-02 INSERT Commit**\n--\nCreate commits with conventional messages" <<include>> as VCS02
+    usecase "**VCS-03 READ Diff**\n--\nRead diff between working tree and HEAD" <<master>> as VCS03
+    usecase "**VCS-04 AUTO-COMMIT**\n--\nAuto-commit after file edits" <<master>> as VCS04
   }
 }
 

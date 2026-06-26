@@ -69,10 +69,10 @@ actor "AgentOrchestrator" as Agent <<system>>
 
 rectangle "nasim" {
   package "Sandbox Group (SBX)" {
-    usecase "**SBX-01 ISOLATE Command**\n--\nExecute command in isolated OS environment" as SBX01
-    usecase "**SBX-02 APPLY Sandbox Policy**\n--\nEnforce network, filesystem, exec restrictions" as SBX02
-    usecase "**SBX-03 MONITOR Process**\n--\nMonitor process, enforce timeout and resource limits" as SBX03
-    usecase "**SBX-04 LIMIT Resources**\n--\nEnforce CPU, memory, and disk quotas" as SBX04
+    usecase "**SBX-01 ISOLATE Command**\n--\nExecute command in isolated OS environment" <<master>> as SBX01
+    usecase "**SBX-02 APPLY Sandbox Policy**\n--\nEnforce network, filesystem, exec restrictions" <<include>> as SBX02
+    usecase "**SBX-03 MONITOR Process**\n--\nMonitor process, enforce timeout and resource limits" <<include>> as SBX03
+    usecase "**SBX-04 LIMIT Resources**\n--\nEnforce CPU, memory, and disk quotas" <<include>> as SBX04
   }
 }
 

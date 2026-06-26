@@ -71,10 +71,10 @@ actor "AgentOrchestrator" as Agent <<system>>
 
 rectangle "nasim" {
   package "Provider Group (PRV)" {
-    usecase "**PRV-01 REGISTER Provider**\n--\nRegister provider with LiteLLM proxy" as PRV01
-    usecase "**PRV-02 REQUEST Chat**\n--\nSingle-turn LLM chat request" as PRV02
-    usecase "**PRV-03 STREAM Chat**\n--\nStream LLM chat response" as PRV03
-    usecase "**PRV-04 SELECT Provider Backend**\n--\nSelect best provider backend" as PRV04
+    usecase "**PRV-01 REGISTER Provider**\n--\nRegister provider with LiteLLM proxy" <<include>> as PRV01
+    usecase "**PRV-02 REQUEST Chat**\n--\nSingle-turn LLM chat request" <<master>> as PRV02
+    usecase "**PRV-03 STREAM Chat**\n--\nStream LLM chat response" <<master>> as PRV03
+    usecase "**PRV-04 SELECT Provider Backend**\n--\nSelect best provider backend" <<master>> as PRV04
   }
 }
 

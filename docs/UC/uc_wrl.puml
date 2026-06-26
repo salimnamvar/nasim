@@ -69,11 +69,11 @@ actor "AgentOrchestrator" as Agent <<system>>
 
 rectangle "nasim" {
   package "Wire Log Group (WRL)" {
-    usecase "**WRL-01 APPEND Event**\n--\nAppend event to append-only log" as WRL01
-    usecase "**WRL-02 READ Log**\n--\nRead and parse wire log entries" as WRL02
-    usecase "**WRL-03 SEEK Turn**\n--\nRandom access via TurnIndex" as WRL03
-    usecase "**WRL-04 FORK Session**\n--\nFork session from wire log replay" as WRL04
-    usecase "**WRL-05 CHECKPOINT Turn**\n--\nIndex wire log entries by turn number" as WRL05
+    usecase "**WRL-01 APPEND Event**\n--\nAppend event to append-only log" <<master>> as WRL01
+    usecase "**WRL-02 READ Log**\n--\nRead and parse wire log entries" <<include>> as WRL02
+    usecase "**WRL-03 SEEK Turn**\n--\nRandom access via TurnIndex" <<include>> as WRL03
+    usecase "**WRL-04 FORK Session**\n--\nFork session from wire log replay" <<master>> as WRL04
+    usecase "**WRL-05 CHECKPOINT Turn**\n--\nIndex wire log entries by turn number" <<master>> as WRL05
   }
 }
 

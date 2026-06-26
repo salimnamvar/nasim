@@ -70,10 +70,10 @@ actor "MCP Client" as MCPClient <<system>>
 
 rectangle "nasim" {
   package "MCP Group (MCP)" {
-    usecase "**MCP-01 CONNECT MCP Server**\n--\nConnect to external MCP server via stdio/SSE" as MCP01
-    usecase "**MCP-02 DISCOVER MCP Tools**\n--\nDiscover and register tools from MCP servers" as MCP02
-    usecase "**MCP-03 ADAPT MCP Tool**\n--\nWrap MCP tools into nasim Tool ABC format" as MCP03
-    usecase "**MCP-04 EXPOSE nasim Tools**\n--\nExpose nasim tools to external MCP clients" as MCP04
+    usecase "**MCP-01 CONNECT MCP Server**\n--\nConnect to external MCP server via stdio/SSE" <<master>> as MCP01
+    usecase "**MCP-02 DISCOVER MCP Tools**\n--\nDiscover and register tools from MCP servers" <<include>> as MCP02
+    usecase "**MCP-03 ADAPT MCP Tool**\n--\nWrap MCP tools into nasim Tool ABC format" <<include>> as MCP03
+    usecase "**MCP-04 EXPOSE nasim Tools**\n--\nExpose nasim tools to external MCP clients" <<master>> as MCP04
   }
 }
 
