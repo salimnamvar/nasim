@@ -86,9 +86,19 @@ User --> CTX01
 
 
 Router --> CTX01 : dispatches
+Router --> CTX02 : dispatches
+Router --> CTX03 : dispatches
+Router --> CTX04 : dispatches
+Router --> CTX05 : dispatches
+Router --> CTX06 : dispatches
 
 
 Agent --> CTX01 : calls
+Agent --> CTX02 : calls
+Agent --> CTX03 : calls
+Agent --> CTX04 : calls
+Agent --> CTX05 : calls
+Agent --> CTX06 : calls
 
 
 ' ------------------------------------------------------------
