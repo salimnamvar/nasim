@@ -73,6 +73,7 @@
 | `sm_session_lifecycle.puml` | Session entity lifecycle — 6 states (API-First) |
 | `sm_plan_lifecycle.puml` | Plan entity lifecycle — 7 states |
 | `sm_plugin_lifecycle.puml` | Plugin entity lifecycle — 6 states |
+| `sm_subagent_lifecycle.puml` | Subagent entity lifecycle — 5 states (IDLE→SPAWNING→RUNNING→COMPLETED/FAILED) |
 
 ## Notes
 

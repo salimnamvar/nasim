@@ -49,9 +49,7 @@ ref over pipeline, graph
   CTX-05: COMPACT Nodes
 end ref
 
-ref over pipeline, prioritizer, graph
-  CTX-07: SCORE Nodes
-end ref
+pipeline -> pipeline : score node priorities
 
 ref over pipeline, graph
   CTX-02: TRUNCATE Nodes
@@ -69,7 +67,6 @@ pipeline --> agent : ProcessedContext
 deactivate pipeline
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over agent, prioritizer
   Flow:    User → ServerRouter → AgentOrchestrator → PipelineOrchestrator → compact → score → truncate → distill → inject

@@ -47,7 +47,6 @@ break File not found
     ft --> registry : ToolResult(success=False, error="Error: file not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: file not found")
 end
 
 ft -> ft : content.count(old_string)
@@ -56,19 +55,16 @@ alt count == 0
     ft --> registry : ToolResult(success=False, error="old_string not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="old_string not found")
 else count > 1
     ft --> registry : ToolResult(success=False, error="old_string found N times (ambiguous)")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="old_string found N times (ambiguous)")
 else count == 1
     ft -> ft : content.replace(old_string, new_string, 1)
     ft -> fs : Path(path).write_text(new_content)
     ft --> registry : ToolResult(success=True, content="Edited: replaced 1 occurrence")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Done)
-    result --> user : result
 end
 
 note over user, fs

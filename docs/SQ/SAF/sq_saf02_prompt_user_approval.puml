@@ -57,12 +57,10 @@ alt user = y
     renderer --> gate : approved
     gate --> agent : approved
     agent --> router : AgentEvent(Done)
-    result --> user : result: tool approved
 else user = N
     renderer --> gate : rejected
     gate --> agent : rejected
     agent --> router : AgentEvent(Done)
-    result --> user : result: tool skipped
 end
 
 deactivate gate

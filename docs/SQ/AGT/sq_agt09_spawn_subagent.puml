@@ -60,12 +60,10 @@ break Spawn failure
     coord --> agent : SpawnError
     agent -> agent : log error, report to parent
     agent --> router : AgentEvent(Error)
-    result --> user : spawn failed
 end
 
 agent --> router : AgentEvent(SubagentSpawned)
 deactivate agent
-result --> user : child spawned
 
 note over user, store
   Flow:    AGT-09 → validate parent → create child session → return child_id

@@ -70,7 +70,6 @@ deactivate pm
 
 agent --> router : AgentEvent(Done)
 deactivate agent
-result --> user : result
 
 note over user, reg
   Flow:    AGT-13 → unload current → load new → apply

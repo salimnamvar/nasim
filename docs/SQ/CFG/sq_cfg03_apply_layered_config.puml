@@ -56,7 +56,6 @@ cfg -> cfg : cfg03 RETURN Merged Config
 cfg --> agent : Config merged
 agent --> router : Config merged
 deactivate agent
-result --> user : config applied
 deactivate router
 
 note over user, cfg

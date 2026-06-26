@@ -42,7 +42,6 @@ agent -> registry : TL-14 List Registered Tools({})
 registry -> registry : enumerate registered tools
 registry --> agent : ToolResult(success=True, tools=[...])
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, registry
   Flow:    TL-14: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> list all registered tools -> ToolResult

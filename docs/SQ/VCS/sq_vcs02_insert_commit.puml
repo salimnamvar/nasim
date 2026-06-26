@@ -57,7 +57,6 @@ deactivate status
 break No staged files
     commit --> agent : Result(success=false, error="no_staged_files")
     agent --> router : AgentEvent(Error)
-    result --> user : error: no staged files
 end
 
 commit -> commit : VCS-02 VALIDATE Message(message)
@@ -65,7 +64,6 @@ commit -> commit : VCS-02 VALIDATE Message(message)
 break Invalid message format
     commit --> agent : Result(success=false, error="invalid_commit_message")
     agent --> router : AgentEvent(Error)
-    result --> user : error: invalid commit message
 end
 
 commit -> git : VCS-02 EXECUTE git_commit(message)
@@ -77,7 +75,6 @@ commit --> agent : Result(success=true, data={hash, files})
 deactivate commit
 
 agent --> router : AgentEvent(Done)
-result --> user : result: commit created
 
 note over user, git
   Flow:    VCS-02 -> User -> ServerRouter -> AgentOrchestrator -> GitCommit -> check staged -> validate message -> commit -> return hash

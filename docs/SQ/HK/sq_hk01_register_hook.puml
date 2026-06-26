@@ -71,7 +71,6 @@ loader --> agent : registered
 deactivate loader
 agent --> router : hook registered
 deactivate agent
-result --> user : hook registered
 deactivate router
 
 note over user, hook

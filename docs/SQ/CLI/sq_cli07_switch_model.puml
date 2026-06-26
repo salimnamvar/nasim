@@ -57,12 +57,10 @@ deactivate rtg
 cmd --> repl : CommandResult("Switched to {model_name}")
 deactivate cmd
 
-result --> user : "Active model: {model_name}"
 
 break Model not found
     rtg --> cmd : ModelNotFoundError
     cmd --> repl : CommandError
-    result --> user : "Model '{model_name}' not available"
 end
 
 note over user, rtg

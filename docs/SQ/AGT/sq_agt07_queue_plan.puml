@@ -55,7 +55,6 @@ deactivate plan
 
 agent --> router : AgentEvent(PlanDisplay)
 deactivate agent
-result --> user : plan displayed
 
 note over user, plan
   Flow:    AGT-07 → queue tool call → display as plan

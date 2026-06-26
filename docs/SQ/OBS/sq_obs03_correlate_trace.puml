@@ -79,7 +79,6 @@ deactivate tools
 
 agent --> router : AgentEvent stream
 deactivate agent
-result --> user : AgentEvent stream
 deactivate router
 
 note over user, tools

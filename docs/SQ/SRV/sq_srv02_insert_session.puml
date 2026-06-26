@@ -26,7 +26,7 @@ note over user, store
   Scope:          Create and persist a new agent session
   Preconditions:  ServerRouter initialized, SessionService available
   Contexts:       Called by HTTPClient via POST /v1/sessions
-  Excludes:       Session dispatch (SRV-06), Session deletion (SRV-05)
+  Excludes:       Session dispatch (SRV-06), Session deletion (API-05)
   Rollback:       500 if SessionStore write fails
   Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard create (AIP-133)
   Classification: Primary Orchestrator

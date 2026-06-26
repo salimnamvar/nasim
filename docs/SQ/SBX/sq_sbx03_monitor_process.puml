@@ -61,20 +61,17 @@ alt timeout exceeded
     monitor --> executor : watch_complete(stats)
     executor --> agent : Result(success=false, error="timeout_exceeded")
     agent --> router : AgentEvent(Error)
-    result --> user : error: process timeout exceeded
 else resource limit exceeded
     monitor -> executor : SBX-03 ENFORCE Limit(violation)
     executor --> monitor : limit_enforced
     monitor --> executor : watch_complete(stats)
     executor --> agent : Result(success=false, error="resource_limit_exceeded")
     agent --> router : AgentEvent(Error)
-    result --> user : error: resource limit exceeded
 else normal completion
     monitor -> monitor : SBX-03 RECORD FinalStats()
     monitor --> executor : watch_complete(stats)
     executor --> agent : Result(success=true, data={stats})
     agent --> router : AgentEvent(Done)
-    result --> user : result: process completed
 end
 
 deactivate monitor

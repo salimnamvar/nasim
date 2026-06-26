@@ -63,7 +63,6 @@ checker --> agent : CheckResult(passed, results[])
 deactivate checker
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, tool
   Flow:    EVL-01 AgentOrchestrator -> SuccessChecker -> [ShellRunner]* -> CheckResult

@@ -49,7 +49,6 @@ agent -> router : RTG-03 CLASSIFY Task(task_description, context)
 break Classification fails (confidence < 0.6)
     router --> agent : default_model
     agent --> router : AgentEvent(Done)
-    result --> user : result: default model (classification failed)
 end
 
 router -> router : RTG-03 EXTRACT Signals(input_length, keywords, traceback, file_content)
@@ -63,13 +62,11 @@ break Model unavailable
     router -> router : RTG-03 RESOLVE NextModel(FallbackChain)
     router --> agent : Result(success=true, data={selected_model, task_type})
     agent --> router : AgentEvent(Done)
-    result --> user : result: fallback model selected
 end
 
 router --> agent : Result(success=true, data={selected_model, task_type})
 
 agent --> router : AgentEvent(Done)
-result --> user : result: optimal model selected
 
 note over user, router
   Flow:    RTG-03 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model

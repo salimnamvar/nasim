@@ -46,12 +46,10 @@ alt Session found
     store --> agent : 200 OK — Session(id, messages)
     agent -> agent : ssn01 PERSIST Session(session_id, messages)
     agent --> router : AgentEvent(Done)
-    result --> user : result — resumed session <id> (<N> messages)
 else Session not found
     store --> agent : 404 NOT_FOUND
     agent -> agent : start fresh
     agent --> router : AgentEvent(Done)
-    result --> user : result — no session found, starting fresh
 end
 
 note over user, agent

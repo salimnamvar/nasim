@@ -60,7 +60,6 @@ store --> agent : recalled_entry
 deactivate store
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, index
   Flow:    MEM-02 AgentOrchestrator -> MemoryStore -> filter by scope -> lookup key -> return entry

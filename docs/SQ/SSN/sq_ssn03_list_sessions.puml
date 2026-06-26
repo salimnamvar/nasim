@@ -45,13 +45,11 @@ break No sessions directory
     dir --> store : FileNotFoundError
     store --> agent : 404 NOT_FOUND — [] (empty list)
     agent --> router : AgentEvent(Done)
-    result --> user : result — no sessions found
 end
 
 store -> store : read metadata from each session
 store --> agent : 200 OK — [(id, created_at, message_count), ...]
 agent --> router : AgentEvent(Done)
-result --> user : result — formatted session table
 
 note over user, dir
   Flow:    SSN-03 → scan directory → read metadata → list

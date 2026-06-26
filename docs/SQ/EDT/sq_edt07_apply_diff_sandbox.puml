@@ -100,7 +100,6 @@ esm --> agent : EditResult
 deactivate esm
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over participants
   Flow:    EDT-07 → sandbox diff → validate → commit

@@ -64,7 +64,6 @@ comp --> pipe : CompactionResult(nodes_removed, tokens_saved)
 deactivate comp
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 break Secondary LLM merge fails
     provider --> comp : ProviderError

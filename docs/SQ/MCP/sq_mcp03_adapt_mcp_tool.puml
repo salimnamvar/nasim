@@ -56,7 +56,6 @@ break Incompatible schema
     adapter --> mcp : SchemaIncompatible(tool_name, reason)
     mcp --> agent : ToolResult(success=false, error="Schema incompatible")
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=false, error="Schema incompatible")
 end
 
 adapter -> adapter : map types to nasim Tool format
@@ -74,7 +73,6 @@ mcp --> agent : ToolResult(success=true, content="ToolRegistered")
 deactivate mcp
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, registry
   Flow:    User → ServerRouter → AgentOrchestrator → MCPClientRuntime → MCPToolAdapter → parse → map → register → ToolRegistered

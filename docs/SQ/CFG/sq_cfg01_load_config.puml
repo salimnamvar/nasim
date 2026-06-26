@@ -57,13 +57,11 @@ cfg -> cfg : cfg02 VALIDATE Config(fields)
 break Invalid YAML or missing required fields
     cfg --> agent : ConfigError("details")
     agent --> router : ConfigError
-    result --> user : config load failed
 end
 
 cfg --> agent : Config object
 agent --> router : Config object
 deactivate agent
-result --> user : config loaded
 deactivate router
 
 note over user, env_vars

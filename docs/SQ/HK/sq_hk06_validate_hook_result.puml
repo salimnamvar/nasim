@@ -52,20 +52,17 @@ hooks -> hooks : hk06 CHECK Schema(hook_result)
 break Result schema invalid
     hooks --> agent : HookResult(action=DENY)
     agent --> router : HookResult(action=DENY)
-    result --> user : hook result invalid
 end
 
 break action not in [ALLOW, DENY, MODIFY]
     hooks --> agent : HookResult(action=DENY)
     agent --> router : HookResult(action=DENY)
-    result --> user : hook result invalid
 end
 
 hooks --> agent : validated result
 deactivate hooks
 agent --> router : validated result
 deactivate agent
-result --> user : hook validated
 deactivate router
 
 note over user, hooks

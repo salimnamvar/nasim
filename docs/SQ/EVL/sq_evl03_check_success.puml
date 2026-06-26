@@ -72,7 +72,6 @@ engine --> agent : SuccessCheckResult
 deactivate engine
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, shell
   Flow:    EVL-03 AgentOrchestrator -> EvaluationEngine -> SuccessCheckRunner -> run user-defined checks -> return pass/fail

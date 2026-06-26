@@ -70,7 +70,6 @@ deactivate provider
 
 agent --> router : LLMResponse(content, tool_calls)
 deactivate agent
-result --> user : LLMResponse(content, tool_calls)
 deactivate router
 
 note over user, api

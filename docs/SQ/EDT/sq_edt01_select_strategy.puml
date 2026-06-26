@@ -75,7 +75,6 @@ selector --> agent : EditStrategy(format, parameters, confidence)
 deactivate selector
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over agent, config
   Flow:    User → ServerRouter → AgentOrchestrator → StrategySelector → Config + EditStrategy → EditStrategy

@@ -72,7 +72,6 @@ end
 deactivate injector
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, history
   Flow:    EVL-09 AgentOrchestrator -> TurnBudgetInjector -> TurnBudget + ConversationHistory -> BudgetStatus

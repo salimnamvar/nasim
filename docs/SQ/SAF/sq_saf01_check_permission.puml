@@ -70,7 +70,6 @@ else tool.safe = False AND safety_mode = "ask"
     gate --> safety : SafetyViolation(permission_denied)
     safety --> agent : SafetyViolation(permission_denied)
     agent --> router : AgentEvent(Error)
-    result --> user : error: permission denied
 else safety_mode = "off"
     gate --> safety : SafetyPassed
 end
@@ -81,7 +80,6 @@ safety --> agent : SafetyPassed
 deactivate safety
 
 agent --> router : AgentEvent(Done)
-result --> user : result: permission passed
 
 note over user, registry
   Flow:    SAF-01 -> User -> ServerRouter -> AgentOrchestrator -> SafetyCoordinator -> PermissionGate -> ToolRegistry.READ -> check safe flag -> return

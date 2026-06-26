@@ -63,7 +63,6 @@ deactivate plan
 
 agent --> router : AgentEvent(Done)
 deactivate agent
-result --> user : plan executed
 
 note over user, registry
   Flow:    AGT-08 → approve → drain queue → execute sequentially → results

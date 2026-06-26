@@ -46,7 +46,6 @@ else within budget
 end
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over agent, history
   Flow:    User → ServerRouter → AgentOrchestrator → message → append → estimate tokens → check budget

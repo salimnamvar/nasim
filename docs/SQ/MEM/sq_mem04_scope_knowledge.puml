@@ -58,7 +58,6 @@ scope --> agent : scoped_entries
 deactivate scope
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, store
   Flow:    MEM-04 AgentOrchestrator -> MemoryScope -> resolve hierarchy -> fetch entries -> apply mask -> return

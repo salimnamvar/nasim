@@ -68,7 +68,6 @@ end
 deactivate retry
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, fs
   Flow:    EVL-06 AgentOrchestrator -> RetryCoordinator -> FileSystem + FeedbackInjector -> RetryResult

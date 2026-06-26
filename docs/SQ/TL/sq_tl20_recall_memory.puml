@@ -47,14 +47,12 @@ break No matching knowledge
     tool --> registry : ToolResult(success=False, error="no match")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="no match")
 end
 
 mem --> tool : matching knowledge
 tool --> registry : ToolResult(success=True, knowledge)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, mem
   Flow:    TL-20: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> MemoryTool -> MemoryStore -> ToolResult

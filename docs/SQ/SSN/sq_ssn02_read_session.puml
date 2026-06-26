@@ -46,13 +46,11 @@ break Session file not found
     store --> agent : 404 NOT_FOUND
     agent -> agent : start fresh session
     agent --> router : AgentEvent(Done)
-    result --> user : result — no session found, starting fresh
 end
 
 store -> store : deserialize JSON Lines -> messages
 store --> agent : 200 OK — Session(id, created_at, messages)
 agent --> router : AgentEvent(Done)
-result --> user : result — session restored
 
 note over user, dir
   Flow:    SSN-02 → read file → deserialize → Session

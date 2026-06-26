@@ -57,7 +57,6 @@ deactivate status
 break No changes detected
     integration --> agent : Result(success=false, error="no_changes")
     agent --> router : AgentEvent(Done)
-    result --> user : result: noop (no changes)
 end
 
 integration -> commit : VCS-04 INSERT Commit(generated_message, files)
@@ -69,7 +68,6 @@ integration --> agent : Result(success=true, data={hash})
 deactivate integration
 
 agent --> router : AgentEvent(Done)
-result --> user : result: auto-commit hash
 
 note over user, commit
   Flow:    VCS-04 -> User -> ServerRouter -> AgentOrchestrator -> GitIntegration -> check dirty -> generate message -> commit -> return

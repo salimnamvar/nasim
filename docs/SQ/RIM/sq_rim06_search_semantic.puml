@@ -70,7 +70,6 @@ deactivate search
 
 agent --> router : SearchResultList(results, scores, snippets)
 deactivate agent
-result --> user : SearchResultList(results, scores, snippets)
 deactivate router
 
 note over user, embeddings

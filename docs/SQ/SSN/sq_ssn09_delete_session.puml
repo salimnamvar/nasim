@@ -29,8 +29,8 @@ end box
 note over user, fs
   Scope:          Permanently delete a session and its associated data
   Preconditions:  Session exists on disk
-  Contexts:       Called by SRV-05 (RETIRE Session) for hard delete
-  Excludes:       Soft delete/retire (SRV-05), session read (SSN-02)
+  Contexts:       Called by API-05 (DELETE Session) for hard delete
+  Excludes:       Hard delete (API-05), session read (SSN-02)
   Rollback:       Deletion is irreversible; backup recommended
   Design:         Removes session directory and all associated files
   Classification: Process Decomposition
@@ -50,7 +50,6 @@ store -> store : validate_session_exists(session_id)
 break Session not found
     store --> agent : 404 NOT_FOUND — DeleteError("session not found")
     agent --> router : AgentEvent(Error)
-    result --> user : result — session not found
 end
 
 store -> fs : ssn09 REMOVE Directory(session_path)
@@ -60,7 +59,6 @@ break Permission denied
     fs --> store : PermissionError
     store --> agent : 403 FORBIDDEN — DeleteError("permission denied")
     agent --> router : AgentEvent(Error)
-    result --> user : result — permission denied
 end
 
 fs --> store : 200 OK — removed
@@ -72,7 +70,6 @@ store --> agent : 200 OK — delete_confirmed(session_id)
 deactivate store
 
 agent --> router : AgentEvent(Done)
-result --> user : result — session permanently deleted
 
 note over user, fs
   Flow:    SSN-09 → validate → remove directory → clear index → confirm

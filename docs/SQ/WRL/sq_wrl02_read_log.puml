@@ -86,7 +86,6 @@ logger --> agent : 200 OK — EventStream(events[], count, truncated)
 deactivate logger
 
 agent --> router : AgentEvent(Done)
-result --> user : result — event stream returned
 
 note over user, fs
   Flow:

@@ -60,7 +60,6 @@ mgr --> agent : ToolResult(success=True)
 deactivate mgr
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over agent, coder
   Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → FencedBlockCoder → extract → locate → replace

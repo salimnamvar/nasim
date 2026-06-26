@@ -65,7 +65,6 @@ deactivate rim
 
 agent --> router : SymbolGraph(symbols, edges)
 deactivate agent
-result --> user : SymbolGraph(symbols, edges)
 deactivate router
 
 note over user, graph

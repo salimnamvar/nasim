@@ -55,14 +55,12 @@ search --> agent : 200 OK — SearchResult[session_id, turn_id, snippet, score]
 deactivate search
 
 agent --> router : AgentEvent(Done)
-result --> user : result — ranked search results
 
 break Index not available
     fts --> search : IndexError
     search -> search : fallback: linear scan
     search --> agent : 200 OK — SearchResult[linear_scan_results]
     agent --> router : AgentEvent(Done)
-    result --> user : result — search results via linear scan
 end
 
 note over user, fts

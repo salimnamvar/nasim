@@ -47,14 +47,12 @@ break Coordinator unavailable or limit reached
     tool --> registry : ToolResult(success=False, error="spawn limit reached")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="spawn limit reached")
 end
 
 coord --> tool : child_id
 tool --> registry : ToolResult(success=True, child_id=child_id)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, coord
   Flow:    TL-15: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> SubagentTool -> SubagentCoordinator -> ToolResult

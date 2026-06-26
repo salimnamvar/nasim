@@ -46,12 +46,10 @@ break Disk write error
     dir --> store : IOError
     store --> agent : 500 INTERNAL — log warning("Session save failed")
     agent --> router : AgentEvent(Error)
-    result --> user : result — session save failed
 end
 
 store --> agent : 200 OK — save complete
 agent --> router : AgentEvent(Done)
-result --> user : result — session persisted
 
 note over user, dir
   Flow:    SSN-01 → serialize → write JSON Lines

@@ -77,7 +77,6 @@ deactivate rim
 
 agent --> router : EmbeddingResult(count, dimensions)
 deactivate agent
-result --> user : EmbeddingResult(count, dimensions)
 deactivate router
 
 note over user, vstore

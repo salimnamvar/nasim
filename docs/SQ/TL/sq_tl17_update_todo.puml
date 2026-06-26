@@ -44,21 +44,18 @@ break Todo not found
     tool --> registry : ToolResult(success=False, error="todo not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="todo not found")
 end
 
 break Invalid status transition
     tool --> registry : ToolResult(success=False, error="invalid transition")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="invalid transition")
 end
 
 tool -> tool : update fields
 tool --> registry : ToolResult(success=True, todo)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, tool
   Flow:    TL-17: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult

@@ -53,7 +53,6 @@ index --> agent : ranked_results
 deactivate index
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, index
   Flow:    MEM-03 AgentOrchestrator -> MemoryIndex -> tokenize -> FTS5 query -> rank -> return

@@ -81,7 +81,6 @@ deactivate injector
 
 agent --> router : RepoMapContext(text, token_count)
 deactivate agent
-result --> user : RepoMapContext(text, token_count)
 deactivate router
 
 note over user, history

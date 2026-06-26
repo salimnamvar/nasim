@@ -50,7 +50,6 @@ break Turn not found
   reader --> idx : 404 NOT_FOUND
   idx --> agent : 404 NOT_FOUND — turn not in index
   agent --> router : AgentEvent(Error)
-  result --> user : result — turn not found
 end
 
 reader --> idx : 200 OK — WireEvents[turn]
@@ -59,7 +58,6 @@ deactivate reader
 idx --> agent : 200 OK — WireEvents[turn]
 
 agent --> router : AgentEvent(Done)
-result --> user : result — wire events for turn
 
 note over user, reader
   Flow:    WRL-03 → lookup offset → read events for turn

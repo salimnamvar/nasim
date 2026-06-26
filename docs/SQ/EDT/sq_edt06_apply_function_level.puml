@@ -79,7 +79,6 @@ esm --> agent : EditResult
 deactivate esm
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over participants
   Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → FunctionLevelCoder → AST parse → replace function → validate

@@ -70,7 +70,6 @@ deactivate eb
 
 agent --> router : AgentEvent(Error)
 deactivate agent
-result --> user : error occurred
 
 note over user, safety
   Flow:    AGT-14 → classify → determine recovery → return action

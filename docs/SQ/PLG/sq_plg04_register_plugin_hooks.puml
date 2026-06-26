@@ -60,7 +60,6 @@ loader --> agent : all hooks registered
 deactivate loader
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, hm
   Flow:    PLG-04 AgentOrchestrator -> PluginLoader -> enumerate plugin hooks -> register in HookManager

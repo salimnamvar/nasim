@@ -69,7 +69,6 @@ engine --> agent : CompletionStatus
 deactivate engine
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, tool
   Flow:    EVL-02 AgentOrchestrator -> EvaluationEngine -> TaskEvaluator -> evaluate against criteria -> return completion status

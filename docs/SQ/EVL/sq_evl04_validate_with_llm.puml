@@ -71,7 +71,6 @@ reviewer --> agent : ReviewResult(score, feedback, passed)
 deactivate reviewer
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, fs
   Flow:    EVL-04 AgentOrchestrator -> LLMReviewer -> FileSystem + Provider -> ReviewResult

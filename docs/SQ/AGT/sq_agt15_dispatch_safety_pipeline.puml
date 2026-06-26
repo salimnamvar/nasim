@@ -79,7 +79,6 @@ deactivate safety
 
 agent --> router : AgentEvent(Done)
 deactivate agent
-result --> user : result
 
 note over user, perm
   Flow:    AGT-15 → injection scan → egress inspect → permission check → return

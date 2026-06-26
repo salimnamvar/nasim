@@ -65,7 +65,6 @@ wl --> agent : 200 OK — CheckpointResult
 deactivate wl
 
 agent --> router : AgentEvent(Done)
-result --> user : result — checkpoint persisted
 
 note over participants
   Flow:    WRL-05 → index turn → persist checkpoint

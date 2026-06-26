@@ -57,14 +57,12 @@ status -> status : VCS-01 PARSE StatusOutput(raw_output)
 break Not a git repo
     status --> agent : Result(success=false, error="not_a_git_repository")
     agent --> router : AgentEvent(Error)
-    result --> user : error: not a git repository
 end
 
 status --> agent : Result(success=true, data={staged, modified, untracked})
 deactivate status
 
 agent --> router : AgentEvent(Done)
-result --> user : result: git status summary
 
 note over user, git
   Flow:    VCS-01 -> User -> ServerRouter -> AgentOrchestrator -> GitStatus -> execute git status -> parse -> return summary

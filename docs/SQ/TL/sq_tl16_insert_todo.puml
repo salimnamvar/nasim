@@ -43,7 +43,6 @@ tool -> tool : generate ID, set status OPEN
 tool --> registry : ToolResult(success=True, todo_id)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, tool
   Flow:    TL-16: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult

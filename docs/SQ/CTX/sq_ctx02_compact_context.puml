@@ -59,7 +59,6 @@ compactor -> compactor : replace selected messages with summary
 compactor --> history : shortened messages (summarized)
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over history, provider
   Flow:    User → ServerRouter → AgentOrchestrator → budget exceeded → select old → summarize → replace

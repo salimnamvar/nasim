@@ -1,0 +1,53 @@
+@startuml sm_subagent_lifecycle
+' ============================================================
+' Title:     nasim — Subagent Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Entity lifecycle for SubagentCoordinator child agent processes.
+'            States: IDLE → SPAWNING → RUNNING → COMPLETED | FAILED
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/SM/README.md
+' Review:    CAR audit 2026-06-26
+' Convention: All transitions are triggered by the corresponding UC ID
+'             as listed in docs/UC/README.md.
+' ============================================================
+
+title nasim — Subagent Lifecycle
+
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+}
+
+[*] --> IDLE
+
+state "IDLE" as IDLE #ECEFF1
+IDLE : No child agent active.
+IDLE : Default state.
+
+state "SPAWNING" as SPAWNING #E3F2FD
+SPAWNING : Child agent process initializing.
+SPAWNING : Session created, orchestrator assigned.
+
+state "RUNNING" as RUNNING #FFF3E0
+RUNNING : Child agent executing task.
+RUNNING : Provider calls, tool dispatches in progress.
+
+state "COMPLETED" as COMPLETED #E8F5E9
+COMPLETED : Child agent finished successfully.
+COMPLETED : Results aggregated to parent.
+
+state "FAILED" as FAILED #FFEBEE
+FAILED : Child agent encountered unrecoverable error.
+FAILED : Error reported to parent, child cleaned up.
+
+IDLE --> SPAWNING : AGT-09
+SPAWNING --> RUNNING : AGT-09
+SPAWNING --> FAILED : AGT-09
+RUNNING --> COMPLETED : AGT-10
+RUNNING --> FAILED : AGT-14
+COMPLETED --> IDLE : AGT-10
+FAILED --> IDLE : AGT-14
+
+@enduml

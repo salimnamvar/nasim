@@ -66,7 +66,6 @@ break Tool not found
     server --> client : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "tool not found"}}
     server --> agent : ToolResult(success=false, error="tool not found")
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=false, error="404 NOT_FOUND")
 end
 
 server -> registry : MCP-04 EXECUTE Tool(name, args)
@@ -78,7 +77,6 @@ break Execution failure
     server --> client : 500 INTERNAL {error: {code: "INTERNAL", message: "execution failed"}}
     server --> agent : ToolResult(success=false, error="execution failed")
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=false, error="500 INTERNAL")
 end
 
 server --> client : 200 OK — ToolResult(result)
@@ -86,7 +84,6 @@ deactivate server
 
 server --> agent : ToolResult(success=true, content="ToolResult")
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, client
   Flow:    User → ServerRouter → AgentOrchestrator → MCPServerRuntime → ToolRegistry → MCP Client

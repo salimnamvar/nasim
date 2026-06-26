@@ -62,7 +62,6 @@ deactivate history
 
 agent --> router : AgentEvent(Done)
 deactivate agent
-result --> user : result
 
 note over user, history
   Flow:    AGT-03 → add message → track tokens → check budget → compact if needed

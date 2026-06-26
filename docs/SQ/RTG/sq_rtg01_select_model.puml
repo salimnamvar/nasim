@@ -74,7 +74,6 @@ break No supported model found
     deactivate fallback
     router --> agent : Result(success=false, error="no_supported_model")
     agent --> router : AgentEvent(Error)
-    result --> user : error: no supported model
 end
 
 router -> fallback : RTG-01 RESOLVE Model(primary_model, fallback_chain)
@@ -86,7 +85,6 @@ router --> agent : Result(success=true, data=selected_model)
 deactivate router
 
 agent --> router : AgentEvent(Done)
-result --> user : result: selected model
 
 note over user, provider
   Flow:    RTG-01 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> classify -> check caps -> fallback chain -> return model

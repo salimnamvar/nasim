@@ -46,13 +46,11 @@ break Permission denied
     glob --> registry : ToolResult(success=False, error="Error: permission denied: path")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: permission denied: path")
 end
 
 glob --> registry : ToolResult(success=True, content=sorted_paths)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, glob
   Flow:    TL-07: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GlobTool -> pathlib.glob -> ToolResult

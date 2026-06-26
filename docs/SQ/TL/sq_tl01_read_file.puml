@@ -47,7 +47,6 @@ break File not found or not a file
     ft --> registry : ToolResult(success=False, error="file not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="file not found")
 end
 
 break Read error (encoding, permissions)
@@ -55,7 +54,6 @@ break Read error (encoding, permissions)
     ft --> registry : ToolResult(success=False, error="Error reading path")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error reading path")
 end
 
 fs --> ft : file content
@@ -63,7 +61,6 @@ ft -> ft : add line numbers, apply offset/limit
 ft --> registry : ToolResult(success=True, content=numbered_content)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, fs
   Flow:    TL-01: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> ReadFileTool -> Host Filesystem -> ToolResult

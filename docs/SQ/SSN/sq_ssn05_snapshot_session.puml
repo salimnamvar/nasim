@@ -53,13 +53,11 @@ ver --> agent : 200 OK — SnapshotCreated(snapshot_id)
 deactivate ver
 
 agent --> router : AgentEvent(Done)
-result --> user : result — snapshot created
 
 break Disk write error
     snap --> ver : IOError
     ver --> agent : 500 INTERNAL — SnapshotError
     agent --> router : AgentEvent(Error)
-    result --> user : result — snapshot failed, continue without snapshot
 end
 
 note over user, snap

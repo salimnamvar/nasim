@@ -47,14 +47,12 @@ break Path not found
     dt --> registry : ToolResult(success=False, error="path not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="path not found")
 end
 
 break Not a directory
     dt --> registry : ToolResult(success=False, error="not a directory")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="not a directory")
 end
 
 dt -> fs : sorted(p.iterdir())
@@ -63,7 +61,6 @@ dt -> dt : format with d/ prefix for dirs
 dt --> registry : ToolResult(success=True, content=formatted_listing)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, fs
   Flow:    TL-04: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> DirTool -> Host Filesystem -> ToolResult

@@ -47,7 +47,6 @@ break Backend unavailable
     search --> registry : ToolResult(success=False, error="Error: search backend unavailable")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: search backend unavailable")
 end
 
 backend --> search : results [{title, url, snippet}, ...]
@@ -55,7 +54,6 @@ search -> search : format results
 search --> registry : ToolResult(success=True, content=formatted_results)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, backend
   Flow:    TL-10: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WebSearchTool -> Search Backend -> ToolResult

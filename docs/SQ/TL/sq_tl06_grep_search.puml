@@ -53,20 +53,17 @@ break No matches found
     grep --> registry : ToolResult(success=False, error="No matches found for pattern")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="No matches found for pattern")
 end
 
 break Permission denied / path error
     grep --> registry : ToolResult(success=False, error="Error: permission denied / path not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: permission denied / path not found")
 end
 
 grep --> registry : ToolResult(success=True, content=formatted_matches)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, shell
   Flow:    TL-06: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GrepTool -> ripgrep/Python -> ToolResult

@@ -61,7 +61,6 @@ engine --> agent : SignalRecorded
 deactivate engine
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, store
   Flow:    EVL-07 AgentOrchestrator -> EvaluationEngine -> QualitySignal -> record accept/reject + feedback

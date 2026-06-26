@@ -48,14 +48,12 @@ break Write error (permissions, disk full)
     ft --> registry : ToolResult(success=False, error="Error writing path: exception")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error writing path: exception")
 end
 
 fs --> ft : OK
 ft --> registry : ToolResult(success=True, content="Wrote N bytes to path")
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, fs
   Flow:    TL-02: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WriteFileTool -> Host Filesystem -> ToolResult

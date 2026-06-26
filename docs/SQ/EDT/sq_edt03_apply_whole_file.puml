@@ -85,7 +85,6 @@ validator --> agent : ValidationResult(passed, reasons[])
 deactivate validator
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, tool
   Flow:

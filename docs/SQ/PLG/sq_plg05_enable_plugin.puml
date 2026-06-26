@@ -56,7 +56,6 @@ loader --> agent : plugin enabled
 deactivate loader
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, hm
   Flow:    PLG-05 AgentOrchestrator -> PluginLoader -> load plugin -> activate tools + hooks -> set state ENABLED

@@ -58,7 +58,6 @@ inj --> pipe : InjectionResult(nodes_added, tokens_used)
 deactivate inj
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 break RepoIndex unavailable
     rim --> inj : IndexError

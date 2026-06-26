@@ -78,7 +78,6 @@ esm --> agent : EditResult
 deactivate esm
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over participants
   Flow:    EDT-09 → parse patch → apply → validate

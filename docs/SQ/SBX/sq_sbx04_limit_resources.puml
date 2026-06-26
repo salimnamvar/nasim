@@ -54,7 +54,6 @@ break Cgroup setup fails
     limiter --> executor : CgroupError("setup failed")
     executor --> agent : Result(success=false, error="cgroup_setup_failed")
     agent --> router : AgentEvent(Error)
-    result --> user : error: cgroup setup failed
 end
 
 limiter -> limiter : SBX-04 SET CpuMax(CPU quota)
@@ -68,7 +67,6 @@ executor --> agent : Result(success=true, data={cgroup_id})
 deactivate executor
 
 agent --> router : AgentEvent(Done)
-result --> user : result: resources limited
 
 note over user, limiter
   Flow:    SBX-04 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> ResourceLimiter -> create cgroup -> set CPU -> set memory -> set I/O -> confirm

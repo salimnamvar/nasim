@@ -62,7 +62,6 @@ loop for each hook in priority order
     break action == DENY
         hooks --> agent : HookResult(action=DENY, reason)
         agent --> router : HookResult(action=DENY)
-        result --> user : tool blocked by hook
     end
 end
 
@@ -70,7 +69,6 @@ hooks --> agent : HookResult(action=ALLOW, modified_args?)
 deactivate hooks
 agent --> router : HookResult(action=ALLOW)
 deactivate agent
-result --> user : hook dispatched
 deactivate router
 
 note over user, tools

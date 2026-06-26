@@ -59,7 +59,6 @@ break Unknown provider type
     factory -> factory : raise ConfigError("Unknown provider: X")
     factory --> agent : ConfigError
     agent --> router : ConfigError
-    result --> user : error message
 end
 
 factory --> agent : Provider instance
@@ -67,7 +66,6 @@ deactivate factory
 
 agent --> router : Provider ready
 deactivate agent
-result --> user : Provider ready
 deactivate router
 
 note over user, proto

@@ -46,7 +46,6 @@ agent -> router : RTG-04 SWITCH Model(target_model)
 break Model not in catalog
     router --> agent : Error("model not available")
     agent --> router : AgentEvent(Error)
-    result --> user : error: model not available
 end
 
 router -> router : RTG-04 VALIDATE ModelAvailability(target_model)
@@ -55,7 +54,6 @@ router -> router : RTG-04 UPDATE ActiveModelConfig(target_model)
 router --> agent : Result(success=true, data={previous_model, new_model})
 
 agent --> router : AgentEvent(Done)
-result --> user : result: switched to target_model
 
 note over user, router
   Flow:    RTG-04 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> validate -> update config -> return

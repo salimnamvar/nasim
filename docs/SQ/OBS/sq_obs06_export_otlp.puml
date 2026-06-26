@@ -79,7 +79,6 @@ deactivate otel
 
 agent --> router : None
 deactivate agent
-result --> user : None
 deactivate router
 
 note over user, backend

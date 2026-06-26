@@ -76,7 +76,6 @@ deactivate ranker
 
 agent --> router : RankedSymbolList(symbols, scores)
 deactivate agent
-result --> user : RankedSymbolList(symbols, scores)
 deactivate router
 
 note over user, history

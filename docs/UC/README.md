@@ -49,6 +49,11 @@
 | CLI-01 | PROCESS User Input | REPLSession | REPL loop, input handling, slash command dispatch. Delegates business ops to API. |
 | CLI-02 | DISPATCH Slash Command | SlashCommandHandler | Map /cmd strings to API calls. No direct core access. |
 | CLI-03 | STREAM Output | Renderer | Render AgentEvents from API SSE stream to terminal |
+| CLI-04 | READ CLI Arguments | ArgParser | Startup argument parsing. Includes CFG-01 (LOAD Config). |
+| CLI-05 | ENABLE Plan Mode | SlashCommandHandler | Toggle plan mode via /plan command. Includes AGT-07 (QUEUE Plan). |
+| CLI-06 | REQUEST Approval | REPLSession | Display safety approval prompt and collect developer decision. Includes SAF-02 (REQUEST Approval). |
+| CLI-07 | SWITCH Model | SlashCommandHandler | Switch active model via /model command. Includes RTG-04 (SWITCH Model). |
+| CLI-08 | LIST Sessions | SlashCommandHandler | List sessions via /sessions command. Includes API-01 (LIST Sessions). |
 
 > **API-First Rule:** CLI-02 (DISPATCH Slash Command) MUST delegate to the API. For example, `/sessions` calls API-01 (LIST Sessions), `/model` calls API-11 (UPDATE Config). No CLI UC may call AgentOrchestrator, SessionStore, or any core service directly.
 

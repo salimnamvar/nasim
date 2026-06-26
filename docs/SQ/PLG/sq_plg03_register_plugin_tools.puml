@@ -58,7 +58,6 @@ loader --> agent : all tools registered
 deactivate loader
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, registry
   Flow:    PLG-03 AgentOrchestrator -> PluginLoader -> enumerate plugin tools -> register in ToolRegistry

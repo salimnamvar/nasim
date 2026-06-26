@@ -46,13 +46,11 @@ break Path not found
     find --> registry : ToolResult(success=False, error="Error: path not found: path")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: path not found: path")
 end
 
 find --> registry : ToolResult(success=True, content=matching_paths)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, find
   Flow:    TL-08: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> FindFileTool -> os.walk -> ToolResult

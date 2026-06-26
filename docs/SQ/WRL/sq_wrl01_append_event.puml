@@ -60,7 +60,6 @@ break Write failure
     fs --> wirelog : IOError
     wirelog --> agent : 500 INTERNAL — AppendError("write failed")
     agent --> router : AgentEvent(Error)
-    result --> user : result — event write failed
 end
 
 fs --> wirelog : 200 OK — write_result
@@ -70,7 +69,6 @@ wirelog --> agent : 200 OK — AppendResult(event_id, offset)
 deactivate wirelog
 
 agent --> router : AgentEvent(Done)
-result --> user : result — event appended
 
 note over user, fs
   Flow:    WRL-01 → serialize → add metadata → append to file

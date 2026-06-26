@@ -60,7 +60,6 @@ break Not a git repo
     git --> registry : ToolResult(success=False, error="Error: not a git repository")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: not a git repository")
 end
 
 break Nothing to commit
@@ -68,12 +67,10 @@ break Nothing to commit
     git --> registry : ToolResult(success=False, error="Nothing to commit")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Nothing to commit")
 end
 
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, shell
   Flow:    TL-11: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GitTool -> Host Shell -> ToolResult

@@ -57,14 +57,12 @@ status -> status : VCS-03 PARSE DiffOutput(raw_diff)
 break No changes detected
     status --> agent : Result(success=true, data={empty_diff})
     agent --> router : AgentEvent(Done)
-    result --> user : result: no changes detected
 end
 
 status --> agent : Result(success=true, data={files, hunks})
 deactivate status
 
 agent --> router : AgentEvent(Done)
-result --> user : result: diff content
 
 note over user, git
   Flow:    VCS-03 -> User -> ServerRouter -> AgentOrchestrator -> GitStatus -> determine scope -> execute git diff -> parse -> return

@@ -66,7 +66,6 @@ engine --> agent : TestSuiteResult
 deactivate engine
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, shell
   Flow:    EVL-05 AgentOrchestrator -> EvaluationEngine -> TestRunner -> run test suite -> collect results -> return

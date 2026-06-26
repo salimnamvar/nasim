@@ -63,7 +63,6 @@ deactivate fs
 agent -> agent : compute_diff(original_content, modified_content)
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over agent, fs
   Flow:    User → ServerRouter → AgentOrchestrator → SearchReplaceCoder + Host Filesystem → EditResult

@@ -73,7 +73,6 @@ deactivate provider
 
 agent --> router : StreamComplete
 deactivate agent
-result --> user : StreamComplete
 deactivate router
 
 note over user, api

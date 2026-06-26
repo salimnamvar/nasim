@@ -43,7 +43,6 @@ tool -> tool : generate step ID, set status PENDING
 tool --> registry : ToolResult(success=True, step_id)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, tool
   Flow:    TL-21: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> PlanTool -> ToolResult

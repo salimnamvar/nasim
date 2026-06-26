@@ -90,7 +90,6 @@ forker --> agent : 200 OK — ForkResult(new_session_id, fork_turn, event_count)
 deactivate forker
 
 agent --> router : AgentEvent(Done)
-result --> user : result — fork complete, new session created
 
 note over user, session
   Flow:

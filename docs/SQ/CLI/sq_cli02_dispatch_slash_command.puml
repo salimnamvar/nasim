@@ -61,7 +61,6 @@ else /sessions
     renderer --> user : session list
 else /quit or /exit
     cmd -> repl : signal exit
-    result --> user : "Bye."
 else unknown command
     cmd -> renderer : displayError("Unknown command: /cmd")
     renderer --> user : error display

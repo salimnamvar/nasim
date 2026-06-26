@@ -47,14 +47,12 @@ break Storage failure
     tool --> registry : ToolResult(success=False, error="persist failed")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="persist failed")
 end
 
 mem --> tool : persisted
 tool --> registry : ToolResult(success=True)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, mem
   Flow:    TL-19: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> MemoryTool -> MemoryStore -> ToolResult

@@ -54,7 +54,6 @@ break Connection refused / timeout
     server --> mcp : ConnectionError
     mcp --> agent : ToolResult(success=false, error="MCP Server unreachable")
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=false, error="503 UNAVAILABLE")
 end
 
 server --> mcp : connection established
@@ -71,7 +70,6 @@ mcp --> agent : ToolResult(success=true, content="ConnectionActive")
 deactivate mcp
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, server
   Flow:    User → ServerRouter → AgentOrchestrator → MCPClientRuntime → MCP Server → handshake → store state

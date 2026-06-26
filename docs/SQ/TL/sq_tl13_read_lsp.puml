@@ -49,7 +49,6 @@ break LSP server unreachable or times out
     tool --> registry : ToolResult(success=False, error="LSP unavailable")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="LSP unavailable")
 end
 
 break Query returns no results
@@ -57,14 +56,12 @@ break Query returns no results
     tool --> registry : ToolResult(success=False, error="no results")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="no results")
 end
 
 lsp --> tool : hover/definition/references result
 tool --> registry : ToolResult(success=True, result)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, lsp
   Flow:    TL-13: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> LspTool -> LSP Server -> ToolResult

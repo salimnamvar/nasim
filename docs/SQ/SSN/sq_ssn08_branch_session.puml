@@ -65,13 +65,11 @@ fork --> agent : 200 OK — BranchCreated(branch_session_id, parent_id)
 deactivate fork
 
 agent --> router : AgentEvent(Done)
-result --> user : result — branch session created
 
 break Copy failure
     store --> fork : IOError
     fork --> agent : 500 INTERNAL — BranchError
     agent --> router : AgentEvent(Error)
-    result --> user : result — branch failed, retain current session
 end
 
 note over user, store

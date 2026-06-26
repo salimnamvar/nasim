@@ -1,15 +1,15 @@
-@startuml sq_srv05_retire_session
+@startuml sq_api05_delete_session
 ' ============================================================
-' Title:     SRV-05 — RETIRE Session
+' Title:     API-05 — DELETE Session
 ' Boundary:  nasim code agent HTTP API
-' Purpose:   Mark a session as retired (soft delete)
+' Purpose:   Delete a session (hard delete)
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SRV-05 RETIRE Session
+title nasim — API-05 DELETE Session
 
 actor "User" as user
 
@@ -23,7 +23,7 @@ box "Repository Group" #E8F5E9
 end box
 
 note over user, store
-  Scope:          Mark a session as retired (soft delete)
+  Scope:          Delete a session (hard delete)
   Preconditions:  Session exists on disk
   Contexts:       Called by HTTPClient via DELETE /v1/sessions/{id}
   Excludes:       Hard delete, message operations
@@ -33,12 +33,12 @@ note over user, store
   Returns:        200 OK with retired status, or 404 NOT_FOUND error
 end note
 
-== SRV-05 RETIRE Session ==
+== API-05 DELETE Session ==
 
 user -> router : DELETE /v1/sessions/{id}
 activate router
 
-router -> svc : SRV-05 RETIRE Session(sessionId)
+router -> svc : API-05 DELETE Session(sessionId)
 activate svc
 
 svc -> store : readSessionExists(sessionId)
@@ -66,7 +66,7 @@ router --> user : 200 OK {retired: true}
 deactivate router
 
 note over user, store
-  Flow:    SRV-05 → read → validate state → retire → respond
+  Flow:    API-05 → read → validate state → retire → respond
   State:   ACTIVE → CLOSED
   Success: 200 OK with retired status
   Failure: 404 not found

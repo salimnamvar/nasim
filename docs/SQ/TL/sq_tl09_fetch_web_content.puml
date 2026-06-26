@@ -47,7 +47,6 @@ break HTTP error (4xx, 5xx)
     fetch --> registry : ToolResult(success=False, error="Error: HTTP {status_code} for {url}")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: HTTP {status_code} for {url}")
 end
 
 break Timeout
@@ -55,7 +54,6 @@ break Timeout
     fetch --> registry : ToolResult(success=False, error="Error: timeout fetching {url}")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: timeout fetching {url}")
 end
 
 web --> fetch : HTML content
@@ -63,7 +61,6 @@ fetch -> fetch : html2text.convert(html) -> markdown
 fetch --> registry : ToolResult(success=True, content=markdown)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, web
   Flow:    TL-09: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WebFetchTool -> Web -> ToolResult

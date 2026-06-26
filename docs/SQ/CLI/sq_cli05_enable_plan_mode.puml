@@ -49,11 +49,9 @@ deactivate agent
 cmd --> repl : CommandResult(confirmation)
 deactivate cmd
 
-result --> user : "Plan mode: ON/OFF"
 
 break Toggle error
     cmd --> repl : CommandError
-    result --> user : "Failed to toggle plan mode"
 end
 
 note over user, agent

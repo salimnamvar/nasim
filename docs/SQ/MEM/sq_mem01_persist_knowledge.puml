@@ -62,7 +62,6 @@ store --> agent : persist_confirmed(key)
 deactivate store
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, index
   Flow:    MEM-01 AgentOrchestrator -> MemoryStore -> validate scope -> write disk -> index -> confirm

@@ -48,7 +48,6 @@ deactivate history
 
 agent --> router : AgentEvent(Done)
 deactivate agent
-result --> user : history cleared
 
 note over user, history
   Flow:    AGT-04 → reset → keep system prompt → clear rest

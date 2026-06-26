@@ -66,7 +66,6 @@ deactivate pm
 
 agent --> router : AgentEvent(Done)
 deactivate agent
-result --> user : result
 
 note over user, reg
   Flow:    AGT-11 → select persona → delegate task

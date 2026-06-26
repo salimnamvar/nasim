@@ -62,7 +62,6 @@ break Timeout or resource violation
     runtime --> executor : timeout/violation error
     executor --> agent : Result(success=false, error="timeout")
     agent --> router : AgentEvent(Error)
-    result --> user : error: sandbox timeout
 end
 
 runtime --> executor : execution_result(output, exit_code)
@@ -72,7 +71,6 @@ executor --> agent : Result(success=true, data={output, exit_code})
 deactivate executor
 
 agent --> router : AgentEvent(Done)
-result --> user : result: command output
 
 note over user, runtime
   Flow:    SBX-01 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> apply policy -> create sandbox -> execute -> return

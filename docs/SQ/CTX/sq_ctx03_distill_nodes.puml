@@ -51,7 +51,6 @@ compactor -> compactor : create summary message {role: "system", content: summar
 compactor --> compactor : return summary message
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over compactor, provider
   Flow:    User → ServerRouter → AgentOrchestrator → select old → build prompt → LLM summarize → summary message

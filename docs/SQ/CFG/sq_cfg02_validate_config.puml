@@ -55,13 +55,11 @@ cfg -> cfg : cfg02 CHECK Timeout(timeout > 0)
 break Validation fails
     cfg --> agent : ConfigError("field: message")
     agent --> router : ConfigError
-    result --> user : validation failed
 end
 
 cfg --> agent : Config valid
 agent --> router : Config valid
 deactivate agent
-result --> user : config validated
 deactivate router
 
 note over user, cfg

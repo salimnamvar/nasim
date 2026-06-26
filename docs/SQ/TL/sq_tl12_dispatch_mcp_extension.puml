@@ -47,7 +47,6 @@ break MCP server not running
     mcp --> registry : ToolResult(success=False, error="Error: MCP server not reachable")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: MCP server not reachable")
 end
 
 break Tool not found on server
@@ -55,7 +54,6 @@ break Tool not found on server
     mcp --> registry : ToolResult(success=False, error="Error: tool not found on MCP server")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error: tool not found on MCP server")
 end
 
 server --> mcp : result
@@ -63,7 +61,6 @@ mcp -> mcp : wrap in ToolResult(success=True, content=result)
 mcp --> registry : ToolResult
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, server
   Flow:    TL-12: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> MCPToolAdapter -> MCP Server -> ToolResult

@@ -56,7 +56,6 @@ gate -> gate : SAF-03 SET self.mode(config.safety_mode)
 gate --> agent : Result(success=true, data={safety_mode})
 
 agent --> router : AgentEvent(Done)
-result --> user : result: safety mode configured
 
 note over user, cfg
   Flow:    SAF-03 -> User -> ServerRouter -> AgentOrchestrator -> ConfigLoader -> PermissionGate -> set mode

@@ -78,7 +78,6 @@ deactivate coord
 
 agent --> router : AgentEvent(Done)
 deactivate agent
-result --> user : result
 
 note over user, store
   Flow:    AGT-10 → wait → collect → aggregate

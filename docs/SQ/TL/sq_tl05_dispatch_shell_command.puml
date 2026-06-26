@@ -47,7 +47,6 @@ break Timeout
     st --> registry : ToolResult(success=False, error="command timed out after Ns")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="command timed out after Ns")
 end
 
 break Execution error
@@ -55,7 +54,6 @@ break Execution error
     st --> registry : ToolResult(success=False, error="Error executing command")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
-    result --> user : ToolResult(success=False, error="Error executing command")
 end
 
 shell --> st : CompletedProcess(stdout, stderr, returncode)
@@ -63,7 +61,6 @@ st -> st : format output (stdout + stderr + exit code)
 st --> registry : ToolResult(success=True, content=command_output)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, shell
   Flow:    TL-05: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> ShellTool -> Host Shell -> ToolResult

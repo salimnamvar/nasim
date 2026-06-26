@@ -73,14 +73,12 @@ break All models unavailable
     fallback --> router : FallbackError("all models unavailable")
     router --> agent : Result(success=false, error="all_models_unavailable")
     agent --> router : AgentEvent(Error)
-    result --> user : error: all models unavailable
 end
 
 router --> agent : Result(success=true, data=selected_model)
 deactivate router
 
 agent --> router : AgentEvent(Done)
-result --> user : result: selected model
 
 note over user, provider
   Flow:    RTG-02 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> FallbackChain -> check each model -> return first available

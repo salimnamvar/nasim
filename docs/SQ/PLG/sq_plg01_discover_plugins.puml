@@ -60,7 +60,6 @@ loader --> agent : list[PluginManifest]
 deactivate loader
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, fs
   Flow:    PLG-01 AgentOrchestrator -> PluginLoader -> scan directory -> load manifests -> return list

@@ -78,7 +78,6 @@ mcp --> agent : ToolResult(success=true, content="DiscoveryComplete")
 deactivate mcp
 
 agent --> router : AgentEvent(Done)
-result --> user : result
 
 note over user, server
   Flow:    User → ServerRouter → AgentOrchestrator → MCPClientRuntime → MCPDiscovery → list tools → wrap each → register → DiscoveryComplete
