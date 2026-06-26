@@ -4,11 +4,15 @@
 ' Title:     nasim — UC: Agent Group
 ' Group:     AGT (Agent Core)
 ' Boundary:  nasim code agent
-' Purpose:   Core agentic loop, permissions, context, plans, subagents
+' Purpose:   Core agentic loop: provider call, tool dispatch,
+'            conversation history, context compaction, plans,
+'            subagents, personas, error handling, safety pipeline.
+'            Entry chain: User → ServerRouter → AgentOrchestrator
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_agt01..sq_agt15
 ' ============================================================
 
 left to right direction
@@ -50,13 +54,16 @@ skinparam usecase<<extref>> {
 ' Actors
 ' ============================================================
 
-actor "Agent" as Agent <<system>>
+actor "User" as User
+actor "ServerRouter" as Router <<system>>
 
 ' ============================================================
 ' Cross-Group External References
 ' ============================================================
 
 usecase "SAF-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>>
+usecase "PRV-02\nREQUEST Chat\n[uc_provider]" as PRV02_ext <<extref>>
+usecase "PRV-03\nSTREAM Chat\n[uc_provider]" as PRV03_ext <<extref>>
 
 ' ============================================================
 ' System Boundary
@@ -64,20 +71,20 @@ usecase "SAF-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>>
 
 rectangle "nasim" {
   package "Agent Group (AGT)" {
-    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop: provider call, tool dispatch" as AGT01
+    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop:\nprovider call, tool dispatch" as AGT01
     usecase "**AGT-02 DISPATCH Tool Call**\n--\nRoute tool call to registry" as AGT02
     usecase "**AGT-03 UPDATE Conversation**\n--\nManage message list and token count" as AGT03
     usecase "**AGT-04 DELETE History**\n--\nReset conversation history" as AGT04
-    usecase "**AGT-06 COMPACT Context**\n--\nSummarize old exchanges via secondary LLM" as AGT06
+    usecase "**AGT-06 COMPACT Context**\n--\nSummarize old exchanges\nvia secondary LLM" as AGT06
     usecase "**AGT-07 QUEUE Plan**\n--\nHold queued tool calls in plan mode" as AGT07
     usecase "**AGT-08 APPROVE Plan**\n--\nDrain queued plan calls" as AGT08
-    usecase "**AGT-09 SPAWN Subagent**\n--\nCreate child agent with restricted tools" as AGT09
-    usecase "**AGT-10 COLLECT Subagent Result**\n--\nGather results from completed child agents" as AGT10
-    usecase "**AGT-11 DELEGATE to Persona**\n--\nAssign tasks to specialized persona roles" as AGT11
+    usecase "**AGT-09 SPAWN Subagent**\n--\nCreate child agent\nwith restricted tools" as AGT09
+    usecase "**AGT-10 COLLECT Subagent Result**\n--\nGather results from\ncompleted child agents" as AGT10
+    usecase "**AGT-11 DELEGATE to Persona**\n--\nAssign tasks to\nspecialized persona roles" as AGT11
     usecase "**AGT-12 LOAD Persona**\n--\nLoad persona configuration" as AGT12
     usecase "**AGT-13 SWITCH Persona**\n--\nSwitch to different persona at runtime" as AGT13
     usecase "**AGT-14 HANDLE Error**\n--\nStructured error handling with recovery" as AGT14
-    usecase "**AGT-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection, egress checks" as AGT15
+    usecase "**AGT-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection,\negress checks" as AGT15
   }
 }
 
@@ -85,27 +92,28 @@ rectangle "nasim" {
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Agent --> AGT01
-Agent --> AGT04
-Agent --> AGT07
-Agent --> AGT11
-Agent --> AGT12
-Agent --> AGT13
-Agent --> AGT15
-Agent --> SAF01_ext
+User --> AGT01 : via API-06 :dispatch
+Router --> AGT01 : delegates
 
 ' ============================================================
-' Relationships
+' Relationships (downward <<include>> only)
 ' ============================================================
 
-AGT01 ..> AGT15 : <<include>>
+AGT01 ..> AGT02 : <<include>>
 AGT01 ..> AGT03 : <<include>>
-AGT15 ..> AGT02 : <<include>>
-AGT02 ..> SAF01_ext : <<include>>
 AGT01 ..> AGT06 : <<extend>>
-AGT07 ..> AGT08 : <<extend>>
+AGT01 ..> AGT07 : <<extend>>
 AGT01 ..> AGT09 : <<extend>>
-AGT09 ..> AGT10 : <<include>>
+AGT01 ..> AGT11 : <<extend>>
 AGT01 ..> AGT14 : <<extend>>
+AGT01 ..> AGT15 : <<include>>
+
+AGT02 ..> SAF01_ext : <<include>>
+AGT02 ..> PRV02_ext : <<include>>
+AGT02 ..> PRV03_ext : <<extend>>
+
+AGT07 ..> AGT08 : <<extend>>
+
+AGT09 ..> AGT10 : <<include>>
 
 @enduml

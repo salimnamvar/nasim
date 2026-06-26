@@ -1,0 +1,145 @@
+@startuml uc_tl_advanced
+
+' ============================================================
+' Title:     nasim — UC: Tool Group — Advanced & Integration Tools
+' Group:     TL (Tool Layer)
+' Boundary:  nasim code agent
+' Purpose:   Advanced tool implementations: git, MCP dispatch, LSP,
+'            registry, subagent, todo, memory, plan.
+'            Entry chain: User → ServerRouter → AgentOrchestrator →
+'            ToolRegistry → Tool implementation
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_tl11..sq_tl22
+' ============================================================
+
+left to right direction
+
+title nasim — Tool Use Cases — Advanced Tools
+
+note top of User
+  Scope:          TL-11..TL-22 — Git, MCP, LSP, registry, subagent, todo, memory, plan tools
+  Preconditions:  ToolRegistry initialized, AgentOrchestrator active
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call); sq_tl11..sq_tl22
+  Excludes:       Core file/shell/search/web tools (see uc_tl.puml)
+  Rollback:       TL-15 spawn rolls back via subagent teardown; TL-16..22 roll back via reverse op
+  Design:         Each tool registered in ToolRegistry; dispatched via AgentOrchestrator
+  Returns:
+    - Success: ToolResult(success=true, data=...)
+    - Failure: ToolResult(success=false, error=...)
+end note
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Integration Tools" as INT_PKG {
+    usecase "**TL-11 READ Git Status**\n--\nGit status, diff, commit operations" as TL11
+    usecase "**TL-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" as TL12
+    usecase "**TL-13 READ LSP**\n--\nLSP ops: hover, definition, references" as TL13
+    usecase "**TL-14 LIST Registered Tools**\n--\nList all registered tools" as TL14
+  }
+  package "Agent Tools" as AGT_PKG {
+    usecase "**TL-15 SPAWN Subagent**\n--\nSpawn child agent via SubagentCoordinator" as TL15
+  }
+  package "Task Tracking" as TODO_PKG {
+    usecase "**TL-16 INSERT Todo**\n--\nCreate task tracking entry" as TL16
+    usecase "**TL-17 UPDATE Todo**\n--\nUpdate task tracking entry" as TL17
+    usecase "**TL-18 READ Todos**\n--\nList task tracking entries" as TL18
+  }
+  package "Memory" as MEM_PKG {
+    usecase "**TL-19 PERSIST Memory**\n--\nStore cross-session knowledge" as TL19
+    usecase "**TL-20 RECALL Memory**\n--\nRetrieve cross-session knowledge" as TL20
+  }
+  package "Planning" as PLAN_PKG {
+    usecase "**TL-21 INSERT Plan**\n--\nCreate plan entry" as TL21
+    usecase "**TL-22 UPDATE Plan**\n--\nUpdate plan entry" as TL22
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+User --> TL11
+User --> TL12
+User --> TL13
+User --> TL14
+User --> TL15
+User --> TL16
+User --> TL17
+User --> TL18
+User --> TL19
+User --> TL20
+User --> TL21
+User --> TL22
+
+Router --> TL11 : dispatches
+Router --> TL12 : dispatches
+Router --> TL13 : dispatches
+Router --> TL14 : dispatches
+Router --> TL15 : dispatches
+Router --> TL16 : dispatches
+Router --> TL17 : dispatches
+Router --> TL18 : dispatches
+Router --> TL19 : dispatches
+Router --> TL20 : dispatches
+Router --> TL21 : dispatches
+Router --> TL22 : dispatches
+
+Agent --> TL11 : calls
+Agent --> TL12 : calls
+Agent --> TL13 : calls
+Agent --> TL14 : calls
+Agent --> TL15 : calls
+Agent --> TL16 : calls
+Agent --> TL17 : calls
+Agent --> TL18 : calls
+Agent --> TL19 : calls
+Agent --> TL20 : calls
+Agent --> TL21 : calls
+Agent --> TL22 : calls
+
+note bottom of Agent
+  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls tool
+  State:  TL-11..TL-22 — each returns ToolResult(success=bool, data|error)
+  Success: Tool executes, returns expected data or confirmation
+  Failure: Tool returns error; caller handles per AGT-14 (HANDLE Error)
+end note
+
+@enduml

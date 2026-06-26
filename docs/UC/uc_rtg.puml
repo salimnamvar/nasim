@@ -1,0 +1,111 @@
+@startuml uc_rtg
+
+' ============================================================
+' Title:     nasim — UC: Router Group
+' Group:     RTG (Router Layer)
+' Boundary:  nasim code agent
+' Purpose:   Model selection, fallback chains, task classification,
+'            runtime model switching.
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ModelRouter
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_rtg01..sq_rtg04
+' ============================================================
+
+left to right direction
+
+title nasim — Router Use Cases
+
+note top of User
+  Scope:          RTG-01..RTG-04 — Select model, apply fallback, classify task, switch model at runtime
+  Preconditions:  ModelRouter initialized, provider backends registered
+  Contexts:       Called by AGT-01 (PROCESS User Task); sq_rtg01..sq_rtg04
+  Excludes:       Provider registration (see PRV-01)
+  Rollback:       N/A — stateless routing decisions
+  Design:         ModelRouter selects model based on task class; fallback chain ensures availability
+  Returns:
+    - Success: ModelSelection or TaskClass
+    - Failure: NoSuitableModel with retry advice
+end note
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Router Group (RTG)" {
+    usecase "**RTG-01 SELECT Model**\n--\nSelect best model for task" as RTG01
+    usecase "**RTG-02 APPLY Fallback**\n--\nFallback to next available model" as RTG02
+    usecase "**RTG-03 CLASSIFY Task**\n--\nClassify task for model routing" as RTG03
+    usecase "**RTG-04 SWITCH Model**\n--\nSwitch model at runtime" as RTG04
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+User --> RTG01
+User --> RTG02
+User --> RTG03
+User --> RTG04
+
+Router --> RTG01 : dispatches
+Router --> RTG02 : dispatches
+Router --> RTG03 : dispatches
+Router --> RTG04 : dispatches
+
+Agent --> RTG01 : calls
+Agent --> RTG02 : calls
+Agent --> RTG03 : calls
+Agent --> RTG04 : calls
+
+' ============================================================
+' Relationships
+' ============================================================
+
+RTG01 ..> RTG03 : <<include>>
+RTG01 ..> RTG02 : <<include>>
+
+note bottom of Agent
+  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls ModelRouter
+  State:  RTG-01..RTG-04 — each returns routing decision or switch confirmation
+  Success: Model selected / fallback applied / task classified / model switched
+  Failure: NoSuitableModel; upstream uses fallback chain or raises error
+end note
+
+@enduml

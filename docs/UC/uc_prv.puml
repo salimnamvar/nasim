@@ -1,0 +1,110 @@
+@startuml uc_prv
+
+' ============================================================
+' Title:     nasim — UC: Provider Group
+' Group:     PRV (Provider Layer)
+' Boundary:  nasim code agent
+' Purpose:   LLM provider abstraction via LiteLLM proxy: registration,
+'            chat request/stream, backend selection.
+'            Entry chain: User → ServerRouter → AgentOrchestrator → Provider
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_prv01..sq_prv04
+' ============================================================
+
+left to right direction
+
+title nasim — Provider Use Cases
+
+note top of User
+  Scope:          PRV-01..PRV-04 — LLM provider registration, chat request/stream, backend selection
+  Preconditions:  LiteLLM proxy configured, provider credentials available
+  Contexts:       Called by AGT-02 (DISPATCH Tool Call); sq_prv01..sq_prv04
+  Excludes:       Provider backend lifecycle (outside scope)
+  Rollback:       N/A — transient stateless operations
+  Design:         LiteLLMProxy wraps litellm for provider abstraction; Provider is the callable handle
+  Returns:
+    - Success: ChatResponse or ProviderHandle
+    - Failure: ProviderError with reason
+end note
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+' ============================================================
+' Actors
+' ============================================================
+
+actor "User" as User
+actor "ServerRouter" as Router <<system>>
+actor "AgentOrchestrator" as Agent <<system>>
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+rectangle "nasim" {
+  package "Provider Group (PRV)" {
+    usecase "**PRV-01 REGISTER Provider**\n--\nRegister provider with LiteLLM proxy" as PRV01
+    usecase "**PRV-02 REQUEST Chat**\n--\nSingle-turn LLM chat request" as PRV02
+    usecase "**PRV-03 STREAM Chat**\n--\nStream LLM chat response" as PRV03
+    usecase "**PRV-04 SELECT Provider Backend**\n--\nSelect best provider backend" as PRV04
+  }
+}
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+User --> PRV01
+User --> PRV02
+User --> PRV03
+User --> PRV04
+
+Router --> PRV01 : dispatches
+Router --> PRV02 : dispatches
+Router --> PRV03 : dispatches
+Router --> PRV04 : dispatches
+
+Agent --> PRV01 : calls
+Agent --> PRV02 : calls
+Agent --> PRV03 : calls
+Agent --> PRV04 : calls
+
+' ============================================================
+' Relationships
+' ============================================================
+
+PRV04 ..> PRV01 : <<include>>
+
+note bottom of Agent
+  Flow:   User request → ServerRouter dispatches → AgentOrchestrator calls Provider
+  State:  PRV-01..PRV-04 — each returns ProviderResponse or streams ChatChunk
+  Success: Provider returns chat response / streaming completes
+  Failure: ProviderError with retry handled upstream by AGT-14
+end note
+
+@enduml
