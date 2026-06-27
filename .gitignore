@@ -100,6 +100,7 @@ credentials.json
 .agents
 .micode
 .kimi
+.autohand
 
 # ==========================================
 # 9. IDE ARTIFACTS
