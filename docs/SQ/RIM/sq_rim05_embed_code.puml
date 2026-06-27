@@ -13,20 +13,20 @@ title nasim — RIM-05 EMBED Code
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Group" #EDE7F6
+box "Repo Intelligence Group" #E8F5E9
   participant "RepoIntelligenceManager" as rim
   participant "EmbeddingAdapter" as embed
 end box
 box "External" #F5F5F5
   participant "EmbeddingProvider" as provider
 end box
-box "Storage Group" #F3E5F5
+box "Storage Group" #E8F5E9
   participant "VectorStore" as vstore
 end box
 

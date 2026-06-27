@@ -13,15 +13,18 @@ title nasim — CLI-05 ENABLE Plan Mode
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "CLI Interface Container" #E3F2FD
+  participant "REPLSession" as repl
+end box
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 
-note over user, agent
+note over user, repl
   Scope:          Toggle plan mode on/off via slash command
   Preconditions:  ServerRouter active, SlashCommandHandler registered
   Contexts:       Invoked by Developer via /plan-mode command
@@ -35,7 +38,7 @@ end note
 == CLI-05 Enable Plan Mode ==
 
 user -> repl : "/plan-mode"
-result -> cmd : dispatch("/plan-mode")
+repl -> cmd : dispatch("/plan-mode")
 activate cmd
 
 cmd -> cmd : parse command arguments
@@ -54,7 +57,7 @@ break Toggle error
     cmd --> repl : CommandError
 end
 
-note over user, agent
+note over user, repl
   Flow:    CLI-05 enablePlanMode: User → ServerRouter → SlashCommandHandler → toggle → confirm
   State:   <back:#ECEFF1>IDLE</back> → TOGGLING → <back:#ECEFF1>IDLE</back>
   Success: Plan mode toggled, confirmation shown

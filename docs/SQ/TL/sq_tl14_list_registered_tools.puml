@@ -37,12 +37,18 @@ end note
 == TL-14 List Registered Tools ==
 
 user -> router : types input
+activate router
 router -> agent : TL-14 PROCESS(user_input)
-agent -> registry : TL-14 List Registered Tools({})
-registry -> registry : enumerate registered tools
-registry --> agent : ToolResult(success=True, tools=[...])
+activate agent
+agent -> registry : TL-14 List Registered Tools(pageSize=100, pageToken="abc")
+activate registry
+registry -> registry : enumerate registered tools (limit=100, offset=0)
+registry --> agent : ToolResult(success=True, tools=[...], nextPageToken)
+deactivate registry
 agent --> router : AgentEvent(Done)
 
+deactivate agent
+deactivate router
 note over user, registry
   Flow:    TL-14: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> list all registered tools -> ToolResult
   State:   No state change

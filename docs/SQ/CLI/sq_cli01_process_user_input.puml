@@ -13,19 +13,19 @@ title nasim — CLI-01 PROCESS User Input (API-First)
 
 actor "User" as user
 
-box "CLI Interface Container" #E8F5E9
-  participant "ServerRouter" as router
+box "CLI Interface Container" #E3F2FD
+  participant "REPLSession" as repl
   participant "Renderer" as renderer
 end box
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
   participant "APISchema" as schema
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "ErrorBoundary" as eb
 end box
-box "Observability Group" #E0F2F1
+box "Observability Group" #F3E5F5
   participant "StructuredLogger" as logger
 end box
 
@@ -49,14 +49,14 @@ ref over repl, logger
   OBS-01: STREAM Structured Log (user input received)
 end ref
 
-result -> result : check for slash command
+repl -> repl : check for slash command
 
 alt is slash command
     ref over repl
       CLI-02: DISPATCH Slash Command (routes through API)
     end ref
 else normal input
-    result -> schema : validate(request_body)
+    repl -> schema : validate(request_body)
     schema --> repl : ValidatedDispatchRequest
 
     repl -> router : API-06 DISPATCH Message(session_id, message)
@@ -81,16 +81,16 @@ else normal input
 
     loop for each AgentEvent
         alt TextChunk event
-            result -> renderer : render TextChunk
+            repl -> renderer : render TextChunk
             renderer --> user : streamed token
         else ToolStart event
-            result -> renderer : render ToolStart
+            repl -> renderer : render ToolStart
             renderer --> user : tool call display
         else ToolResult event
-            result -> renderer : render ToolResult
+            repl -> renderer : render ToolResult
             renderer --> user : tool result preview
         else Done event
-            result -> renderer : render Done
+            repl -> renderer : render Done
             renderer --> user : formatted output
         end
     end
@@ -109,7 +109,7 @@ break Agent throws exception
     ref over repl, logger
       OBS-01: STREAM Structured Log (error)
     end ref
-    result -> renderer : render Error event
+    repl -> renderer : render Error event
     renderer --> user : red error display
 end
 

@@ -13,16 +13,16 @@ title nasim — HK-03 DISPATCH Post-Tool Hook
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as tools
 end box
-box "Hooks Group" #FFFDE7
+box "Hooks Group" #F3E5F5
   participant "HookManager" as hooks
   participant "Hook" as hook
 end box

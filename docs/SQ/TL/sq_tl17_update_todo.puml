@@ -36,27 +36,37 @@ end note
 == TL-17 Update Todo ==
 
 user -> router : types input
+activate router
 router -> agent : TL-17 PROCESS(user_input)
-agent -> registry : TL-17 Update Todo(todo_id, status, description)
-registry -> tool : TL-17 Update Todo(todo_id, status, description)
+activate agent
+agent -> registry : TL-17 Update Todo(todo_id, status, description, updateMask)
+activate registry
+registry -> tool : TL-17 Update Todo(todo_id, status, description, updateMask)
+activate tool
 
 break Todo not found
     tool --> registry : ToolResult(success=False, error="todo not found")
+    deactivate tool
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 break Invalid status transition
     tool --> registry : ToolResult(success=False, error="invalid transition")
+    deactivate tool
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 tool -> tool : update fields
 tool --> registry : ToolResult(success=True, todo)
+deactivate tool
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate registry
+deactivate agent
+deactivate router
 note over user, tool
   Flow:    TL-17: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
   State:   Todo status/content updated

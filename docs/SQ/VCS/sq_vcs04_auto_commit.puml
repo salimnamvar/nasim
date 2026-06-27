@@ -13,13 +13,13 @@ title nasim — VCS-04 AUTO-COMMIT
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Git Group" #E8EAF6
+box "Git Group" #E8F5E9
   participant "GitIntegration" as integration
   participant "GitStatus" as status
   participant "GitCommit" as commit

@@ -13,10 +13,10 @@ title nasim — EDT-05 UPDATE Fenced Block
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 box "Edit Strategy Group" #FFF3E0
@@ -39,7 +39,7 @@ end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
-agent -> mgr : EDT-05 APPLY_FENCED_BLOCK(file, block)
+agent -> mgr : EDT-05 APPLY_FENCED_BLOCK(file, block, updateMask)
 activate mgr
 
 mgr -> coder : apply(block, file_content)

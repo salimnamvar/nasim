@@ -1,6 +1,6 @@
-@startuml sq_saf02_prompt_user_approval
+@startuml sq_saf02_request_approval
 ' ============================================================
-' Title:     SAF-02 — Prompt User Approval
+' Title:     SAF-02 — REQUEST Approval
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Display approval prompt for unsafe tool execution
 ' Milestone: v1.0
@@ -13,11 +13,11 @@ title nasim — SAF-02 PROMPT User Approval
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
   participant "Renderer" as renderer
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "PermissionGate" as gate
 end box

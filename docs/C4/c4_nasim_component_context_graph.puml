@@ -1,8 +1,3 @@
-@startuml c4_nasim_component_context_graph
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
-!include common/c4_styles.puml
-!theme plain
-
 ' ============================================================
 ' Title:     NASIM Application — Context Graph Component Diagram
 ' Boundary:  NASIM Application (container) — Context Graph Group
@@ -15,9 +10,15 @@
 ' Date:      2026-06-26
 ' ============================================================
 
+@startuml c4_nasim_component_context_graph
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
+!theme plain
+
+
 title NASIM Application — Context Graph Component Diagram
 
-Boundary(nasim_application, "NASIM Application") {
+Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(context_graph_group, "Context Graph Group") <<service>> {
         Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
         Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages and tracks token budget")

@@ -11,13 +11,13 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Memory Group" #E0F2F1
+box "Memory Group" #E8F5E9
   participant "MemoryScope" as scope
   participant "MemoryStore" as store
 end box

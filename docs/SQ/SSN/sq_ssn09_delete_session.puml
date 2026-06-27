@@ -13,13 +13,13 @@ title nasim — SSN-09 DELETE Session
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Session Group" #F3E5F5
+box "Session Group" #E8F5E9
   participant "SessionStore" as store
 end box
 box "External" #F5F5F5

@@ -11,17 +11,20 @@
 
 actor "User" as user
 
+box "CLI Interface Container" #E3F2FD
+  participant "REPLSession" as repl
+end box
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
   participant "Renderer" as renderer
 end box
 box "Repository Group" #E8F5E9
-  participant "SessionRepository" as session_repo
+  participant "SessionStore" as store
 end box
 
-note over user, renderer
+note over user, store
   Scope:          Rendering AgentEvents to terminal
   Preconditions:  Agent event stream active
   Contexts:       Called by CLI-01 (PROCESS User Input)
@@ -34,33 +37,40 @@ end note
 
 == CLI-03 STREAM Output ==
 
-result -> renderer : subscribe to AgentEvent stream
+repl -> renderer : subscribe to AgentEvent stream
+activate renderer
 
 loop for each event
     alt TextChunk event
-        result -> renderer : TextChunk(text)
+        repl -> renderer : TextChunk(text)
         renderer -> renderer : colored output (green for nasim>)
         renderer --> user : streamed token
     else ToolStart event
-        result -> renderer : ToolStart(name, args)
+        repl -> renderer : ToolStart(name, args)
         renderer -> renderer : dimmed box with tool name + args
         renderer --> user : tool call display
     else ToolResult event
-        result -> renderer : ToolResult(name, result, truncated)
+        repl -> renderer : ToolResult(name, result, truncated)
         renderer -> renderer : truncated result (max 200 chars)
         renderer --> user : tool result preview
     else Error event
-        result -> renderer : Error(message)
+        repl -> renderer : Error(message)
         renderer -> renderer : red highlight
         renderer --> user : error display
     else Done event
-        result -> renderer : Done()
+        repl -> renderer : Done()
         renderer -> renderer : newline + reset
     end
 end
 
-note over user, renderer
-  Flow:    CLI-03 streamOutput: Event stream -> Renderer -> formatted terminal output
+renderer -> store : store rendered output
+activate store
+store --> renderer : stored
+deactivate store
+
+deactivate renderer
+note over user, store
+  Flow:    CLI-03 streamOutput: Event stream -> Renderer -> formatted terminal output; SessionStore stores result
   State:   No state change
   Success: All events rendered with appropriate formatting
   Failure: N/A — renderer is passive

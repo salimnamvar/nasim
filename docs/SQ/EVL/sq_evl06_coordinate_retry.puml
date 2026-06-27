@@ -11,10 +11,10 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 box "Evaluation Group" #FFF3E0
@@ -22,7 +22,7 @@ box "Evaluation Group" #FFF3E0
   participant "FeedbackInjector" as feedback
   participant "TurnBudgetInjector" as budget
 end box
-box "Sandbox Group" #F1F8E9
+box "Sandbox Group" #F3E5F5
   participant "FileSystem" as fs
 end box
 

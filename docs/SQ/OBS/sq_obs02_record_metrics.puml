@@ -13,19 +13,19 @@ title nasim — OBS-02 RECORD Metrics
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 box "Provider Group" #FFF3E0
   participant "Provider" as provider
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as tools
 end box
-box "Observability Group" #E0F2F1
+box "Observability Group" #F3E5F5
   participant "MetricsCollector" as metrics
   participant "TraceCorrelator" as trace
 end box

@@ -37,13 +37,19 @@ end note
 == TL-01 READ File ==
 
 user -> router : types input
+activate router
 router -> agent : TL-01 PROCESS(user_input)
+activate agent
 agent -> registry : TL-01 READ File(path, offset, limit)
+activate registry
 registry -> ft : TL-01 READ File(path, offset, limit)
+activate ft
 ft -> fs : Path(path).read_text()
+activate fs
 
 break File not found or not a file
     fs --> ft : FileNotFoundError / IsADirectoryError
+    deactivate fs
     ft --> registry : ToolResult(success=False, error="file not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
@@ -51,17 +57,23 @@ end
 
 break Read error (encoding, permissions)
     fs --> ft : PermissionError / UnicodeDecodeError
+    deactivate fs
     ft --> registry : ToolResult(success=False, error="Error reading path")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 fs --> ft : file content
+deactivate fs
 ft -> ft : add line numbers, apply offset/limit
 ft --> registry : ToolResult(success=True, content=numbered_content)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate ft
+deactivate registry
+deactivate agent
+deactivate router
 note over user, fs
   Flow:    TL-01: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> ReadFileTool -> Host Filesystem -> ToolResult
   State:   No state change

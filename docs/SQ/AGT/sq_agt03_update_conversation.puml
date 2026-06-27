@@ -13,10 +13,10 @@ title nasim — AGT-03 UPDATE Conversation
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
 end box
@@ -42,7 +42,7 @@ user -> router : types input
 router -> agent : PROCESS(user_input)
 activate agent
 
-agent -> history : agt03 ADD Message({msg})
+agent -> history : agt03 ADD Message({msg}, updateMask)
 activate history
 history -> history : self.messages.append(msg)
 history -> history : self.token_count += estimate_tokens(msg)

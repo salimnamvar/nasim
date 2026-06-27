@@ -35,23 +35,30 @@ end note
 == SSN-04 Resume Session ==
 
 user -> router : types input
+activate router
 router -> agent : PROCESS(user_input)
+activate agent
 
 agent -> store : ssn04 READ Session(session_id)
+activate store
 ref over store
   SSN-02: Load Session
 end ref
 
 alt Session found
     store --> agent : 200 OK — Session(id, messages)
+    deactivate store
     agent -> agent : ssn01 PERSIST Session(session_id, messages)
     agent --> router : AgentEvent(Done)
 else Session not found
     store --> agent : 404 NOT_FOUND
+    deactivate store
     agent -> agent : start fresh
     agent --> router : AgentEvent(Done)
 end
 
+    deactivate agent
+deactivate router
 note over user, agent
   Flow:    SSN-04 → load session → restore messages → continue
   State:   No state change

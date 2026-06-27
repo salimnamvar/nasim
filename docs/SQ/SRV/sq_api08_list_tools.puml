@@ -1,6 +1,6 @@
 @startuml sq_srv08_list_tools
 ' ============================================================
-' Title:     SRV-08 — LIST Tools
+' Title:     API-08 — LIST Tools
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   List all registered tools available to the agent
 ' Milestone: v1.0
@@ -9,14 +9,14 @@
 ' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
-title nasim — SRV-08 LIST Tools
+title nasim — API-08 LIST Tools
 
 actor "User" as user
 
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
   participant "ToolService" as svc
 end box
 box "Repository Group" #E8F5E9
@@ -34,15 +34,15 @@ note over user, registry
   Returns:        200 OK with tool list, or 500 INTERNAL error
 end note
 
-== SRV-08 LIST Tools ==
+== API-08 LIST Tools ==
 
-user -> router : GET /v1/tools
+user -> router : GET /v1/tools?page_size=100&page_token=abc
 activate router
 
-router -> svc : SRV-08 LIST Tools()
+router -> svc : API-08 LIST Tools(pageSize=100, pageToken="abc")
 activate svc
 
-svc -> registry : listTools()
+svc -> registry : listTools(limit=100, cursor="abc")
 activate registry
 
 break Registry read failure [500]
@@ -52,16 +52,16 @@ break Registry read failure [500]
     router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list tools", status: "INTERNAL"}}
 end
 
-registry --> svc : ToolList
+registry --> svc : ToolList, next_page_token
 deactivate registry
 
-svc --> router : ListToolsResponse {tools: [...]}
+svc --> router : ListToolsResponse {tools: [...], nextPageToken}
 deactivate svc
-router --> user : 200 OK {tools: [...]}
+router --> user : 200 OK {tools: [...], next_page_token}
 deactivate router
 
 note over user, registry
-  Flow:    SRV-08 → listTools → respond
+  Flow:    API-08 → listTools → respond
   State:   No state change
   Success: 200 OK with tool list
   Failure: 500 INTERNAL on registry read failure

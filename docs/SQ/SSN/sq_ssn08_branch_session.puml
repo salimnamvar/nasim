@@ -13,13 +13,13 @@ title nasim — SSN-08 INSERT Session
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Session Group" #F1F8E9
+box "Session Group" #E8F5E9
   participant "SessionFork" as fork
 end box
 database "Session Store" as store

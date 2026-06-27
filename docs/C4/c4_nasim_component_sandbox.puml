@@ -1,8 +1,3 @@
-@startuml c4_nasim_component_sandbox
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
-!include common/c4_styles.puml
-!theme plain
-
 ' ============================================================
 ' Title:     NASIM Application — Sandbox Component Diagram
 ' Boundary:  NASIM Application (container) — Sandbox Group
@@ -15,9 +10,15 @@
 ' Date:      2026-06-26
 ' ============================================================
 
+@startuml c4_nasim_component_sandbox
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
+!theme plain
+
+
 title NASIM Application — Sandbox Component Diagram
 
-Boundary(nasim_application, "NASIM Application") {
+Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
         Component(sandbox_executor, "SandboxExecutor", "", "OS-level process isolation: landlock, seccomp, bubblewrap")
         Component(sandbox_policy, "SandboxPolicy", "", "Network domain allowlists, filesystem mount rules, exec restrictions")

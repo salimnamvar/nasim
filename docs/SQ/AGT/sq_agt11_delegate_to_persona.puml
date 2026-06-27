@@ -13,14 +13,14 @@ title nasim — AGT-11 DELEGATE to Persona
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "PersonaManager" as pm
 end box
-box "Config Group" #FCE4EC
+box "Config Group" #E8F5E9
   participant "PersonaRegistry" as reg
 end box
 box "Repository Group" #E8F5E9

@@ -42,9 +42,12 @@ end note
 == RTG-03 Classify Task ==
 
 user -> router : types input
+activate router
 router -> agent : RTG-03 PROCESS(user_input)
+activate agent
 
 agent -> router : RTG-03 CLASSIFY Task(task_description, context)
+activate router
 
 break Classification fails (confidence < 0.6)
     router --> agent : default_model
@@ -68,6 +71,8 @@ router --> agent : Result(success=true, data={selected_model, task_type})
 
 agent --> router : AgentEvent(Done)
 
+deactivate agent
+deactivate router
 note over user, router
   Flow:    RTG-03 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model
   State:   No state change

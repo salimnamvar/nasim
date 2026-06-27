@@ -16,7 +16,7 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerApp" as server
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
   participant "MetricsCollector" as metrics
 end box
 box "Repository Group" #E8F5E9

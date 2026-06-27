@@ -13,14 +13,17 @@ title nasim — CLI-07 UPDATE Model
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "CLI Interface Container" #E3F2FD
+  participant "REPLSession" as repl
+end box
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Routing Group" #E8EAF6
+box "Routing Group" #FFF3E0
   participant "RTGModelRouter" as rtg
 end box
 box "Repository Group" #E8F5E9
@@ -41,11 +44,11 @@ end note
 == CLI-07 Switch Model ==
 
 user -> repl : "/model {model_name}"
-result -> cmd : dispatch("/model {model_name}")
+repl -> cmd : dispatch("/model {model_name}")
 activate cmd
 
 cmd -> cmd : parse model name
-cmd -> rtg : switchModel(model_name)
+cmd -> rtg : switchModel(model_name, updateMask)
 activate rtg
 
 rtg -> rtg : validate model availability

@@ -1,6 +1,6 @@
 @startuml sq_srv11_update_config
 ' ============================================================
-' Title:     SRV-11 — UPDATE Config
+' Title:     API-11 — UPDATE Config
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Update agent configuration at runtime
 ' Milestone: v1.0
@@ -9,14 +9,14 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SRV-11 UPDATE Config
+title nasim — API-11 UPDATE Config
 
 actor "User" as user
 
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FCE4EC
+box "Service Group" #FFF3E0
   participant "ConfigService" as svc
 end box
 box "Repository Group" #E8F5E9
@@ -34,7 +34,7 @@ note over user, config
   Returns:        200 OK with updated config, or 400 INVALID_ARGUMENT error
 end note
 
-== SRV-11 UPDATE Config ==
+== API-11 UPDATE Config ==
 
 user -> router : PATCH /v1/config
 activate router
@@ -44,7 +44,7 @@ alt Structural validation failed [400]
   router --> user : 400 INVALID_ARGUMENT
 end
 
-router -> svc : SRV-11 UPDATE Config(patchData)
+router -> svc : API-11 UPDATE Config(patchData, updateMask)
 activate svc
 
 svc -> svc : Phase 2: validate business rules
@@ -67,7 +67,7 @@ router --> user : 200 OK {config: {updated_fields: [...]}}
 deactivate router
 
 note over user, config
-  Flow:    SRV-11 → validate → updateConfig → respond
+  Flow:    API-11 → validate → updateConfig → respond
   State:   No state change
   Success: 200 OK with updated config
   Failure: 400 invalid config values

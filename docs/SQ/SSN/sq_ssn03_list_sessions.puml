@@ -36,21 +36,29 @@ end note
 == SSN-03 List Sessions ==
 
 user -> router : types input
+activate router
 router -> agent : PROCESS(user_input)
+activate agent
 
-agent -> store : ssn03 LIST Sessions()
+agent -> store : ssn03 LIST Sessions(pageSize=20, pageToken="abc")
+activate store
 store -> dir : scan ~/.nasim/sessions/
+activate dir
 
 break No sessions directory
     dir --> store : FileNotFoundError
+    deactivate dir
     store --> agent : 404 NOT_FOUND — [] (empty list)
     agent --> router : AgentEvent(Done)
 end
 
 store -> store : read metadata from each session
-store --> agent : 200 OK — [(id, created_at, message_count), ...]
+store --> agent : 200 OK — [(id, created_at, message_count), ...], nextPageToken
 agent --> router : AgentEvent(Done)
 
+deactivate store
+deactivate agent
+deactivate router
 note over user, dir
   Flow:    SSN-03 → scan directory → read metadata → list
   State:   No state change

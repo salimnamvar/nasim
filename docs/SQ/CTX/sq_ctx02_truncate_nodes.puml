@@ -1,8 +1,8 @@
-@startuml sq_ctx02_compact_context
+@startuml sq_ctx02_truncate_nodes
 ' ============================================================
-' Title:     CTX-02 — COMPACT Context
+' Title:     CTX-02 — TRUNCATE Nodes
 ' Boundary:  nasim code agent
-' Purpose:   Compact context when token budget exceeded
+' Purpose:   Truncate context when token budget exceeded
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
@@ -11,10 +11,10 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
   participant "ContextCompactor" as compactor
@@ -24,7 +24,7 @@ box "Provider Group" #FFF3E0
 end box
 
 note over history, provider
-  Scope:          Compact context when token budget exceeded
+  Scope:          Truncate context when token budget exceeded
   Preconditions:  token_count > context_budget
   Contexts:       Called by CTX-01 when budget exceeded
   Excludes:       Token tracking (CTX-01)
@@ -34,11 +34,14 @@ note over history, provider
   Returns:        shortened messages on success; truncated messages on failure
 end note
 
-== CTX-02 COMPACT Context ==
+== CTX-02 TRUNCATE Nodes ==
 
 user -> router : types input
+activate router
 router -> agent : PROCESS(user_input)
-agent -> history : CTX-02 COMPACT(messages, budget)
+activate agent
+agent -> history : CTX-02 TRUNCATE(messages, budget)
+activate history
 compactor -> compactor : query ContextPrioritizer for node importance scores
 compactor -> compactor : sort nodes by ascending importance (lowest first)
 compactor -> compactor : protect system prompt nodes (never truncated)
@@ -46,20 +49,25 @@ compactor -> compactor : drop lowest-importance nodes until within budget
 compactor -> compactor : build summarization prompt
 
 compactor -> provider : chat([summary_prompt + selected_messages])
+activate provider
 
 break Secondary LLM call fails
     provider --> compactor : ProviderError
+    deactivate provider
     compactor -> compactor : fallback: truncate oldest messages
     compactor --> history : shortened messages (truncated)
 end
 
 provider --> compactor : summary text
+deactivate provider
 compactor -> compactor : create summary message
 compactor -> compactor : replace selected messages with summary
 compactor --> history : shortened messages (summarized)
 
 agent --> router : AgentEvent(Done)
 
+deactivate agent
+deactivate router
 note over history, provider
   Flow:    User → ServerRouter → AgentOrchestrator → budget exceeded → select old → summarize → replace
   State:   <back:#E0F2F1>COMPACTING</back> -> <back:#FFF3E0>THINKING</back>

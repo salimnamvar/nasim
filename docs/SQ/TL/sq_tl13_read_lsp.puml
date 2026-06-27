@@ -39,13 +39,19 @@ end note
 == TL-13 Read LSP ==
 
 user -> router : types input
+activate router
 router -> agent : TL-13 PROCESS(user_input)
+activate agent
 agent -> registry : TL-13 Read LSP(query, params)
+activate registry
 registry -> tool : TL-13 Read LSP(query, params)
+activate tool
 tool -> lsp : send request(query, params)
+activate lsp
 
 break LSP server unreachable or times out
     lsp --> tool : ConnectionError / TimeoutError
+    deactivate lsp
     tool --> registry : ToolResult(success=False, error="LSP unavailable")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
@@ -53,16 +59,22 @@ end
 
 break Query returns no results
     lsp --> tool : empty result
+    deactivate lsp
     tool --> registry : ToolResult(success=False, error="no results")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 lsp --> tool : hover/definition/references result
+deactivate lsp
 tool --> registry : ToolResult(success=True, result)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate tool
+deactivate registry
+deactivate agent
+deactivate router
 note over user, lsp
   Flow:    TL-13: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> LspTool -> LSP Server -> ToolResult
   State:   No state change

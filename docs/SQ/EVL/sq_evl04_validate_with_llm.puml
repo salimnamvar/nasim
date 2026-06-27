@@ -11,16 +11,16 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 box "Evaluation Group" #FFF3E0
   participant "LLMReviewer" as reviewer
 end box
-box "Provider Group" #E3F2FD
+box "Provider Group" #FFF3E0
   participant "Provider" as provider
 end box
 box "Edit Group" #FFF3E0

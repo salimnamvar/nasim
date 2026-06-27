@@ -16,10 +16,10 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "Renderer" as renderer
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Safety Group" #FFF9C4
+box "Safety Group" #FFF3E0
   participant "SafetyCoordinator" as safety
 end box
 box "Repository Group" #E8F5E9

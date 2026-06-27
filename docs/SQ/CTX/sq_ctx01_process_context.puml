@@ -13,25 +13,28 @@ title nasim — CTX-01 PROCESS Context
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Context Graph Group" #E0F2F1
+box "Context Graph Group" #FFF3E0
   participant "PipelineOrchestrator" as pipeline
   participant "ContextGraph" as graph
   participant "ContextPrioritizer" as prioritizer
 end box
+box "Repository Group" #E8F5E9
+  participant "ContextStore" as ctx_store
+end box
 
-note over agent, prioritizer
+note over agent, ctx_store
   Scope:          Orchestrate context processing pipeline stages in order
   Preconditions:  ContextGraph initialized, budget set
   Contexts:       Called by AGT-01 when context needs processing
   Excludes:       Individual processor logic (CTX-02..05)
   Rollback:       Pipeline failure returns partial context
-  Design:         PipelineOrchestrator tracks token budget and drives stages: compact -> score -> truncate -> distill -> inject
+  Design:         PipelineOrchestrator tracks token budget and drives stages: compact -> score -> truncate -> distill -> inject; ContextStore persists context
   Classification: Process Decomposition
   Returns:        ProcessedContext on success; partial context on failure
 end note
@@ -63,13 +66,15 @@ ref over pipeline, graph
   CTX-04: INJECT Context
 end ref
 
+pipeline -> ctx_store : store processed context
+ctx_store --> pipeline : stored
 pipeline --> agent : ProcessedContext
 deactivate pipeline
 
 agent --> router : AgentEvent(Done)
 
-note over agent, prioritizer
-  Flow:    User → ServerRouter → AgentOrchestrator → PipelineOrchestrator → compact → score → truncate → distill → inject
+note over agent, ctx_store
+  Flow:    User → ServerRouter → AgentOrchestrator → PipelineOrchestrator → compact → score → truncate → distill → inject; ContextStore stores processed context
   State:   No state change
   Success: Optimized context graph within budget
   Failure: Processor failure returns partial context

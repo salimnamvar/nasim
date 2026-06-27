@@ -37,13 +37,19 @@ end note
 == TL-09 FETCH Web Content ==
 
 user -> router : types input
+activate router
 router -> agent : TL-09 PROCESS(user_input)
+activate agent
 agent -> registry : TL-09 FETCH Web Content(url, timeout)
+activate registry
 registry -> fetch : TL-09 FETCH Web Content(url, timeout)
+activate fetch
 fetch -> web : httpx GET url (timeout=timeout)
+activate web
 
 break HTTP error (4xx, 5xx)
     web --> fetch : HTTPError
+    deactivate web
     fetch --> registry : ToolResult(success=False, error="Error: HTTP {status_code} for {url}")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
@@ -51,17 +57,23 @@ end
 
 break Timeout
     web --> fetch : TimeoutException
+    deactivate web
     fetch --> registry : ToolResult(success=False, error="Error: timeout fetching {url}")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 web --> fetch : HTML content
+deactivate web
 fetch -> fetch : html2text.convert(html) -> markdown
 fetch --> registry : ToolResult(success=True, content=markdown)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate fetch
+deactivate registry
+deactivate agent
+deactivate router
 note over user, web
   Flow:    TL-09: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WebFetchTool -> Web -> ToolResult
   State:   No state change

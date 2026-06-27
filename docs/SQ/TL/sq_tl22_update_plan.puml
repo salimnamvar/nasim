@@ -36,27 +36,37 @@ end note
 == TL-22 Update Plan ==
 
 user -> router : types input
+activate router
 router -> agent : TL-22 PROCESS(user_input)
-agent -> registry : TL-22 Update Plan(step_id, status, description)
-registry -> tool : TL-22 Update Plan(step_id, status, description)
+activate agent
+agent -> registry : TL-22 Update Plan(step_id, status, description, updateMask)
+activate registry
+registry -> tool : TL-22 Update Plan(step_id, status, description, updateMask)
+activate tool
 
 break Step not found
     tool --> registry : ToolResult(success=False, error="step not found")
+    deactivate tool
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 break Invalid status transition
     tool --> registry : ToolResult(success=False, error="invalid transition")
+    deactivate tool
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 tool -> tool : update fields
 tool --> registry : ToolResult(success=True, step)
+deactivate tool
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate registry
+deactivate agent
+deactivate router
 note over user, tool
   Flow:    TL-22: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> PlanTool -> ToolResult
   State:   Plan step status/content updated

@@ -1,6 +1,6 @@
 @startuml sq_srv10_read_config
 ' ============================================================
-' Title:     SRV-10 — READ Config
+' Title:     API-10 — GET Config
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Read current agent configuration
 ' Milestone: v1.0
@@ -9,14 +9,14 @@
 ' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
-title nasim — SRV-10 READ Config
+title nasim — API-10 GET Config
 
 actor "User" as user
 
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FCE4EC
+box "Service Group" #FFF3E0
   participant "ConfigService" as svc
 end box
 box "Repository Group" #E8F5E9
@@ -34,12 +34,12 @@ note over user, config
   Returns:        200 OK with sanitized config, or 500 INTERNAL error
 end note
 
-== SRV-10 READ Config ==
+== API-10 READ Config ==
 
 user -> router : GET /v1/config
 activate router
 
-router -> svc : SRV-10 READ Config()
+router -> svc : API-10 READ Config()
 activate svc
 
 svc -> config : readConfig()
@@ -61,7 +61,7 @@ router --> user : 200 OK {config: {provider: "...", model: "...", safety_mode: "
 deactivate router
 
 note over user, config
-  Flow:    SRV-10 → readConfig → respond
+  Flow:    API-10 → readConfig → respond
   State:   No state change
   Success: 200 OK with sanitized config
   Failure: 500 INTERNAL on config read failure

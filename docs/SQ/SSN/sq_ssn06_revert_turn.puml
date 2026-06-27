@@ -13,13 +13,13 @@ title nasim — SSN-06 UPDATE Turn
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Session Group" #F1F8E9
+box "Session Group" #E8F5E9
   participant "SessionVersioning" as ver
 end box
 database "Snapshot Store" as snap
@@ -40,7 +40,7 @@ end note
 user -> router : types input
 router -> agent : PROCESS(user_input)
 
-agent -> ver : ssn06 REVERT Session(session_id, snapshot_id)
+agent -> ver : ssn06 REVERT Session(session_id, snapshot_id, updateMask)
 activate ver
 
 ver -> snap : ssn06 READ Snapshot(snapshot_id)

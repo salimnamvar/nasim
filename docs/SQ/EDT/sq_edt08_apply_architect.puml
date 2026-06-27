@@ -13,20 +13,20 @@ title nasim — EDT-08 UPDATE Architect
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 box "Edit Strategy Group" #FFF3E0
   participant "EditStrategyManager" as esm
   participant "ArchitectCoder" as arch
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ASTParser" as ast
 end box
-box "FileSystem Group" #F3E5F5
+box "FileSystem Group" #E8F5E9
   participant "FileSystem" as fs
 end box
 
@@ -46,7 +46,7 @@ end note
 user -> router : types input
 router -> agent : PROCESS(user_input)
 
-agent -> esm : EDT-08 APPLY_ARCHITECT(edit_plan[])
+agent -> esm : EDT-08 APPLY_ARCHITECT(edit_plan[], updateMask)
 activate esm
 
 esm -> arch : code_architectural_edit(edit_plan)

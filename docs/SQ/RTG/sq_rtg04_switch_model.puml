@@ -39,9 +39,12 @@ end note
 == RTG-04 Switch Model ==
 
 user -> router : types input
+activate router
 router -> agent : RTG-04 PROCESS(user_input)
+activate agent
 
-agent -> router : RTG-04 SWITCH Model(target_model)
+agent -> router : RTG-04 SWITCH Model(target_model, updateMask)
+activate router
 
 break Model not in catalog
     router --> agent : Error("model not available")
@@ -55,6 +58,8 @@ router --> agent : Result(success=true, data={previous_model, new_model})
 
 agent --> router : AgentEvent(Done)
 
+deactivate agent
+deactivate router
 note over user, router
   Flow:    RTG-04 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> validate -> update config -> return
   State:   Active model updated

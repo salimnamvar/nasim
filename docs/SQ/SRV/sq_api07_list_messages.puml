@@ -1,6 +1,6 @@
 @startuml sq_srv07_list_messages
 ' ============================================================
-' Title:     SRV-07 — LIST Messages
+' Title:     API-07 — LIST Messages
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Retrieve message history for a session
 ' Milestone: v1.0
@@ -9,14 +9,15 @@
 ' Review:    —
 ' ============================================================
 
-title nasim — SRV-07 LIST Messages
+title nasim — API-07 LIST Messages
 
 actor "User" as user
 
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
 end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
@@ -26,29 +27,29 @@ note over user, store
   Scope:          Retrieve message history for a session
   Preconditions:  Session exists, ServerRouter initialized
   Contexts:       Called by HTTPClient via GET /v1/sessions/{id}/messages
-  Excludes:       Session CRUD (SRV-01..05), Message dispatch (SRV-06)
+  Excludes:       Session CRUD (API-01..05), Message dispatch (API-06)
   Rollback:       404 if session not found
   Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard list (AIP-132)
   Classification: Primary Orchestrator
   Returns:        200 OK with message list, or 404 NOT_FOUND error
 end note
 
-== SRV-07 LIST Messages ==
+== API-07 LIST Messages ==
 
-user -> router : GET /v1/sessions/{id}/messages
+user -> router : GET /v1/sessions/{id}/messages?page_size=50&page_token=abc
 activate router
 
-router -> svc : SRV-07 LIST Messages(sessionId)
+router -> svc : API-07 LIST Messages(sessionId, pageSize=50, pageToken="abc")
 activate svc
 
-svc -> store : readSessionMessages(sessionId)
+svc -> store : readSessionMessages(sessionId, limit=50, cursor="abc")
 activate store
 
 alt Session exists
-    store --> svc : SessionEntity(messages=[...])
+    store --> svc : SessionEntity(messages=[...], next_page_token="def")
     deactivate store
-    svc --> router : ListMessagesResponse {messages: [...]}
-    router --> user : 200 OK {messages: [...]}
+    svc --> router : ListMessagesResponse {messages: [...], nextPageToken: "def"}
+    router --> user : 200 OK {messages: [...], next_page_token: "def"}
 else Session not found [404]
     store --> svc : null
     deactivate store
@@ -60,7 +61,7 @@ deactivate svc
 deactivate router
 
 note over user, store
-  Flow:    SRV-07 → readMessages → respond
+  Flow:    API-07 → readMessages → respond
   State:   No state change
   Success: 200 OK with message list
   Failure: 404 session not found

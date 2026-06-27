@@ -36,13 +36,18 @@ end note
 == SSN-02 Load Session ==
 
 user -> router : types input
+activate router
 router -> agent : PROCESS(user_input)
+activate agent
 
 agent -> store : ssn02 READ Session(session_id)
+activate store
 store -> dir : read session.jsonl
+activate dir
 
 break Session file not found
     dir --> store : FileNotFoundError
+    deactivate dir
     store --> agent : 404 NOT_FOUND
     agent -> agent : start fresh session
     agent --> router : AgentEvent(Done)
@@ -52,6 +57,9 @@ store -> store : deserialize JSON Lines -> messages
 store --> agent : 200 OK — Session(id, created_at, messages)
 agent --> router : AgentEvent(Done)
 
+deactivate store
+deactivate agent
+deactivate router
 note over user, dir
   Flow:    SSN-02 → read file → deserialize → Session
   State:   No state change

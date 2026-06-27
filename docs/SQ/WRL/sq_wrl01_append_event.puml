@@ -13,13 +13,13 @@ title nasim — WRL-01 INSERT Event
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Wire Log Group" #E0F2F1
+box "Wire Log Group" #F3E5F5
   participant "WireLog" as wirelog
   participant "WireAppender" as appender
 end box

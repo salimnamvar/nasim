@@ -1,8 +1,3 @@
-@startuml c4_nasim_component_edit_strategy
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
-!theme plain
-!include common/c4_styles.puml
-
 ' ============================================================
 ' Title:     NASIM Application — Edit Strategy Component Diagram
 ' Boundary:  NASIM Application (container) — Edit Strategy Group
@@ -15,9 +10,15 @@
 ' Date:      2026-06-26
 ' ============================================================
 
+@startuml c4_nasim_component_edit_strategy
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+!include common/c4_styles.puml
+
+
 title NASIM Application — Edit Strategy Component Diagram
 
-Boundary(nasim_application, "NASIM Application") {
+Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(edit_strategy_group, "Edit Strategy Group") <<service>> {
         Component(edit_strategy_mgr, "EditStrategyManager", "", "Manages and selects edit strategy based on edit type and context")
         Component(edit_strategy, "EditStrategy", "ABC", "Base strategy interface: plan_edit, apply_edit, validate_edit")

@@ -37,13 +37,19 @@ end note
 == TL-12 Dispatch MCP Extension ==
 
 user -> router : types input
+activate router
 router -> agent : TL-12 PROCESS(user_input)
+activate agent
 agent -> registry : TL-12 Dispatch MCP Extension(tool_name, args)
+activate registry
 registry -> mcp : TL-12 Dispatch MCP Extension(tool_name, args)
+activate mcp
 mcp -> server : MCP call(tool_name, args) via stdio/SSE
+activate server
 
 break MCP server not running
     server --> mcp : ConnectionRefused
+    deactivate server
     mcp --> registry : ToolResult(success=False, error="Error: MCP server not reachable")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
@@ -51,17 +57,23 @@ end
 
 break Tool not found on server
     server --> mcp : UnknownTool error
+    deactivate server
     mcp --> registry : ToolResult(success=False, error="Error: tool not found on MCP server")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 server --> mcp : result
+deactivate server
 mcp -> mcp : wrap in ToolResult(success=True, content=result)
 mcp --> registry : ToolResult
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate mcp
+deactivate registry
+deactivate agent
+deactivate router
 note over user, server
   Flow:    TL-12: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> MCPToolAdapter -> MCP Server -> ToolResult
   State:   No state change

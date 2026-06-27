@@ -1,6 +1,6 @@
 @startuml sq_srv04_update_session
 ' ============================================================
-' Title:     SRV-04 — UPDATE Session
+' Title:     API-04 — UPDATE Session
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Update session metadata or settings
 ' Milestone: v1.0
@@ -9,14 +9,15 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SRV-04 UPDATE Session
+title nasim — API-04 UPDATE Session
 
 actor "User" as user
 
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
 end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
@@ -26,14 +27,14 @@ note over user, store
   Scope:          Update session metadata or settings
   Preconditions:  Session exists on disk
   Contexts:       Called by HTTPClient via PATCH /v1/sessions/{id}
-  Excludes:       Message dispatch (SRV-06), session deletion
+  Excludes:       Message dispatch (API-06), session deletion
   Rollback:       404 if not found, 400 if invalid body
   Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard update (AIP-134)
   Classification: Primary Orchestrator
   Returns:        200 OK with updated session metadata, or 400/404 error
 end note
 
-== SRV-04 UPDATE Session ==
+== API-04 UPDATE Session ==
 
 user -> router : PATCH /v1/sessions/{id}
 activate router
@@ -43,7 +44,7 @@ alt Structural validation failed [400]
   router --> user : 400 INVALID_ARGUMENT
 end
 
-router -> svc : SRV-04 UPDATE Session(sessionId, patchData)
+router -> svc : API-04 UPDATE Session(sessionId, patchData)
 activate svc
 
 svc -> store : readSessionExists(sessionId)
@@ -72,7 +73,7 @@ router --> user : 200 OK {session: {id, updated_at}}
 deactivate router
 
 note over user, store
-  Flow:    SRV-04 → validate → read → applyMask → save → respond
+  Flow:    API-04 → validate → read → applyMask → save → respond
   State:   No state change
   Success: 200 OK with updated session metadata
   Failure: 404 not found, 400 invalid body

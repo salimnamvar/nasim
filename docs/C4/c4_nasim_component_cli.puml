@@ -1,8 +1,3 @@
-@startuml c4_nasim_component_cli
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
-!include common/c4_styles.puml
-!theme plain
-
 ' ============================================================
 ' Title:     NASIM Application — CLI Component Diagram
 ' Boundary:  NASIM Application (container) — CLI Group
@@ -18,11 +13,17 @@
 ' Date:      2026-06-26
 ' ============================================================
 
+@startuml c4_nasim_component_cli
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
+!theme plain
+
+
 title NASIM Application — CLI Component Diagram
 
 Person(user, "User", "Developer using NASIM Application")
 
-Boundary(nasim_application, "NASIM Application") {
+Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(cli_group, "CLI Group") <<controller>> {
         Component(arg_parser, "ArgParser", "", "CLI argument parsing with layered config overrides")
         Component(repl_session, "REPLSession", "", "Interactive REPL loop, input handling, slash command dispatch")

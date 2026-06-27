@@ -13,13 +13,13 @@ title nasim — RIM-02 BUILD SymbolGraph
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Group" #EDE7F6
+box "Repo Intelligence Group" #E8F5E9
   participant "RepoIntelligenceManager" as rim
   participant "SymbolGraph" as graph
 end box

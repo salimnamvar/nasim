@@ -37,13 +37,19 @@ end note
 == TL-04 LIST Directory ==
 
 user -> router : types input
+activate router
 router -> agent : TL-04 PROCESS(user_input)
-agent -> registry : TL-04 LIST Directory(path)
-registry -> dt : TL-04 LIST Directory(path)
+activate agent
+agent -> registry : TL-04 LIST Directory(path, pageSize=100, pageToken="abc")
+activate registry
+registry -> dt : TL-04 LIST Directory(path, pageSize=100, pageToken="abc")
+activate dt
 dt -> fs : Path(path).resolve()
+activate fs
 
 break Path not found
     fs --> dt : FileNotFoundError
+    deactivate fs
     dt --> registry : ToolResult(success=False, error="path not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
@@ -56,12 +62,18 @@ break Not a directory
 end
 
 dt -> fs : sorted(p.iterdir())
-fs --> dt : entries
+activate fs
+fs --> dt : entries, next_page_token
+deactivate fs
 dt -> dt : format with d/ prefix for dirs
-dt --> registry : ToolResult(success=True, content=formatted_listing)
+dt --> registry : ToolResult(success=True, content=formatted_listing, nextPageToken)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate dt
+deactivate registry
+deactivate agent
+deactivate router
 note over user, fs
   Flow:    TL-04: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> DirTool -> Host Filesystem -> ToolResult
   State:   No state change

@@ -37,24 +37,35 @@ end note
 == TL-10 SEARCH Web ==
 
 user -> router : types input
+activate router
 router -> agent : TL-10 PROCESS(user_input)
+activate agent
 agent -> registry : TL-10 SEARCH Web(query, num_results)
+activate registry
 registry -> search : TL-10 SEARCH Web(query, num_results)
+activate search
 search -> backend : search(query, num_results)
+activate backend
 
 break Backend unavailable
     backend --> search : ConnectionError
+    deactivate backend
     search --> registry : ToolResult(success=False, error="Error: search backend unavailable")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 backend --> search : results [{title, url, snippet}, ...]
+deactivate backend
 search -> search : format results
 search --> registry : ToolResult(success=True, content=formatted_results)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate search
+deactivate registry
+deactivate agent
+deactivate router
 note over user, backend
   Flow:    TL-10: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WebSearchTool -> Search Backend -> ToolResult
   State:   No state change

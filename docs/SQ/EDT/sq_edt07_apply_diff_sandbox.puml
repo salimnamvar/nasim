@@ -13,20 +13,20 @@ title nasim — EDT-07 UPDATE Diff Sandbox
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 box "Edit Strategy Group" #FFF3E0
   participant "EditStrategyManager" as esm
   participant "DiffSandboxCoder" as dsc
 end box
-box "Sandbox Group" #B3E5FC
+box "Sandbox Group" #F3E5F5
   participant "DiffSandboxManager" as dsm
 end box
-box "FileSystem Group" #F3E5F5
+box "FileSystem Group" #E8F5E9
   participant "FileSystem" as fs
 end box
 
@@ -46,7 +46,7 @@ end note
 user -> router : types input
 router -> agent : PROCESS(user_input)
 
-agent -> esm : EDT-07 APPLY_DIFF_SANDBOX(file_path, diff_patch)
+agent -> esm : EDT-07 APPLY_DIFF_SANDBOX(file_path, diff_patch, updateMask)
 activate esm
 
 esm -> dsc : code_sandboxed_diff(file_path, diff_patch)

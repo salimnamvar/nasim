@@ -13,13 +13,13 @@ title nasim — SBX-04 UPDATE Resources
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Sandbox Group" #F1F8E9
+box "Sandbox Group" #F3E5F5
   participant "SandboxExecutor" as executor
   participant "ResourceLimiter" as limiter
 end box
@@ -42,7 +42,7 @@ end note
 user -> router : types input
 router -> agent : SBX-04 PROCESS(user_input)
 
-agent -> executor : SBX-04 LIMIT Resources(cgroup_id, quotas)
+agent -> executor : SBX-04 LIMIT Resources(cgroup_id, quotas, updateMask)
 activate executor
 
 executor -> limiter : SBX-04 SET Limits(cgroup_id, quotas)

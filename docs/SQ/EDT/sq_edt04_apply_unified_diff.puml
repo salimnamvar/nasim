@@ -13,24 +13,27 @@ title nasim — EDT-04 UPDATE Unified Diff
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 box "Edit Strategy Group" #FFF3E0
   participant "EditStrategyManager" as mgr
   participant "UnifiedDiffCoder" as coder
 end box
+box "Repository Group" #E8F5E9
+  participant "FileSystem" as fs
+end box
 
-note over agent, coder
+note over agent, fs
   Scope:          Apply unified diff format edit to file
   Preconditions:  EditStrategyManager initialized, file exists
   Contexts:       Called by AGT-02 DISPATCH Tool Call
   Excludes:       Strategy selection (EDT-01), validation (EDT-03)
   Rollback:       Diff application failure returns error
-  Design:         Parses unified diff, applies hunks sequentially
+  Design:         Parses unified diff, applies hunks sequentially; FileSystem persists file changes
   Classification: Process Decomposition
   Returns:        ToolResult(success=True) on success; ToolResult(success=False) on failure
 end note
@@ -39,7 +42,7 @@ end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
-agent -> mgr : EDT-04 APPLY_UNIFIED_DIFF(file, diff)
+agent -> mgr : EDT-04 APPLY_UNIFIED_DIFF(file, diff, updateMask)
 activate mgr
 
 mgr -> coder : apply(diff, file_content)
@@ -52,6 +55,8 @@ break Hunk application fails
   coder --> mgr : DiffError(hunk_mismatch)
 end
 
+coder -> fs : write modified content
+fs --> coder : written
 coder --> mgr : ModifiedContent
 deactivate coder
 
@@ -60,8 +65,8 @@ deactivate mgr
 
 agent --> router : AgentEvent(Done)
 
-note over agent, coder
-  Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → UnifiedDiffCoder → parse hunks → apply → result
+note over agent, fs
+  Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → UnifiedDiffCoder → parse hunks → apply → result; FileSystem writes modified file
   State:   No state change
   Success: File modified with unified diff
   Failure: Hunk mismatch, file not found -> ToolResult(success=False)

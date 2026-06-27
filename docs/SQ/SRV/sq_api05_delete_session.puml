@@ -16,7 +16,8 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
 end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store

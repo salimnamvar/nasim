@@ -1,8 +1,3 @@
-@startuml c4_nasim_component_wire_log
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
-!theme plain
-!include common/c4_styles.puml
-
 ' ============================================================
 ' Title:     NASIM Application — Wire Log Component Diagram
 ' Boundary:  NASIM Application (container) — Wire Log Group
@@ -15,9 +10,15 @@
 ' Date:      2026-06-26
 ' ============================================================
 
+@startuml c4_nasim_component_wire_log
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+!include common/c4_styles.puml
+
+
 title NASIM Application — Wire Log Component Diagram
 
-Boundary(nasim_application, "NASIM Application") {
+Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(wire_log_group, "Wire Log Group") <<infrastructure>> {
         Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
         Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")

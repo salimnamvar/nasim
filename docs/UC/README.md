@@ -39,17 +39,17 @@
 
 | UC ID | Operation | HTTP Method | Path | Component Owner | SQ Diagram |
 |-------|-----------|-------------|------|-----------------|------------|
-| API-01 | LIST Sessions | GET | /v1/sessions | ServerRouter → SessionStore | `sq_srv01_list_sessions.puml` |
-| API-02 | CREATE Session | POST | /v1/sessions | ServerRouter → SessionStore | `sq_srv02_create_session.puml` |
-| API-03 | GET Session | GET | /v1/sessions/{id} | ServerRouter → SessionStore | `sq_srv03_get_session.puml` |
-| API-04 | UPDATE Session | PATCH | /v1/sessions/{id} | ServerRouter → SessionStore | `sq_srv04_update_session.puml` |
-| API-05 | DELETE Session | DELETE | /v1/sessions/{id} | ServerRouter → SessionStore | `sq_srv05_delete_session.puml` |
-| API-06 | DISPATCH Message | POST | /v1/sessions/{id}:dispatch | ServerRouter → AgentOrchestrator | `sq_srv06_dispatch_message.puml` |
-| API-07 | LIST Messages | GET | /v1/sessions/{id}/messages | ServerRouter → SessionStore | `sq_srv07_list_messages.puml` |
-| API-08 | LIST Tools | GET | /v1/tools | ServerRouter → ToolRegistry | `sq_srv08_list_tools.puml` |
-| API-09 | GET Tool | GET | /v1/tools/{name} | ServerRouter → ToolRegistry | `sq_srv09_get_tool.puml` |
-| API-10 | GET Config | GET | /v1/config | ServerRouter → ConfigLoader | `sq_srv10_get_config.puml` |
-| API-11 | UPDATE Config | PATCH | /v1/config | ServerRouter → ConfigLoader | `sq_srv11_update_config.puml` |
+| API-01 | LIST Sessions | GET | /v1/sessions | ServerRouter → SessionStore | `sq_api01_list_sessions.puml` |
+| API-02 | CREATE Session | POST | /v1/sessions | ServerRouter → SessionStore | `sq_api02_create_session.puml` |
+| API-03 | GET Session | GET | /v1/sessions/{id} | ServerRouter → SessionStore | `sq_api03_get_session.puml` |
+| API-04 | UPDATE Session | PATCH | /v1/sessions/{id} | ServerRouter → SessionStore | `sq_api04_update_session.puml` |
+| API-05 | DELETE Session | DELETE | /v1/sessions/{id} | ServerRouter → SessionStore | `sq_api05_delete_session.puml` |
+| API-06 | DISPATCH Message | POST | /v1/sessions/{id}:dispatch | ServerRouter → AgentOrchestrator | `sq_api06_dispatch_message.puml` |
+| API-07 | LIST Messages | GET | /v1/sessions/{id}/messages | ServerRouter → SessionStore | `sq_api07_list_messages.puml` |
+| API-08 | LIST Tools | GET | /v1/tools | ServerRouter → ToolRegistry | `sq_api08_list_tools.puml` |
+| API-09 | GET Tool | GET | /v1/tools/{name} | ServerRouter → ToolRegistry | `sq_api09_get_tool.puml` |
+| API-10 | GET Config | GET | /v1/config | ServerRouter → ConfigLoader | `sq_api10_get_config.puml` |
+| API-11 | UPDATE Config | PATCH | /v1/config | ServerRouter → ConfigLoader | `sq_api11_update_config.puml` |
 
 ---
 
@@ -370,17 +370,17 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 
 | UC ID | Operation | C4 Component Owner | C4 Group | SQ Diagram |
 |-------|-----------|-------------------|----------|------------|
-| API-01 | LIST Sessions | ServerRouter | API Group | `sq_srv01_list_sessions.puml` |
-| API-02 | CREATE Session | ServerRouter | API Group | `sq_srv02_create_session.puml` |
-| API-03 | GET Session | ServerRouter | API Group | `sq_srv03_get_session.puml` |
-| API-04 | UPDATE Session | ServerRouter | API Group | `sq_srv04_update_session.puml` |
-| API-05 | DELETE Session | ServerRouter | API Group | `sq_srv05_delete_session.puml` |
-| API-06 | DISPATCH Message | ServerRouter | API Group | `sq_srv06_dispatch_message.puml` |
-| API-07 | LIST Messages | ServerRouter | API Group | `sq_srv07_list_messages.puml` |
-| API-08 | LIST Tools | ServerRouter | API Group | `sq_srv08_list_tools.puml` |
-| API-09 | GET Tool | ServerRouter | API Group | `sq_srv09_get_tool.puml` |
-| API-10 | GET Config | ServerRouter | API Group | `sq_srv10_get_config.puml` |
-| API-11 | UPDATE Config | ServerRouter | API Group | `sq_srv11_update_config.puml` |
+| API-01 | LIST Sessions | ServerRouter | API Group | `sq_api01_list_sessions.puml` |
+| API-02 | CREATE Session | ServerRouter | API Group | `sq_api02_create_session.puml` |
+| API-03 | GET Session | ServerRouter | API Group | `sq_api03_get_session.puml` |
+| API-04 | UPDATE Session | ServerRouter | API Group | `sq_api04_update_session.puml` |
+| API-05 | DELETE Session | ServerRouter | API Group | `sq_api05_delete_session.puml` |
+| API-06 | DISPATCH Message | ServerRouter | API Group | `sq_api06_dispatch_message.puml` |
+| API-07 | LIST Messages | ServerRouter | API Group | `sq_api07_list_messages.puml` |
+| API-08 | LIST Tools | ServerRouter | API Group | `sq_api08_list_tools.puml` |
+| API-09 | GET Tool | ServerRouter | API Group | `sq_api09_get_tool.puml` |
+| API-10 | GET Config | ServerRouter | API Group | `sq_api10_get_config.puml` |
+| API-11 | UPDATE Config | ServerRouter | API Group | `sq_api11_update_config.puml` |
 | CLI-01 | PROCESS User Input | REPLSession | CLI Group | `sq_cli01_process_user_input.puml` |
 | CLI-02 | DISPATCH Slash Command | SlashCommandHandler | CLI Group | `sq_cli02_dispatch_slash_command.puml` |
 | CLI-03 | STREAM Output | Renderer | CLI Group | `sq_cli03_stream_output.puml` |
@@ -531,7 +531,7 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 - **SM ↔ SQ:** All state transitions in SQs match valid SM transitions ✓
 - **Method Consistency:** API-06, AGT-01, PRV-02 identical across layers ✓
 - **API-First:** All entry chains go through ServerRouter ✓
-- **Naming:** UC group code `API` (not `SRV`); SQ files in `docs/SQ/SRV/` for backward compatibility ✓
+- **Naming:** UC group code `API`; SQ files in `docs/SQ/SRV/` with `sq_api*` prefix ✓
 
 ### Design Chain Consistency: 100%
 
@@ -549,7 +549,7 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 | 6 | Missing SQ filenames in UC tables | Added SQ diagram column to every UC table |
 | 7 | Missing traceability matrix | Added full 148-row traceability matrix (UC ID → C4 Component → SQ file) |
 | 8 | Sub-UCs not modeled with `<<include>>` | Documented parent→sub-UC relationships for CTX, EDT, EVL |
-| 9 | Only 9 uc_*.puml files exist | Noted for Phase 2; 13 groups still need diagrams |
+| 9 | 22 uc_*.puml files exist (21 groups + overview) | Phase 2: remaining groups will get diagrams |
 
 ---
 
@@ -575,9 +575,9 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 - [x] Relationships use `<<include>>` downward only, `<<extend>>` for optional paths
 
 **Visual:**
-- [x] One subject boundary per diagram (enforced in Phase 2)
-- [x] No technology/implementation details inside use cases
-- [x] Diagrams have ≤15 use cases (Will enforce in Phase 2; TL, AGT, EDT need splitting)
+- [ ] One subject boundary per diagram (enforced in Phase 2)
+- [ ] No technology/implementation details inside use cases (enforced in Phase 2)
+- [ ] Diagrams have ≤15 use cases (enforced in Phase 2; TL=22, AGT=14, EDT=10 need splitting)
 
 ### C4 Rulebook Validation Checklist (10-item)
 
@@ -592,4 +592,4 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 9. ✅ Does the diagram avoid exposing internal details of lower levels?
 10. ✅ Is there a **legend** and a **descriptive title**?
 
-**All checklists pass. Ready for Phase 2.**
+**Naming and C4 Traceability checklists pass. Visual checklists pending Phase 2.**

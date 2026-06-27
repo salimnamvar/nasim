@@ -1,6 +1,6 @@
-@startuml sq_tl06_grep_search
+@startuml sq_tl06_search_grep
 ' ============================================================
-' Title:     TL-06 — Grep Search
+' Title:     TL-06 — SEARCH Grep
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Search file contents by regex pattern
 ' Milestone: v1.0
@@ -11,13 +11,13 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "GrepTool" as grep
   participant "ShellTool" as shell
@@ -37,13 +37,19 @@ end note
 == TL-06 GREP Search ==
 
 user -> router : types input
+activate router
 router -> agent : TL-06 PROCESS(user_input)
+activate agent
 agent -> registry : TL-06 GREP Search(pattern, path, case_sensitive, include_glob)
+activate registry
 registry -> grep : TL-06 GREP Search(pattern, path, case_sensitive, include_glob)
+activate grep
 
 alt ripgrep available
     grep -> shell : subprocess: rg --json pattern path
+    activate shell
     shell --> grep : JSON output
+    deactivate shell
     grep -> grep : parse matches -> file:line:content format
 else ripgrep not found
     grep -> grep : Python os.walk + re.search fallback
@@ -65,6 +71,10 @@ grep --> registry : ToolResult(success=True, content=formatted_matches)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate grep
+deactivate registry
+deactivate agent
+deactivate router
 note over user, shell
   Flow:    TL-06: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GrepTool -> ripgrep/Python -> ToolResult
   State:   No state change

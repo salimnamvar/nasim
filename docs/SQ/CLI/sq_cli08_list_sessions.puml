@@ -17,7 +17,8 @@ box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
+  participant "SessionService" as ssn_svc
 end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as ssn
@@ -41,17 +42,17 @@ activate router
 router -> cmd : dispatch("/sessions")
 activate cmd
 
-cmd -> ssn_svc : CLI-08 LIST Sessions()
+cmd -> ssn_svc : CLI-08 LIST Sessions(pageSize=20, pageToken="abc")
 activate ssn_svc
 
-ssn_svc -> ssn : listSessions()
+ssn_svc -> ssn : listSessions(limit=20, cursor="abc")
 activate ssn
 
 ssn -> ssn : scan session directory
-ssn --> ssn_svc : sessionList [id, created_at, summary]
+ssn --> ssn_svc : sessionList [id, created_at, summary], next_page_token
 deactivate ssn
 
-ssn_svc --> cmd : ListSessionsResponse {sessions: [...]}
+ssn_svc --> cmd : ListSessionsResponse {sessions: [...], nextPageToken}
 deactivate ssn_svc
 
 cmd -> cmd : format session table

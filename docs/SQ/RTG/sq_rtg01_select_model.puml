@@ -13,18 +13,18 @@ title nasim — RTG-01 SELECT Model
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Router Group" #EDE7F6
+box "Router Group" #E3F2FD
   participant "ModelRouter" as router
   participant "FallbackChain" as fallback
   participant "ProviderCapabilities" as caps
 end box
-box "Config Group" #FCE4EC
+box "Config Group" #E8F5E9
   participant "ConfigLoader" as cfg
 end box
 box "Provider Group" #FFF3E0

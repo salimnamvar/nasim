@@ -36,14 +36,22 @@ end note
 == TL-18 Read Todos ==
 
 user -> router : types input
+activate router
 router -> agent : TL-18 PROCESS(user_input)
+activate agent
 agent -> registry : TL-18 Read Todos(status_filter?)
+activate registry
 registry -> tool : TL-18 Read Todos(status_filter)
+activate tool
 tool -> tool : query todos, apply filter
 tool --> registry : ToolResult(success=True, todos=[...])
+deactivate tool
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate registry
+deactivate agent
+deactivate router
 note over user, tool
   Flow:    TL-18: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
   State:   No state change

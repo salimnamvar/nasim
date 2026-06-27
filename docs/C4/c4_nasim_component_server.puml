@@ -1,8 +1,3 @@
-@startuml c4_nasim_component_server
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
-!include common/c4_styles.puml
-!theme plain
-
 ' ============================================================
 ' Title:     NASIM Application — API Component Diagram
 ' Boundary:  NASIM Application (container) — API Group
@@ -17,9 +12,15 @@
 ' Date:      2026-06-26
 ' ============================================================
 
+@startuml c4_nasim_component_server
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
+!theme plain
+
+
 title NASIM Application — API Component Diagram
 
-Boundary(nasim_application, "NASIM Application") {
+Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(api_group, "API Group") <<controller>> {
         Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
         Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate for all interface containers.")

@@ -1,6 +1,6 @@
 @startuml sq_srv01_list_sessions
 ' ============================================================
-' Title:     SRV-01 — LIST Sessions
+' Title:     API-01 — LIST Sessions
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   List all sessions with pagination
 ' Milestone: v1.0
@@ -9,14 +9,15 @@
 ' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
 ' ============================================================
 
-title nasim — SRV-01 LIST Sessions
+title nasim — API-01 LIST Sessions
 
 actor "User" as user
 
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
 end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
@@ -26,19 +27,19 @@ note over user, store
   Scope:          List all sessions with pagination
   Preconditions:  ServerRouter initialized, SessionService available
   Contexts:       Called by HTTPClient via GET /v1/sessions
-  Excludes:       Session CRUD (SRV-02..05), Message operations (SRV-06..07)
+  Excludes:       Session CRUD (API-02..05), Message operations (API-06..07)
   Rollback:       None (read-only operation)
   Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard list (AIP-132)
   Classification: Primary Orchestrator
   Returns:        200 OK with session list and pagination token, or 500 INTERNAL error
 end note
 
-== SRV-01 LIST Sessions ==
+== API-01 LIST Sessions ==
 
 user -> router : GET /v1/sessions?page_size=10&page_token=abc
 activate router
 
-router -> svc : SRV-01 LIST Sessions(pageSize=10, pageToken="abc")
+router -> svc : API-01 LIST Sessions(pageSize=10, pageToken="abc")
 activate svc
 
 svc -> store : listSessions(limit=10, cursor="abc")
@@ -67,7 +68,7 @@ deactivate svc
 deactivate router
 
 note over user, store
-  Flow:    SRV-01 → validate → listSessions → respond
+  Flow:    API-01 → validate → listSessions → respond
   State:   No state change
   Success: 200 OK with session list and pagination token
   Failure: 500 INTERNAL on store read failure

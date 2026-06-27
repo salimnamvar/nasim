@@ -13,14 +13,14 @@ title nasim — AGT-13 UPDATE Persona
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "PersonaManager" as pm
 end box
-box "Config Group" #FCE4EC
+box "Config Group" #E8F5E9
   participant "PersonaRegistry" as reg
 end box
 box "Repository Group" #E8F5E9
@@ -45,7 +45,7 @@ user -> router : types input
 router -> agent : PROCESS(user_input)
 activate agent
 
-agent -> pm : agt13 SWITCH Persona({new_persona_name})
+agent -> pm : agt13 SWITCH Persona({new_persona_name}, updateMask)
 activate pm
 
 pm -> pm : unload current persona

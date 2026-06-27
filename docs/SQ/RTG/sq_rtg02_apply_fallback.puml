@@ -13,13 +13,13 @@ title nasim — RTG-02 UPDATE Fallback
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Router Group" #EDE7F6
+box "Router Group" #E3F2FD
   participant "ModelRouter" as router
   participant "FallbackChain" as fallback
 end box
@@ -48,7 +48,7 @@ end note
 user -> router : types input
 router -> agent : RTG-02 PROCESS(user_input)
 
-agent -> router : RTG-02 APPLY Fallback(primary_model, chain)
+agent -> router : RTG-02 APPLY Fallback(primary_model, chain, updateMask)
 activate router
 
 router -> fallback : RTG-02 APPLY Fallback(primary_model, chain)

@@ -13,14 +13,14 @@ title nasim — AGT-14 HANDLE Error
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "ErrorBoundary" as eb
 end box
-box "Safety Group" #FFF9C4
+box "Safety Group" #FFF3E0
   participant "SafetyCoordinator" as safety
 end box
 box "Repository Group" #E8F5E9

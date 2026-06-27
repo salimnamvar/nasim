@@ -1,8 +1,3 @@
-@startuml c4_nasim_container
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
-!include common/c4_styles.puml
-!theme plain
-
 ' ============================================================
 ' Title:     NASIM Application — Container Diagram
 ' Boundary:  NASIM Application
@@ -18,8 +13,13 @@
 ' Date:      2026-06-25
 ' ============================================================
 
+@startuml c4_nasim_container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
+!include common/c4_styles.puml
+!theme plain
+
+
 LAYOUT_TOP_DOWN()
-LAYOUT_WITH_LEGEND()
 
 title NASIM Application — Container Diagram
 
@@ -57,5 +57,13 @@ Rel(core_engine, llm_backend, "sends context and receives code completions", "HT
 Rel(core_engine, host_fs, "reads, writes, and searches project files", "path I/O")
 Rel(core_engine, host_shell, "executes shell commands", "subprocess")
 Rel(core_engine, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
+
+legend right
+    |= Symbol |= Meaning |
+    | Person | Human actor (Developer) |
+    | Container | Internal runtime unit within the NASIM Application boundary |
+    | Container_Ext | External client interface (webapp, mobile, desktop) |
+    | System_Ext | External system or service outside the boundary |
+end legend
 
 @enduml

@@ -36,14 +36,22 @@ end note
 == TL-21 Insert Plan ==
 
 user -> router : types input
+activate router
 router -> agent : TL-21 PROCESS(user_input)
+activate agent
 agent -> registry : TL-21 Insert Plan(description, dependencies?)
+activate registry
 registry -> tool : TL-21 Insert Plan(description, dependencies)
+activate tool
 tool -> tool : generate step ID, set status PENDING
 tool --> registry : ToolResult(success=True, step_id)
+deactivate tool
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate registry
+deactivate agent
+deactivate router
 note over user, tool
   Flow:    TL-21: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> PlanTool -> ToolResult
   State:   New plan step created (PENDING)

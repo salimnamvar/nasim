@@ -1,7 +1,3 @@
-@startuml c4_nasim_context
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
-!theme plain
-
 ' ============================================================
 ' Title:     NASIM Application — System Context
 ' Boundary:  NASIM Application
@@ -36,8 +32,12 @@
 ' Date:      2026-06-25
 ' ============================================================
 
+@startuml c4_nasim_context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
+!theme plain
+
+
 LAYOUT_LEFT_RIGHT()
-LAYOUT_WITH_LEGEND()
 
 title NASIM Application — System Context
 
@@ -65,5 +65,12 @@ Rel(mcp_client, nasim_application, "invokes NASIM Application tools via MCP prot
 Rel(nasim_application, git_repo, "reads repository state and creates atomic commits")
 Rel(nasim_application, repo_intel, "parses code, queries intelligence, and performs similarity search")
 Rel(nasim_application, obs_platform, "emits structured logs, traces, and metrics for collection")
+
+legend right
+    |= Symbol |= Meaning |
+    | Person | Human actor (Developer) |
+    | System | The system of interest (NASIM Application) |
+    | System_Ext | External system or service outside the boundary |
+end legend
 
 @enduml

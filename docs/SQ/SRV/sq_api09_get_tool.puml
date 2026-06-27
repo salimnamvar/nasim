@@ -1,6 +1,6 @@
 @startuml sq_srv09_read_tool
 ' ============================================================
-' Title:     SRV-09 — READ Tool
+' Title:     API-09 — GET Tool
 ' Boundary:  nasim code agent HTTP API
 ' Purpose:   Read details of a specific registered tool
 ' Milestone: v1.0
@@ -9,14 +9,14 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — SRV-09 READ Tool
+title nasim — API-09 GET Tool
 
 actor "User" as user
 
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
   participant "ToolService" as svc
 end box
 box "Repository Group" #E8F5E9
@@ -34,12 +34,12 @@ note over user, registry
   Returns:        200 OK with tool metadata, or 404 NOT_FOUND error
 end note
 
-== SRV-09 READ Tool ==
+== API-09 READ Tool ==
 
 user -> router : GET /v1/tools/{name}
 activate router
 
-router -> svc : SRV-09 READ Tool(name)
+router -> svc : API-09 READ Tool(name)
 activate svc
 
 svc -> registry : readTool(name)
@@ -61,7 +61,7 @@ router --> user : 200 OK {tool: {name, description, safe, parameters}}
 deactivate router
 
 note over user, registry
-  Flow:    SRV-09 → readTool → respond
+  Flow:    API-09 → readTool → respond
   State:   No state change
   Success: 200 OK with tool metadata
   Failure: 404 tool not found

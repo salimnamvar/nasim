@@ -37,23 +37,34 @@ end note
 == TL-15 Spawn Subagent ==
 
 user -> router : types input
+activate router
 router -> agent : TL-15 PROCESS(user_input)
+activate agent
 agent -> registry : TL-15 Spawn Subagent(prompt, subagent_type)
+activate registry
 registry -> tool : TL-15 Spawn Subagent(prompt, subagent_type)
+activate tool
 tool -> coord : create_child(prompt, subagent_type)
+activate coord
 
 break Coordinator unavailable or limit reached
     coord --> tool : CapacityError
+    deactivate coord
     tool --> registry : ToolResult(success=False, error="spawn limit reached")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
 end
 
 coord --> tool : child_id
+deactivate coord
 tool --> registry : ToolResult(success=True, child_id=child_id)
 registry --> agent : ToolResult
 agent --> router : AgentEvent(Done)
 
+deactivate tool
+deactivate registry
+deactivate agent
+deactivate router
 note over user, coord
   Flow:    TL-15: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> SubagentTool -> SubagentCoordinator -> ToolResult
   State:   New child subagent spawned

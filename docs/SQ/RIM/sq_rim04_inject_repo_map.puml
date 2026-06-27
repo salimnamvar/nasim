@@ -1,4 +1,4 @@
-@startuml sq_rim04_inject_repomap
+@startuml sq_rim04_inject_repo_map
 ' ============================================================
 ' Title:     RIM-04 — INJECT RepoMap
 ' Boundary:  nasim code agent CLI
@@ -13,17 +13,17 @@ title nasim — RIM-04 INJECT RepoMap
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Repo Intelligence Group" #EDE7F6
+box "Repo Intelligence Group" #E8F5E9
   participant "RepoMapInjector" as injector
   participant "SymbolRanker" as ranker
 end box
-box "Context Group" #E8F5E9
+box "Context Group" #FFF3E0
   participant "TokenBudget" as budget
   participant "ConversationHistory" as history
 end box

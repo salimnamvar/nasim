@@ -35,14 +35,17 @@ end note
 == CLI-04 Parse CLI Arguments ==
 
 user -> parser : nasim [args]
+activate parser
 parser -> parser : argparse.ArgumentParser.parse_args()
 parser -> cfg : load(cli_args=argv)
+activate cfg
 cfg -> cfg : read ~/.nasim/config.yaml
 cfg -> cfg : read .nasim/config.yaml
 cfg -> cfg : read NASIM_* env vars
 cfg -> cfg : merge: CLI > env > project > global
 cfg -> cfg : validate Config fields
 cfg --> parser : Config object
+deactivate cfg
 
 break Invalid arguments
     parser -> parser : print usage
@@ -52,11 +55,13 @@ end
 break Invalid config
     cfg -> cfg : raise ConfigError
     cfg --> parser : ConfigError
+    deactivate cfg
     parser --> user : "Config error: details"
 end
 
 parser --> user : Config ready, start REPL or single-shot
 
+deactivate parser
 note over user, cfg
   Flow:    CLI-04 readCliArguments: argv -> ArgParser -> ConfigLoader -> layered merge -> Config
   State:   No state change

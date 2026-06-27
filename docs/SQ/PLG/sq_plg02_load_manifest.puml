@@ -11,13 +11,13 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Plugins Group" #EDE7F6
+box "Plugins Group" #F3E5F5
   participant "PluginLoader" as loader
 end box
 participant "Host Filesystem" as fs

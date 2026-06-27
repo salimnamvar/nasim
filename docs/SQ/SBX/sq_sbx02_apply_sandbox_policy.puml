@@ -13,13 +13,13 @@ title nasim — SBX-02 UPDATE Sandbox Policy
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Sandbox Group" #F1F8E9
+box "Sandbox Group" #F3E5F5
   participant "SandboxExecutor" as executor
   participant "SandboxPolicy" as policy
 end box
@@ -42,7 +42,7 @@ end note
 user -> router : types input
 router -> agent : SBX-02 PROCESS(user_input)
 
-agent -> executor : SBX-02 APPLY SandboxPolicy(policy_path)
+agent -> executor : SBX-02 APPLY SandboxPolicy(policy_path, updateMask)
 activate executor
 
 executor -> policy : SBX-02 LOAD Policy(policy_path)

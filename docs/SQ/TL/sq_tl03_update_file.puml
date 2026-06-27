@@ -1,6 +1,6 @@
-@startuml sq_tl03_edit_file
+@startuml sq_tl03_update_file
 ' ============================================================
-' Title:     TL-03 — Edit File
+' Title:     TL-03 — UPDATE File
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Replace an exact string in a file
 ' Milestone: v1.0
@@ -11,13 +11,13 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "EditFileTool" as ft
 end box
@@ -37,13 +37,19 @@ end note
 == TL-03 EDIT File ==
 
 user -> router : types input
+activate router
 router -> agent : TL-03 PROCESS(user_input)
-agent -> registry : TL-03 EDIT File(path, old_string, new_string)
+activate agent
+agent -> registry : TL-03 EDIT File(path, old_string, new_string, updateMask)
+activate registry
 registry -> ft : TL-03 EDIT File(path, old_string, new_string)
+activate ft
 ft -> fs : Path(path).read_text()
+activate fs
 
 break File not found
     fs --> ft : FileNotFoundError
+    deactivate fs
     ft --> registry : ToolResult(success=False, error="Error: file not found")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Error)
@@ -62,11 +68,16 @@ else count > 1
 else count == 1
     ft -> ft : content.replace(old_string, new_string, 1)
     ft -> fs : Path(path).write_text(new_content)
+    activate fs
     ft --> registry : ToolResult(success=True, content="Edited: replaced 1 occurrence")
     registry --> agent : ToolResult
     agent --> router : AgentEvent(Done)
 end
 
+    deactivate ft
+    deactivate registry
+    deactivate agent
+deactivate router
 note over user, fs
   Flow:    TL-03: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> EditFileTool -> Host Filesystem -> ToolResult
   State:   No state change

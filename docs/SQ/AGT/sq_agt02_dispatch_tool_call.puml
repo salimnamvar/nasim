@@ -14,24 +14,24 @@ title nasim — AGT-02 DISPATCH Tool Call
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "ErrorBoundary" as eb
 end box
-box "Safety Group" #FFF9C4
+box "Safety Group" #FFF3E0
   participant "SafetyCoordinator" as safety
   participant "PermissionGate" as gate
   participant "InjectionScanner" as inj
   participant "EgressInspector" as egr
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "Tool" as tool
 end box
-box "Observability Group" #E0F2F1
+box "Observability Group" #F3E5F5
   participant "StructuredLogger" as logger
 end box
 

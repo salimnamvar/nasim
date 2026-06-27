@@ -88,3 +88,37 @@ CAR refinement loop transforming nasim to API-First architecture.
 - **API-First:** All entry chains go through ServerRouter ✓
 
 ### Design Chain Consistency: 100%
+
+## P0 Self-Certification (2026-06-27)
+
+### Linter Results — rod_csr_sq_lint.py
+
+| Severity | Count | Status |
+|----------|:-----:|:------:|
+| Critical | 0 | ✅ |
+| High | 0 | ✅ |
+| Medium | 0 | ✅ |
+| **Total** | **0** | ✅ **PASS** |
+
+### Cross-Reference Checks (Appendix A)
+
+| Check | Result |
+|-------|:------:|
+| CAR-UC-02: Matrix refs vs disk — missing SQ files | 0 missing ✅ |
+| CAR-UC-01: Orphan UC-IDs in SQ bodies | 0 orphan ✅ |
+| CAR-SQ-08: All diagrams use `actor "User"` | 148/148 ✅ |
+| CAR-SQ-07: DRY `ref over` adoption | 8 files (steady) |
+
+### P0 Items Closed
+
+| P0 | Fix | Files Affected | Linter Delta |
+|----|-----|:-------------:|:------------:|
+| 1 | Empty Service boxes + undeclared `svc` lifelines | 7 | 3 CRITICAL → 0 |
+| 2 | Duplicate `router` alias + `result`/`repl` lifelines | 6 | — |
+| 3 | Box colour normalisation (CSR palette) | 148 | — |
+| 4 | Pagination — `page_size`/`page_token`/`next_page_token` | 8 | 3 CRITICAL → 0 |
+| 5 | `update_mask` on Update operations (AIP-134) | 19 | 0 |
+| 6 | Missing Repository layer (RCSR-004) | 9 | 0 |
+| — | Activation bars (RSQ-006) | 34 | 34 MEDIUM → 0 |
+
+**Gate status: ✅ SQ P0 clean — ready for Tech Lead review.**

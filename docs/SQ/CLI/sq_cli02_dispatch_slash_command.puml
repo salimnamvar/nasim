@@ -11,19 +11,22 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "CLI Interface Container" #E3F2FD
+  participant "REPLSession" as repl
+end box
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
   participant "Renderer" as renderer
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 box "Repository Group" #E8F5E9
   participant "SessionRepository" as session_repo
 end box
 
-note over user, agent
+note over user, repl
   Scope:          Slash command parsing and dispatch
   Preconditions:  REPL running, input starts with /
   Contexts:       Called by CLI-01 (PROCESS User Input)
@@ -37,36 +40,55 @@ end note
 == CLI-02 Execute Slash Command ==
 
 user -> repl : /command
-result -> cmd : dispatch("/command")
+activate repl
+repl -> cmd : dispatch("/command")
+activate cmd
 cmd -> cmd : parse command name and args
 
 alt /help
     cmd -> renderer : displayHelpText()
+    activate renderer
     renderer --> user : help menu
+    deactivate renderer
 else /reset
     cmd -> agent : reset()
+    activate agent
     agent -> agent : clear conversation history
     cmd -> renderer : displayConfirmation("History cleared.")
+    activate renderer
     renderer --> user : confirmation
+    deactivate renderer
 else /model
     cmd -> renderer : displayModelInfo()
+    activate renderer
     renderer --> user : model info
+    deactivate renderer
 else /plan
     cmd -> agent : togglePlanMode()
+    activate agent
     agent -> agent : toggle PLANNING state
     cmd -> renderer : displayConfirmation("Plan mode: ON/OFF")
+    activate renderer
     renderer --> user : confirmation
+    deactivate renderer
 else /sessions
     cmd -> renderer : displaySessionList()
+    activate renderer
     renderer --> user : session list
+    deactivate renderer
 else /quit or /exit
     cmd -> repl : signal exit
+    activate repl
 else unknown command
     cmd -> renderer : displayError("Unknown command: /cmd")
+    activate renderer
     renderer --> user : error display
+    deactivate renderer
 end
 
-note over user, agent
+deactivate cmd
+deactivate repl
+note over user, repl
   Flow:    CLI-02 dispatchSlashCommand: /cmd -> SlashCommandHandler -> action -> Renderer -> User
   State:   No state change (except /plan toggles PLANNING, /reset clears history)
   Success: Command action completed

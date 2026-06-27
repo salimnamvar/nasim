@@ -13,13 +13,13 @@ title nasim — MCP-01 CONNECT McpServer
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "MCP Group" #EDE7F6
+box "MCP Group" #F3E5F5
   participant "MCPClientRuntime" as mcp
 end box
 box "External" #F5F5F5
