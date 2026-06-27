@@ -110,28 +110,6 @@ User → Controller (CLI/API) → Service (Agent/Router/Safety/...) → Reposito
 - `AgentOrchestrator` → `ContextGraph` (context pipeline orchestration)
 - `ServerRouter` → `AgentOrchestrator` (sole entry gate for all interface containers)
 
-## Architecture Differentiators vs Reference Agents
-
-### vs aider
-- **CSR enforcement**: nasim strictly separates Controller → Service → Repository. aider mixes concerns.
-- **SafetyCoordinator**: Dedicated safety pipeline with PermissionGate, InjectionScanner, EgressInspector. aider has ad-hoc safety checks.
-- **ErrorBoundary**: Structured error hierarchy with recovery actions. aider uses generic try/except.
-
-### vs Cline
-- **No God Objects**: nasim decomposes functionality into 21 focused groups. Cline often has monolithic controllers.
-- **ContextGraph**: Dedicated context pipeline with prioritization, truncation, distillation, injection, compaction. Cline uses simpler context management.
-- **EditStrategyManager**: Polymorphic edit strategies (8 implementations) vs Cline's single approach.
-
-### vs Claude Code
-- **CSR visibility**: nasim's diagrams make the layering explicit through color coding and stereotypes.
-- **SafetyCoordinator**: Proactive safety pipeline vs Claude Code's reactive approach.
-- **Observability**: Dedicated StructuredLogger, MetricsCollector, TraceCorrelator with OTel support. Claude Code has minimal observability.
-
-### vs Roo-Code
-- **Container clarity**: nasim's 3-runtime-entry-point model (CLI, API Server, Core Engine) is cleaner than Roo-Code's architecture.
-- **MCP integration**: nasim treats MCP as first-class with dedicated runtime, adapter, and discovery components.
-- **Memory system**: nasim has 8 memory components (store, index, scope, adapters, retriever, indexer) vs Roo-Code's simpler approach.
-
 ## C4 Hierarchy
 
 ```

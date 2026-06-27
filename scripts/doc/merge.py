@@ -1,6 +1,6 @@
 import argparse
-import sys
 from pathlib import Path
+import sys
 
 
 class DocumentMerger:
@@ -42,19 +42,23 @@ class DocumentMerger:
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_INPUTS = ["docs/C4", "docs/SQ", "docs/UC", "docs/SM"]
-DEFAULT_OUTPUTS = [PROJECT_ROOT / f"{Path(d).name}_DIAGRAMS.md" for d in DEFAULT_INPUTS]
+DEFAULT_OUTPUTS = [PROJECT_ROOT / f"{Path(d).name}_Diagrams.md" for d in DEFAULT_INPUTS]
 
 
 def parse_args(argv=None):
-    p = argparse.ArgumentParser(
-        description="Merge doc directories into separate .md files."
-    )
+    p = argparse.ArgumentParser(description="Merge doc directories into separate .md files.")
     p.add_argument(
-        "-i", "--input", nargs="+", default=DEFAULT_INPUTS,
+        "-i",
+        "--input",
+        nargs="+",
+        default=DEFAULT_INPUTS,
         help="Input directories (one per merge)",
     )
     p.add_argument(
-        "-o", "--output", nargs="+", default=DEFAULT_OUTPUTS,
+        "-o",
+        "--output",
+        nargs="+",
+        default=DEFAULT_OUTPUTS,
         help="Output .md files (one per input, same order)",
     )
     args = p.parse_args(argv)

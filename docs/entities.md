@@ -157,9 +157,3 @@ domain verbs. Banned: CREATE, GET, EXECUTE, RUN, INVOKE, PERFORM, TRIGGER, MANAG
 Model routing is via litellm model string prefix only (e.g., `anthropic/claude-sonnet-4-6`,
 `openai/gpt-4o`, `ollama/qwen2.5-coder:7b`).
 
----
-
-## Source
-
-Authoritative rule-layer version: `.nasim/rules/ENTITIES.md`
-This file is the design-chain-facing public view for all `docs/` artifacts.
