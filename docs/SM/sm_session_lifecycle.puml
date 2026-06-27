@@ -51,6 +51,6 @@ BRANCHED --> ACTIVE : API-02
 BRANCHED --> CLOSED : API-05
 SAVED --> CLOSED : API-05
 
-CLOSED --> [*]
+CLOSED --> [*] : API-05
 
 @enduml
