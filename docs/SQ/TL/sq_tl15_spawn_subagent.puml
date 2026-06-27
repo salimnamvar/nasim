@@ -25,17 +25,6 @@ end box
 participant "SubagentCoordinator" as coord
 
 
-note over user
-  Scope:          TL-15 SPAWN Subagent — Create a child subagent via SubagentTool
-  Preconditions:  SubagentCoordinator available; spawn limit not reached
-  Contexts:       Called by any UC requiring parallel or delegated execution
-  Excludes:       Subagent lifecycle management, inter-agent communication, result collection
-  Rollback:       Capacity limit → ToolResult(success=False); no partial state
-  Design:         Creates child with prompt + type; returns child_id for tracking; respects concurrency limits
-  Returns:
-    - Success: ToolResult(success=True, child_id=child_id)
-    - Failure: ToolResult(success=False) — spawn limit reached
-end note
 
 == TL-15 Spawn Subagent ==
 
@@ -69,11 +58,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-15 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → SubagentTool → SubagentCoordinator.create_child()
-  State:   No state change
-  Success: 200 + ToolResult(success=True, child_id=child_id)
-  Failure: ToolResult(success=False): spawn limit reached
-end note
 
 @enduml

@@ -24,17 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user
-  Scope:          API-01 LIST Sessions
-  Preconditions:  None
-  Contexts:       Parent: HTTP Client request
-  Excludes:       Session creation, message history
-  Rollback:       No state change on failure
-  Design:         Paginated collection read via Service layer
-  Returns:
-    - Success: 200 OK — {sessions: [...], next_page_token: string}
-    - Failure: 500 INTERNAL — store read failure
-end note
 
 
 == API-01 LIST Sessions ==
@@ -70,12 +59,6 @@ end
 deactivate svc
 deactivate router
 
-note over user
-  Flow:    API-01 → router → svc → store → svc → router → user
-  State:   No state change
-  Success: 200 OK — {sessions: [...], next_page_token: string}
-  Failure: 500 INTERNAL: store read failure — retry later
-end note
 
 
 @enduml

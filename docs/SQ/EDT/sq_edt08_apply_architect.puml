@@ -32,17 +32,6 @@ box "FileSystem Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          EDT-08 APPLY Architect — Plan and apply multi-file edits via architectural decomposition
-  Preconditions:  Edit plan with multiple file edits and dependencies; all target files exist
-  Contexts:       Invoked via dynamic dispatch from EDT-01 for multi-file changes
-  Excludes:       Single-file edits; sandbox isolation; strategy selection
-  Rollback:       Partially written files may need manual revert
-  Design:         Dependency-ordered edits; cross-file integrity validation after all steps
-  Returns:
-    - Success: 200 OK — EditResult(success, files_modified[])
-    - Failure: 400 BAD_REQUEST: cross-file integrity failure
-end note
 
 
 == EDT-08 APPLY Architect ==
@@ -92,11 +81,5 @@ deactivate esm
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EDT-08 → user input → router → agent → esm → arch(analyze deps → sort → loop: read → ast → apply → write → validate) → cross-file validation → Done
-  State:   No state change
-  Success: 200 OK — EditResult(success, files_modified[])
-  Failure: 400 BAD_REQUEST: cross-file integrity failure — partial revert may be needed
-end note
 
 @enduml

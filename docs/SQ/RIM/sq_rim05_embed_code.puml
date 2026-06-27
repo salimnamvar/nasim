@@ -32,17 +32,6 @@ box "Storage Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          RIM-05 EMBED Code — generate vector embeddings for code fragments
-  Preconditions:  Code fragments extracted; embedding provider configured and available
-  Contexts:       Called by AgentOrchestrator to build searchable vector index for semantic search
-  Excludes:       Codebase indexing, symbol ranking, repo-map injection, semantic search queries
-  Rollback:       Provider failure → error propagated per batch; partial embedding on partial success
-  Design:         Batch embedding with dimension validation; stores in VectorStore for downstream search
-  Returns:
-    - Success: 200 OK — EmbeddingResult(count, dimensions)
-    - Failure: 500 INTERNAL — embedding provider error
-end note
 
 == RIM-05 EMBED Code ==
 
@@ -81,11 +70,5 @@ agent --> router : EmbeddingResult(count, dimensions)
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → EmbeddingAdapter → batch embed → validate → store vectors → Result
-  State:   No state change (populates VectorStore)
-  Success: 200 OK — EmbeddingResult(count, dimensions)
-  Failure: 500 INTERNAL: embedding provider error — propagate error to caller
-end note
 
 @enduml

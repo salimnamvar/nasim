@@ -26,17 +26,6 @@ box "Session Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          AGT-09 SPAWN Subagent — Delegate work to child agent
-  Preconditions:  Parent session exists, task_prompt provided
-  Contexts:       AGT-01 PROCESS User Task (when delegation required)
-  Excludes:       Subagent execution details, Result collection (AGT-10)
-  Rollback:       Spawn failure → SpawnError → AgentEvent(Error)
-  Design:         Isolated child session with independent ConversationHistory
-  Returns:
-    - Success: 200 AgentEvent(SubagentSpawned) with child_id
-    - Failure: 500 SpawnError on session creation failure
-end note
 
 == AGT-09 SPAWN Subagent ==
 
@@ -68,11 +57,5 @@ agent --> router : AgentEvent(SubagentSpawned)
 deactivate agent
 
 
-note over user
-  Flow:    AGT-09 → validate parent → create child session → initialize child
-  State:   THINKING → SPAWNED (child) → THINKING
-  Success: 200 AgentEvent(SubagentSpawned) with child_session_id
-  Failure: 500 SpawnError on parent validation or session creation failure
-end note
 
 @enduml

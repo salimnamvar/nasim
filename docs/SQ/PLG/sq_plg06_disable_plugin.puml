@@ -26,17 +26,6 @@ box "Hooks Group" #F3E5F5
   participant "HookManager" as hm
 end box
 
-note over user
-  Scope:          PLG-06 Disable Plugin — Deactivates plugin tools and hooks, sets state DISABLED
-  Preconditions:  Plugin is currently enabled (state = ENABLED)
-  Contexts:       Root entry point for disabling a plugin
-  Excludes:       Plugin discovery, manifest loading
-  Rollback:       Unregister failure → set state ERROR, log failure
-  Design:         Unregisters tools from ToolRegistry and hooks from HookManager, sets DISABLED
-  Returns:
-    - Success: 200 + plugin disabled
-    - Failure: 200 + state set to ERROR
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -59,11 +48,5 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    PLG-06 → unregister tools → unregister hooks → set DISABLED
-  State:   ENABLED → DISABLED (or → ERROR on failure)
-  Success: 200 + plugin disabled
-  Failure: 200 + state ERROR — unregister failure, logged
-end note
 
 @enduml

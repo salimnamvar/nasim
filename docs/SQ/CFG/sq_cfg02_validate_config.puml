@@ -28,17 +28,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          CFG-02 Validate Config — Validate config fields against allowed values
-  Preconditions:  Config object exists and has been loaded via CFG-01
-  Contexts:       Called by CFG-01 after merge; can also be invoked independently
-  Excludes:       Config loading (CFG-01), config merging (CFG-03), persistence
-  Rollback:       ConfigError returned with field-specific message on any validation failure
-  Design:         Independent field checks: provider whitelist, safety mode enum, positive integers
-  Returns:
-    - Success: 200 Config valid
-    - Failure: ConfigError
-end note
 
 == CFG-02 VALIDATE Config ==
 
@@ -64,11 +53,5 @@ deactivate agent
 deactivate router
 
 
-note over user
-  Flow:    CFG-02 → check provider → check safety mode → check context budget → check timeout → return
-  State:   No state change
-  Success: 200 Config valid
-  Failure: ConfigError — field validation failure
-end note
 
 @enduml

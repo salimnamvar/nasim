@@ -30,17 +30,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          WRL-04 FORK Session — fork session at any turn
-  Preconditions:  Source session exists; fork_turn is valid turn number
-  Contexts:       Called by AgentOrchestrator when user requests branch/experiment from prior turn
-  Excludes:       Log reading, seeking, checkpointing, event appending to source session
-  Rollback:       (No explicit failure path in diagram — assumes source session and turn are valid)
-  Design:         Creates new session, copies events up to fork point, appends ForkEvent
-  Returns:
-    - Success: 200 OK — ForkResult(new_session_id, fork_turn, event_count)
-    - Failure: (implicit — returns error if source session or turn invalid)
-end note
 
 == wrl03 FORK Session ==
 
@@ -74,11 +63,5 @@ deactivate forker
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → SessionForker → read log → create session → copy events → append ForkEvent → Result
-  State:   No state change (new session created; source session immutable)
-  Success: 200 OK — AgentEvent(Done) with ForkResult(new_session_id, fork_turn, event_count)
-  Failure: (implicit) source session or turn invalid — propagate error to user
-end note
 
 @enduml

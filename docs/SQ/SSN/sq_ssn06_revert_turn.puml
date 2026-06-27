@@ -25,17 +25,6 @@ box "Session Group" #E8F5E9
 end box
 database "Snapshot Store" as snap
 
-note over user
-  Scope:          SSN-06 Revert Turn — Restore session to a previous snapshot or turn
-  Preconditions:  Snapshot exists with valid snapshot_id
-  Contexts:       Called by user-facing revert command
-  Excludes:       Branching, search, snapshot creation
-  Rollback:       Snapshot not found → 404; snapshot unreadable → 500 INTERNAL
-  Design:         Truncates messages after snapshot point; non-destructive to snapshot store
-  Returns:
-    - Success: 200 OK — Reverted(snapshot_id, turn_count)
-    - Failure: 404 NOT_FOUND / 500 INTERNAL — snapshot unreadable
-end note
 
 == SSN-06 Revert Turn ==
 
@@ -71,12 +60,6 @@ break Snapshot load error
     agent --> router : AgentEvent(Error)
 end
 
-note over user
-  Flow:    SSN-06 → read snapshot → replace messages → truncate after → 200 OK
-  State:   No state change (messages modified in-place)
-  Success: 200 OK — Reverted(snapshot_id, turn_count)
-  Failure: 404 NOT_FOUND: snapshot not found; 500 INTERNAL: snapshot unreadable
-end note
 
 
 @enduml

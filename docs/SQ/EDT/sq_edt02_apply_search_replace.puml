@@ -26,17 +26,6 @@ end box
 participant "Host Filesystem" as fs
 
 
-note over user
-  Scope:          EDT-02 APPLY Search-Replace — Execute edit via search-replace strategy
-  Preconditions:  EditStrategy from EDT-01 selected search-replace format; target file exists
-  Contexts:       Invoked via dynamic dispatch from EDT-01
-  Excludes:       Strategy selection (EDT-01); sandbox validation (EDT-07); linter checks
-  Rollback:       Backup restored from backup_path on failure
-  Design:         Creates backup before write; computes diff after apply
-  Returns:
-    - Success: 200 OK — AgentEvent(Done)
-    - Failure: 500 INTERNAL: file write or apply failure
-end note
 
 
 == EDT-02 APPLY Search-Replace ==
@@ -69,11 +58,5 @@ agent -> agent : compute_diff(original_content, modified_content)
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EDT-02 → user input → router → agent → fs(read) → fs(backup) → strategy(apply) → fs(write) → compute_diff → Done
-  State:   No state change
-  Success: 200 OK — AgentEvent(Done)
-  Failure: 500 INTERNAL: apply or write failure — backup restored
-end note
 
 @enduml

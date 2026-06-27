@@ -24,17 +24,6 @@ box "Tool Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          TL-21 INSERT Plan — Add a new plan step via PlanTool
-  Preconditions:  PlanTool initialized; description provided
-  Contexts:       Called by task planning, workflow creation, step definition
-  Excludes:       Plan execution, deletion, bulk operations
-  Rollback:       No failure path in diagram
-  Design:         Generates unique step ID; sets initial status to PENDING; optional dependencies
-  Returns:
-    - Success: ToolResult(success=True, step_id)
-    - Failure: N/A — no failure path in diagram
-end note
 
 == TL-21 Insert Plan ==
 
@@ -56,11 +45,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-21 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → PlanTool (generate ID, set PENDING)
-  State:   No state change
-  Success: 200 + ToolResult(success=True, step_id)
-  Failure: N/A — no failure path
-end note
 
 @enduml

@@ -24,18 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user
-  Scope:          API-02 INSERT Session
-  Preconditions:  None
-  Contexts:       Parent: HTTP Client request
-  Excludes:       Session update, deletion, message dispatch
-  Rollback:       No partial state on failure; store write is atomic
-  Design:         Controller validates structure; Service orchestrates create
-  Returns:
-    - Success: 201 Created — {id, created_at, model, state}
-    - Failure: 400 INVALID_ARGUMENT — structural validation failed
-    - Failure: 500 INTERNAL — store write failure
-end note
 
 
 == API-02 INSERT Session ==
@@ -69,13 +57,6 @@ deactivate svc
 router --> user : 201 Created {id, created_at, model, state}
 deactivate router
 
-note over user
-  Flow:    API-02 → router → svc → store → svc → router → user
-  State:   No state change (INSERT creates initial state)
-  Success: 201 Created — {id, created_at, model, state}
-  Failure: 400 INVALID_ARGUMENT: structural validation — fix request body
-  Failure: 500 INTERNAL: store write failure — retry later
-end note
 
 
 @enduml

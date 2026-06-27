@@ -24,18 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user
-  Scope:          API-05 DELETE Session
-  Preconditions:  Session must exist
-  Contexts:       Parent: HTTP Client request
-  Excludes:       Session creation, update, message dispatch
-  Rollback:       Delete is not reversible; state guard prevents invalid transitions
-  Design:         Service validates state transition (ACTIVE → CLOSED) before delete
-  Returns:
-    - Success: 200 OK — {retired: true}
-    - Failure: 404 NOT_FOUND — session does not exist
-    - Failure: 409 FAILED_PRECONDITION — invalid state transition
-end note
 
 
 == API-05 DELETE Session ==
@@ -71,13 +59,6 @@ deactivate svc
 router --> user : 200 OK {retired: true}
 deactivate router
 
-note over user
-  Flow:    API-05 → router → svc → store(read) → svc → store(delete) → router → user
-  State:   ACTIVE → CLOSED
-  Success: 200 OK — {retired: true}
-  Failure: 404 NOT_FOUND: session does not exist — verify session ID
-  Failure: 409 FAILED_PRECONDITION: invalid state transition — check session state
-end note
 
 
 @enduml

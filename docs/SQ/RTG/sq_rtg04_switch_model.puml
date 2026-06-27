@@ -25,17 +25,6 @@ box "Router Group" #FFF3E0
 end box
 
 
-note over user
-  Scope:          RTG-04 Switch Model — change the active model at runtime
-  Preconditions:  Target model specified; model catalog available
-  Contexts:       Called by AgentOrchestrator when user or system requests runtime model change
-  Excludes:       Initial model selection, fallback chain application, task classification
-  Rollback:       Model not in catalog → Error("model not available")
-  Design:         Validates model availability, updates active model config atomically
-  Returns:
-    - Success: 200 OK — {previous_model, new_model}
-    - Failure: 400 Bad Request — model not available
-end note
 
 == RTG-04 Switch Model ==
 
@@ -62,11 +51,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → ModelRouter → validate availability → update config → Result
-  State:   No state change (updates runtime config; previous model tracked for rollback)
-  Success: 200 OK — AgentEvent(Done) with {previous_model, new_model}
-  Failure: 400 Bad Request: model not in catalog — propagate error to user
-end note
 
 @enduml

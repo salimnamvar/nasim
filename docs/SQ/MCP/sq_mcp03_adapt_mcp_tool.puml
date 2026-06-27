@@ -29,17 +29,6 @@ box "Tool Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          MCP-03 ADAPT McpTool — Wrap MCP server tool into nasim Tool format
-  Preconditions:  MCP tool definition available from MCP-02 discovery
-  Contexts:       Called by MCP-02 discovery loop for each tool
-  Excludes:       Connection; tool discovery; tool execution
-  Rollback:       No tool registered; adapter rejects incompatible schemas
-  Design:         Maps MCP JSON Schema types to nasim internal format; creates execution wrapper
-  Returns:
-    - Success: 200 OK — ToolResult(success=true, content="ToolRegistered")
-    - Failure: 400 BAD_REQUEST: SchemaIncompatible
-end note
 
 
 == MCP-03 ADAPT McpTool ==
@@ -77,11 +66,5 @@ deactivate mcp
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    MCP-03 → user → router → agent → mcp → adapter(parse → map → wrap) → registry(register) → Done
-  State:   No state change
-  Success: 200 OK — ToolResult(success=true, content="ToolRegistered")
-  Failure: 400 BAD_REQUEST: schema incompatible — tool not registered
-end note
 
 @enduml

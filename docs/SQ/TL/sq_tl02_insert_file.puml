@@ -25,17 +25,6 @@ end box
 participant "Host Filesystem" as fs
 
 
-note over user
-  Scope:          TL-02 INSERT File — Create or overwrite a file
-  Preconditions:  File path and content provided by user; host filesystem writable
-  Contexts:       Called by any UC requiring file creation/update (editing, saving)
-  Excludes:       File reading, appending, partial edits
-  Rollback:       PermissionError/OSError → ToolResult(success=False); no partial state changes
-  Design:         Creates parent directories automatically; atomic write; always overwrites existing files
-  Returns:
-    - Success: ToolResult(success=True, content='Wrote N bytes to path')
-    - Failure: ToolResult(success=False) — PermissionError, OSError
-end note
 
 == TL-02 WRITE File ==
 
@@ -71,11 +60,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-02 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → WriteFileTool → Host Filesystem.write_text()
-  State:   No state change
-  Success: 200 + ToolResult(success=True, content='Wrote N bytes to path')
-  Failure: ToolResult(success=False): PermissionError/OSError — Error writing path
-end note
 
 @enduml

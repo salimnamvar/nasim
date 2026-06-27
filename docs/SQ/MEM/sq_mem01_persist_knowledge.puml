@@ -26,17 +26,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryIndex" as index
 end box
 
-note over user
-  Scope:          MEM-01 PERSIST Knowledge
-  Preconditions:  MemoryStore accessible
-  Contexts:       Called by AgentOrchestrator during task processing
-  Excludes:       Knowledge recall, search, scope filtering
-  Rollback:       Disk write failure leaves entry uncommitted
-  Design:         Atomic write with scope validation and index update
-  Returns:
-    - Success: persist_confirmed(key)
-    - Failure: PersistError("write failed")
-end note
 
 
 user -> router : types input
@@ -68,12 +57,6 @@ deactivate store
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    MEM-01 → agent → store → scope → store → index → store → agent
-  State:   No state change
-  Success: persist_confirmed(key)
-  Failure: PersistError — disk write failed; data not committed
-end note
 
 
 @enduml

@@ -28,17 +28,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          RTG-03 Classify Task — classify task type and select optimal model
-  Preconditions:  User input available; ModelRepository with model catalog loaded
-  Contexts:       Called by AgentOrchestrator to determine best model for given task
-  Excludes:       Model selection routing, fallback application, runtime switching
-  Rollback:       Classification confidence < 0.6 → returns default_model; model unavailable → resolves next from FallbackChain
-  Design:         Extracts signals (keywords, context, length), scores task types (0.4/0.4/0.2 weights), maps to model tier
-  Returns:
-    - Success: 200 OK — {selected_model, task_type}
-    - Failure: (implicit) confidence too low → default_model
-end note
 
 == RTG-03 Classify Task ==
 
@@ -75,11 +64,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → ModelRouter → extract signals → score task types → select highest → map to tier → verify availability → fallback if needed → Result
-  State:   No state change (in-memory classification)
-  Success: 200 OK — AgentEvent(Done) with {selected_model, task_type}
-  Failure: (implicit) classification confidence < 0.6 — returns default_model; model unavailable — resolves from FallbackChain
-end note
 
 @enduml

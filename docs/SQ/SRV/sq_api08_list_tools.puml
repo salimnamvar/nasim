@@ -24,17 +24,6 @@ box "Repository Group" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over user
-  Scope:          API-08 LIST Tools
-  Preconditions:  None
-  Contexts:       Parent: HTTP Client request
-  Excludes:       Tool details, tool execution
-  Rollback:       No state change on failure
-  Design:         Paginated tool collection read via Service layer
-  Returns:
-    - Success: 200 OK — {tools: [...], next_page_token: string}
-    - Failure: 500 INTERNAL — registry read failure
-end note
 
 
 == API-08 LIST Tools ==
@@ -63,12 +52,6 @@ deactivate svc
 router --> user : 200 OK {tools: [...], next_page_token}
 deactivate router
 
-note over user
-  Flow:    API-08 → router → svc → registry → svc → router → user
-  State:   No state change
-  Success: 200 OK — {tools: [...], next_page_token: string}
-  Failure: 500 INTERNAL: registry read failure — retry later
-end note
 
 
 @enduml

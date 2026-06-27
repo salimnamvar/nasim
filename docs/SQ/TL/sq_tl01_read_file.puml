@@ -25,17 +25,6 @@ end box
 participant "Host Filesystem" as fs
 
 
-note over user
-  Scope:          TL-01 READ File — File read tool execution
-  Preconditions:  File path provided by user; host filesystem accessible
-  Contexts:       Called by any UC requiring file content (e.g., TL-03 EDIT File pre-read, agent exploration)
-  Excludes:       File writing, directory listing, file metadata operations
-  Rollback:       FileNotFoundError → ToolResult(success=False); PermissionError/UnicodeDecodeError → ToolResult(success=False); no partial state changes
-  Design:         Reads file with line numbers; supports offset/limit pagination; single atomic read operation
-  Returns:
-    - Success: ToolResult(success=True, content=numbered_content)
-    - Failure: ToolResult(success=False) — FileNotFoundError, PermissionError, UnicodeDecodeError
-end note
 
 == TL-01 READ File ==
 
@@ -78,11 +67,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-01 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → ReadFileTool → Host Filesystem.read_text()
-  State:   No state change
-  Success: 200 + ToolResult(success=True, content=numbered_content)
-  Failure: ToolResult(success=False): FileNotFoundError — file not found | PermissionError/UnicodeDecodeError — Error reading path
-end note
 
 @enduml

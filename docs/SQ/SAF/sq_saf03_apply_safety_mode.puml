@@ -25,17 +25,6 @@ box "Config Group" #E8F5E9
   participant "ConfigLoader" as cfg
 end box
 
-note over user
-  Scope:          SAF-03 Apply Safety Mode — Configure safety mode from config
-  Preconditions:  Config file exists with safety_mode setting
-  Contexts:       Called at startup; called when config is reloaded
-  Excludes:       Permission check (SAF-01), approval prompt (SAF-02)
-  Rollback:       None (config read always succeeds with defaults)
-  Design:         Config-driven; applies to PermissionGate; supports hot-reload
-  Returns:
-    - Success: Result(success=true, data={safety_mode})
-    - Failure: (none — always succeeds with defaults)
-end note
 
 == SAF-03 Apply Safety Mode ==
 
@@ -54,11 +43,5 @@ gate --> agent : Result(success=true, data={safety_mode})
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    SAF-03 → read config → apply mode → 200 OK
-  State:   No state change
-  Success: Result(success=true, data={safety_mode})
-  Failure: (none — always succeeds with defaults)
-end note
 
 @enduml

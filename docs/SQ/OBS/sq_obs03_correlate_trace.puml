@@ -34,17 +34,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user
-  Scope:          OBS-03 Correlate Trace — Generate and propagate trace context across nasim surfaces
-  Preconditions:  None
-  Contexts:       Called at start of each CLI turn
-  Excludes:       Log streaming (OBS-01), metrics recording (OBS-02)
-  Rollback:       None (trace generation always succeeds)
-  Design:         UUID4 trace/span IDs; contextvars propagation; child spans for LLM and tool
-  Returns:
-    - Success: AgentEvent stream with trace context
-    - Failure: (none — always succeeds)
-end note
 
 == OBS-03 CORRELATE Trace (CLI turn) ==
 
@@ -82,12 +71,6 @@ agent --> router : AgentEvent stream
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    OBS-03 → new trace → propagate → LLM child span → tool child span → stream
-  State:   No state change
-  Success: AgentEvent stream with trace context
-  Failure: (none — always succeeds)
-end note
 
 
 @enduml

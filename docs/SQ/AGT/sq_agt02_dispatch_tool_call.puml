@@ -37,17 +37,6 @@ box "Observability Group" #F3E5F5
 end box
 
 
-note over user
-  Scope:          AGT-02 DISPATCH Tool Call — Execute LLM tool calls with safety
-  Preconditions:  LLM returned tool_calls, AgentOrchestrator in THINKING state
-  Contexts:       AGT-01 PROCESS User Task (loop for each tool_call)
-  Excludes:       LLM inference (PRV-02), Tool registration (ToolRegistry)
-  Rollback:       Safety denied → ToolResult(error="safety violation"), Tool not found → ErrorBoundary(abort)
-  Design:         Safety Pipeline (AGT-15) before execution, no God Object pattern
-  Returns:
-    - Success: 200 ToolResult appended to messages
-    - Failure: 400 ToolResult(success=false) on safety/deny/unknown tool
-end note
 
 == AGT-02 DISPATCH Tool Call ==
 
@@ -106,11 +95,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 
 
-note over user
-  Flow:    AGT-02 → AGT-15 → ToolRegistry → Tool.execute → OBS-01
-  State:   THINKING → AWAITING_APPROVAL (if unsafe) → TOOL_EXEC → THINKING
-  Success: 200 ToolResult(success=true) with execution output
-  Failure: 400 ToolResult(success=false) on safety violation, unknown tool, or execution error
-end note
 
 @enduml

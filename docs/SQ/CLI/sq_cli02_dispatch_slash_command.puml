@@ -1,100 +1,79 @@
 @startuml sq_cli02_dispatch_slash_command
 !include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-02 — Dispatch Slash Command
+' Title:     CLI-02 — DISPATCH Slash Command
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Slash command routing and execution
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
+
+title nasim — CLI-02 DISPATCH Slash Command
 
 actor "User" as user
 
-note over user
-  Scope:          CLI-02 — Dispatch Slash Command
-  Preconditions:  REPLSession active, user authenticated
-  Contexts:       Called by CLI-01 when input starts with '/'
-  Excludes:       Normal message processing (CLI-01), plan mode toggle (CLI-05), model switch (CLI-07)
-  Rollback:       Unknown command → display error message to user
-  Design:         Centralized routing through SlashCommandHandler, each command has dedicated handler
-  Returns:
-    - Success: Confirmation or display rendered to terminal
-    - Failure: Unknown command error message
-end note #E3F2FD
+box "CLI Interface Container" #E3F2FD
   participant "REPLSession" as repl
+  participant "SlashCommandHandler" as cmdhandler
 end box
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-  participant "SlashCommandHandler" as cmd
-  participant "Renderer" as renderer
 end box
 box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Repository Group" #E8F5E9
-  participant "SessionRepository" as session_repo
+box "Config Group" #E8F5E9
+  participant "ConfigLoader" as config
 end box
 
 
-== CLI-02 Execute Slash Command ==
+== CLI-02 DISPATCH Slash Command ==
 
-user -> repl : /command
+user -> repl : enter slash command
 activate repl
-repl -> cmd : dispatch("/command")
-activate cmd
-cmd -> cmd : parse command name and args
+repl -> repl : check for slash command prefix
 
-alt /help
-    cmd -> renderer : displayHelpText()
-    activate renderer
-    renderer --> user : help menu
-    deactivate renderer
-else /reset
-    cmd -> agent : reset()
+repl -> cmdhandler : cli02 PARSE SlashCommand({input})
+activate cmdhandler
+cmdhandler -> cmdhandler : extract command name and args
+
+alt /sessions command
+    cmdhandler -> router : api01 LIST Sessions({filters})
+    activate router
+    router --> cmdhandler : 200 OK — SessionList
+    deactivate router
+    cmdhandler --> repl : CommandResult(SessionsList)
+else /config command
+    cmdhandler -> config : cfg01 READ Config()
+    activate config
+    config --> cmdhandler : 200 OK — Config
+    deactivate config
+    cmdhandler --> repl : CommandResult(ConfigDisplay)
+else /plan command
+    cmdhandler -> router : cli05 ENABLE Plan Mode()
+    activate router
+    router -> agent : agt07 QUEUE Plan()
     activate agent
-    agent -> agent : clear conversation history
-    cmd -> renderer : displayConfirmation("History cleared.")
-    activate renderer
-    renderer --> user : confirmation
-    deactivate renderer
-else /model
-    cmd -> renderer : displayModelInfo()
-    activate renderer
-    renderer --> user : model info
-    deactivate renderer
-else /plan
-    cmd -> agent : togglePlanMode()
-    activate agent
-    agent -> agent : toggle PLANNING state
-    cmd -> renderer : displayConfirmation("Plan mode: ON/OFF")
-    activate renderer
-    renderer --> user : confirmation
-    deactivate renderer
-else /sessions
-    cmd -> renderer : displaySessionList()
-    activate renderer
-    renderer --> user : session list
-    deactivate renderer
-else /quit or /exit
-    cmd -> repl : signal exit
-    activate repl
+    agent --> router : PlanSession(queued)
+    deactivate agent
+    router --> cmdhandler : 200 OK — PlanEnabled
+    deactivate router
+    cmdhandler --> repl : CommandResult(PlanMode)
+else /model command
+    cmdhandler -> router : cli07 SWITCH Model({model_name})
+    activate router
+    router --> cmdhandler : 200 OK — ModelSwitched
+    deactivate router
+    cmdhandler --> repl : CommandResult(ModelSwitched)
 else unknown command
-    cmd -> renderer : displayError("Unknown command: /cmd")
-    activate renderer
-    renderer --> user : error display
-    deactivate renderer
+    cmdhandler --> repl : CommandResult(UnknownCommand)
 end
 
-deactivate cmd
+repl --> user : display command result
+deactivate cmdhandler
 deactivate repl
 
-note over user
-  Flow:    user → REPLSession → SlashCommandHandler → [command handler] → Renderer → user
-  State:   No state change (routing only, state managed by sub-commands)
-  Success: Command executed, result displayed (help text, confirmation, error)
-  Failure: Unknown command: display error message
-end note
 
 @enduml

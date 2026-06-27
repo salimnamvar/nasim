@@ -31,17 +31,6 @@ box "External" #F5F5F5
 end box
 
 
-note over user
-  Scope:          MCP-04 EXPOSE NasimTools — Expose nasim tools to external MCP clients
-  Preconditions:  Tools are registered in ToolRegistry; MCP server runtime is active
-  Contexts:       Called by external MCP clients via protocol
-  Excludes:       Connection; tool discovery; tool adaptation
-  Rollback:       Tool not executed; error returned to client
-  Design:         Server-side MCP runtime; validates tool existence before execution
-  Returns:
-    - Success: 200 OK — ToolResult(result)
-    - Failure: 404 NOT_FOUND: tool not found; 500 INTERNAL: execution failed
-end note
 
 
 == MCP-04 EXPOSE NasimTools ==
@@ -86,11 +75,5 @@ server --> agent : ToolResult(success=true, content="ToolResult")
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    MCP-04 → user → router → agent → server → registry(read tools) → client(ToolDefinitions) → client(execute) → registry(execute) → Done
-  State:   No state change
-  Success: 200 OK — ToolResult(result)
-  Failure: 404 NOT_FOUND: tool missing; 500 INTERNAL: execution failed
-end note
 
 @enduml

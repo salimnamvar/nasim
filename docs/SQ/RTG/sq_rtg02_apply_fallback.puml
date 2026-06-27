@@ -32,17 +32,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          RTG-02 APPLY Fallback — apply fallback chain when primary model fails
-  Preconditions:  Primary model failed; fallback chain configured
-  Contexts:       Called by AgentOrchestrator when RTG-01 primary selection fails at runtime
-  Excludes:       Initial model selection, task classification, runtime model switching
-  Rollback:       All models unavailable → FallbackError("all_models_unavailable")
-  Design:         Iterates fallback chain checking provider availability; returns first available model
-  Returns:
-    - Success: 200 OK — selected_model
-    - Failure: 503 Service Unavailable — all_models_unavailable
-end note
 
 == RTG-02 APPLY Fallback ==
 
@@ -81,11 +70,5 @@ deactivate router
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → ModelRouter → FallbackChain → loop check availability → first available → Result
-  State:   No state change (in-memory availability check)
-  Success: 200 OK — AgentEvent(Done) with selected_model
-  Failure: 503 Service Unavailable: all models unavailable — propagate error to user
-end note
 
 @enduml

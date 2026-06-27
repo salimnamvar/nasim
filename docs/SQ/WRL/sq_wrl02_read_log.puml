@@ -27,17 +27,6 @@ box "FileSystem Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          WRL-02 READ Log — sequential scan of wire log for replay
-  Preconditions:  Wire log file exists; session_id and filter parameters provided
-  Contexts:       Called by AgentOrchestrator for log replay, debugging, or audit
-  Excludes:       Event appending, seeking to specific turn, forking
-  Rollback:       No failure paths in current design; returns empty stream if no matches
-  Design:         Reads raw lines, deserializes per line, applies session+filter; supports truncation flag
-  Returns:
-    - Success: 200 OK — EventStream(events[], count, truncated)
-    - Failure: (none — returns empty stream on no matches)
-end note
 
 == wrl02 READ Log ==
 
@@ -68,11 +57,5 @@ deactivate logger
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → WireLogger → read file → deserialize loop → filter → collect → Result
-  State:   No state change (read-only)
-  Success: 200 OK — AgentEvent(Done) with EventStream(events[], count, truncated)
-  Failure: (none — returns empty EventStream when no matches)
-end note
 
 @enduml

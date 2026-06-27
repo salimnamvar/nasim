@@ -32,17 +32,6 @@ box "FileSystem Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          EDT-06 APPLY Function-Level — Edit a single function via AST-aware replace
-  Preconditions:  EditStrategy from EDT-01 selected function-level format; target file exists
-  Contexts:       Invoked via dynamic dispatch from EDT-01
-  Excludes:       Multi-file edits; diff-based editing; sandbox validation
-  Rollback:       File unchanged if AST validation fails
-  Design:         AST-aware replacement preserves surrounding code; validates AST integrity after edit
-  Returns:
-    - Success: 200 OK — EditResult(success, file_path, function_name)
-    - Failure: 400 BAD_REQUEST: AST validation failure or function not found
-end note
 
 
 == EDT-06 APPLY Function-Level ==
@@ -85,11 +74,5 @@ deactivate esm
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EDT-06 → user input → router → agent → esm → flc → fs(read) → ast(parse) → locate_function → replace_body → validate_ast → fs(write) → Done
-  State:   No state change
-  Success: 200 OK — EditResult(success, file_path, function_name)
-  Failure: 400 BAD_REQUEST: function not found or AST invalid — file unchanged
-end note
 
 @enduml

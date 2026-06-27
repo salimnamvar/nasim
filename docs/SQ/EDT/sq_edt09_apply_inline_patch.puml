@@ -29,17 +29,6 @@ box "FileSystem Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          EDT-09 APPLY Inline Patch — Apply inline patch with line-level precision
-  Preconditions:  EditStrategy from EDT-01 selected inline patch format; target file exists
-  Contexts:       Invoked via dynamic dispatch from EDT-01
-  Excludes:       Whole-file replacement; AST-based editing; sandbox validation
-  Rollback:       Patch rejected; original file preserved on context mismatch
-  Design:         Context-line validation prevents applying patches to wrong locations
-  Returns:
-    - Success: 200 OK — EditResult(success, file_path, lines_changed)
-    - Failure: 400 BAD_REQUEST: context mismatch
-end note
 
 
 == EDT-09 APPLY Inline Patch ==
@@ -84,11 +73,5 @@ deactivate esm
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EDT-09 → user input → router → agent → esm → ipc(parse → fs(read) → validate_context → apply_hunks → fs(write) → validate) → Done
-  State:   No state change
-  Success: 200 OK — EditResult(success, file_path, lines_changed)
-  Failure: 400 BAD_REQUEST: context mismatch — patch rejected, file unchanged
-end note
 
 @enduml

@@ -26,17 +26,6 @@ box "Session Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          AGT-10 COLLECT Subagent Result — Aggregate child agent results
-  Preconditions:  Child agent spawned via AGT-09, timeout specified
-  Contexts:       AGT-01 PROCESS User Task (after subagent completion)
-  Excludes:       Child execution internals, Parent context merging
-  Rollback:       Timeout → cancel child → PartialResult, Failure → ChildError
-  Design:         Timeout-based collection with partial result handling
-  Returns:
-    - Success: 200 result aggregated into parent context
-    - Failure: 408 PartialResult(timeout), 500 ChildError
-end note
 
 == AGT-10 COLLECT Subagent Result ==
 
@@ -82,11 +71,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 
 
-note over user
-  Flow:    AGT-10 → get child status → (completed|running|failed) → aggregate
-  State:   SPAWNED (child) → COLLECTING → THINKING
-  Success: 200 result aggregated from child completion
-  Failure: 408 PartialResult(timeout), 500 ChildError on child failure
-end note
 
 @enduml

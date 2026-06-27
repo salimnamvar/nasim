@@ -33,17 +33,6 @@ box "Config Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          EDT-01 SELECT Strategy — Choose optimal edit format for the target model
-  Preconditions:  User has provided file path and edit description; model_id is available
-  Contexts:       Called by AgentOrchestrator as entry to edit pipeline
-  Excludes:       Actual edit execution (EDT-02..10); file I/O; validation
-  Rollback:       No file changes; returns error if no compatible format found
-  Design:         Heuristic: ≤5 lines→SearchReplace, ≤50→UnifiedDiff, >50→FullRewrite; validates format compatibility with model
-  Returns:
-    - Success: 200 OK — EditStrategy(format, parameters, confidence)
-    - Failure: 400 BAD_REQUEST: no compatible strategy for model
-end note
 
 
 == EDT-01 SELECT Strategy ==
@@ -85,11 +74,5 @@ deactivate selector
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EDT-01 → user input → router → agent → selector → config(formats) → estimate size → select strategy → validate compat → return EditStrategy
-  State:   No state change
-  Success: 200 OK — EditStrategy(format, parameters, confidence)
-  Failure: 400 BAD_REQUEST: no compatible strategy — fallback to safe default
-end note
 
 @enduml

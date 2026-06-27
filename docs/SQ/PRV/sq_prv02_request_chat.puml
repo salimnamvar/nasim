@@ -31,17 +31,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          PRV-02 REQUEST Chat — Synchronous LLM chat completion via provider abstraction
-  Preconditions:  Provider registered (PRV-01); messages and tools are prepared
-  Contexts:       Called by AgentOrchestrator for non-streaming completions
-  Excludes:       Streaming (PRV-03); provider registration (PRV-01); backend selection (PRV-04)
-  Rollback:       No response stored; agent enters ERROR state
-  Design:         Synchronous blocking call; stores response in ChatStore
-  Returns:
-    - Success: 200 OK — LLMResponse(content, tool_calls)
-    - Failure: 503 SERVICE_UNAVAILABLE: provider unreachable
-end note
 
 
 == PRV-02 REQUEST Chat ==
@@ -80,11 +69,5 @@ deactivate agent
 deactivate router
 
 
-note over user
-  Flow:    PRV-02 → user → router → agent → provider → api(HTTP POST sync) → parse response → chat_store(store) → Done
-  State:   THINKING → IDLE
-  Success: 200 OK — LLMResponse(content, tool_calls)
-  Failure: 503 SERVICE_UNAVAILABLE: connection failed — agent enters ERROR state
-end note
 
 @enduml

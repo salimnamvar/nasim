@@ -36,17 +36,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          RTG-01 SELECT Model — model selection and fallback routing
-  Preconditions:  Model config loaded; provider capabilities available
-  Contexts:       Called by AgentOrchestrator at start of each inference request
-  Excludes:       Task classification, runtime model switching, fallback application
-  Rollback:       No supported model found → reads default model from FallbackChain; returns error "no_supported_model"
-  Design:         Reads config, classifies task, checks capabilities, resolves via fallback chain
-  Returns:
-    - Success: 200 OK — selected_model
-    - Failure: 400 Bad Request — no_supported_model
-end note
 
 == RTG-01 SELECT Model ==
 
@@ -87,11 +76,5 @@ deactivate router
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → ModelRouter → read config → classify task → read capabilities → resolve fallback → Result
-  State:   No state change (in-memory selection; config read-only)
-  Success: 200 OK — AgentEvent(Done) with selected_model
-  Failure: 400 Bad Request: no_supported_model — propagate error to user
-end note
 
 @enduml

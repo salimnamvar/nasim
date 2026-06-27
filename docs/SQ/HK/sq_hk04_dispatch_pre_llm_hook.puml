@@ -31,17 +31,6 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
-note over user
-  Scope:          HK-04 Dispatch Pre-LLM Hook — Execute hooks before LLM call
-  Preconditions:  Hooks registered for PreLLMCall event; messages are valid
-  Contexts:       Called by AgentOrchestrator before LLM invocation
-  Excludes:       Hook registration (HK-01), Tool hooks (HK-02, HK-03), Post-LLM dispatch (HK-05)
-  Rollback:       DENY action → LLM call aborted, HookResult returned immediately
-  Design:         Hooks execute in priority order; DENY action breaks the loop early
-  Returns:
-    - Success: 200 HookResult(action=ALLOW, modified_messages?)
-    - Failure: 200 HookResult(action=DENY, reason)
-end note
 
 == HK-04 DISPATCH Pre-LLM Hook ==
 
@@ -71,11 +60,5 @@ agent --> router : HookResult(action=ALLOW)
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    HK-04 → invoke agent → find hooks → loop priority → execute hook → DENY or continue
-  State:   No state change
-  Success: 200 HookResult(action=ALLOW, modified_messages?)
-  Failure: 200: DENY action — LLM call aborted, reason returned
-end note
 
 @enduml

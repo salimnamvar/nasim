@@ -29,17 +29,6 @@ box "Chat Group" #FFF3E0
 end box
 
 
-note over user
-  Scope:          RIM-03 RANK Results — PageRank ranking with chat-personalization for symbol importance
-  Preconditions:  SymbolGraph available from RIM-02; conversation history has recent tokens
-  Contexts:       Called by AgentOrchestrator before context injection to prioritize relevant symbols
-  Excludes:       Codebase indexing, embedding, semantic search, repo-map injection
-  Rollback:       (No explicit failure path — always produces ranked list)
-  Design:         PageRank (damping=0.85, max 50 iterations) + chat boost (weight=0.3) on mentioned symbols
-  Returns:
-    - Success: 200 OK — RankedSymbolList(symbols, scores)
-    - Failure: (none — always returns ranked list)
-end note
 
 == RIM-03 RANK Symbols ==
 
@@ -80,11 +69,5 @@ agent --> router : RankedSymbolList(symbols, scores)
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → SymbolRanker → get adjacency → get recent tokens → PageRank loop → chat boost → sort → Result
-  State:   No state change (in-memory computation)
-  Success: 200 OK — RankedSymbolList(symbols, scores)
-  Failure: (none — always returns ranked list)
-end note
 
 @enduml

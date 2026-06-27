@@ -31,17 +31,6 @@ box "Repository Group" #E8F5E9
   participant "ContextStore" as ctx_store
 end box
 
-note over user
-  Scope:          CTX-05 COMPACT Nodes — merge overlapping context nodes to reduce token usage
-  Preconditions:  ContextGraph nodes present; secondary Provider available for merge
-  Contexts:       Called by CTX-01 via ref
-  Excludes:       Node truncation, distillation, context injection
-  Rollback:       LLM merge failure → fallback: drop lowest-ranked nodes
-  Design:         Only merges if overlap detected; skips if no candidates found
-  Returns:
-    - Success: 200 + CompactionResult(nodes_removed, tokens_saved)
-    - Failure: 200 + CompactionResult(nodes_dropped, tokens_saved) on merge failure
-end note
 
 == CTX-05 Compact Nodes ==
 
@@ -80,11 +69,5 @@ break Secondary LLM merge fails
     comp --> pipe : CompactionResult(nodes_dropped, tokens_saved)
 end
 
-note over user
-  Flow:    CTX-05 → identify overlapping nodes → calculate merge candidates → merge via LLM → store
-  State:   No state change (ContextGraph nodes replaced by merged nodes)
-  Success: 200 + CompactionResult(nodes_removed, tokens_saved)
-  Failure: 200: LLM merge fails — fallback to drop lowest-ranked nodes
-end note
 
 @enduml

@@ -27,17 +27,6 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
-note over user
-  Scope:          HK-06 Validate Hook Result — Validate HookResult schema and action field
-  Preconditions:  HookResult is available from hook execution
-  Contexts:       Called internally by HookManager during hook dispatch (HK-02..HK-05)
-  Excludes:       Hook registration (HK-01), Hook execution, Tool/LLM operations
-  Rollback:       Invalid schema → DENY result; unknown action → DENY result
-  Design:         Schema validation runs first; only ALLOW, DENY, MODIFY are valid actions; anything else yields DENY
-  Returns:
-    - Success: 200 Validated HookResult
-    - Failure: 200 HookResult(action=DENY)
-end note
 
 == HK-06 VALIDATE Hook Result ==
 
@@ -65,11 +54,5 @@ agent --> router : validated result
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    HK-06 → invoke agent → check schema → check action field → validated or DENY
-  State:   No state change
-  Success: 200 Validated HookResult
-  Failure: 200: invalid schema or unknown action — DENY result returned
-end note
 
 @enduml

@@ -25,17 +25,6 @@ box "Sandbox Group" #F3E5F5
   participant "SandboxPolicy" as policy
 end box
 
-note over user
-  Scope:          SBX-02 Apply Sandbox Policy — Load and apply sandbox security policy
-  Preconditions:  Policy file may or may not exist
-  Contexts:       Called at startup; called when policy is updated
-  Excludes:       Command isolation (SBX-01), monitoring (SBX-03), resource limits (SBX-04)
-  Rollback:       Policy file not found → default policy; invalid rules → revert to defaults, error
-  Design:         File-based policy; validation before apply; default fallback on missing/invalid
-  Returns:
-    - Success: Result(success=true, data={rules_count})
-    - Failure: Result(success=false, error="policy_invalid")
-end note
 
 == SBX-02 APPLY Sandbox Policy ==
 
@@ -74,12 +63,6 @@ deactivate executor
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    SBX-02 → load policy → validate rules → apply → 200 OK or error
-  State:   No state change
-  Success: Result(success=true, data={rules_count})
-  Failure: Result(success=false, error="policy_invalid"): invalid rules — revert to defaults
-end note
 
 
 @enduml

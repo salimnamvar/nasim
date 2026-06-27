@@ -25,17 +25,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as ssn
 end box
 
-note over user
-  Scope:          CLI-08 LIST Sessions
-  Preconditions:  REPLSession active, SessionStore accessible
-  Contexts:       Called via /sessions slash command from CLI-01
-  Excludes:       Normal message flow, model switching, output streaming
-  Rollback:       SessionStore unavailable → error
-  Design:         Table formatting for session display; delegates to SSN-03 via Service
-  Returns:
-    - Success: CommandResult with formatted session table
-    - Failure: Error if SessionStore unavailable
-end note
 
 
 == CLI-08 LIST Sessions ==
@@ -63,12 +52,6 @@ deactivate cmd
 router --> user : displayed session list
 deactivate router
 
-note over user
-  Flow:    CLI-08 → router → cmd → svc → SSN-03 → svc → cmd → router → user
-  State:   No state change
-  Success: CommandResult with formatted session table
-  Failure: SessionStore unavailable — error displayed
-end note
 
 
 @enduml

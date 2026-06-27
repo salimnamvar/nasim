@@ -1,74 +1,58 @@
 @startuml sq_cli04_read_cli_arguments
 !include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-04 — Read CLI Arguments
+' Title:     CLI-04 — READ CLI Arguments
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Startup argument parsing and config initialization
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
+
+title nasim — CLI-04 READ CLI Arguments
 
 actor "User" as user
 
-note over user
-  Scope:          CLI-04 — Read CLI Arguments
-  Preconditions:  CLI process started
-  Contexts:       Entry point, called at CLI startup
-  Excludes:       Runtime input processing, slash commands, output streaming
-  Rollback:       Invalid arguments → exit(1), Invalid config → ConfigError displayed
-  Design:         Config priority: CLI args > env vars > project config > global config
-  Returns:
-    - Success: Config object, start REPL or single-shot mode
-    - Failure: exit(1) for invalid args, ConfigError message for invalid config
-end note #E3F2FD
-  participant "ArgParser" as parser
+box "CLI Interface Container" #E3F2FD
+  participant "ArgParser" as argparser
 end box
-box "Service Group" #FFF3E0
-  participant "ConfigLoader" as cfg
-end box
-box "Repository Group" #E8F5E9
-  participant "SessionRepository" as session_repo
+box "Config Group" #E8F5E9
+  participant "ConfigLoader" as config
 end box
 
 
-== CLI-04 Parse CLI Arguments ==
+== CLI-04 READ CLI Arguments ==
 
-user -> parser : nasim [args]
-activate parser
-parser -> parser : argparse.ArgumentParser.parse_args()
-parser -> cfg : load(cli_args=argv)
-activate cfg
-cfg -> cfg : read ~/.nasim/config.yaml
-cfg -> cfg : read .nasim/config.yaml
-cfg -> cfg : read NASIM_* env vars
-cfg -> cfg : merge: CLI > env > project > global
-cfg -> cfg : validate Config fields
-cfg --> parser : Config object
-deactivate cfg
+user -> argparser : pass CLI arguments (argv)
+activate argparser
 
-break Invalid arguments
-    parser -> parser : print usage
-    parser --> user : exit(1)
+argparser -> argparser : cli04 PARSE Argv({argv})
+argparser -> argparser : validate required flags
+
+alt invalid arguments
+    argparser --> user : error: invalid argument — {detail}
+else valid arguments
+    argparser -> config : cfg01 LOAD Config({cli_args})
+    activate config
+
+    config -> config : cfg01 READ Global Defaults(~/.nasim/config.yaml)
+    config -> config : cfg01 READ Project Overrides(.nasim/config.yaml)
+    config -> config : cfg01 READ Env Overrides(NASIM_*)
+    config -> config : cfg03 APPLY Layered Config(global, project, env, cli)
+
+    break invalid YAML or missing required fields
+        config --> argparser : ConfigError({detail})
+        argparser --> user : error: config load failed — {detail}
+    end
+
+    config --> argparser : Config object
+    deactivate config
+
+    argparser --> user : Config loaded — nasim ready
 end
 
-break Invalid config
-    cfg -> cfg : raise ConfigError
-    cfg --> parser : ConfigError
-    deactivate cfg
-    parser --> user : "Config error: details"
-end
+deactivate argparser
 
-parser --> user : Config ready, start REPL or single-shot
-
-deactivate parser
-
-note over user
-  Flow:    user → ArgParser → ConfigLoader → Config object → start REPL
-  State:   No state change
-  Success: Config object created, REPL or single-shot mode initialized
-  Failure: Invalid arguments: exit(1); Invalid config: ConfigError displayed
-end note
 
 @enduml

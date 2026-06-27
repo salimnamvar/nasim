@@ -25,17 +25,6 @@ box "Session Group" #E8F5E9
 end box
 database "Session Store" as store
 
-note over user
-  Scope:          SSN-08 Branch Session — Fork session into a new branch for parallel exploration
-  Preconditions:  Source session exists with messages up to from_turn
-  Contexts:       Called by user-facing branch command
-  Excludes:       Revert, snapshot, search
-  Rollback:       Copy failure → 500 INTERNAL, branch not created
-  Design:         Parent-child link; generates new session_id; calls WRL-04 for wire log fork
-  Returns:
-    - Success: 200 OK — BranchCreated(branch_session_id, parent_id)
-    - Failure: 500 INTERNAL — copy failure
-end note
 
 == SSN-08 Branch Session ==
 
@@ -71,12 +60,6 @@ break Copy failure
     agent --> router : AgentEvent(Error)
 end
 
-note over user
-  Flow:    SSN-08 → load messages → generate id → create branch → copy messages → 200 OK
-  State:   No state change
-  Success: 200 OK — BranchCreated(branch_session_id, parent_id)
-  Failure: 500 INTERNAL: copy failure — branch not created
-end note
 
 
 @enduml

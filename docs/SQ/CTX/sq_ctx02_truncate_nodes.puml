@@ -24,17 +24,6 @@ box "Provider Group" #FFF3E0
   participant "Provider" as provider
 end box
 
-note over user
-  Scope:          CTX-02 TRUNCATE Nodes — truncate context when token budget exceeded
-  Preconditions:  ContextGraph populated; ContextPrioritizer scores available; token budget exceeded
-  Contexts:       Called by CTX-01 via ref
-  Excludes:       Node importance scoring, context injection
-  Rollback:       LLM failure → fallback to truncate oldest messages
-  Design:         Protects system prompt nodes from truncation; uses secondary LLM for summarization
-  Returns:
-    - Success: 200 + shortened messages (summarized)
-    - Failure: 200 + shortened messages (truncated oldest fallback)
-end note
 
 == CTX-02 TRUNCATE Nodes ==
 
@@ -71,11 +60,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    CTX-02 → query importance scores → sort ascending → protect system prompt → drop lowest → summarize via LLM
-  State:   No state change (messages shortened in-place)
-  Success: 200 + shortened messages (summarized)
-  Failure: 200: LLM call fails — fallback to truncate oldest messages
-end note
 
 @enduml

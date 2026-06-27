@@ -25,17 +25,6 @@ end box
 participant "MemoryStore" as mem
 
 
-note over user
-  Scope:          TL-19 PERSIST Memory — Persist knowledge to memory via MemoryTool
-  Preconditions:  MemoryTool initialized; key, value, and scope provided
-  Contexts:       Called by knowledge preservation, learning capture, project memory
-  Excludes:       Memory recall, deletion, scope migration
-  Rollback:       Storage failure → ToolResult(success=False); no partial state
-  Design:         Delegates to MEM-01 persist operation; scoped storage
-  Returns:
-    - Success: ToolResult(success=True)
-    - Failure: ToolResult(success=False) — persist failed
-end note
 
 == TL-19 Persist Memory ==
 
@@ -69,11 +58,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-19 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → MemoryTool → MemoryStore (MEM-01 persist)
-  State:   No state change
-  Success: 200 + ToolResult(success=True)
-  Failure: ToolResult(success=False): persist failed
-end note
 
 @enduml

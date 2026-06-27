@@ -23,17 +23,6 @@ box "Session Group" #E8F5E9
 end box
 database "Session Directory" as dir
 
-note over user
-  Scope:          SSN-02 Read Session — Load conversation history from disk
-  Preconditions:  Session directory exists on disk
-  Contexts:       Called by SSN-04 (Restore Session) and AGT-15 (agent process loop)
-  Excludes:       Session creation, versioning, search
-  Rollback:       File not found → 404 NOT_FOUND, start fresh session
-  Design:         JSONL deserialization; file-per-session model; graceful 404 fallback
-  Returns:
-    - Success: 200 OK — Session(id, created_at, messages)
-    - Failure: 404 NOT_FOUND — session file missing
-end note
 
 == SSN-02 Load Session ==
 
@@ -63,11 +52,5 @@ deactivate store
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    SSN-02 → read session.jsonl → deserialize → 200 OK or 404
-  State:   No state change
-  Success: 200 OK — Session(id, created_at, messages)
-  Failure: 404 NOT_FOUND: session file missing — start fresh session
-end note
 
 @enduml

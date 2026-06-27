@@ -28,17 +28,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          CFG-03 Apply Layered Config — Merge config layers with skip-None precedence
-  Preconditions:  Global defaults, project overrides, env overrides available; CLI args provided
-  Contexts:       Called by CFG-01 as part of the layered merge step
-  Excludes:       Config validation (CFG-02), failure paths, persistence
-  Rollback:       No failure path — merge always succeeds with skip-None precedence
-  Design:         Global defaults → project overrides → env overrides → CLI args; None values skipped
-  Returns:
-    - Success: 200 Config merged
-    - Failure: (none)
-end note
 
 == CFG-03 APPLY Layered Config ==
 
@@ -60,11 +49,5 @@ deactivate agent
 deactivate router
 
 
-note over user
-  Flow:    CFG-03 → merge global → merge project → merge env → merge CLI args → return merged config
-  State:   No state change
-  Success: 200 Config merged
-  Failure: (none)
-end note
 
 @enduml

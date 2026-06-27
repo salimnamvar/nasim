@@ -29,17 +29,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          AGT-14 HANDLE Error — Classify and recover from errors
-  Preconditions:  Error occurred in agent execution, ErrorBoundary initialized
-  Contexts:       AGT-01 PROCESS User Task, AGT-02 DISPATCH Tool Call
-  Excludes:       Specific error types, External system error handling
-  Rollback:       Retryable → retry with backoff, Recoverable → fallback, Unrecoverable → abort
-  Design:         Three-tier recovery: retry/fallback/abort with safety checks
-  Returns:
-    - Success: 200 RecoveryAction(retry|fallback)
-    - Failure: 500 RecoveryAction(abort) with error logging
-end note
 
 == AGT-14 HANDLE Error ==
 
@@ -74,11 +63,5 @@ agent --> router : AgentEvent(Error)
 deactivate agent
 
 
-note over user
-  Flow:    AGT-14 → classify error → determine severity → (retry|fallback|abort)
-  State:   ERROR → RETRYING | FALLBACK | ABORTED
-  Success: 200 RecoveryAction with appropriate recovery strategy
-  Failure: 500 RecoveryAction(abort) on unrecoverable errors
-end note
 
 @enduml

@@ -24,17 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user
-  Scope:          API-03 READ Session
-  Preconditions:  Session must exist
-  Contexts:       Parent: HTTP Client request
-  Excludes:       Session creation, update, deletion
-  Rollback:       No state change on failure
-  Design:         Read-only; 404 if session does not exist
-  Returns:
-    - Success: 200 OK — {session: {id, messages, created_at, updated_at}}
-    - Failure: 404 NOT_FOUND — session does not exist
-end note
 
 
 == API-03 READ Session ==
@@ -64,12 +53,6 @@ deactivate svc
 router --> user : 200 OK {session: {id, messages, created_at, updated_at}}
 deactivate router
 
-note over user
-  Flow:    API-03 → router → svc → store → svc → router → user
-  State:   No state change
-  Success: 200 OK — {session: {id, messages, created_at, updated_at}}
-  Failure: 404 NOT_FOUND: session does not exist — verify session ID
-end note
 
 
 @enduml

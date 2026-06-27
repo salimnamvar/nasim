@@ -1,7 +1,7 @@
 @startuml sq_cli06_request_approval
 !include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-06 — Request Approval
+' Title:     CLI-06 — REQUEST Approval
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Display approval prompt and collect developer decision
 ' Milestone: v1.0
@@ -14,58 +14,51 @@ title nasim — CLI-06 REQUEST Approval
 
 actor "User" as user
 
-note over user
-  Scope:          CLI-06 — Request Approval
-  Preconditions:  AgentOrchestrator active, tool call pending approval
-  Contexts:       Called by agent during tool execution when safety requires approval
-  Excludes:       Normal message flow, slash commands, output streaming
-  Rollback:       Timeout or denial → tool call denied
-  Design:         Interactive approval with timeout, SafetyCoordinator determines approval requirement
-  Returns:
-    - Success: Approved, tool call proceeds
-    - Failure: Denied (user rejection or timeout)
-end note #E3F2FD
-  participant "Renderer" as renderer
+box "CLI Interface Container" #E3F2FD
+  participant "REPLSession" as repl
 end box
-box "Service Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
 end box
-box "Safety Group" #FFF3E0
+box "Agent Group" #FFF3E0
   participant "SafetyCoordinator" as safety
 end box
-box "Repository Group" #E8F5E9
-  participant "SessionRepository" as session_repo
-end box
 
 
-== CLI-06 Request Approval ==
+== CLI-06 REQUEST Approval ==
 
-agent -> safety : requires_approval(tool_call)
+user -> repl : await approval prompt
+activate repl
+
+repl -> router : cli06 REQUEST Approval({tool_name}, {args})
+activate router
+
+router -> safety : saf02 REQUEST Approval({tool_name}, {args})
 activate safety
-safety --> agent : true
-deactivate safety
 
-agent -> renderer : request_approval(tool_description, args)
-activate renderer
+safety -> repl : saf02 DISPLAY Approval({tool_name}, {args})
 
-renderer --> user : "Allow {tool}({args})? [y/N]"
-user --> renderer : decision (y/n/timeout)
+hnote over safety #FFF9C4 : **State: AWAITING_APPROVAL**
 
-alt approved
-    renderer --> agent : Approved
-else denied
-    renderer --> agent : Denied
-else timeout
-    renderer --> agent : Denied(timeout)
+repl --> user : "Allow {tool_name}({args})? [y/N]"
+
+user -> repl : y or N
+
+alt user = y
+    repl -> safety : saf02 APPROVE Action({tool_name})
+    safety --> router : approved
+    router --> repl : 200 OK — Approved
+    repl --> user : "Approved — executing {tool_name}"
+else user = N
+    repl -> safety : saf02 REJECT Action({tool_name})
+    safety --> router : rejected
+    router --> repl : 403 PERMISSION_DENIED — Rejected by user
+    repl --> user : "Rejected — {tool_name} will not execute"
 end
 
-deactivate renderer
+deactivate safety
+deactivate router
+deactivate repl
 
-note over user
-  Flow:    AgentOrchestrator → SafetyCoordinator → Renderer → user → Renderer → AgentOrchestrator
-  State:   No state change
-  Success: Approved, tool call proceeds
-  Failure: Denied: user rejection or timeout — tool call blocked
-end note
 
 @enduml

@@ -24,17 +24,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryIndex" as index
 end box
 
-note over user
-  Scope:          MEM-03 SEARCH Knowledge
-  Preconditions:  MemoryIndex accessible with FTS5 virtual table
-  Contexts:       Called by AgentOrchestrator during task processing
-  Excludes:       Knowledge persist, recall, scope filtering
-  Rollback:       No results returns empty list
-  Design:         BM25-ranked FTS5 search with scope filters
-  Returns:
-    - Success: ranked_results
-    - Failure: empty list (no results found)
-end note
 
 
 user -> router : types input
@@ -59,12 +48,6 @@ deactivate index
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    MEM-03 → agent → index → index(FTS5) → agent
-  State:   No state change
-  Success: ranked_results
-  Failure: empty list — no matching knowledge found
-end note
 
 
 @enduml

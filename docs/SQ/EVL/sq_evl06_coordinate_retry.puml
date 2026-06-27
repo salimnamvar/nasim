@@ -28,17 +28,6 @@ box "Sandbox Group" #F3E5F5
 end box
 
 
-note over user
-  Scope:          EVL-06 COORDINATE Retry — Retry with feedback on failure
-  Preconditions:  Edit or check has failed; backup exists; retry count < max
-  Contexts:       Called by EvaluationEngine after failed checks (EVL-01/03/05)
-  Excludes:       Turn budget (EVL-09); repetition detection (EVL-08)
-  Rollback:       Backup restored; feedback injected into context for retry
-  Design:         Max 3 retries; restores backup and injects failure feedback
-  Returns:
-    - Success: 200 OK — RetryResult(retry_count, feedback_context, continue=true)
-    - Failure: 429 TOO_MANY_REQUESTS: RetryExhausted(retry_count, final_error)
-end note
 
 
 == EVL-06 COORDINATE Retry ==
@@ -71,11 +60,5 @@ deactivate retry
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EVL-06 → agent → retry(increment → check limit) → pass: fs(restore) → feedback(inject) → continue / fail: RetryExhausted
-  State:   No state change
-  Success: 200 OK — RetryResult(retry_count, feedback_context, continue=true)
-  Failure: 429 TOO_MANY_REQUESTS: max retries exceeded — agent stops
-end note
 
 @enduml

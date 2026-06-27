@@ -29,17 +29,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          AGT-08 APPROVE Plan — Execute queued tool calls
-  Preconditions:  Plan queued via AGT-07, user approval received (/approve)
-  Contexts:       /approve API endpoint
-  Excludes:       Safety pipeline (AGT-15), Individual tool error handling
-  Rollback:       Sequential execution, partial results on failure
-  Design:         Sequential execution of queued calls, result aggregation
-  Returns:
-    - Success: 200 AgentEvent(Done) with all tool results
-    - Failure: 400 partial results if any tool execution fails
-end note
 
 == AGT-08 APPROVE Plan ==
 
@@ -67,11 +56,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 
 
-note over user
-  Flow:    AGT-08 → APPROVE Plan → loop AGT-02 → collect results
-  State:   PLAN_QUEUED → TOOL_EXEC (per tool) → THINKING
-  Success: 200 AgentEvent(Done) with aggregated tool results
-  Failure: 400 partial results if any queued tool execution fails
-end note
 
 @enduml

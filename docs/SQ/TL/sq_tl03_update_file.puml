@@ -25,17 +25,6 @@ end box
 participant "Host Filesystem" as fs
 
 
-note over user
-  Scope:          TL-03 UPDATE File — Replace an exact string in a file
-  Preconditions:  File path, old_string, and new_string provided; file must exist
-  Contexts:       Called by any UC requiring precise text replacement (code editing, refactoring)
-  Excludes:       Regex replacement, multi-file edits, binary file editing
-  Rollback:       FileNotFoundError → ToolResult(success=False); old_string not found → ToolResult(success=False); old_string found N times → ToolResult(success=False); no partial writes on failure
-  Design:         Requires exact single match; reads full file, replaces, writes back; uses updateMask for field selection
-  Returns:
-    - Success: ToolResult(success=True, content='Edited: replaced 1 occurrence')
-    - Failure: ToolResult(success=False) — FileNotFoundError, ambiguous/missing match
-end note
 
 == TL-03 EDIT File ==
 
@@ -82,11 +71,5 @@ end
     deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-03 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → EditFileTool → Host Filesystem.read_text() + write_text()
-  State:   No state change
-  Success: 200 + ToolResult(success=True, content='Edited: replaced 1 occurrence')
-  Failure: ToolResult(success=False): FileNotFoundError — file not found | count==0 — old_string not found | count>1 — old_string found N times (ambiguous)
-end note
 
 @enduml

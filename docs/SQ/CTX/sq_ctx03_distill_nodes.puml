@@ -26,17 +26,6 @@ box "Repository Group" #E8F5E9
   participant "ContextStore" as ctx_store
 end box
 
-note over user
-  Scope:          CTX-03 DISTILL Nodes — summarize old message exchanges into compact form
-  Preconditions:  Old messages present in conversation history; Provider available
-  Contexts:       Called by CTX-01 via ref
-  Excludes:       Node truncation, context injection
-  Rollback:       Summary empty or provider fails → use truncated raw content as summary
-  Design:         Summary stored as system role message in ContextStore
-  Returns:
-    - Success: 200 + summary message stored
-    - Failure: 200 + truncated raw content used as summary
-end note
 
 == CTX-03 Summarize Old Exchanges ==
 
@@ -71,11 +60,5 @@ deactivate compactor
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    CTX-03 → build summary prompt → LLM summarize → create summary message → store
-  State:   No state change (old messages replaced by summary in ContextStore)
-  Success: 200 + summary message stored
-  Failure: 200: LLM empty/fails — use truncated raw content as summary
-end note
 
 @enduml

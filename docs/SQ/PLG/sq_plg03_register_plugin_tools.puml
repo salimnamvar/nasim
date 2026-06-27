@@ -23,17 +23,6 @@ box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over user
-  Scope:          PLG-03 Register Plugin Tools — Registers all tools declared in a plugin manifest
-  Preconditions:  Plugin manifest loaded and parsed successfully
-  Contexts:       Called by PLG-05 Enable Plugin
-  Excludes:       Hook registration, plugin discovery
-  Rollback:       Name collision → log warning, skip tool
-  Design:         Iterates manifest tools, registers each into ToolRegistry by plugin::tool_name
-  Returns:
-    - Success: 200 + all tools registered
-    - Failure: 200 with skipped tools logged as warnings
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -61,11 +50,5 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    PLG-03 → enumerate tools → loop: register(plugin::name, handler) → return
-  State:   No state change
-  Success: 200 + all tools registered
-  Failure: 200 — name collision: log warning, skip duplicate tool
-end note
 
 @enduml

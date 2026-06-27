@@ -28,17 +28,6 @@ box "Safety Group" #FFF3E0
 end box
 
 
-note over user
-  Scope:          AGT-15 DISPATCH Safety Pipeline — Execute safety checks
-  Preconditions:  Tool call received, SafetyCoordinator initialized
-  Contexts:       AGT-02 DISPATCH Tool Call (before tool execution)
-  Excludes:       Tool execution, Error handling, Observability logging
-  Rollback:       Injection → block, Egress → flag, Permission → deny
-  Design:         Three-stage pipeline: injection scan, egress inspect, permission check
-  Returns:
-    - Success: 200 SafetyPassed (all checks passed)
-    - Failure: 400 SafetyViolation(injection|egress|permission)
-end note
 
 == AGT-15 DISPATCH Safety Pipeline ==
 
@@ -83,11 +72,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 
 
-note over user
-  Flow:    AGT-15 → injection scan → egress inspect → permission check
-  State:   SAFETY_CHECKING → PASSED | BLOCKED
-  Success: 200 SafetyPassed (all three safety stages passed)
-  Failure: 400 SafetyViolation(injection|egress|permission) on any check failure
-end note
 
 @enduml

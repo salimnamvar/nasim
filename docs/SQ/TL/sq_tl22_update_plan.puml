@@ -24,17 +24,6 @@ box "Tool Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          TL-22 UPDATE Plan — Update status or content of an existing plan step
-  Preconditions:  Plan step exists with given step_id
-  Contexts:       Called by plan progress tracking, step completion, workflow management
-  Excludes:       Plan step creation, deletion, bulk updates
-  Rollback:       Step not found → ToolResult(success=False); Invalid status transition → ToolResult(success=False); no partial state
-  Design:         Uses updateMask for partial updates; enforces valid state transitions
-  Returns:
-    - Success: ToolResult(success=True, step)
-    - Failure: ToolResult(success=False) — not found, invalid transition
-end note
 
 == TL-22 Update Plan ==
 
@@ -71,11 +60,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-22 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → PlanTool (update fields)
-  State:   No state change
-  Success: 200 + ToolResult(success=True, step)
-  Failure: ToolResult(success=False): step not found | invalid transition
-end note
 
 @enduml

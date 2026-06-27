@@ -26,17 +26,6 @@ box "Edit Strategy Group" #FFF3E0
 end box
 
 
-note over user
-  Scope:          EDT-05 APPLY Fenced Block — Apply fenced code block format edit
-  Preconditions:  EditStrategy from EDT-01 selected fenced block format; target file exists
-  Contexts:       Invoked via dynamic dispatch from EDT-01
-  Excludes:       Strategy selection (EDT-01); unified diff; AST-based editing
-  Rollback:       File unchanged if section not found
-  Design:         Matches fenced blocks by content; replaces matching section
-  Returns:
-    - Success: 200 OK — ToolResult(success=True)
-    - Failure: 400 BAD_REQUEST: BlockError(section_not_found)
-end note
 
 
 == EDT-05 APPLY Fenced Block ==
@@ -66,11 +55,5 @@ deactivate mgr
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EDT-05 → user input → router → agent → mgr → coder(extract block, locate section, replace) → Done
-  State:   No state change
-  Success: 200 OK — ToolResult(success=True)
-  Failure: 400 BAD_REQUEST: section_not_found — file unchanged
-end note
 
 @enduml

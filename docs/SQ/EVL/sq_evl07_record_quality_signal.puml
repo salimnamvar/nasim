@@ -27,17 +27,6 @@ box "Storage Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          EVL-07 RECORD Quality Signal — Record accept/reject quality signal with feedback
-  Preconditions:  Task has been evaluated; decision (accept/reject) is made
-  Contexts:       Called by EvaluationEngine for quality tracking
-  Excludes:       Retry coordination; LLM validation; success checks
-  Rollback:       Signal not recorded; original state preserved
-  Design:         Timestamped signal records persisted to SignalStore
-  Returns:
-    - Success: 200 OK — SignalRecorded(signal_id)
-    - Failure: 500 INTERNAL: persist failure
-end note
 
 
 == EVL-07 RECORD Quality Signal ==
@@ -64,11 +53,5 @@ deactivate engine
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EVL-07 → agent → engine → signal(build record) → store(persist) → Done
-  State:   No state change
-  Success: 200 OK — SignalRecorded(signal_id)
-  Failure: 500 INTERNAL: persist failure — signal lost, non-critical
-end note
 
 @enduml

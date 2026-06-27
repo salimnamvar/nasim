@@ -30,17 +30,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          EVL-02 CHECK Task Completion — Evaluate task completion against defined criteria
-  Preconditions:  Task exists with defined completion criteria
-  Contexts:       Called by EvaluationEngine during task lifecycle
-  Excludes:       Success checks (EVL-03); LLM validation (EVL-04); retry (EVL-06)
-  Rollback:       Evaluation is read-only; no state change
-  Design:         Predicate-based evaluation per criterion; aggregates to boolean completion
-  Returns:
-    - Success: 200 OK — CompletionStatus(completed, details[])
-    - Failure: 400 BAD_REQUEST: completion criteria not met
-end note
 
 
 == EVL-02 CHECK Task Completion ==
@@ -72,11 +61,5 @@ deactivate engine
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EVL-02 → agent → engine → evaluator(loop: extract → query_state → evaluate) → aggregate → Done
-  State:   No state change
-  Success: 200 OK — CompletionStatus(completed, details[])
-  Failure: 400 BAD_REQUEST: criteria not met — continue or retry
-end note
 
 @enduml

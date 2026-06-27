@@ -26,17 +26,6 @@ box "Provider Group" #FFF3E0
 end box
 
 
-note over user
-  Scope:          PRV-01 REGISTER Provider — Provider instantiation from config
-  Preconditions:  Config file contains valid provider configuration with provider name and credentials
-  Contexts:       Called by AgentOrchestrator during startup or config reload
-  Excludes:       Chat requests (PRV-02/03); backend selection logic (PRV-04)
-  Rollback:       ConfigError raised; no provider instance created; agent enters ERROR state
-  Design:         Factory pattern dispatches to Ollama/OpenAI/Anthropic based on config.provider string
-  Returns:
-    - Success: 200 OK — Provider instance ready
-    - Failure: 400 BAD_REQUEST: unknown provider type
-end note
 
 
 == PRV-01 REGISTER Provider ==
@@ -72,11 +61,5 @@ deactivate agent
 deactivate router
 
 
-note over user
-  Flow:    PRV-01 → user → router → agent → factory(lookup config) → instantiate provider → Done
-  State:   No state change
-  Success: 200 OK — Provider instance ready
-  Failure: 400 BAD_REQUEST: unknown provider type — agent enters ERROR state
-end note
 
 @enduml

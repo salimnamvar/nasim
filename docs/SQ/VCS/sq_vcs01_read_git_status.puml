@@ -28,17 +28,6 @@ box "External" #F5F5F5
 end box
 
 
-note over user
-  Scope:          VCS-01 READ Git Status — read working tree and staged changes
-  Preconditions:  Git repository exists in project root; git CLI available
-  Contexts:       Called by AgentOrchestrator before commit/diff operations
-  Excludes:       Diff computation, commit creation, branch switching
-  Rollback:       Not a git repo → return error "not_a_git_repository"
-  Design:         Uses porcelain output for stable parsing; no side effects
-  Returns:
-    - Success: 200 OK — {staged, modified, untracked}
-    - Failure: 400 Bad Request — not_a_git_repository
-end note
 
 == VCS-01 READ Git Status ==
 
@@ -65,11 +54,5 @@ deactivate status
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    User → ServerRouter → AgentOrchestrator → GitStatus → git status → parse → Result
-  State:   No state change (read-only)
-  Success: 200 OK — AgentEvent(Done) with {staged, modified, untracked}
-  Failure: 400 Bad Request: not_a_git_repository — propagate error to user
-end note
 
 @enduml

@@ -29,17 +29,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          AGT-13 SWITCH Persona — Unload current, load new persona
-  Preconditions:  Current persona loaded, new_persona_name provided
-  Contexts:       AGT-01 PROCESS User Task, /persona switch endpoint
-  Excludes:       Persona configuration creation, Task context preservation
-  Rollback:       Invalid new config → reload previous persona, PersonaSwitchFailed
-  Design:         Atomic switch with previous config rollback on failure
-  Returns:
-    - Success: 200 PersonaSwitched with new persona config
-    - Failure: 400 PersonaSwitchFailed (retains previous persona)
-end note
 
 == AGT-13 SWITCH Persona ==
 
@@ -74,11 +63,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 
 
-note over user
-  Flow:    AGT-13 → unload current → get new config → apply or rollback
-  State:   PERSONA_ACTIVE → UNLOADING → PERSONA_ACTIVE (new) or PERSONA_ACTIVE (previous)
-  Success: 200 PersonaSwitched with new persona configuration
-  Failure: 400 PersonaSwitchFailed (retains previous persona on invalid config)
-end note
 
 @enduml

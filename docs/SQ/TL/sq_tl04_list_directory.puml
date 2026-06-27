@@ -25,17 +25,6 @@ end box
 participant "Host Filesystem" as fs
 
 
-note over user
-  Scope:          TL-04 LIST Directory — List files and directories at a path
-  Preconditions:  Directory path provided by user; directory exists
-  Contexts:       Called by agent exploration, file browsing, project navigation
-  Excludes:       File content reading, recursive directory traversal, file metadata
-  Rollback:       FileNotFoundError → ToolResult(success=False); not a directory → ToolResult(success=False); no partial state
-  Design:         Paginated results (default 100 entries); formats dirs with d/ prefix; sorted output
-  Returns:
-    - Success: ToolResult(success=True, content=formatted_listing, nextPageToken)
-    - Failure: ToolResult(success=False) — FileNotFoundError, not a directory
-end note
 
 == TL-04 LIST Directory ==
 
@@ -78,11 +67,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-04 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → DirTool → Host Filesystem.iterdir()
-  State:   No state change
-  Success: 200 + ToolResult(success=True, content=formatted_listing, nextPageToken)
-  Failure: ToolResult(success=False): FileNotFoundError — path not found | not a directory — not a directory
-end note
 
 @enduml

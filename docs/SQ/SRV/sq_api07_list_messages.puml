@@ -24,17 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user
-  Scope:          API-07 LIST Messages
-  Preconditions:  Session must exist
-  Contexts:       Parent: HTTP Client request
-  Excludes:       Session management, message dispatch
-  Rollback:       No state change on failure
-  Design:         Paginated message read; session existence check via Service
-  Returns:
-    - Success: 200 OK — {messages: [...], next_page_token: string}
-    - Failure: 404 NOT_FOUND — session does not exist
-end note
 
 
 == API-07 LIST Messages ==
@@ -63,12 +52,6 @@ end
 deactivate svc
 deactivate router
 
-note over user
-  Flow:    API-07 → router → svc → store → svc → router → user
-  State:   No state change
-  Success: 200 OK — {messages: [...], next_page_token: string}
-  Failure: 404 NOT_FOUND: session does not exist — verify session ID
-end note
 
 
 @enduml

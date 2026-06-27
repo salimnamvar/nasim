@@ -1,7 +1,7 @@
 @startuml sq_cli05_enable_plan_mode
 !include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-05 — Enable Plan Mode
+' Title:     CLI-05 — ENABLE Plan Mode
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Toggle plan mode via slash command
 ' Milestone: v1.0
@@ -14,55 +14,51 @@ title nasim — CLI-05 ENABLE Plan Mode
 
 actor "User" as user
 
-note over user
-  Scope:          CLI-05 — Enable Plan Mode
-  Preconditions:  REPLSession active, AgentOrchestrator available
-  Contexts:       Called via /plan slash command from CLI-01
-  Excludes:       Model switching (CLI-07), session management, output streaming
-  Rollback:       Toggle error → CommandError returned
-  Design:         Toggle via SlashCommandHandler, state managed by AgentOrchestrator
-  Returns:
-    - Success: CommandResult with confirmation message
-    - Failure: CommandError on toggle failure
-end note #E3F2FD
+box "CLI Interface Container" #E3F2FD
   participant "REPLSession" as repl
+  participant "SlashCommandHandler" as cmdhandler
 end box
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-  participant "SlashCommandHandler" as cmd
 end box
 box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
+  participant "PlanSession" as plan
 end box
 
 
-== CLI-05 Enable Plan Mode ==
+== CLI-05 ENABLE Plan Mode ==
 
-user -> repl : "/plan-mode"
-repl -> cmd : dispatch("/plan-mode")
-activate cmd
+user -> repl : /plan
+activate repl
 
-cmd -> cmd : parse command arguments
-cmd -> cmd : toggle plan_mode flag
+repl -> cmdhandler : cli02 PARSE SlashCommand({input})
+activate cmdhandler
 
-cmd -> agent : setPlanMode(enabled/disabled)
+cmdhandler -> router : cli05 ENABLE Plan Mode()
+activate router
+
+router -> agent : agt07 QUEUE Plan()
 activate agent
-agent --> cmd : planModeUpdated
+
+agent -> plan : agt07 INSERT Plan({pending_calls})
+activate plan
+plan --> agent : PlanSession(queued)
+deactivate plan
+
+hnote over plan #FFF9C4 : **State: PLAN_ACTIVE**
+
+agent --> router : 200 OK — PlanEnabled
 deactivate agent
 
-cmd --> repl : CommandResult(confirmation)
-deactivate cmd
+router --> cmdhandler : 200 OK — PlanEnabled
+deactivate router
 
+cmdhandler --> repl : CommandResult(PlanModeEnabled)
+deactivate cmdhandler
 
-break Toggle error
-    cmd --> repl : CommandError
-end
+repl --> user : "Plan mode enabled — tool calls will be queued"
+deactivate repl
 
-note over user
-  Flow:    user → REPLSession → SlashCommandHandler → AgentOrchestrator → REPLSession
-  State:   IDLE → PLANNING or PLANNING → IDLE
-  Success: CommandResult with confirmation ("Plan mode: ON/OFF")
-  Failure: Toggle error: CommandError
-end note
 
 @enduml

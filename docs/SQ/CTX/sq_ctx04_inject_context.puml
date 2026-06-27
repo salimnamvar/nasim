@@ -28,17 +28,6 @@ box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 
-note over user
-  Scope:          CTX-04 INJECT Context — retrieve and inject context into the reasoning graph
-  Preconditions:  RepoIndex populated; task description available
-  Contexts:       Called by CTX-01 via ref
-  Excludes:       Context truncation, distillation, compaction
-  Rollback:       RepoIndex unavailable → skip injection, return (0, 0)
-  Design:         Context blocks injected as nodes into reasoning graph; filtered by relevance score
-  Returns:
-    - Success: 200 + InjectionResult(nodes_added, tokens_used)
-    - Failure: 200 + InjectionResult(0, 0) on IndexError
-end note
 
 == CTX-04 Inject Context ==
 
@@ -67,11 +56,5 @@ break RepoIndex unavailable
     inj --> pipe : InjectionResult(0, 0)
 end
 
-note over user
-  Flow:    CTX-04 → query RepoIndex → filter by relevance → format context blocks → inject into graph
-  State:   No state change (reasoning graph extended with new nodes)
-  Success: 200 + InjectionResult(nodes_added, tokens_used)
-  Failure: 200: IndexError — skip injection, return InjectionResult(0, 0)
-end note
 
 @enduml

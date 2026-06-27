@@ -24,17 +24,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user
-  Scope:          OBS-05 Expose Metrics — Serve /metrics endpoint for Prometheus pull scrape
-  Preconditions:  MetricsCollector initialized with recorded metrics
-  Contexts:       Called by Prometheus scraper via HTTP
-  Excludes:       OTLP export (OBS-06), log streaming (OBS-01)
-  Rollback:       None (always returns metrics text)
-  Design:         Prometheus exposition format; HTTP GET /metrics; Content-Type: text/plain
-  Returns:
-    - Success: 200 OK — Prometheus text format
-    - Failure: (none — always succeeds)
-end note
 
 == OBS-05 EXPOSE Metrics (HTTP mode) ==
 
@@ -50,11 +39,5 @@ deactivate metrics
 server --> user : 200 OK — Content-Type: text/plain; version=0.0.4
 deactivate server
 
-note over user
-  Flow:    OBS-05 → collect metrics → format → 200 OK
-  State:   No state change
-  Success: 200 OK — Content-Type: text/plain; version=0.0.4
-  Failure: (none — always succeeds)
-end note
 
 @enduml

@@ -26,17 +26,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryIndex" as index
 end box
 
-note over user
-  Scope:          MEM-02 RECALL Knowledge
-  Preconditions:  MemoryStore accessible
-  Contexts:       Called by AgentOrchestrator during task processing
-  Excludes:       Knowledge persist, search, scope filtering
-  Rollback:       Key not found returns null
-  Design:         Scope-filtered lookup via index
-  Returns:
-    - Success: recalled_entry
-    - Failure: null (key not found)
-end note
 
 
 user -> router : types input
@@ -66,12 +55,6 @@ deactivate store
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    MEM-02 → agent → store → scope → store → index → store → agent
-  State:   No state change
-  Success: recalled_entry
-  Failure: null — key not found in scope
-end note
 
 
 @enduml

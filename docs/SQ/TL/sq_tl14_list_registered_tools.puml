@@ -25,17 +25,6 @@ box "Tool Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          TL-14 LIST Registered Tools — Return list of all tools registered in the ToolRegistry
-  Preconditions:  ToolRegistry initialized; at least one tool registered
-  Contexts:       Called by tool discovery, capability listing, debugging
-  Excludes:       Tool invocation, tool registration, tool configuration
-  Rollback:       No failure path; always succeeds (may return empty list)
-  Design:         Paginated enumeration (default 100); returns tool names and metadata
-  Returns:
-    - Success: ToolResult(success=True, tools=[...], nextPageToken)
-    - Failure: N/A — no failure path in diagram
-end note
 
 == TL-14 List Registered Tools ==
 
@@ -53,11 +42,5 @@ agent --> router : AgentEvent(Done)
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-14 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry (self-enumeration)
-  State:   No state change
-  Success: 200 + ToolResult(success=True, tools=[...], nextPageToken)
-  Failure: N/A — no failure path
-end note
 
 @enduml

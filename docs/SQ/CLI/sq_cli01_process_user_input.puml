@@ -14,17 +14,6 @@ title nasim — CLI-01 PROCESS User Input (API-First)
 
 actor "User" as user
 
-note over user
-  Scope:          CLI-01 — Process User Input (API-First)
-  Preconditions:  User authenticated, CLI process running, ServerRouter initialized
-  Contexts:       Called by CLI startup (CLI-04), slash commands route via CLI-02
-  Excludes:       Slash command routing (CLI-02), output streaming (CLI-03), plan mode (CLI-05)
-  Rollback:       Agent throws exception → ErrorBoundary handles → 502 UNAVAILABLE returned
-  Design:         API-First architecture, SSE streaming for AgentEvents, structured logging via OBS-01
-  Returns:
-    - Success: 200 OK, SSE stream of AgentEvents (TextChunk, ToolStart, ToolResult, Done)
-    - Failure: 502 UNAVAILABLE, error event rendered in red
-end note
 
 box "CLI Interface Container" #E3F2FD
   participant "REPLSession" as repl
@@ -117,11 +106,5 @@ end
 
 hnote over repl #ECEFF1 : **State: IDLE**
 
-note over user
-  Flow:    user → REPLSession → validate → ServerRouter → AgentOrchestrator → SSE stream → Renderer → user
-  State:   IDLE → SERVING → THINKING → RESPONDING → IDLE
-  Success: 200 OK, streamed AgentEvents rendered to terminal
-  Failure: 502 UNAVAILABLE: agent exception — ErrorBoundary recovery or abort
-end note
 
 @enduml

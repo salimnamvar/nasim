@@ -24,17 +24,6 @@ box "Tool Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          TL-18 READ Todos — List all todo items or filter by status
-  Preconditions:  TodoTool initialized
-  Contexts:       Called by task review, status checking, planning
-  Excludes:       Todo modification, deletion, bulk operations
-  Rollback:       No failure path; always succeeds (may return empty list)
-  Design:         Optional status filter; returns all matching todos
-  Returns:
-    - Success: ToolResult(success=True, todos=[...])
-    - Failure: N/A — no failure path in diagram
-end note
 
 == TL-18 Read Todos ==
 
@@ -56,11 +45,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-18 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → TodoTool (query, apply filter)
-  State:   No state change
-  Success: 200 + ToolResult(success=True, todos=[...])
-  Failure: N/A — no failure path
-end note
 
 @enduml

@@ -30,17 +30,6 @@ box "Repository Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          EVL-09 INJECT Turn Budget — Turn budget injection per-turn
-  Preconditions:  Turn budget configuration exists; current turn count available
-  Contexts:       Called by AgentOrchestrator each turn
-  Excludes:       Retry coordination (EVL-06); repetition detection (EVL-08)
-  Rollback:       No state change if exhausted; agent stops
-  Design:         Warning threshold at 20% remaining; injects system message into conversation
-  Returns:
-    - Success: 200 OK — BudgetStatus(remaining, warning, continue=true)
-    - Failure: 429 TOO_MANY_REQUESTS: BudgetExhausted(current_turn, max_turns)
-end note
 
 
 == EVL-09 INJECT Turn Budget ==
@@ -75,11 +64,5 @@ deactivate injector
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    EVL-09 → agent → injector → budget(get max turns) → compute remaining → check warning → format message → history(prepend) → Done
-  State:   No state change
-  Success: 200 OK — BudgetStatus(remaining, warning, continue=true)
-  Failure: 429 TOO_MANY_REQUESTS: budget exhausted — agent stops
-end note
 
 @enduml

@@ -28,17 +28,6 @@ box "External" #F5F5F5
 end box
 
 
-note over user
-  Scope:          MCP-01 CONNECT McpServer — Connect to external MCP server via stdio/SSE
-  Preconditions:  MCP server endpoint and transport type are configured
-  Contexts:       Called by AgentOrchestrator when MCP integration is enabled
-  Excludes:       Tool discovery (MCP-02), tool adaptation (MCP-03), tool execution
-  Rollback:       No connection state persisted; returns error to agent
-  Design:         Supports stdio and SSE transports; performs capability handshake after connect
-  Returns:
-    - Success: 200 OK — ToolResult(success=true, content="ConnectionActive")
-    - Failure: 503 SERVICE_UNAVAILABLE: MCP Server unreachable
-end note
 
 
 == MCP-01 CONNECT McpServer ==
@@ -73,11 +62,5 @@ deactivate mcp
 agent --> router : AgentEvent(Done)
 
 
-note over user
-  Flow:    MCP-01 → user → router → agent → mcp → server(connect) → server(handshake) → store state → Done
-  State:   No state change
-  Success: 200 OK — ToolResult(success=true, content="ConnectionActive")
-  Failure: 503 SERVICE_UNAVAILABLE: server unreachable — agent reports error
-end note
 
 @enduml

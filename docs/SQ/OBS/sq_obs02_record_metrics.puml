@@ -34,17 +34,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user
-  Scope:          OBS-02 Record Metrics — Record metric points for token usage, latency, tool calls
-  Preconditions:  MetricsCollector initialized
-  Contexts:       Called by agent (LLM request), ToolRegistry (tool call), agent (error)
-  Excludes:       Log streaming (OBS-01), trace correlation (OBS-03)
-  Rollback:       None (fire-and-forget)
-  Design:         Prometheus-style counters/histograms; labeled by model, provider, tool, error_type
-  Returns:
-    - Success: None (fire-and-forget)
-    - Failure: (none — no error handling)
-end note
 
 == OBS-02 RECORD Metrics (LLM Request) ==
 
@@ -88,12 +77,6 @@ agent --> router : None
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    OBS-02 → record LLM metrics → record tool metrics → record error metrics
-  State:   No state change
-  Success: None (fire-and-forget)
-  Failure: (none — no error handling)
-end note
 
 
 @enduml

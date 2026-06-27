@@ -23,17 +23,6 @@ box "Session Group" #E8F5E9
 end box
 database "Session Directory" as dir
 
-note over user
-  Scope:          SSN-03 List Sessions — List available saved sessions with pagination
-  Preconditions:  None
-  Contexts:       Called by user-facing list command
-  Excludes:       Session content, search, deletion
-  Rollback:       No sessions directory → 404 NOT_FOUND, return empty list
-  Design:         Paginated results (default 20 per page); metadata-only (no message content)
-  Returns:
-    - Success: 200 OK — session list + nextPageToken
-    - Failure: 404 NOT_FOUND — empty list
-end note
 
 == SSN-03 List Sessions ==
 
@@ -62,11 +51,5 @@ deactivate store
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    SSN-03 → scan sessions dir → read metadata → 200 OK or 404
-  State:   No state change
-  Success: 200 OK — [(id, created_at, message_count), ...], nextPageToken
-  Failure: 404 NOT_FOUND: no sessions directory — return empty list
-end note
 
 @enduml

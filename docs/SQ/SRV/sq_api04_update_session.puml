@@ -24,20 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user
-  Scope:          API-04 UPDATE Session
-  Preconditions:  Session must exist
-  Contexts:       Parent: HTTP Client request
-  Excludes:       Session creation, deletion, message dispatch
-  Rollback:       No partial state on failure; store write is atomic
-  Design:         Controller validates structure; Service validates business rules
-                  and applies update mask
-  Returns:
-    - Success: 200 OK — {session: {id, updated_at}}
-    - Failure: 400 INVALID_ARGUMENT — structural validation failed
-    - Failure: 404 NOT_FOUND — session does not exist
-    - Failure: 422 FAILED_PRECONDITION — business rule violation
-end note
 
 
 == API-04 UPDATE Session ==
@@ -79,14 +65,6 @@ deactivate svc
 router --> user : 200 OK {session: {id, updated_at}}
 deactivate router
 
-note over user
-  Flow:    API-04 → router → svc → store(read) → svc → store(write) → router → user
-  State:   No state change (metadata update only)
-  Success: 200 OK — {session: {id, updated_at}}
-  Failure: 400 INVALID_ARGUMENT: structural validation — fix request body
-  Failure: 404 NOT_FOUND: session does not exist — verify session ID
-  Failure: 422 FAILED_PRECONDITION: business rule violation — check patch fields
-end note
 
 
 @enduml

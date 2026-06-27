@@ -1,81 +1,73 @@
 @startuml sq_cli03_stream_output
 !include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-03 — Stream Output
+' Title:     CLI-03 — STREAM Output
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Streaming token-by-token output with rich formatting
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
-' Review:    —
+' Review:    docs/SQ/README.md
 ' ============================================================
+
+title nasim — CLI-03 STREAM Output
 
 actor "User" as user
 
-note over user
-  Scope:          CLI-03 — Stream Output
-  Preconditions:  Agent processing active, AgentEvent stream available
-  Contexts:       Called by CLI-01 after agent dispatch
-  Excludes:       Input processing, slash command routing, error recovery
-  Rollback:       Error event → red highlight displayed, Done event → stream completes
-  Design:         Event-driven streaming with rich terminal formatting, output stored in SessionStore
-  Returns:
-    - Success: Streamed tokens rendered to terminal
-    - Failure: Error event rendered in red highlight
-end note #E3F2FD
+box "CLI Interface Container" #E3F2FD
   participant "REPLSession" as repl
-end box
-box "Controller Group" #E3F2FD
-  participant "ServerRouter" as router
-end box
-box "Service Group" #FFF3E0
   participant "Renderer" as renderer
 end box
-box "Repository Group" #E8F5E9
-  participant "SessionStore" as store
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
 end box
 
 
 == CLI-03 STREAM Output ==
 
-repl -> renderer : subscribe to AgentEvent stream
-activate renderer
+user -> repl : await response
+activate repl
 
-loop for each event
+repl -> router : api06 DISPATCH Message({session_id}, {message})
+activate router
+
+router --> repl : SSE stream (AgentEvents)
+deactivate router
+
+hnote over repl #E0F7FA : **State: STREAMING**
+
+loop for each AgentEvent in stream
     alt TextChunk event
-        repl -> renderer : TextChunk(text)
-        renderer -> renderer : colored output (green for nasim>)
+        repl -> renderer : cli03 RENDER TextChunk({token})
+        activate renderer
         renderer --> user : streamed token
+        deactivate renderer
     else ToolStart event
-        repl -> renderer : ToolStart(name, args)
-        renderer -> renderer : dimmed box with tool name + args
+        repl -> renderer : cli03 RENDER ToolStart({tool_name})
+        activate renderer
         renderer --> user : tool call display
+        deactivate renderer
     else ToolResult event
-        repl -> renderer : ToolResult(name, result, truncated)
-        renderer -> renderer : truncated result (max 200 chars)
+        repl -> renderer : cli03 RENDER ToolResult({result})
+        activate renderer
         renderer --> user : tool result preview
+        deactivate renderer
     else Error event
-        repl -> renderer : Error(message)
-        renderer -> renderer : red highlight
-        renderer --> user : error display
+        repl -> renderer : cli03 RENDER Error({error})
+        activate renderer
+        renderer --> user : red error display
+        deactivate renderer
     else Done event
-        repl -> renderer : Done()
-        renderer -> renderer : newline + reset
+        repl -> renderer : cli03 RENDER Done()
+        activate renderer
+        renderer --> user : formatted completion
+        deactivate renderer
     end
 end
 
-renderer -> store : store rendered output
-activate store
-store --> renderer : stored
-deactivate store
+hnote over repl #ECEFF1 : **State: IDLE**
 
-deactivate renderer
+deactivate repl
 
-note over user
-  Flow:    AgentEvent stream → Renderer → user, output stored in SessionStore
-  State:   No state change
-  Success: All events rendered (TextChunk, ToolStart, ToolResult, Done)
-  Failure: Error event: agent error — red highlight displayed
-end note
 
 @enduml

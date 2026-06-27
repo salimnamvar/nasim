@@ -29,17 +29,6 @@ box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over user
-  Scope:          SAF-01 Check Permission — Per-tool safety check before execution
-  Preconditions:  Tool registered in ToolRegistry; safety_mode configured
-  Contexts:       Internal step of AGT-15 (agent process loop); called before every tool dispatch
-  Excludes:       User approval prompt (SAF-02), safety mode config (SAF-03)
-  Rollback:       Safety violation → SafetyViolation error, tool execution blocked
-  Design:         Three safety modes (auto/ask/off); tool.safe flag; permission gate pattern
-  Returns:
-    - Success: SafetyPassed
-    - Failure: SafetyViolation(permission_denied)
-end note
 
 == SAF-01 CHECK Permission ==
 
@@ -78,12 +67,6 @@ deactivate safety
 
 agent --> router : AgentEvent(Done)
 
-note over user
-  Flow:    SAF-01 → read tool → validate safety → SafetyPassed or SafetyViolation
-  State:   No state change
-  Success: SafetyPassed — tool execution allowed
-  Failure: SafetyViolation(permission_denied): unsafe tool in ask mode — block execution
-end note
 
 
 @enduml

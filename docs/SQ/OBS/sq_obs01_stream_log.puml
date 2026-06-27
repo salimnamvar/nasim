@@ -30,17 +30,6 @@ box "External" #F5F5F5
   participant "Stdout" as stdout
 end box
 
-note over user
-  Scope:          OBS-01 Stream Structured Log — Emit structured JSON log record to stdout
-  Preconditions:  Trace context available (OBS-03)
-  Contexts:       Called by agent for every log-eligible event
-  Excludes:       Metrics recording (OBS-02), redaction (OBS-04 — called internally)
-  Rollback:       None (fire-and-forget; stdout write failure not handled)
-  Design:         JSON format; includes trace context; redacts sensitive data before emission
-  Returns:
-    - Success: None (fire-and-forget)
-    - Failure: (none — no error handling)
-end note
 
 == OBS-01 STREAM StructuredLog ==
 
@@ -79,12 +68,6 @@ agent --> router : None
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    OBS-01 → get trace → build record → redact → emit to stdout
-  State:   No state change
-  Success: None (fire-and-forget)
-  Failure: (none — no error handling)
-end note
 
 
 @enduml

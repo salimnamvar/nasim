@@ -22,17 +22,6 @@ box "Session Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user
-  Scope:          SSN-04 Restore Session — Resume a previous session by loading its history
-  Preconditions:  Session may or may not exist on disk
-  Contexts:       Called by user-facing resume command
-  Excludes:       Session creation, snapshotting, branching
-  Rollback:       Session not found → 404 NOT_FOUND, start fresh; delegates to SSN-02 for read
-  Design:         Composes SSN-02 (load) + SSN-01 (persist) for resume; starts fresh on 404
-  Returns:
-    - Success: 200 OK — Session(id, messages)
-    - Failure: 404 NOT_FOUND — fallback to fresh session
-end note
 
 == SSN-04 Resume Session ==
 
@@ -62,11 +51,5 @@ end
     deactivate agent
 deactivate router
 
-note over user
-  Flow:    SSN-04 → SSN-02 (load) → SSN-01 (persist) → 200 OK, or 404 → start fresh
-  State:   No state change
-  Success: 200 OK — Session(id, messages)
-  Failure: 404 NOT_FOUND: session missing — start fresh session
-end note
 
 @enduml

@@ -25,17 +25,6 @@ end box
 participant "Web" as web
 
 
-note over user
-  Scope:          TL-09 FETCH Web Content — Fetch URL content and convert to markdown
-  Preconditions:  Valid URL provided by user; network access available
-  Contexts:       Called by documentation lookup, reference gathering, web research
-  Excludes:       Web search, multi-page crawling, authentication-required pages
-  Rollback:       HTTP error (4xx/5xx) → ToolResult(success=False); Timeout → ToolResult(success=False); no partial state
-  Design:         Uses httpx for HTTP; html2text for conversion; configurable timeout
-  Returns:
-    - Success: ToolResult(success=True, content=markdown)
-    - Failure: ToolResult(success=False) — HTTP error, timeout
-end note
 
 == TL-09 FETCH Web Content ==
 
@@ -78,11 +67,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-09 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → WebFetchTool → httpx GET → html2text.convert()
-  State:   No state change
-  Success: 200 + ToolResult(success=True, content=markdown)
-  Failure: ToolResult(success=False): HTTP {status_code} for {url} | timeout fetching {url}
-end note
 
 @enduml

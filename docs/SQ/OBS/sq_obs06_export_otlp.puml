@@ -32,17 +32,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user
-  Scope:          OBS-06 Export OTLP — Export traces and metrics to OTel-compatible backend
-  Preconditions:  OTel backend reachable (or buffered for retry)
-  Contexts:       Called periodically or on shutdown
-  Excludes:       Log streaming (OBS-01), local metrics expose (OBS-05)
-  Rollback:       Backend unreachable → buffer for retry
-  Design:         OTLP HTTP protocol; batches traces + metrics; retry buffer on connection failure
-  Returns:
-    - Success: OtlpExportResult(traces, metrics)
-    - Failure: ConnectionError — buffer for retry
-end note
 
 == OBS-06 EXPORT Otlp ==
 
@@ -82,12 +71,6 @@ agent --> router : None
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    OBS-06 → export spans → export metrics → POST to backend → 200 OK
-  State:   No state change
-  Success: OtlpExportResult(traces, metrics)
-  Failure: ConnectionError: backend unreachable — buffer for retry
-end note
 
 
 @enduml

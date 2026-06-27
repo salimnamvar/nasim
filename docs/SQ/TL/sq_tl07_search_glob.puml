@@ -24,17 +24,6 @@ box "Tool Group" #E8F5E9
 end box
 
 
-note over user
-  Scope:          TL-07 SEARCH Glob — Find files by glob pattern
-  Preconditions:  Glob pattern and base path provided by user; base path accessible
-  Contexts:       Called by file discovery, project structure exploration, config file lookup
-  Excludes:       Content search, regex search, binary file filtering
-  Rollback:       Permission denied → ToolResult(success=False); no state change
-  Design:         Uses pathlib.Path.glob(); returns sorted matching paths; no depth limit
-  Returns:
-    - Success: ToolResult(success=True, content=sorted_paths)
-    - Failure: ToolResult(success=False) — permission denied
-end note
 
 == TL-07 GLOB Files ==
 
@@ -65,11 +54,5 @@ deactivate registry
 deactivate agent
 deactivate router
 
-note over user
-  Flow:    TL-07 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → GlobTool → Path.glob()
-  State:   No state change
-  Success: 200 + ToolResult(success=True, content=sorted_paths)
-  Failure: ToolResult(success=False): permission denied: path
-end note
 
 @enduml
