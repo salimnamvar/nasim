@@ -82,7 +82,7 @@ rectangle "nasim" {
     usecase "**TL-08 SEARCH Find**\n--\nFind files by name pattern" <<master>> as TL08
   }
   package "Web Tools" as WEB_PKG {
-    usecase "**TL-09 FETCH Web Content**\n--\nFetch URL content as markdown" as TL09
+    usecase "**TL-09 FETCH Web Content**\n--\nFetch URL content as markdown" <<master>> as TL09
     usecase "**TL-10 SEARCH Web**\n--\nSearch the web for information" <<master>> as TL10
   }
 }

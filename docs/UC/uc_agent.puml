@@ -86,7 +86,7 @@ usecase "PRV-03\nSTREAM Chat\n[uc_provider]" as PRV03_ext <<extref>>
 
 rectangle "nasim" {
   package "Agent Group (AGT)" {
-    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop:\nprovider call, tool dispatch" <<extend>> as AGT01
+    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop:\nprovider call, tool dispatch" <<master>> as AGT01
     usecase "**AGT-02 DISPATCH Tool Call**\n--\nRoute tool call to registry" <<include>> as AGT02
     usecase "**AGT-03 UPDATE Conversation**\n--\nManage message list and token count" <<include>> as AGT03
     usecase "**AGT-04 DELETE History**\n--\nReset conversation history" <<master>> as AGT04
@@ -107,6 +107,17 @@ rectangle "nasim" {
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
+
+
+User --> AGT01
+User --> AGT04
+User --> AGT06
+User --> AGT08
+User --> AGT09
+User --> AGT11
+User --> AGT12
+User --> AGT13
+User --> AGT14
 
 
 ' ============================================================
