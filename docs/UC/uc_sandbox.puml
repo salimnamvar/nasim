@@ -1,22 +1,31 @@
 @startuml uc_sandbox
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: Sandbox Group
 ' Group:     SBX (Sandbox)
 ' Boundary:  nasim code agent
 ' Purpose:   OS-level process isolation for shell and edit operations
+'            Entry chain: User → ServerRouter → AgentOrchestrator → SandboxGroup
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_sbx01..sq_sbx04
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — Sandbox Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,40 +43,55 @@ skinparam actor {
   FontSize 12
 }
 
-' ============================================================
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+actor "User" as User
+
+
+
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Sandbox Group (SBX)" {
-    usecase "**SBX-01 ISOLATE Command**\n--\nExecute command in isolated OS environment" as SBX01
-    usecase "**SBX-02 APPLY Sandbox Policy**\n--\nEnforce network, filesystem, exec restrictions" as SBX02
-    usecase "**SBX-03 MONITOR Process**\n--\nMonitor process, enforce timeout and resource limits" as SBX03
-    usecase "**SBX-04 LIMIT Resources**\n--\nEnforce CPU, memory, and disk quotas" as SBX04
+    usecase "**SBX-01 ISOLATE Command**\n--\nExecute command in isolated OS environment" <<master>> as SBX01
+    usecase "**SBX-02 APPLY Sandbox Policy**\n--\nEnforce network, filesystem, exec restrictions" <<include>> as SBX02
+    usecase "**SBX-03 MONITOR Process**\n--\nMonitor process, enforce timeout and resource limits" <<include>> as SBX03
+    usecase "**SBX-04 LIMIT Resources**\n--\nEnforce CPU, memory, and disk quotas" <<include>> as SBX04
   }
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-Agent --> SBX01
-Agent --> SBX02
-Agent --> SBX03
-Agent --> SBX04
 
-' ============================================================
+User --> SBX01
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
+
 
 SBX01 ..> SBX02 : <<include>>
 SBX01 ..> SBX03 : <<include>>
 SBX01 ..> SBX04 : <<include>>
+
+
+
 
 @enduml

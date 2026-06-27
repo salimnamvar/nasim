@@ -1,15 +1,24 @@
-# Python
+# =============================================================================
+# nasim — GitHub Project
+# =============================================================================
+
+# ==========================================
+# 1. PYTHON
+# ==========================================
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-*.pyc
 *$py.class
+*.so
+*.so.*
 .mypy_cache/
 .dmypy.json
 dmypy.json
 
-# Build & Distribution
+# ==========================================
+# 2. BUILD & DISTRIBUTION
+# ==========================================
 build/
 dist/
 out/
@@ -20,14 +29,18 @@ outputs/
 *.egg
 MANIFEST
 
-# Virtual Environments
+# ==========================================
+# 3. VIRTUAL ENVIRONMENTS
+# ==========================================
 .venv/
 venv/
 env/
 ENV/
 .python-version
 
-# Testing & Coverage
+# ==========================================
+# 4. TESTING & COVERAGE
+# ==========================================
 .pytest_cache/
 .tox/
 .nox/
@@ -40,21 +53,66 @@ htmlcov/
 nosetests.xml
 TEST*.xml
 
-# Linters & Caches
+# ==========================================
+# 5. LINTERS & CACHES
+# ==========================================
 .ruff_cache/
 .cache/
 .eslintcache
 
-# Hidden directories
+# ==========================================
+# 6. SECRETS & CREDENTIALS
+# ==========================================
+.env
+.env.*
+*.env
+!.env.example
+secrets/
+secrets*
+*.jwt
+*.pem
+*.key
+auth.json*
+.credentials.json
+credentials.json
+
+# ==========================================
+# 7. HIDDEN DIRECTORIES
+# ==========================================
 .*/
 
-# IDE non-hidden artifacts
+# ==========================================
+# 8. AI / AGENT TOOLS
+# ==========================================
+.aider*
+.nasim
+.claude
+.grok
+.mimo
+.opencode
+.codex
+.cursor
+.copilot
+.continue
+.cody
+.zed
+.windsurf
+.agents
+.micode
+.kimi
+
+# ==========================================
+# 9. IDE ARTIFACTS
+# ==========================================
+.idea/
 *.iml
 *.ipr
 *.iws
 *.swp
 *.swo
 
-# OS
+# ==========================================
+# 10. OS / EDITOR TEMP
+# ==========================================
 .DS_Store
 .*/

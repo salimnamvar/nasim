@@ -1,0 +1,74 @@
+@startuml sq_router02_apply_fallback
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     RTG-02 — APPLY Fallback
+' Boundary:  nasim code agent
+' Purpose:   Apply fallback chain when primary model fails
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — RTG-02 UPDATE Fallback
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Router Group" #FFF3E0
+  participant "ModelRouter" as router
+  participant "FallbackChain" as fallback
+end box
+box "Provider Group" #FFF3E0
+  participant "LiteLLMProxy" as provider
+end box
+box "Repository Group" #E8F5E9
+  participant "ModelRepository" as model_repo
+end box
+
+
+
+== RTG-02 APPLY Fallback ==
+
+user -> router : types input
+router -> agent : RTG-02 PROCESS(user_input)
+
+agent -> router : RTG-02 APPLY Fallback(primary_model, chain, updateMask)
+activate router
+
+router -> fallback : RTG-02 APPLY Fallback(primary_model, chain)
+activate fallback
+
+loop for each model in fallback_chain
+    fallback -> provider : RTG-02 CHECK Availability(model)
+    activate provider
+
+    alt provider available
+        provider --> fallback : available
+        deactivate provider
+        fallback --> router : selected_model(model)
+        deactivate fallback
+    else provider unavailable
+        provider --> fallback : unavailable
+        deactivate provider
+    end
+end
+
+break All models unavailable
+    fallback --> router : FallbackError("all models unavailable")
+    router --> agent : Result(success=false, error="all_models_unavailable")
+    agent --> router : AgentEvent(Error)
+end
+
+router --> agent : Result(success=true, data=selected_model)
+deactivate router
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

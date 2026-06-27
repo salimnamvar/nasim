@@ -1,0 +1,58 @@
+@startuml sq_git03_read_diff
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     VCS-03 — READ Diff
+' Boundary:  nasim code agent
+' Purpose:   Read diff of staged or unstaged changes
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — VCS-03 READ Diff
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Git Group" #E8F5E9
+  participant "GitStatus" as status
+end box
+box "External" #F5F5F5
+  participant "Git Repository" as git
+end box
+
+
+
+== VCS-03 READ Diff ==
+
+user -> router : types input
+router -> agent : VCS-03 PROCESS(user_input)
+
+agent -> status : VCS-03 READ Diff(scope)
+activate status
+
+status -> git : VCS-03 EXECUTE git_diff(scope)
+activate git
+git --> status : raw_diff
+deactivate git
+
+status -> status : VCS-03 PARSE DiffOutput(raw_diff)
+
+break No changes detected
+    status --> agent : Result(success=true, data={empty_diff})
+    agent --> router : AgentEvent(Done)
+end
+
+status --> agent : Result(success=true, data={files, hunks})
+deactivate status
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

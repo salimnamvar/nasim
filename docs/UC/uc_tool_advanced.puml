@@ -1,0 +1,118 @@
+@startuml uc_tool_advanced
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Tool Group — Advanced & Integration Tools
+' Group:     TL (Tool Layer)
+' Boundary:  nasim code agent
+' Purpose:   Advanced tool implementations: git, MCP dispatch, LSP,
+'            registry, subagent, todo, memory, plan.
+'            Entry chain: User → ServerRouter → AgentOrchestrator →
+'            ToolRegistry → Tool implementation
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_tl11..sq_tl22
+' ============================================================
+
+
+left to right direction
+
+
+title nasim — Tool Use Cases — Advanced Tools
+
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+' ============================================================
+' Actors
+' ============================================================
+
+
+actor "User" as User
+
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+
+rectangle "nasim" {
+  package "Integration Tools" as INT_PKG {
+    usecase "**TL-11 READ Git Status**\n--\nGit status, diff, commit operations" <<master>> as TL11
+    usecase "**TL-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" <<master>> as TL12
+    usecase "**TL-13 READ LSP**\n--\nLSP ops: hover, definition, references" <<master>> as TL13
+    usecase "**TL-14 LIST Registered Tools**\n--\nList all registered tools" <<master>> as TL14
+  }
+  package "Agent Tools" as AGT_PKG {
+    usecase "**TL-15 SPAWN Subagent**\n--\nSpawn child agent via SubagentCoordinator" <<master>> as TL15
+  }
+  package "Task Tracking" as TODO_PKG {
+    usecase "**TL-16 INSERT Todo**\n--\nCreate task tracking entry" <<master>> as TL16
+    usecase "**TL-17 UPDATE Todo**\n--\nUpdate task tracking entry" <<master>> as TL17
+    usecase "**TL-18 READ Todos**\n--\nList task tracking entries" <<master>> as TL18
+  }
+  package "Memory" as MEM_PKG {
+    usecase "**TL-19 PERSIST Memory**\n--\nStore cross-session knowledge" <<master>> as TL19
+    usecase "**TL-20 RECALL Memory**\n--\nRetrieve cross-session knowledge" <<master>> as TL20
+  }
+  package "Planning" as PLAN_PKG {
+    usecase "**TL-21 INSERT Plan**\n--\nCreate plan entry" <<master>> as TL21
+    usecase "**TL-22 UPDATE Plan**\n--\nUpdate plan entry" <<master>> as TL22
+  }
+}
+
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+
+User --> TL11
+User --> TL12
+User --> TL13
+User --> TL14
+User --> TL15
+User --> TL16
+User --> TL17
+User --> TL18
+User --> TL19
+User --> TL20
+User --> TL21
+User --> TL22
+
+
+
+
+
+
+@enduml

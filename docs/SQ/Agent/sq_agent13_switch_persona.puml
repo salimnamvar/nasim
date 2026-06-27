@@ -1,0 +1,67 @@
+@startuml sq_agent13_switch_persona
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     AGT-13 — SWITCH Persona
+' Boundary:  nasim code agent
+' Purpose:   Unload current persona and load a new one
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — AGT-13 UPDATE Persona
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "PersonaManager" as pm
+end box
+box "Config Group" #E8F5E9
+  participant "PersonaRegistry" as reg
+end box
+box "Repository Group" #E8F5E9
+  participant "MemoryRepository" as memory
+end box
+
+
+
+== AGT-13 SWITCH Persona ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+activate agent
+
+agent -> pm : agt13 SWITCH Persona({new_persona_name}, updateMask)
+activate pm
+
+pm -> pm : unload current persona
+pm -> pm : clear system prompt
+pm -> pm : clear tool allowlist
+
+pm -> reg : get_persona_config(new_persona_name)
+activate reg
+reg --> pm : new_config
+deactivate reg
+
+alt new config valid
+    pm -> pm : parse new system prompt
+    pm -> pm : apply new config
+    pm --> agent : PersonaSwitched(new_persona)
+else new config invalid
+    pm -> pm : reload previous persona config
+    pm --> agent : PersonaSwitchFailed(retained previous)
+end
+
+deactivate pm
+
+agent --> router : AgentEvent(Done)
+deactivate agent
+
+
+
+@enduml

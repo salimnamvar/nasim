@@ -185,6 +185,8 @@ Message Create returns a Server-Sent Events stream. Event types:
 
 All paths start with `/v1/` (AIP-185). The API version is independent of the server version. Breaking changes bump the major version.
 
+**Status:** RESOLVED (DGA-01 fix, 2026-06-22). All 8 path entries in `openapi.yaml` updated with `/v1/` prefix.
+
 ---
 
 ## Design Chain Traceability

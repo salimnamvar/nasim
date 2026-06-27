@@ -1,0 +1,59 @@
+@startuml sq_config01_load_config
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     CFG-01 — Load Config
+' Boundary:  nasim code agent CLI
+' Purpose:   Layered config loading from all sources
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Config Group" #E8F5E9
+  participant "ConfigLoader" as cfg
+end box
+database "Global YAML" as global_yaml
+database "Project YAML" as project_yaml
+database "Env Vars" as env_vars
+
+
+
+== CFG-01 Load Config ==
+
+user -> router : invoke agent
+activate router
+router -> agent : cfg01 LOAD Config(cli_args=argv)
+activate agent
+agent -> cfg : cfg01 LOAD Config(cli_args=argv)
+activate cfg
+cfg -> global_yaml : cfg01 READ Global Defaults(~/.nasim/config.yaml)
+global_yaml --> cfg : global_defaults
+cfg -> project_yaml : cfg01 READ Project Overrides(.nasim/config.yaml)
+project_yaml --> cfg : project_overrides
+cfg -> env_vars : cfg01 READ Env Overrides(NASIM_*)
+env_vars --> cfg : env_overrides
+cfg -> cfg : cfg01 APPLY Layered Config(global, project, env, CLI)
+cfg -> cfg : cfg02 VALIDATE Config(fields)
+
+break Invalid YAML or missing required fields
+    cfg --> agent : ConfigError("details")
+    agent --> router : ConfigError
+end
+
+cfg --> agent : Config object
+agent --> router : Config object
+deactivate agent
+deactivate router
+
+
+
+@enduml

@@ -1,0 +1,62 @@
+@startuml sq_tool20_recall_memory
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     TL-20 — Recall Memory
+' Boundary:  nasim code agent
+' Purpose:   Recall knowledge from memory via MemoryTool
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "MemoryTool" as tool
+end box
+participant "MemoryStore" as mem
+
+
+
+== TL-20 Recall Memory ==
+
+user -> router : types input
+activate router
+router -> agent : TL-20 PROCESS(user_input)
+activate agent
+agent -> registry : TL-20 Recall Memory(query, scope?)
+activate registry
+registry -> tool : TL-20 Recall Memory(query, scope)
+activate tool
+tool -> mem : MEM-02 recall(query, scope)
+activate mem
+
+break No matching knowledge
+    mem --> tool : empty result
+    deactivate mem
+    tool --> registry : ToolResult(success=False, error="no match")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+mem --> tool : matching knowledge
+deactivate mem
+tool --> registry : ToolResult(success=True, knowledge)
+registry --> agent : ToolResult
+agent --> router : AgentEvent(Done)
+
+deactivate tool
+deactivate registry
+deactivate agent
+deactivate router
+
+
+@enduml

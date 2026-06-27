@@ -1,30 +1,43 @@
 @startuml c4_nasim_component_router
+' ============================================================
+' Title:     NASIM Application — Router Component Diagram
+' Boundary:  NASIM Application (container) — Router Group
+' Purpose:   Model selection, fallback chains, capability queries
+'            CSR Layer: Service
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
-' ============================================================
-' Title:     nasim — Router Component Diagram
-' Boundary:  nasim core library — Router group
-' Purpose:   Model selection, fallback chains, capability queries
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    —
-' ============================================================
 
-title nasim — Router Component Diagram
+title NASIM Application — Router Component Diagram
 
-Container_Boundary(router_boundary, "Router Group") {
-    Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
-    Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(router_group, "Router Group") <<service>> {
+        Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
+        Component(fallback_chain, "FallbackChain", "", "Ordered provider failover chain with retry and exponential backoff")
+    }
 }
 
-Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
-Component_Ext(provider, "Provider", "Provider Group")
+System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+System_Ext(provider, "Provider", "Provider Group")
 
 Rel(agent_orch, model_router, "route model selection")
 Rel(model_router, provider, "route to provider")
 Rel(model_router, fallback_chain, "trigger failover")
 Rel(fallback_chain, provider, "failover to next provider")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

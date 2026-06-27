@@ -1,73 +1,79 @@
 @startuml sq_cli02_dispatch_slash_command
+!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-02 — Dispatch Slash Command
+' Title:     CLI-02 — DISPATCH Slash Command
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Slash command routing and execution
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
-' Review:    —
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+title nasim — CLI-02 DISPATCH Slash Command
 
-box "CLI Layer" #E8F5E9
+actor "User" as user
+
+box "CLI Interface Container" #E3F2FD
   participant "REPLSession" as repl
-  participant "SlashCommandHandler" as cmd
-  participant "Renderer" as renderer
+  participant "SlashCommandHandler" as cmdhandler
 end box
-box "Agent Layer" #E3F2FD
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
+box "Config Group" #E8F5E9
+  participant "ConfigLoader" as config
+end box
 
-note over user, agent
-  Scope:          Slash command parsing and dispatch
-  Preconditions:  REPL running, input starts with /
-  Contexts:       Called by CLI-01 (PROCESS User Input)
-  Excludes:       Normal user input (CLI-01)
-  Rollback:       Unknown command -> error message
-  Design:         Commands: /help, /reset, /model, /quit, /plan, /sessions
-  Classification: Primary Orchestrator
-end note
 
-== CLI-02 Execute Slash Command ==
+== CLI-02 DISPATCH Slash Command ==
 
-user -> repl : /command
-repl -> cmd : dispatch("/command")
-cmd -> cmd : parse command name and args
+user -> repl : enter slash command
+activate repl
+repl -> repl : check for slash command prefix
 
-alt /help
-    cmd -> renderer : display help text
-    renderer --> user : help menu
-else /reset
-    cmd -> agent : reset()
-    agent -> agent : clear conversation history
-    cmd -> renderer : "History cleared."
-    renderer --> user : confirmation
-else /model
-    cmd -> renderer : display current model name
-    renderer --> user : model info
-else /plan
-    cmd -> agent : toggle_plan_mode()
-    agent -> agent : toggle PLANNING state
-    cmd -> renderer : "Plan mode: ON/OFF"
-    renderer --> user : confirmation
-else /sessions
-    cmd -> renderer : list available sessions
-    renderer --> user : session list
-else /quit or /exit
-    cmd -> repl : signal exit
-    repl --> user : "Bye."
+repl -> cmdhandler : cli02 PARSE SlashCommand({input})
+activate cmdhandler
+cmdhandler -> cmdhandler : extract command name and args
+
+alt /sessions command
+    cmdhandler -> router : api01 LIST Sessions({filters})
+    activate router
+    router --> cmdhandler : 200 OK — SessionList
+    deactivate router
+    cmdhandler --> repl : CommandResult(SessionsList)
+else /config command
+    cmdhandler -> config : cfg01 READ Config()
+    activate config
+    config --> cmdhandler : 200 OK — Config
+    deactivate config
+    cmdhandler --> repl : CommandResult(ConfigDisplay)
+else /plan command
+    cmdhandler -> router : cli05 ENABLE Plan Mode()
+    activate router
+    router -> agent : agt07 QUEUE Plan()
+    activate agent
+    agent --> router : PlanSession(queued)
+    deactivate agent
+    router --> cmdhandler : 200 OK — PlanEnabled
+    deactivate router
+    cmdhandler --> repl : CommandResult(PlanMode)
+else /model command
+    cmdhandler -> router : cli07 SWITCH Model({model_name})
+    activate router
+    router --> cmdhandler : 200 OK — ModelSwitched
+    deactivate router
+    cmdhandler --> repl : CommandResult(ModelSwitched)
 else unknown command
-    cmd -> renderer : "Unknown command: /cmd"
-    renderer --> user : error display
+    cmdhandler --> repl : CommandResult(UnknownCommand)
 end
 
-note over user, agent
-  Flow:    /cmd -> SlashCommandHandler -> action -> Renderer -> User
-  State:   No state change (except /plan toggles PLANNING, /reset clears history)
-  Failure: Unknown command -> error message
-  Success: Command action completed
-end note
+repl --> user : display command result
+deactivate cmdhandler
+deactivate repl
+
 
 @enduml

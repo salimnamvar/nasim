@@ -1,0 +1,65 @@
+@startuml sq_sandbox01_isolate_command
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SBX-01 — ISOLATE Command
+' Boundary:  nasim code agent
+' Purpose:   Execute command in OS-level sandbox
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — SBX-01 INSERT Command
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Sandbox Group" #F3E5F5
+  participant "SandboxExecutor" as executor
+  participant "SandboxPolicy" as policy
+end box
+box "External" #F5F5F5
+  participant "Sandbox Runtime" as runtime
+end box
+
+
+== SBX-01 ISOLATE Command ==
+
+user -> router : types input
+router -> agent : SBX-01 PROCESS(user_input)
+
+agent -> executor : SBX-01 ISOLATE Command(command, policy)
+activate executor
+
+executor -> policy : SBX-01 APPLY Rules(policy)
+activate policy
+policy --> executor : rules_applied
+deactivate policy
+
+executor -> executor : SBX-01 CREATE Sandbox(namespace, cgroup)
+executor -> runtime : SBX-01 SPAWN Process(command)
+activate runtime
+
+break Timeout or resource violation
+    runtime --> executor : timeout/violation error
+    executor --> agent : Result(success=false, error="timeout")
+    agent --> router : AgentEvent(Error)
+end
+
+runtime --> executor : execution_result(output, exit_code)
+deactivate runtime
+
+executor --> agent : Result(success=true, data={output, exit_code})
+deactivate executor
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

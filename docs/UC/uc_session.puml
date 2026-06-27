@@ -1,22 +1,31 @@
 @startuml uc_session
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: Session Group
 ' Group:     SSN (Session)
 ' Boundary:  nasim code agent
 ' Purpose:   Session persistence, versioning, search, fork
+'            Entry chain: User → ServerRouter → AgentOrchestrator → SessionGroup
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_ssn01..sq_ssn09
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — Session Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,51 +43,68 @@ skinparam actor {
   FontSize 12
 }
 
-' ============================================================
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+actor "User" as User
+
+
+
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Session Group (SSN)" {
-    usecase "**SSN-01 PERSIST Session**\n--\nSave session to storage" as SSN01
-    usecase "**SSN-02 READ Session**\n--\nLoad session from storage" as SSN02
-    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" as SSN03
-    usecase "**SSN-04 RESTORE Session**\n--\nResume a previously saved session" as SSN04
-    usecase "**SSN-05 SNAPSHOT Session**\n--\nCreate session state snapshot" as SSN05
-    usecase "**SSN-06 REVERT Turn**\n--\nUndo last turn in session" as SSN06
-    usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" as SSN07
-    usecase "**SSN-08 BRANCH Session**\n--\nFork conversation from any point" as SSN08
-    usecase "**SSN-09 DELETE Session**\n--\nDelete session from storage" as SSN09
+    usecase "**SSN-01 PERSIST Session**\n--\nSave session to storage" <<include>> as SSN01
+    usecase "**SSN-02 READ Session**\n--\nLoad session from storage" <<include>> as SSN02
+    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" <<master>> as SSN03
+    usecase "**SSN-04 RESTORE Session**\n--\nResume a previously saved session" <<master>> as SSN04
+    usecase "**SSN-05 SNAPSHOT Session**\n--\nCreate session state snapshot" <<master>> as SSN05
+    usecase "**SSN-06 REVERT Turn**\n--\nUndo last turn in session" <<master>> as SSN06
+    usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" <<master>> as SSN07
+    usecase "**SSN-08 BRANCH Session**\n--\nFork conversation from any point" <<master>> as SSN08
+    usecase "**SSN-09 DELETE Session**\n--\nDelete session from storage" <<master>> as SSN09
   }
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-Agent --> SSN01
-Agent --> SSN02
-Agent --> SSN03
-Agent --> SSN04
-Agent --> SSN05
-Agent --> SSN06
-Agent --> SSN07
-Agent --> SSN08
-Agent --> SSN09
 
-' ============================================================
+User --> SSN03
+User --> SSN04
+User --> SSN05
+User --> SSN06
+User --> SSN07
+User --> SSN08
+User --> SSN09
+
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
+
 
 SSN04 ..> SSN02 : <<include>>
 SSN05 ..> SSN01 : <<include>>
 SSN06 ..> SSN02 : <<include>>
 SSN08 ..> SSN01 : <<include>>
+
+
+
 
 @enduml

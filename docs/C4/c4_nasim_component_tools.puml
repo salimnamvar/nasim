@@ -1,49 +1,56 @@
 @startuml c4_nasim_component_tools
+' ============================================================
+' Title:     NASIM Application — Tools Component Diagram
+' Boundary:  NASIM Application (container) — Tool Group
+' Purpose:   Tool layer: base ABC, registry, file/search/shell/web/git/lsp tools
+'            CSR Layer: Repository
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+' SIM-01 EXCEPTION: 25 elements — single-group component diagram showing all 16 tool sub-components + 8 external dependencies; splitting by tool category would lose the registry-ABC-inheritance pattern
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
 
-' ============================================================
-' Title:     nasim — Tools Component Diagram
-' Boundary:  nasim core library — Tool group
-' Purpose:   Tool layer internal components including repo intelligence and review tools
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' ============================================================
+title NASIM Application — Tools Component Diagram
 
-title nasim — Tools Component Diagram
-
-Container_Boundary(tool_boundary, "Tool Group") {
-    Component(tool_abc, "Tool", "ABC", "Base tool: name, description, parameters, safe, execute")
-    Component(tool_registry, "ToolRegistry", "", "Instance-based registry, dynamic registration for MCP")
-    Component(file_tools, "FileTools", "", "ReadFileTool, WriteFileTool, EditFileTool")
-    Component(search_tools, "SearchTools", "", "GrepTool, GlobTool, FindFileTool")
-    Component(shell_tool, "ShellTool", "", "Shell command execution via sandbox with timeout")
-    Component(dir_tool, "DirTool", "", "List directory contents")
-    Component(web_tools, "WebTools", "", "WebFetchTool, WebSearchTool")
-    Component(git_tool, "GitTool", "", "Git status, diff, commit operations")
-    Component(lsp_tool, "LspTool", "", "LSP operations: hover, definition, references, symbols")
-    Component(subagent_tool, "SubagentTool", "", "Spawns child agents via SubagentCoordinator")
-    Component(todo_tool, "TodoTool", "", "Task tracking within session")
-    Component(memory_tool, "MemoryTool", "", "Persist and retrieve cross-session knowledge")
-    Component(plan_tool, "PlanTool", "", "Plan creation and management")
-    Component(repo_map_tool, "RepoMapTool", "", "Generates and queries repository map summaries")
-    Component(semantic_search_tool, "SemanticSearchTool", "", "Embedding-based semantic code search")
-    Component(review_tool, "ReviewTool", "", "LLM-driven code review and quality assessment")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(tool_group, "Tool Group") <<repository>> {
+        Component(tool_abc, "Tool", "ABC", "Base tool: name, description, parameters, safe, execute")
+        Component(tool_registry, "ToolRegistry", "", "Instance-based registry, dynamic registration for MCP")
+        Component(file_tools, "FileTools", "", "ReadFileTool, WriteFileTool, EditFileTool")
+        Component(search_tools, "SearchTools", "", "GrepTool, GlobTool, FindFileTool")
+        Component(shell_tool, "ShellTool", "", "Shell command execution via sandbox with timeout")
+        Component(dir_tool, "DirTool", "", "List directory contents")
+        Component(web_tools, "WebTools", "", "WebFetchTool, WebSearchTool")
+        Component(git_tool, "GitTool", "", "Git status, diff, commit operations")
+        Component(lsp_tool, "LspTool", "", "LSP operations: hover, definition, references, symbols")
+        Component(subagent_tool, "SubagentTool", "", "Spawns child agents via SubagentCoordinator")
+        Component(todo_tool, "TodoTool", "", "Task tracking within session")
+        Component(memory_tool, "MemoryTool", "", "Persist and retrieve cross-session knowledge")
+        Component(plan_tool, "PlanTool", "", "Plan creation and management")
+        Component(repo_map_tool, "RepoMapTool", "", "Generates and queries repository map summaries")
+        Component(semantic_search_tool, "SemanticSearchTool", "", "Embedding-based semantic code search")
+        Component(review_tool, "ReviewTool", "", "LLM-driven code review and quality assessment")
+    }
 }
 
-Container_Ext(sandbox_group, "Sandbox Group")
-Container_Ext(repo_intelligence_group, "Repo Intelligence Group")
-Container_Ext(provider_group, "Provider Group")
-System_Ext(host_fs, "Host Filesystem")
-System_Ext(web, "Web")
-System_Ext(mcp_server, "MCP Server")
-System_Ext(git_repo, "Git Repository")
-System_Ext(lsp_server, "LSP Server")
+System_Ext(sandbox_executor, "SandboxExecutor", "Sandbox Group")
+System_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
+System_Ext(provider, "Provider", "Provider Group")
+System_Ext(host_fs, "Host Filesystem", "Project source code files")
+System_Ext(web, "Web", "Documentation and search engines")
+System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
+System_Ext(git_repo, "Git Repository", "Version-controlled project files")
+System_Ext(lsp_server, "LSP Server", "Language server for code intelligence")
 
-Rel(tool_registry, tool_abc, "manages instances")
+Rel(tool_registry, tool_abc, "manages tool instances via ABC interface")
 Rel(file_tools, tool_abc, "extends")
 Rel(search_tools, tool_abc, "extends")
 Rel(shell_tool, tool_abc, "extends")
@@ -58,16 +65,23 @@ Rel(plan_tool, tool_abc, "extends")
 Rel(repo_map_tool, tool_abc, "extends")
 Rel(semantic_search_tool, tool_abc, "extends")
 Rel(review_tool, tool_abc, "extends")
-Rel(shell_tool, sandbox_group, "executes via sandbox")
-Rel(file_tools, host_fs, "path I/O")
-Rel(search_tools, host_fs, "search files")
-Rel(dir_tool, host_fs, "directory listing")
-Rel(web_tools, web, "HTTP")
-Rel(git_tool, git_repo, "git CLI")
-Rel(lsp_tool, lsp_server, "LSP protocol")
-Rel(repo_map_tool, repo_intelligence_group, "queries repo map")
-Rel(semantic_search_tool, repo_intelligence_group, "vector search")
-Rel(review_tool, provider_group, "LLM review call")
-Rel(tool_registry, mcp_server, "discovers and registers MCP tools")
+Rel(shell_tool, sandbox_executor, "executes commands in sandboxed environment")
+Rel(file_tools, host_fs, "reads and writes project files")
+Rel(search_tools, host_fs, "searches project files by pattern")
+Rel(dir_tool, host_fs, "lists directory contents")
+Rel(web_tools, web, "fetches documentation and search results")
+Rel(git_tool, git_repo, "queries repository state and creates commits")
+Rel(lsp_tool, lsp_server, "requests code intelligence data")
+Rel(repo_map_tool, repo_intel_mgr, "queries repository map summaries")
+Rel(semantic_search_tool, repo_intel_mgr, "performs vector similarity search")
+Rel(review_tool, provider, "invokes LLM for code review")
+Rel(tool_registry, mcp_server, "discovers and registers MCP extension tools")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

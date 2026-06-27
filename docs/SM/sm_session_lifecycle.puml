@@ -1,39 +1,35 @@
 @startuml sm_session_lifecycle
+!include common/sm_styles.puml
 ' ============================================================
-' Title:     nasim — Session Lifecycle State Machine
+' Title:     nasim — Session Lifecycle State Machine (API-First)
 ' Boundary:  nasim code agent
-' Purpose:   Entity lifecycle for Session (persisted to disk)
+' Purpose:   Entity lifecycle for Session (persisted to disk).
+'            All mutations routed through API Group (Entry Gate).
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Version:   8.0.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
 ' ============================================================
 
-title nasim — Session Lifecycle
+title nasim — Session Lifecycle (API-First)
 
-skinparam state {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-}
+[*] --> CREATED : API-02
 
-[*] --> CREATED : SSN-01
-
-state "CREATED" as CREATED #E3F2FD
+state "CREATED" as CREATED #BBDEFB
 CREATED : Session record initialized.
-CREATED : SSN-01 PERSIST Session owns all writes here.
+CREATED : API-02 CREATE Session.
 
 state "ACTIVE" as ACTIVE #2E7D32
 ACTIVE : Session accepting messages.
-ACTIVE : SSN-02 READ Session, SRV-06 DISPATCH Message.
+ACTIVE : API-03 GET Session, API-06 DISPATCH Message.
 
 state "SAVED" as SAVED #1565C0
 SAVED : Session persisted to disk.
-SAVED : SSN-01 PERSIST Session.
+SAVED : API-01 LIST Sessions, API-04 UPDATE Session.
 
 state "RESTORED" as RESTORED #1E88E5
 RESTORED : Session loaded from disk.
-RESTORED : SSN-04 RESTORE Session.
+RESTORED : API-03 GET Session.
 
 state "BRANCHED" as BRANCHED #7B1FA2
 BRANCHED : Session forked from parent.
@@ -43,16 +39,17 @@ state "CLOSED" as CLOSED #757575
 CLOSED : Session terminated.
 CLOSED : Terminal state.
 
-CREATED --> ACTIVE : SSN-01
-ACTIVE --> SAVED : SSN-01
+CREATED --> ACTIVE : API-02
+ACTIVE --> SAVED : API-04
 ACTIVE --> BRANCHED : WRL-04
-ACTIVE --> CLOSED : SSN-01
-SAVED --> RESTORED : SSN-04
-RESTORED --> ACTIVE : SSN-01
-RESTORED --> SAVED : SSN-01
-BRANCHED --> ACTIVE : SSN-01
-BRANCHED --> CLOSED : SSN-01
-SAVED --> CLOSED : SSN-01
+ACTIVE --> CLOSED : API-05
+SAVED --> RESTORED : API-03
+RESTORED --> ACTIVE : API-02
+RESTORED --> SAVED : API-04
+RESTORED --> CLOSED : API-05
+BRANCHED --> ACTIVE : API-02
+BRANCHED --> CLOSED : API-05
+SAVED --> CLOSED : API-05
 
 CLOSED --> [*]
 

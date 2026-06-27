@@ -1,22 +1,31 @@
 @startuml uc_memory
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: Memory Group
 ' Group:     MEM (Memory)
 ' Boundary:  nasim code agent
-' Purpose:   Cross-session knowledge persistence, retrieval, and RAG adapters
+' Purpose:   Cross-session knowledge persistence, retrieval, search, scoping
+'            Entry chain: User → ServerRouter → AgentOrchestrator → MemoryGroup
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_mem01..sq_mem04
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — Memory Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,45 +43,55 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+actor "User" as User
+
+
+
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Memory Group (MEM)" {
-    usecase "**MEM-01 PERSIST Knowledge**\n--\nStore knowledge entries with scope, key, content" as MEM01
-    usecase "**MEM-02 RECALL Knowledge**\n--\nRetrieve knowledge from memory stores" as MEM02
-    usecase "**MEM-03 SEARCH Knowledge**\n--\nFTS5 search across stored knowledge" as MEM03
-    usecase "**MEM-04 SCOPE Knowledge**\n--\nIsolate knowledge by global, project, session scope" as MEM04
+    usecase "**MEM-01 PERSIST Knowledge**\n--\nStore knowledge entries with scope, key, content" <<master>> as MEM01
+    usecase "**MEM-02 RECALL Knowledge**\n--\nRetrieve knowledge from memory stores" <<master>> as MEM02
+    usecase "**MEM-03 SEARCH Knowledge**\n--\nFTS5 search across stored knowledge" <<include>> as MEM03
+    usecase "**MEM-04 SCOPE Knowledge**\n--\nIsolate knowledge by global, project, session scope" <<include>> as MEM04
   }
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-Agent --> MEM01
-Agent --> MEM02
-Agent --> MEM03
-Agent --> MEM04
 
-' ============================================================
+User --> MEM01
+User --> MEM02
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
+
 
 MEM01 ..> MEM04 : <<include>>
 MEM02 ..> MEM03 : <<include>>
+
+
+
 
 @enduml

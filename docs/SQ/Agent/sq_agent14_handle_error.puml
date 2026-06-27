@@ -1,0 +1,67 @@
+@startuml sq_agent14_handle_error
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     AGT-14 — HANDLE Error
+' Boundary:  nasim code agent
+' Purpose:   Classify errors and determine recovery action
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — AGT-14 HANDLE Error
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "ErrorBoundary" as eb
+end box
+box "Safety Group" #FFF3E0
+  participant "SafetyCoordinator" as safety
+end box
+box "Repository Group" #E8F5E9
+  participant "MemoryRepository" as memory
+end box
+
+
+
+== AGT-14 HANDLE Error ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+activate agent
+
+agent -> eb : agt14 HANDLE Error({error})
+activate eb
+
+eb -> eb : classify error type
+eb -> eb : determine severity
+
+alt retryable error (transient)
+    eb -> eb : set retry policy (backoff + max retries)
+    eb --> agent : RecoveryAction(retry)
+else recoverable error (config)
+    eb -> safety : check safety constraints
+    activate safety
+    safety --> eb : safety_status
+    deactivate safety
+    eb -> eb : determine fallback strategy
+    eb --> agent : RecoveryAction(fallback)
+else unrecoverable error
+    eb -> eb : log error details
+    eb --> agent : RecoveryAction(abort)
+end
+
+deactivate eb
+
+agent --> router : AgentEvent(Error)
+deactivate agent
+
+
+
+@enduml

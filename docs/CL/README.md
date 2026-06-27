@@ -136,7 +136,7 @@ Back to [docs/](../README.md).
 
 - nasim is a CLI agent tool with HTTP API server mode. The CL diagram covers runtime structure
   rather than a pure domain model (no business entities). This is a deliberate
-  deviation from the OVMS-style domain CL — documented in entities.md.
+  deviation from the OVMS-style domain CL.
 - **Implementation status:** All module paths are planned. No Python source code exists yet.
 - AgentEvent hierarchy uses ABC base with concrete subtypes (TextChunk, ToolStart, ToolResultEvent, Error, Done).
 - Tool ABC defines the contract; ToolRegistry manages instances.
@@ -159,4 +159,3 @@ Back to [docs/](../README.md).
 | UC inventory | `docs/UC/` |
 | SQ diagrams | `docs/SQ/` |
 | ERD — session store | `docs/ER/er_session_store.puml` |
-| Entity registry | `docs/ENTITIES.md` |

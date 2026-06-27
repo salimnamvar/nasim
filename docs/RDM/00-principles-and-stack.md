@@ -49,7 +49,7 @@ All code written in any milestone **must** follow these without deferral:
 | LLM providers | `httpx` (sync) | Async-ready for web server mode |
 | Config | `pydantic` + `pydantic-settings` | Typed config with validation |
 | Session storage | JSON Lines (`pathlib` + `json`) | No database required |
-| Testing | `pytest` + `pytest-asyncio` + `httpx` TestClient | Layered: agent/tool/cli |
+| Testing | `pytest` + `pytest-asyncio` + `httpx` TestClient | Layered: agent/toolcli |
 | Lint/Format | `ruff` · `black`(120) · `mypy --strict` | Configured in `pyproject.toml` |
 | MCP | `mcp` SDK | Extension tools via Model Context Protocol |
 | Context compaction | Secondary LLM call | Summarize old exchanges when budget exceeded |

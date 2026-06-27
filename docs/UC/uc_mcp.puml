@@ -1,22 +1,31 @@
 @startuml uc_mcp
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: MCP Group
 ' Group:     MCP (Model Context Protocol)
 ' Boundary:  nasim code agent
 ' Purpose:   MCP as first-class subsystem: client/server runtime, tool adapter, discovery
+'            Entry chain: User → ServerRouter → AgentOrchestrator → MCPGroup
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_mcp01..sq_mcp04
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — MCP Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,46 +43,61 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
+
+
+actor "User" as User
+
 
 actor "MCP Client" as MCPClient <<system>>
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "MCP Group (MCP)" {
-    usecase "**MCP-01 CONNECT MCP Server**\n--\nConnect to external MCP server via stdio/SSE" as MCP01
-    usecase "**MCP-02 DISCOVER MCP Tools**\n--\nDiscover and register tools from MCP servers" as MCP02
-    usecase "**MCP-03 ADAPT MCP Tool**\n--\nWrap MCP tools into nasim Tool ABC format" as MCP03
-    usecase "**MCP-04 EXPOSE nasim Tools**\n--\nExpose nasim tools to external MCP clients" as MCP04
+    usecase "**MCP-01 CONNECT MCP Server**\n--\nConnect to external MCP server via stdio/SSE" <<master>> as MCP01
+    usecase "**MCP-02 DISCOVER MCP Tools**\n--\nDiscover and register tools from MCP servers" <<include>> as MCP02
+    usecase "**MCP-03 ADAPT MCP Tool**\n--\nWrap MCP tools into nasim Tool ABC format" <<include>> as MCP03
+    usecase "**MCP-04 EXPOSE nasim Tools**\n--\nExpose nasim tools to external MCP clients" <<master>> as MCP04
   }
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-MCPClient --> MCP04
-Agent --> MCP01
-Agent --> MCP02
-Agent --> MCP03
 
-' ============================================================
+User --> MCP01
+User --> MCP04
+
+
+MCPClient --> MCP04 : calls
+
+
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
+
 
 MCP01 ..> MCP02 : <<include>>
 MCP02 ..> MCP03 : <<include>>
+
+
 
 @enduml

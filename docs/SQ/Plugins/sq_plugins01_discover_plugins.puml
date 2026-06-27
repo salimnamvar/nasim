@@ -1,0 +1,56 @@
+@startuml sq_plugins01_discover_plugins
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     PLG-01 — DISCOVER Plugins
+' Boundary:  nasim code agent
+' Purpose:   Discover plugins from plugin directory
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Plugins Group" #F3E5F5
+  participant "PluginLoader" as loader
+end box
+participant "Host Filesystem" as fs
+
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+== PLG-01 DISCOVER Plugins ==
+
+agent -> loader : PLG-01 DISCOVER(plugin_dir)
+activate loader
+
+loader -> fs : scan(plugin_dir)
+activate fs
+fs --> loader : plugin_directories[]
+deactivate fs
+
+loop for each plugin directory
+    loader -> loader : PLG-02 load_manifest()
+
+    break Manifest load fails
+        loader --> loader : skip plugin, log warning
+    end
+
+    loader --> loader : append to discovered list
+end
+
+loader --> agent : list[PluginManifest]
+deactivate loader
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

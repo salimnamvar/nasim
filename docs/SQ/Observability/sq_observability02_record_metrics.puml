@@ -1,0 +1,82 @@
+@startuml sq_observability02_record_metrics
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     OBS-02 — RECORD Metrics
+' Boundary:  nasim code agent
+' Purpose:   Record metric points for token usage, latency, tool calls
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — OBS-02 RECORD Metrics
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Provider Group" #FFF3E0
+  participant "Provider" as provider
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as tools
+end box
+box "Observability Group" #F3E5F5
+  participant "MetricsCollector" as metrics
+  participant "TraceCorrelator" as trace
+end box
+box "Repository Group" #E8F5E9
+  participant "ObservabilityRepository" as obs_repo
+end box
+
+
+== OBS-02 RECORD Metrics (LLM Request) ==
+
+user -> router : OBS-02 RECORD Metrics(llm_request)
+activate router
+router -> agent : OBS-02 RECORD Metrics(llm_request)
+activate agent
+
+agent -> metrics : OBS-02 RECORD Metrics(llm_request, model, provider, latency_ms, tokens)
+activate metrics
+
+metrics -> metrics : llm_latency_ms.labels(model, provider).observe(latency_ms)
+metrics -> metrics : llm_tokens_total.labels(model, provider).inc(tokens)
+metrics -> metrics : llm_requests_total.labels(model, provider).inc()
+
+metrics --> agent : None
+deactivate metrics
+
+== OBS-02 RECORD Metrics (Tool Call) ==
+
+tools -> metrics : OBS-02 RECORD Metrics(tool_call, tool, success, duration_ms)
+activate metrics
+
+metrics -> metrics : tool_duration_ms.labels(tool).observe(duration_ms)
+metrics -> metrics : tool_calls_total.labels(tool, success).inc()
+
+metrics --> tools : None
+deactivate metrics
+
+== OBS-02 RECORD Metrics (Error) ==
+
+agent -> metrics : OBS-02 RECORD Metrics(error, error_type)
+activate metrics
+
+metrics -> metrics : errors_total.labels(type=error_type).inc()
+
+metrics --> agent : None
+deactivate metrics
+
+agent --> router : None
+deactivate agent
+deactivate router
+
+
+
+@enduml

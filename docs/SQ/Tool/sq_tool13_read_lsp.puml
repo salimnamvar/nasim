@@ -1,0 +1,72 @@
+@startuml sq_tool13_read_lsp
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     TL-13 — Read LSP
+' Boundary:  nasim code agent
+' Purpose:   Query LSP server for hover, definition, or references
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — TL-13 READ LSP
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "LspTool" as tool
+end box
+participant "LSP Server" as lsp
+
+
+
+== TL-13 Read LSP ==
+
+user -> router : types input
+activate router
+router -> agent : TL-13 PROCESS(user_input)
+activate agent
+agent -> registry : TL-13 Read LSP(query, params)
+activate registry
+registry -> tool : TL-13 Read LSP(query, params)
+activate tool
+tool -> lsp : send request(query, params)
+activate lsp
+
+break LSP server unreachable or times out
+    lsp --> tool : ConnectionError / TimeoutError
+    deactivate lsp
+    tool --> registry : ToolResult(success=False, error="LSP unavailable")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+break Query returns no results
+    lsp --> tool : empty result
+    deactivate lsp
+    tool --> registry : ToolResult(success=False, error="no results")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+lsp --> tool : hover/definition/references result
+deactivate lsp
+tool --> registry : ToolResult(success=True, result)
+registry --> agent : ToolResult
+agent --> router : AgentEvent(Done)
+
+deactivate tool
+deactivate registry
+deactivate agent
+deactivate router
+
+
+@enduml

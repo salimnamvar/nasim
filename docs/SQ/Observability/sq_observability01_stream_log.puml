@@ -1,0 +1,73 @@
+@startuml sq_observability01_stream_log
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     OBS-01 — STREAM Structured Log
+' Boundary:  nasim code agent
+' Purpose:   Emit structured JSON log record to stdout
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — OBS-01 STREAM StructuredLog
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Observability Group" #F3E5F5
+  participant "StructuredLogger" as logger
+  participant "LogRedactor" as redactor
+  participant "TraceCorrelator" as trace
+  participant "DualOutputAdapter" as adapter
+end box
+box "External" #F5F5F5
+  participant "Stdout" as stdout
+end box
+
+
+== OBS-01 STREAM StructuredLog ==
+
+user -> router : OBS-01 STREAM StructuredLog(msg, level, extra)
+activate router
+router -> agent : OBS-01 STREAM StructuredLog(msg, level, extra)
+activate agent
+
+agent -> logger : OBS-01 STREAM StructuredLog(msg, level, extra)
+activate logger
+
+logger -> trace : trace.current_span()
+activate trace
+trace --> logger : TraceContext(trace_id, span_id, parent_span_id)
+deactivate trace
+
+logger -> logger : build_record(msg, level, trace_ctx, extra)
+
+logger -> redactor : OBS-04 REDACT SensitiveData(record)
+activate redactor
+redactor --> logger : SanitizedRecord
+deactivate redactor
+
+logger -> adapter : OBS-01 EMIT LogRecord(sanitized_record)
+activate adapter
+
+adapter -> adapter : serialize_json(record)
+adapter -> stdout : write_json(record)
+
+adapter --> logger : None
+deactivate adapter
+
+deactivate logger
+
+agent --> router : None
+deactivate agent
+deactivate router
+
+
+
+@enduml

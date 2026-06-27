@@ -1,0 +1,57 @@
+@startuml sq_api08_list_tools
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     API-08 — LIST Tools
+' Boundary:  nasim code agent HTTP API
+' Purpose:   List all registered tools available to the agent
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
+' ============================================================
+
+title nasim — API-08 LIST Tools
+
+actor "User" as user
+
+box "Controller Group" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Service Group" #FFF3E0
+  participant "ToolService" as svc
+end box
+box "Repository Group" #E8F5E9
+  participant "ToolRegistry" as registry
+end box
+
+
+
+== API-08 LIST Tools ==
+
+user -> router : GET /v1/tools?page_size=100&page_token=abc
+activate router
+
+router -> svc : API-08 LIST Tools(pageSize=100, pageToken="abc")
+activate svc
+
+svc -> registry : listTools(limit=100, cursor="abc")
+activate registry
+
+break Registry read failure [500]
+    registry --> svc : InternalError
+    deactivate registry
+    svc --> router : 500 INTERNAL
+    router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list tools", status: "INTERNAL"}}
+end
+
+registry --> svc : ToolList, next_page_token
+deactivate registry
+
+svc --> router : ListToolsResponse {tools: [...], nextPageToken}
+deactivate svc
+router --> user : 200 OK {tools: [...], next_page_token}
+deactivate router
+
+
+
+@enduml

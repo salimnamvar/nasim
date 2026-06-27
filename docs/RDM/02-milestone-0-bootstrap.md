@@ -33,4 +33,4 @@ Set up project structure, config loading, and session persistence. Foundation fo
 - `black --check` passes
 - All config tests pass (layered loading, env override, validation)
 - All session tests pass (save, load, list, resume, atomic writes)
-- No agent/CLI imports in config or session code
+- No agentcli imports in config or session code

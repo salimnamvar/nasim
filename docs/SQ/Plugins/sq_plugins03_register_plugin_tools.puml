@@ -1,0 +1,54 @@
+@startuml sq_plugins03_register_plugin_tools
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     PLG-03 — Register Plugin Tools
+' Boundary:  nasim code agent
+' Purpose:   Register all tools declared in a plugin manifest
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "PluginLoader" as loader
+  participant "ToolRegistry" as registry
+end box
+
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+== PLG-03 Register Plugin Tools ==
+
+agent -> loader : PLG-03 REGISTER_PLUGIN_TOOLS(manifest)
+activate loader
+
+loader -> loader : enumerate tools from PluginManifest
+
+loop for each tool in manifest
+    loader -> registry : register(plugin::tool_name, handler)
+
+    break Name collision
+        registry --> loader : CollisionError
+        loader --> loader : log warning, skip tool
+    end
+
+    registry --> loader : registered
+end
+
+loader --> agent : all tools registered
+deactivate loader
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

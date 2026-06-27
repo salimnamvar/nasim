@@ -1,30 +1,42 @@
 @startuml c4_nasim_component_hooks
+' ============================================================
+' Title:     NASIM Application — Hooks Component Diagram
+' Boundary:  NASIM Application (container) — Hooks Group
+' Purpose:   Pre/post hooks for tool use and LLM calls
+'            CSR Layer: Infrastructure
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
 
-' ============================================================
-' Title:     nasim — Hooks Component Diagram
-' Boundary:  nasim core library — Hooks group
-' Purpose:   Pre/post hooks for tool use and LLM calls
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
-' ============================================================
+title NASIM Application — Hooks Component Diagram
 
-title nasim — Hooks Component Diagram
-
-Container_Boundary(hooks_boundary, "Hooks Group") {
-    Component(hook_manager, "HookManager", "nasim/hooks/manager.py", "Registers, discovers, and executes hooks in priority order")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(hooks_group, "Hooks Group") <<infrastructure>> {
+        Component(hook_manager, "HookManager", "nasim/hooks/manager.py", "Registers, discovers, and executes hooks in priority order")
+    }
 }
 
-System_Ext(agent_orch, "Agent Orchestrator", "Core agentic loop")
-System_Ext(tool_registry, "Tool Registry", "Tool instances")
-System_Ext(plugin_loader, "Plugin Loader", "Plugin discovery")
+System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(plugin_loader, "PluginLoader", "Plugins Group")
 
-Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall")
-Rel(plugin_loader, hook_manager, "registers plugin hooks")
-Rel(hook_manager, tool_registry, "queries tool metadata for hook dispatch")
+Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall lifecycle hooks")
+Rel(plugin_loader, hook_manager, "registers plugin hooks at startup")
+Rel(hook_manager, tool_registry, "queries tool metadata for hook dispatch decisions")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

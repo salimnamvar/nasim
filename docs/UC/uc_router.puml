@@ -1,22 +1,32 @@
 @startuml uc_router
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: Router Group
-' Group:     RTG (Model Router)
+' Group:     RTG (Router Layer)
 ' Boundary:  nasim code agent
-' Purpose:   Model selection, fallback chains, task classification
+' Purpose:   Model selection, fallback chains, task classification,
+'            runtime model switching.
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ModelRouter
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_rtg01..sq_rtg04
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — Router Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +36,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,45 +44,56 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ============================================================
 ' Actors
 ' ============================================================
 
-actor "Agent" as Agent <<system>>
+
+actor "User" as User
+
+
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
 
+
 rectangle "nasim" {
   package "Router Group (RTG)" {
-    usecase "**RTG-01 SELECT Model**\n--\nSelect optimal model for task" as RTG01
-    usecase "**RTG-02 APPLY Fallback**\n--\nTrigger provider failover on error" as RTG02
-    usecase "**RTG-03 CLASSIFY Task**\n--\nClassify task type for model selection" as RTG03
-    usecase "**RTG-04 SWITCH Model**\n--\nSwitch model at runtime" as RTG04
+    usecase "**RTG-01 SELECT Model**\n--\nSelect best model for task" <<master>> as RTG01
+    usecase "**RTG-02 APPLY Fallback**\n--\nFallback to next available model" <<include>> as RTG02
+    usecase "**RTG-03 CLASSIFY Task**\n--\nClassify task for model routing" <<include>> as RTG03
+    usecase "**RTG-04 SWITCH Model**\n--\nSwitch model at runtime" <<master>> as RTG04
   }
 }
+
 
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Agent --> RTG01
-Agent --> RTG02
-Agent --> RTG03
-Agent --> RTG04
+
+User --> RTG01
+User --> RTG04
+
+
 
 ' ============================================================
 ' Relationships
 ' ============================================================
 
+
 RTG01 ..> RTG03 : <<include>>
-RTG01 ..> RTG02 : <<extend>>
+RTG01 ..> RTG02 : <<include>>
+
+
 
 @enduml

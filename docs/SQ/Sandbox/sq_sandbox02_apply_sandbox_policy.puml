@@ -1,0 +1,68 @@
+@startuml sq_sandbox02_apply_sandbox_policy
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SBX-02 — APPLY Sandbox Policy
+' Boundary:  nasim code agent
+' Purpose:   Load and apply sandbox security policy
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — SBX-02 UPDATE Sandbox Policy
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Sandbox Group" #F3E5F5
+  participant "SandboxExecutor" as executor
+  participant "SandboxPolicy" as policy
+end box
+
+
+== SBX-02 APPLY Sandbox Policy ==
+
+user -> router : types input
+router -> agent : SBX-02 PROCESS(user_input)
+
+agent -> executor : SBX-02 APPLY SandboxPolicy(policy_path, updateMask)
+activate executor
+
+executor -> policy : SBX-02 LOAD Policy(policy_path)
+activate policy
+
+policy -> policy : SBX-02 READ PolicyFile(policy_path)
+
+break Policy file not found
+    policy --> executor : default policy applied
+    executor --> agent : Result(success=true, data={rules_count, fallback=true})
+    agent --> router : AgentEvent(Done)
+end
+
+policy -> policy : SBX-02 VALIDATE Rules(rules)
+
+break Invalid policy rules
+    policy --> executor : revert to defaults, log error
+    executor --> agent : Result(success=false, error="policy_invalid")
+    agent --> router : AgentEvent(Error)
+end
+
+policy -> policy : SBX-02 APPLY ToSandbox(instance)
+
+policy --> executor : Result(success=true, data={rules_count})
+deactivate policy
+
+executor --> agent : Result(success=true, data={rules_count})
+deactivate executor
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

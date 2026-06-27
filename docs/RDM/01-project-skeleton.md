@@ -15,7 +15,7 @@ chain layers. Every method/test cites UC+SQ. No orphan code.
 src/nasim/
 ├── __init__.py
 ├── __main__.py                 # python -m nasim entry
-├── cli/                        # CLI LAYER — user interaction
+├── CLI/                        # CLI LAYER — user interaction
 │   ├── __init__.py
 │   ├── args.py                 # ArgParser (C4: CLI)
 │   ├── repl.py                 # REPLSession (C4: CLI)
@@ -67,7 +67,7 @@ tests/
 ├── integration/                # Cross-layer integration tests
 │   ├── agent_provider/         # Agent + provider interaction
 │   └── session_persistence/    # Full save/load cycle
-└── cli/                        # CLI integration tests
+└── CLI/                        # CLI integration tests
 ```
 
 ---
@@ -76,7 +76,7 @@ tests/
 
 | Layer | Do | Don't |
 | --- | --- | --- |
-| `cli/` | Parse input → delegate to AgentOrchestrator → render AgentEvents | Business logic, direct tool calls, provider calls |
+| `CLI/` | Parse input → delegate to AgentOrchestrator → render AgentEvents | Business logic, direct tool calls, provider calls |
 | `agent/` | Orchestrate LLM/tool loop, emit AgentEvents, manage permissions | Import CLI/rendering, print(), sys.exit(), direct file I/O |
 | `provider/` | Implement Provider Protocol, handle HTTP/JSON, return LLMResponse | Import agent or CLI, manage state beyond single call |
 | `tools/` | Implement Tool ABC, return ToolResult, declare safe/unsafe | Import agent or CLI, manage cross-tool state |
@@ -84,7 +84,7 @@ tests/
 | `session/` | Persist/load sessions, return Session objects | Import agent, CLI, or config |
 | `domain/` | Shared types and exceptions | Framework imports, persistence logic |
 
-**Dependency direction:** `cli/ → agent/ → {provider/, tools/, config/, session/}`. No circular.
+**Dependency direction:** `CLI/ → agent/ → {provider/, tools/, config/, session/}`. No circular.
 Agent layer never imports from CLI. Tools never import from agent.
 
 ---
@@ -104,7 +104,7 @@ black --check src/nasim/
 # Tests
 pytest tests/ -v
 
-# Layer boundary check (no agent→cli imports)
-grep -r "from nasim.cli" src/nasim/agent/ && echo "FAIL: agent imports CLI" || echo "OK"
-grep -r "from nasim.agent" src/nasim/cli/ && echo "FAIL: CLI imports agent internals" || echo "OK"
+# Layer boundary check (no agent→CLI imports)
+grep -r "from nasim.CLI" src/nasim/agent/ && echo "FAIL: agent imports CLI" || echo "OK"
+grep -r "from nasim.agent" src/nasimcli/ && echo "FAIL: CLI imports agent internals" || echo "OK"
 ```

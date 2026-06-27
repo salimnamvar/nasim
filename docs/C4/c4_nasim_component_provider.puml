@@ -1,44 +1,48 @@
-@startuml nasim_component_provider
+@startuml c4_nasim_component_provider
+' ============================================================
+' Title:     NASIM Application — Provider Component Diagram
+' Boundary:  NASIM Application (container) — Provider Group
+' Purpose:   Provider Group: universal LLM abstraction via litellm.
+'            Provider is a Protocol — all LLM calls route through
+'            LiteLLM Proxy to 100+ backends without per-provider code.
+'            CSR Layer: Service
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/entities.md
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
-' ============================================================
-' Title: nasim — Provider Component Diagram
-' Boundary: nasim core library — Provider group
-' Purpose: Universal LLM provider abstraction via litellm proxy (100+ providers)
-' Milestone: v1.0
-' Version: 6.0.0
-' Source: docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review: —
-' ============================================================
 
-LAYOUT_LEFT_RIGHT()
-LAYOUT_WITH_LEGEND()
+title NASIM Application — Provider Component Diagram
 
-title nasim — Provider Components
-
-' ============================================================
-' Provider Group
-' ============================================================
-
-Container_Boundary(provider_boundary, "Provider Group") {
-
-    Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name. All providers route through litellm.")
-
-    Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(provider_group, "Provider Group") <<service>> {
+        Component(provider, "Provider", "Protocol", "Unified interface: chat(), chat_stream(), model_name, capabilities. All providers route through litellm.")
+        Component(litellm_proxy, "LiteLLM Proxy", "litellm library", "Universal LLM proxy: 100+ providers via model string prefix (anthropic/, openai/, gemini/, deepseek/, ollama/, etc.)")
+        Component(provider_caps, "ProviderCapabilities", "", "Per-model capability metadata: supports_tools, supports_vision, supports_streaming, max_context, supports_prompt_caching.")
+    }
 }
 
-' ============================================================
-' External: LLM Backends (consolidated — litellm routes to 100+)
-' ============================================================
+System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+System_Ext(model_router, "ModelRouter", "Router Group")
+System_Ext(all_llm_backends, "LLM Backends", "Unified via litellm: OpenAI, Anthropic, Google, DeepSeek, Ollama, vLLM, and 100+ providers via model string prefix")
 
-System_Ext(all_llm_backends, "100+ LLM Backends", "Unified via litellm. Includes cloud (OpenAI, Anthropic, Google, DeepSeek, Mistral, Groq, Cohere, etc.) and local (Ollama, vLLM, LM Studio)")
-
-' ============================================================
-' Provider Relationships
-' ============================================================
-
-Rel(provider, litellm_proxy, "delegates all LLM calls")
+Rel(agent_orch, provider, "invokes LLM inference via provider protocol")
+Rel(model_router, provider_caps, "queries capabilities for model selection")
+Rel(provider, litellm_proxy, "delegates all LLM calls to universal proxy")
+Rel(provider, provider_caps, "exposes capability metadata to callers")
 Rel(litellm_proxy, all_llm_backends, "routes via model string prefix", "HTTP/JSON")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

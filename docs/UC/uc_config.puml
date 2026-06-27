@@ -1,22 +1,31 @@
 @startuml uc_config
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: Config Group
 ' Group:     CFG (Configuration)
 ' Boundary:  nasim code agent
 ' Purpose:   Config loading, validation, and layered overrides
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ConfigGroup
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_cfg01..sq_cfg03
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — Config Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,37 +43,54 @@ skinparam actor {
   FontSize 12
 }
 
-' ============================================================
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+actor "User" as User
+
+
+
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Config Group (CFG)" {
-    usecase "**CFG-01 LOAD Config**\n--\nLoad global YAML, project YAML, env vars, CLI flags" as CFG01
-    usecase "**CFG-02 VALIDATE Config**\n--\nValidate config schema at load time" as CFG02
-    usecase "**CFG-03 APPLY Layered Config**\n--\nMerge layered config with precedence rules" as CFG03
+    usecase "**CFG-01 LOAD Config**\n--\nLoad global YAML, project YAML, env vars, CLI flags" <<master>> as CFG01
+    usecase "**CFG-02 VALIDATE Config**\n--\nValidate config schema at load time" <<include>> as CFG02
+    usecase "**CFG-03 APPLY Layered Config**\n--\nMerge layered config with precedence rules" <<include>> as CFG03
   }
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-Agent --> CFG01
-Agent --> CFG02
-Agent --> CFG03
 
-' ============================================================
+User --> CFG01
+
+
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
+
 
 CFG01 ..> CFG03 : <<include>>
 CFG03 ..> CFG02 : <<include>>
+
+
 
 @enduml

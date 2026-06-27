@@ -1,0 +1,111 @@
+@startuml uc_tool_core
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Tool Group — Core Tools
+' Group:     TL (Tool Layer)
+' Boundary:  nasim code agent
+' Purpose:   Core tool implementations: file operations, shell execution,
+'            search tools, web tools. Entry chain: User →
+'            ServerRouter → AgentOrchestrator → ToolRegistry
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_tl01..sq_tl10
+' ============================================================
+
+
+left to right direction
+
+
+title nasim — Tool Use Cases — Core Tools
+
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+' ============================================================
+' Actors
+' ============================================================
+
+
+actor "User" as User
+
+
+
+' ============================================================
+' System Boundary
+' ============================================================
+
+
+rectangle "nasim" {
+  package "File Operations" as FILE_PKG {
+    usecase "**TL-01 READ File**\n--\nRead file contents with offset/limit" <<master>> as TL01
+    usecase "**TL-02 INSERT File**\n--\nCreate or overwrite files" <<master>> as TL02
+    usecase "**TL-03 UPDATE File**\n--\nReplace exact strings in files" <<master>> as TL03
+    usecase "**TL-04 LIST Directory**\n--\nList directory contents" <<master>> as TL04
+  }
+  package "Shell Execution" as SHL_PKG {
+    usecase "**TL-05 DISPATCH Shell Command**\n--\nExecute shell command via sandbox" <<master>> as TL05
+  }
+  package "Search Tools" as SRCH_PKG {
+    usecase "**TL-06 SEARCH Grep**\n--\nSearch file contents by regex" <<master>> as TL06
+    usecase "**TL-07 SEARCH Glob**\n--\nFind files by glob pattern" <<master>> as TL07
+    usecase "**TL-08 SEARCH Find**\n--\nFind files by name pattern" <<master>> as TL08
+  }
+  package "Web Tools" as WEB_PKG {
+    usecase "**TL-09 FETCH Web Content**\n--\nFetch URL content as markdown" as TL09
+    usecase "**TL-10 SEARCH Web**\n--\nSearch the web for information" <<master>> as TL10
+  }
+}
+
+
+' ============================================================
+' Actor -> Use Case Associations
+' ============================================================
+
+
+User --> TL01
+User --> TL02
+User --> TL03
+User --> TL04
+User --> TL05
+User --> TL06
+User --> TL07
+User --> TL08
+User --> TL09
+User --> TL10
+
+
+
+
+
+@enduml

@@ -1,22 +1,31 @@
 @startuml uc_observability
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: Observability Group
 ' Group:     OBS (Observability)
 ' Boundary:  nasim code agent
 ' Purpose:   Emit-only structured logging, metrics, trace correlation (tenas pattern)
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ObservabilityGroup
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_obs01..sq_obs06
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — Observability Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,53 +43,61 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "HTTP Client" as HTTPClient <<system>>
+
+actor "User" as User
+
+
 actor "Observability Platform" as Platform <<system>>
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Observability Group (OBS)" {
-    usecase "**OBS-01 STREAM Structured Log**\n--\nWrite structured JSON records to stdout" as OBS01
-    usecase "**OBS-02 RECORD Metrics**\n--\nIncrement counters and observe histograms" as OBS02
-    usecase "**OBS-03 CORRELATE Trace**\n--\nGenerate and bind trace/span ids per entrypoint" as OBS03
-    usecase "**OBS-04 REDACT Sensitive**\n--\nStrip secrets before any emission" as OBS04
-    usecase "**OBS-05 EXPOSE /metrics**\n--\nServe /metrics endpoint for pull scrape" as OBS05
-    usecase "**OBS-06 EXPORT OTLP**\n--\nExport traces/metrics via OTLP (optional)" as OBS06
+    usecase "**OBS-01 STREAM Structured Log**\n--\nWrite structured JSON records to stdout" <<master>> as OBS01
+    usecase "**OBS-02 RECORD Metrics**\n--\nIncrement counters and observe histograms" <<master>> as OBS02
+    usecase "**OBS-03 CORRELATE Trace**\n--\nGenerate and bind trace/span ids per entrypoint" <<include>> as OBS03
+    usecase "**OBS-04 REDACT Sensitive**\n--\nStrip secrets before any emission" <<extend>> as OBS04
+    usecase "**OBS-05 EXPOSE /metrics**\n--\nServe /metrics endpoint for pull scrape" <<master>> as OBS05
+    usecase "**OBS-06 EXPORT OTLP**\n--\nExport traces/metrics via OTLP (optional)" <<master>> as OBS06
   }
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-HTTPClient --> OBS05
-Platform --> OBS05
-Agent --> OBS01
-Agent --> OBS02
-Agent --> OBS03
-Agent --> OBS04
-Agent --> OBS06
 
-' ============================================================
+User --> OBS05
+Platform --> OBS05 : scrapes
+
+
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
+
 
 OBS02 ..> OBS03 : <<include>>
 OBS04 ..> OBS01 : <<extend>>
 OBS04 ..> OBS02 : <<extend>>
+
+
 
 @enduml

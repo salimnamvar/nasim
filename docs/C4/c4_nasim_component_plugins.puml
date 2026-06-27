@@ -1,32 +1,42 @@
 @startuml c4_nasim_component_plugins
+' ============================================================
+' Title:     NASIM Application — Plugins Component Diagram
+' Boundary:  NASIM Application (container) — Plugins Group
+' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
+'            CSR Layer: Infrastructure
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
-LAYOUT_LEFT_RIGHT()
-LAYOUT_WITH_LEGEND()
+!include common/c4_styles.puml
 
 
-' ============================================================
-' Title:     nasim — Plugins Component Diagram
-' Boundary:  nasim core library — Plugins group
-' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
-' ============================================================
+title NASIM Application — Plugins Component Diagram
 
-title nasim — Plugins Component Diagram
-
-Container_Boundary(plugins_boundary, "Plugins Group") {
-    Component(plugin_loader, "PluginLoader", "nasim/plugins/loader.py", "Discovers and loads plugins from ~/.nasim/plugins/")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(plugins_group, "Plugins Group") <<infrastructure>> {
+        Component(plugin_loader, "PluginLoader", "nasim/plugins/loader.py", "Discovers and loads plugins from ~/.nasim/plugins/")
+    }
 }
 
 System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
-System_Ext(tool_registry, "Tool Registry", "Instance-based tool registry")
-System_Ext(hook_manager, "Hook Manager", "Hook registration")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(hook_manager, "HookManager", "Hooks Group")
 
-Rel(plugin_loader, plugin_dir, "discovers plugin manifests")
-Rel(plugin_loader, tool_registry, "registers plugin tools")
-Rel(plugin_loader, hook_manager, "registers plugin hooks")
+Rel(plugin_loader, plugin_dir, "discovers plugin manifests at startup")
+Rel(plugin_loader, tool_registry, "registers plugin tools into Tool Registry")
+Rel(plugin_loader, hook_manager, "registers plugin hooks into Hook Manager")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

@@ -1,0 +1,55 @@
+@startuml sq_session04_restore_session
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SSN-04 — Restore Session
+' Boundary:  nasim code agent CLI
+' Purpose:   Resume a previous session by loading its history
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Session Group" #E8F5E9
+  participant "SessionStore" as store
+end box
+
+
+== SSN-04 Resume Session ==
+
+user -> router : types input
+activate router
+router -> agent : PROCESS(user_input)
+activate agent
+
+agent -> store : ssn04 READ Session(session_id)
+activate store
+ref over store
+  SSN-02: Load Session
+end ref
+
+alt Session found
+    store --> agent : 200 OK — Session(id, messages)
+    deactivate store
+    agent -> agent : ssn01 PERSIST Session(session_id, messages)
+    agent --> router : AgentEvent(Done)
+else Session not found
+    store --> agent : 404 NOT_FOUND
+    deactivate store
+    agent -> agent : start fresh
+    agent --> router : AgentEvent(Done)
+end
+
+    deactivate agent
+deactivate router
+
+
+@enduml

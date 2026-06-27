@@ -1,42 +1,54 @@
 @startuml c4_nasim_component_memory
+' ============================================================
+' Title:     NASIM Application — Memory Component Diagram
+' Boundary:  NASIM Application (container) — Memory Group
+' Purpose:   Cross-session knowledge persistence, retrieval, and RAG adapters
+'            CSR Layer: Repository
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
 
-' ============================================================
-' Title:     nasim — Memory Component Diagram
-' Boundary:  nasim core library — Memory group
-' Purpose:   Cross-session knowledge persistence, retrieval, and RAG adapters
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' ============================================================
+title NASIM Application — Memory Component Diagram
 
-title nasim — Memory Component Diagram
-
-Container_Boundary(memory_boundary, "Memory Group") {
-    Component(memory_store, "MemoryStore", "", "Persists knowledge entries with scope, key, content, timestamps")
-    Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search across stored knowledge")
-    Component(memory_scope, "MemoryScope", "", "Scope isolation: global, project, session-level knowledge")
-    Component(episodic_mem_adapter, "EpisodicMemoryAdapter", "", "Stores and retrieves episodic memory: past actions, outcomes, lessons")
-    Component(semantic_mem_adapter, "SemanticMemoryAdapter", "", "Stores and retrieves semantic memory: facts, rules, preferences")
-    Component(working_mem_adapter, "WorkingMemoryAdapter", "", "Short-term working memory for current session context")
-    Component(memory_retriever, "MemoryRetriever", "", "RAG retrieval: query memory stores, rank by relevance")
-    Component(memory_indexer, "MemoryIndexer", "", "Indexes new memory entries into FTS5 and embedding stores")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(memory_group, "Memory Group") <<repository>> {
+        Component(memory_store, "MemoryStore", "", "Persists knowledge entries with scope, key, content, timestamps")
+        Component(memory_index, "MemoryIndex", "", "FTS5 index for semantic search across stored knowledge")
+        Component(memory_scope, "MemoryScope", "", "Scope isolation: global, project, session-level knowledge")
+        Component(episodic_mem_adapter, "EpisodicMemoryAdapter", "", "Stores and retrieves episodic memory: past actions, outcomes, lessons")
+        Component(semantic_mem_adapter, "SemanticMemoryAdapter", "", "Stores and retrieves semantic memory: facts, rules, preferences")
+        Component(working_mem_adapter, "WorkingMemoryAdapter", "", "Short-term working memory for current session context")
+        Component(memory_retriever, "MemoryRetriever", "", "RAG retrieval: query memory stores, rank by relevance")
+        Component(memory_indexer, "MemoryIndexer", "", "Indexes new memory entries into FTS5 and embedding stores")
+    }
 }
 
 System_Ext(memory_backend, "Memory Backend", "Persistent storage for knowledge entries")
 
-Rel(memory_store, memory_index, "indexes new entries")
-Rel(memory_store, memory_backend, "read/write persistence")
-Rel(memory_scope, memory_store, "filters by scope")
-Rel(episodic_mem_adapter, memory_store, "persist episodic entries")
-Rel(semantic_mem_adapter, memory_store, "persist semantic entries")
-Rel(working_mem_adapter, memory_store, "persist working entries")
-Rel(memory_retriever, memory_index, "query index")
-Rel(memory_retriever, memory_store, "fetch entries")
-Rel(memory_indexer, memory_index, "index entries")
-Rel(memory_indexer, memory_store, "read entries for indexing")
+Rel(memory_store, memory_index, "indexes new entries for search")
+Rel(memory_store, memory_backend, "reads and writes persistent storage")
+Rel(memory_scope, memory_store, "filters entries by scope")
+Rel(episodic_mem_adapter, memory_store, "persists episodic memory entries")
+Rel(semantic_mem_adapter, memory_store, "persists semantic memory entries")
+Rel(working_mem_adapter, memory_store, "persists working memory entries")
+Rel(memory_retriever, memory_index, "queries FTS5 index for relevant entries")
+Rel(memory_retriever, memory_store, "fetches full entries by key")
+Rel(memory_indexer, memory_index, "indexes new entries into FTS5")
+Rel(memory_indexer, memory_store, "reads entries for indexing")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

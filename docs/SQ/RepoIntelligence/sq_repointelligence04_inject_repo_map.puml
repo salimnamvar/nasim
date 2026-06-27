@@ -1,0 +1,78 @@
+@startuml sq_repointelligence04_inject_repo_map
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     RIM-04 — INJECT RepoMap
+' Boundary:  nasim code agent CLI
+' Purpose:   Token-budgeted repo-map injection into LLM context
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — RIM-04 INJECT RepoMap
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Repo Intelligence Group" #E8F5E9
+  participant "RepoMapInjector" as injector
+  participant "SymbolRanker" as ranker
+end box
+box "Context Group" #FFF3E0
+  participant "TokenBudget" as budget
+  participant "ConversationHistory" as history
+end box
+
+
+
+== RIM-04 INJECT RepoMap ==
+
+user -> router : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
+activate router
+router -> agent : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
+activate agent
+
+agent -> injector : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
+activate injector
+
+injector -> budget : budget.get_available_budget()
+activate budget
+budget --> injector : available_tokens
+deactivate budget
+
+injector -> injector : split_budget(available_tokens, ratios=[0.6, 0.25, 0.15])
+
+injector -> ranker : ranker.get_top_symbols(structure_budget)
+activate ranker
+ranker --> injector : structure_symbols[]
+deactivate ranker
+
+injector -> ranker : ranker.get_relevant_snippets(snippet_budget)
+activate ranker
+ranker --> injector : snippet_symbols[]
+deactivate ranker
+
+injector -> injector : format_repo_map(structure_symbols, snippet_symbols)
+
+injector -> injector : truncate_to_budget(formatted_map, max_tokens)
+
+injector -> history : history.prepend_context(repo_map_text)
+activate history
+history --> injector : context_injected
+deactivate history
+
+injector --> agent : RepoMapContext(text, token_count)
+deactivate injector
+
+agent --> router : RepoMapContext(text, token_count)
+deactivate agent
+deactivate router
+
+
+@enduml

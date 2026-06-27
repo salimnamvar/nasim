@@ -1,0 +1,64 @@
+@startuml sq_provider04_select_provider_backend
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     PRV-04 — SELECT Provider Backend
+' Boundary:  nasim code agent CLI
+' Purpose:   Map config.provider string to provider class
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — PRV-04 SELECT ProviderBackend
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Config Group" #E8F5E9
+  participant "ConfigLoader" as cfg
+end box
+box "Provider Group" #FFF3E0
+  participant "ProviderFactory" as factory
+end box
+
+
+
+
+== PRV-04 SELECT ProviderBackend ==
+
+user -> router : PRV-04 SELECT ProviderBackend(provider_name)
+activate router
+router -> agent : PRV-04 SELECT ProviderBackend(provider_name)
+activate agent
+
+agent -> cfg : PRV-04 READ Config(provider_field)
+activate cfg
+cfg --> agent : provider_string
+deactivate cfg
+
+agent -> factory : PRV-04 SELECT ProviderBackend(provider_string)
+activate factory
+factory -> factory : PROV_REGISTRY lookup
+
+break Provider not in registry
+    factory -> factory : raise ConfigError("Unknown provider: X")
+    factory --> agent : ConfigError
+    agent --> router : ConfigError
+end
+
+factory --> agent : provider_class
+deactivate factory
+
+agent --> router : provider_class
+deactivate agent
+deactivate router
+
+
+
+@enduml

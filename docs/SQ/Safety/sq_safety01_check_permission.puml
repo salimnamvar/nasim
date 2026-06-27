@@ -1,0 +1,72 @@
+@startuml sq_safety01_check_permission
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SAF-01 — CHECK Permission
+' Boundary:  nasim code agent
+' Purpose:   Per-tool safety check before execution (internal step of AGT-15)
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    Prompt audit 2026-06-21 (gro.md: God Object residual fixed)
+' Note:      Process decomposition — internal step of AGT-15
+' ============================================================
+
+title nasim — SAF-01 READ Permission
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Safety Group" #FFF3E0
+  participant "PermissionGate" as gate
+  participant "SafetyCoordinator" as safety
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+end box
+
+
+== SAF-01 CHECK Permission ==
+
+user -> router : types input
+router -> agent : SAF-01 PROCESS(user_input)
+
+agent -> safety : SAF-01 CHECK Permission(tool_name, safety_mode)
+activate safety
+
+safety -> gate : SAF-01 CHECK Permission(tool_name, safety_mode)
+activate gate
+
+gate -> registry : SAF-01 READ Tool(tool_name)
+activate registry
+registry --> gate : Tool(safe=True/False)
+deactivate registry
+
+gate -> gate : SAF-01 VALIDATE ToolSafety(tool.safe, safety_mode)
+
+alt tool.safe = True
+    gate --> safety : SafetyPassed
+else tool.safe = False AND safety_mode = "auto"
+    gate --> safety : SafetyPassed
+else tool.safe = False AND safety_mode = "ask"
+    gate --> safety : SafetyViolation(permission_denied)
+    safety --> agent : SafetyViolation(permission_denied)
+    agent --> router : AgentEvent(Error)
+else safety_mode = "off"
+    gate --> safety : SafetyPassed
+end
+
+deactivate gate
+
+safety --> agent : SafetyPassed
+deactivate safety
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

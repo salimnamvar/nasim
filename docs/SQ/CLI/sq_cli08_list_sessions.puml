@@ -1,67 +1,57 @@
 @startuml sq_cli08_list_sessions
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-08 — List Sessions
 ' Boundary:  nasim code agent CLI
 ' Purpose:   List sessions via slash command
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CLI-08 List Sessions
+title nasim — CLI-08 LIST Sessions
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "Controller Group" #E3F2FD
+  participant "ServerRouter" as router
   participant "SlashCommandHandler" as cmd
 end box
-box "Session Layer" #F1F8E9
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
+end box
+box "Repository Group" #E8F5E9
   participant "SessionStore" as ssn
 end box
 
-note over user, ssn
-  Scope:          List available sessions via /sessions slash command
-  Preconditions:  REPLSession active, SessionStore initialized
-  Excludes:       Session read (SSN-02), session persist (SSN-01)
-  Contexts:       Invoked by Developer via /sessions command
-  Rollback:       Read error → display error message
-  Design:         Delegates to SSN-03 LIST Sessions for actual retrieval
-  Classification: Primary Orchestrator
-end note
 
-== CLI-08 List Sessions ==
 
-user -> repl : "/sessions"
-repl -> cmd : dispatch("/sessions")
+== CLI-08 LIST Sessions ==
+
+user -> router : "/sessions"
+activate router
+router -> cmd : dispatch("/sessions")
 activate cmd
 
-cmd -> ssn : list_sessions()
-activate ssn
+cmd -> svc : CLI-08 LIST Sessions(pageSize=100, pageToken="")
+activate svc
 
-ssn -> ssn : scan session directory
-ssn --> cmd : session_list [id, created_at, summary]
-deactivate ssn
+ref over svc, ssn
+  SSN-03: LIST Sessions
+end ref
+
+svc --> cmd : SessionList{sessions, nextPageToken}
+deactivate svc
 
 cmd -> cmd : format session table
 
-cmd --> repl : CommandResult(formatted_table)
+cmd --> router : CommandResult(formatted_table)
 deactivate cmd
 
-repl --> user : displayed session list
+router --> user : displayed session list
+deactivate router
 
-break Session directory unreadable
-    ssn --> cmd : IOError
-    cmd --> repl : CommandError
-    repl --> user : "Failed to list sessions"
-end
 
-note over user, ssn
-  Flow:    Developer → REPLSession → SlashCommandHandler → SSN-03 LIST Sessions → display
-  State:   <back:#ECEFF1>IDLE</back> → LISTING → <back:#ECEFF1>IDLE</back>
-  Failure: Directory error → display error
-  Success: Session list formatted and displayed
-end note
 
 @enduml

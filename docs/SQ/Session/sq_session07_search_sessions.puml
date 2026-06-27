@@ -1,0 +1,59 @@
+@startuml sq_session07_search_sessions
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SSN-07 — Search Sessions
+' Boundary:  nasim code agent CLI
+' Purpose:   Full-text search across session history
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — SSN-07 LIST Sessions
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Session Group" #E8F5E9
+  participant "SessionSearch" as search
+end box
+database "FTS5 Index" as fts
+
+
+== SSN-07 Search Sessions ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+agent -> search : ssn07 SEARCH Session History(query, pageSize=20, pageToken="abc")
+activate search
+
+search -> fts : FTS5 query(query, limit=20, offset=0)
+activate fts
+fts --> search : raw_results [session_id, turn_id, snippet, rank], next_page_token
+deactivate fts
+
+search -> search : rank results by relevance
+search -> search : format snippets
+
+search --> agent : 200 OK — SearchResult[session_id, turn_id, snippet, score], nextPageToken
+deactivate search
+
+agent --> router : AgentEvent(Done)
+
+break Index not available
+    fts --> search : IndexError
+    search -> search : fallback: linear scan
+    search --> agent : 200 OK — SearchResult[linear_scan_results]
+    agent --> router : AgentEvent(Done)
+end
+
+
+
+@enduml

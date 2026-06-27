@@ -14,7 +14,7 @@ Back to [docs/](../README.md).
 | 02 | [Milestone 0 — Bootstrap](02-milestone-0-bootstrap.md) | Day 1 |
 | 03 | [Milestone 1 — Provider & Tools](03-milestone-1-provider-tools.md) | After M0 |
 | 04 | [Milestone 2 — Agent Core](04-milestone-2-agent-core.md) | After M1 |
-| 05 | [Milestone 3 — CLI & Session](05-milestone-3-cli-session.md) | After M2 |
+| 05 | [Milestone 3 — CLI & Session](05-milestone-3-CLI-session.md) | After M2 |
 | 06 | [Milestone 4 — Integration & Hardening](06-milestone-4-integration-hardening.md) | After M3 |
 | 07 | [Milestone 5 — Packaging & Release](07-milestone-5-packaging-release.md) | After M4 |
 | 08 | [Quality Gates & CI/CD](08-quality-gates-cicd.md) | Continuously, every PR |
