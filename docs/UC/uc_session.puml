@@ -8,6 +8,7 @@
 ' Group:     SSN (Session)
 ' Boundary:  nasim code agent
 ' Purpose:   Session persistence, versioning, search, fork
+'            Entry chain: User → ServerRouter → AgentOrchestrator → SessionGroup
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
@@ -56,9 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -94,24 +92,6 @@ User --> SSN06
 User --> SSN07
 User --> SSN08
 User --> SSN09
-
-
-Router --> SSN03 : dispatches
-Router --> SSN04 : dispatches
-Router --> SSN05 : dispatches
-Router --> SSN06 : dispatches
-Router --> SSN07 : dispatches
-Router --> SSN08 : dispatches
-Router --> SSN09 : dispatches
-
-
-Agent --> SSN03 : calls
-Agent --> SSN04 : calls
-Agent --> SSN05 : calls
-Agent --> SSN06 : calls
-Agent --> SSN07 : calls
-Agent --> SSN08 : calls
-Agent --> SSN09 : calls
 
 
 ' ------------------------------------------------------------

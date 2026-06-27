@@ -67,10 +67,6 @@ skinparam usecase<<extref>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
-
 
 
 ' ============================================================
@@ -113,24 +109,6 @@ rectangle "nasim" {
 ' ============================================================
 
 
-Router --> AGT04 : dispatches
-Router --> AGT12 : dispatches
-Router --> AGT13 : dispatches
-Agent --> AGT04 : calls
-Agent --> AGT12 : calls
-Agent --> AGT13 : calls
-
-Router --> AGT06 : dispatches
-Agent --> AGT06 : calls
-Router --> AGT08 : dispatches
-Agent --> AGT08 : calls
-Router --> AGT09 : dispatches
-Agent --> AGT09 : calls
-Router --> AGT11 : dispatches
-Agent --> AGT11 : calls
-Router --> AGT14 : dispatches
-Agent --> AGT14 : calls
-
 ' ============================================================
 ' Relationships (downward <<include>> only)
 ' ============================================================
@@ -155,7 +133,6 @@ AGT07 ..> AGT08 : <<extend>>
 
 
 AGT09 ..> AGT10 : <<include>>
-
 
 
 

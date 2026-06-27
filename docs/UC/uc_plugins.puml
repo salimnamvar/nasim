@@ -8,6 +8,7 @@
 ' Group:     PLG (Plugins)
 ' Boundary:  nasim code agent
 ' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
+'            Entry chain: User → ServerRouter → AgentOrchestrator → PluginsGroup
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
@@ -56,9 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -89,14 +87,7 @@ User --> PLG05
 User --> PLG06
 
 
-Router --> PLG01 : dispatches
-Router --> PLG05 : dispatches
-Router --> PLG06 : dispatches
 
-
-Agent --> PLG01 : calls
-Agent --> PLG05 : calls
-Agent --> PLG06 : calls
 
 
 ' ------------------------------------------------------------
@@ -107,7 +98,6 @@ Agent --> PLG06 : calls
 PLG01 ..> PLG02 : <<include>>
 PLG02 ..> PLG03 : <<include>>
 PLG02 ..> PLG04 : <<include>>
-
 
 
 

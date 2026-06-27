@@ -32,8 +32,8 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
-Component_Ext(config_loader, "ConfigLoader", "Config Group")
+System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+System_Ext(config_loader, "ConfigLoader", "Config Group")
 
 Rel(user, repl_session, "types commands", "terminal REPL")
 Rel(repl_session, agent_orch, "delegates agent tasks to orchestrator")

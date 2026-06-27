@@ -8,6 +8,7 @@
 ' Group:     SBX (Sandbox)
 ' Boundary:  nasim code agent
 ' Purpose:   OS-level process isolation for shell and edit operations
+'            Entry chain: User → ServerRouter → AgentOrchestrator → SandboxGroup
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
@@ -56,9 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -83,10 +81,6 @@ rectangle "nasim" {
 
 
 User --> SBX01
-
-Router --> SBX01 : dispatches
-
-Agent --> SBX01 : calls
 
 ' ------------------------------------------------------------
 ' Relationships

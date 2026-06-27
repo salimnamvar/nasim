@@ -30,8 +30,8 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(memory_store, "MemoryStore", "Memory Group")
-Component_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
+System_Ext(memory_store, "MemoryStore", "Memory Group")
+System_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
 System_Ext(llm_backend, "LLM Backend", "Used for distillation and summarization calls")
 
 Rel(pipeline_orchestrator, context_prioritizer, "runs priority scoring stage")

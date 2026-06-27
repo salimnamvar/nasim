@@ -27,8 +27,8 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
-Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
 Rel(agent_orch, safety_coord, "validates before tool dispatch")
 Rel(safety_coord, permission_gate, "evaluates tool safety flags against session policy")

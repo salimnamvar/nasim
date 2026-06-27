@@ -57,9 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -86,13 +83,6 @@ User --> SAF02
 User --> SAF03
 
 
-Router --> SAF02 : dispatches
-Router --> SAF03 : dispatches
-
-
-Agent --> SAF02 : calls
-Agent --> SAF03 : calls
-
 
 ' ============================================================
 ' Relationships
@@ -103,5 +93,5 @@ SAF02 ..> SAF01 : <<include>>
 
 
 
-
+@enduml
 @enduml

@@ -8,6 +8,7 @@
 ' Group:     WRL (Wire Log)
 ' Boundary:  nasim code agent
 ' Purpose:   Append-only event log, replay, session fork from wire
+'            Entry chain: User → ServerRouter → AgentOrchestrator → WireLogGroup
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
@@ -56,9 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -86,16 +84,6 @@ rectangle "nasim" {
 User --> WRL01
 User --> WRL04
 User --> WRL05
-
-
-Router --> WRL01 : dispatches
-Router --> WRL04 : dispatches
-Router --> WRL05 : dispatches
-
-
-Agent --> WRL01 : calls
-Agent --> WRL04 : calls
-Agent --> WRL05 : calls
 
 
 ' ------------------------------------------------------------

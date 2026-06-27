@@ -79,9 +79,9 @@ System_Ext(prometheus, "Prometheus", "Metrics collection and storage")
 System_Ext(wire_log_dir, "Wire Log Storage", "~/.nasim/wire-logs/<session-id>/")
 System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
 
-Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
-Component_Ext(session_store, "SessionStore", "Session Group")
-Component_Ext(config_loader, "ConfigLoader", "Config Group")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(session_store, "SessionStore", "Session Group")
+System_Ext(config_loader, "ConfigLoader", "Config Group")
 
 ' ── Entry points ──
 Rel(user, repl_session, "types commands", "terminal REPL")

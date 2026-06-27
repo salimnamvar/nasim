@@ -66,10 +66,6 @@ skinparam usecase<<extref>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
-
 
 
 ' ------------------------------------------------------------
@@ -115,8 +111,7 @@ User --> CLI07
 User --> CLI08
 
 
-Router --> CLI01 : delegates
-Agent --> CLI01 : orchestrates
+
 
 ' ------------------------------------------------------------
 ' Relationships (downward <<include>> only)
@@ -127,7 +122,6 @@ CLI01 ..> CLI03 : <<include>>
 CLI01 ..> API06_ext : <<include>>
 CLI02 ..> API01_ext : <<include>>
 CLI02 ..> API11_ext : <<include>>
-
 
 
 

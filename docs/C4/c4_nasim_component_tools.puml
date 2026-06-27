@@ -39,9 +39,9 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(sandbox_executor, "SandboxExecutor", "Sandbox Group")
-Component_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
-Component_Ext(provider, "Provider", "Provider Group")
+System_Ext(sandbox_executor, "SandboxExecutor", "Sandbox Group")
+System_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
+System_Ext(provider, "Provider", "Provider Group")
 System_Ext(host_fs, "Host Filesystem", "Project source code files")
 System_Ext(web, "Web", "Documentation and search engines")
 System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")

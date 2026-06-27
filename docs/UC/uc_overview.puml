@@ -65,8 +65,6 @@ skinparam usecase<<extref>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
 
 
 actor "MCP Client" as MCPClient <<system>>
@@ -207,28 +205,6 @@ MCPClient --> mcp_group
 Platform --> observability_group
 
 
-Router --> api_group : entry gate
-
-
-Agent --> agent_group : orchestrates
-Agent --> provider_group
-Agent --> router_group
-Agent --> tool_group
-Agent --> mcp_group
-Agent --> config_group
-Agent --> session_group
-Agent --> hooks_group
-Agent --> plugins_group
-Agent --> sandbox_group
-Agent --> safety_group
-Agent --> observability_group
-Agent --> memory_group
-Agent --> git_group
-Agent --> repo_intelligence_group
-Agent --> edit_strategy_group
-Agent --> evaluation_group
-Agent --> wire_log_group
-Agent --> context_graph_group
 
 
 ' ------------------------------------------------------------
@@ -252,7 +228,6 @@ agent_group ..> router_group : <<include>>
 agent_group ..> context_graph_group : <<include>>
 agent_group ..> edit_strategy_group : <<extend>>
 agent_group ..> evaluation_group : <<extend>>
-
 
 
 

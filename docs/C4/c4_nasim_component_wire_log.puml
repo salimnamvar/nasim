@@ -27,7 +27,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(session_store, "SessionStore", "Session Group")
+System_Ext(session_store, "SessionStore", "Session Group")
 System_Ext(wire_log_dir, "Wire Log Storage", "~/.nasim/wire-logs/<session-id>/")
 
 Rel(wire_log, wire_appender, "delegates entry appending to appender")

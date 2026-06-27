@@ -34,7 +34,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(diff_sandbox_mgr, "DiffSandboxManager", "Sandbox Group")
+System_Ext(diff_sandbox_mgr, "DiffSandboxManager", "Sandbox Group")
 System_Ext(host_fs, "Host Filesystem", "Target files for editing")
 
 Rel(edit_strategy_mgr, strategy_selector, "queries optimal strategy for edit context")

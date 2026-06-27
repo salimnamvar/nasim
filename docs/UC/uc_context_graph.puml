@@ -8,6 +8,7 @@
 ' Group:     CTX (Context Management)
 ' Boundary:  nasim code agent
 ' Purpose:   Context pipeline: graph construction, truncation, distillation, injection, compaction
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ContextGraphGroup
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
@@ -56,9 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -87,8 +85,7 @@ rectangle "nasim" {
 User --> CTX01
 
 
-Router --> CTX01 : dispatches
-Agent --> CTX01 : calls
+
 
 ' ------------------------------------------------------------
 ' Relationships
@@ -100,7 +97,6 @@ CTX01 ..> CTX03 : <<include>>
 CTX01 ..> CTX04 : <<include>>
 CTX01 ..> CTX05 : <<include>>
 CTX01 ..> CTX06 : <<include>>
-
 
 
 

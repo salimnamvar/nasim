@@ -25,8 +25,8 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
-Component_Ext(provider, "Provider", "Provider Group")
+System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+System_Ext(provider, "Provider", "Provider Group")
 
 Rel(agent_orch, model_router, "route model selection")
 Rel(model_router, provider, "route to provider")

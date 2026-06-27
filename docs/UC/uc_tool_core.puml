@@ -58,9 +58,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -107,29 +104,6 @@ User --> TL08
 User --> TL09
 User --> TL10
 
-
-Router --> TL01 : dispatches
-Router --> TL02 : dispatches
-Router --> TL03 : dispatches
-Router --> TL04 : dispatches
-Router --> TL05 : dispatches
-Router --> TL06 : dispatches
-Router --> TL07 : dispatches
-Router --> TL08 : dispatches
-Router --> TL09 : dispatches
-Router --> TL10 : dispatches
-
-
-Agent --> TL01 : calls
-Agent --> TL02 : calls
-Agent --> TL03 : calls
-Agent --> TL04 : calls
-Agent --> TL05 : calls
-Agent --> TL06 : calls
-Agent --> TL07 : calls
-Agent --> TL08 : calls
-Agent --> TL09 : calls
-Agent --> TL10 : calls
 
 
 

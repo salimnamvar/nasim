@@ -29,7 +29,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 
 Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
 Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application")

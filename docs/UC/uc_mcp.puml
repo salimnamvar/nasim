@@ -8,6 +8,7 @@
 ' Group:     MCP (Model Context Protocol)
 ' Boundary:  nasim code agent
 ' Purpose:   MCP as first-class subsystem: client/server runtime, tool adapter, discovery
+'            Entry chain: User → ServerRouter → AgentOrchestrator → MCPGroup
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
@@ -56,8 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
 
 
 actor "MCP Client" as MCPClient <<system>>
@@ -90,13 +89,6 @@ User --> MCP04
 MCPClient --> MCP04 : calls
 
 
-Router --> MCP01 : dispatches
-Router --> MCP04 : dispatches
-
-
-Agent --> MCP01 : calls
-Agent --> MCP04 : calls
-
 
 ' ------------------------------------------------------------
 ' Relationships
@@ -108,5 +100,5 @@ MCP02 ..> MCP03 : <<include>>
 
 
 
-
+@enduml
 @enduml

@@ -31,12 +31,12 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
-Component_Ext(provider, "Provider", "Provider Group")
-Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
-Component_Ext(wire_log, "WireLog", "Wire Log Group")
-Component_Ext(config_loader, "ConfigLoader", "Config Group")
-Component_Ext(renderer, "Renderer", "CLI Group")
+System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+System_Ext(provider, "Provider", "Provider Group")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(wire_log, "WireLog", "Wire Log Group")
+System_Ext(config_loader, "ConfigLoader", "Config Group")
+System_Ext(renderer, "Renderer", "CLI Group")
 
 System_Ext(stdout, "stdout", "Standard output stream")
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")

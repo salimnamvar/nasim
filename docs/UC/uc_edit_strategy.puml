@@ -8,6 +8,7 @@
 ' Group:     EDT (Edit Strategy)
 ' Boundary:  nasim code agent
 ' Purpose:   Polymorphic edit strategies with sandboxed diff staging
+'            Entry chain: User → ServerRouter → AgentOrchestrator → EditStrategyGroup
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
@@ -56,9 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -90,9 +88,7 @@ rectangle "nasim" {
 
 User --> EDT01
 
-Router --> EDT01 : dispatches
 
-Agent --> EDT01 : calls
 
 ' ------------------------------------------------------------
 ' Relationships
@@ -108,7 +104,6 @@ EDT01 ..> EDT07 : <<include>>
 EDT01 ..> EDT08 : <<include>>
 EDT01 ..> EDT09 : <<include>>
 EDT07 ..> EDT10 : <<include>>
-
 
 
 

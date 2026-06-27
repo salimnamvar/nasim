@@ -8,6 +8,7 @@
 ' Group:     RIM (Repo Intelligence)
 ' Boundary:  nasim code agent
 ' Purpose:   Codebase intelligence: AST indexing, symbol graph, semantic search, repo mapping
+'            Entry chain: User → ServerRouter → AgentOrchestrator → RepoIntelligence
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
@@ -56,9 +57,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -87,14 +85,6 @@ rectangle "nasim" {
 User --> RIM01
 User --> RIM04
 User --> RIM05
-
-Router --> RIM01 : dispatches
-Router --> RIM04 : dispatches
-Router --> RIM05 : dispatches
-
-Agent --> RIM01 : calls
-Agent --> RIM04 : calls
-Agent --> RIM05 : calls
 
 ' ------------------------------------------------------------
 ' Relationships

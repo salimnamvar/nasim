@@ -29,7 +29,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 
 System_Ext(mcp_server, "MCP Server", "External extension tools")
 System_Ext(mcp_client, "MCP Client", "External tool consumers")
-Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
 Rel(mcp_client_rt, mcp_server, "invokes extension tool operations on external MCP servers")
 Rel(mcp_client_rt, mcp_discovery, "discovers available tools at startup")

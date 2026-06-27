@@ -58,9 +58,6 @@ skinparam actor<<system>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
 
 
 
@@ -88,13 +85,6 @@ User --> RTG01
 User --> RTG04
 
 
-Router --> RTG01 : dispatches
-Router --> RTG04 : dispatches
-
-
-Agent --> RTG01 : calls
-Agent --> RTG04 : calls
-
 
 ' ============================================================
 ' Relationships
@@ -106,5 +96,5 @@ RTG01 ..> RTG02 : <<include>>
 
 
 
-
+@enduml
 @enduml

@@ -31,8 +31,8 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(provider, "Provider", "Provider Group")
-Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(provider, "Provider", "Provider Group")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
 Rel(eval_engine, task_evaluator, "evaluates task completion against success criteria")
 Rel(eval_engine, success_check_runner, "runs user-defined success checks")

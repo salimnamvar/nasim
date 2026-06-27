@@ -42,7 +42,7 @@ Level 3: Component  →  c4_nasim_component_overview_core.puml (core groups)
 
 ## Per-Group Component Diagrams (21 diagrams)
 
-Each per-group diagram shows internal components within `Container_Boundary(nasim_application, "NASIM Application")` and `Boundary(group_name)`. Cross-group references use `Component_Ext(alias, "ComponentName", "Group Name")`.
+Each per-group diagram shows internal components within `Container_Boundary(nasim_application, "NASIM Application")` and `Boundary(group_name)`. Cross-group references use `System_Ext(alias, "ComponentName", "Group Name")`.
 
 ### Controller Layer (Blue)
 
@@ -303,7 +303,7 @@ diagrams only.
 - **Container_Ext = separate deployable unit outside the system boundary:** WebApp, DesktopApp, and MobileApp are truly separate applications with their own processes. They are clients of NASIM Application, not part of it.
 - **CSR Pattern:** Controller (CLI Group / API Group) → Service (Agent Group, Router Group, etc.) → Repository (Session Group, Tool Group, Memory Group, Config Group). Strict delegation.
 - **One group, one Boundary:** Each component group is a `Boundary` inside `Container_Boundary(nasim_application, "NASIM Application")`. Groups are logical, not deployable.
-- **No Container_Ext for internals:** Cross-group references inside NASIM Application use `Component_Ext(alias, "ComponentName", "Group Name")`, never `Container_Ext` or `System_Ext`.
+- **System_Ext for cross-group references:** Cross-group references inside NASIM Application use `System_Ext(alias, "ComponentName", "Group Name")` as opaque references, never `Container_Ext`.
 - **System_Ext for real externals only:** Filesystems, web, git repos, LLM backends, MCP servers, LSP servers — genuinely external infrastructure.
 - **Version consistency:** All diagram headers use Version 9.0.0.
 - **Pin C4-PlantUML:** All diagrams reference v2.10.0 — never `master`.

@@ -32,12 +32,12 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Component_Ext(provider, "Provider", "Provider Group")
-Component_Ext(tool_registry, "ToolRegistry", "Tool Group")
-Component_Ext(session_store, "SessionStore", "Session Group")
-Component_Ext(memory_store, "MemoryStore", "Memory Group")
-Component_Ext(structured_logger, "StructuredLogger", "Observability Group")
-Component_Ext(safety_coord, "SafetyCoordinator", "Safety Group")
+System_Ext(provider, "Provider", "Provider Group")
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(session_store, "SessionStore", "Session Group")
+System_Ext(memory_store, "MemoryStore", "Memory Group")
+System_Ext(structured_logger, "StructuredLogger", "Observability Group")
+System_Ext(safety_coord, "SafetyCoordinator", "Safety Group")
 
 Rel(agent_orch, provider, "invokes LLM inference for task completion")
 Rel(agent_orch, tool_registry, "dispatches tool calls for execution")

@@ -68,10 +68,6 @@ skinparam usecase<<extref>> {
 
 
 actor "User" as User
-actor "ServerRouter" as Router <<system>>
-actor "AgentOrchestrator" as Agent <<system>>
-
-
 
 
 ' ------------------------------------------------------------
@@ -135,20 +131,6 @@ User --> API10
 User --> API11
 
 
-Router --> API01 : dispatches
-Router --> API02 : dispatches
-Router --> API03 : dispatches
-Router --> API04 : dispatches
-Router --> API05 : dispatches
-Router --> API06 : dispatches
-Router --> API07 : dispatches
-Router --> API08 : dispatches
-Router --> API09 : dispatches
-Router --> API10 : dispatches
-Router --> API11 : dispatches
-
-
-Agent --> API06 : delegates
 
 
 ' ------------------------------------------------------------
@@ -167,7 +149,6 @@ API08 ..> TL14_ext : <<include>>
 API09 ..> TL14_ext : <<include>>
 API10 ..> CFG01_ext : <<include>>
 API11 ..> CFG03_ext : <<include>>
-
 
 
 
