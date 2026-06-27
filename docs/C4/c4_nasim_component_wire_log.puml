@@ -1,35 +1,47 @@
 @startuml c4_nasim_component_wire_log
+' ============================================================
+' Title:     NASIM Application — Wire Log Component Diagram
+' Boundary:  NASIM Application (container) — Wire Log Group
+' Purpose:   Agent-provider-tool interaction logging, replay, and session forking
+'            CSR Layer: Infrastructure
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
 
-' ============================================================
-' Title:     nasim — Wire Log Component Diagram
-' Boundary:  nasim core library — Wire Log group
-' Purpose:   Agent-provider-tool interaction logging, replay, and session forking
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' ============================================================
+title NASIM Application — Wire Log Component Diagram
 
-title nasim — Wire Log Component Diagram
-
-Container_Boundary(wire_log_boundary, "Wire Log Group") {
-    Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
-    Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")
-    Component(wire_reader, "WireReader", "ABC", "Reads and parses wire log entries for replay and analysis")
-    Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(wire_log_group, "Wire Log Group") <<infrastructure>> {
+        Component(wire_log, "WireLog", "", "Records all agent-provider-tool interactions as structured log")
+        Component(wire_appender, "WireAppender", "", "Appends wire log entries with buffering and flush control")
+        Component(wire_reader, "WireReader", "ABC", "Reads and parses wire log entries for replay and analysis")
+        Component(session_fork_mgr, "SessionForkManager", "", "Forks sessions from wire log replay at any turn")
+    }
 }
 
-Container_Ext(session_group, "Session Group")
+System_Ext(session_store, "SessionStore", "Session Group")
 System_Ext(wire_log_dir, "Wire Log Storage", "~/.nasim/wire-logs/<session-id>/")
 
-Rel(wire_log, wire_appender, "appends entries")
-Rel(wire_log, wire_reader, "reads entries")
-Rel(wire_log, session_fork_mgr, "fork from turn")
-Rel(wire_appender, wire_log_dir, "writes log files")
-Rel(wire_reader, wire_log_dir, "reads log files")
-Rel(session_fork_mgr, session_group, "creates forked session")
+Rel(wire_log, wire_appender, "delegates entry appending to appender")
+Rel(wire_log, wire_reader, "delegates entry reading to reader")
+Rel(wire_log, session_fork_mgr, "enables session forking from recorded turns")
+Rel(wire_appender, wire_log_dir, "writes log files to storage")
+Rel(wire_reader, wire_log_dir, "reads log files from storage")
+Rel(session_fork_mgr, session_store, "creates forked session from replay state")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

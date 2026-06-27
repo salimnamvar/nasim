@@ -1,0 +1,59 @@
+@startuml sq_agent03_update_conversation
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     AGT-03 — UPDATE Conversation
+' Boundary:  nasim code agent
+' Purpose:   Message list management and token tracking
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — AGT-03 UPDATE Conversation
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "ConversationHistory" as history
+end box
+box "Repository Group" #E8F5E9
+  participant "MemoryRepository" as memory
+end box
+
+
+
+== AGT-03 UPDATE Conversation ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+activate agent
+
+agent -> history : agt03 ADD Message({msg}, updateMask)
+activate history
+history -> history : self.messages.append(msg)
+history -> history : self.token_count += estimate_tokens(msg)
+
+alt token_count > context_budget
+    history --> agent : COMPACT_NEEDED
+    ref over history, agent
+      CTX-02: COMPACT Context
+    end ref
+else within budget
+    history --> agent : ok
+end
+
+agent -> history : agt03 GET Messages()
+history --> agent : messages list
+deactivate history
+
+agent --> router : AgentEvent(Done)
+deactivate agent
+
+
+
+@enduml

@@ -1,0 +1,99 @@
+@startuml sq_agent02_dispatch_tool_call
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     AGT-02 — DISPATCH Tool Call
+' Boundary:  nasim code agent
+' Purpose:   Tool dispatch with Safety Pipeline (no God Object)
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    Meta-Software Designer audit 2026-06-21
+' Pattern:   Service (AgentOrchestrator) -> Safety (SafetyCoordinator) -> Repository (ToolRegistry)
+' ============================================================
+
+title nasim — AGT-02 DISPATCH Tool Call
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "ErrorBoundary" as eb
+end box
+box "Safety Group" #FFF3E0
+  participant "SafetyCoordinator" as safety
+  participant "PermissionGate" as gate
+  participant "InjectionScanner" as inj
+  participant "EgressInspector" as egr
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "Tool" as tool
+end box
+box "Observability Group" #F3E5F5
+  participant "StructuredLogger" as logger
+end box
+
+
+
+== AGT-02 DISPATCH Tool Call ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+activate agent
+
+agent -> agent : receive tool_call from LLM response
+
+hnote over agent #FFF9C4 : **State: AWAITING_APPROVAL** (if unsafe)
+
+' --- NO GOD OBJECT: Delegate to SafetyCoordinator (AGT-15) ---
+agent -> safety : agt15 DISPATCH Safety Pipeline({tool_call})
+activate safety
+ref over safety
+  AGT-15: DISPATCH Safety Pipeline (injection, egress, permission)
+end ref
+safety --> agent : SafetyResult(approved/denied)
+deactivate safety
+
+alt safety denied
+    agent -> agent : ToolResult(success=false, error="safety violation")
+    ref over agent, logger
+      OBS-01: STREAM Structured Log (tool blocked by safety)
+    end ref
+else safety approved
+    hnote over agent #F3E5F5 : **State: TOOL_EXEC**
+
+    agent -> registry : find(tool_call.name)
+    activate registry
+    alt tool not found
+        registry --> agent : null
+        agent -> eb : handle(UnknownTool)
+        activate eb
+        eb --> agent : RecoveryAction(abort)
+        deactivate eb
+        agent -> agent : ToolResult(success=false, error="unknown tool")
+    else tool found
+        registry --> tool : tool
+        deactivate registry
+        activate tool
+        agent -> tool : execute(tool_call.arguments)
+        tool --> agent : ToolResult
+        deactivate tool
+        ref over agent, logger
+          OBS-01: STREAM Structured Log (tool execution result)
+        end ref
+    end
+end
+
+agent -> agent : append ToolResult to messages
+
+hnote over agent #FFF3E0 : **State: THINKING**
+
+agent --> router : AgentEvent(Done)
+deactivate agent
+
+
+
+@enduml

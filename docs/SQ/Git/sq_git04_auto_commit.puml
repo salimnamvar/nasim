@@ -1,0 +1,63 @@
+@startuml sq_git04_auto_commit
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     VCS-04 — AUTO-COMMIT
+' Boundary:  nasim code agent
+' Purpose:   Automatically commit changes after edit operations
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — VCS-04 AUTO-COMMIT
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Git Group" #E8F5E9
+  participant "GitIntegration" as integration
+  participant "GitStatus" as status
+  participant "GitCommit" as commit
+end box
+box "Repository Group" #E8F5E9
+  participant "GitRepository" as git_repo
+end box
+
+
+
+== VCS-04 AUTO-COMMIT ==
+
+user -> router : types input
+router -> agent : VCS-04 PROCESS(user_input)
+
+agent -> integration : VCS-04 AUTO-COMMIT(edit_context)
+activate integration
+
+integration -> status : VCS-04 READ DirtyStatus()
+activate status
+status --> integration : is_dirty
+deactivate status
+
+break No changes detected
+    integration --> agent : Result(success=false, error="no_changes")
+    agent --> router : AgentEvent(Done)
+end
+
+integration -> commit : VCS-04 INSERT Commit(generated_message, files)
+activate commit
+commit --> integration : Result(success=true, data={hash})
+deactivate commit
+
+integration --> agent : Result(success=true, data={hash})
+deactivate integration
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

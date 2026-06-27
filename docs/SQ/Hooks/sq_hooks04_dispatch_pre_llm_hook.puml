@@ -1,0 +1,64 @@
+@startuml sq_hooks04_dispatch_pre_llm_hook
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     HK-04 — DISPATCH Pre-LLM Hook
+' Boundary:  nasim code agent
+' Purpose:   Execute hooks before LLM call
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — HK-04 DISPATCH Pre-LLM Hook
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Hooks Group" #F3E5F5
+  participant "HookManager" as hooks
+  participant "Hook" as hook
+end box
+box "Provider Group" #FFF3E0
+  participant "LiteLLMProxy" as provider
+end box
+box "Repository Group" #E8F5E9
+  participant "HookRepository" as hook_repo
+end box
+
+
+== HK-04 DISPATCH Pre-LLM Hook ==
+
+user -> router : invoke agent
+activate router
+router -> agent : hk04 DISPATCH Pre-LLM Hook(messages)
+activate agent
+agent -> hooks : hk04 DISPATCH Pre-LLM Hook(messages)
+activate hooks
+hooks -> hooks : hk04 FIND Hooks For Event(PreLLMCall)
+
+loop for each hook in priority order
+    hooks -> hook : hk04 EXECUTE Hook(messages)
+    activate hook
+    hook --> hooks : HookResult(action, data?)
+    deactivate hook
+
+    break action == DENY
+        hooks --> agent : HookResult(action=DENY, reason)
+        agent --> router : HookResult(action=DENY)
+    end
+end
+
+hooks --> agent : HookResult(action=ALLOW, modified_messages?)
+deactivate hooks
+agent --> router : HookResult(action=ALLOW)
+deactivate agent
+deactivate router
+
+
+@enduml

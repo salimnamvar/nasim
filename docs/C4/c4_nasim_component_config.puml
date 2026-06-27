@@ -1,32 +1,44 @@
 @startuml c4_nasim_component_config
+' ============================================================
+' Title:     NASIM Application — Config Component Diagram
+' Boundary:  NASIM Application (container) — Config Group
+' Purpose:   Config layer internal components
+'            CSR Layer: Repository
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
 !theme plain
 
 
-' ============================================================
-' Title:     nasim — Config Component Diagram
-' Boundary:  nasim core library — Config group
-' Purpose:   Config layer internal components
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
-' ============================================================
+title NASIM Application — Config Component Diagram
 
-title nasim — Config Component Diagram
-
-Container_Boundary(config_boundary, "Config Group") {
-    Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags; validates at load")
-    Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety_mode, context_budget, mcp_servers")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(config_group, "Config Group") <<repository>> {
+        Component(config_loader, "ConfigLoader", "pydantic", "Loads global YAML, project YAML, env vars, CLI flags; validates at load")
+        Component(config_schema, "Config", "dataclass", "Typed configuration: provider, model, safety_mode, context_budget, mcp_servers")
+    }
 }
 
 System_Ext(global_config, "Global Config", "~/.nasim/config.yaml")
 System_Ext(project_config, "Project Config", ".nasim/config.yaml")
 System_Ext(env_vars, "Environment Variables", "NASIM_* env vars")
 
-Rel(config_loader, global_config, "reads defaults")
+Rel(config_loader, global_config, "reads global defaults")
 Rel(config_loader, project_config, "reads project overrides")
-Rel(config_loader, env_vars, "reads env overrides")
-Rel(config_loader, config_schema, "produces validated Config")
+Rel(config_loader, env_vars, "reads environment overrides")
+Rel(config_loader, config_schema, "produces validated Config instance")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

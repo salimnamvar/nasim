@@ -1,71 +1,67 @@
 @startuml sq_cli07_switch_model
+!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-07 — Switch Model
+' Title:     CLI-07 — SWITCH Model
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Switch active model via slash command
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CLI-07 Switch Model
+title nasim — CLI-07 SWITCH Model
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
+box "CLI Interface Container" #E3F2FD
   participant "REPLSession" as repl
-  participant "SlashCommandHandler" as cmd
+  participant "SlashCommandHandler" as cmdhandler
 end box
-box "Agent Layer" #E3F2FD
-  participant "AgentOrchestrator" as agent
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
 end box
-box "Routing Layer" #E8EAF6
-  participant "RTGModelRouter" as rtg
+box "Router Group" #FFF3E0
+  participant "ModelRouter" as mrouter
 end box
 
-note over user, rtg
-  Scope:          Switch active model via /model slash command
-  Preconditions:  REPLSession active, model registry available
-  Excludes:       Provider registration (PRV-01), fallback logic (RTG-02)
-  Contexts:       Invoked by Developer via /model command
-  Rollback:       Model not found → display error, retain current model
-  Design:         Delegates to RTG-04 SWITCH Model for actual provider switch
-  Classification: Primary Orchestrator
-end note
 
-== CLI-07 Switch Model ==
+== CLI-07 SWITCH Model ==
 
-user -> repl : "/model {model_name}"
-repl -> cmd : dispatch("/model {model_name}")
-activate cmd
+user -> repl : /model {model_name}
+activate repl
 
-cmd -> cmd : parse model name
-cmd -> rtg : switch_model(model_name)
-activate rtg
+repl -> cmdhandler : cli02 PARSE SlashCommand({input})
+activate cmdhandler
 
-rtg -> rtg : validate model availability
-rtg -> rtg : update active model pointer
+cmdhandler -> router : cli07 SWITCH Model({model_name})
+activate router
 
-rtg --> cmd : ModelSwitched(new_model)
-deactivate rtg
+router -> mrouter : rtg04 SWITCH Model({model_name})
+activate mrouter
 
-cmd --> repl : CommandResult("Switched to {model_name}")
-deactivate cmd
+mrouter -> mrouter : rtg04 VALIDATE ModelAvailability({model_name})
 
-repl --> user : "Active model: {model_name}"
-
-break Model not found
-    rtg --> cmd : ModelNotFoundError
-    cmd --> repl : CommandError
-    repl --> user : "Model '{model_name}' not available"
+break model not in catalog
+    mrouter --> router : Error("model not available")
+    router --> cmdhandler : 404 NOT_FOUND — Model not in catalog
+    cmdhandler --> repl : CommandResult(Error)
+    repl --> user : "Error: model {model_name} not available"
 end
 
-note over user, rtg
-  Flow:    Developer → REPLSession → SlashCommandHandler → RTG-04 SWITCH Model → confirm
-  State:   <back:#ECEFF1>IDLE</back> → SWITCHING → <back:#ECEFF1>IDLE</back>
-  Failure: Model not found → display error, retain current
-  Success: Model switched, confirmation shown
-end note
+mrouter -> mrouter : rtg04 UPDATE ActiveModelConfig({model_name})
+
+mrouter --> router : 200 OK — {previous_model, new_model}
+deactivate mrouter
+
+router --> cmdhandler : 200 OK — ModelSwitched
+deactivate router
+
+cmdhandler --> repl : CommandResult(ModelSwitched)
+deactivate cmdhandler
+
+repl --> user : "Model switched: {previous_model} → {new_model}"
+deactivate repl
+
 
 @enduml

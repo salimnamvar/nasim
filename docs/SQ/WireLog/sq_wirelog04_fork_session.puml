@@ -1,0 +1,67 @@
+@startuml sq_wirelog04_fork_session
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     WRL-04 — Fork Session
+' Boundary:  nasim code agent CLI
+' Purpose:   Fork session at any turn
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Wire Log Group" #F3E5F5
+  participant "WireLogger" as logger
+  participant "SessionForker" as forker
+end box
+box "Session Group" #E8F5E9
+  participant "SessionManager" as session
+end box
+box "Repository Group" #E8F5E9
+  participant "WireLogStore" as wrl
+end box
+
+
+
+== wrl03 FORK Session ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+agent -> forker : wrl04 FORK Session(source_session_id, fork_turn)
+activate forker
+
+forker -> logger : wrl02 READ Log(source_session_id, up_to_turn=fork_turn)
+activate logger
+logger --> forker : 200 OK — events[]
+deactivate logger
+
+forker -> session : wrl04 CREATE Session(forked_from=source_session_id)
+activate session
+session --> forker : 200 OK — new_session_id
+deactivate session
+
+forker -> forker : copy_events_to_session(events, new_session_id)
+
+forker -> logger : wrl01 APPEND Event(ForkEvent(source, fork_point, new_session_id))
+activate logger
+logger -> wrl : persist wire events
+wrl --> logger : persisted
+logger --> forker : 200 OK — append_success
+deactivate logger
+
+forker --> agent : 200 OK — ForkResult(new_session_id, fork_turn, event_count)
+deactivate forker
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

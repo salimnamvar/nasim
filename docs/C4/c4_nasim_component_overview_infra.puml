@@ -1,0 +1,133 @@
+@startuml c4_nasim_component_overview_infra
+' ============================================================
+' Title:     NASIM Application — Infrastructure Layer Overview
+' Boundary:  NASIM Application (container)
+' Purpose:   High-level map of all infrastructure groups shown as
+'            single components. Shows how the core orchestration
+'            path (User → CLI/API → AgentOrchestrator) flows into
+'            infrastructure services. Core groups (CLI, API, Agent)
+'            are inside the NASIM Application boundary.
+'            Detailed sub-components are in per-group diagrams.
+'            CSR Pattern:
+'            - Controller:       CLI Group, API Group
+'            - Service:          Agent Group
+'            - Infrastructure:   MCP Group, Sandbox Group, Observability Group,
+'                                Wire Log Group, Hooks Group, Plugins Group
+' Milestone: v1.0
+' Version:   24.0.0
+' Source:    docs/entities.md, docs/UC.md
+' Review:    —
+' Date:      2026-06-25
+' ============================================================
+' SIM-01 EXCEPTION: 31 elements — cross-cutting overview of all 6 infrastructure groups; splitting would lose the integration path visibility with core groups
+' ============================================================
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+!include common/c4_styles.puml
+
+
+LAYOUT_LEFT_RIGHT()
+title NASIM Application — Infrastructure Layer Overview
+
+Person(user, "User", "Developer using NASIM")
+
+Container_Boundary(nasim_application, "NASIM Application") {
+
+    Boundary(cli_group, "CLI Group") <<controller>> {
+        Component(repl_session, "REPLSession", "", "Terminal REPL entry point")
+    }
+
+    Boundary(api_group, "API Group") <<controller>> {
+        Component(server_router, "ServerRouter", "FastAPI", "HTTP + SSE entry gate")
+    }
+
+    Boundary(agent_group, "Agent Group") <<service>> {
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat")
+    }
+
+    Boundary(mcp_group, "MCP Group") <<infrastructure>> {
+        Component(mcp_client_rt, "MCPClientRuntime", "", "External MCP server connections and tool discovery")
+    }
+
+    Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
+        Component(sandbox_executor, "SandboxExecutor", "", "OS-level command isolation and sandboxed diff staging")
+    }
+
+    Boundary(observability_group, "Observability Group") <<infrastructure>> {
+        Component(observability_mgr, "ObservabilityManager", "", "Structured logging, metrics collection, trace correlation")
+    }
+
+    Boundary(wire_log_group, "Wire Log Group") <<infrastructure>> {
+        Component(wire_log, "WireLog", "", "Event recording for debugging and audit")
+    }
+
+    Boundary(hooks_group, "Hooks Group") <<infrastructure>> {
+        Component(hook_manager, "HookManager", "", "Pre/post hook lifecycle management")
+    }
+
+    Boundary(plugins_group, "Plugins Group") <<infrastructure>> {
+        Component(plugin_loader, "PluginLoader", "", "Discovers and loads plugins from ~/.nasim/plugins/")
+    }
+}
+
+System_Ext(mcp_server, "MCP Server", "External extension tools")
+System_Ext(mcp_client, "MCP Client", "External tool consumers")
+System_Ext(host_shell, "Host Shell", "subprocess execution")
+System_Ext(host_fs, "Host Filesystem", "restricted mount points")
+System_Ext(stdout, "stdout", "Standard output stream")
+System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
+System_Ext(prometheus, "Prometheus", "Metrics collection and storage")
+System_Ext(wire_log_dir, "Wire Log Storage", "~/.nasim/wire-logs/<session-id>/")
+System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
+
+System_Ext(tool_registry, "ToolRegistry", "Tool Group")
+System_Ext(session_store, "SessionStore", "Session Group")
+System_Ext(config_loader, "ConfigLoader", "Config Group")
+
+' ── Entry points ──
+Rel(user, repl_session, "types commands", "terminal REPL")
+Rel(user, server_router, "sends requests", "HTTP/JSON + SSE")
+Rel(repl_session, agent_orch, "delegates user tasks", "UC AGT-01")
+Rel(server_router, agent_orch, "delegates HTTP tasks", "UC AGT-01")
+
+' ── MCP Group ──
+Rel(mcp_client_rt, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
+Rel(mcp_client_rt, mcp_client, "exposes NASIM Application capabilities")
+Rel(mcp_client_rt, tool_registry, "registers discovered tools")
+
+' ── Sandbox Group ──
+Rel(tool_registry, sandbox_executor, "executes tools in isolated sandbox", "UC EDT-01")
+Rel(sandbox_executor, host_shell, "runs isolated subprocess", "stdio")
+Rel(sandbox_executor, host_fs, "restricted file access", "posix")
+
+' ── Observability Group ──
+Rel(agent_orch, observability_mgr, "logs lifecycle events and records metrics")
+Rel(observability_mgr, stdout, "writes structured JSON logs to stdout")
+Rel(observability_mgr, prometheus, "exposes /metrics for pull scrape", "HTTP GET")
+Rel(observability_mgr, otel_collector, "exports metrics (when otel enabled)", "OTLP/gRPC")
+Rel(config_loader, observability_mgr, "configures log level, format, and metrics emission")
+
+' ── Wire Log Group ──
+Rel(agent_orch, wire_log, "records agent-provider-tool interactions")
+Rel(wire_log, wire_log_dir, "writes log files")
+Rel(wire_log, session_store, "enables session replay from wire logs")
+
+' ── Hooks Group ──
+Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall")
+Rel(hook_manager, tool_registry, "queries tool metadata for hook dispatch")
+
+' ── Plugins Group ──
+Rel(plugin_loader, plugin_dir, "discovers plugin manifests")
+Rel(plugin_loader, tool_registry, "registers plugin tools")
+Rel(plugin_loader, hook_manager, "registers plugin hooks")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent Group |
+    |<#F3E5F5>  **Infrastructure** |
+    MCP, Sandbox, Observability,
+    Wire Log, Hooks, Plugins |
+end legend
+
+@enduml

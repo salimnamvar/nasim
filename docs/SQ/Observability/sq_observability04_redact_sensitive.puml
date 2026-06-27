@@ -1,0 +1,89 @@
+@startuml sq_observability04_redact_sensitive
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     OBS-04 — REDACT Sensitive Data
+' Boundary:  nasim code agent
+' Purpose:   Strip secrets before emission to structured logs or wire
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — OBS-04 REDACT SensitiveData
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Observability Group" #F3E5F5
+  participant "StructuredLogger" as logger
+  participant "WireAppender" as wire
+  participant "LogRedactor" as redactor
+end box
+box "Config Group" #E8F5E9
+  participant "Config" as config
+end box
+box "Repository Group" #E8F5E9
+  participant "ObservabilityRepository" as obs_repo
+end box
+
+
+== OBS-04 REDACT SensitiveData (structured log) ==
+
+user -> router : OBS-04 REDACT SensitiveData(record)
+activate router
+router -> agent : OBS-04 REDACT SensitiveData(record)
+activate agent
+
+agent -> logger : OBS-04 REDACT SensitiveData(record)
+activate logger
+
+logger -> redactor : OBS-04 REDACT SensitiveData(record)
+activate redactor
+
+redactor -> config : config.load_redaction_rules()
+activate config
+config --> redactor : rules[]
+deactivate config
+
+loop for each rule in rules
+    redactor -> redactor : apply_pattern(record, rule.pattern, rule.replacement)
+end
+
+redactor -> redactor : set_redacted_flag(record)
+
+redactor --> logger : SanitizedRecord(redacted=true)
+deactivate redactor
+
+logger --> agent : SanitizedRecord
+deactivate logger
+
+== OBS-04 REDACT SensitiveData (wire event) ==
+
+wire -> redactor : OBS-04 REDACT SensitiveData(payload)
+activate redactor
+
+redactor -> config : config.load_redaction_rules()
+activate config
+config --> redactor : rules[]
+deactivate config
+
+loop for each rule in rules
+    redactor -> redactor : apply_pattern(payload, rule.pattern, rule.replacement)
+end
+
+redactor --> wire : SanitizedPayload(redacted=true)
+deactivate redactor
+
+agent --> router : None
+deactivate agent
+deactivate router
+
+
+
+@enduml

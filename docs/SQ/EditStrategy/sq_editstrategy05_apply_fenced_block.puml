@@ -1,0 +1,59 @@
+@startuml sq_editstrategy05_apply_fenced_block
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     EDT-05 — APPLY Fenced Block
+' Boundary:  nasim code agent
+' Purpose:   Apply fenced code block format edit
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — EDT-05 UPDATE Fenced Block
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Strategy Group" #FFF3E0
+  participant "EditStrategyManager" as mgr
+  participant "FencedBlockCoder" as coder
+end box
+
+
+
+
+== EDT-05 APPLY Fenced Block ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> mgr : EDT-05 APPLY_FENCED_BLOCK(file, block, updateMask)
+activate mgr
+
+mgr -> coder : apply(block, file_content)
+activate coder
+
+coder -> coder : extract fenced block content
+coder -> coder : locate matching section in file
+coder -> coder : replace section
+
+break Section not found
+  coder --> mgr : BlockError(section_not_found)
+end
+
+coder --> mgr : ModifiedContent
+deactivate coder
+
+mgr --> agent : ToolResult(success=True)
+deactivate mgr
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

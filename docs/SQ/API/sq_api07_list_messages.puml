@@ -1,0 +1,57 @@
+@startuml sq_api07_list_messages
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     API-07 — LIST Messages
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Retrieve message history for a session
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+title nasim — API-07 LIST Messages
+
+actor "User" as user
+
+box "Controller Group" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
+end box
+box "Repository Group" #E8F5E9
+  participant "SessionStore" as store
+end box
+
+
+
+== API-07 LIST Messages ==
+
+user -> router : GET /v1/sessions/{id}/messages?page_size=50&page_token=abc
+activate router
+
+router -> svc : API-07 LIST Messages(sessionId, pageSize=50, pageToken="abc")
+activate svc
+
+svc -> store : API-07 LIST Messages(sessionId, pageSize=50, pageToken="abc")
+activate store
+
+alt Session exists
+    store --> svc : 200 OK {messages: [...], nextPageToken: "def"}
+    deactivate store
+    svc --> router : 200 OK {messages: [...], nextPageToken: "def"}
+    router --> user : 200 OK {messages: [...], next_page_token: "def"}
+else Session not found [404]
+    store --> svc : 404 NOT_FOUND
+    deactivate store
+    svc --> router : 404 NOT_FOUND
+    router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
+end
+
+deactivate svc
+deactivate router
+
+
+
+@enduml

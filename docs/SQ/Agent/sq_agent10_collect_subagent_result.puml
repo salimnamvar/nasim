@@ -1,0 +1,75 @@
+@startuml sq_agent10_collect_subagent_result
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     AGT-10 — COLLECT Subagent Result
+' Boundary:  nasim code agent
+' Purpose:   Wait for child agent completion and aggregate result
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — AGT-10 COLLECT Subagent Result
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "SubagentCoordinator" as coord
+end box
+box "Session Group" #E8F5E9
+  participant "SessionStore" as store
+end box
+
+
+
+== AGT-10 COLLECT Subagent Result ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+activate agent
+
+agent -> coord : agt10 COLLECT Subagent Result({child_id}, {timeout})
+activate coord
+
+coord -> store : get child session status
+activate store
+store --> coord : child_status (running | completed | failed)
+deactivate store
+
+alt child completed
+    coord -> store : get child result
+    activate store
+    store --> coord : child_result
+    deactivate store
+    coord -> coord : aggregate result into parent context
+    coord --> agent : result
+else child still running
+    coord -> coord : wait with timeout
+    alt timeout exceeded
+        coord -> coord : cancel child execution
+        coord --> agent : PartialResult(timeout)
+    else child completes in time
+        coord -> store : get child result
+        activate store
+        store --> coord : child_result
+        deactivate store
+        coord --> agent : result
+    end
+else child failed
+    coord -> coord : collect error details
+    coord --> agent : ChildError
+end
+
+deactivate coord
+
+agent --> router : AgentEvent(Done)
+deactivate agent
+
+
+
+@enduml

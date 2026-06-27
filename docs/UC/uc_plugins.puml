@@ -1,22 +1,31 @@
 @startuml uc_plugins
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: Plugins Group
 ' Group:     PLG (Plugins)
 ' Boundary:  nasim code agent
 ' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
+'            Entry chain: User → ServerRouter → AgentOrchestrator → PluginsGroup
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_plg01..sq_plg06
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — Plugins Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +35,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,44 +43,62 @@ skinparam actor {
   FontSize 12
 }
 
-' ============================================================
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+' ------------------------------------------------------------
 ' Actors
-' ============================================================
+' ------------------------------------------------------------
 
-actor "Agent" as Agent <<system>>
 
-' ============================================================
+actor "User" as User
+
+
+
+' ------------------------------------------------------------
 ' System Boundary
-' ============================================================
+' ------------------------------------------------------------
+
 
 rectangle "nasim" {
   package "Plugins Group (PLG)" {
-    usecase "**PLG-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" as PLG01
-    usecase "**PLG-02 LOAD Manifest**\n--\nParse plugin manifest metadata" as PLG02
-    usecase "**PLG-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" as PLG03
-    usecase "**PLG-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" as PLG04
-    usecase "**PLG-05 ENABLE Plugin**\n--\nEnable a plugin" as PLG05
-    usecase "**PLG-06 DISABLE Plugin**\n--\nDisable a plugin" as PLG06
+    usecase "**PLG-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" <<master>> as PLG01
+    usecase "**PLG-02 LOAD Manifest**\n--\nParse plugin manifest metadata" <<include>> as PLG02
+    usecase "**PLG-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" <<include>> as PLG03
+    usecase "**PLG-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" <<include>> as PLG04
+    usecase "**PLG-05 ENABLE Plugin**\n--\nEnable a plugin" <<master>> as PLG05
+    usecase "**PLG-06 DISABLE Plugin**\n--\nDisable a plugin" <<master>> as PLG06
   }
 }
 
-' ============================================================
+
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
-' ============================================================
+' ------------------------------------------------------------
 
-Agent --> PLG01
-Agent --> PLG02
-Agent --> PLG03
-Agent --> PLG04
-Agent --> PLG05
-Agent --> PLG06
 
-' ============================================================
+User --> PLG01
+User --> PLG05
+User --> PLG06
+
+
+
+
+
+' ------------------------------------------------------------
 ' Relationships
-' ============================================================
+' ------------------------------------------------------------
+
 
 PLG01 ..> PLG02 : <<include>>
 PLG02 ..> PLG03 : <<include>>
 PLG02 ..> PLG04 : <<include>>
+
+
 
 @enduml

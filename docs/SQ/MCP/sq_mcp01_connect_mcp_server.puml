@@ -1,91 +1,66 @@
 @startuml sq_mcp01_connect_mcp_server
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-01 — CONNECT MCP Server
 ' Boundary:  nasim code agent
 ' Purpose:   Connect to external MCP server via stdio/SSE
 ' Milestone: v1.0
-' Version:   3.0.0
-' Source:    docs/UC/README.md
-' Review:    Meta-Software Designer audit 2026-06-21
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    CAR audit 2026-06-26 (refactored to API-First entry chain)
 ' ============================================================
 
-title nasim — MCP-01 CONNECT MCP Server
+title nasim — MCP-01 CONNECT McpServer
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "REPLSession" as repl
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
 end box
-box "Agent Layer" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
-  participant "ErrorBoundary" as eb
 end box
-box "MCP Layer" #EDE7F6
-  participant "MCPClientRuntime" as client
+box "MCP Group" #F3E5F5
+  participant "MCPClientRuntime" as mcp
 end box
 box "External" #F5F5F5
   participant "MCP Server" as server
 end box
 
-note over user, server
-  Scope:          Connection establishment to external MCP server
-  Preconditions:  MCP server endpoint configured in config
-  Excludes:       Tool discovery and adaptation (MCP-02, MCP-03)
-  Contexts:       Called by TL-12 (DISPATCH MCP Extension) or agent initialization
-  Rollback:       Close socket on failure, map to AIP-193 error
-  Design:         Connection pooling and heartbeat monitoring. ErrorBoundary handles all connection failures
-  Classification: UC-level Sub-flow
-end note
 
-== MCP-01 CONNECT MCP Server ==
 
-user -> repl : invoke MCP connect
-repl -> agent : CONNECT_MCP(server_config)
-activate agent
 
-hnote over agent #FFF3E0 : **State: THINKING**
+== MCP-01 CONNECT McpServer ==
 
-agent -> client : connect(server_config)
-activate client
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> mcp : MCP-01 CONNECT McpServer(endpoint, transport)
+activate mcp
 
-client -> server : establish stdio/SSE connection
+mcp -> server : MCP-01 CONNECT McpServer(endpoint, transport)
 activate server
 
 break Connection refused / timeout
-    server --> client : ConnectionError
-    client --> eb : raise MCPConnectionFailed
-    activate eb
-    eb --> agent : map_to_aip_193(503, "MCP Server Unreachable")
-    deactivate eb
-    agent --> repl : AIP-193 Error (503)
-    deactivate agent
-    deactivate client
+    server --> mcp : ConnectionError
+    mcp --> agent : ToolResult(success=false, error="MCP Server unreachable")
+    agent --> router : AgentEvent(Error)
 end
 
-server --> client : connection established
+server --> mcp : connection established
 deactivate server
 
-client -> server : send initialize handshake
+mcp -> server : MCP-01 INITIALIZE Handshake(capabilities)
 activate server
-server --> client : handshake response (capabilities)
+server --> mcp : HandshakeResponse(server_capabilities)
 deactivate server
 
-client -> client : store connection state
+mcp -> mcp : store connection state
 
-client --> agent : ConnectionReady
-deactivate client
+mcp --> agent : ToolResult(success=true, content="ConnectionActive")
+deactivate mcp
 
-hnote over agent #ECEFF1 : **State: IDLE**
+agent --> router : AgentEvent(Done)
 
-agent --> repl : 200 OK (Connection Active)
-deactivate agent
 
-note over user, server
-  Flow:    Developer -> REPLSession -> AgentOrchestrator -> MCPClientRuntime -> establish connection -> handshake -> ready
-  State:   <back:#ECEFF1>IDLE</back> -> <back:#FFF3E0>THINKING</back> -> <back:#ECEFF1>IDLE</back>
-  Failure: Connection refused/timeout -> ErrorBoundary -> 503 UNAVAILABLE
-  Success: Agent receives ready connection handle
-  ROD errors: 503 UNAVAILABLE {error: {code: "UNAVAILABLE", message: "MCP Server Unreachable", status: "UNAVAILABLE"}}
-end note
 
 @enduml

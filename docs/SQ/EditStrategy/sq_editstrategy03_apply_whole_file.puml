@@ -1,0 +1,62 @@
+@startuml sq_editstrategy03_apply_whole_file
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     EDT-03 — Apply Whole File
+' Boundary:  nasim code agent CLI
+' Purpose:   Verify edit applied correctly
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Strategy Group" #FFF3E0
+  participant "EditValidator" as validator
+  participant "FileSystem" as fs
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as tool
+end box
+
+
+
+
+== edt03 VALIDATE Edit ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> validator : EDT-03 VALIDATE_EDIT(edit_result)
+activate validator
+
+validator -> fs : read_file(edit_result.file_path)
+activate fs
+fs --> validator : actual_content
+deactivate fs
+
+validator -> validator : verify_diff_applies(edit_result.diff, actual_content)
+
+validator -> tool : run_linter(file_path)
+activate tool
+tool --> validator : lint_result
+deactivate tool
+
+validator -> validator : check_syntax(lint_result)
+
+validator -> validator : verify_no_unintended_changes(actual_content, edit_result)
+
+validator --> agent : ValidationResult(passed, reasons[])
+deactivate validator
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

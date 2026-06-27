@@ -1,0 +1,70 @@
+@startuml sq_sandbox03_monitor_process
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SBX-03 — MONITOR Process
+' Boundary:  nasim code agent
+' Purpose:   Monitor sandboxed process for timeout and resource usage
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — SBX-03 READ Process
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Sandbox Group" #F3E5F5
+  participant "SandboxExecutor" as executor
+  participant "SandboxMonitor" as monitor
+end box
+
+
+== SBX-03 MONITOR Process ==
+
+user -> router : types input
+router -> agent : SBX-03 PROCESS(user_input)
+
+agent -> executor : SBX-03 MONITOR Process(process_id, limits)
+activate executor
+
+executor -> monitor : SBX-03 START Watch(process_id, limits)
+activate monitor
+
+loop while process running
+    monitor -> monitor : SBX-03 POLL ProcessStatus()
+    monitor -> monitor : SBX-03 CHECK TimeoutElapsed()
+    monitor -> monitor : SBX-03 CHECK ResourceUsage(CPU, memory)
+end
+
+alt timeout exceeded
+    monitor -> executor : SBX-03 KILL Process(SIGKILL)
+    executor --> monitor : process_killed
+    monitor --> executor : watch_complete(stats)
+    executor --> agent : Result(success=false, error="timeout_exceeded")
+    agent --> router : AgentEvent(Error)
+else resource limit exceeded
+    monitor -> executor : SBX-03 ENFORCE Limit(violation)
+    executor --> monitor : limit_enforced
+    monitor --> executor : watch_complete(stats)
+    executor --> agent : Result(success=false, error="resource_limit_exceeded")
+    agent --> router : AgentEvent(Error)
+else normal completion
+    monitor -> monitor : SBX-03 RECORD FinalStats()
+    monitor --> executor : watch_complete(stats)
+    executor --> agent : Result(success=true, data={stats})
+    agent --> router : AgentEvent(Done)
+end
+
+deactivate monitor
+deactivate executor
+
+
+
+@enduml

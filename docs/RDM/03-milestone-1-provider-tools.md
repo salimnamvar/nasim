@@ -33,5 +33,5 @@ Implement the provider abstraction and all tool implementations. These are the e
 - All tools return structured `ToolResult` (success, content, error)
 - ToolRegistry supports dynamic registration (for MCP)
 - MCPToolAdapter wraps MCP server tools into nasim Tool format
-- No agent/CLI imports in provider or tool code
+- No agentcli imports in provider or tool code
 - Tests for each provider and tool

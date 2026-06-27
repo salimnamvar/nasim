@@ -1,0 +1,61 @@
+@startuml sq_hooks05_dispatch_post_llm_hook
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     HK-05 — DISPATCH Post-LLM Hook
+' Boundary:  nasim code agent
+' Purpose:   Execute hooks after LLM call completes
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — HK-05 DISPATCH Post-LLM Hook
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Hooks Group" #F3E5F5
+  participant "HookManager" as hooks
+  participant "Hook" as hook
+end box
+box "Repository Group" #E8F5E9
+  participant "HookRepository" as hook_repo
+end box
+
+
+== HK-05 DISPATCH Post-LLM Hook ==
+
+user -> router : invoke agent
+activate router
+router -> agent : hk05 DISPATCH Post-LLM Hook(llm_result)
+activate agent
+agent -> hooks : hk05 DISPATCH Post-LLM Hook(llm_result)
+activate hooks
+hooks -> hooks : hk05 FIND Hooks For Event(PostLLMCall)
+
+loop for each hook in priority order
+    hooks -> hook : hk05 EXECUTE Hook(llm_result)
+    activate hook
+    hook --> hooks : HookResult(action, data?)
+    deactivate hook
+
+    break action == DENY
+        hooks --> agent : HookResult(action=DENY, reason)
+        agent --> router : HookResult(action=DENY)
+    end
+end
+
+hooks --> agent : HookResult(action=ALLOW, modified_data?)
+deactivate hooks
+agent --> router : HookResult(action=ALLOW)
+deactivate agent
+deactivate router
+
+
+@enduml

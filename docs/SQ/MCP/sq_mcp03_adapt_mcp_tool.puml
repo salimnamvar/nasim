@@ -1,54 +1,70 @@
 @startuml sq_mcp03_adapt_mcp_tool
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-03 — ADAPT MCP Tool
 ' Boundary:  nasim code agent
 ' Purpose:   Wrap MCP server tool into nasim Tool format
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
-' Review:    docs/SQ/README.md
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    CAR audit 2026-06-26 (refactored to API-First entry chain)
 ' ============================================================
 
-title nasim — MCP-03 ADAPT MCP Tool
+title nasim — MCP-03 ADAPT McpTool
 
-box "MCP Layer" #EDE7F6
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "MCP Group" #F3E5F5
+  participant "MCPClientRuntime" as mcp
   participant "MCPToolAdapter" as adapter
 end box
-box "Tool Layer" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over adapter, registry
-  Scope:          Tool format adaptation from MCP to nasim
-  Preconditions:  Tool discovered from MCP server (MCP-02)
-  Excludes:       Discovery and registration logic
-  Contexts:       Called by MCPDiscovery during tool registration
-  Rollback:       Reject incompatible tool schemas
-  Design:         Schema mapping with type coercion
-  Classification: Process Decomposition
-end note
 
-== MCP-03 ADAPT MCP Tool ==
+
+
+== MCP-03 ADAPT McpTool ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> mcp : MCP-03 ADAPT McpTool(tool_definition)
+activate mcp
+
+mcp -> adapter : MCP-03 ADAPT McpTool(tool_definition)
+activate adapter
 
 adapter -> adapter : parse MCP tool schema
 
 break Incompatible schema
-    adapter --> adapter : skip tool, log warning
+    adapter --> mcp : SchemaIncompatible(tool_name, reason)
+    mcp --> agent : ToolResult(success=false, error="Schema incompatible")
+    agent --> router : AgentEvent(Error)
 end
 
 adapter -> adapter : map types to nasim Tool format
 adapter -> adapter : create execution wrapper
 
-adapter -> registry : register(adapted_tool)
+adapter -> registry : MCP-03 REGISTER Tool(adapted_tool)
 activate registry
-registry --> adapter : tool_registered(name, version)
+registry --> adapter : ToolRegistered(name, version)
 deactivate registry
 
-note over adapter, registry
-  Flow:    MCPToolAdapter -> parse schema -> map types -> create wrapper -> register
-  State:   No state change
-  Failure: Incompatible schema -> skip tool, log warning
-  Success: Tool available in nasim ToolRegistry with MCP backend
-end note
+adapter --> mcp : ToolRegistered(name, version)
+deactivate adapter
+
+mcp --> agent : ToolResult(success=true, content="ToolRegistered")
+deactivate mcp
+
+agent --> router : AgentEvent(Done)
+
+
 
 @enduml

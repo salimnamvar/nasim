@@ -1,22 +1,32 @@
 @startuml uc_provider
 
+!include common/uc_styles.puml
+
+
 ' ============================================================
 ' Title:     nasim — UC: Provider Group
-' Group:     PRV (Provider Abstraction)
+' Group:     PRV (Provider Layer)
 ' Boundary:  nasim code agent
-' Purpose:   LLM provider abstraction via litellm proxy (100+ providers)
+' Purpose:   LLM provider abstraction via LiteLLM proxy: registration,
+'            chat request/stream, backend selection.
+'            Entry chain: User → ServerRouter → AgentOrchestrator → Provider
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/ENTITIES.md
-' Review:    docs/audit/audit.2026.06.20.uc-layer.car.md
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_prv01..sq_prv04
 ' ============================================================
+
 
 left to right direction
 
+
 title nasim — Provider Use Cases
+
 
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
+
 
 skinparam usecase {
   BackgroundColor #FFFFFF
@@ -26,6 +36,7 @@ skinparam usecase {
   FontSize 12
 }
 
+
 skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
@@ -33,44 +44,56 @@ skinparam actor {
   FontSize 12
 }
 
+
 skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
 }
 
+
 ' ============================================================
 ' Actors
 ' ============================================================
 
-actor "Agent" as Agent <<system>>
+
+actor "User" as User
+
+
 
 ' ============================================================
 ' System Boundary
 ' ============================================================
 
+
 rectangle "nasim" {
   package "Provider Group (PRV)" {
-    usecase "**PRV-01 REGISTER Provider**\n--\nInitialize provider from config" as PRV01
-    usecase "**PRV-02 REQUEST Chat**\n--\nSend chat request to LLM provider" as PRV02
-    usecase "**PRV-03 STREAM Chat**\n--\nStream chat response from LLM provider" as PRV03
-    usecase "**PRV-04 SELECT Provider Backend**\n--\nSelect provider backend from config" as PRV04
+    usecase "**PRV-01 REGISTER Provider**\n--\nRegister provider with LiteLLM proxy" <<include>> as PRV01
+    usecase "**PRV-02 REQUEST Chat**\n--\nSingle-turn LLM chat request" <<master>> as PRV02
+    usecase "**PRV-03 STREAM Chat**\n--\nStream LLM chat response" <<master>> as PRV03
+    usecase "**PRV-04 SELECT Provider Backend**\n--\nSelect best provider backend" <<master>> as PRV04
   }
 }
+
 
 ' ============================================================
 ' Actor -> Use Case Associations
 ' ============================================================
 
-Agent --> PRV01
-Agent --> PRV02
-Agent --> PRV03
-Agent --> PRV04
+
+User --> PRV02
+User --> PRV03
+User --> PRV04
+
+
 
 ' ============================================================
 ' Relationships
 ' ============================================================
 
+
 PRV04 ..> PRV01 : <<include>>
+
+
 
 @enduml

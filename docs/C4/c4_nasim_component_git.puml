@@ -1,31 +1,43 @@
 @startuml c4_nasim_component_git
+' ============================================================
+' Title:     NASIM Application — Git Component Diagram
+' Boundary:  NASIM Application (container) — Git Group
+' Purpose:   Version control awareness: status, diff, commit
+'            CSR Layer: Repository
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
+!include common/c4_styles.puml
 
 
-' ============================================================
-' Title:     nasim — Git Component Diagram
-' Boundary:  nasim core library — Git group
-' Purpose:   Version control awareness: status, diff, commit
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/prompt/p1.md — corrective architecture review
-' Review:    docs/audit/audit.2026.06.20.comprehensive.reference.audit.md
-' ============================================================
+title NASIM Application — Git Component Diagram
 
-title nasim — Git Component Diagram
-
-Container_Boundary(git_boundary, "Git Group") {
-    Component(git_integration, "GitIntegration", "", "Auto-commit after file edits, branch awareness, diff tracking")
-    Component(git_status, "GitStatus", "", "Read working tree status, staged changes, branch info")
-    Component(git_commit, "GitCommit", "", "Create commits with conventional commit messages")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(git_group, "Git Group") <<repository>> {
+        Component(git_integration, "GitIntegration", "", "Auto-commit after file edits, branch awareness, diff tracking")
+        Component(git_status, "GitStatus", "", "Read working tree status, staged changes, branch info")
+        Component(git_commit, "GitCommit", "", "Create commits with conventional commit messages")
+    }
 }
 
 System_Ext(git_repo, "Git Repository", "Version control for project files")
 
-Rel(git_integration, git_status, "reads current state")
-Rel(git_integration, git_commit, "creates commits")
-Rel(git_status, git_repo, "git status, git diff")
-Rel(git_commit, git_repo, "git commit, git add")
+Rel(git_integration, git_status, "reads current repository state")
+Rel(git_integration, git_commit, "creates versioned commits")
+Rel(git_status, git_repo, "reads working tree state and staged changes")
+Rel(git_commit, git_repo, "creates versioned snapshots of project changes")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

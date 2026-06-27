@@ -1,0 +1,58 @@
+@startuml sq_git01_read_git_status
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     VCS-01 — READ Git Status
+' Boundary:  nasim code agent
+' Purpose:   Read working tree status and staged changes
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — VCS-01 READ Git Status
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Git Group" #E8F5E9
+  participant "GitStatus" as status
+end box
+box "External" #F5F5F5
+  participant "Git Repository" as git
+end box
+
+
+
+== VCS-01 READ Git Status ==
+
+user -> router : types input
+router -> agent : VCS-01 PROCESS(user_input)
+
+agent -> status : VCS-01 READ GitStatus()
+activate status
+
+status -> git : VCS-01 EXECUTE git_status_porouslain()
+activate git
+git --> status : raw_output
+deactivate git
+
+status -> status : VCS-01 PARSE StatusOutput(raw_output)
+
+break Not a git repo
+    status --> agent : Result(success=false, error="not_a_git_repository")
+    agent --> router : AgentEvent(Error)
+end
+
+status --> agent : Result(success=true, data={staged, modified, untracked})
+deactivate status
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

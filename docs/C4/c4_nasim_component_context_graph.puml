@@ -1,46 +1,58 @@
 @startuml c4_nasim_component_context_graph
+' ============================================================
+' Title:     NASIM Application — Context Graph Component Diagram
+' Boundary:  NASIM Application (container) — Context Graph Group
+' Purpose:   Context pipeline: graph construction, truncation, distillation, injection, compaction
+'            CSR Layer: Service
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
+' ============================================================
+
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!include common/c4_styles.puml
 !theme plain
 
 
-' ============================================================
-' Title:     nasim — Context Graph Component Diagram
-' Boundary:  nasim core library — Context Graph group
-' Purpose:   Context pipeline: graph construction, truncation, distillation, injection, compaction
-' Milestone: v1.0
-' Version:   6.0.0
-' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md
-' Review:    —
-' ============================================================
+title NASIM Application — Context Graph Component Diagram
 
-title nasim — Context Graph Component Diagram
-
-Container_Boundary(context_graph_boundary, "Context Graph Group") {
-    Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
-    Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages in order")
-    Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget")
-    Component(distillation_processor, "DistillationProcessor", "", "Summarizes and distills long context nodes")
-    Component(injection_processor, "InjectionProcessor", "", "Injects retrieved context (memory, repo map) into context graph")
-    Component(compaction_processor, "CompactionProcessor", "", "Merges redundant or overlapping context nodes")
-    Component(token_budget_tracker, "TokenBudgetTracker", "", "Tracks cumulative token usage across context pipeline stages")
+Container_Boundary(nasim_application, "NASIM Application") {
+    Boundary(context_graph_group, "Context Graph Group") <<service>> {
+        Component(context_graph, "ContextGraph", "", "Directed graph of context nodes with edges: dependencies, references, flow")
+        Component(pipeline_orchestrator, "PipelineOrchestrator", "", "Orchestrates context processing pipeline stages and tracks token budget")
+        Component(context_prioritizer, "ContextPrioritizer", "", "Assigns importance score to each ContextNode: recency_weight * (1 - age/max_age) + frequency_weight * edit_count + type_weight. Enables priority-based truncation (lowest importance dropped first).")
+        Component(truncation_processor, "TruncationProcessor", "", "Truncates context nodes to fit within token budget. Drops nodes in ascending importance order (via ContextPrioritizer).")
+        Component(distillation_processor, "DistillationProcessor", "", "Summarizes and distills long context nodes")
+        Component(injection_processor, "InjectionProcessor", "", "Injects retrieved context (memory, repo map) into context graph")
+        Component(compaction_processor, "CompactionProcessor", "", "Merges redundant or overlapping context nodes")
+    }
 }
 
-Container_Ext(memory_group, "Memory Group")
-Container_Ext(repo_intelligence_group, "Repo Intelligence Group")
+System_Ext(memory_store, "MemoryStore", "Memory Group")
+System_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
 System_Ext(llm_backend, "LLM Backend", "Used for distillation and summarization calls")
 
+Rel(pipeline_orchestrator, context_prioritizer, "runs priority scoring stage")
+Rel(pipeline_orchestrator, truncation_processor, "runs truncation stage")
+Rel(pipeline_orchestrator, distillation_processor, "runs distillation stage")
+Rel(pipeline_orchestrator, injection_processor, "runs injection stage")
+Rel(pipeline_orchestrator, compaction_processor, "runs compaction stage")
+Rel(pipeline_orchestrator, context_graph, "operates on graph and tracks token budget")
+Rel(context_prioritizer, context_graph, "scores nodes by importance")
+Rel(distillation_processor, llm_backend, "invokes LLM for context summarization")
+Rel(injection_processor, memory_store, "injects retrieved memory into graph")
+Rel(injection_processor, repo_intel_mgr, "injects repo map into graph")
+Rel(truncation_processor, context_prioritizer, "queries node priorities for drop order")
+Rel(truncation_processor, context_graph, "queries remaining token budget")
+Rel(compaction_processor, context_graph, "merges redundant nodes")
 
-Rel(pipeline_orchestrator, truncation_processor, "truncation stage")
-Rel(pipeline_orchestrator, distillation_processor, "distillation stage")
-Rel(pipeline_orchestrator, injection_processor, "injection stage")
-Rel(pipeline_orchestrator, compaction_processor, "compaction stage")
-Rel(pipeline_orchestrator, token_budget_tracker, "track budget")
-Rel(pipeline_orchestrator, context_graph, "operates on graph")
-Rel(distillation_processor, llm_backend, "summarization call")
-Rel(injection_processor, memory_group, "injects memory")
-Rel(injection_processor, repo_intelligence_group, "injects repo map")
-Rel(truncation_processor, token_budget_tracker, "queries remaining budget")
-Rel(compaction_processor, context_graph, "merges nodes")
-Rel(token_budget_tracker, context_graph, "reads node costs")
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Provider, Safety, Context Graph, Edit Strategy, Evaluation |
+    |<#E8F5E9>  **Repository** | Session, Tool, Memory, Config, Git, Repo Intelligence |
+    |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
+end legend
 
 @enduml

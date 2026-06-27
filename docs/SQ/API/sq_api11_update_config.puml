@@ -1,0 +1,63 @@
+@startuml sq_api11_update_config
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     API-11 — UPDATE Config
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Update agent configuration at runtime
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — API-11 UPDATE Config
+
+actor "User" as user
+
+box "Controller Group" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Service Group" #FFF3E0
+  participant "ConfigService" as svc
+end box
+box "Repository Group" #E8F5E9
+  participant "ConfigLoader" as config
+end box
+
+
+
+== API-11 UPDATE Config ==
+
+user -> router : PATCH /v1/config
+activate router
+
+router -> router : Phase 1: validate patch body
+alt Structural validation failed [400]
+  router --> user : 400 INVALID_ARGUMENT
+end
+
+router -> svc : API-11 UPDATE Config(patchData, updateMask)
+activate svc
+
+svc -> svc : Phase 2: validate business rules
+svc -> config : updateConfig(patch)
+activate config
+
+break Invalid config [400]
+  config --> svc : ConfigError(invalid_value)
+  deactivate config
+  svc --> router : 400 INVALID_ARGUMENT
+  router --> user : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid config", status: "INVALID_ARGUMENT"}}
+end
+
+config --> svc : applied
+deactivate config
+
+svc --> router : ConfigResponseDTO
+deactivate svc
+router --> user : 200 OK {config: {updated_fields: [...]}}
+deactivate router
+
+
+
+@enduml

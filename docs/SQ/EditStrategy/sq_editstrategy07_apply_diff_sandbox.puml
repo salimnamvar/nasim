@@ -1,0 +1,99 @@
+@startuml sq_editstrategy07_apply_diff_sandbox
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     EDT-07 — APPLY Diff Sandbox
+' Boundary:  nasim code agent
+' Purpose:   Apply diff in isolated sandbox before committing to real file
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — EDT-07 UPDATE Diff Sandbox
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Strategy Group" #FFF3E0
+  participant "EditStrategyManager" as esm
+  participant "DiffSandboxCoder" as dsc
+end box
+box "Sandbox Group" #F3E5F5
+  participant "DiffSandboxManager" as dsm
+end box
+box "FileSystem Group" #E8F5E9
+  participant "FileSystem" as fs
+end box
+
+
+
+
+== EDT-07 APPLY Diff Sandbox ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+agent -> esm : EDT-07 APPLY_DIFF_SANDBOX(file_path, diff_patch, updateMask)
+activate esm
+
+esm -> dsc : code_sandboxed_diff(file_path, diff_patch)
+activate dsc
+
+dsc -> dsm : create_sandbox(file_path)
+activate dsm
+dsm -> fs : copy_to_sandbox(file_path)
+activate fs
+fs --> dsm : sandbox_path
+deactivate fs
+dsm --> dsc : SandboxHandle(sandbox_path)
+deactivate dsm
+
+dsc -> dsm : apply_diff(sandbox_path, diff_patch)
+activate dsm
+dsm -> fs : apply_patch(sandbox_path, diff_patch)
+activate fs
+fs --> dsm : patch_result
+deactivate fs
+dsm --> dsc : DiffApplyResult
+deactivate dsm
+
+dsc -> dsm : validate_sandbox(sandbox_path)
+activate dsm
+dsm -> dsm : run_syntax_check(sandbox_path)
+dsm -> dsm : run_basic_validation(sandbox_path)
+dsm --> dsc : ValidationResult
+deactivate dsm
+
+alt validation passes
+    dsc -> dsm : commit_sandbox(sandbox_path, file_path)
+    activate dsm
+    dsm -> fs : move_sandbox_to_target(sandbox_path, file_path)
+    activate fs
+    fs --> dsm : write_result
+    deactivate fs
+    dsm --> dsc : CommitResult
+    deactivate dsm
+else validation fails
+    dsc -> dsm : discard_sandbox(sandbox_path)
+    activate dsm
+    dsm --> dsc : DiscardResult
+    deactivate dsm
+end
+
+dsc --> esm : EditResult(success, file_path)
+deactivate dsc
+
+esm --> agent : EditResult
+deactivate esm
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

@@ -1,63 +1,73 @@
 @startuml sq_cli03_stream_output
+!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-03 — Stream Output
+' Title:     CLI-03 — STREAM Output
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Streaming token-by-token output with rich formatting
 ' Milestone: v1.0
-' Version:   2.0.0
-' Source:    docs/UC/README.md
-' Review:    —
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
 ' ============================================================
 
-actor "Developer" as user
+title nasim — CLI-03 STREAM Output
 
-box "CLI Layer" #E8F5E9
+actor "User" as user
+
+box "CLI Interface Container" #E3F2FD
   participant "REPLSession" as repl
   participant "Renderer" as renderer
 end box
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
 
-note over user, renderer
-  Scope:          Rendering AgentEvents to terminal
-  Preconditions:  Agent event stream active
-  Contexts:       Called by CLI-01 (PROCESS User Input)
-  Excludes:       Agent loop logic, tool execution
-  Rollback:       N/A — renderer is passive consumer
-  Design:         Uses Rich library for colors, diffs, formatting
-  Classification: Primary Orchestrator
-end note
 
 == CLI-03 STREAM Output ==
 
-repl -> renderer : subscribe to AgentEvent stream
+user -> repl : await response
+activate repl
 
-loop for each event
+repl -> router : api06 DISPATCH Message({session_id}, {message})
+activate router
+
+router --> repl : SSE stream (AgentEvents)
+deactivate router
+
+hnote over repl #E0F7FA : **State: STREAMING**
+
+loop for each AgentEvent in stream
     alt TextChunk event
-        repl -> renderer : TextChunk(text)
-        renderer -> renderer : colored output (green for nasim>)
+        repl -> renderer : cli03 RENDER TextChunk({token})
+        activate renderer
         renderer --> user : streamed token
+        deactivate renderer
     else ToolStart event
-        repl -> renderer : ToolStart(name, args)
-        renderer -> renderer : dimmed box with tool name + args
+        repl -> renderer : cli03 RENDER ToolStart({tool_name})
+        activate renderer
         renderer --> user : tool call display
+        deactivate renderer
     else ToolResult event
-        repl -> renderer : ToolResult(name, result, truncated)
-        renderer -> renderer : truncated result (max 200 chars)
+        repl -> renderer : cli03 RENDER ToolResult({result})
+        activate renderer
         renderer --> user : tool result preview
+        deactivate renderer
     else Error event
-        repl -> renderer : Error(message)
-        renderer -> renderer : red highlight
-        renderer --> user : error display
+        repl -> renderer : cli03 RENDER Error({error})
+        activate renderer
+        renderer --> user : red error display
+        deactivate renderer
     else Done event
-        repl -> renderer : Done()
-        renderer -> renderer : newline + reset
+        repl -> renderer : cli03 RENDER Done()
+        activate renderer
+        renderer --> user : formatted completion
+        deactivate renderer
     end
 end
 
-note over user, renderer
-  Flow:    Event stream -> Renderer -> formatted terminal output
-  State:   No state change
-  Failure: N/A — renderer is passive
-  Success: All events rendered with appropriate formatting
-end note
+hnote over repl #ECEFF1 : **State: IDLE**
+
+deactivate repl
+
 
 @enduml

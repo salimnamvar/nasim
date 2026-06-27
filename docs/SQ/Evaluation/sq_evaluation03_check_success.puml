@@ -1,0 +1,68 @@
+@startuml sq_evaluation03_check_success
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     EVL-03 — CHECK Success
+' Boundary:  nasim code agent
+' Purpose:   Run user-defined success checks and return pass/fail
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Group" #FFF3E0
+  participant "EvaluationEngine" as engine
+  participant "SuccessCheckRunner" as runner
+end box
+box "Tool Group" #E8F5E9
+  participant "ShellRunner" as shell
+end box
+box "Repository Group" #E8F5E9
+  participant "EvaluationRepository" as eval_repo
+end box
+
+
+
+
+== EVL-03 CHECK Success ==
+
+agent -> engine : EVL-03 CHECK_SUCCESS(check_commands[])
+activate engine
+
+engine -> runner : run_checks(check_commands)
+activate runner
+
+loop for each check_command
+    runner -> shell : execute(check_command, timeout=30s)
+    activate shell
+    alt exit_code == 0
+        shell --> runner : CheckOutput(exit_code=0, stdout)
+    else exit_code != 0
+        shell --> runner : CheckOutput(exit_code, stderr)
+    end
+    deactivate shell
+
+    runner -> runner : record_result(check_command, output)
+end
+
+runner -> runner : aggregate_results()
+
+runner --> engine : SuccessCheckResult(passed, results[])
+deactivate runner
+
+engine --> agent : SuccessCheckResult
+deactivate engine
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

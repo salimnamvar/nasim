@@ -1,0 +1,58 @@
+@startuml sq_tool08_search_find
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     TL-08 — SEARCH Find
+' Boundary:  nasim code agent CLI
+' Purpose:   Find files by name pattern with depth limit
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "FindFileTool" as find
+end box
+
+
+
+== TL-08 FIND Files ==
+
+user -> router : types input
+activate router
+router -> agent : TL-08 PROCESS(user_input)
+activate agent
+agent -> registry : TL-08 FIND Files(name_pattern, path, max_depth)
+activate registry
+registry -> find : TL-08 FIND Files(name_pattern, path, max_depth)
+activate find
+find -> find : os.walk(path) with depth tracking
+find -> find : fnmatch.fnmatch(filename, pattern)
+
+break Path not found
+    find --> registry : ToolResult(success=False, error="Error: path not found: path")
+    deactivate find
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+find --> registry : ToolResult(success=True, content=matching_paths)
+deactivate find
+registry --> agent : ToolResult
+agent --> router : AgentEvent(Done)
+
+deactivate registry
+deactivate agent
+deactivate router
+
+
+@enduml

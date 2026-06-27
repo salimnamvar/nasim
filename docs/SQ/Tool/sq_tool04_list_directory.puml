@@ -1,0 +1,71 @@
+@startuml sq_tool04_list_directory
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     TL-04 — List Directory
+' Boundary:  nasim code agent CLI
+' Purpose:   List files and directories at a path
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "DirTool" as dt
+end box
+participant "Host Filesystem" as fs
+
+
+
+== TL-04 LIST Directory ==
+
+user -> router : types input
+activate router
+router -> agent : TL-04 PROCESS(user_input)
+activate agent
+agent -> registry : TL-04 LIST Directory(path, pageSize=100, pageToken="abc")
+activate registry
+registry -> dt : TL-04 LIST Directory(path, pageSize=100, pageToken="abc")
+activate dt
+dt -> fs : Path(path).resolve()
+activate fs
+
+break Path not found
+    fs --> dt : FileNotFoundError
+    deactivate fs
+    dt --> registry : ToolResult(success=False, error="path not found")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+break Not a directory
+    dt --> registry : ToolResult(success=False, error="not a directory")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+dt -> fs : sorted(p.iterdir())
+activate fs
+fs --> dt : entries, next_page_token
+deactivate fs
+dt -> dt : format with d/ prefix for dirs
+dt --> registry : ToolResult(success=True, content=formatted_listing, nextPageToken)
+registry --> agent : ToolResult
+agent --> router : AgentEvent(Done)
+
+deactivate dt
+deactivate registry
+deactivate agent
+deactivate router
+
+
+@enduml

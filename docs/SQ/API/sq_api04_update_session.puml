@@ -1,0 +1,70 @@
+@startuml sq_api04_update_session
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     API-04 — UPDATE Session
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Update session metadata or settings
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — API-04 UPDATE Session
+
+actor "User" as user
+
+box "Controller Group" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
+end box
+box "Repository Group" #E8F5E9
+  participant "SessionStore" as store
+end box
+
+
+
+== API-04 UPDATE Session ==
+
+user -> router : PATCH /v1/sessions/{id}
+activate router
+
+router -> router : Phase 1: validate patch body
+alt Structural validation failed [400]
+  router --> user : 400 INVALID_ARGUMENT
+end
+
+router -> svc : API-04 UPDATE Session(sessionId, patchData, updateMask)
+activate svc
+
+svc -> store : API-04 READ Session(sessionId)
+activate store
+
+break Session not found [404]
+  store --> svc : 404 NOT_FOUND
+  deactivate store
+  svc --> router : 404 NOT_FOUND
+  router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
+end
+
+store --> svc : SessionEntity
+deactivate store
+
+svc -> svc : validate business rules
+svc -> svc : applyUpdateMask(existing, patchData)
+
+svc -> store : API-04 UPDATE Session(updatedSession)
+activate store
+store --> svc : updated
+deactivate store
+
+svc --> router : 200 OK {session: {id, updated_at}}
+deactivate svc
+router --> user : 200 OK {session: {id, updated_at}}
+deactivate router
+
+
+
+@enduml

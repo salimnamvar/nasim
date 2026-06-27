@@ -1,0 +1,93 @@
+@startuml sq_api06_dispatch_message
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     API-06 — DISPATCH Message
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Dispatch a user message through the agent and stream SSE response
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    Meta-Software Designer audit 2026-06-21
+' Pattern:   Controller (ServerRouter) -> Service (AgentOrchestrator) -> Repository (SessionStore)
+' ============================================================
+
+title nasim — API-06 DISPATCH Message
+
+actor "User" as user
+
+box "Controller Group" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Service Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "ErrorBoundary" as eb
+end box
+box "Repository Group" #E8F5E9
+  participant "SessionStore" as store
+end box
+box "Observability Group" #F3E5F5
+  participant "SSEHandler" as sse
+  participant "TraceCorrelator" as trace
+end box
+
+
+
+== API-06 SEND Message ==
+
+ref over agent, trace
+  OBS-03: CORRELATE Trace
+end ref
+
+user -> router : POST /v1/sessions/{id}:dispatch
+activate router
+
+router -> router : Phase 1: validate request body
+alt Structural validation failed [400]
+  router --> user : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid request", status: "INVALID_ARGUMENT"}}
+end
+
+router -> agent : API-06 SEND Message(sessionId, message)
+activate agent
+
+agent -> store : readSessionExists(sessionId)
+activate store
+store --> agent : SessionEntity
+deactivate store
+
+break Session not found [404]
+  agent --> router : 404 NOT_FOUND
+  router --> user : 404 NOT_FOUND
+end
+
+hnote over agent #FFF3E0 : **State: THINKING**
+
+ref over agent
+  AGT-01: PROCESS User Task
+end ref
+
+break Agent error [502]
+  agent -> eb : handle(AgentError)
+  activate eb
+  eb --> agent : RecoveryAction(retry/abort)
+  deactivate eb
+  agent --> router : 502 UNAVAILABLE
+  router --> user : 502 UNAVAILABLE {error: {code: "UNAVAILABLE", message: "Agent error", status: "UNAVAILABLE"}}
+end
+
+agent --> router : AgentEventStream
+deactivate agent
+
+hnote over sse #E8F5E9 : **State: RESPONDING**
+
+router -> sse : stream(events)
+activate sse
+sse --> user : Content-Type: text/event-stream
+sse --> user : SSE: TextChunk, ToolStart, ToolResult, Done
+deactivate sse
+
+router --> user : 200 OK (stream complete)
+deactivate router
+
+
+
+@enduml

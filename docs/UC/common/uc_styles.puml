@@ -1,0 +1,93 @@
+' ============================================================
+' nasim — UC Common Styles
+' Include via: !include common/uc_styles.puml
+'
+' Provides consistent skinparam and stereotype styling for
+' all Use Case diagrams in the nasim project.
+' ============================================================
+
+' ------------------------------------------------------------
+' Base skinparam — direction, actor, use case
+' ------------------------------------------------------------
+
+left to right direction
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
+' ------------------------------------------------------------
+' Use Case Stereotypes (for visual distinction)
+' ------------------------------------------------------------
+
+' Master / Primary Use Cases (entry points)
+' Use on UCs that are independently invocable by an actor.
+' These must have at least one actor association (UC-008).
+skinparam usecase<<master>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+  FontStyle bold
+}
+
+' Included Use Cases (via <<include>>)
+' Use on UCs that are always executed as part of a master UC.
+' These must NOT have direct actor associations — rely on
+' the <<include>> relationship from the parent UC.
+skinparam usecase<<include>> {
+  BackgroundColor #FFF8E1
+  BorderColor #F9A825
+  FontColor #5D4037
+}
+
+' Extended Use Cases (via <<extend>>)
+' Use on UCs that represent optional or conditional behavior.
+' These must NOT have direct actor associations — rely on
+' the <<extend>> relationship from the parent UC.
+skinparam usecase<<extend>> {
+  BackgroundColor #F3E5F5
+  BorderColor #7B1FA2
+  FontColor #4A148C
+}
+
+' ------------------------------------------------------------
+' Usage Guidelines
+' ------------------------------------------------------------
+' 1. Tag every use case with exactly one stereotype:
+'    - <<master>>  : entry points, independently invocable
+'    - <<include>> : mandatory sub-flows (right side of <<include>>)
+'    - <<extend>>  : optional sub-flows (right side of <<extend>>)
+'    - <<extref>>  : external references (cross-group pointers only)
+' 2. Master UCs must have at least one actor association (UC-008).
+' 3. <<include>> and <<extend>> UCs must NOT have direct actor
+'    associations — the parent master UC carries them.
+' 4. Keep diagrams clean: no heavy notes, let structure speak.
+' 5. Overview diagrams (uc_overview.puml) are exempt from UC-008.
+' ============================================================

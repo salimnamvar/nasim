@@ -1,0 +1,70 @@
+@startuml sq_contextgraph01_process_context
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     CTX-01 — PROCESS Context
+' Boundary:  nasim code agent
+' Purpose:   Orchestrate context processing pipeline stages
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    CAR audit 2026-06-26 (moved PipelineOrchestrator to Context Graph Group, removed TokenBudgetTracker phantom)
+' ============================================================
+
+title nasim — CTX-01 PROCESS Context
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Context Graph Group" #FFF3E0
+  participant "PipelineOrchestrator" as pipeline
+  participant "ContextGraph" as graph
+  participant "ContextPrioritizer" as prioritizer
+end box
+box "Repository Group" #E8F5E9
+  participant "ContextStore" as ctx_store
+end box
+
+
+== CTX-01 PROCESS Context ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> pipeline : CTX-01 PROCESS(graph, budget)
+activate pipeline
+
+ref over pipeline, graph
+  CTX-06: TRACK Token Budget
+end ref
+
+ref over pipeline, graph
+  CTX-05: COMPACT Nodes
+end ref
+
+pipeline -> pipeline : score node priorities
+
+ref over pipeline, graph
+  CTX-02: TRUNCATE Nodes
+end ref
+
+ref over pipeline, graph
+  CTX-03: DISTILL Nodes
+end ref
+
+ref over pipeline, graph
+  CTX-04: INJECT Context
+end ref
+
+pipeline -> ctx_store : store processed context
+ctx_store --> pipeline : stored
+pipeline --> agent : ProcessedContext
+deactivate pipeline
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

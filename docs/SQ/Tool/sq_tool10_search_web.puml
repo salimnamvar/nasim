@@ -1,0 +1,63 @@
+@startuml sq_tool10_search_web
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     TL-10 — SEARCH Web
+' Boundary:  nasim code agent CLI
+' Purpose:   Search the web for information
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "WebSearchTool" as search
+end box
+participant "Search Backend" as backend
+
+
+
+== TL-10 SEARCH Web ==
+
+user -> router : types input
+activate router
+router -> agent : TL-10 PROCESS(user_input)
+activate agent
+agent -> registry : TL-10 SEARCH Web(query, num_results)
+activate registry
+registry -> search : TL-10 SEARCH Web(query, num_results)
+activate search
+search -> backend : search(query, num_results)
+activate backend
+
+break Backend unavailable
+    backend --> search : ConnectionError
+    deactivate backend
+    search --> registry : ToolResult(success=False, error="Error: search backend unavailable")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+backend --> search : results [{title, url, snippet}, ...]
+deactivate backend
+search -> search : format results
+search --> registry : ToolResult(success=True, content=formatted_results)
+registry --> agent : ToolResult
+agent --> router : AgentEvent(Done)
+
+deactivate search
+deactivate registry
+deactivate agent
+deactivate router
+
+
+@enduml

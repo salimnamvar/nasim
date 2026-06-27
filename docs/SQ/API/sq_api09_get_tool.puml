@@ -1,0 +1,57 @@
+@startuml sq_api09_get_tool
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     API-09 — GET Tool
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Read details of a specific registered tool
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — API-09 GET Tool
+
+actor "User" as user
+
+box "Controller Group" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Service Group" #FFF3E0
+  participant "ToolService" as svc
+end box
+box "Repository Group" #E8F5E9
+  participant "ToolRegistry" as registry
+end box
+
+
+
+== API-09 READ Tool ==
+
+user -> router : GET /v1/tools/{name}
+activate router
+
+router -> svc : API-09 READ Tool(name)
+activate svc
+
+svc -> registry : readTool(name)
+activate registry
+
+break Tool not found [404]
+  registry --> svc : NotFound
+  deactivate registry
+  svc --> router : 404 NOT_FOUND
+  router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Tool not found", status: "NOT_FOUND"}}
+end
+
+registry --> svc : ToolMetadata
+deactivate registry
+
+svc --> router : ToolResponseDTO
+deactivate svc
+router --> user : 200 OK {tool: {name, description, safe, parameters}}
+deactivate router
+
+
+
+@enduml

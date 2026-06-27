@@ -1,0 +1,57 @@
+@startuml sq_api10_get_config
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     API-10 — GET Config
+' Boundary:  nasim code agent HTTP API
+' Purpose:   Read current agent configuration
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    Prompt audit 2026-06-21 (cop.md: AIP-193 error path added)
+' ============================================================
+
+title nasim — API-10 GET Config
+
+actor "User" as user
+
+box "Controller Group" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Service Group" #FFF3E0
+  participant "ConfigService" as svc
+end box
+box "Repository Group" #E8F5E9
+  participant "ConfigLoader" as config
+end box
+
+
+
+== API-10 READ Config ==
+
+user -> router : GET /v1/config
+activate router
+
+router -> svc : API-10 READ Config()
+activate svc
+
+svc -> config : readConfig()
+activate config
+
+break Config read failure [500]
+    config --> svc : InternalError
+    deactivate config
+    svc --> router : 500 INTERNAL
+    router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to read config", status: "INTERNAL"}}
+end
+
+config --> svc : ConfigEntity
+deactivate config
+
+svc --> router : ConfigResponseDTO
+deactivate svc
+router --> user : 200 OK {config: {provider: "...", model: "...", safety_mode: "..."}}
+deactivate router
+
+
+
+@enduml

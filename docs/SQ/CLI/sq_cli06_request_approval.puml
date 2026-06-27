@@ -1,66 +1,64 @@
 @startuml sq_cli06_request_approval
+!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-06 — Request Approval
+' Title:     CLI-06 — REQUEST Approval
 ' Boundary:  nasim code agent CLI
 ' Purpose:   Display approval prompt and collect developer decision
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    docs/UC/README.md
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
-title nasim — CLI-06 Request Approval
+title nasim — CLI-06 REQUEST Approval
 
-actor "Developer" as user
+actor "User" as user
 
-box "CLI Layer" #E8F5E9
-  participant "Renderer" as renderer
+box "CLI Interface Container" #E3F2FD
+  participant "REPLSession" as repl
 end box
-box "Agent Layer" #E3F2FD
-  participant "AgentOrchestrator" as agent
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
 end box
-box "Safety Layer" #FFF9C4
+box "Agent Group" #FFF3E0
   participant "SafetyCoordinator" as safety
 end box
 
-note over user, safety
-  Scope:          Display approval prompt for dangerous operations and collect decision
-  Preconditions:  SafetyCoordinator flagged operation requiring approval
-  Excludes:       Permission checks (SAF-01), auto-approve scenarios
-  Contexts:       Called by AGT-02 when tool requires user confirmation
-  Rollback:       Timeout → default deny
-  Design:         Renderer displays prompt; blocks until user responds or timeout
-  Classification: Primary Orchestrator
-end note
 
-== CLI-06 Request Approval ==
+== CLI-06 REQUEST Approval ==
 
-agent -> safety : requires_approval(tool_call)
+user -> repl : await approval prompt
+activate repl
+
+repl -> router : cli06 REQUEST Approval({tool_name}, {args})
+activate router
+
+router -> safety : saf02 REQUEST Approval({tool_name}, {args})
 activate safety
-safety --> agent : true
-deactivate safety
 
-agent -> renderer : request_approval(tool_description, args)
-activate renderer
+safety -> repl : saf02 DISPLAY Approval({tool_name}, {args})
 
-renderer --> user : "Allow {tool}({args})? [y/N]"
-user --> renderer : decision (y/n/timeout)
+hnote over safety #FFF9C4 : **State: AWAITING_APPROVAL**
 
-alt approved
-    renderer --> agent : Approved
-else denied
-    renderer --> agent : Denied
-else timeout
-    renderer --> agent : Denied(timeout)
+repl --> user : "Allow {tool_name}({args})? [y/N]"
+
+user -> repl : y or N
+
+alt user = y
+    repl -> safety : saf02 APPROVE Action({tool_name})
+    safety --> router : approved
+    router --> repl : 200 OK — Approved
+    repl --> user : "Approved — executing {tool_name}"
+else user = N
+    repl -> safety : saf02 REJECT Action({tool_name})
+    safety --> router : rejected
+    router --> repl : 403 PERMISSION_DENIED — Rejected by user
+    repl --> user : "Rejected — {tool_name} will not execute"
 end
 
-deactivate renderer
+deactivate safety
+deactivate router
+deactivate repl
 
-note over user, safety
-  Flow:    AgentOrchestrator → Renderer → display prompt → Developer → decision
-  State:   PENDING → APPROVED | DENIED
-  Failure: Timeout → default deny
-  Success: Developer decision returned to agent
-end note
 
 @enduml
