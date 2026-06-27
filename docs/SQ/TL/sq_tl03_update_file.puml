@@ -1,4 +1,5 @@
 @startuml sq_tl03_update_file
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-03 — UPDATE File
 ' Boundary:  nasim code agent CLI
@@ -23,16 +24,6 @@ box "Tool Group" #E8F5E9
 end box
 participant "Host Filesystem" as fs
 
-note over user, fs
-  Scope:          Find-and-replace in a file
-  Preconditions:  Path, old_string, new_string provided by LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       Read, write
-  Rollback:       Error if old_string not found or ambiguous
-  Design:         Fails if old_string appears 0 or >1 times
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content="Edited: replaced 1 occurrence") or ToolResult(success=False, error=str)
-end note
 
 == TL-03 EDIT File ==
 
@@ -78,11 +69,5 @@ end
     deactivate registry
     deactivate agent
 deactivate router
-note over user, fs
-  Flow:    TL-03: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> EditFileTool -> Host Filesystem -> ToolResult
-  State:   No state change
-  Success: Single replacement written
-  Failure: Not found or ambiguous -> ToolResult(success=False)
-end note
 
 @enduml

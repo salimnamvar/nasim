@@ -1,4 +1,5 @@
 @startuml sq_agt09_spawn_subagent
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-09 — SPAWN Subagent
 ' Boundary:  nasim code agent
@@ -24,17 +25,6 @@ box "Session Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, store
-  Scope:          AGT-09 SPAWN Subagent
-  Preconditions:  AgentOrchestrator initialized, parent session active
-  Contexts:       Called via ref from AGT-02 (DISPATCH Tool Call)
-  Excludes:       Result collection (AGT-10), persona delegation (AGT-11)
-  Rollback:       Spawn failure → report error to parent, no child created
-  Design:         SubagentCoordinator manages child lifecycle; each child gets its own session
-  Classification: Process Decomposition
-  Returns:        Success: child_id for later collection (AGT-10)
-                  Failure: SpawnError — error reported to parent
-end note
 
 == AGT-09 SPAWN Subagent ==
 
@@ -65,11 +55,5 @@ end
 agent --> router : AgentEvent(SubagentSpawned)
 deactivate agent
 
-note over user, store
-  Flow:    AGT-09 → validate parent → create child session → return child_id
-  State:   <back:#ECEFF1>IDLE</back> -> SPAWNING -> READY
-  Success: child_id returned for later collection (AGT-10)
-  Failure: SpawnError — error reported to parent, no child
-end note
 
 @enduml

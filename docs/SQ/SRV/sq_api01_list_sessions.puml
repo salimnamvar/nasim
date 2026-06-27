@@ -1,4 +1,5 @@
 @startuml sq_srv01_list_sessions
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-01 — LIST Sessions
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, store
-  Scope:          List all sessions with pagination
-  Preconditions:  ServerRouter initialized, SessionService available
-  Contexts:       Called by HTTPClient via GET /v1/sessions
-  Excludes:       Session CRUD (API-02..05), Message operations (API-06..07)
-  Rollback:       None (read-only operation)
-  Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard list (AIP-132)
-  Classification: Primary Orchestrator
-  Returns:        200 OK with session list and pagination token, or 500 INTERNAL error
-end note
 
 == API-01 LIST Sessions ==
 
@@ -67,11 +58,5 @@ end
 deactivate svc
 deactivate router
 
-note over user, store
-  Flow:    API-01 → validate → listSessions → respond
-  State:   No state change
-  Success: 200 OK with session list and pagination token
-  Failure: 500 INTERNAL on store read failure
-end note
 
 @enduml

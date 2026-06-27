@@ -1,4 +1,5 @@
 @startuml sq_evl09_inject_turn_budget
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-09 — Inject Turn Budget
 ' Boundary:  nasim code agent CLI
@@ -28,16 +29,6 @@ box "Repository Group" #E8F5E9
   participant "EvaluationRepository" as eval_repo
 end box
 
-note over user, history
-  Scope:          Turn budget injection per-turn
-  Preconditions:  TurnBudget initialized with max_turns, ConversationHistory tracks turn count
-  Contexts:       Called at start of each agentic turn; injects budget status into context for LLM awareness
-  Excludes:       Repetition detection (handled by EVL-08), edit evaluation (handled by EVL-01/02)
-  Rollback:       Budget exceeded -> force task completion
-  Design:         TurnBudgetInjector computes remaining budget; injects formatted status into system message; warns when budget drops below threshold (20%); forces completion at zero budget
-  Classification: Primary Orchestrator
-  Returns:        BudgetStatus(remaining, warning, continue=true) or BudgetExhausted(current_turn, max_turns)
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -73,11 +64,5 @@ deactivate injector
 
 agent --> router : AgentEvent(Done)
 
-note over user, history
-  Flow:    EVL-09 AgentOrchestrator -> TurnBudgetInjector -> TurnBudget + ConversationHistory -> BudgetStatus
-  State:   <back:#ECEFF1>IDLE</back> → COMPUTING → CHECKING → INJECTING → DONE
-  Success: BudgetStatus with remaining turns
-  Failure: Budget exhausted -> BudgetExhausted error
-end note
 
 @enduml

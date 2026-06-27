@@ -1,4 +1,5 @@
 @startuml sq_vcs01_read_git_status
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     VCS-01 — READ Git Status
 ' Boundary:  nasim code agent
@@ -26,18 +27,6 @@ box "External" #F5F5F5
   participant "Git Repository" as git
 end box
 
-note over user, git
-  Scope:          VCS-01 READ GitStatus — git working tree status inspection
-  Preconditions:  Git repository initialized
-  Contexts:       Called by TL-11 (READ Git Status), pre-commit validation
-  Excludes:       Commit operations (VCS-02), diff (VCS-03)
-  Rollback:       No rollback needed (read-only operation)
-  Design:         Cached status with file system watch invalidation
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={staged, modified, untracked})
-    - Failure: Result(success=false, error="not_a_git_repository")
-end note
 
 == VCS-01 READ Git Status ==
 
@@ -64,11 +53,5 @@ deactivate status
 
 agent --> router : AgentEvent(Done)
 
-note over user, git
-  Flow:    VCS-01 -> User -> ServerRouter -> AgentOrchestrator -> GitStatus -> execute git status -> parse -> return summary
-  State:   No state change
-  Success: Result(success=true, data={staged, modified, untracked})
-  Failure: Result(success=false, error="not_a_git_repository") — return error status
-end note
 
 @enduml

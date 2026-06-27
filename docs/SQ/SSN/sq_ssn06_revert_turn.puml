@@ -1,4 +1,5 @@
 @startuml sq_ssn06_revert_turn
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-06 — Revert Turn
 ' Boundary:  nasim code agent CLI
@@ -24,16 +25,6 @@ box "Session Group" #E8F5E9
 end box
 database "Snapshot Store" as snap
 
-note over user, snap
-  Scope:          Restore session to a previous snapshot or specific turn
-  Preconditions:  Snapshot exists (created via SSN-05)
-  Contexts:       Called when user requests undo or revert
-  Excludes:       Snapshot creation (SSN-05), session persistence (SSN-01)
-  Rollback:       Snapshot not found → display error, retain current state
-  Design:         Revert replaces current messages with snapshot copy
-  Classification: Process Decomposition
-  Returns:        Success: Reverted(snapshot_id, turn_count); Failure: RevertError → retain current
-end note
 
 == SSN-06 Revert Turn ==
 
@@ -69,11 +60,5 @@ break Snapshot load error
     agent --> router : AgentEvent(Error)
 end
 
-note over user, snap
-  Flow:    SSN-06 → find snapshot → restore to turn
-  State:   <back:#2E7D32>ACTIVE</back> → REVERTING → <back:#2E7D32>ACTIVE</back>
-  Success: 200 OK — session restored to snapshot point
-  Failure: 404 NOT_FOUND — snapshot not found, retain current
-end note
 
 @enduml

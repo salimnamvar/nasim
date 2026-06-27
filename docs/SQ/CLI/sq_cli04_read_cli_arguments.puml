@@ -1,4 +1,5 @@
 @startuml sq_cli04_read_cli_arguments
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-04 — Read CLI Arguments
 ' Boundary:  nasim code agent CLI
@@ -14,23 +15,13 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ArgParser" as parser
 end box
-box "Service Group" #F3E5F5
+box "Service Group" #FFF3E0
   participant "ConfigLoader" as cfg
 end box
 box "Repository Group" #E8F5E9
   participant "SessionRepository" as session_repo
 end box
 
-note over user, cfg
-  Scope:          CLI argument parsing and config initialization
-  Preconditions:  Developer invokes nasim command
-  Contexts:       Entry point for all CLI invocations
-  Excludes:       Runtime input processing (CLI-01)
-  Rollback:       Invalid args -> print usage -> exit(1)
-  Design:         Args override config; layered resolution
-  Classification: Primary Orchestrator
-  Returns:        Config object ready for REPL or single-shot execution
-end note
 
 == CLI-04 Parse CLI Arguments ==
 
@@ -62,11 +53,5 @@ end
 parser --> user : Config ready, start REPL or single-shot
 
 deactivate parser
-note over user, cfg
-  Flow:    CLI-04 readCliArguments: argv -> ArgParser -> ConfigLoader -> layered merge -> Config
-  State:   No state change
-  Success: Config object ready for component initialization
-  Failure: Invalid args or config -> error + exit
-end note
 
 @enduml

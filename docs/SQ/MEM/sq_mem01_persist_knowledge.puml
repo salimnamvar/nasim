@@ -1,4 +1,5 @@
 @startuml sq_mem01_persist_knowledge
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     MEM-01 — PERSIST Knowledge
 ' Boundary:  nasim code agent
@@ -23,16 +24,6 @@ box "Memory Group" #E8F5E9
   participant "MemoryIndex" as index
 end box
 
-note over user, index
-  Scope:          Store cross-session knowledge entries
-  Preconditions:  MemoryStore initialized, scope valid
-  Contexts:       Called by TL-19 (PERSIST Memory), session checkpoint
-  Excludes:       Search and recall (MEM-02, MEM-03)
-  Rollback:       Transactional write with rollback on index failure
-  Design:         Append-only store with index synchronization
-  Classification: Process Decomposition
-  Returns:        persist_confirmed(key) or PersistError("write failed")
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -63,11 +54,5 @@ deactivate store
 
 agent --> router : AgentEvent(Done)
 
-note over user, index
-  Flow:    MEM-01 AgentOrchestrator -> MemoryStore -> validate scope -> write disk -> index -> confirm
-  State:   No state change
-  Success: Entry persisted and indexed for search
-  Failure: Disk write fails -> rollback, no index update
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_obs06_export_otlp
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-06 — EXPORT OTLP
 ' Boundary:  nasim code agent
@@ -31,17 +32,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user, backend
-  Scope:          OBS-06 EXPORT Otlp — export traces and metrics to OTel-compatible backend
-  Preconditions:  OTel feature flag enabled, backend reachable
-  Contexts:       Called periodically or on shutdown
-  Excludes:       Local log emission (OBS-01), redaction (OBS-04)
-  Rollback:       Export failure logged, data buffered for retry
-  Design:         Behind otel feature flag. Bridges spans + metrics to OTel SDK
-  Returns:
-    - Success: 200 OK — OtlpExportResult(traces, metrics)
-    - Failure: Export failed -> buffer for retry
-end note
 
 == OBS-06 EXPORT Otlp ==
 
@@ -81,11 +71,5 @@ agent --> router : None
 deactivate agent
 deactivate router
 
-note over user, backend
-  Flow:    OBS-06 → User → ServerRouter → AgentOrchestrator → OTelExporter → TraceCorrelator + MetricsCollector → POST to backend
-  State:   No state change
-  Success: 200 OK — traces and metrics exported to OTel backend
-  Failure: Backend unreachable -> buffer and retry
-end note
 
 @enduml

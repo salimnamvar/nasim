@@ -1,4 +1,5 @@
 @startuml sq_agt14_handle_error
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-14 — HANDLE Error
 ' Boundary:  nasim code agent
@@ -27,17 +28,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
-note over user, safety
-  Scope:          AGT-14 HANDLE Error
-  Preconditions:  Error occurred in agent loop (LLM, tool, or session)
-  Contexts:       Called by AGT-01 when LLM or tool call fails
-  Excludes:       Error display (CLI-03), error logging (OBS-01)
-  Rollback:       Unrecoverable error → terminate task with error event
-  Design:         Error classification drives retry, fallback, or abort decisions
-  Classification: Process Decomposition
-  Returns:        Success: RecoveryAction(retry | fallback | abort)
-                  Failure: unrecoverable → abort with error event
-end note
 
 == AGT-14 HANDLE Error ==
 
@@ -71,11 +61,5 @@ deactivate eb
 agent --> router : AgentEvent(Error)
 deactivate agent
 
-note over user, safety
-  Flow:    AGT-14 → classify → determine recovery → return action
-  State:   <back:#FFEBEE>ERROR</back> -> CLASSIFYING -> <back:#FBE9E7>RETRY</back> | FALLBACK | ABORT
-  Success: recovery action returned for agent to execute
-  Failure: unrecoverable -> abort with error event
-end note
 
 @enduml

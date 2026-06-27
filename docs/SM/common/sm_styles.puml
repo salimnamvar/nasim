@@ -1,0 +1,9 @@
+' ============================================================
+' nasim — SM Common Styles
+' Include via: !include common/sm_styles.puml
+' ============================================================
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+}

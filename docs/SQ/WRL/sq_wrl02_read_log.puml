@@ -1,4 +1,5 @@
 @startuml sq_wrl02_read_log
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-02 — READ Log (Sequential Scan for Replay)
 ' Boundary:  nasim code agent CLI
@@ -25,38 +26,6 @@ box "FileSystem Group" #E8F5E9
   participant "FileSystem" as fs
 end box
 
-note over user, fs
-  Scope:
-    - wrl02 READ Log — sequential scan for replay
-
-  Preconditions:
-    - Wire log file exists with events
-    - FileSystem read access available
-
-  Contexts:
-    - Called by WRL-03 (Fork Session) and WRL-04 (Replay Session)
-    - Provides event stream for session reconstruction
-
-  Excludes:
-    - Event writing (handled by WRL-01)
-    - Session forking (handled by WRL-03)
-    - Session replay (handled by WRL-04)
-
-  Rollback:
-    - Read failure → return partial events with error
-
-  Design:
-    - WireLogger reads log file sequentially
-    - EventDeserializer parses each line into Event objects
-    - Supports filtering by session_id and event type
-    - Streaming read for memory efficiency
-
-  Classification: Primary Orchestrator
-
-  Returns:
-    - Success: EventStream with deserialized events
-    - Failure: EventStream with partial results and error
-end note
 
 == wrl02 READ Log ==
 
@@ -87,23 +56,5 @@ deactivate logger
 
 agent --> router : AgentEvent(Done)
 
-note over user, fs
-  Flow:
-    - WRL-02 → WireLogger → FileSystem + EventDeserializer → EventStream
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → READING → DESERIALIZING → FILTERING → DONE
-
-  Success:
-    - 200 OK — EventStream with matching events
-
-  Failure:
-    - 500 INTERNAL — Read failure → partial events + error
-
-  Key invariants:
-    - Sequential read (no random access)
-    - Each line deserialized independently
-    - Filtering is optional (returns all events if no filter)
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_hk06_validate_hook_result
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-06 — VALIDATE Hook Result
 ' Boundary:  nasim code agent
@@ -26,18 +27,6 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
-note over user, hooks
-  Scope:          HK-06 VALIDATE Hook Result
-  Preconditions:  HookResult produced by a hook
-  Contexts:       Called internally by HookManager after each hook execution
-  Excludes:       Hook execution, hook registration
-  Rollback:       Invalid result treated as DENY
-  Design:         Ensures result schema compliance
-  Classification: Process Decomposition
-  Returns:
-    - Success: HookResult(validated) — action in [ALLOW, DENY, MODIFY]
-    - Failure: HookResult(action=DENY) — invalid schema or unknown action
-end note
 
 == HK-06 VALIDATE Hook Result ==
 
@@ -65,11 +54,5 @@ agent --> router : validated result
 deactivate agent
 deactivate router
 
-note over user, hooks
-  Flow:    HK-06 → HookManager → validate HookResult → allow/deny/modify → return validated result
-  State:   No state change
-  Success: HookResult(validated) — action in [ALLOW, DENY, MODIFY]
-  Failure: HookResult(action=DENY) — invalid schema or unknown action
-end note
 
 @enduml

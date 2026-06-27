@@ -1,4 +1,5 @@
 @startuml sq_srv09_read_tool
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-09 — GET Tool
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over user, registry
-  Scope:          Read details of a specific registered tool
-  Preconditions:  ToolRegistry initialized
-  Contexts:       Called by HTTPClient via GET /v1/tools/{name}
-  Excludes:       Tool execution, tool listing
-  Rollback:       404 if tool not found
-  Design:         CSR: Controller(ServerRouter) -> Service(ToolService) -> Repository(ToolRegistry). ROD: standard get (AIP-131)
-  Classification: Primary Orchestrator
-  Returns:        200 OK with tool metadata, or 404 NOT_FOUND error
-end note
 
 == API-09 READ Tool ==
 
@@ -60,11 +51,5 @@ deactivate svc
 router --> user : 200 OK {tool: {name, description, safe, parameters}}
 deactivate router
 
-note over user, registry
-  Flow:    API-09 → readTool → respond
-  State:   No state change
-  Success: 200 OK with tool metadata
-  Failure: 404 tool not found
-end note
 
 @enduml

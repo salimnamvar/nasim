@@ -1,4 +1,5 @@
 @startuml sq_vcs03_read_diff
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     VCS-03 — READ Diff
 ' Boundary:  nasim code agent
@@ -26,18 +27,6 @@ box "External" #F5F5F5
   participant "Git Repository" as git
 end box
 
-note over user, git
-  Scope:          VCS-03 READ Diff — diff inspection for staged/unstaged changes
-  Preconditions:  Git repository with changes
-  Contexts:       Pre-commit review, change inspection
-  Excludes:       Commit operations (VCS-02)
-  Rollback:       No rollback needed (read-only operation)
-  Design:         Unified diff format with context lines
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={files, hunks})
-    - Failure: Result(success=false, error="no_changes")
-end note
 
 == VCS-03 READ Diff ==
 
@@ -64,11 +53,5 @@ deactivate status
 
 agent --> router : AgentEvent(Done)
 
-note over user, git
-  Flow:    VCS-03 -> User -> ServerRouter -> AgentOrchestrator -> GitStatus -> determine scope -> execute git diff -> parse -> return
-  State:   No state change
-  Success: Result(success=true, data={files, hunks})
-  Failure: Result(success=false, error="no_changes") — return empty diff
-end note
 
 @enduml

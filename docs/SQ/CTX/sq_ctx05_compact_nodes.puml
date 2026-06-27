@@ -1,4 +1,5 @@
 @startuml sq_ctx05_compact_nodes
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-05 — Compact Nodes
 ' Boundary:  nasim code agent CLI
@@ -30,16 +31,6 @@ box "Repository Group" #E8F5E9
   participant "ContextStore" as ctx_store
 end box
 
-note over pipe, ctx_store
-  Scope:          Merge overlapping context nodes to reduce token usage
-  Preconditions:  Context graph has overlapping or redundant nodes
-  Contexts:       Called when token budget is tight and nodes overlap
-  Excludes:       Context injection (CTX-04), token tracking (CTX-06)
-  Rollback:       Merge failure → retain original nodes
-  Design:         Identifies overlapping nodes and merges via secondary LLM or heuristics; ContextStore persists compacted context
-  Classification: Process Decomposition
-  Returns:        CompactionResult(nodes_removed, tokens_saved) on success; CompactionResult(nodes_dropped, tokens_saved) on failure
-end note
 
 == CTX-05 Compact Nodes ==
 
@@ -78,11 +69,5 @@ break Secondary LLM merge fails
     comp --> pipe : CompactionResult(nodes_dropped, tokens_saved)
 end
 
-note over pipe, ctx_store
-  Flow:    User → ServerRouter → AgentOrchestrator → PipelineOrchestrator → CompactionProcessor → find overlapping nodes → merge → return; ContextStore stores compacted result
-  State:   <back:#E0F2F1>COMPACTING</back> → READY
-  Success: Nodes compacted, token count reduced
-  Failure: LLM merge fails → drop lowest-ranked nodes
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_ssn08_branch_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-08 — Branch Session
 ' Boundary:  nasim code agent CLI
@@ -24,19 +25,6 @@ box "Session Group" #E8F5E9
 end box
 database "Session Store" as store
 
-note over user, store
-  Scope:          Fork current session into a new branch
-  Preconditions:  Active session with message history
-  Contexts:       Called when user requests to explore alternative path
-  Excludes:       Session revert (SSN-06), session search (SSN-07)
-  Rollback:       Fork failure → display error, retain current session
-  Design:         High-level domain operation. Calls WRL-04 (FORK Session) for
-                  the low-level storage-layer fork (wire log slice + new file).
-                  This UC owns session-level semantics (parent-child link,
-                  branch metadata); WRL-04 owns event-log-level semantics.
-  Classification: Process Decomposition
-  Returns:        Success: BranchCreated(branch_session_id, parent_id); Failure: BranchError → retain current
-end note
 
 == SSN-08 Branch Session ==
 
@@ -72,11 +60,5 @@ break Copy failure
     agent --> router : AgentEvent(Error)
 end
 
-note over user, store
-  Flow:    SSN-08 → copy session → create branch
-  State:   <back:#2E7D32>ACTIVE</back> → BRANCHING → <back:#2E7D32>ACTIVE</back> (parent + child)
-  Success: 200 OK — branch session created, new session_id returned
-  Failure: 500 INTERNAL — copy error, display error, retain current
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_agt03_update_conversation
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-03 — UPDATE Conversation
 ' Boundary:  nasim code agent
@@ -24,17 +25,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
-note over user, history
-  Scope:          AGT-03 UPDATE Conversation
-  Preconditions:  ConversationHistory initialized
-  Contexts:       Called by AGT-01 (PROCESS User Task)
-  Excludes:       Context compaction (CTX-02)
-  Rollback:       N/A
-  Design:         Owns messages + token_count; triggers compaction
-  Classification: Process Decomposition
-  Returns:        Success: messages list
-                  Failure: N/A (internal operation)
-end note
 
 == AGT-03 UPDATE Conversation ==
 
@@ -63,11 +53,5 @@ deactivate history
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, history
-  Flow:    AGT-03 → add message → track tokens → check budget → compact if needed
-  State:   No state change (or COMPACTING if budget exceeded)
-  Success: messages list returned
-  Failure: N/A (internal operation)
-end note
 
 @enduml

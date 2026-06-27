@@ -1,4 +1,5 @@
 @startuml sq_rim05_embed_code
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-05 — EMBED Code
 ' Boundary:  nasim code agent
@@ -30,17 +31,6 @@ box "Storage Group" #E8F5E9
   participant "VectorStore" as vstore
 end box
 
-note over user, vstore
-  Scope:          RIM-05 EMBED Code — generate vector embeddings for code fragments
-  Preconditions:  Embedding provider configured, code fragments identified
-  Contexts:       RIM-01 INDEX Codebase identifies fragments; RIM-06 SEARCH Semantic consumes embeddings
-  Excludes:       Semantic search (RIM-06), AST indexing (RIM-01)
-  Rollback:       Provider failure -> partial embeddings retained, error reported
-  Design:         EmbeddingAdapter batches fragments, calls provider, stores vectors
-  Returns:
-    - Success: EmbeddingResult(count, dimensions)
-    - Failure: Partial embeddings retained on provider failure
-end note
 
 == RIM-05 EMBED Code ==
 
@@ -79,11 +69,5 @@ agent --> router : EmbeddingResult(count, dimensions)
 deactivate agent
 deactivate router
 
-note over user, vstore
-  Flow:    RIM-05 → User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → EmbeddingAdapter → generate embeddings → return vectors
-  State:   No state change
-  Success: EmbeddingResult with fragment count and vector dimensions
-  Failure: Provider failure -> partial embeddings retained
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_rim04_inject_repo_map
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-04 — INJECT RepoMap
 ' Boundary:  nasim code agent CLI
@@ -28,17 +29,6 @@ box "Context Group" #FFF3E0
   participant "ConversationHistory" as history
 end box
 
-note over user, history
-  Scope:          RIM-04 INJECT RepoMap — token-budgeted repo-map injection into context
-  Preconditions:  RIM-01 completed (AST index available), RIM-02 completed (symbols ranked), TokenBudget initialized
-  Contexts:       Called before each LLM call to provide repository context
-  Excludes:       Full file content injection (AGT-02), embedding search results (RIM-06)
-  Rollback:       Budget exceeded -> truncate to fit budget; empty index -> inject empty map with warning
-  Design:         RepoMapInjector selects top-ranked symbols within token budget. Budget split: 60% structure, 25% snippets, 15% reserves
-  Returns:
-    - Success: RepoMapContext(text, token_count)
-    - Failure: Empty context with warning
-end note
 
 == RIM-04 INJECT RepoMap ==
 
@@ -83,11 +73,5 @@ agent --> router : RepoMapContext(text, token_count)
 deactivate agent
 deactivate router
 
-note over user, history
-  Flow:    RIM-04 → User → ServerRouter → AgentOrchestrator → RepoMapInjector → TokenBudget + SymbolRanker + ConversationHistory → RepoMapContext
-  State:   No state change
-  Success: RepoMapContext with formatted text within token budget
-  Failure: Budget exceeded -> truncate to fit; empty index -> empty map + warning
-end note
 
 @enduml

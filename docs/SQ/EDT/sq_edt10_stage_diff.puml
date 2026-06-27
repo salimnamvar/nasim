@@ -1,4 +1,5 @@
 @startuml sq_edt10_stage_diff
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-10 — STAGE Diff
 ' Boundary:  nasim code agent
@@ -26,17 +27,6 @@ box "Sandbox Group" #F3E5F5
   participant "DiffComputer" as diff_comp
 end box
 
-note over user, diff_comp
-  Scope:          EDT-10 STAGE Diff
-  Preconditions:  Edit strategy applied, DiffSandboxManager initialized
-  Contexts:       Called by EDT-01 (SELECT Strategy) when diff_sandbox mode selected
-  Excludes:       Edit execution (EDT-02..09), user review (SAF-02), file system writes
-  Rollback:       Staging failure → discard from sandbox
-  Design:         DiffSandboxManager holds pending edits in isolated staging area via EditStagingArea. DiffComputer computes diffs for review.
-  Classification: Process Decomposition
-  Returns:        Success: StagedDiff(diff_id, diff_text) — diff staged for review
-                  Failure: StagingError — sandbox allocation or diff computation failed
-end note
 
 == EDT-10 STAGE Diff ==
 
@@ -64,15 +54,5 @@ deactivate diff_mgr
 
 agent --> router : AgentEvent(Done)
 
-note over user, diff_comp
-  Flow:    User → ServerRouter → AgentOrchestrator → DiffSandboxManager → EditStagingArea → DiffComputer → return
-  State:   <back:#F1F8E9>STAGING</back>
-  Success: StagedDiff(diff_id, diff_text) — diff staged for review
-  Failure: StagingError — sandbox allocation or diff computation failed
-  Key invariants:
-    - Each staged edit has unique ID
-    - Sandbox is in-memory (no file system side effects)
-    - Edits can be applied atomically or discarded
-end note
 
 @enduml

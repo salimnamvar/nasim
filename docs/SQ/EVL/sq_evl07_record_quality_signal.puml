@@ -1,4 +1,5 @@
 @startuml sq_evl07_record_quality_signal
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-07 — RECORD Quality Signal
 ' Boundary:  nasim code agent
@@ -25,16 +26,6 @@ box "Storage Group" #E8F5E9
   participant "SignalStore" as store
 end box
 
-note over user, store
-  Scope:          Record accept/reject quality signal with feedback for future reference
-  Preconditions:  Evaluation completed, decision made (accept or reject)
-  Contexts:       Called after EVL-01..06 evaluation completes
-  Excludes:       Evaluation logic, retry coordination
-  Rollback:       Storage failure -> signal lost, warning logged
-  Design:         QualitySignal persists accept/reject decision with contextual feedback
-  Classification: Process Decomposition
-  Returns:        SignalRecorded(signal_id)
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -62,11 +53,5 @@ deactivate engine
 
 agent --> router : AgentEvent(Done)
 
-note over user, store
-  Flow:    EVL-07 AgentOrchestrator -> EvaluationEngine -> QualitySignal -> record accept/reject + feedback
-  State:   <back:#ECEFF1>IDLE</back> → RECORDING → PERSISTED → DONE
-  Success: SignalRecorded with signal_id for future reference
-  Failure: Storage failure -> signal lost, warning logged
-end note
 
 @enduml

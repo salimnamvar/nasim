@@ -1,4 +1,5 @@
 @startuml sq_rtg01_select_model
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RTG-01 — SELECT Model
 ' Boundary:  nasim code agent
@@ -19,7 +20,7 @@ end box
 box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Router Group" #E3F2FD
+box "Router Group" #FFF3E0
   participant "ModelRouter" as router
   participant "FallbackChain" as fallback
   participant "ProviderCapabilities" as caps
@@ -34,18 +35,6 @@ box "Repository Group" #E8F5E9
   participant "ModelRepository" as model_repo
 end box
 
-note over user, provider
-  Scope:          RTG-01 SELECT Model — model selection and fallback routing
-  Preconditions:  ModelRouter initialized, Config loaded
-  Contexts:       Called by AGT-01 before PRV-02 REQUEST Chat
-  Excludes:       Model switching (RTG-04), task classification (RTG-03)
-  Rollback:       Fallback to default model on selection failure
-  Design:         Composite strategy: classify task -> select model -> fallback chain
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data=selected_model)
-    - Failure: Result(success=false, error="no_supported_model")
-end note
 
 == RTG-01 SELECT Model ==
 
@@ -86,11 +75,5 @@ deactivate router
 
 agent --> router : AgentEvent(Done)
 
-note over user, provider
-  Flow:    RTG-01 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> classify -> check caps -> fallback chain -> return model
-  State:   <back:#EDE7F6>ROUTING</back>
-  Success: Result(success=true, data=selected_model)
-  Failure: Result(success=false, error="no_supported_model") — fallback to default
-end note
 
 @enduml

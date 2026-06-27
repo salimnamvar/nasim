@@ -1,4 +1,5 @@
 @startuml sq_obs01_stream_log
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-01 — STREAM Structured Log
 ' Boundary:  nasim code agent
@@ -29,17 +30,6 @@ box "External" #F5F5F5
   participant "Stdout" as stdout
 end box
 
-note over user, stdout
-  Scope:          OBS-01 STREAM StructuredLog — emit structured JSON log record to stdout
-  Preconditions:  StructuredLogger configured, LogRedactor available
-  Contexts:       Called on every significant agent event (turn, LLM call, tool exec, error)
-  Excludes:       Wire log append (WRL-01), metrics recording (OBS-02)
-  Rollback:       Write failure -> stderr warning, never raises to caller
-  Design:         StructuredLogger constructs LogRecord with trace context; LogRedactor strips secrets; DualOutputAdapter writes JSON to stdout
-  Returns:
-    - Success: None (fire-and-forget)
-    - Failure: Write failure -> stderr warning, never raises
-end note
 
 == OBS-01 STREAM StructuredLog ==
 
@@ -78,11 +68,5 @@ agent --> router : None
 deactivate agent
 deactivate router
 
-note over user, stdout
-  Flow:    OBS-01 → User → ServerRouter → AgentOrchestrator → StructuredLogger → TraceCorrelator + LogRedactor → DualOutputAdapter → Stdout
-  State:   No state change
-  Success: JSON line written to stdout
-  Failure: Write failure -> stderr warning, never raises
-end note
 
 @enduml

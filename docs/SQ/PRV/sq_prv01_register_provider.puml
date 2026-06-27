@@ -1,4 +1,5 @@
 @startuml sq_prv01_register_provider
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PRV-01 — REGISTER Provider
 ' Boundary:  nasim code agent CLI
@@ -24,17 +25,6 @@ box "Provider Group" #FFF3E0
   participant "Provider" as proto
 end box
 
-note over user, proto
-  Scope:          PRV-01 REGISTER Provider — provider instantiation from configuration
-  Preconditions:  Config loaded with valid provider name
-  Contexts:       Called by main() during startup
-  Excludes:       Provider chat/stream (PRV-02, PRV-03)
-  Rollback:       Unknown provider -> ConfigError
-  Design:         Factory pattern; one class per backend
-  Returns:
-    - Success: Provider instance ready for chat/stream
-    - Failure: ConfigError — unknown provider type
-end note
 
 == PRV-01 REGISTER Provider ==
 
@@ -68,11 +58,5 @@ agent --> router : Provider ready
 deactivate agent
 deactivate router
 
-note over user, proto
-  Flow:    PRV-01 → User → ServerRouter → AgentOrchestrator → ProviderFactory → provider class lookup → instance
-  State:   No state change
-  Success: Provider instance ready for chat/stream
-  Failure: Unknown provider type -> ConfigError
-end note
 
 @enduml

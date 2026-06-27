@@ -1,4 +1,5 @@
 @startuml sq_rim03_rank_results
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-03 — RANK Results
 ' Boundary:  nasim code agent CLI
@@ -27,17 +28,6 @@ box "Chat Group" #FFF3E0
   participant "ConversationHistory" as history
 end box
 
-note over user, history
-  Scope:          RIM-03 RANK Symbols — PageRank ranking with chat-personalization
-  Preconditions:  RIM-01 completed successfully (SymbolGraph populated), ConversationHistory has chat context
-  Contexts:       Called after RIM-01 or when user context shifts. Output feeds into RIM-04
-  Excludes:       Embedding-based ranking (RIM-06), file system traversal (RIM-01)
-  Rollback:       PageRank convergence failure -> fall back to degree-centrality ranking; empty graph -> empty ranking
-  Design:         SymbolRanker runs iterative PageRank on SymbolGraph. Chat personalization boosts symbols mentioned in recent conversation
-  Returns:
-    - Success: RankedSymbolList(symbols, scores)
-    - Failure: Empty list with fallback flag
-end note
 
 == RIM-03 RANK Symbols ==
 
@@ -78,11 +68,5 @@ agent --> router : RankedSymbolList(symbols, scores)
 deactivate agent
 deactivate router
 
-note over user, history
-  Flow:    RIM-03 → User → ServerRouter → AgentOrchestrator → SymbolRanker → SymbolGraph + ConversationHistory → RankedSymbolList
-  State:   No state change
-  Success: RankedSymbolList sorted by importance score
-  Failure: Convergence failure -> fallback to degree centrality; empty graph -> empty ranking
-end note
 
 @enduml

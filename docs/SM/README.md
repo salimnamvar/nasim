@@ -6,13 +6,13 @@
 |-------|-------------|-----------------|-----------|
 | IDLE | Agent waiting for user input | Startup or response complete | #ECEFF1 |
 | LISTENING | Receiving and parsing user input | API-06 DISPATCH Message received | #E8EAF6 |
-| THINKING | LLM processing messages | Input parsed, messages built | #FFF3E0 |
-| TOOL_EXEC | Executing a tool call | LLM returns tool_calls | #F3E5F5 |
-| RESPONDING | Streaming final text to user via API SSE | LLM returns text only | #E8F5E9 |
+| THINKING | LLM processing messages | Input parsed, messages built | #D7CCC8 |
+| TOOL_EXEC | Executing a tool call | LLM returns tool_calls | #B2DFDB |
+| RESPONDING | Streaming final text to user via API SSE | LLM returns text only | #D1C4E9 |
 | ERROR | Error occurred | LLM call or tool exec fails | #FFEBEE |
 | COMPACTING | Summarizing old exchanges | token_count > context_budget | #E0F2F1 |
 | AWAITING_APPROVAL | Waiting for user permission | safety_mode=ask AND unsafe tool | #FFF9C4 |
-| PLANNING | Plan mode, tool calls queued | /plan command entered | #E3F2FD |
+| PLANNING | Plan mode, tool calls queued | /plan command entered | #FFCCBC |
 | HOOK_RUNNING | Pre/post hook executing | tool or LLM call with hooks | #FFFDE7 |
 | ROUTING | Model selection in progress | ModelRouter resolving model | #EDE7F6 |
 | SERVING | API processing request from any interface | API-06 DISPATCH Message | #E0F7FA |
@@ -20,6 +20,7 @@
 | REVIEWING | LLM review of results | success checks passed, optional review | #FFF8E1 |
 | RETRYING | Retrying with feedback | success checks failed or review rejected | #FBE9E7 |
 | STAGING | Diff sandbox staging | tool exec in diff_sandbox mode | #F1F8E9 |
+| AWAITING_DIFF_APPROVAL | Presenting diff to user | SAF-02 REQUEST Approval | #FCE4EC |
 
 > **API-First Entry:** All entry/exit transitions use `API-06` (DISPATCH Message) as the sole entry gate. No interface container may bypass the API.
 
@@ -29,13 +30,12 @@
 |------|----|-------|-----------|
 | STAGING | AWAITING_DIFF_APPROVAL | EDT-10 | Diff computed successfully |
 | STAGING | ERROR | EDT-10 | Diff computation failed (file deleted, conflict, algorithm error) |
-| AWAITING_DIFF_APPROVAL | Presenting diff to user | diff staged, awaiting user approval | #FCE4EC |
 
 ## Session Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
-| CREATED | Session record initialized | API-02 CREATE Session | #E3F2FD |
+| CREATED | Session record initialized | API-02 CREATE Session | #BBDEFB |
 | ACTIVE | Session accepting messages | Session created or restored | #2E7D32 |
 | SAVED | Session persisted to disk | API-04 UPDATE Session | #1565C0 |
 | RESTORED | Session loaded from disk | API-03 GET Session | #1E88E5 |

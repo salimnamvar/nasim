@@ -1,4 +1,5 @@
 @startuml sq_tl13_read_lsp
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-13 — Read LSP
 ' Boundary:  nasim code agent
@@ -13,28 +14,18 @@ title nasim — TL-13 READ LSP
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "LspTool" as tool
 end box
 participant "LSP Server" as lsp
 
-note over user, lsp
-  Scope:          Query LSP server for hover, definition, or references
-  Preconditions:  LSP server running for target language
-  Excludes:       LSP initialization, diagnostics, code actions
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Rollback:       Error string returned to LLM
-  Design:         Stateless query; no session-side cache
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=result) or ToolResult(success=False, error=str)
-end note
 
 == TL-13 Read LSP ==
 
@@ -75,11 +66,5 @@ deactivate tool
 deactivate registry
 deactivate agent
 deactivate router
-note over user, lsp
-  Flow:    TL-13: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> LspTool -> LSP Server -> ToolResult
-  State:   No state change
-  Success: LSP query result returned
-  Failure: LSP unavailable or no results -> ToolResult(success=False)
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_obs02_record_metrics
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-02 — RECORD Metrics
 ' Boundary:  nasim code agent
@@ -33,17 +34,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user, trace
-  Scope:          OBS-02 RECORD Metrics — increment counters, observe histograms
-  Preconditions:  MetricsCollector configured (enabled)
-  Contexts:       Called on every LLM request, tool call, error, session event
-  Excludes:       Structured logging (OBS-01), trace correlation (OBS-03), OTel export (OBS-06)
-  Rollback:       Record failure -> silently ignored (never blocks agent)
-  Design:         MetricsCollector provides counter/gauge/histogram handles. Labels are low-cardinality. Pull-based only — never pushes to Prometheus
-  Returns:
-    - Success: None (fire-and-forget)
-    - Failure: Record failure -> silently ignored
-end note
 
 == OBS-02 RECORD Metrics (LLM Request) ==
 
@@ -87,11 +77,5 @@ agent --> router : None
 deactivate agent
 deactivate router
 
-note over user, trace
-  Flow:    OBS-02 → User → ServerRouter → AgentOrchestrator/ToolRegistry → MetricsCollector → in-memory metrics
-  State:   No state change
-  Success: Metric point recorded in memory
-  Failure: Record failure -> silently ignored (never blocks agent)
-end note
 
 @enduml

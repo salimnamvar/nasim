@@ -1,4 +1,5 @@
 @startuml sq_ssn07_search_sessions
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-07 — Search Sessions
 ' Boundary:  nasim code agent CLI
@@ -24,16 +25,6 @@ box "Session Group" #E8F5E9
 end box
 database "FTS5 Index" as fts
 
-note over user, fts
-  Scope:          Full-text search across all session history
-  Preconditions:  FTS5 index built on session messages
-  Contexts:       Called when user searches past conversations
-  Excludes:       Session read (SSN-02), session persist (SSN-01)
-  Rollback:       Index missing → fallback to linear scan
-  Design:         FTS5 for fast search; results ranked by relevance
-  Classification: Process Decomposition
-  Returns:        Success: SearchResult[session_id, turn_id, snippet, score]; Failure: IndexError → linear scan
-end note
 
 == SSN-07 Search Sessions ==
 
@@ -63,11 +54,5 @@ break Index not available
     agent --> router : AgentEvent(Done)
 end
 
-note over user, fts
-  Flow:    SSN-07 → FTS5 query → rank → return
-  State:   No state change (read-only query)
-  Success: 200 OK — ranked search results returned
-  Failure: 500 INTERNAL — index missing, linear scan fallback
-end note
 
 @enduml

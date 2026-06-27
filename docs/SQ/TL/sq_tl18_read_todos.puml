@@ -1,4 +1,5 @@
 @startuml sq_tl18_read_todos
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-18 — Read Todos
 ' Boundary:  nasim code agent
@@ -11,27 +12,17 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "TodoTool" as tool
 end box
 
-note over user, tool
-  Scope:          List todo items, optionally filtered by status
-  Preconditions:  TodoTool initialized
-  Excludes:       Todo creation, update, deletion
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Rollback:       Error string returned to LLM
-  Design:         Read-only; supports status filter
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, todos=[...])
-end note
 
 == TL-18 Read Todos ==
 
@@ -52,11 +43,5 @@ agent --> router : AgentEvent(Done)
 deactivate registry
 deactivate agent
 deactivate router
-note over user, tool
-  Flow:    TL-18: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
-  State:   No state change
-  Success: List of todo items
-  Failure: N/A (read-only query)
-end note
 
 @enduml

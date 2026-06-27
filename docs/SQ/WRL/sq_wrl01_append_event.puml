@@ -1,4 +1,5 @@
 @startuml sq_wrl01_append_event
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-01 — APPEND Event
 ' Boundary:  nasim code agent
@@ -27,16 +28,6 @@ box "External" #F5F5F5
   participant "Host Filesystem" as fs
 end box
 
-note over user, fs
-  Scope:          Append event to wire log
-  Preconditions:  Wire log file path configured, write access available
-  Contexts:       Called on every significant agent event; prerequisite for WRL-02/03/04
-  Excludes:       Log reading (WRL-02), session forking (WRL-04)
-  Rollback:       Write failure -> event lost, log warning
-  Design:         WireAppender appends serialized events; append-only log; buffered writes with flush on session end
-  Classification: Process Decomposition
-  Returns:        Success: AppendResult(event_id, offset); Failure: AppendError("write failed")
-end note
 
 == WRL-01 APPEND Event ==
 
@@ -70,11 +61,5 @@ deactivate wirelog
 
 agent --> router : AgentEvent(Done)
 
-note over user, fs
-  Flow:    WRL-01 → serialize → add metadata → append to file
-  State:   No state change
-  Success: 200 OK — AppendResult with event_id and offset
-  Failure: 500 INTERNAL — write failure, event lost, warning logged
-end note
 
 @enduml

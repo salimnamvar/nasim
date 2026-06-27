@@ -1,4 +1,5 @@
 @startuml sq_srv03_read_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-03 — GET Session
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, store
-  Scope:          Read a session's current state and messages
-  Preconditions:  Session exists on disk
-  Contexts:       Called by HTTPClient via GET /v1/sessions/{id}
-  Excludes:       Session creation (API-02), message dispatch (API-06)
-  Rollback:       404 if session not found
-  Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard get (AIP-131)
-  Classification: Primary Orchestrator
-  Returns:        200 OK with session data, or 404 NOT_FOUND error
-end note
 
 == API-03 READ Session ==
 
@@ -60,11 +51,5 @@ deactivate svc
 router --> user : 200 OK {session: {id, messages, created_at, updated_at}}
 deactivate router
 
-note over user, store
-  Flow:    API-03 → readSession → respond
-  State:   No state change
-  Success: 200 OK with session data
-  Failure: 404 session not found
-end note
 
 @enduml

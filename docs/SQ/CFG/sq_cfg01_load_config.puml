@@ -1,4 +1,5 @@
 @startuml sq_cfg01_load_config
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CFG-01 — Load Config
 ' Boundary:  nasim code agent CLI
@@ -24,18 +25,6 @@ database "Global YAML" as global_yaml
 database "Project YAML" as project_yaml
 database "Env Vars" as env_vars
 
-note over user, env_vars
-  Scope:          CFG-01 LOAD Config
-  Preconditions:  CLI invoked
-  Contexts:       Called by CLI-04 (Parse CLI Arguments)
-  Excludes:       Runtime config changes
-  Rollback:       Invalid YAML -> ConfigError
-  Design:         4-layer merge: global < project < env < CLI
-  Classification: Process Decomposition
-  Returns:
-    - Success: Config(dataclass) — typed configuration ready
-    - Failure: ConfigError — invalid YAML or missing required fields
-end note
 
 == CFG-01 Load Config ==
 
@@ -64,11 +53,5 @@ agent --> router : Config object
 deactivate agent
 deactivate router
 
-note over user, env_vars
-  Flow:    CFG-01 → read global → read project → read env → merge → validate → Config
-  State:   No state change
-  Success: Config(dataclass) — typed configuration ready
-  Failure: ConfigError — invalid YAML or missing required fields
-end note
 
 @enduml

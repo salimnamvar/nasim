@@ -1,4 +1,5 @@
 @startuml sq_tl20_recall_memory
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-20 — Recall Memory
 ' Boundary:  nasim code agent
@@ -11,28 +12,18 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "MemoryTool" as tool
 end box
 participant "MemoryStore" as mem
 
-note over user, mem
-  Scope:          Recall knowledge from the memory store by query
-  Preconditions:  MemoryTool initialized, memory not empty
-  Excludes:       Memory persist, search, scoping
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call); delegates to MEM-02
-  Rollback:       Error string returned to LLM
-  Design:         Delegates to MEM-02 RECALL Knowledge
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, knowledge=knowledge) or ToolResult(success=False, error=str)
-end note
 
 == TL-20 Recall Memory ==
 
@@ -65,11 +56,5 @@ deactivate tool
 deactivate registry
 deactivate agent
 deactivate router
-note over user, mem
-  Flow:    TL-20: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> MemoryTool -> MemoryStore -> ToolResult
-  State:   No state change
-  Success: Recalled knowledge returned
-  Failure: No matching knowledge -> ToolResult(success=False)
-end note
 
 @enduml

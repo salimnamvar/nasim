@@ -1,4 +1,5 @@
 @startuml sq_saf01_check_permission
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SAF-01 — CHECK Permission
 ' Boundary:  nasim code agent
@@ -31,18 +32,6 @@ box "Repository Group" #E8F5E9
   participant "PolicyRepository" as policy_repo
 end box
 
-note over user, registry
-  Scope:          SAF-01 CHECK Permission — check tool permission before execution
-  Preconditions:  Tool call received from LLM, SafetyCoordinator initialized
-  Contexts:       Called by AGT-15 (DISPATCH Safety Pipeline)
-  Excludes:       User approval prompt (SAF-02), injection/egress checks
-  Rollback:       Rejected -> SafetyViolation returned to caller
-  Design:         SafetyCoordinator delegates to PermissionGate for safe-flag check
-  Classification: Process Decomposition
-  Returns:
-    - Success: SafetyPassed
-    - Failure: SafetyViolation(permission_denied)
-end note
 
 == SAF-01 CHECK Permission ==
 
@@ -81,11 +70,5 @@ deactivate safety
 
 agent --> router : AgentEvent(Done)
 
-note over user, registry
-  Flow:    SAF-01 -> User -> ServerRouter -> AgentOrchestrator -> SafetyCoordinator -> PermissionGate -> ToolRegistry.READ -> check safe flag -> return
-  State:   No state change (delegated by AGT-15)
-  Success: SafetyPassed — proceed to next pipeline stage
-  Failure: SafetyViolation(permission_denied) — propagate back through entry chain
-end note
 
 @enduml

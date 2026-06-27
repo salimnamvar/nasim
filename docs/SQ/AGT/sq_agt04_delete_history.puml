@@ -1,4 +1,5 @@
 @startuml sq_agt04_delete_history
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-04 — DELETE History
 ' Boundary:  nasim code agent
@@ -21,17 +22,6 @@ box "Agent Group" #FFF3E0
   participant "ConversationHistory" as history
 end box
 
-note over user, history
-  Scope:          AGT-04 DELETE History
-  Preconditions:  Agent initialized with system prompt
-  Contexts:       Called by CLI-02 (/reset slash command)
-  Excludes:       Session persistence
-  Rollback:       N/A
-  Design:         Keeps system prompt, clears all other messages
-  Classification: Process Decomposition
-  Returns:        Success: history cleared (system prompt retained)
-                  Failure: N/A (internal operation)
-end note
 
 == AGT-04 DELETE History ==
 
@@ -49,11 +39,5 @@ deactivate history
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, history
-  Flow:    AGT-04 → reset → keep system prompt → clear rest
-  State:   No state change
-  Success: history cleared, system prompt retained
-  Failure: N/A (internal operation)
-end note
 
 @enduml

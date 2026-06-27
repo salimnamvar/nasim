@@ -1,4 +1,5 @@
 @startuml sq_plg03_register_plugin_tools
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-03 — Register Plugin Tools
 ' Boundary:  nasim code agent
@@ -22,16 +23,6 @@ box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over user, registry
-  Scope:          Register plugin-declared tools into ToolRegistry
-  Preconditions:  Valid PluginManifest loaded (PLG-02)
-  Contexts:       Called during plugin enable (PLG-05)
-  Excludes:       Hook registration, plugin activation
-  Rollback:       Registration failure logged; other tools still registered
-  Design:         Namespaced tool names to avoid collisions
-  Classification: Process Decomposition
-  Returns:        all tools registered or CollisionError with tool skipped
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -59,11 +50,5 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
-note over user, registry
-  Flow:    PLG-03 AgentOrchestrator -> PluginLoader -> enumerate plugin tools -> register in ToolRegistry
-  State:   Tools added to registry
-  Success: All plugin tools registered
-  Failure: Name collision -> tool skipped with warning
-end note
 
 @enduml

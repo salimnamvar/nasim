@@ -1,4 +1,5 @@
 @startuml sq_tl10_search_web
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-10 — SEARCH Web
 ' Boundary:  nasim code agent CLI
@@ -11,28 +12,18 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "WebSearchTool" as search
 end box
 participant "Search Backend" as backend
 
-note over user, backend
-  Scope:          Web search with ranked results
-  Preconditions:  Query provided by LLM
-  Excludes:       URL fetching (TL-09)
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Rollback:       Backend error returned as error string
-  Design:         Configurable backend: DuckDuckGo, Brave, SerpAPI
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=formatted_results) or ToolResult(success=False, error=str)
-end note
 
 == TL-10 SEARCH Web ==
 
@@ -66,11 +57,5 @@ deactivate search
 deactivate registry
 deactivate agent
 deactivate router
-note over user, backend
-  Flow:    TL-10: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WebSearchTool -> Search Backend -> ToolResult
-  State:   No state change
-  Success: Ranked search results with titles, URLs, snippets
-  Failure: Backend unavailable -> ToolResult(success=False)
-end note
 
 @enduml

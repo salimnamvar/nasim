@@ -1,4 +1,5 @@
 @startuml sq_edt03_apply_whole_file
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-03 — Apply Whole File
 ' Boundary:  nasim code agent CLI
@@ -25,38 +26,6 @@ box "Tool Group" #E8F5E9
   participant "ToolRegistry" as tool
 end box
 
-note over user, tool
-  Scope:
-    - edt03 VALIDATE Edit — verify edit applied correctly
-
-  Preconditions:
-    - EDT-02 completed (EditResult available)
-    - File exists at target path
-
-  Contexts:
-    - Called after EDT-02 (Apply Edit)
-    - Feeds into EDT-04 (Stage Edit) on success
-
-  Excludes:
-    - Edit execution (handled by EDT-02)
-    - Diff staging (handled by EDT-04)
-    - Semantic correctness (handled by EVL-01/02)
-
-  Rollback:
-    - Validation failure → trigger revert via backup_path
-
-  Design:
-    - EditValidator reads edited file and compares with expected
-    - Syntax check via language-specific linter (if available)
-    - Diff verification ensures intended changes applied
-    - Returns structured validation result
-
-  Classification: Primary Orchestrator
-
-  Returns:
-    - Success: ValidationResult with pass/fail details
-    - Failure: ValidationResult with failure reasons
-end note
 
 == edt03 VALIDATE Edit ==
 
@@ -86,24 +55,5 @@ deactivate validator
 
 agent --> router : AgentEvent(Done)
 
-note over user, tool
-  Flow:
-    - User → ServerRouter → AgentOrchestrator → EditValidator → FileSystem + ToolRegistry → ValidationResult
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → READING → CHECKING → LINTING → DONE
-
-  Success:
-    - ValidationResult with pass=true
-
-  Failure:
-    - Diff mismatch → validation fails
-    - Syntax error → validation fails
-
-  Key invariants:
-    - Edited file always read fresh for validation
-    - Linter run only if language supported
-    - Validation is deterministic for same input
-end note
 
 @enduml

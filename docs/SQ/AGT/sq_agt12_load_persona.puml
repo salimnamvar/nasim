@@ -1,4 +1,5 @@
 @startuml sq_agt12_load_persona
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-12 — LOAD Persona
 ' Boundary:  nasim code agent
@@ -27,17 +28,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
-note over user, reg
-  Scope:          AGT-12 LOAD Persona
-  Preconditions:  PersonaManager initialized, persona name provided
-  Contexts:       Called by AGT-11 or directly by AgentOrchestrator
-  Excludes:       Persona switch (AGT-13), delegation (AGT-11)
-  Rollback:       Config parse error → log error, retain current persona
-  Design:         Persona config includes system prompt, allowed tools, model override
-  Classification: Process Decomposition
-  Returns:        Success: PersonaLoaded(config)
-                  Failure: PersonaLoadError — config parse error
-end note
 
 == AGT-12 LOAD Persona ==
 
@@ -67,11 +57,5 @@ deactivate pm
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, reg
-  Flow:    AGT-12 → load persona config → apply system prompt
-  State:   <back:#ECEFF1>IDLE</back> -> LOADING -> <back:#2E7D32>ACTIVE</back>
-  Success: persona config loaded and applied
-  Failure: config error -> log, retain current persona
-end note
 
 @enduml

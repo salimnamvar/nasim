@@ -1,4 +1,5 @@
 @startuml sq_agt07_queue_plan
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-07 — QUEUE Plan
 ' Boundary:  nasim code agent
@@ -24,17 +25,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
-note over user, plan
-  Scope:          AGT-07 QUEUE Plan
-  Preconditions:  Plan mode active (/plan toggled)
-  Contexts:       Called by AGT-01 (PROCESS User Task) in plan mode
-  Excludes:       Tool execution, permission checks
-  Rollback:       N/A — queued calls are never executed until approved
-  Design:         Tool calls displayed as plan, not executed
-  Classification: Process Decomposition
-  Returns:        Success: formatted plan text with queued calls
-                  Failure: N/A (internal operation)
-end note
 
 == AGT-07 QUEUE Plan ==
 
@@ -56,11 +46,5 @@ deactivate plan
 agent --> router : AgentEvent(PlanDisplay)
 deactivate agent
 
-note over user, plan
-  Flow:    AGT-07 → queue tool call → display as plan
-  State:   <back:#FFF3E0>THINKING</back> -> <back:#E3F2FD>PLANNING</back>
-  Success: tool calls queued and displayed as plan
-  Failure: N/A (internal operation)
-end note
 
 @enduml

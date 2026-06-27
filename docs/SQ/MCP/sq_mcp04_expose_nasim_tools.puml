@@ -1,4 +1,5 @@
 @startuml sq_mcp04_expose_nasim_tools
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-04 — EXPOSE Nasim Tools
 ' Boundary:  nasim code agent
@@ -29,20 +30,6 @@ box "External" #F5F5F5
   participant "MCP Client" as client
 end box
 
-note over user, client
-  Scope:          MCP-04 EXPOSE NasimTools — serving nasim tools via MCP server interface
-  Preconditions:  MCPServerRuntime initialized, tools registered
-  Contexts:       External MCP client connection lifecycle
-  Excludes:       Tool discovery (MCP-02), tool adaptation (MCP-03)
-  Rollback:       Disconnect client on tool execution failure
-  Design:         Request validation and rate limiting
-  Classification: Process Decomposition
-  Returns:
-    - Success: ToolDefinitions(tools[])
-    - Success: ToolResult(result)
-    - Failure: 404 NOT_FOUND — tool not found
-    - Failure: 500 INTERNAL — execution failed
-end note
 
 == MCP-04 EXPOSE NasimTools ==
 
@@ -85,11 +72,5 @@ deactivate server
 server --> agent : ToolResult(success=true, content="ToolResult")
 agent --> router : AgentEvent(Done)
 
-note over user, client
-  Flow:    User → ServerRouter → AgentOrchestrator → MCPServerRuntime → ToolRegistry → MCP Client
-  State:   No state change
-  Success: ToolResult with execution result
-  Failure: 404 NOT_FOUND — tool not found; 500 INTERNAL — execution failed
-end note
 
 @enduml

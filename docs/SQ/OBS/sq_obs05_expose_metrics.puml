@@ -1,4 +1,5 @@
 @startuml sq_obs05_expose_metrics
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-05 — EXPOSE Metrics
 ' Boundary:  nasim code agent
@@ -23,17 +24,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user, metrics
-  Scope:          OBS-05 EXPOSE Metrics — serve metrics for pull scrape
-  Preconditions:  MetricsCollector configured (metrics_enabled), ServerApp running (HTTP mode)
-  Contexts:       HTTP mode: /metrics served by ServerApp. Prometheus pull-scrapes periodically
-  Excludes:       Metrics recording (OBS-02), structured logging (OBS-01), OTel export (OBS-06)
-  Rollback:       Metrics disabled -> 503 response
-  Design:         MetricsCollector exposes prometheus-client generate_latest(). ServerApp adds /metrics route (GET only). No authentication required
-  Returns:
-    - Success: 200 OK — metrics text (Prometheus format)
-    - Failure: 503 SERVICE_UNAVAILABLE — metrics disabled
-end note
 
 == OBS-05 EXPOSE Metrics (HTTP mode) ==
 
@@ -49,11 +39,5 @@ deactivate metrics
 server --> user : 200 OK — Content-Type: text/plain; version=0.0.4
 deactivate server
 
-note over user, metrics
-  Flow:    OBS-05 → ServerApp → MetricsCollector → metrics text
-  State:   No state change
-  Success: 200 OK — Prometheus-compatible metrics text
-  Failure: 503 SERVICE_UNAVAILABLE — metrics disabled
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_sbx04_limit_resources
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-04 — LIMIT Resources
 ' Boundary:  nasim code agent
@@ -24,18 +25,6 @@ box "Sandbox Group" #F3E5F5
   participant "ResourceLimiter" as limiter
 end box
 
-note over user, limiter
-  Scope:          SBX-04 LIMIT Resources — resource quota enforcement via cgroups
-  Preconditions:  Sandbox instance created, limits defined
-  Contexts:       Called by SandboxExecutor during sandbox creation
-  Excludes:       Process monitoring (SBX-03)
-  Rollback:       Remove cgroup on setup failure
-  Design:         Linux cgroup v2 with CPU, memory, disk I/O limits
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={cgroup_id})
-    - Failure: Result(success=false, error="cgroup_setup_failed")
-end note
 
 == SBX-04 LIMIT Resources ==
 
@@ -68,11 +57,5 @@ deactivate executor
 
 agent --> router : AgentEvent(Done)
 
-note over user, limiter
-  Flow:    SBX-04 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> ResourceLimiter -> create cgroup -> set CPU -> set memory -> set I/O -> confirm
-  State:   No state change
-  Success: Result(success=true, data={cgroup_id})
-  Failure: Result(success=false, error="cgroup_setup_failed") — remove partial cgroup, return error
-end note
 
 @enduml

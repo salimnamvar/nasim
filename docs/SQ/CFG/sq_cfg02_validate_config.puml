@@ -1,4 +1,5 @@
 @startuml sq_cfg02_validate_config
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CFG-02 — VALIDATE Config
 ' Boundary:  nasim code agent CLI
@@ -26,18 +27,6 @@ box "Repository Group" #E8F5E9
   participant "ConfigRepository" as cfg_repo
 end box
 
-note over user, cfg
-  Scope:          CFG-02 VALIDATE Config
-  Preconditions:  Config loaded from sources
-  Contexts:       Called by CFG-01 (LOAD Config) after merge
-  Excludes:       Config loading (CFG-01)
-  Rollback:       Validation error -> ConfigError with details
-  Design:         Typed dataclass with __post_init__ validation
-  Classification: Process Decomposition
-  Returns:
-    - Success: Config(valid) — all fields pass schema checks
-    - Failure: ConfigError — invalid field value with details
-end note
 
 == CFG-02 VALIDATE Config ==
 
@@ -62,11 +51,5 @@ agent --> router : Config valid
 deactivate agent
 deactivate router
 
-note over user, cfg
-  Flow:    CFG-02 → field checks → valid or ConfigError
-  State:   No state change
-  Success: Config(valid) — all fields pass schema checks
-  Failure: ConfigError — invalid field value with details
-end note
 
 @enduml

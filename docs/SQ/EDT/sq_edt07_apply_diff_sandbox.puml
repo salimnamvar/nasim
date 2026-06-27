@@ -1,4 +1,5 @@
 @startuml sq_edt07_apply_diff_sandbox
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-07 — APPLY Diff Sandbox
 ' Boundary:  nasim code agent
@@ -30,16 +31,6 @@ box "FileSystem Group" #E8F5E9
   participant "FileSystem" as fs
 end box
 
-note over participants
-  Scope:          Apply diff in sandbox, validate, then commit to real file
-  Preconditions:  Diff generated, sandbox environment available
-  Contexts:       EDT-01 SELECT Strategy chooses this for risky or large diffs
-  Excludes:       Direct file edits, AST-level manipulation
-  Rollback:       Sandbox validation fails → discard sandbox, report error
-  Design:         DiffSandboxCoder delegates to DiffSandboxManager for isolation
-  Classification: Process Decomposition
-  Returns:        EditResult(success, file_path) on success; sandbox discarded on failure
-end note
 
 == EDT-07 APPLY Diff Sandbox ==
 
@@ -101,11 +92,5 @@ deactivate esm
 
 agent --> router : AgentEvent(Done)
 
-note over participants
-  Flow:    EDT-07 → sandbox diff → validate → commit
-  State:   <back:#ECEFF1>IDLE</back> → SANDBOXING → APPLYING → VALIDATING → COMMITTING → DONE
-  Success: EditResult(success=true, file_path) — diff applied via sandbox
-  Failure: EditResult(success=false, error) — sandbox validation failed
-end note
 
 @enduml

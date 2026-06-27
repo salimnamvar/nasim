@@ -1,4 +1,5 @@
 @startuml sq_wrl04_fork_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-04 — Fork Session
 ' Boundary:  nasim code agent CLI
@@ -28,42 +29,6 @@ box "Repository Group" #E8F5E9
   participant "WireLogStore" as wrl
 end box
 
-note over user, wrl
-  Scope:
-    - WRL-04 FORK Session — low-level storage-layer fork of wire log
-
-  Preconditions:
-    - Wire log has events for source session
-    - SessionManager available for new session creation
-
-  Contexts:
-    - Called by SSN-08 (BRANCH Session) only — the domain-level fork operation
-    - Uses WRL-02 (Read Log) to get events up to fork point
-
-  Excludes:
-    - Log reading (handled by WRL-02)
-    - Session replay (handled by WRL-04)
-    - Event writing (handled by WRL-01)
-    - Session-level semantics (parent-child link, branch metadata) — handled by SSN-08
-
-  Rollback:
-    - Fork failure → no new session created
-
-  Design:
-    - Storage-layer operation only: reads events up to fork_point, writes new JSONL file
-    - SessionForker reads events up to fork_point from wire log
-    - Creates new session with copied event history
-    - New session gets unique session_id
-    - Fork point marked in wire log for traceability
-    - Does NOT create parent-child link or branch metadata — SSN-08 owns that
-    - WireLog serves as repository layer for wire log persistence
-
-  Classification: Primary Orchestrator
-
-  Returns:
-    - Success: ForkResult with new_session_id and fork_point
-    - Failure: ForkError with details
-end note
 
 == wrl03 FORK Session ==
 
@@ -97,23 +62,5 @@ deactivate forker
 
 agent --> router : AgentEvent(Done)
 
-note over user, wrl
-  Flow:
-    - WRL-04 → read events → create session → copy events → append fork event; WireLog persists fork events
-
-  State:
-    - <back:#ECEFF1>IDLE</back> → READING → CREATING → COPYING → DONE
-
-  Success:
-    - 200 OK — ForkResult with new session ID
-
-  Failure:
-    - 500 INTERNAL — Fork failure → no session created
-
-  Key invariants:
-    - Fork point always recorded in wire log
-    - New session gets unique ID
-    - Events copied atomically (all or none)
-end note
 
 @enduml

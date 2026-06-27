@@ -1,4 +1,5 @@
 @startuml sq_sbx01_isolate_command
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-01 — ISOLATE Command
 ' Boundary:  nasim code agent
@@ -27,19 +28,6 @@ box "External" #F5F5F5
   participant "Sandbox Runtime" as runtime
 end box
 
-note over user, runtime
-  Scope:          SBX-01 ISOLATE Command — sandboxed command execution
-  Preconditions:  SandboxExecutor initialized, policy loaded
-  Contexts:       Called by TL-05 (DISPATCH Shell Command)
-  Excludes:       Policy management (SBX-02), monitoring (SBX-03)
-  Rollback:       Kill sandbox process on timeout or violation
-  Design:         Process isolation with namespace and cgroup
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={output, exit_code})
-    - Failure: Result(success=false, error="timeout")
-    - Failure: Result(success=false, error="policy_violation")
-end note
 
 == SBX-01 ISOLATE Command ==
 
@@ -72,11 +60,5 @@ deactivate executor
 
 agent --> router : AgentEvent(Done)
 
-note over user, runtime
-  Flow:    SBX-01 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> apply policy -> create sandbox -> execute -> return
-  State:   <back:#F1F8E9>STAGING</back>
-  Success: Result(success=true, data={output, exit_code})
-  Failure: Result(success=false, error="timeout") — kill sandbox, return violation error
-end note
 
 @enduml

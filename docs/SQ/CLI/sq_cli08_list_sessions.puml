@@ -1,4 +1,5 @@
 @startuml sq_cli08_list_sessions
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-08 — List Sessions
 ' Boundary:  nasim code agent CLI
@@ -24,16 +25,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as ssn
 end box
 
-note over user, ssn
-  Scope:          List available sessions via /sessions slash command
-  Preconditions:  ServerRouter active, SessionStore initialized
-  Contexts:       Invoked by Developer via /sessions command
-  Excludes:       Session read (SSN-02), session persist (SSN-01)
-  Rollback:       Read error → display error message
-  Design:         Delegates to SSN-03 LIST Sessions for actual retrieval
-  Classification: Primary Orchestrator
-  Returns:        Session list formatted and displayed
-end note
 
 == CLI-08 List Sessions ==
 
@@ -42,18 +33,9 @@ activate router
 router -> cmd : dispatch("/sessions")
 activate cmd
 
-cmd -> ssn_svc : CLI-08 LIST Sessions(pageSize=20, pageToken="abc")
-activate ssn_svc
-
-ssn_svc -> ssn : listSessions(limit=20, cursor="abc")
-activate ssn
-
-ssn -> ssn : scan session directory
-ssn --> ssn_svc : sessionList [id, created_at, summary], next_page_token
-deactivate ssn
-
-ssn_svc --> cmd : ListSessionsResponse {sessions: [...], nextPageToken}
-deactivate ssn_svc
+ref over cmd, ssn
+  SSN-03: LIST Sessions
+end ref
 
 cmd -> cmd : format session table
 
@@ -63,18 +45,5 @@ deactivate cmd
 router --> user : displayed session list
 deactivate router
 
-break Session directory unreadable [500]
-    ssn --> ssn_svc : IOError
-    ssn_svc --> cmd : 500 INTERNAL
-    cmd --> router : CommandError
-    router --> user : "Failed to list sessions"
-end
-
-note over user, ssn
-  Flow:    CLI-08 listSessions: User → ServerRouter → SlashCommandHandler → SSN-03 LIST Sessions → display
-  State:   <back:#ECEFF1>IDLE</back> → LISTING → <back:#ECEFF1>IDLE</back>
-  Success: Session list formatted and displayed
-  Failure: Directory error → display error
-end note
 
 @enduml

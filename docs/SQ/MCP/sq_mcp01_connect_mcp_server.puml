@@ -1,4 +1,5 @@
 @startuml sq_mcp01_connect_mcp_server
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-01 — CONNECT MCP Server
 ' Boundary:  nasim code agent
@@ -26,19 +27,6 @@ box "External" #F5F5F5
   participant "MCP Server" as server
 end box
 
-note over user, server
-  Scope:          MCP-01 CONNECT McpServer — connection establishment to external MCP server
-  Preconditions:  MCP server endpoint configured in config
-  Contexts:       Called by TL-12 (DISPATCH MCP Extension) or agent initialization
-  Excludes:       Tool discovery (MCP-02), tool adaptation (MCP-03)
-  Rollback:       Close socket on failure, map to AIP-193 error
-  Design:         Connection pooling and heartbeat monitoring
-  Classification: Process Decomposition
-  Returns:
-    - Success: ConnectionActive(handle, capabilities)
-    - Failure: 503 UNAVAILABLE — MCP Server unreachable
-    - Failure: 504 TIMEOUT — handshake timeout
-end note
 
 == MCP-01 CONNECT McpServer ==
 
@@ -71,11 +59,5 @@ deactivate mcp
 
 agent --> router : AgentEvent(Done)
 
-note over user, server
-  Flow:    User → ServerRouter → AgentOrchestrator → MCPClientRuntime → MCP Server → handshake → store state
-  State:   No state change
-  Success: ConnectionActive with server capabilities
-  Failure: 503 UNAVAILABLE — MCP Server unreachable
-end note
 
 @enduml

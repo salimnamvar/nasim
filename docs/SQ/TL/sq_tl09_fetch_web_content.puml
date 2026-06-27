@@ -1,4 +1,5 @@
 @startuml sq_tl09_fetch_web_content
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-09 — FETCH Web Content
 ' Boundary:  nasim code agent CLI
@@ -11,28 +12,18 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "WebFetchTool" as fetch
 end box
 participant "Web" as web
 
-note over user, web
-  Scope:          Fetch URL content as markdown text
-  Preconditions:  URL provided by LLM
-  Excludes:       Web search (TL-10)
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Rollback:       HTTP error returned as error string
-  Design:         Uses httpx + html2text for conversion
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=markdown) or ToolResult(success=False, error=str)
-end note
 
 == TL-09 FETCH Web Content ==
 
@@ -74,11 +65,5 @@ deactivate fetch
 deactivate registry
 deactivate agent
 deactivate router
-note over user, web
-  Flow:    TL-09: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WebFetchTool -> Web -> ToolResult
-  State:   No state change
-  Success: Page content as markdown text
-  Failure: HTTP error, timeout -> ToolResult(success=False)
-end note
 
 @enduml

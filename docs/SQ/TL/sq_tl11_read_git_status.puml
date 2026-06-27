@@ -1,4 +1,5 @@
 @startuml sq_tl11_read_git_status
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-11 — Read Git Status
 ' Boundary:  nasim code agent CLI
@@ -11,28 +12,18 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "GitTool" as git
 end box
 participant "Host Shell" as shell
 
-note over user, shell
-  Scope:          Git status, diff, and commit operations
-  Preconditions:  Git repo in working directory
-  Excludes:       Branch operations, merge, push
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Rollback:       Git error returned as error string
-  Design:         Delegates to git CLI via subprocess
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=git_output) or ToolResult(success=False, error=str)
-end note
 
 == TL-11 READ Git Status ==
 
@@ -88,11 +79,5 @@ agent --> router : AgentEvent(Done)
 deactivate registry
 deactivate agent
 deactivate router
-note over user, shell
-  Flow:    TL-11: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GitTool -> Host Shell -> ToolResult
-  State:   No state change
-  Success: Git operation output
-  Failure: Not a repo, nothing to commit -> ToolResult(success=False)
-end note
 
 @enduml

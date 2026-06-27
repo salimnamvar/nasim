@@ -1,4 +1,5 @@
 @startuml sq_rtg03_classify_task
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RTG-03 — Classify Task
 ' Boundary:  nasim code agent
@@ -13,31 +14,19 @@ title nasim — RTG-03 Classify Task
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Router Group" #EDE7F6
+box "Router Group" #FFF3E0
   participant "ModelRouter" as router
 end box
 box "Repository Group" #E8F5E9
   participant "ModelRepository" as model_repo
 end box
 
-note over user, router
-  Scope:          RTG-03 CLASSIFY Task — classify task type and select optimal model
-  Preconditions:  ModelRouter initialized with model catalog
-  Contexts:       Called by AGT-01 or RTG-01
-  Excludes:       Model switching, fallback application
-  Rollback:       Default model used on classification failure
-  Design:         Heuristic or LLM-based classification
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={selected_model, task_type})
-    - Failure: Result(success=false, error="classification_failed")
-end note
 
 == RTG-03 Classify Task ==
 
@@ -73,11 +62,5 @@ agent --> router : AgentEvent(Done)
 
 deactivate agent
 deactivate router
-note over user, router
-  Flow:    RTG-03 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> classify task type -> select optimal model
-  State:   No state change
-  Success: Result(success=true, data={selected_model, task_type})
-  Failure: Result(success=false, error="classification_failed") — default model returned
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_edt06_apply_function_level
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-06 — APPLY Function-Level
 ' Boundary:  nasim code agent
@@ -30,16 +31,6 @@ box "FileSystem Group" #E8F5E9
   participant "FileSystem" as fs
 end box
 
-note over participants
-  Scope:          Function-level edit via AST parse and targeted replace
-  Preconditions:  File identified, function boundary determinable
-  Contexts:       EDT-01 SELECT Strategy selects this for function-scoped diffs
-  Excludes:       Multi-file edits, whole-file rewrites
-  Rollback:       AST parse failure → fallback to EDT-02 or EDT-03
-  Design:         FunctionLevelCoder locates function node, replaces body, validates AST integrity
-  Classification: Process Decomposition
-  Returns:        EditResult(success, file_path, function_name) on success; fallback to EDT-02/EDT-03 on failure
-end note
 
 == EDT-06 APPLY Function-Level ==
 
@@ -80,11 +71,5 @@ deactivate esm
 
 agent --> router : AgentEvent(Done)
 
-note over participants
-  Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → FunctionLevelCoder → AST parse → replace function → validate
-  State:   <back:#ECEFF1>IDLE</back> → PARSING → REPLACING → VALIDATING → DONE
-  Success: EditResult with modified file and function scope
-  Failure: AST parse error → fallback to EDT-02/EDT-03; function not found → error
-end note
 
 @enduml

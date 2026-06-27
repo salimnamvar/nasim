@@ -1,4 +1,5 @@
 @startuml sq_rim02_build_symbol_graph
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-02 — BUILD Symbol Graph
 ' Boundary:  nasim code agent
@@ -24,17 +25,6 @@ box "Repo Intelligence Group" #E8F5E9
   participant "SymbolGraph" as graph
 end box
 
-note over user, graph
-  Scope:          RIM-02 BUILD SymbolGraph — build cross-file symbol reference graph
-  Preconditions:  AST index available from RIM-01
-  Contexts:       Called after RIM-01 INDEX Codebase
-  Excludes:       AST parsing (RIM-01), search (RIM-06)
-  Rollback:       Partial graph on parse errors
-  Design:         Builds directed graph of symbols and their references
-  Returns:
-    - Success: SymbolGraph(symbols, edges)
-    - Failure: Partial graph with unresolved refs
-end note
 
 == RIM-02 BUILD SymbolGraph ==
 
@@ -67,11 +57,5 @@ agent --> router : SymbolGraph(symbols, edges)
 deactivate agent
 deactivate router
 
-note over user, graph
-  Flow:    RIM-02 → User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → SymbolGraph → extract symbols → resolve refs → build graph
-  State:   No state change
-  Success: Complete symbol reference graph
-  Failure: Partial graph on unresolved references
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_edt09_apply_inline_patch
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-09 — APPLY Inline Patch
 ' Boundary:  nasim code agent
@@ -27,16 +28,6 @@ box "FileSystem Group" #E8F5E9
   participant "FileSystem" as fs
 end box
 
-note over participants
-  Scope:          Inline patch application with line-level precision
-  Preconditions:  Patch generated with line offsets, target file readable
-  Contexts:       EDT-01 SELECT Strategy selects this for precise line-targeted edits
-  Excludes:       Whole-file rewrites, sandbox isolation, AST manipulation
-  Rollback:       Patch context mismatch → reject patch, report conflict
-  Design:         InlinePatchCoder parses patch format, validates context lines, applies at offset
-  Classification: Process Decomposition
-  Returns:        EditResult(success, file_path, lines_changed) on success; patch rejected on failure
-end note
 
 == EDT-09 APPLY Inline Patch ==
 
@@ -79,11 +70,5 @@ deactivate esm
 
 agent --> router : AgentEvent(Done)
 
-note over participants
-  Flow:    EDT-09 → parse patch → apply → validate
-  State:   <back:#ECEFF1>IDLE</back> → PARSING → VALIDATING → APPLYING → DONE
-  Success: EditResult(success=true, file_path, lines_changed) — patch applied
-  Failure: EditResult(success=false, error) — context mismatch, patch rejected
-end note
 
 @enduml

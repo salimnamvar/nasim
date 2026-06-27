@@ -1,4 +1,5 @@
 @startuml sq_srv10_read_config
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-10 — GET Config
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "ConfigLoader" as config
 end box
 
-note over user, config
-  Scope:          Read current agent configuration
-  Preconditions:  ConfigLoader initialized
-  Contexts:       Called by HTTPClient via GET /v1/config
-  Excludes:       Config update, config validation
-  Rollback:       500 if config read fails
-  Design:         CSR: Controller(ServerRouter) -> Service(ConfigService) -> Repository(ConfigLoader). ROD: standard get (AIP-131). Returns sanitized config (no secrets).
-  Classification: Primary Orchestrator
-  Returns:        200 OK with sanitized config, or 500 INTERNAL error
-end note
 
 == API-10 READ Config ==
 
@@ -60,11 +51,5 @@ deactivate svc
 router --> user : 200 OK {config: {provider: "...", model: "...", safety_mode: "..."}}
 deactivate router
 
-note over user, config
-  Flow:    API-10 → readConfig → respond
-  State:   No state change
-  Success: 200 OK with sanitized config
-  Failure: 500 INTERNAL on config read failure
-end note
 
 @enduml

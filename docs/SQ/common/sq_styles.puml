@@ -1,0 +1,93 @@
+' ============================================================
+' nasim — SQ Common Styles
+' Include via: !include common/sq_styles.puml
+'
+' Provides consistent skinparam and CSR colour palette for
+' all Sequence diagrams in the nasim project.
+' ============================================================
+
+' ------------------------------------------------------------
+' CSR Layer Box Colours (Sequence Diagram participants)
+'   Controller    #E3F2FD  — blue   (CLI, API groups)
+'   Service       #FFF3E0  — orange (Agent, Router, Safety, Context,
+'                                    Edit Strategy, Evaluation, Provider)
+'   Repository    #E8F5E9  — green  (Session, Tool, Memory, Config, Git,
+'                                    Repo Intelligence)
+'   Infrastructure #F3E5F5 — purple (MCP, Sandbox, Observability,
+'                                    Wire Log, Hooks, Plugins)
+' ------------------------------------------------------------
+
+!define CONTROLLER_COLOR #E3F2FD
+!define SERVICE_COLOR #FFF3E0
+!define REPOSITORY_COLOR #E8F5E9
+!define INFRASTRUCTURE_COLOR #F3E5F5
+
+' ------------------------------------------------------------
+' Skinparam — base settings
+' ------------------------------------------------------------
+
+skinparam defaultFontSize 12
+skinparam defaultFontName Courier
+skinparam dpi 200
+skinparam handwritten false
+
+skinparam sequence {
+  ArrowColor #424242
+  ArrowFontSize 10
+  ArrowMessageAlignment center
+
+  ActorBorderColor #1565C0
+  ActorBackgroundColor #E3F2FD
+  ActorFontColor #0D47A1
+  ActorFontSize 12
+  ActorFontStyle bold
+
+  LifeLineBorderColor #424242
+  LifeLineBackgroundColor #FAFAFA
+
+  ParticipantBorderColor #90A4AE
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #212121
+  ParticipantFontSize 11
+
+  BoxBorderColor #546E7A
+  BoxFontColor #212121
+  BoxFontSize 11
+  BoxFontStyle bold
+
+  ActivationBorderColor #78909C
+  ActivationBackgroundColor #ECEFF1
+
+  GroupBorderColor #90A4AE
+  GroupHeaderBackgroundColor #ECEFF1
+  GroupHeaderFontColor #212121
+  GroupHeaderFontSize 11
+
+  NoteBorderColor #90A4AE
+  NoteBackgroundColor #FFFDE7
+  NoteFontColor #212121
+  NoteFontSize 10
+
+  ReferenceBackgroundColor #F5F5F5
+  ReferenceBorderColor #9E9E9E
+  ReferenceFontColor #212121
+  ReferenceFontSize 11
+
+  DividerBackgroundColor #ECEFF1
+  DividerFontColor #37474F
+  DividerFontSize 12
+  DividerFontStyle bold
+}
+
+skinparam shadowing false
+
+' ------------------------------------------------------------
+' Spacing
+' ------------------------------------------------------------
+
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+skinparam SequenceMessagePadding 5
+skinparam SequenceGroupBodyPadding 10
+skinparam SequenceLifeLineBorderThickness 1
+skinparam SequenceReferenceBorderThickness 1

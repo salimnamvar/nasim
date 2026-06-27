@@ -1,4 +1,5 @@
 @startuml sq_hk05_dispatch_post_llm_hook
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-05 — DISPATCH Post-LLM Hook
 ' Boundary:  nasim code agent
@@ -27,18 +28,6 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
-note over user, hook
-  Scope:          HK-05 DISPATCH Post-LLM Hook
-  Preconditions:  LLM call completed, hooks registered for PostLLMCall event
-  Contexts:       Called by AGT-01 (PROCESS User Task) after PRV-02
-  Excludes:       Pre-LLM hooks (HK-04), tool hooks (HK-02/03)
-  Rollback:       Hook failure logged; pipeline continues
-  Design:         Priority-ordered execution; short-circuit on deny
-  Classification: Process Decomposition
-  Returns:
-    - Success: HookResult(action=ALLOW, modified_data?) — pipeline continues
-    - Failure: HookResult(action=DENY, reason) — LLM result blocked
-end note
 
 == HK-05 DISPATCH Post-LLM Hook ==
 
@@ -68,11 +57,5 @@ agent --> router : HookResult(action=ALLOW)
 deactivate agent
 deactivate router
 
-note over user, hook
-  Flow:    HK-05 → HookManager → find hooks → execute in priority order → return HookResult
-  State:   No state change
-  Success: HookResult(action=ALLOW) — pipeline continues
-  Failure: HookResult(action=DENY) — LLM result blocked
-end note
 
 @enduml

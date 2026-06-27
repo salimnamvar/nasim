@@ -1,4 +1,5 @@
 @startuml sq_obs04_redact_sensitive
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-04 — REDACT Sensitive Data
 ' Boundary:  nasim code agent
@@ -31,18 +32,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user, config
-  Scope:          OBS-04 REDACT SensitiveData — strip secrets before any emission
-  Preconditions:  LogRedactor initialized with redaction rules, Config loaded
-  Contexts:       Called before every emission to structured logs (OBS-01) and wire events (WRL-01)
-  Excludes:       Log emission (OBS-01), wire append (WRL-01)
-  Rollback:       Rule load failure -> use default rules only
-  Design:         LogRedactor applies regex patterns to record fields. Always on — cannot be disabled
-  Returns:
-    - Success: SanitizedRecord(redacted=true)
-    - Success: SanitizedPayload(redacted=true)
-    - Failure: Rule load failure -> default rules only
-end note
 
 == OBS-04 REDACT SensitiveData (structured log) ==
 
@@ -95,11 +84,5 @@ agent --> router : None
 deactivate agent
 deactivate router
 
-note over user, config
-  Flow:    OBS-04 → User → ServerRouter → AgentOrchestrator → StructuredLogger/WireAppender → LogRedactor → Config (rules) → sanitized record/payload
-  State:   No state change
-  Success: SanitizedRecord with redacted=true flag
-  Failure: Rule load failure -> default rules only
-end note
 
 @enduml

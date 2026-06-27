@@ -1,4 +1,5 @@
 @startuml sq_ctx02_truncate_nodes
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-02 — TRUNCATE Nodes
 ' Boundary:  nasim code agent
@@ -23,16 +24,6 @@ box "Provider Group" #FFF3E0
   participant "Provider" as provider
 end box
 
-note over history, provider
-  Scope:          Truncate context when token budget exceeded
-  Preconditions:  token_count > context_budget
-  Contexts:       Called by CTX-01 when budget exceeded
-  Excludes:       Token tracking (CTX-01)
-  Rollback:       Secondary LLM fails -> truncate oldest messages
-  Design:         Summarize oldest N exchanges via secondary LLM call
-  Classification: Process Decomposition
-  Returns:        shortened messages on success; truncated messages on failure
-end note
 
 == CTX-02 TRUNCATE Nodes ==
 
@@ -68,11 +59,5 @@ agent --> router : AgentEvent(Done)
 
 deactivate agent
 deactivate router
-note over history, provider
-  Flow:    User → ServerRouter → AgentOrchestrator → budget exceeded → select old → summarize → replace
-  State:   <back:#E0F2F1>COMPACTING</back> -> <back:#FFF3E0>THINKING</back>
-  Success: Messages shortened, token count reduced
-  Failure: LLM fails -> truncate fallback
-end note
 
 @enduml

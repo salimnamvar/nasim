@@ -1,4 +1,5 @@
 @startuml sq_srv04_update_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-04 — UPDATE Session
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, store
-  Scope:          Update session metadata or settings
-  Preconditions:  Session exists on disk
-  Contexts:       Called by HTTPClient via PATCH /v1/sessions/{id}
-  Excludes:       Message dispatch (API-06), session deletion
-  Rollback:       404 if not found, 400 if invalid body
-  Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard update (AIP-134)
-  Classification: Primary Orchestrator
-  Returns:        200 OK with updated session metadata, or 400/404 error
-end note
 
 == API-04 UPDATE Session ==
 
@@ -72,11 +63,5 @@ deactivate svc
 router --> user : 200 OK {session: {id, updated_at}}
 deactivate router
 
-note over user, store
-  Flow:    API-04 → validate → read → applyMask → save → respond
-  State:   No state change
-  Success: 200 OK with updated session metadata
-  Failure: 404 not found, 400 invalid body
-end note
 
 @enduml

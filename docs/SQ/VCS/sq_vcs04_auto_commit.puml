@@ -1,4 +1,5 @@
 @startuml sq_vcs04_auto_commit
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     VCS-04 — AUTO-COMMIT
 ' Boundary:  nasim code agent
@@ -28,18 +29,6 @@ box "Repository Group" #E8F5E9
   participant "GitRepository" as git_repo
 end box
 
-note over user, commit
-  Scope:          VCS-04 AUTO-COMMIT — automatic commit after file edits
-  Preconditions:  File edits completed, working tree dirty
-  Contexts:       Post-edit hook, batch operation cleanup
-  Excludes:       Manual commit (VCS-02)
-  Rollback:       Skip commit if no changes detected
-  Design:         Debounced auto-commit with conventional message generation
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={hash})
-    - Failure: Result(success=false, error="no_changes") — noop
-end note
 
 == VCS-04 AUTO-COMMIT ==
 
@@ -69,11 +58,5 @@ deactivate integration
 
 agent --> router : AgentEvent(Done)
 
-note over user, commit
-  Flow:    VCS-04 -> User -> ServerRouter -> AgentOrchestrator -> GitIntegration -> check dirty -> generate message -> commit -> return
-  State:   No state change
-  Success: Result(success=true, data={hash})
-  Failure: Result(success=false, error="no_changes") — skip commit, return noop
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_sbx03_monitor_process
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-03 — MONITOR Process
 ' Boundary:  nasim code agent
@@ -24,19 +25,6 @@ box "Sandbox Group" #F3E5F5
   participant "SandboxMonitor" as monitor
 end box
 
-note over user, monitor
-  Scope:          SBX-03 MONITOR Process — process monitoring within sandbox
-  Preconditions:  Sandbox process running (SBX-01)
-  Contexts:       Long-running commands, background processes
-  Excludes:       Resource limiting (SBX-04)
-  Rollback:       Kill process on timeout, enforce resource limits
-  Design:         Watchdog thread with configurable intervals
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={stats})
-    - Failure: Result(success=false, error="timeout_exceeded")
-    - Failure: Result(success=false, error="resource_limit_exceeded")
-end note
 
 == SBX-03 MONITOR Process ==
 
@@ -77,11 +65,5 @@ end
 deactivate monitor
 deactivate executor
 
-note over user, monitor
-  Flow:    SBX-03 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> SandboxMonitor -> poll -> enforce limits -> complete
-  State:   No state change
-  Success: Result(success=true, data={stats})
-  Failure: Result(success=false, error="timeout_exceeded") or Result(success=false, error="resource_limit_exceeded") — kill/enforce
-end note
 
 @enduml

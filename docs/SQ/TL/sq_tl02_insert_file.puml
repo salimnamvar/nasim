@@ -1,4 +1,5 @@
 @startuml sq_tl02_insert_file
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-02 — INSERT File
 ' Boundary:  nasim code agent CLI
@@ -23,16 +24,6 @@ box "Tool Group" #E8F5E9
 end box
 participant "Host Filesystem" as fs
 
-note over user, fs
-  Scope:          Write content to a file
-  Preconditions:  Path and content provided by LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       Read, edit
-  Rollback:       Error string returned to LLM
-  Design:         Creates parent directories automatically
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content="Wrote N bytes") or ToolResult(success=False, error=str)
-end note
 
 == TL-02 WRITE File ==
 
@@ -67,11 +58,5 @@ deactivate ft
 deactivate registry
 deactivate agent
 deactivate router
-note over user, fs
-  Flow:    TL-02: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> WriteFileTool -> Host Filesystem -> ToolResult
-  State:   No state change
-  Success: ToolResult(success=True, "Wrote N bytes")
-  Failure: Permissions, disk space -> ToolResult(success=False)
-end note
 
 @enduml

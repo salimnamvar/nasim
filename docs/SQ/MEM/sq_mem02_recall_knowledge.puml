@@ -1,4 +1,5 @@
 @startuml sq_mem02_recall_knowledge
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     MEM-02 — RECALL Knowledge
 ' Boundary:  nasim code agent
@@ -23,16 +24,6 @@ box "Memory Group" #E8F5E9
   participant "MemoryIndex" as index
 end box
 
-note over user, index
-  Scope:          Knowledge retrieval by key or pattern
-  Preconditions:  Knowledge entries exist in store
-  Contexts:       Called by TL-20 (RECALL Memory), session rebuild
-  Excludes:       Full-text search (MEM-03), scope filtering (MEM-04)
-  Rollback:       No rollback needed (read-only operation)
-  Design:         Key-based lookup with scope filtering
-  Classification: Process Decomposition
-  Returns:        recalled_entry or null (key not found)
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -61,11 +52,5 @@ deactivate store
 
 agent --> router : AgentEvent(Done)
 
-note over user, index
-  Flow:    MEM-02 AgentOrchestrator -> MemoryStore -> filter by scope -> lookup key -> return entry
-  State:   No state change
-  Success: Agent receives knowledge entry
-  Failure: Key not found -> return null, log miss
-end note
 
 @enduml

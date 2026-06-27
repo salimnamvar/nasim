@@ -1,4 +1,5 @@
 @startuml sq_agt08_approve_plan
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-08 — APPROVE Plan
 ' Boundary:  nasim code agent
@@ -27,17 +28,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
-note over user, registry
-  Scope:          AGT-08 APPROVE Plan
-  Preconditions:  Plan mode active with queued calls
-  Contexts:       Called by CLI-02 (/approve command)
-  Excludes:       Plan queuing (AGT-07)
-  Rollback:       Partial execution on failure
-  Design:         Drains pending_calls queue sequentially
-  Classification: Process Decomposition
-  Returns:        Success: all queued calls executed with results
-                  Failure: partial execution on tool failure
-end note
 
 == AGT-08 APPROVE Plan ==
 
@@ -64,11 +54,5 @@ deactivate plan
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, registry
-  Flow:    AGT-08 → approve → drain queue → execute sequentially → results
-  State:   <back:#E3F2FD>PLANNING</back> -> <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF3E0>THINKING</back>
-  Success: all queued calls executed with results
-  Failure: partial execution on tool failure
-end note
 
 @enduml

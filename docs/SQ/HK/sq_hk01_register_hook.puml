@@ -1,4 +1,5 @@
 @startuml sq_hk01_register_hook
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-01 — REGISTER Hook
 ' Boundary:  nasim code agent
@@ -30,18 +31,6 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
-note over user, hook
-  Scope:          HK-01 REGISTER Hook
-  Preconditions:  HookManager initialized, PluginLoader active
-  Contexts:       Called by PLG-04 (REGISTER Plugin Hooks)
-  Excludes:       Hook execution (HK-02..05), hook validation (HK-06)
-  Rollback:       Registration failure logged, hook not added
-  Design:         PluginLoader registers plugin-provided hooks at load time
-  Classification: Process Decomposition
-  Returns:
-    - Success: Hook(registered) — hook instance appended to registry
-    - Failure: Warning logged — duplicate hook name skipped
-end note
 
 == HK-01 REGISTER Hook ==
 
@@ -73,11 +62,5 @@ agent --> router : hook registered
 deactivate agent
 deactivate router
 
-note over user, hook
-  Flow:    HK-01 → PluginLoader → HookManager → Hook creation → check duplicate → append to registry
-  State:   No state change
-  Success: Hook(registered) — hook instance appended to registry
-  Failure: Warning logged — duplicate hook name skipped
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_sbx02_apply_sandbox_policy
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-02 — APPLY Sandbox Policy
 ' Boundary:  nasim code agent
@@ -24,18 +25,6 @@ box "Sandbox Group" #F3E5F5
   participant "SandboxPolicy" as policy
 end box
 
-note over user, policy
-  Scope:          SBX-02 APPLY SandboxPolicy — sandbox policy loading and application
-  Preconditions:  Policy file exists, SandboxPolicy initialized
-  Contexts:       Called by SBX-01 before command execution
-  Excludes:       Command execution (SBX-01), monitoring (SBX-03)
-  Rollback:       Revert to default policy on validation failure
-  Design:         Declarative policy with rule inheritance
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={rules_count})
-    - Failure: Result(success=false, error="policy_invalid") — reverted to defaults
-end note
 
 == SBX-02 APPLY Sandbox Policy ==
 
@@ -74,11 +63,5 @@ deactivate executor
 
 agent --> router : AgentEvent(Done)
 
-note over user, policy
-  Flow:    SBX-02 -> User -> ServerRouter -> AgentOrchestrator -> SandboxExecutor -> SandboxPolicy -> read policy -> validate -> apply -> confirm
-  State:   No state change
-  Success: Result(success=true, data={rules_count})
-  Failure: Result(success=false, error="policy_invalid") — revert to defaults, log error
-end note
 
 @enduml

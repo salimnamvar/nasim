@@ -1,4 +1,5 @@
 @startuml sq_prv04_select_provider_backend
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PRV-04 — SELECT Provider Backend
 ' Boundary:  nasim code agent CLI
@@ -26,17 +27,6 @@ box "Provider Group" #FFF3E0
   participant "ProviderFactory" as factory
 end box
 
-note over user, factory
-  Scope:          PRV-04 SELECT ProviderBackend — provider backend selection from config
-  Preconditions:  Config loaded with provider field
-  Contexts:       Called by PRV-01 (REGISTER Provider)
-  Excludes:       Provider instantiation (PRV-01)
-  Rollback:       Unknown provider -> ConfigError
-  Design:         Registry mapping: str -> class
-  Returns:
-    - Success: provider_class reference for instantiation
-    - Failure: ConfigError — unknown provider name
-end note
 
 == PRV-04 SELECT ProviderBackend ==
 
@@ -67,11 +57,5 @@ agent --> router : provider_class
 deactivate agent
 deactivate router
 
-note over user, factory
-  Flow:    PRV-04 → User → ServerRouter → AgentOrchestrator → ConfigLoader → ProviderFactory → registry lookup → class
-  State:   No state change
-  Success: Provider class reference for instantiation
-  Failure: Unknown provider name -> ConfigError
-end note
 
 @enduml

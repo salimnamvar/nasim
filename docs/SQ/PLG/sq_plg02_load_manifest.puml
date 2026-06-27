@@ -1,4 +1,5 @@
 @startuml sq_plg02_load_manifest
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-02 — Load Manifest
 ' Boundary:  nasim code agent
@@ -22,16 +23,6 @@ box "Plugins Group" #F3E5F5
 end box
 participant "Host Filesystem" as fs
 
-note over user, fs
-  Scope:          Read manifest.yaml and parse plugin metadata
-  Preconditions:  Plugin directory exists
-  Contexts:       Called during plugin discovery (PLG-01)
-  Excludes:       Tool/hook registration, plugin activation
-  Rollback:       Plugin skipped with warning
-  Design:         Strict schema validation; fail-fast on malformed YAML
-  Classification: Process Decomposition
-  Returns:        PluginManifest or plugin skipped with warning
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -71,11 +62,5 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
-note over user, fs
-  Flow:    PLG-02 AgentOrchestrator -> PluginLoader -> read manifest.yaml -> parse metadata -> return PluginManifest
-  State:   No state change
-  Success: Validated PluginManifest returned
-  Failure: File not found or malformed YAML -> plugin skipped
-end note
 
 @enduml

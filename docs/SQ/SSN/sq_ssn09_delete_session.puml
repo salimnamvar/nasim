@@ -1,4 +1,5 @@
 @startuml sq_ssn09_delete_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-09 — DELETE Session
 ' Boundary:  nasim code agent
@@ -26,16 +27,6 @@ box "External" #F5F5F5
   participant "Host Filesystem" as fs
 end box
 
-note over user, fs
-  Scope:          Permanently delete a session and its associated data
-  Preconditions:  Session exists on disk
-  Contexts:       Called by API-05 (DELETE Session) for hard delete
-  Excludes:       Hard delete (API-05), session read (SSN-02)
-  Rollback:       Deletion is irreversible; backup recommended
-  Design:         Removes session directory and all associated files
-  Classification: Process Decomposition
-  Returns:        Success: delete_confirmed(session_id); Failure: DeleteError(session not found | permission denied)
-end note
 
 == SSN-09 DELETE Session ==
 
@@ -71,11 +62,5 @@ deactivate store
 
 agent --> router : AgentEvent(Done)
 
-note over user, fs
-  Flow:    SSN-09 → validate → remove directory → clear index → confirm
-  State:   <back:#757575>CLOSED</back>
-  Success: 200 OK — session permanently deleted
-  Failure: 404 NOT_FOUND — session not found; 403 FORBIDDEN — permission denied
-end note
 
 @enduml

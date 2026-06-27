@@ -1,4 +1,5 @@
 @startuml sq_tl05_dispatch_shell_command
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-05 — Dispatch Shell Command
 ' Boundary:  nasim code agent CLI
@@ -11,28 +12,18 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "ShellTool" as st
 end box
 participant "Host Shell" as shell
 
-note over user, shell
-  Scope:          Execute shell command with timeout
-  Preconditions:  Command string provided by LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       File operations
-  Rollback:       Error string returned to LLM
-  Design:         subprocess.run with shell=True, configurable timeout
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=command_output) or ToolResult(success=False, error=str)
-end note
 
 == TL-05 EXECUTE Shell Command ==
 
@@ -74,11 +65,5 @@ deactivate st
 deactivate registry
 deactivate agent
 deactivate router
-note over user, shell
-  Flow:    TL-05: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> ShellTool -> Host Shell -> ToolResult
-  State:   No state change
-  Success: Command output (stdout + stderr)
-  Failure: Timeout, execution error -> ToolResult(success=False)
-end note
 
 @enduml

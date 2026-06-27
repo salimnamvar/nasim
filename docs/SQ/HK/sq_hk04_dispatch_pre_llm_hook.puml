@@ -1,4 +1,5 @@
 @startuml sq_hk04_dispatch_pre_llm_hook
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-04 — DISPATCH Pre-LLM Hook
 ' Boundary:  nasim code agent
@@ -30,18 +31,6 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
-note over user, provider
-  Scope:          HK-04 DISPATCH Pre-LLM Hook
-  Preconditions:  Hooks registered for PreLLMCall event
-  Contexts:       Called by AGT-01 (PROCESS User Task) before PRV-02
-  Excludes:       Post-LLM hooks (HK-05), tool hooks (HK-02/03)
-  Rollback:       Hook deny blocks LLM call
-  Design:         Priority-ordered execution; short-circuit on deny
-  Classification: Process Decomposition
-  Returns:
-    - Success: HookResult(action=ALLOW, modified_messages?) — LLM call proceeds
-    - Failure: HookResult(action=DENY, reason) — LLM call blocked
-end note
 
 == HK-04 DISPATCH Pre-LLM Hook ==
 
@@ -71,11 +60,5 @@ agent --> router : HookResult(action=ALLOW)
 deactivate agent
 deactivate router
 
-note over user, provider
-  Flow:    HK-04 → HookManager → find hooks → execute in priority order → return HookResult
-  State:   No state change
-  Success: HookResult(action=ALLOW) — LLM call proceeds
-  Failure: HookResult(action=DENY) — LLM call blocked
-end note
 
 @enduml

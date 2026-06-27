@@ -1,4 +1,5 @@
 @startuml sq_agt01_process_user_task
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-01 — PROCESS User Task (API-First)
 ' Boundary:  nasim code agent
@@ -34,19 +35,6 @@ box "Observability Group" #F3E5F5
   participant "TraceCorrelator" as trace
 end box
 
-note over user, trace
-  Scope:          AGT-01 PROCESS User Task (API-First)
-  Preconditions:  Agent initialized with Provider, ToolRegistry, ConversationHistory
-  Contexts:       Called by API-06 (DISPATCH Message) via ServerRouter
-  Excludes:       Slash command handling (CLI-02), session CRUD (API-01..05)
-  Rollback:       LLM call failure -> append error message -> ERROR state -> IDLE; Tool execution failure -> append error message -> ERROR state -> IDLE; Max iterations exceeded -> force Done event
-  Design:         CSR: Controller(ServerRouter) → Service(AgentOrchestrator) → Repository(ToolRegistry, SessionStore).
-                  AgentOrchestrator yields AgentEvent objects (no print()); Max iterations configurable;
-                  SafetyCoordinator consulted before every tool execution; Recursive: after tool dispatch, re-calls Provider for next response
-  Classification: Primary Orchestrator (via API Entry Gate)
-  Returns:        Success: AgentEvent(Done) with final text response
-                  Failure: AgentEvent(Error) — LLM error or tool execution failure
-end note
 
 == AGT-01 PROCESS User Task (API-First) ==
 
@@ -111,12 +99,5 @@ deactivate agent
 router --> user : SSE stream (AgentEvents)
 deactivate router
 
-note over user, trace
-  Flow:    AGT-01 → User → API(ServerRouter) → AgentOrchestrator → [OBS-03] → [AGT-03] → [HK-04] → [PRV-02] → [HK-05] → [AGT-03] → (tool loop via AGT-02) → Done → SSE stream → User
-  State:   <back:#ECEFF1>IDLE</back> -> <back:#E0F7FA>SERVING</back> -> <back:#FFF3E0>THINKING</back> -> [<back:#F3E5F5>TOOL_EXEC</back>]* -> <back:#E8F5E9>RESPONDING</back> -> <back:#ECEFF1>IDLE</back>
-  Success: AgentEvent(Done) — final text response streamed to user via API SSE
-  Failure: AgentEvent(Error) — LLM error or tool error; ERROR -> IDLE
-  Invariant: AgentOrchestrator is NEVER called directly by any interface. ALL calls go through API (ServerRouter).
-end note
 
 @enduml

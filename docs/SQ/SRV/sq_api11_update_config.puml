@@ -1,4 +1,5 @@
 @startuml sq_srv11_update_config
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-11 — UPDATE Config
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "ConfigLoader" as config
 end box
 
-note over user, config
-  Scope:          Update agent configuration at runtime
-  Preconditions:  ConfigLoader initialized
-  Contexts:       Called by HTTPClient via PATCH /v1/config
-  Excludes:       Config read, config validation
-  Rollback:       400 if invalid config values
-  Design:         CSR: Controller(ServerRouter) -> Service(ConfigService) -> Repository(ConfigLoader). ROD: standard update (AIP-134). Partial config patch. Triggers CFG-03 APPLY.
-  Classification: Primary Orchestrator
-  Returns:        200 OK with updated config, or 400 INVALID_ARGUMENT error
-end note
 
 == API-11 UPDATE Config ==
 
@@ -66,11 +57,5 @@ deactivate svc
 router --> user : 200 OK {config: {updated_fields: [...]}}
 deactivate router
 
-note over user, config
-  Flow:    API-11 → validate → updateConfig → respond
-  State:   No state change
-  Success: 200 OK with updated config
-  Failure: 400 invalid config values
-end note
 
 @enduml

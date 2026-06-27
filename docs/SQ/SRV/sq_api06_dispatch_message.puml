@@ -1,4 +1,5 @@
 @startuml sq_srv06_dispatch_message
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-06 — DISPATCH Message
 ' Boundary:  nasim code agent HTTP API
@@ -29,16 +30,6 @@ box "Observability Group" #F3E5F5
   participant "TraceCorrelator" as trace
 end box
 
-note over user, trace
-  Scope:          Dispatch a user message through the agent and stream SSE response
-  Preconditions:  Session exists, ServerRouter initialized
-  Contexts:       Called by HTTPClient via POST /v1/sessions/{id}:dispatch
-  Excludes:       Session CRUD (API-01..05), Tool listing (API-08..09)
-  Rollback:       404 if session not found, 400 if invalid body, 502 if agent fails
-  Design:         CSR: Controller(ServerRouter) -> Service(AgentOrchestrator) -> Repository(SessionStore). ROD: custom method :dispatch (AIP-136)
-  Classification: Primary Orchestrator
-  Returns:        200 OK with SSE event stream, or 400/404/502 error
-end note
 
 == API-06 SEND Message ==
 
@@ -96,11 +87,5 @@ deactivate sse
 router --> user : 200 OK (stream complete)
 deactivate router
 
-note over user, trace
-  Flow:    API-06 → validate → dispatch → agent loop → SSE stream
-  State:   IDLE → SERVING → THINKING → RESPONDING → IDLE
-  Success: 200 OK with SSE event stream
-  Failure: 404 NOT_FOUND, 400 INVALID_ARGUMENT, 502 UNAVAILABLE
-end note
 
 @enduml

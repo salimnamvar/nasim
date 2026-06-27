@@ -1,4 +1,5 @@
 @startuml sq_obs03_correlate_trace
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-03 — CORRELATE Trace
 ' Boundary:  nasim code agent
@@ -33,17 +34,6 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
-note over user, tools
-  Scope:          OBS-03 CORRELATE Trace — generate and propagate trace context
-  Preconditions:  TraceCorrelator initialized (contextvars available)
-  Contexts:       Called at entrypoint: CLI turn start or HTTP request
-  Excludes:       Structured logging (OBS-01), metrics recording (OBS-02), wire log (WRL)
-  Rollback:       Trace generation failure -> fallback to random ids
-  Design:         TraceCorrelator generates root trace/span per entrypoint. ContextPropagator ensures trace flows across boundaries
-  Returns:
-    - Success: TraceContext(trace_id, span_id)
-    - Failure: Fallback to random ids on generation failure
-end note
 
 == OBS-03 CORRELATE Trace (CLI turn) ==
 
@@ -81,11 +71,5 @@ agent --> router : AgentEvent stream
 deactivate agent
 deactivate router
 
-note over user, tools
-  Flow:    OBS-03 → User → ServerRouter → AgentOrchestrator → TraceCorrelator → ContextPropagator → Provider + ToolRegistry
-  State:   No state change
-  Success: End-to-end correlation across all surfaces
-  Failure: Trace generation failure -> fallback to random ids
-end note
 
 @enduml

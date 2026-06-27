@@ -1,4 +1,5 @@
 @startuml sq_cli07_switch_model
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-07 — Switch Model
 ' Boundary:  nasim code agent CLI
@@ -30,16 +31,6 @@ box "Repository Group" #E8F5E9
   participant "SessionRepository" as session_repo
 end box
 
-note over user, rtg
-  Scope:          Switch active model via /model slash command
-  Preconditions:  ServerRouter active, model registry available
-  Contexts:       Invoked by Developer via /model command
-  Excludes:       Provider registration (PRV-01), fallback logic (RTG-02)
-  Rollback:       Model not found → display error, retain current model
-  Design:         Delegates to RTG-04 SWITCH Model for actual provider switch
-  Classification: Primary Orchestrator
-  Returns:        Active model switched, confirmation shown
-end note
 
 == CLI-07 Switch Model ==
 
@@ -66,11 +57,5 @@ break Model not found
     cmd --> repl : CommandError
 end
 
-note over user, rtg
-  Flow:    CLI-07 switchModel: User → ServerRouter → SlashCommandHandler → RTG-04 SWITCH Model → confirm
-  State:   <back:#ECEFF1>IDLE</back> → SWITCHING → <back:#ECEFF1>IDLE</back>
-  Success: Model switched, confirmation shown
-  Failure: Model not found → display error, retain current
-end note
 
 @enduml

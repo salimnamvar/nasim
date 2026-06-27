@@ -1,4 +1,5 @@
 @startuml sm_session_lifecycle
+!include common/sm_styles.puml
 ' ============================================================
 ' Title:     nasim — Session Lifecycle State Machine (API-First)
 ' Boundary:  nasim code agent
@@ -12,15 +13,9 @@
 
 title nasim — Session Lifecycle (API-First)
 
-skinparam state {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-}
-
 [*] --> CREATED : API-02
 
-state "CREATED" as CREATED #E3F2FD
+state "CREATED" as CREATED #BBDEFB
 CREATED : Session record initialized.
 CREATED : API-02 CREATE Session.
 

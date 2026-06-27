@@ -1,4 +1,5 @@
 @startuml sq_srv08_list_tools
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-08 — LIST Tools
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over user, registry
-  Scope:          List all registered tools available to the agent
-  Preconditions:  ToolRegistry initialized
-  Contexts:       Called by HTTPClient via GET /v1/tools
-  Excludes:       Tool execution, tool registration
-  Rollback:       500 if registry read fails
-  Design:         CSR: Controller(ServerRouter) -> Service(ToolService) -> Repository(ToolRegistry). ROD: standard list (AIP-132)
-  Classification: Primary Orchestrator
-  Returns:        200 OK with tool list, or 500 INTERNAL error
-end note
 
 == API-08 LIST Tools ==
 
@@ -60,11 +51,5 @@ deactivate svc
 router --> user : 200 OK {tools: [...], next_page_token}
 deactivate router
 
-note over user, registry
-  Flow:    API-08 → listTools → respond
-  State:   No state change
-  Success: 200 OK with tool list
-  Failure: 500 INTERNAL on registry read failure
-end note
 
 @enduml

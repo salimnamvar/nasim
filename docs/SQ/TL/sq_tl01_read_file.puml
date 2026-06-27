@@ -1,4 +1,5 @@
 @startuml sq_tl01_read_file
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-01 — Read File
 ' Boundary:  nasim code agent CLI
@@ -11,28 +12,18 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "ReadFileTool" as ft
 end box
 participant "Host Filesystem" as fs
 
-note over user, fs
-  Scope:          Read file contents with line numbers
-  Preconditions:  File path provided by LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       Write, edit, directory listing
-  Rollback:       Error string returned to LLM
-  Design:         Supports offset/limit for large files
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=numbered_content) or ToolResult(success=False, error=str)
-end note
 
 == TL-01 READ File ==
 
@@ -74,11 +65,5 @@ deactivate ft
 deactivate registry
 deactivate agent
 deactivate router
-note over user, fs
-  Flow:    TL-01: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> ReadFileTool -> Host Filesystem -> ToolResult
-  State:   No state change
-  Success: File content with line numbers
-  Failure: File not found, permissions, encoding -> ToolResult(success=False)
-end note
 
 @enduml

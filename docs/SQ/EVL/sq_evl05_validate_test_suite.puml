@@ -1,4 +1,5 @@
 @startuml sq_evl05_validate_test_suite
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-05 — VALIDATE Test Suite
 ' Boundary:  nasim code agent
@@ -28,16 +29,6 @@ box "Repository Group" #E8F5E9
   participant "EvaluationRepository" as eval_repo
 end box
 
-note over user, shell
-  Scope:          Execute test suite and collect structured results
-  Preconditions:  Test framework configured, test files present
-  Contexts:       EVL-01 EVALUATE Task delegates test validation here
-  Excludes:       LLM-based review, quality signal recording
-  Rollback:       No state change — read-only execution
-  Design:         TestRunner invokes configured test framework, parses output into structured results
-  Classification: Process Decomposition
-  Returns:        TestSuiteResult(total, passed, failed, skipped, errors[])
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -67,11 +58,5 @@ deactivate engine
 
 agent --> router : AgentEvent(Done)
 
-note over user, shell
-  Flow:    EVL-05 AgentOrchestrator -> EvaluationEngine -> TestRunner -> run test suite -> collect results -> return
-  State:   <back:#ECEFF1>IDLE</back> → RUNNING → PARSING → DONE
-  Success: TestSuiteResult with counts and failure details
-  Failure: Test framework error -> TestSuiteResult with error details
-end note
 
 @enduml

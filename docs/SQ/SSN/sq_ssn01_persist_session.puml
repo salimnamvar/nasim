@@ -1,4 +1,5 @@
 @startuml sq_ssn01_persist_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-01 — Persist Session
 ' Boundary:  nasim code agent CLI
@@ -11,27 +12,17 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Session Group" #F1F8E9
+box "Session Group" #E8F5E9
   participant "SessionStore" as store
 end box
 database "Session Directory" as dir
 
-note over user, dir
-  Scope:          Save session messages to JSON Lines file
-  Preconditions:  AgentOrchestrator has messages to save
-  Contexts:       Called by AGT-01 after each task turn
-  Excludes:       Session loading (SSN-02)
-  Rollback:       Write error -> log warning, session lost
-  Design:         One file per session: ~/.nasim/sessions/<id>/session.jsonl
-  Classification: Process Decomposition
-  Returns:        Success: Result(success=true, data={session_id}); Failure: Result(success=false, error="write_failed")
-end note
 
 == SSN-01 Save Session ==
 
@@ -59,11 +50,5 @@ agent --> router : AgentEvent(Done)
 deactivate store
 deactivate agent
 deactivate router
-note over user, dir
-  Flow:    SSN-01 → serialize → write JSON Lines
-  State:   No state change
-  Success: 200 OK — session persisted to disk
-  Failure: 500 INTERNAL — disk error, log warning, continue
-end note
 
 @enduml

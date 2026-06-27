@@ -1,4 +1,5 @@
 @startuml sq_prv02_request_chat
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PRV-02 — REQUEST Chat
 ' Boundary:  nasim code agent CLI
@@ -29,18 +30,6 @@ box "Repository Group" #E8F5E9
   participant "ChatStore" as chat_store
 end box
 
-note over user, chat_store
-  Scope:          PRV-02 REQUEST Chat — single synchronous chat completion
-  Preconditions:  Provider initialized and reachable
-  Contexts:       Called by AGT-01 (Process User Task)
-  Excludes:       Streaming (PRV-03), tool parsing
-  Rollback:       HTTP error raised as ProviderError
-  Design:         Uses httpx.AsyncClient with timeout; ChatStore persists chat results
-  Returns:
-    - Success: LLMResponse(content, tool_calls)
-    - Failure: ProviderError — connection failed
-    - Failure: ProviderError — timeout
-end note
 
 == PRV-02 REQUEST Chat ==
 
@@ -77,11 +66,5 @@ agent --> router : LLMResponse(content, tool_calls)
 deactivate agent
 deactivate router
 
-note over user, chat_store
-  Flow:    PRV-02 → User → ServerRouter → AgentOrchestrator → Provider → HTTP POST → JSON parse → LLMResponse; ChatStore stores result
-  State:   <back:#FFF3E0>THINKING</back> → <back:#FFF3E0>THINKING</back> (no state change)
-  Success: LLMResponse with content and/or tool_calls
-  Failure: HTTP error or timeout -> ProviderError
-end note
 
 @enduml

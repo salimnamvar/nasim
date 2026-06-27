@@ -1,4 +1,5 @@
 @startuml sq_cfg03_apply_layered_config
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CFG-03 — APPLY Layered Config
 ' Boundary:  nasim code agent CLI
@@ -26,18 +27,6 @@ box "Repository Group" #E8F5E9
   participant "ConfigRepository" as cfg_repo
 end box
 
-note over user, cfg
-  Scope:          CFG-03 APPLY Layered Config
-  Preconditions:  All sources loaded
-  Contexts:       Called by CFG-01 (LOAD Config)
-  Excludes:       Validation (CFG-02)
-  Rollback:       N/A — merge always produces a result
-  Design:         Precedence: CLI > env > project > global
-  Classification: Process Decomposition
-  Returns:
-    - Success: Config(merged) — correct precedence applied
-    - Failure: N/A — merge is always defined
-end note
 
 == CFG-03 APPLY Layered Config ==
 
@@ -58,11 +47,5 @@ agent --> router : Config merged
 deactivate agent
 deactivate router
 
-note over user, cfg
-  Flow:    CFG-03 → global → project → env → CLI → merged Config
-  State:   No state change
-  Success: Config(merged) — correct precedence applied
-  Failure: N/A — merge is always defined
-end note
 
 @enduml

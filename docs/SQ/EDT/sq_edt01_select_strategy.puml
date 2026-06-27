@@ -1,8 +1,13 @@
 @startuml sq_edt01_select_strategy
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-01 — SELECT Strategy
 ' Boundary:  nasim code agent
 ' Purpose:   Choose optimal edit format for the target model
+' Note: EDT-01 is a strategy selector, not a sub-UC orchestrator.
+' It selects one strategy from EDT-02..10; ref would show all paths
+' simultaneously, which is misleading. Conditional ref is not supported
+' in PlantUML. The selected strategy is invoked via dynamic dispatch.
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
@@ -27,16 +32,6 @@ box "Config Group" #E8F5E9
   participant "ConfigLoader" as config
 end box
 
-note over agent, config
-  Scope:          Choose optimal edit format for the target model
-  Preconditions:  Agent has identified a file to edit, Config loaded
-  Contexts:       Called before EDT-02 (APPLY Search-Replace); entry point for edit subsystem
-  Excludes:       Edit execution (EDT-02..09), diff staging (EDT-10)
-  Rollback:       No valid strategy -> return error, suggest manual edit
-  Design:         StrategySelector evaluates model capabilities vs edit requirements; format selected by diff size and model support
-  Classification: Process Decomposition
-  Returns:        EditStrategy(format, parameters, confidence) on success; error with manual suggestion on failure
-end note
 
 == EDT-01 SELECT Strategy ==
 
@@ -76,11 +71,5 @@ deactivate selector
 
 agent --> router : AgentEvent(Done)
 
-note over agent, config
-  Flow:    User → ServerRouter → AgentOrchestrator → StrategySelector → Config + EditStrategy → EditStrategy
-  State:   <back:#ECEFF1>IDLE</back> -> <back:#FFF3E0>THINKING</back> -> <back:#ECEFF1>IDLE</back>
-  Success: EditStrategy with chosen format and parameters
-  Failure: No compatible format -> error + manual suggestion
-end note
 
 @enduml

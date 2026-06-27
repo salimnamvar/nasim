@@ -1,4 +1,5 @@
 @startuml sq_ctx01_process_context
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-01 — PROCESS Context
 ' Boundary:  nasim code agent
@@ -28,16 +29,6 @@ box "Repository Group" #E8F5E9
   participant "ContextStore" as ctx_store
 end box
 
-note over agent, ctx_store
-  Scope:          Orchestrate context processing pipeline stages in order
-  Preconditions:  ContextGraph initialized, budget set
-  Contexts:       Called by AGT-01 when context needs processing
-  Excludes:       Individual processor logic (CTX-02..05)
-  Rollback:       Pipeline failure returns partial context
-  Design:         PipelineOrchestrator tracks token budget and drives stages: compact -> score -> truncate -> distill -> inject; ContextStore persists context
-  Classification: Process Decomposition
-  Returns:        ProcessedContext on success; partial context on failure
-end note
 
 == CTX-01 PROCESS Context ==
 
@@ -46,7 +37,9 @@ router -> agent : PROCESS(user_input)
 agent -> pipeline : CTX-01 PROCESS(graph, budget)
 activate pipeline
 
-pipeline -> pipeline : check token budget, identify overage
+ref over pipeline, graph
+  CTX-06: TRACK Token Budget
+end ref
 
 ref over pipeline, graph
   CTX-05: COMPACT Nodes
@@ -73,11 +66,5 @@ deactivate pipeline
 
 agent --> router : AgentEvent(Done)
 
-note over agent, ctx_store
-  Flow:    User → ServerRouter → AgentOrchestrator → PipelineOrchestrator → compact → score → truncate → distill → inject; ContextStore stores processed context
-  State:   No state change
-  Success: Optimized context graph within budget
-  Failure: Processor failure returns partial context
-end note
 
 @enduml

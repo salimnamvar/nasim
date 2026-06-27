@@ -1,4 +1,5 @@
 @startuml sq_tl06_search_grep
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-06 — SEARCH Grep
 ' Boundary:  nasim code agent CLI
@@ -23,16 +24,6 @@ box "Tool Group" #E8F5E9
   participant "ShellTool" as shell
 end box
 
-note over user, shell
-  Scope:          Search file contents by regex pattern
-  Preconditions:  Pattern and path provided by LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       File globbing, file reading
-  Rollback:       Error string returned to LLM
-  Design:         Prefers ripgrep; falls back to Python re
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=formatted_matches) or ToolResult(success=False, error=str)
-end note
 
 == TL-06 GREP Search ==
 
@@ -75,11 +66,5 @@ deactivate grep
 deactivate registry
 deactivate agent
 deactivate router
-note over user, shell
-  Flow:    TL-06: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GrepTool -> ripgrep/Python -> ToolResult
-  State:   No state change
-  Success: List of matching file:line:content
-  Failure: No matches, permission error -> ToolResult(success=False)
-end note
 
 @enduml

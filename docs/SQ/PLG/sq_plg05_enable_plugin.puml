@@ -1,4 +1,5 @@
 @startuml sq_plg05_enable_plugin
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-05 — Enable Plugin
 ' Boundary:  nasim code agent
@@ -25,16 +26,6 @@ box "Hooks Group" #F3E5F5
   participant "HookManager" as hm
 end box
 
-note over user, hm
-  Scope:          Load plugin, register tools and hooks, set state ENABLED
-  Preconditions:  Valid PluginManifest loaded (PLG-02)
-  Contexts:       Called by CLI or PluginLoader
-  Excludes:       Plugin discovery, disable
-  Rollback:       Partial enable logged; state set to ERROR
-  Design:         Atomic enable: tools + hooks + state
-  Classification: Process Decomposition
-  Returns:        plugin enabled or state ERROR with partial enable logged
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -57,11 +48,5 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
-note over user, hm
-  Flow:    PLG-05 AgentOrchestrator -> PluginLoader -> load plugin -> activate tools + hooks -> set state ENABLED
-  State:   Plugin state: DISABLED -> ENABLED (or ERROR)
-  Success: Plugin enabled with tools and hooks active
-  Failure: Registration failure -> state ERROR, partial enable logged
-end note
 
 @enduml

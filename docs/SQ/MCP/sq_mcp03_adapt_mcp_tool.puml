@@ -1,4 +1,5 @@
 @startuml sq_mcp03_adapt_mcp_tool
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-03 — ADAPT MCP Tool
 ' Boundary:  nasim code agent
@@ -27,18 +28,6 @@ box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
 end box
 
-note over user, registry
-  Scope:          MCP-03 ADAPT McpTool — tool format adaptation from MCP to nasim
-  Preconditions:  Tool discovered from MCP server (MCP-02)
-  Contexts:       Called by MCPDiscovery during tool registration
-  Excludes:       Discovery logic (MCP-02), registration logic
-  Rollback:       Reject incompatible tool schemas
-  Design:         Schema mapping with type coercion
-  Classification: Process Decomposition
-  Returns:
-    - Success: ToolRegistered(name, version)
-    - Failure: SchemaIncompatible — skip tool, log warning
-end note
 
 == MCP-03 ADAPT McpTool ==
 
@@ -74,11 +63,5 @@ deactivate mcp
 
 agent --> router : AgentEvent(Done)
 
-note over user, registry
-  Flow:    User → ServerRouter → AgentOrchestrator → MCPClientRuntime → MCPToolAdapter → parse → map → register → ToolRegistered
-  State:   No state change
-  Success: ToolRegistered — tool available in nasim ToolRegistry with MCP backend
-  Failure: SchemaIncompatible — skip tool, log warning
-end note
 
 @enduml

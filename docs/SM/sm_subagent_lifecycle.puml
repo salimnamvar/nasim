@@ -1,4 +1,5 @@
 @startuml sm_subagent_lifecycle
+!include common/sm_styles.puml
 ' ============================================================
 ' Title:     nasim — Subagent Lifecycle State Machine
 ' Boundary:  nasim code agent
@@ -14,27 +15,21 @@
 
 title nasim — Subagent Lifecycle
 
-skinparam state {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-}
-
-[*] --> IDLE
+[*] --> IDLE : AGT-09
 
 state "IDLE" as IDLE #ECEFF1
 IDLE : No child agent active.
 IDLE : Default state.
 
-state "SPAWNING" as SPAWNING #E3F2FD
+state "SPAWNING" as SPAWNING #FFCCBC
 SPAWNING : Child agent process initializing.
 SPAWNING : Session created, orchestrator assigned.
 
-state "RUNNING" as RUNNING #FFF3E0
+state "RUNNING" as RUNNING #D7CCC8
 RUNNING : Child agent executing task.
 RUNNING : Provider calls, tool dispatches in progress.
 
-state "COMPLETED" as COMPLETED #E8F5E9
+state "COMPLETED" as COMPLETED #D1C4E9
 COMPLETED : Child agent finished successfully.
 COMPLETED : Results aggregated to parent.
 

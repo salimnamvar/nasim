@@ -1,4 +1,5 @@
 @startuml sq_tl17_update_todo
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-17 — Update Todo
 ' Boundary:  nasim code agent
@@ -11,27 +12,17 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "TodoTool" as tool
 end box
 
-note over user, tool
-  Scope:          Update status or content of a todo item by ID
-  Preconditions:  Todo exists with given ID
-  Excludes:       Todo creation, deletion, listing
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Rollback:       Error string returned to LLM
-  Design:         Validates status transitions
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, todo=updated_todo) or ToolResult(success=False, error=str)
-end note
 
 == TL-17 Update Todo ==
 
@@ -67,11 +58,5 @@ agent --> router : AgentEvent(Done)
 deactivate registry
 deactivate agent
 deactivate router
-note over user, tool
-  Flow:    TL-17: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> TodoTool -> ToolResult
-  State:   Todo status/content updated
-  Success: Updated todo returned
-  Failure: Todo not found or invalid transition -> ToolResult(success=False)
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_rim01_index_codebase
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-01 — INDEX Codebase
 ' Boundary:  nasim code agent
@@ -28,18 +29,6 @@ box "External" #F5F5F5
   participant "Host Filesystem" as fs
 end box
 
-note over user, fs
-  Scope:          RIM-01 INDEX Codebase — build AST index and symbol graph from project source
-  Preconditions:  Project root accessible, supported source files present
-  Contexts:       Called at session start or on-demand; prerequisite for RIM-02/03
-  Excludes:       Embedding generation (RIM-05), semantic search (RIM-06)
-  Rollback:       Parse error -> skip file, log warning; complete failure -> empty index
-  Design:         RepoIntelligenceManager orchestrates pipeline; ASTParser extracts definitions; SymbolGraph builds relationships
-  Returns:
-    - Success: IndexStats(files, symbols, edges)
-    - Failure: Partial index with skipped files
-    - Failure: Empty index on complete failure
-end note
 
 == RIM-01 INDEX Codebase ==
 
@@ -90,11 +79,5 @@ agent --> router : IndexStats(files, symbols, edges)
 deactivate agent
 deactivate router
 
-note over user, fs
-  Flow:    RIM-01 → User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → [FileSystem → ASTIndexAdapter → SymbolGraph]* → IndexStats
-  State:   No state change
-  Success: IndexStats with file count, symbol count, edge count
-  Failure: Parse error -> skip file; complete failure -> empty index
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_evl04_validate_with_llm
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-04 — Validate With LLM
 ' Boundary:  nasim code agent CLI
@@ -27,16 +28,6 @@ box "Edit Group" #FFF3E0
   participant "FileSystem" as fs
 end box
 
-note over user, fs
-  Scope:          LLM-as-judge scoring for edit quality
-  Preconditions:  Edit applied to file system, Provider available, review prompt template configured
-  Contexts:       Called after EVL-01 (Run Success Checks) as complementary evaluation; provides semantic quality assessment beyond exit codes
-  Excludes:       Shell-based checks (handled by EVL-01), retry coordination (handled by EVL-06)
-  Rollback:       LLM call failure -> skip review, proceed with exit code results only
-  Design:         LLMReviewer sends original + edited file to Provider; prompt asks for quality score (1-10) and feedback; score below threshold triggers retry via EVL-06; review is non-blocking
-  Classification: Primary Orchestrator
-  Returns:        ReviewResult(score, feedback, passed) or ReviewResult(skip=true) on failure
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -72,11 +63,5 @@ deactivate reviewer
 
 agent --> router : AgentEvent(Done)
 
-note over user, fs
-  Flow:    EVL-04 AgentOrchestrator -> LLMReviewer -> FileSystem + Provider -> ReviewResult
-  State:   <back:#ECEFF1>IDLE</back> → READING → PROMPTING → SCORING → DONE
-  Success: ReviewResult with score and feedback
-  Failure: LLM call failure -> skip review; Parse failure -> skip review
-end note
 
 @enduml

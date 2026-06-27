@@ -1,4 +1,5 @@
 @startuml sq_vcs02_insert_commit
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     VCS-02 — INSERT Commit
 ' Boundary:  nasim code agent
@@ -27,19 +28,6 @@ box "External" #F5F5F5
   participant "Git Repository" as git
 end box
 
-note over user, git
-  Scope:          VCS-02 INSERT Commit — git commit creation with conventional format
-  Preconditions:  Files staged, commit message valid
-  Contexts:       Called by VCS-04 (AUTO-COMMIT), manual commit requests
-  Excludes:       Status checking (VCS-01), diff (VCS-03)
-  Rollback:       Reset HEAD if commit fails mid-operation
-  Design:         Atomic commit with pre-commit hook validation
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={hash, files})
-    - Failure: Result(success=false, error="no_staged_files")
-    - Failure: Result(success=false, error="invalid_commit_message")
-end note
 
 == VCS-02 INSERT Commit ==
 
@@ -76,11 +64,5 @@ deactivate commit
 
 agent --> router : AgentEvent(Done)
 
-note over user, git
-  Flow:    VCS-02 -> User -> ServerRouter -> AgentOrchestrator -> GitCommit -> check staged -> validate message -> commit -> return hash
-  State:   No state change
-  Success: Result(success=true, data={hash, files})
-  Failure: Result(success=false, error="no_staged_files") or Result(success=false, error="invalid_commit_message") — abort, return error
-end note
 
 @enduml

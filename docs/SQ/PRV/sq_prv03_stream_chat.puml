@@ -1,4 +1,5 @@
 @startuml sq_prv03_stream_chat
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PRV-03 — STREAM Chat
 ' Boundary:  nasim code agent CLI
@@ -29,17 +30,6 @@ box "Repository Group" #E8F5E9
   participant "ChatStore" as chat_store
 end box
 
-note over user, chat_store
-  Scope:          PRV-03 STREAM ProviderChat — streaming chat completion yielding chunks
-  Preconditions:  Provider initialized and reachable
-  Contexts:       Called by AGT-01 (Process User Task)
-  Excludes:       Sync chat (PRV-02), tool execution
-  Rollback:       Connection drop -> ProviderError
-  Design:         Yields str | ToolCall chunks from HTTP stream; ChatStore persists chat results
-  Returns:
-    - Success: Stream of TextChunk and ToolCall objects
-    - Failure: ProviderError — stream interrupted
-end note
 
 == PRV-03 STREAM ProviderChat ==
 
@@ -80,11 +70,5 @@ agent --> router : StreamComplete
 deactivate agent
 deactivate router
 
-note over user, chat_store
-  Flow:    PRV-03 → User → ServerRouter → AgentOrchestrator → Provider → HTTP stream → parse chunks → yield str | ToolCall; ChatStore stores result
-  State:   <back:#FFF3E0>THINKING</back> → <back:#FFF3E0>THINKING</back> (no state change)
-  Success: Stream of text tokens and ToolCall objects
-  Failure: Connection drop -> ProviderError
-end note
 
 @enduml

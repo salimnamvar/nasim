@@ -1,4 +1,5 @@
 @startuml sq_srv02_insert_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-02 — CREATE Session
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, store
-  Scope:          Create and persist a new agent session
-  Preconditions:  ServerRouter initialized, SessionService available
-  Contexts:       Called by HTTPClient via POST /v1/sessions
-  Excludes:       Session dispatch (API-06), Session deletion (API-05)
-  Rollback:       500 if SessionStore write fails
-  Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard create (AIP-133)
-  Classification: Primary Orchestrator
-  Returns:        201 Created with session metadata, or 400/500 error
-end note
 
 == API-02 INSERT Session ==
 
@@ -64,11 +55,5 @@ deactivate svc
 router --> user : 201 Created {id, created_at, model, state}
 deactivate router
 
-note over user, store
-  Flow:    API-02 → validate → createSession → persist → respond
-  State:   No state change
-  Success: 201 Created with session metadata
-  Failure: 400 invalid body, 500 store write failure
-end note
 
 @enduml

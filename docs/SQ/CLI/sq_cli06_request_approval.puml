@@ -1,4 +1,5 @@
 @startuml sq_cli06_request_approval
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-06 — Request Approval
 ' Boundary:  nasim code agent CLI
@@ -26,16 +27,6 @@ box "Repository Group" #E8F5E9
   participant "SessionRepository" as session_repo
 end box
 
-note over user, safety
-  Scope:          Display approval prompt for dangerous operations and collect decision
-  Preconditions:  SafetyCoordinator flagged operation requiring approval
-  Contexts:       Called by AGT-02 when tool requires user confirmation
-  Excludes:       Permission checks (SAF-01), auto-approve scenarios
-  Rollback:       Timeout → default deny
-  Design:         Renderer displays prompt; blocks until user responds or timeout
-  Classification: Primary Orchestrator
-  Returns:        Approval decision (Approved/Denied) returned to AgentOrchestrator
-end note
 
 == CLI-06 Request Approval ==
 
@@ -60,11 +51,5 @@ end
 
 deactivate renderer
 
-note over user, safety
-  Flow:    CLI-06 requestApproval: AgentOrchestrator → Renderer → display prompt → User → decision
-  State:   PENDING → APPROVED | DENIED
-  Success: Developer decision returned to agent
-  Failure: Timeout → default deny
-end note
 
 @enduml

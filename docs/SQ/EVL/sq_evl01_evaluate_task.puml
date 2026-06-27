@@ -1,8 +1,13 @@
 @startuml sq_evl01_evaluate_task
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-01 — EVALUATE Task
 ' Boundary:  nasim code agent
 ' Purpose:   Evaluate task completion via success checks and quality signals
+' Note: EVL-01 is a process-decomposition step that runs success checks
+' via ShellRunner. EVL-02..09 are separate Evaluation UCs that follow
+' different architectural paths (EvaluationEngine/TaskEvaluator).
+' Refs would introduce misleading lifelines not present in this flow.
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    CAR refinement loop — API-First transformation
@@ -25,16 +30,6 @@ box "Tool Group" #E8F5E9
   participant "ToolRegistry" as tool
 end box
 
-note over user, tool
-  Scope:          Evaluate task completion via success checks and quality signals
-  Preconditions:  EDT-05 completed (edit applied and user-approved), shell environment available
-  Contexts:       Called after edit application to verify correctness; feeds into EVL-06 (COORDINATE Retry) on failure
-  Excludes:       LLM-based review (EVL-04), repetition detection (EVL-08)
-  Rollback:       Check failure -> report to EVL-06 for retry coordination
-  Design:         SuccessChecker runs configured check commands with timeout; aggregate pass/fail across all checks
-  Classification: Primary Orchestrator
-  Returns:        CheckResult(passed, results[])
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -64,11 +59,5 @@ deactivate checker
 
 agent --> router : AgentEvent(Done)
 
-note over user, tool
-  Flow:    EVL-01 AgentOrchestrator -> SuccessChecker -> [ShellRunner]* -> CheckResult
-  State:   <back:#ECEFF1>IDLE</back> -> <back:#F9FBE7>EVALUATING</back> -> <back:#ECEFF1>IDLE</back>
-  Success: All checks pass -> CheckResult(passed=true)
-  Failure: Any check fails -> CheckResult(passed=false)
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_ssn05_snapshot_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-05 — Snapshot Session
 ' Boundary:  nasim code agent CLI
@@ -24,16 +25,6 @@ box "Session Group" #E8F5E9
 end box
 database "Snapshot Store" as snap
 
-note over user, snap
-  Scope:          Create a point-in-time snapshot of session messages
-  Preconditions:  Active session with messages
-  Contexts:       Called before risky operations or on explicit request
-  Excludes:       Session read (SSN-02), revert (SSN-06)
-  Rollback:       Snapshot failure → log warning, continue without snapshot
-  Design:         Snapshot stored as immutable copy; supports revert via SSN-06
-  Classification: Process Decomposition
-  Returns:        Success: SnapshotCreated(snapshot_id); Failure: SnapshotError → log warning
-end note
 
 == SSN-05 Snapshot Session ==
 
@@ -60,11 +51,5 @@ break Disk write error
     agent --> router : AgentEvent(Error)
 end
 
-note over user, snap
-  Flow:    SSN-05 → serialize → create snapshot → store
-  State:   No state change (snapshot is side-effect)
-  Success: 200 OK — snapshot ID returned for future revert (SSN-06)
-  Failure: 500 INTERNAL — disk error, log warning, continue
-end note
 
 @enduml

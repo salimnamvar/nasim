@@ -1,4 +1,5 @@
 @startuml sq_ssn02_read_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-02 — Read Session
 ' Boundary:  nasim code agent CLI
@@ -11,27 +12,17 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Session Group" #F1F8E9
+box "Session Group" #E8F5E9
   participant "SessionStore" as store
 end box
 database "Session Directory" as dir
 
-note over user, dir
-  Scope:          Load session messages from JSON Lines file
-  Preconditions:  Session ID provided (--continue or --session)
-  Contexts:       Called by CLI-04 or SSN-04 (Resume Session)
-  Excludes:       Session saving (SSN-01)
-  Rollback:       Not found -> start fresh session
-  Design:         Deserialize JSON Lines back to message list
-  Classification: Process Decomposition
-  Returns:        Success: Session(id, created_at, messages); Failure: FileNotFoundError -> start fresh
-end note
 
 == SSN-02 Load Session ==
 
@@ -60,11 +51,5 @@ agent --> router : AgentEvent(Done)
 deactivate store
 deactivate agent
 deactivate router
-note over user, dir
-  Flow:    SSN-02 → read file → deserialize → Session
-  State:   No state change
-  Success: 200 OK — session with restored messages
-  Failure: 404 NOT_FOUND — file not found, start fresh
-end note
 
 @enduml

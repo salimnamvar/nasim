@@ -1,4 +1,5 @@
 @startuml sq_rtg02_apply_fallback
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RTG-02 — APPLY Fallback
 ' Boundary:  nasim code agent
@@ -19,7 +20,7 @@ end box
 box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Router Group" #E3F2FD
+box "Router Group" #FFF3E0
   participant "ModelRouter" as router
   participant "FallbackChain" as fallback
 end box
@@ -30,18 +31,6 @@ box "Repository Group" #E8F5E9
   participant "ModelRepository" as model_repo
 end box
 
-note over user, provider
-  Scope:          RTG-02 APPLY Fallback — apply fallback chain when primary model fails
-  Preconditions:  FallbackChain initialized with model list
-  Contexts:       Called by RTG-01 when primary model unavailable
-  Excludes:       Model selection (RTG-01), task classification (RTG-03)
-  Rollback:       Return error if all models in chain fail
-  Design:         Circuit breaker pattern with exponential backoff
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data=selected_model)
-    - Failure: Result(success=false, error="all_models_unavailable")
-end note
 
 == RTG-02 APPLY Fallback ==
 
@@ -80,11 +69,5 @@ deactivate router
 
 agent --> router : AgentEvent(Done)
 
-note over user, provider
-  Flow:    RTG-02 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> FallbackChain -> check each model -> return first available
-  State:   No state change
-  Success: Result(success=true, data=selected_model)
-  Failure: Result(success=false, error="all_models_unavailable") — all models unavailable
-end note
 
 @enduml

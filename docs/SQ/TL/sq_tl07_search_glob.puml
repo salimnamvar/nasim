@@ -1,4 +1,5 @@
 @startuml sq_tl07_search_glob
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-07 — SEARCH Glob
 ' Boundary:  nasim code agent CLI
@@ -22,16 +23,6 @@ box "Tool Group" #E8F5E9
   participant "GlobTool" as glob
 end box
 
-note over user, glob
-  Scope:          Find files matching glob pattern
-  Preconditions:  Glob pattern provided by LLM
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       Content search, file reading
-  Rollback:       Error string returned to LLM
-  Design:         Uses pathlib.Path.glob()
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=sorted_paths) or ToolResult(success=False, error=str)
-end note
 
 == TL-07 GLOB Files ==
 
@@ -61,11 +52,5 @@ agent --> router : AgentEvent(Done)
 deactivate registry
 deactivate agent
 deactivate router
-note over user, glob
-  Flow:    TL-07: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> GlobTool -> pathlib.glob -> ToolResult
-  State:   No state change
-  Success: Sorted list of matching file paths
-  Failure: Permission denied -> ToolResult(success=False)
-end note
 
 @enduml

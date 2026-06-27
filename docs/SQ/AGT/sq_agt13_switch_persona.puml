@@ -1,4 +1,5 @@
 @startuml sq_agt13_switch_persona
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-13 — SWITCH Persona
 ' Boundary:  nasim code agent
@@ -27,17 +28,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
-note over user, reg
-  Scope:          AGT-13 SWITCH Persona
-  Preconditions:  PersonaManager active with current persona loaded
-  Contexts:       Called when user or task requests persona change mid-session
-  Excludes:       Load only (AGT-12), delegation (AGT-11)
-  Rollback:       New persona load fails → retain previous persona
-  Design:         Atomic switch: unload current → load new; partial failure retains old
-  Classification: Process Decomposition
-  Returns:        Success: PersonaSwitched(new_persona)
-                  Failure: PersonaSwitchFailed(retained previous)
-end note
 
 == AGT-13 SWITCH Persona ==
 
@@ -71,11 +61,5 @@ deactivate pm
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, reg
-  Flow:    AGT-13 → unload current → load new → apply
-  State:   <back:#2E7D32>ACTIVE</back> -> SWITCHING -> <back:#2E7D32>ACTIVE</back>
-  Success: persona switched, new system prompt active
-  Failure: new config invalid -> retain previous persona
-end note
 
 @enduml

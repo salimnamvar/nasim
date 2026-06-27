@@ -1,4 +1,5 @@
 @startuml sq_ctx06_track_token_budget
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-06 — Track Token Budget
 ' Boundary:  nasim code agent CLI
@@ -11,24 +12,14 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "ConversationHistory" as history
 end box
 
-note over agent, history
-  Scope:          Track token count as messages accumulate
-  Preconditions:  ConversationHistory initialized
-  Contexts:       Called by AGT-01 after each message append
-  Excludes:       Context compaction (CTX-02)
-  Rollback:       N/A — tracking is passive
-  Design:         Heuristic: len(str) / 4 for estimation
-  Classification: Process Decomposition
-  Returns:        ok on success; COMPACT_NEEDED when budget exceeded
-end note
 
 == CTX-01 Track Token Count ==
 
@@ -54,11 +45,5 @@ agent --> router : AgentEvent(Done)
 
 deactivate agent
 deactivate router
-note over agent, history
-  Flow:    User → ServerRouter → AgentOrchestrator → message → append → estimate tokens → check budget
-  State:   No state change (or triggers COMPACTING)
-  Success: Message added, token count updated
-  Failure: N/A
-end note
 
 @enduml

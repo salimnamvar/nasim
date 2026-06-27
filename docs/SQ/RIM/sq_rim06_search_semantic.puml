@@ -1,4 +1,5 @@
 @startuml sq_rim06_search_semantic
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-06 — SEARCH Semantic
 ' Boundary:  nasim code agent CLI
@@ -29,17 +30,6 @@ box "Storage Group" #E8F5E9
   participant "EmbeddingStore" as embeddings
 end box
 
-note over user, embeddings
-  Scope:          RIM-06 SEARCH Semantic — embedding-based code similarity search
-  Preconditions:  RIM-01 completed (AST index available), EmbeddingStore populated, Provider available
-  Contexts:       Called by AgentOrchestrator when user query requires semantic understanding. Complementary to RIM-02 (structural ranking)
-  Excludes:       Structural/graph-based search (RIM-02), full-text grep search (TL-02)
-  Rollback:       Embedding generation failure -> return empty results; store unavailable -> fall back to keyword search
-  Design:         SemanticSearch embeds query via Provider. Cosine similarity against EmbeddingStore. Top-K results with minimum similarity threshold (0.3). Pagination by page_size/page_token per AIP-158
-  Returns:
-    - Success: SearchResultList(results, scores, snippets)
-    - Failure: Empty results with fallback flag
-end note
 
 == RIM-06 SEARCH Semantic ==
 
@@ -72,11 +62,5 @@ agent --> router : SearchResultList(results, scores, snippets)
 deactivate agent
 deactivate router
 
-note over user, embeddings
-  Flow:    RIM-06 → User → ServerRouter → AgentOrchestrator → SemanticSearch → Provider(embed) → EmbeddingStore → SearchResultList
-  State:   No state change
-  Success: SearchResultList with similarity-scored snippets
-  Failure: Embedding failure -> empty results + fallback flag; store unavailable -> keyword fallback
-end note
 
 @enduml

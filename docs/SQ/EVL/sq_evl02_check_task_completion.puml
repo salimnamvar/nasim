@@ -1,4 +1,5 @@
 @startuml sq_evl02_check_task_completion
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-02 — CHECK Task Completion
 ' Boundary:  nasim code agent
@@ -28,16 +29,6 @@ box "Repository Group" #E8F5E9
   participant "EvaluationRepository" as eval_repo
 end box
 
-note over user, tool
-  Scope:          Check whether a task meets its completion criteria
-  Preconditions:  Task defined with acceptance criteria, tool results available
-  Contexts:       EVL-01 EVALUATE Task delegates completion check here
-  Excludes:       Success check execution (EVL-03), retry coordination (EVL-06)
-  Rollback:       No state change — read-only evaluation
-  Design:         TaskEvaluator compares tool outputs against criteria predicates
-  Classification: Process Decomposition
-  Returns:        CompletionStatus(completed, details[])
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -70,11 +61,5 @@ deactivate engine
 
 agent --> router : AgentEvent(Done)
 
-note over user, tool
-  Flow:    EVL-02 AgentOrchestrator -> EvaluationEngine -> TaskEvaluator -> evaluate against criteria -> return completion status
-  State:   <back:#ECEFF1>IDLE</back> → <back:#F9FBE7>EVALUATING</back> → AGGREGATING → DONE
-  Success: CompletionStatus with per-criterion pass/fail
-  Failure: No state change on evaluation failure — returns partial status
-end note
 
 @enduml

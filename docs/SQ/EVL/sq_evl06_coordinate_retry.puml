@@ -1,4 +1,5 @@
 @startuml sq_evl06_coordinate_retry
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-06 — Coordinate Retry
 ' Boundary:  nasim code agent CLI
@@ -26,16 +27,6 @@ box "Sandbox Group" #F3E5F5
   participant "FileSystem" as fs
 end box
 
-note over user, fs
-  Scope:          Retry with feedback on failure
-  Preconditions:  EVL-01 or EVL-02 identified failure, backup file available for revert, turn budget not exhausted
-  Contexts:       Called after evaluation failure (EVL-01 or EVL-02); triggers new EDT cycle with injected feedback
-  Excludes:       Evaluation logic (handled by EVL-01/02), turn budget management (handled by EVL-09)
-  Rollback:       Max retries exceeded -> abort, report to user; turn budget exhausted -> abort, report to user
-  Design:         RetryCoordinator manages retry count and limits; FeedbackInjector formats failure details for next LLM call; backup restored before retry attempt; max 3 retries per edit before escalating
-  Classification: Primary Orchestrator
-  Returns:        RetryResult(retry_count, feedback_context, continue=true) or RetryExhausted(retry_count, final_error)
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -69,11 +60,5 @@ deactivate retry
 
 agent --> router : AgentEvent(Done)
 
-note over user, fs
-  Flow:    EVL-06 AgentOrchestrator -> RetryCoordinator -> FileSystem + FeedbackInjector -> RetryResult
-  State:   <back:#ECEFF1>IDLE</back> → CHECKING_LIMIT → RESTORING → INJECTING → DONE
-  Success: RetryResult with feedback for next attempt
-  Failure: Max retries exceeded -> RetryExhausted error
-end note
 
 @enduml

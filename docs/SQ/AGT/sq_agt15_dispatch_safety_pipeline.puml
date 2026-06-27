@@ -1,4 +1,5 @@
 @startuml sq_agt15_dispatch_safety_pipeline
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-15 — DISPATCH Safety Pipeline
 ' Boundary:  nasim code agent
@@ -26,17 +27,6 @@ box "Safety Group" #FFF3E0
   participant "PermissionGate" as perm
 end box
 
-note over user, perm
-  Scope:          AGT-15 DISPATCH Safety Pipeline
-  Preconditions:  Tool call queued, SafetyCoordinator initialized
-  Contexts:       Called by AGT-02 before every tool dispatch
-  Excludes:       Individual safety checks (SAF-01/02/03)
-  Rollback:       Any stage fails → block tool execution, report violation
-  Design:         Pipeline stages run sequentially; first failure short-circuits
-  Classification: Process Decomposition
-  Returns:        Success: SafetyPassed — tool execution allowed
-                  Failure: SafetyViolation(injection | egress | permission) — tool blocked
-end note
 
 == AGT-15 DISPATCH Safety Pipeline ==
 
@@ -80,11 +70,5 @@ deactivate safety
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, perm
-  Flow:    AGT-15 → injection scan → egress inspect → permission check → return
-  State:   CHECKING -> INJECTION -> EGRESS -> PERMISSION -> PASSED | BLOCKED
-  Success: SafetyPassed, tool execution allowed
-  Failure: any stage fails -> block, report violation
-end note
 
 @enduml

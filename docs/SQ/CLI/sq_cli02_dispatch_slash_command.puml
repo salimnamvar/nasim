@@ -1,4 +1,5 @@
 @startuml sq_cli02_dispatch_slash_command
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-02 — Dispatch Slash Command
 ' Boundary:  nasim code agent CLI
@@ -26,16 +27,6 @@ box "Repository Group" #E8F5E9
   participant "SessionRepository" as session_repo
 end box
 
-note over user, repl
-  Scope:          Slash command parsing and dispatch
-  Preconditions:  REPL running, input starts with /
-  Contexts:       Called by CLI-01 (PROCESS User Input)
-  Excludes:       Normal user input (CLI-01)
-  Rollback:       Unknown command -> error message
-  Design:         Commands: /help, /reset, /model, /quit, /plan, /sessions
-  Classification: Primary Orchestrator
-  Returns:        Developer sees command result or error message
-end note
 
 == CLI-02 Execute Slash Command ==
 
@@ -88,11 +79,5 @@ end
 
 deactivate cmd
 deactivate repl
-note over user, repl
-  Flow:    CLI-02 dispatchSlashCommand: /cmd -> SlashCommandHandler -> action -> Renderer -> User
-  State:   No state change (except /plan toggles PLANNING, /reset clears history)
-  Success: Command action completed
-  Failure: Unknown command -> error message
-end note
 
 @enduml

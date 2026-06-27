@@ -1,4 +1,5 @@
 @startuml sq_edt05_apply_fenced_block
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-05 — APPLY Fenced Block
 ' Boundary:  nasim code agent
@@ -24,16 +25,6 @@ box "Edit Strategy Group" #FFF3E0
   participant "FencedBlockCoder" as coder
 end box
 
-note over agent, coder
-  Scope:          Apply fenced code block format edit
-  Preconditions:  EditStrategyManager initialized, file exists
-  Contexts:       Called by AGT-02 DISPATCH Tool Call
-  Excludes:       Strategy selection (EDT-01), validation (EDT-03)
-  Rollback:       Block extraction failure returns error
-  Design:         Extracts fenced code block, replaces matching section
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True) on success; ToolResult(success=False) on failure
-end note
 
 == EDT-05 APPLY Fenced Block ==
 
@@ -61,11 +52,5 @@ deactivate mgr
 
 agent --> router : AgentEvent(Done)
 
-note over agent, coder
-  Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → FencedBlockCoder → extract → locate → replace
-  State:   No state change
-  Success: File modified with fenced block replacement
-  Failure: Section not found, ambiguous match -> ToolResult(success=False)
-end note
 
 @enduml

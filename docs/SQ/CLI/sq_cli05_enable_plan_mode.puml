@@ -1,4 +1,5 @@
 @startuml sq_cli05_enable_plan_mode
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-05 — Enable Plan Mode
 ' Boundary:  nasim code agent CLI
@@ -24,16 +25,6 @@ box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 
-note over user, repl
-  Scope:          Toggle plan mode on/off via slash command
-  Preconditions:  ServerRouter active, SlashCommandHandler registered
-  Contexts:       Invoked by Developer via /plan-mode command
-  Excludes:       Plan execution (AGT-07/08), model switching (CLI-07)
-  Rollback:       Toggle failure → display error, retain current state
-  Design:         Plan mode flag stored in session state; affects AGT-01 loop behavior
-  Classification: Primary Orchestrator
-  Returns:        Plan mode state toggled, confirmation shown
-end note
 
 == CLI-05 Enable Plan Mode ==
 
@@ -57,11 +48,5 @@ break Toggle error
     cmd --> repl : CommandError
 end
 
-note over user, repl
-  Flow:    CLI-05 enablePlanMode: User → ServerRouter → SlashCommandHandler → toggle → confirm
-  State:   <back:#ECEFF1>IDLE</back> → TOGGLING → <back:#ECEFF1>IDLE</back>
-  Success: Plan mode toggled, confirmation shown
-  Failure: Toggle error → display error, retain state
-end note
 
 @enduml

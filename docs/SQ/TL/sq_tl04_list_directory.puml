@@ -1,4 +1,5 @@
 @startuml sq_tl04_list_directory
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-04 — List Directory
 ' Boundary:  nasim code agent CLI
@@ -11,28 +12,18 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "DirTool" as dt
 end box
 participant "Host Filesystem" as fs
 
-note over user, fs
-  Scope:          List directory entries sorted by type then name
-  Preconditions:  Path provided (default: current directory)
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Excludes:       File read/write
-  Rollback:       Error string returned to LLM
-  Design:         Directories first, then files, alphabetical
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, content=formatted_listing) or ToolResult(success=False, error=str)
-end note
 
 == TL-04 LIST Directory ==
 
@@ -74,11 +65,5 @@ deactivate dt
 deactivate registry
 deactivate agent
 deactivate router
-note over user, fs
-  Flow:    TL-04: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> DirTool -> Host Filesystem -> ToolResult
-  State:   No state change
-  Success: Directory listing with type prefixes
-  Failure: Not found or not directory -> ToolResult(success=False)
-end note
 
 @enduml

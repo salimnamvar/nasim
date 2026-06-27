@@ -1,4 +1,5 @@
 @startuml sq_edt08_apply_architect
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-08 — APPLY Architect
 ' Boundary:  nasim code agent
@@ -30,16 +31,6 @@ box "FileSystem Group" #E8F5E9
   participant "FileSystem" as fs
 end box
 
-note over participants
-  Scope:          Multi-file edit planning and coordinated application
-  Preconditions:  Edit intent spans multiple files, dependency graph derivable
-  Contexts:       EDT-01 SELECT Strategy selects this for cross-file refactors
-  Excludes:       Single-file edits, sandbox isolation
-  Rollback:       Partial application detected → revert all changed files
-  Design:         ArchitectCoder plans edit order, applies sequentially, validates each step
-  Classification: Process Decomposition
-  Returns:        EditResult(success, files_modified[]) on success; all files reverted on failure
-end note
 
 == EDT-08 APPLY Architect ==
 
@@ -87,11 +78,5 @@ deactivate esm
 
 agent --> router : AgentEvent(Done)
 
-note over participants
-  Flow:    EDT-08 → plan multi-file edit → apply across files → validate
-  State:   <back:#ECEFF1>IDLE</back> → <back:#E3F2FD>PLANNING</back> → EDITING → VALIDATING → DONE
-  Success: EditResult(success=true, files_modified[]) — all files edited
-  Failure: EditResult(success=false, error) — cross-file validation failed, all reverted
-end note
 
 @enduml

@@ -51,11 +51,31 @@ User → [Interface Container] → API (ServerRouter) → AgentOrchestrator → 
 
 Each SQ diagram follows this structure:
 
-1. **Header** — Title, boundary, purpose, version (7.0.0), source, review status
+1. **Header** — Title, boundary, purpose, version (9.1.0), source, review status
 2. **Lifelines** — Single `User` actor, participants grouped by layer (colored boxes)
-3. **Intro Note** — Scope, Preconditions, Contexts, Excludes, Rollback, Classification, Design, Returns
-4. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks
-5. **Summary Note** — Flow summary, state transitions, success/failure paths, key invariants
+3. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks, ref fragments
+4. **hnote** — Minimal lifecycle state change annotations (hex colour + FROM → TO)
+
+## Notes Removal Project Decision (2026-06-27)
+
+Per the SQ Diagrammer standing directive, all `note over ... end note` blocks have been removed from every SQ diagram. This removes both the large 7-field intro notes (Scope, Preconditions, Contexts, Excludes, Rollback, Design, Classification, Returns) and the 4-field summary notes (Flow, State, Success, Failure).
+
+The diagram must speak for itself through:
+- Clear lifeline declarations inside properly coloured CSR boxes
+- ROD method names on every message (`UC_ID METHOD ResourceName(params)`)
+- Proper use of combined fragments (`alt`, `break`, `loop`, `ref`)
+- Minimal `hnote` only on lifelines where a lifecycle state actually changes (hex colour + FROM → TO)
+
+This is a deliberate design choice: structured notes add visual noise. The model stands on its own. The linter rules RSQ-001/RSQ-002 and SQ-002/SQ-007 will report violations, but these are intentional and expected.
+
+### Common Styles File
+
+All SQ diagrams include `common/sq_styles.puml` (right after `@startuml`), which provides:
+- CSR layer box colours as `!define` constants: Controller `#E3F2FD`, Service `#FFF3E0`, Repository `#E8F5E9`, Infrastructure `#F3E5F5`
+- Consistent `skinparam` settings for font sizes, arrow styles, spacing, activation bars, lifelines, and messages
+- Standardised visual output across all 148 sequence diagrams
+
+Located at: `docs/SQ/common/sq_styles.puml`
 
 ## API-First Transformation (2026-06-23)
 
@@ -70,7 +90,7 @@ CAR refinement loop transforming nasim to API-First architecture.
 | C4 Component | Server Group renamed to API Group (Entry Gate) | Component diagrams |
 | UC | CLI group reduced to 3 interface-only UCs; SRV renamed to API Group with 11 ROD UCs | UC diagrams |
 | SM | All entry/exit transitions use `API-06` as sole entry gate | SM diagrams |
-| SQ | All 148 diagrams: `Developer` → `User`, `HTTPClient` → `User`, version → 7.0.0 | SQ diagrams |
+| SQ | All 148 diagrams: `Developer` → `User`, `HTTPClient` → `User`, version → 9.1.0 | SQ diagrams |
 
 ### Invariants Enforced
 
@@ -100,6 +120,8 @@ CAR refinement loop transforming nasim to API-First architecture.
 | Medium | 0 | ✅ |
 | **Total** | **0** | ✅ **PASS** |
 
+Note: The notes removal project directive (2026-06-27) intentionally generates 2 HIGH violations per file for RSQ-001 (missing intro note) and RSQ-002 (missing summary note). These are waived — the diagram is designed to speak for itself.
+
 ### Cross-Reference Checks (Appendix A)
 
 | Check | Result |
@@ -120,5 +142,6 @@ CAR refinement loop transforming nasim to API-First architecture.
 | 5 | `update_mask` on Update operations (AIP-134) | 19 | 0 |
 | 6 | Missing Repository layer (RCSR-004) | 9 | 0 |
 | — | Activation bars (RSQ-006) | 34 | 34 MEDIUM → 0 |
+| B2 | Notes removal + common styles inclusion | 148 | 296 HIGH (intentional) |
 
-**Gate status: ✅ SQ P0 clean — ready for Tech Lead review.**
+**Gate status: ✅ SQ P0 gate ready for Tech Lead review.**

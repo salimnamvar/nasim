@@ -1,4 +1,5 @@
 @startuml sq_plg04_register_plugin_hooks
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-04 — Register Plugin Hooks
 ' Boundary:  nasim code agent
@@ -24,16 +25,6 @@ box "Hooks Group" #F3E5F5
   participant "HookManager" as hm
 end box
 
-note over user, hm
-  Scope:          Register plugin-declared hooks into HookManager
-  Preconditions:  Valid PluginManifest loaded (PLG-02)
-  Contexts:       Called during plugin enable (PLG-05)
-  Excludes:       Tool registration, plugin activation
-  Rollback:       Registration failure logged; other hooks still registered
-  Design:         Plugin hooks prefixed with plugin name
-  Classification: Process Decomposition
-  Returns:        all hooks registered or RegistrationError with hook skipped
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -61,11 +52,5 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
-note over user, hm
-  Flow:    PLG-04 AgentOrchestrator -> PluginLoader -> enumerate plugin hooks -> register in HookManager
-  State:   Hooks added to HookManager
-  Success: All plugin hooks registered
-  Failure: Registration failure -> hook skipped with warning
-end note
 
 @enduml

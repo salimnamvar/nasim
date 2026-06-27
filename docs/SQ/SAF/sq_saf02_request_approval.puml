@@ -1,4 +1,5 @@
 @startuml sq_saf02_request_approval
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SAF-02 — REQUEST Approval
 ' Boundary:  nasim code agent CLI
@@ -25,18 +26,6 @@ box "Repository Group" #E8F5E9
   participant "PolicyRepository" as policy_repo
 end box
 
-note over user, gate
-  Scope:          SAF-02 PROMPT User Approval — prompt user for approval of unsafe tool
-  Preconditions:  safety_mode=ask AND tool.safe=False
-  Contexts:       Called by SAF-01 (CHECK Tool Permission)
-  Excludes:       Permission check logic (SAF-01)
-  Rollback:       User rejects -> tool skipped
-  Design:         Shows tool name + args, prompts [y/N]
-  Classification: Primary Orchestrator
-  Returns:
-    - Success: approved (bool)
-    - Failure: rejected (bool)
-end note
 
 == SAF-02 Prompt User Approval ==
 
@@ -66,11 +55,5 @@ end
 deactivate gate
 deactivate renderer
 
-note over user, gate
-  Flow:    SAF-02 -> User -> ServerRouter -> AgentOrchestrator -> PermissionGate -> Renderer -> user prompt -> choice -> gate
-  State:   <back:#F3E5F5>TOOL_EXEC</back> -> <back:#FFF9C4>AWAITING_APPROVAL</back> -> <back:#F3E5F5>TOOL_EXEC</back> or <back:#ECEFF1>IDLE</back>
-  Success: approved — tool executes
-  Failure: rejected — tool skipped
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_srv07_list_messages
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     API-07 — LIST Messages
 ' Boundary:  nasim code agent HTTP API
@@ -23,16 +24,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, store
-  Scope:          Retrieve message history for a session
-  Preconditions:  Session exists, ServerRouter initialized
-  Contexts:       Called by HTTPClient via GET /v1/sessions/{id}/messages
-  Excludes:       Session CRUD (API-01..05), Message dispatch (API-06)
-  Rollback:       404 if session not found
-  Design:         CSR: Controller(ServerRouter) -> Service(SessionService) -> Repository(SessionStore). ROD: standard list (AIP-132)
-  Classification: Primary Orchestrator
-  Returns:        200 OK with message list, or 404 NOT_FOUND error
-end note
 
 == API-07 LIST Messages ==
 
@@ -60,11 +51,5 @@ end
 deactivate svc
 deactivate router
 
-note over user, store
-  Flow:    API-07 → readMessages → respond
-  State:   No state change
-  Success: 200 OK with message list
-  Failure: 404 session not found
-end note
 
 @enduml

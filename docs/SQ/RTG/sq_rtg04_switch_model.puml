@@ -1,4 +1,5 @@
 @startuml sq_rtg04_switch_model
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     RTG-04 — Switch Model
 ' Boundary:  nasim code agent
@@ -13,28 +14,16 @@ title nasim — RTG-04 UPDATE Model
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Router Group" #EDE7F6
+box "Router Group" #FFF3E0
   participant "ModelRouter" as router
 end box
 
-note over user, router
-  Scope:          RTG-04 SWITCH Model — change active model via CLI or agent request
-  Preconditions:  Target model available in catalog
-  Contexts:       Called by CLI-07 SWITCH Model or AGT-01
-  Excludes:       Model classification, fallback
-  Rollback:       Previous model restored on switch failure
-  Design:         Atomic config update; validates model availability
-  Classification: Process Decomposition
-  Returns:
-    - Success: Result(success=true, data={previous_model, new_model})
-    - Failure: Result(success=false, error="model_not_available")
-end note
 
 == RTG-04 Switch Model ==
 
@@ -60,11 +49,5 @@ agent --> router : AgentEvent(Done)
 
 deactivate agent
 deactivate router
-note over user, router
-  Flow:    RTG-04 -> User -> ServerRouter -> AgentOrchestrator -> ModelRouter -> validate -> update config -> return
-  State:   Active model updated
-  Success: Result(success=true, data={previous_model, new_model})
-  Failure: Result(success=false, error="model_not_available") — error returned
-end note
 
 @enduml

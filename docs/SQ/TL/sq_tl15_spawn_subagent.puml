@@ -1,4 +1,5 @@
 @startuml sq_tl15_spawn_subagent
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-15 — Spawn Subagent
 ' Boundary:  nasim code agent
@@ -11,28 +12,18 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Tool Group" #F3E5F5
+box "Tool Group" #E8F5E9
   participant "ToolRegistry" as registry
   participant "SubagentTool" as tool
 end box
 participant "SubagentCoordinator" as coord
 
-note over user, coord
-  Scope:          Spawn a child subagent with a task prompt
-  Preconditions:  SubagentCoordinator initialized
-  Excludes:       Subagent result collection, cancellation
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call)
-  Rollback:       Error string returned to LLM
-  Design:         Fire-and-forget spawn; child runs independently
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True, child_id=child_id) or ToolResult(success=False, error=str)
-end note
 
 == TL-15 Spawn Subagent ==
 
@@ -65,11 +56,5 @@ deactivate tool
 deactivate registry
 deactivate agent
 deactivate router
-note over user, coord
-  Flow:    TL-15: User -> ServerRouter -> AgentOrchestrator -> ToolRegistry -> SubagentTool -> SubagentCoordinator -> ToolResult
-  State:   New child subagent spawned
-  Success: Child subagent ID returned
-  Failure: Coordinator unavailable or spawn limit -> ToolResult(success=False)
-end note
 
 @enduml

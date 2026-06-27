@@ -1,4 +1,5 @@
 @startuml sq_cli03_stream_output
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-03 — Stream Output
 ' Boundary:  nasim code agent CLI
@@ -24,16 +25,6 @@ box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, store
-  Scope:          Rendering AgentEvents to terminal
-  Preconditions:  Agent event stream active
-  Contexts:       Called by CLI-01 (PROCESS User Input)
-  Excludes:       Agent loop logic, tool execution
-  Rollback:       N/A — renderer is passive consumer
-  Design:         Uses Rich library for colors, diffs, formatting
-  Classification: Primary Orchestrator
-  Returns:        Developer sees formatted terminal output
-end note
 
 == CLI-03 STREAM Output ==
 
@@ -69,11 +60,5 @@ store --> renderer : stored
 deactivate store
 
 deactivate renderer
-note over user, store
-  Flow:    CLI-03 streamOutput: Event stream -> Renderer -> formatted terminal output; SessionStore stores result
-  State:   No state change
-  Success: All events rendered with appropriate formatting
-  Failure: N/A — renderer is passive
-end note
 
 @enduml

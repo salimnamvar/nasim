@@ -1,4 +1,5 @@
 @startuml sq_plg01_discover_plugins
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-01 — DISCOVER Plugins
 ' Boundary:  nasim code agent
@@ -22,16 +23,6 @@ box "Plugins Group" #F3E5F5
 end box
 participant "Host Filesystem" as fs
 
-note over user, fs
-  Scope:          Discover plugins from plugin directory
-  Preconditions:  Plugin directory configured (~/.nasim/plugins/)
-  Contexts:       Called during agent initialization
-  Excludes:       Tool/hook registration (PLG-03/04), activation (PLG-05)
-  Rollback:       Malformed plugins skipped with warning
-  Design:         Scan plugin directory for manifest.yaml files
-  Classification: Process Decomposition
-  Returns:        list[PluginManifest] or empty list on failure
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -61,11 +52,5 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
-note over user, fs
-  Flow:    PLG-01 AgentOrchestrator -> PluginLoader -> scan directory -> load manifests -> return list
-  State:   <back:#ECEFF1>DISCOVERED</back>
-  Success: List of discovered PluginManifests returned
-  Failure: Malformed plugin skipped with warning
-end note
 
 @enduml

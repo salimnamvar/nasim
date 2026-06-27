@@ -1,4 +1,5 @@
 @startuml sq_edt04_apply_unified_diff
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-04 — APPLY Unified Diff
 ' Boundary:  nasim code agent
@@ -27,16 +28,6 @@ box "Repository Group" #E8F5E9
   participant "FileSystem" as fs
 end box
 
-note over agent, fs
-  Scope:          Apply unified diff format edit to file
-  Preconditions:  EditStrategyManager initialized, file exists
-  Contexts:       Called by AGT-02 DISPATCH Tool Call
-  Excludes:       Strategy selection (EDT-01), validation (EDT-03)
-  Rollback:       Diff application failure returns error
-  Design:         Parses unified diff, applies hunks sequentially; FileSystem persists file changes
-  Classification: Process Decomposition
-  Returns:        ToolResult(success=True) on success; ToolResult(success=False) on failure
-end note
 
 == EDT-04 APPLY Unified Diff ==
 
@@ -65,11 +56,5 @@ deactivate mgr
 
 agent --> router : AgentEvent(Done)
 
-note over agent, fs
-  Flow:    User → ServerRouter → AgentOrchestrator → EditStrategyManager → UnifiedDiffCoder → parse hunks → apply → result; FileSystem writes modified file
-  State:   No state change
-  Success: File modified with unified diff
-  Failure: Hunk mismatch, file not found -> ToolResult(success=False)
-end note
 
 @enduml

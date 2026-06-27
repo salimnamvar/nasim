@@ -1,4 +1,5 @@
 @startuml sq_agt06_compact_context
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-06 — COMPACT Context
 ' Boundary:  nasim code agent
@@ -25,17 +26,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
-note over user, compactor
-  Scope:          AGT-06 COMPACT Context
-  Preconditions:  token_count > context_budget
-  Contexts:       Called by AGT-03 (UPDATE Conversation)
-  Excludes:       Token tracking (CTX-01)
-  Rollback:       Truncate oldest messages as fallback
-  Design:         Secondary LLM call to summarize old exchanges
-  Classification: Process Decomposition
-  Returns:        Success: shortened messages list
-                  Failure: truncated messages (fallback)
-end note
 
 == AGT-06 COMPACT Context ==
 
@@ -66,11 +56,5 @@ deactivate history
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, compactor
-  Flow:    AGT-06 → budget check → select old → summarize → replace
-  State:   <back:#FFF3E0>THINKING</back> -> <back:#E0F2F1>COMPACTING</back> -> <back:#FFF3E0>THINKING</back>
-  Success: messages shortened, token count reduced
-  Failure: LLM fails -> truncate fallback
-end note
 
 @enduml

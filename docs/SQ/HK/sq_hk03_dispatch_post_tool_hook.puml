@@ -1,4 +1,5 @@
 @startuml sq_hk03_dispatch_post_tool_hook
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-03 — DISPATCH Post-Tool Hook
 ' Boundary:  nasim code agent
@@ -30,18 +31,6 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
-note over user, hook
-  Scope:          HK-03 DISPATCH Post-Tool Hook
-  Preconditions:  Tool execution completed, hooks registered for PostToolCall event
-  Contexts:       Called by AGT-02 (DISPATCH Tool Call) after tool execution
-  Excludes:       Pre-tool hooks (HK-02), LLM hooks (HK-04/05)
-  Rollback:       Hook failure logged; pipeline continues
-  Design:         Priority-ordered execution; short-circuit on deny
-  Classification: Process Decomposition
-  Returns:
-    - Success: HookResult(action=ALLOW, modified_result?) — pipeline continues
-    - Failure: HookResult(action=DENY, reason) — tool result blocked
-end note
 
 == HK-03 DISPATCH Post-Tool Hook ==
 
@@ -76,11 +65,5 @@ agent --> router : HookResult(action=ALLOW)
 deactivate agent
 deactivate router
 
-note over user, hook
-  Flow:    HK-03 → tool execution → HookManager → find hooks → execute in priority order → return HookResult
-  State:   No state change
-  Success: HookResult(action=ALLOW) — pipeline continues
-  Failure: HookResult(action=DENY) — tool result blocked
-end note
 
 @enduml

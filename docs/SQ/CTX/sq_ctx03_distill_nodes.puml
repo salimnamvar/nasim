@@ -1,4 +1,5 @@
 @startuml sq_ctx03_distill_nodes
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-03 — Distill Nodes
 ' Boundary:  nasim code agent CLI
@@ -11,10 +12,10 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8EAF6
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "ContextCompactor" as compactor
 end box
@@ -25,16 +26,6 @@ box "Repository Group" #E8F5E9
   participant "ContextStore" as ctx_store
 end box
 
-note over compactor, ctx_store
-  Scope:          Summarize selected old exchanges
-  Preconditions:  ContextCompactor has selected messages to summarize
-  Contexts:       Called by CTX-02 (COMPACT Context)
-  Excludes:       Budget tracking, message selection
-  Rollback:       Empty summary -> use truncated raw content
-  Design:         Uses same provider as main agent for consistency
-  Classification: Process Decomposition
-  Returns:        summary message on success; truncated raw content on failure
-end note
 
 == CTX-03 Summarize Old Exchanges ==
 
@@ -68,11 +59,5 @@ agent --> router : AgentEvent(Done)
 deactivate compactor
 deactivate agent
 deactivate router
-note over compactor, ctx_store
-  Flow:    User → ServerRouter → AgentOrchestrator → select old → build prompt → LLM summarize → summary message; ContextStore stores distilled result
-  State:   <back:#E0F2F1>COMPACTING</back>
-  Success: Summary message ready to replace old exchanges
-  Failure: Empty summary -> truncated raw fallback
-end note
 
 @enduml

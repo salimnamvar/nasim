@@ -1,4 +1,5 @@
 @startuml sm_agent_lifecycle
+!include common/sm_styles.puml
 ' ============================================================
 ' Title:     nasim — Agent Lifecycle State Machine (API-First)
 ' Boundary:  nasim code agent
@@ -18,12 +19,6 @@
 
 title nasim — Agent Lifecycle (API-First)
 
-skinparam state {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-}
-
 [*] --> IDLE : AGT-01
 
 state "IDLE" as IDLE #ECEFF1
@@ -34,15 +29,15 @@ state "LISTENING" as LISTENING #E8EAF6
 LISTENING : Receiving and parsing user input.
 LISTENING : API-06 DISPATCH Message (via any interface).
 
-state "THINKING" as THINKING #FFF3E0
+state "THINKING" as THINKING #D7CCC8
 THINKING : LLM processing messages.
 THINKING : PRV-02 REQUEST Chat or PRV-03 STREAM Chat.
 
-state "TOOL_EXEC" as TOOL_EXEC #F3E5F5
+state "TOOL_EXEC" as TOOL_EXEC #B2DFDB
 TOOL_EXEC : Executing a tool call.
 TOOL_EXEC : AGT-02 DISPATCH Tool Call.
 
-state "RESPONDING" as RESPONDING #E8F5E9
+state "RESPONDING" as RESPONDING #D1C4E9
 RESPONDING : Streaming final text to user via API SSE.
 RESPONDING : API-06 DISPATCH Message (SSE response).
 
@@ -58,7 +53,7 @@ state "AWAITING_APPROVAL" as AWAITING_APPROVAL #FFF9C4
 AWAITING_APPROVAL : Waiting for user permission.
 AWAITING_APPROVAL : SAF-02 REQUEST Approval.
 
-state "PLANNING" as PLANNING #E3F2FD
+state "PLANNING" as PLANNING #FFCCBC
 PLANNING : Plan mode, tool calls queued.
 PLANNING : AGT-07 QUEUE Plan.
 

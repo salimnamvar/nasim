@@ -1,4 +1,5 @@
 @startuml sq_agt11_delegate_to_persona
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-11 — DELEGATE to Persona
 ' Boundary:  nasim code agent
@@ -27,17 +28,6 @@ box "Repository Group" #E8F5E9
   participant "MemoryRepository" as memory
 end box
 
-note over user, reg
-  Scope:          AGT-11 DELEGATE to Persona
-  Preconditions:  PersonaManager initialized, at least one persona registered
-  Contexts:       Called by AgentOrchestrator when task requires specialized behavior
-  Excludes:       Persona load/switch (AGT-12/13), subagent spawn (AGT-09)
-  Rollback:       Persona not found → fallback to default persona
-  Design:         Persona selection based on task tags or explicit request
-  Classification: Process Decomposition
-  Returns:        Success: PersonaDelegated with persona context applied
-                  Failure: PersonaDelegated(default) — fallback to default
-end note
 
 == AGT-11 DELEGATE to Persona ==
 
@@ -67,11 +57,5 @@ deactivate pm
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, reg
-  Flow:    AGT-11 → select persona → delegate task
-  State:   <back:#ECEFF1>IDLE</back> -> DELEGATING -> <back:#2E7D32>ACTIVE</back>
-  Success: task delegated with persona context applied
-  Failure: persona not found -> fallback to default
-end note
 
 @enduml

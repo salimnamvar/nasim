@@ -1,4 +1,5 @@
 @startuml sq_ssn04_restore_session
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-04 — Restore Session
 ' Boundary:  nasim code agent CLI
@@ -11,26 +12,16 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Session Group" #F1F8E9
+box "Session Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, agent
-  Scope:          Resume session from --continue or --session flag
-  Preconditions:  CLI invoked with --continue or --session <id>
-  Contexts:       Called by CLI-04 (Parse CLI Arguments)
-  Excludes:       New session creation
-  Rollback:       No session found -> start fresh
-  Design:         --continue loads latest; --session loads by ID
-  Classification: Primary Orchestrator
-  Returns:        Success: Session(id, messages); Failure: FileNotFoundError -> start fresh
-end note
 
 == SSN-04 Resume Session ==
 
@@ -59,11 +50,5 @@ end
 
     deactivate agent
 deactivate router
-note over user, agent
-  Flow:    SSN-04 → load session → restore messages → continue
-  State:   No state change
-  Success: 200 OK — conversation restored, ready for input
-  Failure: 404 NOT_FOUND — no session, start fresh
-end note
 
 @enduml

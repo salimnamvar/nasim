@@ -1,4 +1,5 @@
 @startuml sq_wrl03_seek_turn
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-03 — SEEK Turn
 ' Boundary:  nasim code agent
@@ -27,16 +28,6 @@ box "Repository Group" #E8F5E9
   participant "WireLogStore" as wrl
 end box
 
-note over user, wrl
-  Scope:          Seek to a specific turn in the wire log
-  Preconditions:  Wire log exists, TurnIndex built
-  Contexts:       Called by WRL-04 FORK Session or replay flows
-  Excludes:       Log append (WRL-01), session fork (WRL-04)
-  Rollback:       N/A (read-only)
-  Design:         Uses TurnIndex for O(1) random access by turn number; WireLog persists wire events
-  Classification: Process Decomposition
-  Returns:        Success: WireEvents[turn]; Failure: NotFound — turn not in index
-end note
 
 == WRL-03 SEEK Turn ==
 
@@ -64,11 +55,5 @@ idx --> agent : 200 OK — WireEvents[turn]
 
 agent --> router : AgentEvent(Done)
 
-note over user, wrl
-  Flow:    WRL-03 → lookup offset → read events for turn; WireLog persists wire event data
-  State:   No state change
-  Success: 200 OK — wire events for the requested turn
-  Failure: 404 NOT_FOUND — turn not found in index
-end note
 
 @enduml

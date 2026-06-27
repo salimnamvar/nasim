@@ -1,4 +1,5 @@
 @startuml sq_ctx04_inject_context
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-04 — Inject Context
 ' Boundary:  nasim code agent CLI
@@ -27,16 +28,6 @@ box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
 
-note over pipe, agent
-  Scope:          Retrieve relevant context and inject into reasoning graph
-  Preconditions:  PipelineOrchestrator active, RepoIndex available
-  Contexts:       Called before LLM call to enrich prompt context
-  Excludes:       Context compaction (CTX-02/05), token tracking (CTX-06)
-  Rollback:       Injection failure → proceed with existing context
-  Design:         InjectionProcessor queries RepoIndex for relevant code/docs
-  Classification: Process Decomposition
-  Returns:        InjectionResult(nodes_added, tokens_used) on success; InjectionResult(0, 0) on failure
-end note
 
 == CTX-04 Inject Context ==
 
@@ -65,11 +56,5 @@ break RepoIndex unavailable
     inj --> pipe : InjectionResult(0, 0)
 end
 
-note over pipe, agent
-  Flow:    User → ServerRouter → AgentOrchestrator → PipelineOrchestrator → InjectionProcessor → retrieve context → inject into graph
-  State:   INJECTING → READY
-  Success: Context nodes injected, token count updated
-  Failure: Index unavailable → skip, proceed with existing context
-end note
 
 @enduml

@@ -1,4 +1,5 @@
 @startuml sq_mem04_scope_knowledge
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     MEM-04 — SCOPE Knowledge
 ' Boundary:  nasim code agent
@@ -22,16 +23,6 @@ box "Memory Group" #E8F5E9
   participant "MemoryStore" as store
 end box
 
-note over user, store
-  Scope:          Scope-based filtering of knowledge entries
-  Preconditions:  MemoryStore with multi-scope entries
-  Contexts:       Called by MEM-01 and MEM-02 for scope validation
-  Excludes:       Search and recall (MEM-02, MEM-03)
-  Rollback:       No rollback needed (read-only operation)
-  Design:         Three-level scope hierarchy: global > project > session
-  Classification: Process Decomposition
-  Returns:        scoped_entries[] or global scope entries (fallback)
-end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -59,11 +50,5 @@ deactivate scope
 
 agent --> router : AgentEvent(Done)
 
-note over user, store
-  Flow:    MEM-04 AgentOrchestrator -> MemoryScope -> resolve hierarchy -> fetch entries -> apply mask -> return
-  State:   No state change
-  Success: Agent receives scope-filtered entries
-  Failure: Invalid scope -> return global scope entries
-end note
 
 @enduml

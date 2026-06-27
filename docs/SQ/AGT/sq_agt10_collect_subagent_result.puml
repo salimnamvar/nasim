@@ -1,4 +1,5 @@
 @startuml sq_agt10_collect_subagent_result
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-10 — COLLECT Subagent Result
 ' Boundary:  nasim code agent
@@ -24,17 +25,6 @@ box "Session Group" #E8F5E9
   participant "SessionStore" as store
 end box
 
-note over user, store
-  Scope:          AGT-10 COLLECT Subagent Result
-  Preconditions:  Child agent spawned via AGT-09, child_id valid
-  Contexts:       Called after AGT-09 when parent needs child result
-  Excludes:       Spawn logic (AGT-09), persona delegation (AGT-11)
-  Rollback:       Timeout → cancel child, return partial result
-  Design:         Blocking wait with configurable timeout; result aggregated into parent context
-  Classification: Process Decomposition
-  Returns:        Success: aggregated result from child agent
-                  Failure: PartialResult(timeout) or ChildError
-end note
 
 == AGT-10 COLLECT Subagent Result ==
 
@@ -79,11 +69,5 @@ deactivate coord
 agent --> router : AgentEvent(Done)
 deactivate agent
 
-note over user, store
-  Flow:    AGT-10 → wait → collect → aggregate
-  State:   WAITING -> COLLECTING -> DONE
-  Success: aggregated result returned to parent
-  Failure: timeout -> cancel child -> partial result; child error -> propagate
-end note
 
 @enduml

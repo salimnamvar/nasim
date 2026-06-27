@@ -1,4 +1,5 @@
 @startuml sq_ssn03_list_sessions
+!include common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-03 — List Sessions
 ' Boundary:  nasim code agent CLI
@@ -11,27 +12,17 @@
 
 actor "User" as user
 
-box "API Group (Entry Gate)" #E8F5E9
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #E3F2FD
+box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Session Group" #F1F8E9
+box "Session Group" #E8F5E9
   participant "SessionStore" as store
 end box
 database "Session Directory" as dir
 
-note over user, dir
-  Scope:          List all saved sessions with metadata
-  Preconditions:  /sessions command entered
-  Contexts:       Called by CLI-02 (Execute Slash Command)
-  Excludes:       Session save/load
-  Rollback:       No sessions -> empty list
-  Design:         Scans ~/.nasim/sessions/ for session dirs
-  Classification: Primary Orchestrator
-  Returns:        Success: [(id, created_at, message_count), ...]; Failure: [] (empty list)
-end note
 
 == SSN-03 List Sessions ==
 
@@ -59,11 +50,5 @@ agent --> router : AgentEvent(Done)
 deactivate store
 deactivate agent
 deactivate router
-note over user, dir
-  Flow:    SSN-03 → scan directory → read metadata → list
-  State:   No state change
-  Success: 200 OK — formatted list of sessions
-  Failure: 404 NOT_FOUND — no directory, empty list
-end note
 
 @enduml
