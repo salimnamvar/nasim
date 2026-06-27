@@ -1,3 +1,4 @@
+@startuml c4_nasim_component_overview_infra
 ' ============================================================
 ' Title:     NASIM Application — Infrastructure Layer Overview
 ' Boundary:  NASIM Application (container)
@@ -21,7 +22,6 @@
 ' SIM-01 EXCEPTION: 31 elements — cross-cutting overview of all 6 infrastructure groups; splitting would lose the integration path visibility with core groups
 ' ============================================================
 
-@startuml c4_nasim_component_overview_infra
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 !include common/c4_styles.puml

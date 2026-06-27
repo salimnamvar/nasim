@@ -1,3 +1,4 @@
+@startuml c4_nasim_context
 ' ============================================================
 ' Title:     NASIM Application — System Context
 ' Boundary:  NASIM Application
@@ -32,7 +33,6 @@
 ' Date:      2026-06-25
 ' ============================================================
 
-@startuml c4_nasim_context
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
 !theme plain
 

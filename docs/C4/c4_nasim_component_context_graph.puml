@@ -1,3 +1,4 @@
+@startuml c4_nasim_component_context_graph
 ' ============================================================
 ' Title:     NASIM Application — Context Graph Component Diagram
 ' Boundary:  NASIM Application (container) — Context Graph Group
@@ -10,7 +11,6 @@
 ' Date:      2026-06-26
 ' ============================================================
 
-@startuml c4_nasim_component_context_graph
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !include common/c4_styles.puml
 !theme plain

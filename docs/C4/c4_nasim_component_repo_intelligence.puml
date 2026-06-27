@@ -1,3 +1,4 @@
+@startuml c4_nasim_component_repo_intelligence
 ' ============================================================
 ' Title:     NASIM Application — Repo Intelligence Component Diagram
 ' Boundary:  NASIM Application (container) — Repo Intelligence Group
@@ -17,7 +18,6 @@
 ' Date:      2026-06-26
 ' ============================================================
 
-@startuml c4_nasim_component_repo_intelligence
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
 !include common/c4_styles.puml
