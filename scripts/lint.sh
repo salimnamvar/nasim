@@ -31,4 +31,7 @@ echo "==> ruff check"
 echo "==> pyright (strict)"
 ( cd "${PROJECT_ROOT}" && "${PYRIGHT}" ) || true
 
+echo "==> SQ enforcer (C4 fidelity + ref blocks)"
+( cd "${PROJECT_ROOT}" && python docs/SQ/common/sq_enforce.py ) || true
+
 echo "==> lint complete (some tools may have reported findings above)"

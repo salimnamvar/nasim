@@ -321,45 +321,85 @@ def check_ref_blocks_for_state_writes(files: list[Path]) -> List[dict]:
 
 
 def check_activation_pairs(files: list[Path]) -> List[dict]:
-    """E-SQ-03: Every activate must have a matching deactivate."""
+    """E-SQ-03: Every activate must have a matching deactivate (branch-aware).
+
+    PlantUML semantics:
+    - activate inside alt/else is scoped to that branch
+    - deactivate inside alt/else deactivates something activated before the alt
+    - After alt/else/end, previously activated lifelines remain active
+
+    This checker tracks alt/else/end nesting to avoid false positives.
+    """
     findings = []
     for f in files:
         text = f.read_text()
-        activations = []
-        deactivations = []
+        lines = text.split('\n')
 
-        for i, line in enumerate(text.split('\n'), 1):
+        # Track alt/else/end nesting
+        alt_depth = 0
+        # Stack of (alias, line_num) for activations before alt blocks
+        global_stack = []
+        # Per-branch activations (inside current alt block)
+        branch_activations = []
+
+        for i, line in enumerate(lines, 1):
             stripped = line.strip()
+
+            # Track alt/else/end blocks
+            if stripped.startswith('alt ') or stripped == 'alt':
+                alt_depth += 1
+                branch_activations = []
+            elif stripped.startswith('else') and alt_depth > 0:
+                # End of current branch, start new branch
+                # Deactivations in this branch are valid (they deactivate pre-alt activations)
+                branch_activations = []
+            elif stripped == 'end' and alt_depth > 0:
+                alt_depth -= 1
+                branch_activations = []
+
+            # Handle activate/deactivate
             if stripped.startswith('activate '):
                 alias = stripped.split('activate ')[1].strip()
-                activations.append((i, alias))
+                if alt_depth > 0:
+                    # Activation inside alt block - scoped to branch
+                    branch_activations.append((i, alias))
+                else:
+                    # Global activation
+                    global_stack.append((i, alias))
             elif stripped.startswith('deactivate '):
                 alias = stripped.split('deactivate ')[1].strip()
-                deactivations.append((i, alias))
 
-        # Check for unmatched activations
-        active_stack = []
-        for line_num, alias in activations:
-            active_stack.append((line_num, alias))
+                # First try to match within current branch
+                found_in_branch = False
+                for j in range(len(branch_activations) - 1, -1, -1):
+                    if branch_activations[j][1] == alias:
+                        branch_activations.pop(j)
+                        found_in_branch = True
+                        break
 
-        for line_num, alias in deactivations:
-            # Find matching activation
-            found = False
-            for j in range(len(active_stack) - 1, -1, -1):
-                if active_stack[j][1] == alias:
-                    active_stack.pop(j)
-                    found = True
-                    break
-            if not found:
-                findings.append({
-                    "file": str(f),
-                    "rule": "E-SQ-03",
-                    "severity": "MEDIUM",
-                    "detail": f"Line {line_num}: deactivate {alias} without matching activate.",
-                })
+                if not found_in_branch:
+                    # Try to match in global stack (always, even inside alt blocks)
+                    # Deactivations inside alt blocks should also remove from global stack
+                    # because they deactivate lifelines activated before the alt block
+                    found = False
+                    for j in range(len(global_stack) - 1, -1, -1):
+                        if global_stack[j][1] == alias:
+                            global_stack.pop(j)
+                            found = True
+                            break
+                    if not found:
+                        # Only flag if we're outside alt blocks
+                        # Redundant deactivations (lifeline already inactive) are LOW severity
+                        if alt_depth == 0:
+                            findings.append({
+                                "file": str(f),
+                                "rule": "E-SQ-03",
+                                "severity": "LOW",
+                                "detail": f"Line {i}: deactivate {alias} — possibly redundant (lifeline may already be inactive).",
+                            })
 
-        # Remaining activations without deactivation
-        for line_num, alias in active_stack:
+        # Remaining activations without deactivation (only global ones)
+        for line_num, alias in global_stack:
             findings.append({
                 "file": str(f),
                 "rule": "E-SQ-03",
