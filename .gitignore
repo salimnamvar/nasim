@@ -1,15 +1,24 @@
-# Python
+# =============================================================================
+# nasim — GitHub Project
+# =============================================================================
+
+# ==========================================
+# 1. PYTHON
+# ==========================================
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-*.pyc
 *$py.class
+*.so
+*.so.*
 .mypy_cache/
 .dmypy.json
 dmypy.json
 
-# Build & Distribution
+# ==========================================
+# 2. BUILD & DISTRIBUTION
+# ==========================================
 build/
 dist/
 out/
@@ -20,14 +29,18 @@ outputs/
 *.egg
 MANIFEST
 
-# Virtual Environments
+# ==========================================
+# 3. VIRTUAL ENVIRONMENTS
+# ==========================================
 .venv/
 venv/
 env/
 ENV/
 .python-version
 
-# Testing & Coverage
+# ==========================================
+# 4. TESTING & COVERAGE
+# ==========================================
 .pytest_cache/
 .tox/
 .nox/
@@ -40,22 +53,59 @@ htmlcov/
 nosetests.xml
 TEST*.xml
 
-# Linters & Caches
+# ==========================================
+# 5. LINTERS & CACHES
+# ==========================================
 .ruff_cache/
 .cache/
 .eslintcache
 
-# Hidden directories
+# ==========================================
+# 6. SECRETS & CREDENTIALS (never committed)
+# ==========================================
+.env
+.env.*
+*.env
+!.env.example
+secrets/
+secrets*
+*.jwt
+*.pem
+*.key
+auth.json*
+.credentials.json
+credentials.json
+
+# ==========================================
+# 7. HIDDEN DIRECTORIES (never committed)
+# All hidden directories stay local: agent context, IDE, hooks, CI config.
+# ==========================================
 .*/
 
-# IDE non-hidden artifacts
+# ==========================================
+# 8. AI / AGENT TOOLS (non-tracked)
+# ==========================================
+.aider*
+.nasim/
+.claude/
+.codex/
+.copilot/
+.agents/
+.micode/
+
+# ==========================================
+# 9. IDE ARTIFACTS
+# ==========================================
+.idea/
 *.iml
 *.ipr
 *.iws
 *.swp
 *.swo
 
-# OS
+# ==========================================
+# 10. OS / EDITOR TEMP
+# ==========================================
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -64,26 +114,27 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *~
+*~[0-9]*
 .nfs*
 
-
-# Node.js
+# ==========================================
+# 11. NODE.JS
+# ==========================================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 .npm
 
-# ML & Data
+# ==========================================
+# 12. ML & DATA (local only)
+# ==========================================
 *.onnx
 *.pt
 *.pth
 *.pkl
 *.pickle
 *.bin
-*.so
-*.so.*
 data/
 models/
 checkpoints/
@@ -92,37 +143,52 @@ results/
 predictions/
 static/
 
-# Secrets & Environment
-.env
-.env.*
-*.env
-!.env.example
-secrets*
-*.jwt
-*.pem
-*.key
-
-# Logs & Temp
+# ==========================================
+# 13. LOGS & TEMP
+# ==========================================
 *.log
 *.tmp
 *.temp
+*.tmp*
 nohup.out
 logs/
+worktrees.db
 
-# Docs Generated
-docs/_build/
-site/
-
-# Archives
+# ==========================================
+# 14. ARCHIVES
+# ==========================================
 *.zip
 *.tar
 *.tar.gz
+*.tgz
 *.rar
 *.7z
 *.iso
 *.dmg
 
-# Media
+# ==========================================
+# 15. LOCK FILES (regenerable)
+# ==========================================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+poetry.lock
+Pipfile.lock
+
+# ==========================================
+# 16. JUPYTER
+# ==========================================
+.ipynb_checkpoints/
+
+# ==========================================
+# 17. GENERATED DOCS
+# ==========================================
+docs/_build/
+site/
+
+# ==========================================
+# 18. MEDIA
+# ==========================================
 *.pdf
 *.mp4
 *.avi
@@ -146,10 +212,7 @@ site/
 *.wma
 *.m4a
 
-# Data Files
+# ==========================================
+# 19. DATA FILES
+# ==========================================
 *.csv
-
-# CI caches if any
-.github/workflows/_tmp/
-.aider*
-.*/
