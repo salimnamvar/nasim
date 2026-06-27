@@ -1,5 +1,5 @@
 @startuml sq_agt04_delete_history
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-04 — DELETE History
 ' Boundary:  nasim code agent

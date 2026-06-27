@@ -1,5 +1,5 @@
 @startuml sq_mem01_persist_knowledge
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MEM-01 — PERSIST Knowledge
 ' Boundary:  nasim code agent

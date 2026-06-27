@@ -1,5 +1,5 @@
 @startuml sq_ssn08_branch_session
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-08 — Branch Session
 ' Boundary:  nasim code agent CLI

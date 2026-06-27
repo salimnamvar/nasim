@@ -1,5 +1,5 @@
 @startuml sq_rim04_inject_repo_map
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-04 — INJECT RepoMap
 ' Boundary:  nasim code agent CLI

@@ -1,5 +1,5 @@
 @startuml sq_saf03_apply_safety_mode
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SAF-03 — Apply Safety Mode
 ' Boundary:  nasim code agent CLI
@@ -23,9 +23,6 @@ box "Agent Group" #FFF3E0
 end box
 box "Config Group" #E8F5E9
   participant "ConfigLoader" as cfg
-end box
-box "Repository Group" #E8F5E9
-  participant "PolicyRepository" as policy_repo
 end box
 
 

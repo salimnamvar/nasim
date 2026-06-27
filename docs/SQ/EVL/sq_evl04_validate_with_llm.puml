@@ -1,5 +1,5 @@
 @startuml sq_evl04_validate_with_llm
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-04 — Validate With LLM
 ' Boundary:  nasim code agent CLI

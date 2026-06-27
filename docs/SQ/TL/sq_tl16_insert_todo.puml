@@ -1,5 +1,5 @@
 @startuml sq_tl16_insert_todo
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-16 — Insert Todo
 ' Boundary:  nasim code agent

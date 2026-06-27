@@ -1,5 +1,5 @@
 @startuml sq_edt07_apply_diff_sandbox
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-07 — APPLY Diff Sandbox
 ' Boundary:  nasim code agent

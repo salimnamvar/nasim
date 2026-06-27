@@ -1,5 +1,5 @@
 @startuml sq_cli05_enable_plan_mode
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-05 — Enable Plan Mode
 ' Boundary:  nasim code agent CLI

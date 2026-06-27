@@ -1,5 +1,5 @@
 @startuml sq_mcp04_expose_nasim_tools
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-04 — EXPOSE Nasim Tools
 ' Boundary:  nasim code agent

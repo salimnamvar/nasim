@@ -1,5 +1,5 @@
 @startuml sq_prv01_register_provider
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PRV-01 — REGISTER Provider
 ' Boundary:  nasim code agent CLI

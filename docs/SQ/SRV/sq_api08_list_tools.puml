@@ -1,5 +1,5 @@
 @startuml sq_srv08_list_tools
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-08 — LIST Tools
 ' Boundary:  nasim code agent HTTP API

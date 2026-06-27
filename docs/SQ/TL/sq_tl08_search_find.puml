@@ -1,5 +1,5 @@
 @startuml sq_tl08_search_find
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-08 — SEARCH Find
 ' Boundary:  nasim code agent CLI

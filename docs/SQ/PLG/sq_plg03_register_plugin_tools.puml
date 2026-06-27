@@ -1,5 +1,5 @@
 @startuml sq_plg03_register_plugin_tools
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-03 — Register Plugin Tools
 ' Boundary:  nasim code agent

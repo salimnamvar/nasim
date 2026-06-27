@@ -1,5 +1,5 @@
 @startuml sq_cfg02_validate_config
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CFG-02 — VALIDATE Config
 ' Boundary:  nasim code agent CLI

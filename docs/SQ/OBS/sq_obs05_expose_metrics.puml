@@ -1,5 +1,5 @@
 @startuml sq_obs05_expose_metrics
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-05 — EXPOSE Metrics
 ' Boundary:  nasim code agent

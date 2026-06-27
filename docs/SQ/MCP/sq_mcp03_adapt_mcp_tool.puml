@@ -1,5 +1,5 @@
 @startuml sq_mcp03_adapt_mcp_tool
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-03 — ADAPT MCP Tool
 ' Boundary:  nasim code agent

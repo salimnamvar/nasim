@@ -1,5 +1,5 @@
 @startuml sq_edt01_select_strategy
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-01 — SELECT Strategy
 ' Boundary:  nasim code agent

@@ -1,5 +1,5 @@
 @startuml sq_cli01_process_user_input
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-01 — PROCESS User Input (API-First)
 ' Boundary:  nasim CLI Interface Container

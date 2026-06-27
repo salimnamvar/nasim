@@ -1,5 +1,5 @@
 @startuml sq_evl07_record_quality_signal
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-07 — RECORD Quality Signal
 ' Boundary:  nasim code agent

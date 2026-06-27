@@ -1,5 +1,5 @@
 @startuml sq_hk06_validate_hook_result
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-06 — VALIDATE Hook Result
 ' Boundary:  nasim code agent

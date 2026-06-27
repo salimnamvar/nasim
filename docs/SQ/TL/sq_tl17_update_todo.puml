@@ -1,5 +1,5 @@
 @startuml sq_tl17_update_todo
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-17 — Update Todo
 ' Boundary:  nasim code agent

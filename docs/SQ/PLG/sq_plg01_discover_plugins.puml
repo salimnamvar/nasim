@@ -1,5 +1,5 @@
 @startuml sq_plg01_discover_plugins
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-01 — DISCOVER Plugins
 ' Boundary:  nasim code agent

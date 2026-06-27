@@ -1,5 +1,5 @@
 @startuml sq_cli07_switch_model
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-07 — Switch Model
 ' Boundary:  nasim code agent CLI

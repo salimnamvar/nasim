@@ -1,5 +1,5 @@
 @startuml sq_rtg02_apply_fallback
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RTG-02 — APPLY Fallback
 ' Boundary:  nasim code agent

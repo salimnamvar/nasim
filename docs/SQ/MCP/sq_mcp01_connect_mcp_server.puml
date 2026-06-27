@@ -1,5 +1,5 @@
 @startuml sq_mcp01_connect_mcp_server
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-01 — CONNECT MCP Server
 ' Boundary:  nasim code agent

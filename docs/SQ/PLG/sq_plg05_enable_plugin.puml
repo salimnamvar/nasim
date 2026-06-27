@@ -1,5 +1,5 @@
 @startuml sq_plg05_enable_plugin
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-05 — Enable Plugin
 ' Boundary:  nasim code agent

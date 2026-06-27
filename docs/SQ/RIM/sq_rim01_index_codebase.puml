@@ -1,5 +1,5 @@
 @startuml sq_rim01_index_codebase
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-01 — INDEX Codebase
 ' Boundary:  nasim code agent

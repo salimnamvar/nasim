@@ -1,5 +1,5 @@
 @startuml sq_mcp02_discover_mcp_tools
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-02 — DISCOVER MCP Tools
 ' Boundary:  nasim code agent

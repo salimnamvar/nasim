@@ -1,5 +1,5 @@
 @startuml sq_tl15_spawn_subagent
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-15 — Spawn Subagent
 ' Boundary:  nasim code agent

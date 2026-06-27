@@ -1,5 +1,5 @@
 @startuml sq_ssn02_read_session
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-02 — Read Session
 ' Boundary:  nasim code agent CLI

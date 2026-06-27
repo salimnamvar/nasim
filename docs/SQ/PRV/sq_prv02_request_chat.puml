@@ -1,5 +1,5 @@
 @startuml sq_prv02_request_chat
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PRV-02 — REQUEST Chat
 ' Boundary:  nasim code agent CLI

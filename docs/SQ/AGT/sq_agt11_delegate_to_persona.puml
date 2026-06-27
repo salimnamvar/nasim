@@ -1,5 +1,5 @@
 @startuml sq_agt11_delegate_to_persona
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-11 — DELEGATE to Persona
 ' Boundary:  nasim code agent

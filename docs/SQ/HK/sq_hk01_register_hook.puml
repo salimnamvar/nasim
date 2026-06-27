@@ -1,5 +1,5 @@
 @startuml sq_hk01_register_hook
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-01 — REGISTER Hook
 ' Boundary:  nasim code agent

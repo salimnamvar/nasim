@@ -1,5 +1,5 @@
 @startuml sq_ssn07_search_sessions
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-07 — Search Sessions
 ' Boundary:  nasim code agent CLI

@@ -1,5 +1,5 @@
 @startuml sq_hk04_dispatch_pre_llm_hook
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-04 — DISPATCH Pre-LLM Hook
 ' Boundary:  nasim code agent

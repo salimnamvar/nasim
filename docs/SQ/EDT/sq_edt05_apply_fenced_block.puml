@@ -1,5 +1,5 @@
 @startuml sq_edt05_apply_fenced_block
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-05 — APPLY Fenced Block
 ' Boundary:  nasim code agent

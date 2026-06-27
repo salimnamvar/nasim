@@ -51,4 +51,7 @@ LOADED --> ERROR : PLG-03
 
 ERROR --> DISCOVERED : PLG-01
 
+ENABLED --> [*] : PLG-06
+DISABLED --> [*] : PLG-06
+
 @enduml

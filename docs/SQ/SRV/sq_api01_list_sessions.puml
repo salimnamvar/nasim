@@ -1,5 +1,5 @@
 @startuml sq_srv01_list_sessions
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-01 — LIST Sessions
 ' Boundary:  nasim code agent HTTP API
@@ -17,9 +17,6 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "SessionService" as svc
-end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
@@ -30,32 +27,25 @@ end box
 user -> router : GET /v1/sessions?page_size=10&page_token=abc
 activate router
 
-router -> svc : API-01 LIST Sessions(pageSize=10, pageToken="abc")
-activate svc
-
-svc -> store : listSessions(limit=10, cursor="abc")
+router -> store : API-01 LIST Sessions(pageSize=10, pageToken="abc")
 activate store
 
 break Store read failure [500]
-    store --> svc : InternalError
+    store --> router : 500 INTERNAL
     deactivate store
-    svc --> router : 500 INTERNAL
     router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list sessions", status: "INTERNAL"}}
 end
 
 alt Sessions exist
-    store --> svc : sessions, next_page_token
+    store --> router : 200 OK {sessions, nextPageToken}
     deactivate store
-    svc --> router : ListSessionsResponse {sessions, nextPageToken}
     router --> user : 200 OK {sessions: [...], next_page_token: "def"}
 else No sessions
-    store --> svc : empty list, no token
+    store --> router : 200 OK {sessions: [], nextPageToken: ""}
     deactivate store
-    svc --> router : ListSessionsResponse {sessions: [], nextPageToken: ""}
     router --> user : 200 OK {sessions: [], next_page_token: null}
 end
 
-deactivate svc
 deactivate router
 
 

@@ -1,5 +1,5 @@
 @startuml sq_tl18_read_todos
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-18 — Read Todos
 ' Boundary:  nasim code agent

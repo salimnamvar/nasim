@@ -1,5 +1,5 @@
 @startuml sq_agt13_switch_persona
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-13 — SWITCH Persona
 ' Boundary:  nasim code agent

@@ -1,5 +1,5 @@
 @startuml sq_rim03_rank_results
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-03 — RANK Results
 ' Boundary:  nasim code agent CLI

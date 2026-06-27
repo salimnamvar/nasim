@@ -1,5 +1,5 @@
 @startuml sq_tl14_list_registered_tools
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-14 — List Registered Tools
 ' Boundary:  nasim code agent

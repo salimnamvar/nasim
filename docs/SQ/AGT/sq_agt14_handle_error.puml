@@ -1,5 +1,5 @@
 @startuml sq_agt14_handle_error
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-14 — HANDLE Error
 ' Boundary:  nasim code agent

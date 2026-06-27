@@ -1,5 +1,5 @@
 @startuml sq_hk02_dispatch_pre_tool_hook
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-02 — DISPATCH Pre-Tool Hook
 ' Boundary:  nasim code agent

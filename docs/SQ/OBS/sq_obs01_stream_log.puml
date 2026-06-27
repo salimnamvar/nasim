@@ -1,5 +1,5 @@
 @startuml sq_obs01_stream_log
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-01 — STREAM Structured Log
 ' Boundary:  nasim code agent

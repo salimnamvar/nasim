@@ -1,5 +1,5 @@
 @startuml sq_tl11_read_git_status
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-11 — Read Git Status
 ' Boundary:  nasim code agent CLI

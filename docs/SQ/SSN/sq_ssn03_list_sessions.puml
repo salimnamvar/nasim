@@ -1,5 +1,5 @@
 @startuml sq_ssn03_list_sessions
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-03 — List Sessions
 ' Boundary:  nasim code agent CLI

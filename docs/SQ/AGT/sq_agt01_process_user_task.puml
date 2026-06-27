@@ -1,5 +1,5 @@
 @startuml sq_agt01_process_user_task
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-01 — PROCESS User Task (API-First)
 ' Boundary:  nasim code agent

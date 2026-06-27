@@ -1,5 +1,5 @@
 @startuml sq_cfg01_load_config
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CFG-01 — Load Config
 ' Boundary:  nasim code agent CLI

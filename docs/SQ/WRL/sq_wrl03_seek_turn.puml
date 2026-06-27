@@ -1,5 +1,5 @@
 @startuml sq_wrl03_seek_turn
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-03 — SEEK Turn
 ' Boundary:  nasim code agent

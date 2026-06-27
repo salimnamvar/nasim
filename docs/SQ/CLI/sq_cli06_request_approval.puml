@@ -1,5 +1,5 @@
 @startuml sq_cli06_request_approval
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-06 — Request Approval
 ' Boundary:  nasim code agent CLI

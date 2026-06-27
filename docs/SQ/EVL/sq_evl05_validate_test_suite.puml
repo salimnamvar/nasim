@@ -1,5 +1,5 @@
 @startuml sq_evl05_validate_test_suite
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-05 — VALIDATE Test Suite
 ' Boundary:  nasim code agent

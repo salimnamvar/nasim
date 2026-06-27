@@ -1,5 +1,5 @@
 @startuml sq_tl09_fetch_web_content
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-09 — FETCH Web Content
 ' Boundary:  nasim code agent CLI

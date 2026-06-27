@@ -1,5 +1,5 @@
 @startuml sq_tl03_update_file
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-03 — UPDATE File
 ' Boundary:  nasim code agent CLI

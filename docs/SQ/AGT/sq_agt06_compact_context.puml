@@ -1,5 +1,5 @@
 @startuml sq_agt06_compact_context
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-06 — COMPACT Context
 ' Boundary:  nasim code agent

@@ -1,5 +1,5 @@
 @startuml sq_tl12_dispatch_mcp_extension
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-12 — Dispatch MCP Extension
 ' Boundary:  nasim code agent CLI

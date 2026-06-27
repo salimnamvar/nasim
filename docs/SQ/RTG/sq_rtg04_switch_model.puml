@@ -1,5 +1,5 @@
 @startuml sq_rtg04_switch_model
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RTG-04 — Switch Model
 ' Boundary:  nasim code agent

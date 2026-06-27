@@ -1,5 +1,5 @@
 @startuml sq_sbx04_limit_resources
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-04 — LIMIT Resources
 ' Boundary:  nasim code agent

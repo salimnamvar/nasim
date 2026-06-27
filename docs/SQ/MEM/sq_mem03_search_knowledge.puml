@@ -1,5 +1,5 @@
 @startuml sq_mem03_search_knowledge
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MEM-03 — SEARCH Knowledge
 ' Boundary:  nasim code agent

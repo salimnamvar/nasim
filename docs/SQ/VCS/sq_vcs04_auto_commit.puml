@@ -1,5 +1,5 @@
 @startuml sq_vcs04_auto_commit
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     VCS-04 — AUTO-COMMIT
 ' Boundary:  nasim code agent

@@ -1,5 +1,5 @@
 @startuml sq_evl01_evaluate_task
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-01 — EVALUATE Task
 ' Boundary:  nasim code agent

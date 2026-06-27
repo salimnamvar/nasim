@@ -1,5 +1,5 @@
 @startuml sq_ctx01_process_context
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-01 — PROCESS Context
 ' Boundary:  nasim code agent

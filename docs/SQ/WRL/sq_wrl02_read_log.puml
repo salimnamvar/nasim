@@ -1,5 +1,5 @@
 @startuml sq_wrl02_read_log
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-02 — READ Log (Sequential Scan for Replay)
 ' Boundary:  nasim code agent CLI

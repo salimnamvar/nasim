@@ -1,5 +1,5 @@
 @startuml sq_edt09_apply_inline_patch
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-09 — APPLY Inline Patch
 ' Boundary:  nasim code agent

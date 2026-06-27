@@ -1,5 +1,5 @@
 @startuml sq_saf02_request_approval
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SAF-02 — REQUEST Approval
 ' Boundary:  nasim code agent CLI
@@ -21,9 +21,6 @@ end box
 box "Agent Group" #FFF3E0
   participant "AgentOrchestrator" as agent
   participant "PermissionGate" as gate
-end box
-box "Repository Group" #E8F5E9
-  participant "PolicyRepository" as policy_repo
 end box
 
 

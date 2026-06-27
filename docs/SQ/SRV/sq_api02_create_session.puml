@@ -1,5 +1,5 @@
 @startuml sq_srv02_insert_session
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-02 — CREATE Session
 ' Boundary:  nasim code agent HTTP API
@@ -17,9 +17,6 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "SessionService" as svc
-end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
@@ -35,23 +32,18 @@ alt Structural validation failed [400]
   router --> user : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid request", status: "INVALID_ARGUMENT"}}
 end
 
-router -> svc : API-02 INSERT Session(sessionData)
-activate svc
-
-svc -> svc : Phase 2: validate business rules
-svc -> svc : generateResourceId()
-svc -> store : save(SessionEntity)
+router -> store : API-02 INSERT Session(sessionData)
 activate store
-store --> svc : SessionEntity
+
+store --> store : generateResourceId()
+store --> store : save(SessionEntity)
+store --> router : SessionEntity
 deactivate store
 
 break Store write fails [500]
-  svc --> router : 500 INTERNAL
   router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to create session", status: "INTERNAL"}}
 end
 
-svc --> router : SessionResponseDTO
-deactivate svc
 router --> user : 201 Created {id, created_at, model, state}
 deactivate router
 

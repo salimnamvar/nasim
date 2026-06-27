@@ -1,5 +1,5 @@
 @startuml sq_obs02_record_metrics
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-02 — RECORD Metrics
 ' Boundary:  nasim code agent

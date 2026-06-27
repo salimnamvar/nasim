@@ -45,4 +45,7 @@ RUNNING --> FAILED : AGT-14
 COMPLETED --> IDLE : AGT-10
 FAILED --> IDLE : AGT-14
 
+COMPLETED --> [*] : AGT-10
+FAILED --> [*] : AGT-14
+
 @enduml

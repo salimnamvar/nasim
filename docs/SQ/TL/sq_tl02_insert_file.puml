@@ -1,5 +1,5 @@
 @startuml sq_tl02_insert_file
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-02 — INSERT File
 ' Boundary:  nasim code agent CLI

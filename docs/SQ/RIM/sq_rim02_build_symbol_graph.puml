@@ -1,5 +1,5 @@
 @startuml sq_rim02_build_symbol_graph
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-02 — BUILD Symbol Graph
 ' Boundary:  nasim code agent

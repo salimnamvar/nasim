@@ -1,5 +1,5 @@
 @startuml sq_cli02_dispatch_slash_command
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-02 — Dispatch Slash Command
 ' Boundary:  nasim code agent CLI

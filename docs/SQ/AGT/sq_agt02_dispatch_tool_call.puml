@@ -1,5 +1,5 @@
 @startuml sq_agt02_dispatch_tool_call
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-02 — DISPATCH Tool Call
 ' Boundary:  nasim code agent

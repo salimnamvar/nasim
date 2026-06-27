@@ -1,5 +1,5 @@
 @startuml sq_ssn01_persist_session
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-01 — Persist Session
 ' Boundary:  nasim code agent CLI

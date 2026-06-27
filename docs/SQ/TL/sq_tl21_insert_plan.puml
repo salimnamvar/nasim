@@ -1,5 +1,5 @@
 @startuml sq_tl21_insert_plan
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-21 — Insert Plan
 ' Boundary:  nasim code agent

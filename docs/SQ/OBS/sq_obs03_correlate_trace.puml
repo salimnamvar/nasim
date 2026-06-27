@@ -1,5 +1,5 @@
 @startuml sq_obs03_correlate_trace
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-03 — CORRELATE Trace
 ' Boundary:  nasim code agent

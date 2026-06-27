@@ -1,5 +1,5 @@
 @startuml sq_mem02_recall_knowledge
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MEM-02 — RECALL Knowledge
 ' Boundary:  nasim code agent

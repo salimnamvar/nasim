@@ -1,5 +1,5 @@
 @startuml sq_vcs01_read_git_status
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     VCS-01 — READ Git Status
 ' Boundary:  nasim code agent

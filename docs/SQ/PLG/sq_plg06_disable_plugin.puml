@@ -1,5 +1,5 @@
 @startuml sq_plg06_disable_plugin
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-06 — Disable Plugin
 ' Boundary:  nasim code agent

@@ -1,5 +1,5 @@
 @startuml sq_plg02_load_manifest
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-02 — Load Manifest
 ' Boundary:  nasim code agent
@@ -40,7 +40,6 @@ break File not found
     loader --> agent : PluginSkipped(manifest_path, reason="not found")
     deactivate loader
     agent --> router : AgentEvent(Done)
-    stop
 end
 
 break YAML parse error
@@ -49,7 +48,6 @@ break YAML parse error
     loader --> agent : PluginSkipped(manifest_path, reason="invalid YAML")
     deactivate loader
     agent --> router : AgentEvent(Done)
-    stop
 end
 
 fs --> loader : raw YAML content

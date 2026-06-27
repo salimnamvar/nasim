@@ -1,5 +1,5 @@
 @startuml sq_tl04_list_directory
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-04 — List Directory
 ' Boundary:  nasim code agent CLI

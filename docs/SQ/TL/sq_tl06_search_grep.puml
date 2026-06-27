@@ -1,5 +1,5 @@
 @startuml sq_tl06_search_grep
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-06 — SEARCH Grep
 ' Boundary:  nasim code agent CLI

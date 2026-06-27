@@ -1,5 +1,5 @@
 @startuml sq_tl13_read_lsp
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-13 — Read LSP
 ' Boundary:  nasim code agent

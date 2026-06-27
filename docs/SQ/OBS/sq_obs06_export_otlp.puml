@@ -1,5 +1,5 @@
 @startuml sq_obs06_export_otlp
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-06 — EXPORT OTLP
 ' Boundary:  nasim code agent

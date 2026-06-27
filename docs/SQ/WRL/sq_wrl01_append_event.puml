@@ -1,5 +1,5 @@
 @startuml sq_wrl01_append_event
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-01 — APPEND Event
 ' Boundary:  nasim code agent

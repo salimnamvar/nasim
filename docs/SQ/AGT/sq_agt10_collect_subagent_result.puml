@@ -1,5 +1,5 @@
 @startuml sq_agt10_collect_subagent_result
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-10 — COLLECT Subagent Result
 ' Boundary:  nasim code agent

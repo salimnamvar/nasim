@@ -1,5 +1,5 @@
 @startuml sq_hk05_dispatch_post_llm_hook
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-05 — DISPATCH Post-LLM Hook
 ' Boundary:  nasim code agent

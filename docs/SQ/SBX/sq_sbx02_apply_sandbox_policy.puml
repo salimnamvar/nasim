@@ -1,5 +1,5 @@
 @startuml sq_sbx02_apply_sandbox_policy
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-02 — APPLY Sandbox Policy
 ' Boundary:  nasim code agent

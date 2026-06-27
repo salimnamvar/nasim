@@ -1,5 +1,5 @@
 @startuml sq_agt15_dispatch_safety_pipeline
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-15 — DISPATCH Safety Pipeline
 ' Boundary:  nasim code agent

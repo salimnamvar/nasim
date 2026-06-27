@@ -1,5 +1,5 @@
 @startuml sq_srv06_dispatch_message
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-06 — DISPATCH Message
 ' Boundary:  nasim code agent HTTP API

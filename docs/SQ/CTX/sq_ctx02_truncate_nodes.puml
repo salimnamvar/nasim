@@ -1,5 +1,5 @@
 @startuml sq_ctx02_truncate_nodes
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-02 — TRUNCATE Nodes
 ' Boundary:  nasim code agent

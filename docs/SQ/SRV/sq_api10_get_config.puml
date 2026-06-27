@@ -1,5 +1,5 @@
 @startuml sq_srv10_read_config
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-10 — GET Config
 ' Boundary:  nasim code agent HTTP API

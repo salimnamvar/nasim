@@ -1,5 +1,5 @@
 @startuml sq_edt04_apply_unified_diff
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-04 — APPLY Unified Diff
 ' Boundary:  nasim code agent

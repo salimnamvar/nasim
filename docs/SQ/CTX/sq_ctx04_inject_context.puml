@@ -1,5 +1,5 @@
 @startuml sq_ctx04_inject_context
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-04 — Inject Context
 ' Boundary:  nasim code agent CLI

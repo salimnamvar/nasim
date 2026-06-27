@@ -1,5 +1,5 @@
 @startuml sq_wrl04_fork_session
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-04 — Fork Session
 ' Boundary:  nasim code agent CLI

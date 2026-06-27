@@ -1,5 +1,5 @@
 @startuml sq_agt09_spawn_subagent
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-09 — SPAWN Subagent
 ' Boundary:  nasim code agent

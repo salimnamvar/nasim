@@ -1,5 +1,5 @@
 @startuml sq_rim06_search_semantic
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-06 — SEARCH Semantic
 ' Boundary:  nasim code agent CLI

@@ -1,5 +1,5 @@
 @startuml sq_tl05_dispatch_shell_command
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-05 — Dispatch Shell Command
 ' Boundary:  nasim code agent CLI

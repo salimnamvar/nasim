@@ -1,5 +1,5 @@
 @startuml sq_mem04_scope_knowledge
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MEM-04 — SCOPE Knowledge
 ' Boundary:  nasim code agent

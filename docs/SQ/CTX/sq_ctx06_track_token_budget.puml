@@ -1,5 +1,5 @@
 @startuml sq_ctx06_track_token_budget
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-06 — Track Token Budget
 ' Boundary:  nasim code agent CLI

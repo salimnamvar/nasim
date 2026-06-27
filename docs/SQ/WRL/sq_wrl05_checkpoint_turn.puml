@@ -1,5 +1,5 @@
 @startuml sq_wrl05_checkpoint_turn
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-05 — CHECKPOINT Turn
 ' Boundary:  nasim code agent

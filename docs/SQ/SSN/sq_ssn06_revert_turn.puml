@@ -1,5 +1,5 @@
 @startuml sq_ssn06_revert_turn
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-06 — Revert Turn
 ' Boundary:  nasim code agent CLI

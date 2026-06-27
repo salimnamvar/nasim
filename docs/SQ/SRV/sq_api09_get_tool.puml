@@ -1,5 +1,5 @@
 @startuml sq_srv09_read_tool
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-09 — GET Tool
 ' Boundary:  nasim code agent HTTP API

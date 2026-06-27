@@ -1,5 +1,5 @@
 @startuml sq_sbx03_monitor_process
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-03 — MONITOR Process
 ' Boundary:  nasim code agent

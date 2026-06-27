@@ -1,5 +1,5 @@
 @startuml sq_srv07_list_messages
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-07 — LIST Messages
 ' Boundary:  nasim code agent HTTP API
@@ -17,9 +17,6 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "SessionService" as svc
-end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
@@ -30,25 +27,19 @@ end box
 user -> router : GET /v1/sessions/{id}/messages?page_size=50&page_token=abc
 activate router
 
-router -> svc : API-07 LIST Messages(sessionId, pageSize=50, pageToken="abc")
-activate svc
-
-svc -> store : readSessionMessages(sessionId, limit=50, cursor="abc")
+router -> store : API-07 LIST Messages(sessionId, pageSize=50, pageToken="abc")
 activate store
 
 alt Session exists
-    store --> svc : SessionEntity(messages=[...], next_page_token="def")
+    store --> router : 200 OK {messages: [...], nextPageToken: "def"}
     deactivate store
-    svc --> router : ListMessagesResponse {messages: [...], nextPageToken: "def"}
     router --> user : 200 OK {messages: [...], next_page_token: "def"}
 else Session not found [404]
-    store --> svc : null
+    store --> router : 404 NOT_FOUND
     deactivate store
-    svc --> router : 404 NOT_FOUND
     router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
 end
 
-deactivate svc
 deactivate router
 
 

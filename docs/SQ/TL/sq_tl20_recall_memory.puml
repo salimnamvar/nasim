@@ -1,5 +1,5 @@
 @startuml sq_tl20_recall_memory
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-20 — Recall Memory
 ' Boundary:  nasim code agent

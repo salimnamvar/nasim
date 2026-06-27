@@ -1,5 +1,5 @@
 @startuml sq_plg04_register_plugin_hooks
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-04 — Register Plugin Hooks
 ' Boundary:  nasim code agent

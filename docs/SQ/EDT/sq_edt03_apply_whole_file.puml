@@ -1,5 +1,5 @@
 @startuml sq_edt03_apply_whole_file
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-03 — Apply Whole File
 ' Boundary:  nasim code agent CLI

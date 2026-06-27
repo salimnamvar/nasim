@@ -1,5 +1,5 @@
 @startuml sq_agt12_load_persona
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-12 — LOAD Persona
 ' Boundary:  nasim code agent

@@ -1,5 +1,5 @@
 @startuml sq_evl09_inject_turn_budget
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-09 — Inject Turn Budget
 ' Boundary:  nasim code agent CLI

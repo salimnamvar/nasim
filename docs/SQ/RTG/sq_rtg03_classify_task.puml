@@ -1,5 +1,5 @@
 @startuml sq_rtg03_classify_task
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RTG-03 — Classify Task
 ' Boundary:  nasim code agent

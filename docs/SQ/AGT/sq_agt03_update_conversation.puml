@@ -1,5 +1,5 @@
 @startuml sq_agt03_update_conversation
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-03 — UPDATE Conversation
 ' Boundary:  nasim code agent

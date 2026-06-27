@@ -1,5 +1,5 @@
 @startuml sq_tl22_update_plan
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-22 — Update Plan
 ' Boundary:  nasim code agent

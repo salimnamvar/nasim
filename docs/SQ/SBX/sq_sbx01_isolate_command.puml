@@ -1,5 +1,5 @@
 @startuml sq_sbx01_isolate_command
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-01 — ISOLATE Command
 ' Boundary:  nasim code agent

@@ -1,5 +1,5 @@
 @startuml sq_prv03_stream_chat
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PRV-03 — STREAM Chat
 ' Boundary:  nasim code agent CLI

@@ -1,5 +1,5 @@
 @startuml sq_edt06_apply_function_level
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EDT-06 — APPLY Function-Level
 ' Boundary:  nasim code agent

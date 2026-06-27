@@ -1,5 +1,5 @@
 @startuml sq_ssn09_delete_session
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-09 — DELETE Session
 ' Boundary:  nasim code agent

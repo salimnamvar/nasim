@@ -1,5 +1,5 @@
 @startuml sq_rim05_embed_code
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-05 — EMBED Code
 ' Boundary:  nasim code agent

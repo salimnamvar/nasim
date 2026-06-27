@@ -1,5 +1,5 @@
 @startuml sq_ssn05_snapshot_session
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-05 — Snapshot Session
 ' Boundary:  nasim code agent CLI

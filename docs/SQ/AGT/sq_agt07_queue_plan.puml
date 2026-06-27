@@ -1,5 +1,5 @@
 @startuml sq_agt07_queue_plan
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-07 — QUEUE Plan
 ' Boundary:  nasim code agent

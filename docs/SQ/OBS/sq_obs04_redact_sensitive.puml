@@ -1,5 +1,5 @@
 @startuml sq_obs04_redact_sensitive
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-04 — REDACT Sensitive Data
 ' Boundary:  nasim code agent

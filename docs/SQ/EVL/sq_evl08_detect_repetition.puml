@@ -1,5 +1,5 @@
 @startuml sq_evl08_detect_repetition
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-08 — DETECT Repetition
 ' Boundary:  nasim code agent

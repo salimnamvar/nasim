@@ -1,5 +1,5 @@
 @startuml sq_evl06_coordinate_retry
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     EVL-06 — Coordinate Retry
 ' Boundary:  nasim code agent CLI

@@ -1,5 +1,5 @@
 @startuml sq_ctx05_compact_nodes
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CTX-05 — Compact Nodes
 ' Boundary:  nasim code agent CLI

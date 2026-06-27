@@ -1,5 +1,5 @@
 @startuml sq_vcs02_insert_commit
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     VCS-02 — INSERT Commit
 ' Boundary:  nasim code agent

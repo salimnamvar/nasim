@@ -1,5 +1,5 @@
 @startuml sq_cli04_read_cli_arguments
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-04 — Read CLI Arguments
 ' Boundary:  nasim code agent CLI

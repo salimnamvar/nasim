@@ -1,5 +1,5 @@
 @startuml sq_tl19_persist_memory
-!include common/sq_styles.puml
+!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-19 — Persist Memory
 ' Boundary:  nasim code agent
