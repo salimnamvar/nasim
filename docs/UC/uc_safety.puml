@@ -11,7 +11,7 @@
 '            Entry chain: User → ServerRouter → AgentOrchestrator → SafetyCoordinator
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
 ' SQ:        sq_saf01..sq_saf03
 ' ============================================================

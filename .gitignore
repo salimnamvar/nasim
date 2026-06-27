@@ -154,4 +154,3 @@ site/
 # CI caches if any
 .github/workflows/_tmp/
 .aider*
-.*/

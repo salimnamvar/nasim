@@ -10,7 +10,7 @@
 ' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
 ' SQ:        sq_plg01..sq_plg06
 ' ============================================================

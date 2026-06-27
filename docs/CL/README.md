@@ -159,4 +159,4 @@ Back to [docs/](../README.md).
 | UC inventory | `docs/UC/` |
 | SQ diagrams | `docs/SQ/` |
 | ERD — session store | `docs/ER/er_session_store.puml` |
-| Entity registry | `docs/ENTITIES.md` |
+| Entity registry | `.nasim/rules/ENTITIES.md` |

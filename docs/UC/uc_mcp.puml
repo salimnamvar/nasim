@@ -10,7 +10,7 @@
 ' Purpose:   MCP as first-class subsystem: client/server runtime, tool adapter, discovery
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
 ' SQ:        sq_mcp01..sq_mcp04
 ' ============================================================

@@ -5,6 +5,13 @@
 **Created:** 2026-06-25T15:31:14Z
 **NASIM Version:** 1.0.0
 
+## Knowledge Base
+
+| File | Purpose |
+|------|---------|
+| `.nasim/NASIM.md` | Project entry point and rules index |
+| `.nasim/rules/ENTITIES.md` | Canonical entity registry — component names, UC group codes, actors, design decisions |
+
 ## Project Overview
 
 nasim is a research code agent — a CLI code agent + HTTP API server + MCP server,

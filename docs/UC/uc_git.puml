@@ -10,7 +10,7 @@
 ' Purpose:   Version control awareness: status, diff, commit, auto-commit
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
 ' SQ:        sq_vcs01..sq_vcs04
 ' ============================================================

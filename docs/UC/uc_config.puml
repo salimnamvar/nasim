@@ -10,7 +10,7 @@
 ' Purpose:   Config loading, validation, and layered overrides
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/ENTITIES.md, docs/UC/README.md
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
 ' SQ:        sq_cfg01..sq_cfg03
 ' ============================================================
