@@ -1,62 +1,24 @@
 @startuml uc_overview
 
+!include common/uc_styles.puml
+
 
 ' ============================================================
-' Title:     nasim — UC: Overview (API-First)
+' Title:     nasim — UC Overview (Architecture Navigation Map)
 ' Group:     ALL (All Groups)
 ' Boundary:  nasim code agent
-' Purpose:   Cross-cutting view of all UC groups.
-'            Single User actor. All business operations route
-'            through the API Group (Entry Gate).
-'            Entry chain: User → ServerRouter → AgentOrchestrator → tools
+' Purpose:   High-level group overview showing all 21 UC groups
+'            and their actor interactions. API Group (Entry Gate)
+'            is the central convergence point.
+'            This is a NAVIGATION MAP — no individual UC IDs shown.
+' Source:    docs/UC/README.md, docs/UC/*.puml
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        All sq_*.puml diagrams (cross-cutting reference)
 ' ============================================================
 
 
-left to right direction
-
-
-title nasim — UC Overview (API-First)
-
-
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-
-
-skinparam usecase {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-  ArrowColor #424242
-  FontSize 12
-}
-
-
-skinparam actor {
-  BackgroundColor #E8EAF6
-  BorderColor #3949AB
-  FontColor #1A237E
-  FontSize 12
-}
-
-
-skinparam actor<<system>> {
-  BackgroundColor #E3F2FD
-  BorderColor #1565C0
-  FontColor #0D47A1
-}
-
-
-skinparam usecase<<extref>> {
-  BackgroundColor #FFF9C4
-  BorderColor #F9A825
-  FontColor #5D4037
-  BorderStyle dashed
-}
+title nasim — UC Group Overview (Architecture Navigation)
 
 
 ' ------------------------------------------------------------
@@ -72,163 +34,82 @@ actor "Observability Platform" as Platform <<system>>
 
 
 ' ------------------------------------------------------------
-' System Boundary
+' System Boundary — 21 Group Use Cases
 ' ------------------------------------------------------------
 
 
 rectangle "nasim" {
 
+  usecase "**API Group (Entry Gate)**" <<master>> as API_GROUP
+  usecase "**CLI Group (Interface Container)**" <<master>> as CLI_GROUP
 
-  package "Interface Containers" {
-    usecase "CLI\n(REPL, /cmds)" as cli_group <<extref>>
-    usecase "WebApp\n(Browser)" as webapp_group <<extref>>
-    usecase "DesktopApp\n(Electron)" as desktop_group <<extref>>
-    usecase "MobileApp\n(React Native)" as mobile_group <<extref>>
-  }
+  usecase "**Agent Group**" <<master>> as AGENT_GROUP
+  usecase "**Session Group**" <<master>> as SESSION_GROUP
+  usecase "**Config Group**" <<master>> as CONFIG_GROUP
+  usecase "**Tool Group**" <<master>> as TOOL_GROUP
 
-
-  package "API Group (Entry Gate)" {
-    usecase "API Group\n(ROD REST + SSE)" as api_group <<extref>>
-  }
-
-
-  package "Agent Group" {
-    usecase "Agent Group" as agent_group <<extref>>
-  }
-
-
-  package "Provider Group" {
-    usecase "Provider Group" as provider_group <<extref>>
-  }
-
-
-  package "Router Group" {
-    usecase "Router Group" as router_group <<extref>>
-  }
-
-
-  package "Tool Group" {
-    usecase "Tool Group" as tool_group <<extref>>
-  }
-
-
-  package "MCP Group" {
-    usecase "MCP Group" as mcp_group <<extref>>
-  }
-
-
-  package "Config Group" {
-    usecase "Config Group" as config_group <<extref>>
-  }
-
-
-  package "Session Group" {
-    usecase "Session Group" as session_group <<extref>>
-  }
-
-
-  package "Hooks Group" {
-    usecase "Hooks Group" as hooks_group <<extref>>
-  }
-
-
-  package "Plugins Group" {
-    usecase "Plugins Group" as plugins_group <<extref>>
-  }
-
-
-  package "Sandbox Group" {
-    usecase "Sandbox Group" as sandbox_group <<extref>>
-  }
-
-
-  package "Safety Group" {
-    usecase "Safety Group" as safety_group <<extref>>
-  }
-
-
-  package "Observability Group" {
-    usecase "Observability Group" as observability_group <<extref>>
-  }
-
-
-  package "Memory Group" {
-    usecase "Memory Group" as memory_group <<extref>>
-  }
-
-
-  package "Git Group" {
-    usecase "Git Group" as git_group <<extref>>
-  }
-
-
-  package "Repo Intelligence Group" {
-    usecase "Repo Intelligence Group" as repo_intelligence_group <<extref>>
-  }
-
-
-  package "Edit Strategy Group" {
-    usecase "Edit Strategy Group" as edit_strategy_group <<extref>>
-  }
-
-
-  package "Evaluation Group" {
-    usecase "Evaluation Group" as evaluation_group <<extref>>
-  }
-
-
-  package "Wire Log Group" {
-    usecase "Wire Log Group" as wire_log_group <<extref>>
-  }
-
-
-  package "Context Graph Group" {
-    usecase "Context Graph Group" as context_graph_group <<extref>>
-  }
+  usecase "**Provider Group**" <<master>> as PROVIDER_GROUP
+  usecase "**Router Group**" <<master>> as ROUTER_GROUP
+  usecase "**Context Graph Group**" <<master>> as CTX_GROUP
+  usecase "**Safety Group**" <<master>> as SAFETY_GROUP
+  usecase "**Sandbox Group**" <<master>> as SANDBOX_GROUP
+  usecase "**Edit Strategy Group**" <<master>> as EDIT_GROUP
+  usecase "**Evaluation Group**" <<master>> as EVAL_GROUP
+  usecase "**Git Group**" <<master>> as GIT_GROUP
+  usecase "**MCP Group**" <<master>> as MCP_GROUP
+  usecase "**Hooks Group**" <<master>> as HOOKS_GROUP
+  usecase "**Plugins Group**" <<master>> as PLUGINS_GROUP
+  usecase "**Memory Group**" <<master>> as MEMORY_GROUP
+  usecase "**Repo Intelligence Group**" <<master>> as REPO_INTEL_GROUP
+  usecase "**Wire Log Group**" <<master>> as WIRE_LOG_GROUP
+  usecase "**Observability Group**" <<master>> as OBSERVABILITY_GROUP
 }
 
 
 ' ------------------------------------------------------------
-' Actor -> Use Case Associations
+' Actor → Group Associations
 ' ------------------------------------------------------------
 
 
-User --> cli_group
-User --> webapp_group
-User --> desktop_group
-User --> mobile_group
+User --> CLI_GROUP
+User --> API_GROUP
 
+MCPClient --> MCP_GROUP
 
-MCPClient --> mcp_group
-
-
-Platform --> observability_group
-
-
+Platform --> OBSERVABILITY_GROUP
 
 
 ' ------------------------------------------------------------
-' Key Relationships
+' Group Relationships — API-First Delegation Chain
 ' ------------------------------------------------------------
 
+' Interface containers route through API
+CLI_GROUP ..> API_GROUP : <<include>>
 
-cli_group ..> api_group : <<include>> : all routes through API
-webapp_group ..> api_group : <<include>> : all routes through API
-desktop_group ..> api_group : <<include>> : all routes through API
-mobile_group ..> api_group : <<include>> : all routes through API
+' API Group → downstream core groups (mandatory)
+API_GROUP ..> AGENT_GROUP : <<include>>
+API_GROUP ..> SESSION_GROUP : <<include>>
+API_GROUP ..> CONFIG_GROUP : <<include>>
+API_GROUP ..> TOOL_GROUP : <<include>>
 
+' Agent Group → execution groups (mandatory includes)
+AGENT_GROUP ..> PROVIDER_GROUP : <<include>>
+AGENT_GROUP ..> ROUTER_GROUP : <<include>>
+AGENT_GROUP ..> CTX_GROUP : <<include>>
+AGENT_GROUP ..> SAFETY_GROUP : <<include>>
+AGENT_GROUP ..> SANDBOX_GROUP : <<include>>
 
-api_group ..> agent_group : <<include>>
-api_group ..> session_group : <<include>>
-api_group ..> config_group : <<include>>
-api_group ..> tool_group : <<include>>
-
-
-agent_group ..> router_group : <<include>>
-agent_group ..> context_graph_group : <<include>>
-agent_group ..> edit_strategy_group : <<extend>>
-agent_group ..> evaluation_group : <<extend>>
-
+' Agent Group → specialized/cross-cutting groups (optional extends)
+AGENT_GROUP ..> EDIT_GROUP : <<extend>>
+AGENT_GROUP ..> EVAL_GROUP : <<extend>>
+AGENT_GROUP ..> GIT_GROUP : <<extend>>
+AGENT_GROUP ..> MCP_GROUP : <<extend>>
+AGENT_GROUP ..> HOOKS_GROUP : <<extend>>
+AGENT_GROUP ..> PLUGINS_GROUP : <<extend>>
+AGENT_GROUP ..> MEMORY_GROUP : <<extend>>
+AGENT_GROUP ..> REPO_INTEL_GROUP : <<extend>>
+AGENT_GROUP ..> WIRE_LOG_GROUP : <<extend>>
+AGENT_GROUP ..> OBSERVABILITY_GROUP : <<extend>>
 
 
 @enduml
