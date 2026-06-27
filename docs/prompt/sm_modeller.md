@@ -8,36 +8,37 @@
 
 - Rulebooks: `/home/salim/.agent-global/shared/rules/software-design/sm.md`
 - Linter: `/home/salim/.agent-global/shared/tools/software-design/sm/sm_lint.py`
-- Audits: `/home/salim/prj/salim/nasim/code/nasim/docs/audit/`
 - Working files: `/home/salim/prj/salim/nasim/code/nasim/docs/SM/`
-- SM README + Transition Matrices: `/home/salim/prj/salim/nasim/code/nasim/docs/SM/README.md`
-- Shared styles (palette coordination): `/home/salim/prj/salim/nasim/code/nasim/docs/C4/common/c4_styles.puml`
+- SM README: `/home/salim/prj/salim/nasim/code/nasim/docs/SM/README.md`
+- Shared styles: `/home/salim/prj/salim/nasim/code/nasim/docs/SM/common/sm_styles.puml`
 
-## CAR Refinement Loop (Mandatory)
+## Current P0 Scope (Do This First — Highest Priority)
 
-Follow the loop on every iteration:
+**Critical Issues Remaining:**
+- Initial and terminal states are still incorrect/missing in SM diagrams.
+- Full transition matrices do not exist.
+- SM colours collide with CSR palette.
+- Duplicated skinparam blocks.
 
-1. Read the CAR findings assigned by Tech Lead.
-2. Load current SM diagrams and SM/README.md.
-3. Run `sm_lint.py` before changes.
-4. Make mechanical, rule-exact fixes. Quote the exact rule from `sm.md` in every CAR.
-5. Re-run linter after changes.
-6. Report in strict CAR format.
-7. Declare the gate ready only when your assigned scope is clean.
+### Mandatory Tasks (in order)
 
-## Current P0 Scope (as of 2026-06-27)
+1. **Fix Initial and Terminal States (Critical)**
+   - Every SM must have clear:
+     - `[*] --> FirstRealState : UC-ID`
+     - `LastRealState --> [*] : UC-ID`
+   - Fix `sm_agent_lifecycle.puml` (`IDLE --> [*]` semantic problem).
+   - Fix `sm_subagent_lifecycle.puml` initial transition label.
 
-- Create complete source→event→target transition matrices in `SM/README.md` for all 5 state machines (Agent, Session, Plan, Plugin, Subagent).
-- Coordinate palette split with SQ Diagrammer so SM state colours do not collide with CSR layer colours. Document the final palettes in `c4_styles.puml`.
-- Fix Subagent initial transition label (`[*] --> IDLE : AGT-09`).
-- Add missing `AWAITING_DIFF_APPROVAL` state to the main Agent state table in SM/README.md.
-- (If time) Extract duplicated `skinparam state {}` blocks into a shared include.
+2. **Create Full Transition Matrices** in `SM/README.md` for all 5 state machines.
 
-Escalate any palette decision to Tech Lead before finalising.
+3. **Palette Split** — Coordinate with SQ Diagrammer. Move SM colours to disjoint set from CSR.
 
-## Reporting Format
+4. **Extract Common Styles** into `sm_styles.puml` and include in all 5 diagrams.
 
-Use standard CAR format. End with:  
-**SM P0 gate ready for Tech Lead review.**
+5. **Rendering Verification** — After every change, render diagrams in PlantUML and confirm **zero errors**.
 
-Begin only when Tech Lead assigns the next batch.
+## Reporting
+
+Report in CAR format. End with:  
+**SM P0 gate ready for Tech Lead review.**  
+(Only when diagrams render cleanly + initial/terminal states are correct + matrices exist)
