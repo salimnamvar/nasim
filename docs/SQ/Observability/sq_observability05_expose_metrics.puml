@@ -1,0 +1,43 @@
+@startuml sq_observability05_expose_metrics
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     OBS-05 — EXPOSE Metrics
+' Boundary:  nasim code agent
+' Purpose:   Serve /metrics endpoint for Prometheus pull scrape
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — OBS-05 EXPOSE Metrics
+
+actor "User" as user
+
+box "Controller Group" #E3F2FD
+  participant "ServerApp" as server
+end box
+box "Service Group" #FFF3E0
+  participant "MetricsCollector" as metrics
+end box
+box "Repository Group" #E8F5E9
+  participant "ObservabilityRepository" as obs_repo
+end box
+
+
+== OBS-05 EXPOSE Metrics (HTTP mode) ==
+
+user -> server : GET /metrics
+activate server
+
+server -> metrics : OBS-05 EXPOSE Metrics()
+activate metrics
+metrics -> metrics : collect all metric families
+metrics --> server : MetricsText(format=prometheus)
+deactivate metrics
+
+server --> user : 200 OK — Content-Type: text/plain; version=0.0.4
+deactivate server
+
+
+@enduml

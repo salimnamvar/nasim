@@ -1,0 +1,58 @@
+@startuml sq_hooks06_validate_hook_result
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     HK-06 — VALIDATE Hook Result
+' Boundary:  nasim code agent
+' Purpose:   Validate a HookResult for correctness and safety
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — HK-06 VALIDATE Hook Result
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Hooks Group" #F3E5F5
+  participant "HookManager" as hooks
+end box
+box "Repository Group" #E8F5E9
+  participant "HookRepository" as hook_repo
+end box
+
+
+== HK-06 VALIDATE Hook Result ==
+
+user -> router : invoke agent
+activate router
+router -> agent : hk06 VALIDATE Hook Result(hook_result)
+activate agent
+agent -> hooks : hk06 VALIDATE Hook Result(hook_result)
+activate hooks
+hooks -> hooks : hk06 CHECK Schema(hook_result)
+
+break Result schema invalid
+    hooks --> agent : HookResult(action=DENY)
+    agent --> router : HookResult(action=DENY)
+end
+
+break action not in [ALLOW, DENY, MODIFY]
+    hooks --> agent : HookResult(action=DENY)
+    agent --> router : HookResult(action=DENY)
+end
+
+hooks --> agent : validated result
+deactivate hooks
+agent --> router : validated result
+deactivate agent
+deactivate router
+
+
+@enduml

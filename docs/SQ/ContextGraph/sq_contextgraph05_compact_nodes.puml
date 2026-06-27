@@ -1,0 +1,73 @@
+@startuml sq_contextgraph05_compact_nodes
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     CTX-05 — Compact Nodes
+' Boundary:  nasim code agent CLI
+' Purpose:   Merge overlapping context nodes to reduce token usage
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — CTX-05 COMPACT Nodes
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Context Group" #FFF3E0
+  participant "PipelineOrchestrator" as pipe
+  participant "CompactionProcessor" as comp
+end box
+box "Provider Group" #FFF3E0
+  participant "Provider" as provider
+end box
+box "Repository Group" #E8F5E9
+  participant "ContextStore" as ctx_store
+end box
+
+
+== CTX-05 Compact Nodes ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> pipe : CTX-05 COMPACT(graph, budget)
+activate comp
+
+comp -> comp : identify overlapping nodes
+comp -> comp : calculate merge candidates
+
+alt merge candidates found
+    comp -> provider : merge_nodes(candidates)
+    activate provider
+    provider --> comp : merged_nodes
+    deactivate provider
+
+    comp -> comp : replace original nodes with merged
+    comp -> comp : recalculate token count
+else no overlap
+    comp -> comp : skip merge
+end
+
+comp -> ctx_store : store compacted result
+ctx_store --> comp : stored
+comp --> pipe : CompactionResult(nodes_removed, tokens_saved)
+deactivate comp
+
+agent --> router : AgentEvent(Done)
+
+break Secondary LLM merge fails
+    provider --> comp : ProviderError
+    comp -> comp : fallback: drop lowest-ranked nodes
+    comp -> ctx_store : store fallback result
+    ctx_store --> comp : stored
+    comp --> pipe : CompactionResult(nodes_dropped, tokens_saved)
+end
+
+
+@enduml

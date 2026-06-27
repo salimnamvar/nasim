@@ -1,0 +1,84 @@
+@startuml sq_repointelligence01_index_codebase
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     RIM-01 — INDEX Codebase
+' Boundary:  nasim code agent
+' Purpose:   Build AST index and symbol graph from project source
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — RIM-01 INDEX Codebase
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Repo Intelligence Group" #E8F5E9
+  participant "RepoIntelligenceManager" as rim
+  participant "ASTIndexAdapter" as ast
+  participant "SymbolGraph" as graph
+end box
+box "External" #F5F5F5
+  participant "Host Filesystem" as fs
+end box
+
+
+
+== RIM-01 INDEX Codebase ==
+
+user -> router : RIM-01 INDEX Codebase(project_root)
+activate router
+router -> agent : RIM-01 INDEX Codebase(project_root)
+activate agent
+
+agent -> rim : RIM-01 INDEX Codebase(project_root)
+activate rim
+
+rim -> fs : rim.list_source_files(project_root)
+activate fs
+fs --> rim : source_files[]
+deactivate fs
+
+loop for each source_file
+    rim -> ast : ast.parse(source_file)
+    activate ast
+
+    break Parse error
+        ast --> rim : ParseError(file, reason)
+    end
+
+    ast --> rim : ASTNode[]
+    deactivate ast
+
+    rim -> graph : graph.extract_symbols(ast_nodes)
+    activate graph
+    graph --> rim : symbols[]
+    deactivate graph
+
+    rim -> graph : graph.link_relationships(symbols)
+    activate graph
+    graph --> rim : edges[]
+    deactivate graph
+end
+
+rim -> graph : graph.build_adjacency_index()
+activate graph
+graph --> rim : adjacency_map
+deactivate graph
+
+rim --> agent : IndexStats(files, symbols, edges)
+deactivate rim
+
+agent --> router : IndexStats(files, symbols, edges)
+deactivate agent
+deactivate router
+
+
+@enduml

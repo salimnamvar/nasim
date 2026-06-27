@@ -1,0 +1,62 @@
+@startuml sq_agent06_compact_context
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     AGT-06 — COMPACT Context
+' Boundary:  nasim code agent
+' Purpose:   Context compaction when token budget exceeded
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — AGT-06 COMPACT Context
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "ConversationHistory" as history
+  participant "ContextCompactor" as compactor
+end box
+box "Repository Group" #E8F5E9
+  participant "MemoryRepository" as memory
+end box
+
+
+
+== AGT-06 COMPACT Context ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+activate agent
+
+agent -> history : agt03 UPDATE Conversation({msg})
+activate history
+history -> history : check token_count > budget
+history --> agent : COMPACT_NEEDED
+deactivate history
+
+agent -> compactor : agt06 COMPACT Context({messages}, {budget})
+activate compactor
+ref over compactor
+  CTX-02: COMPACT Context
+end ref
+compactor --> agent : shortened messages
+deactivate compactor
+
+agent -> history : agt03 UPDATE Conversation({shortened_messages})
+activate history
+history -> history : replace messages with shortened list
+history --> agent : ok
+deactivate history
+
+agent --> router : AgentEvent(Done)
+deactivate agent
+
+
+
+@enduml

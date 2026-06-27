@@ -1,0 +1,67 @@
+@startuml sq_session09_delete_session
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SSN-09 — DELETE Session
+' Boundary:  nasim code agent
+' Purpose:   Permanently delete a session and its associated data
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — SSN-09 DELETE Session
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Session Group" #E8F5E9
+  participant "SessionStore" as store
+end box
+box "External" #F5F5F5
+  participant "Host Filesystem" as fs
+end box
+
+
+== SSN-09 DELETE Session ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+agent -> store : ssn09 DELETE Session(session_id)
+activate store
+
+store -> store : validate_session_exists(session_id)
+
+break Session not found
+    store --> agent : 404 NOT_FOUND — DeleteError("session not found")
+    agent --> router : AgentEvent(Error)
+end
+
+store -> fs : ssn09 REMOVE Directory(session_path)
+activate fs
+
+break Permission denied
+    fs --> store : PermissionError
+    store --> agent : 403 FORBIDDEN — DeleteError("permission denied")
+    agent --> router : AgentEvent(Error)
+end
+
+fs --> store : 200 OK — removed
+deactivate fs
+
+store -> store : clear_session_index(session_id)
+
+store --> agent : 200 OK — delete_confirmed(session_id)
+deactivate store
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

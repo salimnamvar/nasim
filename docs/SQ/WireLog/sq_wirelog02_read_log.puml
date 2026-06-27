@@ -1,0 +1,61 @@
+@startuml sq_wirelog02_read_log
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     WRL-02 — READ Log (Sequential Scan for Replay)
+' Boundary:  nasim code agent CLI
+' Purpose:   Sequential scan for replay
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Wire Log Group" #F3E5F5
+  participant "WireLogger" as logger
+  participant "EventDeserializer" as deserializer
+end box
+box "FileSystem Group" #E8F5E9
+  participant "FileSystem" as fs
+end box
+
+
+
+== wrl02 READ Log ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+agent -> logger : wrl02 READ Log(session_id, filter)
+activate logger
+
+logger -> fs : read_file(log_path)
+activate fs
+fs --> logger : raw_lines[]
+deactivate fs
+
+loop for each raw_line
+    logger -> deserializer : deserialize(raw_line)
+    activate deserializer
+    deserializer --> logger : event
+    deactivate deserializer
+
+    logger -> logger : apply_filter(event, session_id, filter)
+end
+
+logger -> logger : collect_matching_events()
+
+logger --> agent : 200 OK — EventStream(events[], count, truncated)
+deactivate logger
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

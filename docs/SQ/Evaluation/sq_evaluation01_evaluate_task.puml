@@ -1,0 +1,66 @@
+@startuml sq_evaluation01_evaluate_task
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     EVL-01 — EVALUATE Task
+' Boundary:  nasim code agent
+' Purpose:   Evaluate task completion via success checks and quality signals
+' Note: EVL-01 is a process-decomposition step that runs success checks
+' via ShellRunner. EVL-02..09 are separate Evaluation UCs that follow
+' different architectural paths (EvaluationEngine/TaskEvaluator).
+' Refs would introduce misleading lifelines not present in this flow.
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Group" #FFF3E0
+  participant "SuccessChecker" as checker
+  participant "ShellRunner" as shell
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as tool
+end box
+
+
+
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+== EVL-01 EVALUATE Task ==
+
+agent -> checker : EVL-01 RUN_CHECKS(file_path, check_commands[])
+activate checker
+
+loop for each check_command
+    checker -> shell : execute(check_command, timeout=30s)
+    activate shell
+    alt exit_code == 0
+        shell --> checker : CheckOutput(exit_code=0, stdout, stderr="")
+    else exit_code != 0
+        shell --> checker : CheckOutput(exit_code, stdout, stderr)
+    end
+    deactivate shell
+
+    checker -> checker : record_result(check_command, output)
+end
+
+checker -> checker : aggregate_results()
+
+checker --> agent : CheckResult(passed, results[])
+deactivate checker
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

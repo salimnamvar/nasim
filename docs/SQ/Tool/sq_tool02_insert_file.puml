@@ -1,0 +1,64 @@
+@startuml sq_tool02_insert_file
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     TL-02 — INSERT File
+' Boundary:  nasim code agent CLI
+' Purpose:   Create or overwrite a file
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "WriteFileTool" as ft
+end box
+participant "Host Filesystem" as fs
+
+
+
+== TL-02 WRITE File ==
+
+user -> router : types input
+activate router
+router -> agent : TL-02 PROCESS(user_input)
+activate agent
+agent -> registry : TL-02 WRITE File(path, content)
+activate registry
+registry -> ft : TL-02 WRITE File(path, content)
+activate ft
+ft -> fs : Path(path).mkdir(parents=True)
+activate fs
+ft -> fs : Path(path).write_text(content)
+activate fs
+
+break Write error (permissions, disk full)
+    fs --> ft : PermissionError / OSError
+    deactivate fs
+    ft --> registry : ToolResult(success=False, error="Error writing path: exception")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+fs --> ft : OK
+deactivate fs
+ft --> registry : ToolResult(success=True, content="Wrote N bytes to path")
+registry --> agent : ToolResult
+agent --> router : AgentEvent(Done)
+
+deactivate ft
+deactivate registry
+deactivate agent
+deactivate router
+
+
+@enduml

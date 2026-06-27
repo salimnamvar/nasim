@@ -1,0 +1,72 @@
+@startuml sq_tool06_search_grep
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     TL-06 — SEARCH Grep
+' Boundary:  nasim code agent CLI
+' Purpose:   Search file contents by regex pattern
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "GrepTool" as grep
+  participant "ShellTool" as shell
+end box
+
+
+
+== TL-06 GREP Search ==
+
+user -> router : types input
+activate router
+router -> agent : TL-06 PROCESS(user_input)
+activate agent
+agent -> registry : TL-06 GREP Search(pattern, path, case_sensitive, include_glob)
+activate registry
+registry -> grep : TL-06 GREP Search(pattern, path, case_sensitive, include_glob)
+activate grep
+
+alt ripgrep available
+    grep -> shell : subprocess: rg --json pattern path
+    activate shell
+    shell --> grep : JSON output
+    deactivate shell
+    grep -> grep : parse matches -> file:line:content format
+else ripgrep not found
+    grep -> grep : Python os.walk + re.search fallback
+end
+
+break No matches found
+    grep --> registry : ToolResult(success=False, error="No matches found for pattern")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+break Permission denied / path error
+    grep --> registry : ToolResult(success=False, error="Error: permission denied / path not found")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+grep --> registry : ToolResult(success=True, content=formatted_matches)
+registry --> agent : ToolResult
+agent --> router : AgentEvent(Done)
+
+deactivate grep
+deactivate registry
+deactivate agent
+deactivate router
+
+
+@enduml

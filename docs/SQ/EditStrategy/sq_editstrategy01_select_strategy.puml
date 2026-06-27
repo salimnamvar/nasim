@@ -1,0 +1,78 @@
+@startuml sq_editstrategy01_select_strategy
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     EDT-01 — SELECT Strategy
+' Boundary:  nasim code agent
+' Purpose:   Choose optimal edit format for the target model
+' Note: EDT-01 is a strategy selector, not a sub-UC orchestrator.
+' It selects one strategy from EDT-02..10; ref would show all paths
+' simultaneously, which is misleading. Conditional ref is not supported
+' in PlantUML. The selected strategy is invoked via dynamic dispatch.
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — EDT-01 SELECT Strategy
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Edit Strategy Group" #FFF3E0
+  participant "StrategySelector" as selector
+  participant "EditStrategy" as strategy
+end box
+box "Config Group" #E8F5E9
+  participant "ConfigLoader" as config
+end box
+
+
+
+
+== EDT-01 SELECT Strategy ==
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+agent -> selector : EDT-01 SELECT_STRATEGY(file_path, edit_description, model_id)
+activate selector
+
+selector -> config : get_supported_formats(model_id)
+activate config
+config --> selector : supported_formats[]
+deactivate config
+
+selector -> selector : estimate_diff_size(edit_description)
+
+alt diff_size <= 5 lines
+    selector -> strategy : CREATE_SEARCH_REPLACE(file_path, edit_description)
+    activate strategy
+    strategy --> selector : SearchReplaceEdit
+    deactivate strategy
+else diff_size <= 50 lines
+    selector -> strategy : CREATE_UNIFIED_DIFF(file_path, edit_description)
+    activate strategy
+    strategy --> selector : UnifiedDiffEdit
+    deactivate strategy
+else diff_size > 50 lines
+    selector -> strategy : CREATE_FULL_REWRITE(file_path, edit_description)
+    activate strategy
+    strategy --> selector : FullRewriteEdit
+    deactivate strategy
+end
+
+selector -> selector : validate_format_compatibility(strategy, model_id)
+
+selector --> agent : EditStrategy(format, parameters, confidence)
+deactivate selector
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

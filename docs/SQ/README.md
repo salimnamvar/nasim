@@ -21,31 +21,237 @@ User → [Interface Container] → API (ServerRouter) → AgentOrchestrator → 
 
 ## Groups
 
-| Group | Boundary | Diagrams | Subdirectory |
-| ----- | -------- | :------: | ------------ |
-| AGT | Agent Core — orchestrator, history, permissions, plans, subagents | 14 | `AGT/` |
-| CLI | CLI Interface Container — REPL, parsing, rendering (routes through API) | 8 | `CLI/` |
-| CFG | Configuration — config loading and validation | 3 | `CFG/` |
-| CTX | Context Management — token counting and compaction | 6 | `CTX/` |
-| EDT | Edit Strategy — polymorphic edit strategies | 10 | `EDT/` |
-| EVL | Evaluation — task evaluation and quality checks | 9 | `EVL/` |
-| HK | Hooks — pre/post hooks for tool and LLM lifecycle | 6 | `HK/` |
-| MCP | Model Context Protocol — client/server extension tools | 4 | `MCP/` |
-| MEM | Memory — cross-session knowledge persistence | 4 | `MEM/` |
-| OBS | Observability — structured logging, metrics, trace correlation | 6 | `OBS/` |
-| PLG | Plugins — plugin discovery, loading, registration | 6 | `PLG/` |
-| PRV | Provider Layer — provider abstraction, chat, streaming | 4 | `PRV/` |
-| RIM | Repo Intelligence — codebase indexing, symbol graphs, embedding | 6 | `RIM/` |
-| RTG | Model Router — model selection, fallback, routing | 4 | `RTG/` |
-| SAF | Safety — permission checks and user approval | 3 | `SAF/` |
-| SBX | Sandbox — OS-level process isolation | 4 | `SBX/` |
-| SRV | API Group (Entry Gate) — REST API, SSE streaming | 11 | `SRV/` |
-| SSN | Session — persistence and resumption | 9 | `SSN/` |
-| TL | Tool Layer — all tool implementations | 22 | `TL/` |
-| VCS | Version Control — Git status, diff, commit | 4 | `VCS/` |
-| WRL | Wire Log — append-only event store, fork, checkpoint | 5 | `WRL/` |
+| Group | Canonical (C4) Name | Boundary | Diagrams | Status |
+| ----- | :-----------------: | -------- | :------: | ------ |
+| AGT | Agent | Agent Core — orchestrator, history, permissions, plans, subagents | 14 | ⚠️ Dev |
+| CLI | CLI | CLI Interface Container — REPL, parsing, rendering (routes through API) | 8 | ✅ Ok |
+| CFG | Config | Configuration — config loading and validation | 3 | ⚠️ Dev |
+| CTX | ContextGraph | Context Management — token counting and compaction | 6 | ⚠️ Dev |
+| EDT | EditStrategy | Edit Strategy — polymorphic edit strategies | 10 | ⚠️ Dev |
+| EVL | Evaluation | Evaluation — task evaluation and quality checks | 9 | ⚠️ Dev |
+| HK | Hooks | Hooks — pre/post hooks for tool and LLM lifecycle | 6 | ⚠️ Dev |
+| MCP | MCP | Model Context Protocol — client/server extension tools | 4 | ✅ Ok |
+| MEM | Memory | Memory — cross-session knowledge persistence | 4 | ⚠️ Dev |
+| OBS | Observability | Observability — structured logging, metrics, trace correlation | 6 | ⚠️ Dev |
+| PLG | Plugins | Plugins — plugin discovery, loading, registration | 6 | ⚠️ Dev |
+| PRV | Provider | Provider Layer — provider abstraction, chat, streaming | 4 | ⚠️ Dev |
+| RIM | RepoIntelligence | Repo Intelligence — codebase indexing, symbol graphs, embedding | 6 | ⚠️ Dev |
+| RTG | Router | Model Router — model selection, fallback, routing | 4 | ⚠️ Dev |
+| SAF | Safety | Safety — permission checks and user approval | 3 | ⚠️ Dev |
+| SBX | Sandbox | Sandbox — OS-level process isolation | 4 | ⚠️ Dev |
+| SRV | API | API Group (Entry Gate) — REST API, SSE streaming | 11 | ⚠️ Dev |
+| SSN | Session | Session — persistence and resumption | 9 | ⚠️ Dev |
+| TL | Tool | Tool Layer — all tool implementations | 22 | ⚠️ Dev |
+| VCS | Git | Version Control — Git status, diff, commit | 4 | ⚠️ Dev |
+| WRL | WireLog | Wire Log — append-only event store, fork, checkpoint | 5 | ⚠️ Dev |
 
 **Total: 148 SQ diagrams across 21 groups**
+
+Status key: ✅ **Ok** — abbreviated name already matches canonical name. ⚠️ **Dev** — temporary deviation, to be renamed in migration iteration.
+
+## Naming Convention & Migration Status
+
+### Migration Complete ✅
+
+SQ group directories and file prefixes now use canonical C4 names.
+
+| Old Dir | New Dir | Files | Status |
+|---------|---------|:-----:|--------|
+| `AGT/` | `Agent/` | 14 | ✅ Migrated |
+| `CFG/` | `Config/` | 3 | ✅ Migrated |
+| `CLI/` | `CLI/` | 8 | ✅ Already canonical |
+| `CTX/` | `ContextGraph/` | 6 | ✅ Migrated |
+| `EDT/` | `EditStrategy/` | 10 | ✅ Migrated |
+| `EVL/` | `Evaluation/` | 9 | ✅ Migrated |
+| `HK/` | `Hooks/` | 6 | ✅ Migrated |
+| `MCP/` | `MCP/` | 4 | ✅ Already canonical |
+| `MEM/` | `Memory/` | 4 | ✅ Migrated |
+| `OBS/` | `Observability/` | 6 | ✅ Migrated |
+| `PLG/` | `Plugins/` | 6 | ✅ Migrated |
+| `PRV/` | `Provider/` | 4 | ✅ Migrated |
+| `RIM/` | `RepoIntelligence/` | 6 | ✅ Migrated |
+| `RTG/` | `Router/` | 4 | ✅ Migrated |
+| `SAF/` | `Safety/` | 3 | ✅ Migrated |
+| `SBX/` | `Sandbox/` | 4 | ✅ Migrated |
+| `SRV/` | `API/` | 11 | ✅ Migrated |
+| `SSN/` | `Session/` | 9 | ✅ Migrated |
+| `TL/` | `Tool/` | 22 | ✅ Migrated |
+| `VCS/` | `Git/` | 4 | ✅ Migrated |
+| `WRL/` | `WireLog/` | 5 | ✅ Migrated |
+
+**Migration Date:** 2026-06-27
+**Total Files Migrated:** 149 (137 renamed + 12 with canonical names already)
+**UC IDs:** Unchanged (e.g., `AGT-01`, `TL-03` remain as stable identifiers)
+
+### Historical Reference (Pre-Migration)
+
+<details>
+<summary>Click to expand old abbreviation mapping</summary>
+
+| Abbreviation | Canonical (C4) Name |
+|:------------:|:-------------------:|
+| `AGT/` | `Agent/` |
+| `CLI/` | `CLI/` |
+| `CFG/` | `Config/` |
+| `CTX/` | `ContextGraph/` |
+| `EDT/` | `EditStrategy/` |
+| `EVL/` | `Evaluation/` |
+| `HK/` | `Hooks/` |
+| `MCP/` | `MCP/` |
+| `MEM/` | `Memory/` |
+| `OBS/` | `Observability/` |
+| `PLG/` | `Plugins/` |
+| `PRV/` | `Provider/` |
+| `RIM/` | `RepoIntelligence/` |
+| `RTG/` | `Router/` |
+| `SAF/` | `Safety/` |
+| `SBX/` | `Sandbox/` |
+| `SRV/` | `API/` |
+| `SSN/` | `Session/` |
+| `TL/` | `Tool/` |
+| `VCS/` | `Git/` |
+| `WRL/` | `WireLog/` |
+
+</details>
+
+### Canonical Naming Convention
+
+New SQ diagrams must use:
+
+```
+docs/SQ/{CanonicalGroup}/sq_{canonical_group}{nn}_{description}.puml
+```
+
+Examples:
+- `docs/SQ/Agent/sq_agent01_process_user_task.puml`
+- `docs/SQ/API/sq_api03_get_session.puml`
+- `docs/SQ/Tool/sq_tool10_dispatch_tool_call.puml`
+- `docs/SQ/Session/sq_session02_resume_session.puml`
+- `docs/SQ/Safety/sq_safety01_check_permission.puml`
+
+### Migration Plan (Complete)
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| **Phase 1: Preparation** | ✅ Complete | Rules updated in sq.md, uc.md, cicd.md. Tools created. |
+| **Phase 2: Execution** | ✅ Complete | 149 files migrated across 21 groups. |
+| **Phase 3: Validation** | ✅ Complete | Linters pass, rendering verified, UC IDs intact. |
+
+#### Phase 1 Deliverables (Complete)
+
+| Deliverable | Location | Status |
+|-------------|----------|--------|
+| Cross-layer naming checker | `~/.agent-global/shared/tools/software-design/common/cross_layer_naming_check.py` | ✅ Created |
+| Migration script | `~/.agent-global/shared/tools/software-design/common/sq_naming_migrate.py` | ✅ Created |
+| Migration plan | `docs/SQ/README.md` (this file) | ✅ Updated |
+| Rules updated | `sq.md`, `uc.md`, `cicd.md` | ✅ Complete |
+
+#### Phase 2: Execution Plan
+
+**Scope:** 149 SQ diagrams across 21 groups (19 directories to rename)
+
+**Mapping Table (Directory → Files):**
+
+| Old Dir | New Dir | Files | Status |
+|---------|---------|:-----:|--------|
+| `AGT/` | `Agent/` | 14 | ⏳ |
+| `CFG/` | `Config/` | 3 | ⏳ |
+| `CLI/` | `CLI/` | 8 | ✅ Already canonical |
+| `CTX/` | `ContextGraph/` | 6 | ⏳ |
+| `EDT/` | `EditStrategy/` | 10 | ⏳ |
+| `EVL/` | `Evaluation/` | 9 | ⏳ |
+| `HK/` | `Hooks/` | 6 | ⏳ |
+| `MCP/` | `MCP/` | 4 | ✅ Already canonical |
+| `MEM/` | `Memory/` | 4 | ⏳ |
+| `OBS/` | `Observability/` | 6 | ⏳ |
+| `PLG/` | `Plugins/` | 6 | ⏳ |
+| `PRV/` | `Provider/` | 4 | ⏳ |
+| `RIM/` | `RepoIntelligence/` | 6 | ⏳ |
+| `RTG/` | `Router/` | 4 | ⏳ |
+| `SAF/` | `Safety/` | 3 | ⏳ |
+| `SBX/` | `Sandbox/` | 4 | ⏳ |
+| `SRV/` | `API/` | 11 | ⏳ |
+| `SSN/` | `Session/` | 9 | ⏳ |
+| `TL/` | `Tool/` | 22 | ⏳ |
+| `VCS/` | `Git/` | 4 | ⏳ |
+| `WRL/` | `WireLog/` | 5 | ⏳ |
+
+**Total:** 137 files to rename + 19 directories to rename
+
+**Execution Steps:**
+
+```bash
+# 1. Preview changes (dry-run)
+python ~/.agent-global/shared/tools/software-design/common/sq_naming_migrate.py \
+  docs --dry-run --update-internal-refs
+
+# 2. Execute migration
+python ~/.agent-global/shared/tools/software-design/common/sq_naming_migrate.py \
+  docs --execute --update-internal-refs
+
+# 3. Verify naming consistency
+python ~/.agent-global/shared/tools/software-design/common/cross_layer_naming_check.py \
+  docs --strict
+```
+
+#### Risk Assessment
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Broken `ref` targets in diagrams | **HIGH** | Script updates internal `@startuml` IDs; manual verification needed for cross-file refs |
+| Linter failures after rename | **MEDIUM** | Run `rod_csr_sq_lint.py --strict` post-migration; fix any issues before commit |
+| Rendering failures | **MEDIUM** | Re-render all 149 diagrams with PlantUML; verify zero errors |
+| Git history disruption | **LOW** | Use `git mv` for tracked files; preserves history |
+| UC ID changes (unintended) | **CRITICAL** | **FORBIDDEN** — UC IDs (`AGT-01`, `SRV-03`) remain unchanged |
+
+#### Validation Steps (Post-Migration)
+
+1. **Naming consistency check:**
+   ```bash
+   python cross_layer_naming_check.py docs --strict
+   # Expected: 0 violations
+   ```
+
+2. **SQ linter:**
+   ```bash
+   python rod_csr_sq_lint.py docs/SQ --strict
+   # Expected: 0 critical, 0 high (waived notes violations expected)
+   ```
+
+3. **Rendering check:**
+   ```bash
+   # Render all diagrams and check for errors
+   for f in docs/SQ/**/*.puml; do
+     java -jar plantuml.jar -tpng -nometadata "$f" || echo "FAILED: $f"
+   done
+   ```
+
+4. **Cross-reference verification:**
+   - All `ref` targets in SQ diagrams resolve to valid UC IDs
+   - All UC IDs in SQ titles exist in `docs/UC/README.md`
+   - All lifelines in SQ diagrams exist in C4 component diagrams
+
+#### Go/No-Go Criteria for Phase 2
+
+| Criterion | Required | Status |
+|-----------|----------|--------|
+| Cross-layer naming checker passes with 0 CRITICAL | ✅ Yes | ⏳ Pending |
+| SQ linter passes with 0 CRITICAL/HIGH | ✅ Yes | ⏳ Pending |
+| All 149 diagrams render without errors | ✅ Yes | ⏳ Pending |
+| Tech Lead approval | ✅ Yes | ⏳ Pending |
+| No UC ID changes in diff | ✅ Yes | ⏳ Pending |
+
+> **Note:** UC IDs (e.g., `AGT-01`, `SRV-03`) are **not** affected by this
+> change — they remain as stable identifiers. Only directory names and file
+> prefixes change.
+
+#### Post-Migration: Phase 3 (Steady State)
+
+After successful migration:
+1. Update CI/CD to enforce canonical naming (Check 7 in cicd.md)
+2. Remove legacy abbreviation support from linters
+3. Update `SQ/README.md` to mark migration as complete
+4. Close technical debt item in project tracker
 
 ## SQ Diagram Convention
 

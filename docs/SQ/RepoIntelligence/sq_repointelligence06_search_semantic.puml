@@ -1,0 +1,67 @@
+@startuml sq_repointelligence06_search_semantic
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     RIM-06 — SEARCH Semantic
+' Boundary:  nasim code agent CLI
+' Purpose:   Embedding-based code similarity search across repository
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — RIM-06 LIST Semantic
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Repo Intelligence Group" #E8F5E9
+  participant "SemanticSearch" as search
+end box
+box "Provider Group" #FFF3E0
+  participant "Provider" as provider
+end box
+box "Storage Group" #E8F5E9
+  participant "EmbeddingStore" as embeddings
+end box
+
+
+
+== RIM-06 SEARCH Semantic ==
+
+user -> router : RIM-06 SEARCH Semantic(query, top_k, page_size=20, page_token="abc")
+activate router
+router -> agent : RIM-06 SEARCH Semantic(query, top_k, page_size=20, page_token="abc")
+activate agent
+
+agent -> search : RIM-06 SEARCH Semantic(query, top_k, page_size=20, page_token="abc")
+activate search
+
+search -> provider : provider.embed(query_text)
+activate provider
+provider --> search : query_embedding
+deactivate provider
+
+search -> embeddings : embeddings.cosine_search(query_embedding, top_k, offset=0)
+activate embeddings
+embeddings --> search : raw_results[], next_page_token
+deactivate embeddings
+
+search -> search : filter_by_threshold(results, min_sim=0.3)
+
+search -> search : format_snippets(filtered_results)
+
+search --> agent : SearchResultList(results, scores, snippets, nextPageToken)
+deactivate search
+
+agent --> router : SearchResultList(results, scores, snippets)
+deactivate agent
+deactivate router
+
+
+@enduml

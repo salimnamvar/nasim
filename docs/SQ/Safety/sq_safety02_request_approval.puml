@@ -1,0 +1,57 @@
+@startuml sq_safety02_request_approval
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SAF-02 — REQUEST Approval
+' Boundary:  nasim code agent CLI
+' Purpose:   Display approval prompt for unsafe tool execution
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+title nasim — SAF-02 PROMPT User Approval
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+  participant "Renderer" as renderer
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "PermissionGate" as gate
+end box
+
+
+== SAF-02 Prompt User Approval ==
+
+user -> router : types input
+router -> agent : SAF-02 PROCESS(user_input)
+
+agent -> gate : SAF-02 PROMPT UserApproval(tool_name, args)
+activate gate
+
+gate -> renderer : SAF-02 DISPLAY Approval(tool_name, args)
+activate renderer
+renderer --> user : "Allow <tool_name>(<args>)? [y/N]"
+
+user -> renderer : y or N
+renderer --> gate : choice (bool)
+
+alt user = y
+    renderer --> gate : approved
+    gate --> agent : approved
+    agent --> router : AgentEvent(Done)
+else user = N
+    renderer --> gate : rejected
+    gate --> agent : rejected
+    agent --> router : AgentEvent(Done)
+end
+
+deactivate gate
+deactivate renderer
+
+
+
+@enduml

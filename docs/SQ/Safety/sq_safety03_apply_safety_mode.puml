@@ -1,0 +1,47 @@
+@startuml sq_safety03_apply_safety_mode
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     SAF-03 — Apply Safety Mode
+' Boundary:  nasim code agent CLI
+' Purpose:   Configure safety mode from config
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+title nasim — SAF-03 UPDATE Safety Mode
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+  participant "PermissionGate" as gate
+end box
+box "Config Group" #E8F5E9
+  participant "ConfigLoader" as cfg
+end box
+
+
+== SAF-03 Apply Safety Mode ==
+
+user -> router : types input
+router -> agent : SAF-03 PROCESS(user_input)
+
+agent -> cfg : SAF-03 READ SafetyModeConfig()
+activate cfg
+cfg --> agent : config.safety_mode
+deactivate cfg
+
+agent -> gate : SAF-03 APPLY SafetyMode(config.safety_mode, updateMask)
+gate -> gate : SAF-03 SET self.mode(config.safety_mode)
+
+gate --> agent : Result(success=true, data={safety_mode})
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

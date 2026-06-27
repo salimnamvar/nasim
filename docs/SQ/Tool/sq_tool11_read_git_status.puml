@@ -1,0 +1,85 @@
+@startuml sq_tool11_read_git_status
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     TL-11 — Read Git Status
+' Boundary:  nasim code agent CLI
+' Purpose:   Git operations: status, diff, commit
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    —
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "ToolRegistry" as registry
+  participant "GitTool" as git
+end box
+participant "Host Shell" as shell
+
+
+
+== TL-11 READ Git Status ==
+
+user -> router : types input
+activate router
+router -> agent : TL-11 PROCESS(user_input)
+activate agent
+agent -> registry : TL-11 READ Git Status(action, args)
+activate registry
+registry -> git : TL-11 READ Git Status(action, args)
+activate git
+
+alt action = "status"
+    git -> shell : subprocess: git status --porcelain
+    activate shell
+    shell --> git : status output
+    deactivate shell
+    git --> registry : ToolResult(success=True, content=formatted_status)
+else action = "diff"
+    git -> shell : subprocess: git diff [args]
+    activate shell
+    shell --> git : diff output
+    deactivate shell
+    git --> registry : ToolResult(success=True, content=diff_text)
+else action = "commit"
+    git -> shell : subprocess: git add -A && git commit -m msg
+    activate shell
+    shell --> git : commit output
+    deactivate shell
+    git --> registry : ToolResult(success=True, content=commit_confirmation)
+end
+
+break Not a git repo
+    shell --> git : fatal: not a git repository
+    deactivate shell
+    git --> registry : ToolResult(success=False, error="Error: not a git repository")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+break Nothing to commit
+    shell --> git : nothing to commit
+    deactivate shell
+    git --> registry : ToolResult(success=False, error="Nothing to commit")
+    registry --> agent : ToolResult
+    agent --> router : AgentEvent(Error)
+end
+
+registry --> agent : ToolResult
+agent --> router : AgentEvent(Done)
+
+    deactivate git
+deactivate registry
+deactivate agent
+deactivate router
+
+
+@enduml

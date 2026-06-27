@@ -1,0 +1,65 @@
+@startuml sq_provider01_register_provider
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     PRV-01 — REGISTER Provider
+' Boundary:  nasim code agent CLI
+' Purpose:   Provider instantiation from config
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+title nasim — PRV-01 REGISTER Provider
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Provider Group" #FFF3E0
+  participant "ProviderFactory" as factory
+  participant "Provider" as proto
+end box
+
+
+
+
+== PRV-01 REGISTER Provider ==
+
+user -> router : PRV-01 REGISTER Provider(ollama)
+activate router
+router -> agent : PRV-01 REGISTER Provider(config)
+activate agent
+
+agent -> factory : PRV-01 REGISTER Provider(config)
+activate factory
+factory -> factory : lookup config.provider
+
+alt provider = "ollama"
+    factory -> proto : OllamaProvider(url, model, timeout)
+else provider = "openai"
+    factory -> proto : OpenAIProvider(api_key, model)
+else provider = "anthropic"
+    factory -> proto : AnthropicProvider(api_key, model)
+end
+
+break Unknown provider type
+    factory -> factory : raise ConfigError("Unknown provider: X")
+    factory --> agent : ConfigError
+    agent --> router : ConfigError
+end
+
+factory --> agent : Provider instance
+deactivate factory
+
+agent --> router : Provider ready
+deactivate agent
+deactivate router
+
+
+
+@enduml

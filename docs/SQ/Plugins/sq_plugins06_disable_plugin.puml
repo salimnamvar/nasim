@@ -1,0 +1,52 @@
+@startuml sq_plugins06_disable_plugin
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     PLG-06 — Disable Plugin
+' Boundary:  nasim code agent
+' Purpose:   Deactivate plugin tools and hooks, set state DISABLED
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "PluginLoader" as loader
+  participant "ToolRegistry" as registry
+end box
+box "Hooks Group" #F3E5F5
+  participant "HookManager" as hm
+end box
+
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+== PLG-06 Disable Plugin ==
+
+agent -> loader : PLG-06 DISABLE_PLUGIN(plugin_id)
+activate loader
+
+loader -> registry : unregister plugin tools
+loader -> hm : unregister plugin hooks
+loader -> loader : set state DISABLED
+
+break Unregister failure
+    loader -> loader : set state ERROR, log failure
+end
+
+loader --> agent : plugin disabled
+deactivate loader
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml

@@ -1,0 +1,57 @@
+@startuml sq_evaluation07_record_quality_signal
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     EVL-07 — RECORD Quality Signal
+' Boundary:  nasim code agent
+' Purpose:   Record accept/reject quality signal with feedback
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Group" #FFF3E0
+  participant "EvaluationEngine" as engine
+  participant "QualitySignal" as signal
+end box
+box "Storage Group" #E8F5E9
+  participant "SignalStore" as store
+end box
+
+
+
+
+== EVL-07 RECORD Quality Signal ==
+
+agent -> engine : EVL-07 RECORD_SIGNAL(task_id, decision, feedback?)
+activate engine
+
+engine -> signal : record_quality_signal(task_id, decision, feedback)
+activate signal
+
+signal -> signal : build_signal_record(task_id, decision, feedback, timestamp)
+
+signal -> store : persist_signal(signal_record)
+activate store
+store --> signal : persist_result
+deactivate store
+
+signal --> engine : SignalRecorded(signal_id)
+deactivate signal
+
+engine --> agent : SignalRecorded
+deactivate engine
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

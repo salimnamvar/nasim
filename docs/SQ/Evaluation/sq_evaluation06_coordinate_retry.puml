@@ -1,0 +1,64 @@
+@startuml sq_evaluation06_coordinate_retry
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     EVL-06 — Coordinate Retry
+' Boundary:  nasim code agent CLI
+' Purpose:   Retry with feedback on failure
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Evaluation Group" #FFF3E0
+  participant "RetryCoordinator" as retry
+  participant "FeedbackInjector" as feedback
+  participant "TurnBudgetInjector" as budget
+end box
+box "Sandbox Group" #F3E5F5
+  participant "FileSystem" as fs
+end box
+
+
+
+
+== EVL-06 COORDINATE Retry ==
+
+agent -> retry : EVL-06 COORDINATE_RETRY(edit_result, check_result, review_result)
+activate retry
+
+retry -> retry : increment_retry_count()
+
+retry -> retry : check_retry_limit(max=3)
+
+alt retry_count <= max_retries
+    retry -> fs : restore_backup(edit_result.backup_path)
+    activate fs
+    fs --> retry : restore_success
+    deactivate fs
+
+    retry -> feedback : INJECT_FEEDBACK(check_result, review_result)
+    activate feedback
+    feedback --> retry : feedback_context
+    deactivate feedback
+
+    retry --> agent : RetryResult(retry_count, feedback_context, continue=true)
+else retry_count > max_retries
+    retry --> agent : RetryExhausted(retry_count, final_error)
+end
+
+deactivate retry
+
+agent --> router : AgentEvent(Done)
+
+
+
+@enduml

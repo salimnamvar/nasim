@@ -1,0 +1,56 @@
+@startuml sq_plugins04_register_plugin_hooks
+!include ../common/sq_styles.puml
+' ============================================================
+' Title:     PLG-04 — Register Plugin Hooks
+' Boundary:  nasim code agent
+' Purpose:   Register all hooks declared in a plugin manifest
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    CAR refinement loop — API-First transformation
+' Review:    docs/SQ/README.md
+' ============================================================
+
+actor "User" as user
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+box "Agent Group" #FFF3E0
+  participant "AgentOrchestrator" as agent
+end box
+box "Tool Group" #E8F5E9
+  participant "PluginLoader" as loader
+end box
+box "Hooks Group" #F3E5F5
+  participant "HookManager" as hm
+end box
+
+
+user -> router : types input
+router -> agent : PROCESS(user_input)
+
+== PLG-04 Register Plugin Hooks ==
+
+agent -> loader : PLG-04 REGISTER_PLUGIN_HOOKS(manifest)
+activate loader
+
+loader -> loader : enumerate hooks from PluginManifest
+
+loop for each hook in manifest
+    loader -> hm : register(event, handler, priority)
+
+    break Registration failure
+        hm --> loader : RegistrationError
+        loader --> loader : log warning, skip hook
+    end
+
+    hm --> loader : registered
+end
+
+loader --> agent : all hooks registered
+deactivate loader
+
+agent --> router : AgentEvent(Done)
+
+
+@enduml
