@@ -3,15 +3,11 @@
 ' Boundary:  NASIM Application (container) — Router Group
 ' Purpose:   Model selection, fallback chains, capability queries
 '            CSR Layer: Service
-'            Cross-boundary callers shown as System_Ext (opaque references).
-'            Component_Ext is not a standard C4-PlantUML macro and is
-'            forbidden per AU-01. Callers/targets are internal components
-'            in other groups — see their dedicated component diagrams.
 ' Milestone: v1.0
-' Version:   9.2.0
-' Source:    docs/entities.md, .nasim/agents/c4_architect.md
-' Review:    AU-01 fix — 2026-06-27
-' Date:      2026-06-27
+' Version:   9.1.0
+' Source:    docs/prompt/p1.md — corrective architecture review
+' Review:    CAR audit 2026-06-26
+' Date:      2026-06-26
 ' ============================================================
 
 @startuml c4_nasim_component_router
@@ -22,9 +18,6 @@
 
 title NASIM Application — Router Component Diagram
 
-System_Ext(agent_sys, "Agent Group", "Caller — AgentOrchestrator dispatches model selection; see c4_nasim_component_agent.puml")
-System_Ext(provider_sys, "Provider Group", "Target — LiteLLMProxy executes the selected model; see c4_nasim_component_provider.puml")
-
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(router_group, "Router Group") <<service>> {
         Component(model_router, "ModelRouter", "", "Model selection, fallback chains, task classification, routing strategies")
@@ -32,10 +25,13 @@ Container_Boundary(nasim_application, "NASIM Application") {
     }
 }
 
-Rel(agent_sys, model_router, "route model selection")
-Rel(model_router, provider_sys, "route to provider")
+Component_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
+Component_Ext(provider, "Provider", "Provider Group")
+
+Rel(agent_orch, model_router, "route model selection")
+Rel(model_router, provider, "route to provider")
 Rel(model_router, fallback_chain, "trigger failover")
-Rel(fallback_chain, provider_sys, "failover to next provider")
+Rel(fallback_chain, provider, "failover to next provider")
 
 legend right
     |<#E3F2FD>  **Controller** | CLI Group, API Group |
