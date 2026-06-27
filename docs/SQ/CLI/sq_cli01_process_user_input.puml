@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> CliManager -> CliStore -> CliDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> REPLSession -> ServerRouter
 ' SM States: LISTENING (#E8EAF6), THINKING (#D7CCC8), RESPONDING (#D1C4E9), IDLE (#ECEFF1)
 ' ============================================================
 
@@ -21,67 +21,47 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
-  participant "CLIRouter" as router
-end box
-box "Service" #FFF3E0
-  participant "CLIExecutor" as exec
-end box
-box "Repository" #E8F5E9
-  participant "CLIStore" as store
-end box
-database "CLIDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "CLI Group" #E3F2FD
+  participant "REPLSession" as repl
 end box
 
-
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
 
 == CLI-01 PROCESS User Input ==
 
 user -> iface : CLI-01 PROCESS Input({input})
 activate iface
-iface -> router : CLI-01 PROCESS Input({input})
+iface -> repl : CLI-01 PROCESS Input({input})
+activate repl
+repl -> router : CLI-01 PARSE Input({input})
 activate router
-router -> router : CLI-01 PROCESS Input({input})
 
-router -> router : CLI-01 PARSE Input({input})
 alt is slash command
-  ref over router
+  ref over repl
     CLI-02: DISPATCH Slash Command
   end ref
-  router --> router : 200 OK
-  router --> iface : 200 OK
-  iface --> user : 200 OK
+  router --> repl : 200 OK
   deactivate router
+  repl --> iface : 200 OK
+  deactivate repl
+  iface --> user : 200 OK
   deactivate iface
-      user -> user : TRANSITION State(<back:#ECEFF1>IDLE</back>)
+  ref over repl : TRANSITION State(<back:#ECEFF1>IDLE</back>)
 else normal input
-  router -> exec : CLI-01 EXECUTE Input({input})
-  activate exec
-      exec -> exec : TRANSITION State(<back:#E8EAF6>LISTENING</back>)
-  exec -> store : CLI-01 PROCESS Input({input})
-  activate store
-  store -> dir : CLI-01 PROCESS Input({input})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> exec : 200 OK
-  deactivate store
-      exec -> exec : TRANSITION State(<back:#D7CCC8>THINKING</back>)
-  ref over exec
+  repl -> router : CLI-01 EXECUTE Input({input})
+  ref over repl : TRANSITION State(<back:#E8EAF6>LISTENING</back>)
+  ref over repl : TRANSITION State(<back:#D7CCC8>THINKING</back>)
+  ref over router
     API-06: DISPATCH Message
   end ref
-      exec -> exec : TRANSITION State(<back:#D1C4E9>RESPONDING</back>)
-  exec --> router : 200 OK
-  deactivate exec
-  router --> router : 200 OK
-  router --> iface : 200 OK
-  iface --> user : 200 OK
+  ref over repl : TRANSITION State(<back:#D1C4E9>RESPONDING</back>)
+  router --> repl : 200 OK
   deactivate router
+  repl --> iface : 200 OK
+  deactivate repl
+  iface --> user : 200 OK
   deactivate iface
 end
 

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> EditstrategyManager -> EditstrategyStore -> EditstrategyDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> FunctionLevelCoder
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Edit Strategy Group (Service)" #FFF3E0
-  participant "EditManager" as mgr
-end box
-box "Edit Strategy Group (Repository)" #E8F5E9
-  participant "EditStore" as store
-end box
-database "EditDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "EditStrategy Group" #FFF3E0
+  participant "FunctionLevelCoder" as coder
 end box
-
-
 
 == EDT-06 APPLY Function-Level ==
 
@@ -46,28 +35,20 @@ user -> iface : POST /editstrategy/function-level
 activate iface
 iface -> router : POST /editstrategy/function-level
 activate router
-router -> mgr : EDT-06 APPLY Function-Level({file_path, function_name, new_body})
-activate mgr
+router -> coder : EDT-06 APPLY Function-Level({file_path, function_name, new_body})
+activate coder
 
-alt validation succeedt
-  mgr -> store : EDT-06 APPLY Function-Level({file_path, function_name, new_body})
-  activate store
-  store -> dir : EDT-06 APPLY Function-Level({file_path, function_name, new_body})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
-  mgr --> router : 200 OK
-  deactivate mgr
+alt validation succeeds
+  ref over coder : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
+  coder --> router : 200 OK
+  deactivate coder
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else validation fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
+  coder --> router : 422 Unprocessable
+  deactivate coder
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

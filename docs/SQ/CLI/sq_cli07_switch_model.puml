@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> CliManager -> CliStore -> CliDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> SlashCommandHandler -> ServerRouter
 ' SM States: ROUTING (#EDE7F6)
 ' ============================================================
 
@@ -21,59 +21,37 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
-  participant "CLIRouter" as router
-end box
-box "Service" #FFF3E0
-  participant "CLIExecutor" as exec
-end box
-box "Repository" #E8F5E9
-  participant "CLIStore" as store
-end box
-database "CLIDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "CLI Group" #E3F2FD
+  participant "SlashCommandHandler" as sch
 end box
 
-
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
 
 == CLI-07 SWITCH Model ==
 
 user -> iface : CLI-07 SWITCH Model({modelName})
 activate iface
-iface -> router : CLI-07 SWITCH Model({modelName})
+iface -> sch : CLI-07 SWITCH Model({modelName})
+activate sch
+sch -> router : CLI-07 SWITCH Model({modelName})
 activate router
-router -> router : CLI-07 SWITCH Model({modelName})
-router -> exec : CLI-07 SWITCH Model({modelName})
-activate exec
-    exec -> exec : TRANSITION State(<back:#EDE7F6>ROUTING</back>)
+ref over sch : TRANSITION State(<back:#EDE7F6>ROUTING</back>)
 
 alt model available
-  exec -> store : CLI-07 SWITCH Model({modelName})
-  activate store
-  store -> dir : CLI-07 SWITCH Model({modelName})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> exec : 200 OK
-  deactivate store
-  exec --> router : 200 OK
-  deactivate exec
-  router --> router : 200 OK
-  router --> iface : 200 OK
-  iface --> user : 200 OK
+  router --> sch : 200 OK
   deactivate router
+  sch --> iface : 200 OK
+  deactivate sch
+  iface --> user : 200 OK
   deactivate iface
 else model not available
-  exec --> router : 404 Not Found
-  deactivate exec
-  router --> router : 404 Not Found
-  router --> iface : 404 Not Found
-  iface --> user : 404 Not Found
+  router --> sch : 404 Not Found
   deactivate router
+  sch --> iface : 404 Not Found
+  deactivate sch
+  iface --> user : 404 Not Found
   deactivate iface
 end
 

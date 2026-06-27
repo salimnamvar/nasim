@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> ErrorBoundary
 ' SM States: FAILED (#EF5350)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Agent Group (Service)" #FFF3E0
-  participant "AgentManager" as mgr
+  participant "ErrorBoundary" as boundary
 end box
-box "Agent Group (Repository)" #E8F5E9
-  participant "AgentStore" as store
-end box
-database "AgentDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == AGT-14 HANDLE Error ==
 
@@ -46,28 +35,22 @@ user -> iface : POST /v1/agents/{agent_id}:handle-error
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:handle-error
 activate router
-router -> mgr : AGT-14 HANDLE Error({error})
-activate mgr
+router -> boundary : AGT-14 HANDLE Error({error})
+activate boundary
 
 alt retryable error
-      mgr -> mgr : TRANSITION State(<back:#EF5350>FAILED</back>)
-  mgr -> store : AGT-14 HANDLE Error({error})
-  activate store
-  store -> dir : AGT-14 HANDLE Error({error})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over boundary : AGT-14 HANDLE Error
+    ' State: <back:#EF5350>FAILED</back>
+    ' Owned by: AGT-14 (SM/README.md)
+  boundary --> router : 200 OK
+  deactivate boundary
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else unrecoverable
-  mgr --> router : 500 Server Error
-  deactivate mgr
+  boundary --> router : 500 Server Error
+  deactivate boundary
   router --> iface : 500 Server Error
   iface --> user : 500 Server Error
   deactivate router

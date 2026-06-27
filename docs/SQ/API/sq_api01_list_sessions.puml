@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ApiManager -> ApiStore -> ApiDirectory -> FileSystem
-' SM States: —
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionStore -> SessionStorage
+' SM States: (no state change — read-only)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,15 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service" #FFF3E0
-  participant "SessionManager" as mgr
-end box
-box "Repository" #E8F5E9
+
+box "Session Group (Repository)" #E8F5E9
   participant "SessionStore" as store
 end box
-database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
+database "SessionStorage" as storage
 
 == API-01 LIST Sessions ==
 
@@ -46,31 +37,41 @@ user -> iface : GET /v1/sessions
 activate iface
 iface -> router : GET /v1/sessions
 activate router
-router -> mgr : api01 LIST Sessions({pageSize, pageToken})
-activate mgr
 
-alt validation succeeds
-  mgr -> store : api01 LIST Sessions({pageSize, pageToken})
-  activate store
-  store -> dir : api01 LIST Sessions({pageSize, pageToken})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
-  deactivate router
-  deactivate iface
+router -> store : API-01 LIST Sessions({pageSize, pageToken})
+activate store
+
+alt validation fails
+    store --> router : 422 Unprocessable
+    router --> iface : 422 Unprocessable
+    iface --> user : 422 Unprocessable
+    deactivate store
+    deactivate router
+    deactivate iface
 end
+
+store -> storage : API-01 LIST Sessions({pageSize, pageToken})
+activate storage
+
+alt directory not found
+    storage --> store : FileNotFoundError
+    deactivate storage
+    store --> router : 200 OK — [] (empty list)
+    router --> iface : 200 OK — [] (empty list)
+    iface --> user : 200 OK — [] (empty list)
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK — [{session_id, created_at, message_count}]
+deactivate storage
+
+store --> router : 200 OK — [{session_id, created_at, message_count}]
+deactivate store
+router --> iface : 200 OK — [{session_id, created_at, message_count}]
+iface --> user : 200 OK — [{session_id, created_at, message_count}]
+deactivate router
+deactivate iface
 
 @enduml

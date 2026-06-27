@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
-' SM States: ACTIVE (#43A047), SAVED (#1565C0), CLOSED (#757575)
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionStore -> SessionStorage
+' SM States: ACTIVE (#43A047), CLOSED (#757575)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,15 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Group (Service)" #FFF3E0
-  participant "SessionManager" as mgr
-end box
+
 box "Session Group (Repository)" #E8F5E9
   participant "SessionStore" as store
 end box
-database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
+database "SessionStorage" as storage
 
 == SSN-09 DELETE Session ==
 
@@ -47,62 +38,48 @@ activate iface
 iface -> router : DELETE /sessions/{session_id}
 activate router
 
-router -> mgr : ssn09 DELETE Session({session_id})
+router -> store : SSN-09 DELETE Session({session_id})
+activate store
 
 alt session_id is empty
     router --> iface : 400 INVALID_ARGUMENT
-    router --> iface : 400 Bad Request
     iface --> user : 400 Bad Request
     deactivate router
     deactivate iface
-    end
 end
 
-activate mgr
-
-mgr -> store : DELETE Session({session_id})
-activate store
-
-break Session not found
-    store --> mgr : 404 NOT_FOUND
-    mgr --> router : 404 NOT_FOUND
-    router --> iface : 404 NOT_FOUND
+alt session not found
+    store --> router : 404 NOT_FOUND
     router --> iface : 404 Not Found
     iface --> user : 404 Not Found
     deactivate store
-    deactivate mgr
     deactivate router
     deactivate iface
-    end
 end
 
-store -> dir : REMOVE SessionFile({session_id}.jsonl)
-activate dir
+store -> storage : SSN-09 DELETE Session({session_id})
+activate storage
 
-break Permission denied
-    dir --> store : PermissionError
-    deactivate dir
-    store --> mgr : 403 FORBIDDEN
-    mgr --> router : 403 FORBIDDEN
-    router --> iface : 403 FORBIDDEN
+alt permission denied
+    storage --> store : PermissionError
+    deactivate storage
+    store --> router : 403 FORBIDDEN
     router --> iface : 403 Forbidden
     iface --> user : 403 Forbidden
     deactivate store
-    deactivate mgr
     deactivate router
     deactivate iface
-    end
 end
 
-dir --> store : 200 OK — removed
-deactivate dir
+storage --> store : 200 OK — removed
+deactivate storage
 
-    store -> store : TRANSITION State(<back:#43A047>ACTIVE</back> → <back:#757575>CLOSED</back>)
+ref over store : SSN-09 DELETE Session
+  ' Session lifecycle: ACTIVE → CLOSED (#757575)
+  ' Owned by: API-05 DELETE Session (SM/README.md)
 
-store --> mgr : 200 OK — delete_confirmed({session_id})
+store --> router : 200 OK — delete_confirmed({session_id})
 deactivate store
-mgr --> router : 200 OK — delete_confirmed({session_id})
-deactivate mgr
 router --> iface : 200 OK — delete_confirmed({session_id})
 iface --> user : 200 OK — delete_confirmed({session_id})
 deactivate router

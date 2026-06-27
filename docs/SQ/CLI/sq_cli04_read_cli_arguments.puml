@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> CliManager -> CliStore -> CliDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> REPLSession -> ArgParser -> ServerRouter
 ' SM States: —
 ' ============================================================
 
@@ -21,58 +21,43 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
-  participant "CLIRouter" as router
-end box
-box "Service" #FFF3E0
-  participant "CLIExecutor" as exec
-end box
-box "Repository" #E8F5E9
-  participant "CLIStore" as store
-end box
-database "CLIDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "CLI Group" #E3F2FD
+  participant "REPLSession" as repl
+  participant "ArgParser" as argparser
 end box
 
-
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
 
 == CLI-04 READ CLI Arguments ==
 
 user -> iface : CLI-04 PARSE Argv({argv})
 activate iface
-iface -> router : CLI-04 PARSE Argv({argv})
+iface -> repl : CLI-04 PARSE Argv({argv})
+activate repl
+repl -> argparser : CLI-04 PARSE Argv({argv})
+activate argparser
+argparser -> router : CLI-04 LOAD Config({parsedArgs})
 activate router
-router -> router : CLI-04 PARSE Argv({argv})
-router -> exec : CLI-04 PARSE Argv({argv})
-activate exec
 
 alt valid arguments
-  exec -> store : CLI-04 LOAD Config({parsedArgs})
-  activate store
-  store -> dir : CLI-04 LOAD Config({parsedArgs})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> exec : 200 OK
-  deactivate store
-  exec --> router : 200 OK
-  deactivate exec
-  router --> router : 200 OK
-  router --> iface : 200 OK
-  iface --> user : 200 OK
+  router --> argparser : 200 OK
   deactivate router
+  argparser --> repl : 200 OK
+  deactivate argparser
+  repl --> iface : 200 OK
+  deactivate repl
+  iface --> user : 200 OK
   deactivate iface
 else invalid arguments
-  exec --> router : 422 Unprocessable
-  deactivate exec
-  router --> router : 422 Unprocessable
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> argparser : 422 Unprocessable
   deactivate router
+  argparser --> repl : 422 Unprocessable
+  deactivate argparser
+  repl --> iface : 422 Unprocessable
+  deactivate repl
+  iface --> user : 422 Unprocessable
   deactivate iface
 end
 

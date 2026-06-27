@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> RouterManager -> RouterStore -> RouterDirectory -> ModelBackend
+' CSR Chain: User -> CLI Process -> ServerRouter -> ModelRouter
 ' SM States: CLASSIFYING (#5C6BC0)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Router Group (Service)" #FFF3E0
-  participant "RouterManager" as mgr
+  participant "ModelRouter" as mgr
 end box
-box "Router Group (Repository)" #E8F5E9
-  participant "RouterStore" as store
-end box
-database "RouterDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "ModelBackend" as ModelBackend
-end box
-
-
 
 == RTG-03 CLASSIFY Task ==
 
@@ -50,15 +39,9 @@ router -> mgr : rtg03 CLASSIFY Task(task_description, context)
 activate mgr
 
 alt classification succeeds
-  mgr -> store : rtg03 CLASSIFY Task(task_description, context)
-  activate store
-  store -> dir : rtg03 CLASSIFY Task(task_description, context)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#5C6BC0>CLASSIFYING</back>)
+  ref over mgr : RTG-03 CLASSIFY Task
+    ' Router lifecycle: → CLASSIFYING (#5C6BC0)
+    ' Owned by: RTG-03 CLASSIFY Task (SM/README.md)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

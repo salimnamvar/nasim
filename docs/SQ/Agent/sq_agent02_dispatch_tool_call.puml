@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> AgentOrchestrator -> SafetyCoordinator
 ' SM States: RUNNING (#43A047), WAITING (#CE93D8)
 ' ============================================================
 
@@ -21,24 +21,14 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Agent Group (Service)" #FFF3E0
-  participant "AgentManager" as mgr
+  participant "AgentOrchestrator" as orchestrator
+  participant "SafetyCoordinator" as safety
 end box
-box "Agent Group (Repository)" #E8F5E9
-  participant "AgentStore" as store
-end box
-database "AgentDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == AGT-02 DISPATCH Tool Call ==
 
@@ -46,29 +36,31 @@ user -> iface : POST /v1/agents/{agent_id}:dispatch-tool
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:dispatch-tool
 activate router
-router -> mgr : AGT-02 DISPATCH Tool Call({tool_name, args})
-activate mgr
+router -> orchestrator : AGT-02 DISPATCH Tool Call({tool_name, args})
+activate orchestrator
+orchestrator -> safety : AGT-02 DISPATCH Safety Check({tool_name, args})
+activate safety
 
 alt safety approved
-      mgr -> mgr : TRANSITION State(<back:#43A047>RUNNING</back>)
-  mgr -> store : AGT-02 DISPATCH Tool Call({tool_name, args})
-  activate store
-  store -> dir : AGT-02 DISPATCH Tool Call({tool_name, args})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over orchestrator : AGT-02 DISPATCH Tool Call
+    ' State: <back:#43A047>RUNNING</back>
+    ' Owned by: AGT-02 (SM/README.md)
+  safety --> orchestrator : 200 OK Approved
+  deactivate safety
+  orchestrator --> router : 200 OK
+  deactivate orchestrator
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else safety violation
-      mgr -> mgr : TRANSITION State(<back:#CE93D8>WAITING</back>)
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
+  ref over orchestrator : AGT-02 DISPATCH Tool Call
+    ' State: <back:#CE93D8>WAITING</back>
+    ' Owned by: AGT-02 (SM/README.md)
+  safety --> orchestrator : 422 Unprocessable
+  deactivate safety
+  orchestrator --> router : 422 Unprocessable
+  deactivate orchestrator
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

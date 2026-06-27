@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> WirelogManager -> WirelogStore -> WirelogDirectory -> FileSystem
-' SM States: SAVED (#1565C0)
+' CSR Chain: User -> CLI Process -> ServerRouter -> WireLog -> WireAppender -> FileSystem
+' SM States: (no session state change — wire log checkpoint)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,16 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "WireLog Group (Service)" #FFF3E0
-  participant "WireLogManager" as mgr
-end box
-box "WireLog Group (Repository)" #E8F5E9
-  participant "WireLogStore" as store
-end box
-database "WireLogDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "WireLog Group (Infrastructure)" #F3E5F5
+  participant "WireLog" as wl
+  participant "WireAppender" as appender
 end box
 
-
+database "WireLogStorage" as storage
 
 == WRL-05 CHECKPOINT Turn ==
 
@@ -46,28 +38,27 @@ user -> iface : POST /wirelog/checkpoint
 activate iface
 iface -> router : POST /wirelog/checkpoint
 activate router
-router -> mgr : wrl05 CHECKPOINT Turn(turn_data)
-activate mgr
+router -> wl : WRL-05 CHECKPOINT Turn(turn_data)
+activate wl
 
 alt checkpoint succeeds
-  mgr -> store : wrl05 CHECKPOINT Turn(turn_data)
-  activate store
-  store -> dir : wrl05 CHECKPOINT Turn(turn_data)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#1565C0>SAVED</back>)
-  mgr --> router : 200 OK
-  deactivate mgr
+  wl -> appender : WRL-05 CHECKPOINT Turn(turn_data)
+  activate appender
+  appender -> storage : WRL-05 CHECKPOINT Turn(turn_data)
+  activate storage
+  storage --> appender : 200 OK
+  deactivate storage
+  appender --> wl : 200 OK
+  deactivate appender
+  wl --> router : 200 OK
+  deactivate wl
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else persist failure
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
+  wl --> router : 422 Unprocessable
+  deactivate wl
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

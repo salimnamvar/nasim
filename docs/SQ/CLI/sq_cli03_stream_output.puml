@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> CliManager -> CliStore -> CliDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> REPLSession -> Renderer -> ServerRouter
 ' SM States: RESPONDING (#D1C4E9), IDLE (#ECEFF1)
 ' ============================================================
 
@@ -21,60 +21,45 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
-  participant "CLIRouter" as router
-end box
-box "Service" #FFF3E0
-  participant "CLIExecutor" as exec
-end box
-box "Repository" #E8F5E9
-  participant "CLIStore" as store
-end box
-database "CLIDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "CLI Group" #E3F2FD
+  participant "REPLSession" as repl
+  participant "Renderer" as renderer
 end box
 
-
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
 
 == CLI-03 STREAM Output ==
 
 user -> iface : CLI-03 STREAM Output({sessionId})
 activate iface
-iface -> router : CLI-03 STREAM Output({sessionId})
+iface -> repl : CLI-03 STREAM Output({sessionId})
+activate repl
+repl -> renderer : CLI-03 STREAM Output({sessionId})
+activate renderer
+renderer -> router : CLI-03 SUBSCRIBE Stream({sessionId})
 activate router
-router -> router : CLI-03 STREAM Output({sessionId})
-router -> exec : CLI-03 STREAM Output({sessionId})
-activate exec
-    exec -> exec : TRANSITION State(<back:#D1C4E9>RESPONDING</back>)
+ref over repl : TRANSITION State(<back:#D1C4E9>RESPONDING</back>)
 
 alt stream available
-  exec -> store : CLI-03 STREAM Output({sessionId})
-  activate store
-  store -> dir : CLI-03 STREAM Output({sessionId})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> exec : 200 OK
-  deactivate store
-  exec --> router : 200 OK
-  deactivate exec
-  router --> router : 200 OK
-  router --> iface : 200 OK
+  router --> renderer : 200 OK
+  deactivate router
+  renderer --> repl : 200 OK
+  deactivate renderer
+  repl --> iface : 200 OK
+  deactivate repl
   iface --> user : 200 OK
-  deactivate router
   deactivate iface
-      user -> user : TRANSITION State(<back:#ECEFF1>IDLE</back>)
+  ref over repl : TRANSITION State(<back:#ECEFF1>IDLE</back>)
 else stream unavailable
-  exec --> router : 503 Unavailable
-  deactivate exec
-  router --> router : 503 Unavailable
-  router --> iface : 503 Unavailable
-  iface --> user : 503 Unavailable
+  router --> renderer : 503 Unavailable
   deactivate router
+  renderer --> repl : 503 Unavailable
+  deactivate renderer
+  repl --> iface : 503 Unavailable
+  deactivate repl
+  iface --> user : 503 Unavailable
   deactivate iface
 end
 

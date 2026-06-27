@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> SubagentCoordinator
 ' SM States: WAITING (#CE93D8)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Agent Group (Service)" #FFF3E0
-  participant "AgentManager" as mgr
+  participant "SubagentCoordinator" as subagent
 end box
-box "Agent Group (Repository)" #E8F5E9
-  participant "AgentStore" as store
-end box
-database "AgentDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == AGT-09 SPAWN Subagent ==
 
@@ -46,28 +35,22 @@ user -> iface : POST /v1/agents/{agent_id}:spawn-subagent
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:spawn-subagent
 activate router
-router -> mgr : AGT-09 SPAWN Subagent({task_prompt, parent_id})
-activate mgr
+router -> subagent : AGT-09 SPAWN Subagent({task_prompt, parent_id})
+activate subagent
 
 alt spawn succeeds
-      mgr -> mgr : TRANSITION State(<back:#CE93D8>WAITING</back>)
-  mgr -> store : AGT-09 SPAWN Subagent({task_prompt, parent_id})
-  activate store
-  store -> dir : AGT-09 SPAWN Subagent({task_prompt, parent_id})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over subagent : AGT-09 SPAWN Subagent
+    ' State: <back:#CE93D8>WAITING</back>
+    ' Owned by: AGT-09 (SM/README.md)
+  subagent --> router : 200 OK
+  deactivate subagent
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else spawn fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
+  subagent --> router : 422 Unprocessable
+  deactivate subagent
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

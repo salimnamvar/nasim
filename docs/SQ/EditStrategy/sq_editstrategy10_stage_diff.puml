@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> EditstrategyManager -> EditstrategyStore -> EditstrategyDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> EditStrategyManager
 ' SM States: EMPTY (#9FA8DA), STAGING (#FFE082), STAGED (#C5E1A5)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Edit Strategy Group (Service)" #FFF3E0
-  participant "EditManager" as mgr
-end box
-box "Edit Strategy Group (Repository)" #E8F5E9
-  participant "EditStore" as store
-end box
-database "EditDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "EditStrategy Group" #FFF3E0
+  participant "EditStrategyManager" as mgr
 end box
-
-
 
 == EDT-10 STAGE Diff ==
 
@@ -49,16 +38,8 @@ activate router
 router -> mgr : EDT-10 STAGE Diff({file_path, diff_content})
 activate mgr
 
-alt validation succeedt
-  mgr -> store : EDT-10 STAGE Diff({file_path, diff_content})
-  activate store
-  store -> dir : EDT-10 STAGE Diff({file_path, diff_content})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#FFE082>STAGING</back>)
+alt validation succeeds
+  ref over mgr : TRANSITION State(<back:#FFE082>STAGING</back>)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -66,7 +47,7 @@ alt validation succeedt
   deactivate router
   deactivate iface
 else validation fails
-      mgr -> mgr : TRANSITION State(<back:#9FA8DA>EMPTY</back>)
+  ref over mgr : TRANSITION State(<back:#9FA8DA>EMPTY</back>)
   mgr --> router : 422 Unprocessable
   deactivate mgr
   router --> iface : 422 Unprocessable

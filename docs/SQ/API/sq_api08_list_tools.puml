@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ApiManager -> ApiStore -> ApiDirectory -> FileSystem
-' SM States: —
+' CSR Chain: User -> CLI Process -> ServerRouter -> ToolRegistry
+' SM States: (no state change — read-only)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service" #FFF3E0
-  participant "ToolManager" as mgr
-end box
-box "Repository" #E8F5E9
-  participant "ToolRegistry" as store
-end box
-database "ToolDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "Tool Group (Repository)" #E8F5E9
+  participant "ToolRegistry" as registry
 end box
-
-
 
 == API-08 LIST Tools ==
 
@@ -46,31 +35,24 @@ user -> iface : GET /v1/tools
 activate iface
 iface -> router : GET /v1/tools
 activate router
-router -> mgr : api08 LIST Tools({pageSize, pageToken})
-activate mgr
 
-alt validation succeeds
-  mgr -> store : api08 LIST Tools({pageSize, pageToken})
-  activate store
-  store -> dir : api08 LIST Tools({pageSize, pageToken})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
-  deactivate router
-  deactivate iface
+router -> registry : API-08 LIST Tools({pageSize, pageToken})
+activate registry
+
+alt validation fails
+    registry --> router : 422 Unprocessable
+    router --> iface : 422 Unprocessable
+    iface --> user : 422 Unprocessable
+    deactivate registry
+    deactivate router
+    deactivate iface
 end
+
+registry --> router : 200 OK — [{name, description, parameters}]
+deactivate registry
+router --> iface : 200 OK — [{name, description, parameters}]
+iface --> user : 200 OK — [{name, description, parameters}]
+deactivate router
+deactivate iface
 
 @enduml

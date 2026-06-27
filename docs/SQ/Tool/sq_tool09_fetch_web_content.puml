@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ToolManager -> ToolStore -> ToolDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> WebFetchTool
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Tool Group (Service)" #FFF3E0
-  participant "ToolOrchestrator" as orch
-end box
+
 box "Tool Group (Repository)" #E8F5E9
-  participant "ToolRegistry" as registry
+  participant "WebFetchTool" as tool
 end box
-database "ToolDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == TL-09 FETCH Web Content ==
 
@@ -46,36 +35,30 @@ user -> iface : POST /tools/fetch_web:execute
 activate iface
 iface -> router : POST /tools/fetch_web:execute
 activate router
-router -> mgr : TL-09 FETCH Web Content(url, timeout)
-router -> orch : TL-09 FETCH Web Content(url, timeout)
-activate orch
+
+router -> tool : TL-09 FETCH Web Content(url, timeout)
+activate tool
 
 alt validation succeeds
-  orch -> registry : TL-09 FETCH Web Content(url, timeout)
-  activate registry
-  registry -> dir : TL-09 FETCH Web Content(url, timeout)
-  activate dir
-  dir --> registry : 200 OK
-  deactivate dir
-  registry --> orch : 200 OK
-  deactivate registry
-      orch -> orch : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
-  orch --> router : 200 OK
-  deactivate orch
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TL-09 FETCH Web Content
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TL-09 FETCH Web Content (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else http error
-  orch --> router : 502 Bad Gateway
-  deactivate orch
+  tool --> router : 502 Bad Gateway
+  deactivate tool
   router --> iface : 502 Bad Gateway
   iface --> user : 502 Bad Gateway
   deactivate router
   deactivate iface
 else timeout
-  orch --> router : 504 Gateway Timeout
-  deactivate orch
+  tool --> router : 504 Gateway Timeout
+  deactivate tool
   router --> iface : 504 Gateway Timeout
   iface --> user : 504 Gateway Timeout
   deactivate router

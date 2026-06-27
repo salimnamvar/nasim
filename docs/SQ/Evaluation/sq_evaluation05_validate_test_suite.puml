@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> EvaluationManager -> EvaluationStore -> EvaluationDirectory -> TestSuite
+' CSR Chain: User -> CLI Process -> ServerRouter -> TestRunner
 ' SM States: TESTING (#D4E157)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Evaluation Group (Service)" #FFF3E0
-  participant "EvaluationManager" as mgr
-end box
-box "Evaluation Group (Repository)" #E8F5E9
-  participant "EvaluationStore" as store
-end box
-database "EvaluationDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "TestSuite" as TestSuite
+box "Evaluation Group" #FFF3E0
+  participant "TestRunner" as runner
 end box
-
-
 
 == EVL-05 VALIDATE Test Suite ==
 
@@ -46,28 +35,20 @@ user -> iface : POST /evaluation/test-suite
 activate iface
 iface -> router : POST /evaluation/test-suite
 activate router
-router -> mgr : EVL-05 VALIDATE Test Suite({task_id, test_commands})
-activate mgr
+router -> runner : EVL-05 VALIDATE Test Suite({task_id, test_commands})
+activate runner
 
 alt tests pass
-  mgr -> store : EVL-05 VALIDATE Test Suite({task_id, test_commands})
-  activate store
-  store -> dir : EVL-05 VALIDATE Test Suite({task_id, test_commands})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#D4E157>TESTING</back>)
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over runner : TRANSITION State(<back:#D4E157>TESTING</back>)
+  runner --> router : 200 OK
+  deactivate runner
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else tests fail
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
+  runner --> router : 422 Unprocessable
+  deactivate runner
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

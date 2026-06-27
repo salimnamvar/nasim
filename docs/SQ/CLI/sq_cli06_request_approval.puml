@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> CliManager -> CliStore -> CliDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> REPLSession -> ServerRouter
 ' SM States: AWAITING_APPROVAL (#FFF9C4)
 ' ============================================================
 
@@ -21,63 +21,37 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
-  participant "CLIRouter" as router
-end box
-box "Service" #FFF3E0
-  participant "CLIExecutor" as exec
-end box
-box "Repository" #E8F5E9
-  participant "CLIStore" as store
-end box
-database "CLIDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "CLI Group" #E3F2FD
+  participant "REPLSession" as repl
 end box
 
-
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
 
 == CLI-06 REQUEST Approval ==
 
 user -> iface : CLI-06 REQUEST Approval({toolName, args})
 activate iface
-iface -> router : CLI-06 REQUEST Approval({toolName, args})
+iface -> repl : CLI-06 REQUEST Approval({toolName, args})
+activate repl
+repl -> router : CLI-06 REGISTER Approval({toolName})
 activate router
-router -> router : CLI-06 REQUEST Approval({toolName, args})
-router -> exec : CLI-06 REQUEST Approval({toolName, args})
-activate exec
-    exec -> exec : TRANSITION State(<back:#FFF9C4>AWAITING_APPROVAL</back>)
+ref over repl : TRANSITION State(<back:#FFF9C4>AWAITING_APPROVAL</back>)
 
 alt user approves
-  exec -> store : CLI-06 APPROVE Action({toolName})
-  activate store
-  store -> dir : CLI-06 APPROVE Action({toolName})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> exec : 200 OK
-  deactivate store
-  exec --> router : 200 OK
-  deactivate exec
-  router --> router : 200 OK
-  router --> iface : 200 OK
-  iface --> user : 200 OK
+  router --> repl : 200 OK
   deactivate router
+  repl --> iface : 200 OK
+  deactivate repl
+  iface --> user : 200 OK
   deactivate iface
 else user rejects
-  exec -> store : CLI-06 REJECT Action({toolName})
-  activate store
-  store --> exec : 200 OK
-  deactivate store
-  exec --> router : 403 Forbidden
-  deactivate exec
-  router --> router : 403 Forbidden
-  router --> iface : 403 Forbidden
-  iface --> user : 403 Forbidden
+  router --> repl : 403 Forbidden
   deactivate router
+  repl --> iface : 403 Forbidden
+  deactivate repl
+  iface --> user : 403 Forbidden
   deactivate iface
 end
 

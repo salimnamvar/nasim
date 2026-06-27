@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> PersonaManager
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Agent Group (Service)" #FFF3E0
-  participant "AgentManager" as mgr
+  participant "PersonaManager" as persona
 end box
-box "Agent Group (Repository)" #E8F5E9
-  participant "AgentStore" as store
-end box
-database "AgentDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == AGT-11 DELEGATE to Persona ==
 
@@ -46,28 +35,22 @@ user -> iface : POST /v1/agents/{agent_id}:delegate-persona
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:delegate-persona
 activate router
-router -> mgr : AGT-11 DELEGATE to Persona({task, persona_hint})
-activate mgr
+router -> persona : AGT-11 DELEGATE to Persona({task, persona_hint})
+activate persona
 
 alt delegation succeeds
-      mgr -> mgr : TRANSITION State(<back:#43A047>RUNNING</back>)
-  mgr -> store : AGT-11 DELEGATE to Persona({task, persona_hint})
-  activate store
-  store -> dir : AGT-11 DELEGATE to Persona({task, persona_hint})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over persona : AGT-11 DELEGATE to Persona
+    ' State: <back:#43A047>RUNNING</back>
+    ' Owned by: AGT-11 (SM/README.md)
+  persona --> router : 200 OK
+  deactivate persona
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else persona not found
-  mgr --> router : 404 Not Found
-  deactivate mgr
+  persona --> router : 404 Not Found
+  deactivate persona
   router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router

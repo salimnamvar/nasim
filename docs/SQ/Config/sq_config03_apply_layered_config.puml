@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ConfigManager -> ConfigStore -> ConfigDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> ConfigLoader
 ' SM States: SERVING (#E0F7FA)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Config Group (Service)" #FFF3E0
-  participant "ConfigManager" as mgr
-end box
+
 box "Config Group (Repository)" #E8F5E9
-  participant "ConfigStore" as store
+  participant "ConfigLoader" as mgr
 end box
-database "ConfigDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == CFG-03 APPLY Layered Config ==
 
@@ -50,15 +39,9 @@ router -> mgr : CFG-03 APPLY Layered Config({global_defaults, project_overrides,
 activate mgr
 
 alt merge succeeds
-  mgr -> store : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
-  activate store
-  store -> dir : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#E0F7FA>SERVING</back>)
+  ref over mgr : CFG-03 APPLY Layered Config
+    ' Config lifecycle: → SERVING (#E0F7FA)
+    ' Owned by: CFG-03 APPLY Layered Config (SM/README.md)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

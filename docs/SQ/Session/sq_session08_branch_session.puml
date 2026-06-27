@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionFork -> SessionStore -> SessionStorage
 ' SM States: ACTIVE (#43A047), BRANCHED (#7B1FA2)
 ' ============================================================
 
@@ -21,24 +21,16 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Group (Service)" #FFF3E0
-  participant "SessionManager" as mgr
-end box
+
 box "Session Group (Repository)" #E8F5E9
+  participant "SessionFork" as fork
   participant "SessionStore" as store
 end box
-database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
+database "SessionStorage" as storage
 
 == SSN-08 BRANCH Session ==
 
@@ -47,82 +39,74 @@ activate iface
 iface -> router : POST /sessions/{session_id}:branch
 activate router
 
-router -> mgr : ssn08 BRANCH Session({session_id}, {from_turn})
+router -> fork : SSN-08 BRANCH Session({session_id}, {from_turn})
+activate fork
 
 alt session_id is empty
     router --> iface : 400 INVALID_ARGUMENT
-    router --> iface : 400 Bad Request
     iface --> user : 400 Bad Request
     deactivate router
     deactivate iface
-    end
 end
 
-activate mgr
-
-mgr -> store : READ Session({session_id})
+fork -> store : SSN-08 READ Session({session_id})
 activate store
 
-break Session not found
-    store --> mgr : 404 NOT_FOUND
-    mgr --> router : 404 NOT_FOUND
-    router --> iface : 404 NOT_FOUND
+alt session not found
+    store --> fork : 404 NOT_FOUND
+    fork --> router : 404 NOT_FOUND
     router --> iface : 404 Not Found
     iface --> user : 404 Not Found
     deactivate store
-    deactivate mgr
+    deactivate fork
     deactivate router
     deactivate iface
-    end
 end
 
-store --> mgr : 200 OK — {session_data}
+store --> fork : 200 OK — {session_data}
 deactivate store
 
-    mgr -> mgr : TRANSITION State(<back:#43A047>ACTIVE</back> → <back:#7B1FA2>BRANCHED</back>)
+ref over fork : SSN-08 BRANCH Session
+  ' Session lifecycle: ACTIVE → BRANCHED (#7B1FA2)
+  ' Owned by: WRL-04 FORK Session (SM/README.md)
 
-mgr -> store : INSERT BranchSession({session_id}, {branch_id}, {from_turn})
+fork -> store : SSN-08 INSERT BranchSession({session_id}, {branch_id}, {from_turn})
 activate store
 
-alt Copy failure
-    store --> mgr : 500 INTERNAL
-    mgr --> router : 500 INTERNAL
-    router --> iface : 500 INTERNAL
+alt copy failure
+    store --> fork : 500 INTERNAL
+    fork --> router : 500 INTERNAL
     router --> iface : 500 Internal Error
     iface --> user : 500 Internal Error
     deactivate store
-    deactivate mgr
+    deactivate fork
     deactivate router
     deactivate iface
-    end
 end
 
-store -> dir : INSERT SessionFile({branch_id}.jsonl)
-activate dir
+store -> storage : SSN-08 INSERT SessionFile({branch_id}.jsonl)
+activate storage
 
-alt Disk write error
-    dir --> store : IOError
-    deactivate dir
-    store --> store : rollback
-    store --> mgr : 500 INTERNAL
-    mgr --> router : 500 INTERNAL
-    router --> iface : 500 INTERNAL
+alt disk write error
+    storage --> store : IOError
+    deactivate storage
+    store --> fork : 500 INTERNAL
+    fork --> router : 500 INTERNAL
     router --> iface : 500 Internal Error
     iface --> user : 500 Internal Error
     deactivate store
-    deactivate mgr
+    deactivate fork
     deactivate router
     deactivate iface
-    end
 end
 
-dir --> store : 200 OK
-deactivate dir
+storage --> store : 200 OK
+deactivate storage
 
-store --> mgr : 200 OK — {branch_id}
+store --> fork : 200 OK — {branch_id}
 deactivate store
-mgr --> router : 200 OK — {branch_id}
-deactivate mgr
+fork --> router : 200 OK — {branch_id}
+deactivate fork
 router --> iface : 200 OK — {branch_id}
 iface --> user : 200 OK — {branch_id}
 deactivate router

@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ApiManager -> ApiStore -> ApiDirectory -> FileSystem
-' SM States: ACTIVE (#43A047)
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionStore -> SessionStorage
+' SM States: CREATED (#BBDEFB), ACTIVE (#43A047)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,15 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service" #FFF3E0
-  participant "SessionManager" as mgr
-end box
-box "Repository" #E8F5E9
+
+box "Session Group (Repository)" #E8F5E9
   participant "SessionStore" as store
 end box
-database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
+database "SessionStorage" as storage
 
 == API-02 CREATE Session ==
 
@@ -46,32 +37,45 @@ user -> iface : POST /v1/sessions
 activate iface
 iface -> router : POST /v1/sessions
 activate router
-router -> mgr : api02 CREATE Session({sessionData})
-activate mgr
 
-alt validation succeeds
-  mgr -> store : api02 CREATE Session({sessionData})
-  activate store
-  store -> dir : api02 CREATE Session({sessionData})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#43A047>ACTIVE</back>)
-  mgr --> router : 200 OK
-  deactivate mgr
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
-  deactivate router
-  deactivate iface
+router -> store : API-02 CREATE Session({sessionData})
+activate store
+
+alt validation fails
+    store --> router : 422 Unprocessable
+    router --> iface : 422 Unprocessable
+    iface --> user : 422 Unprocessable
+    deactivate store
+    deactivate router
+    deactivate iface
 end
+
+store -> storage : API-02 CREATE Session({sessionData})
+activate storage
+
+alt disk write error
+    storage --> store : IOError
+    deactivate storage
+    store --> router : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK
+deactivate storage
+
+ref over store : API-02 CREATE Session
+  ' Session lifecycle: CREATED (#BBDEFB) → ACTIVE (#43A047)
+  ' Owned by: API-02 CREATE Session (SM/README.md)
+
+store --> router : 200 OK
+deactivate store
+router --> iface : 200 OK
+iface --> user : 200 OK
+deactivate router
+deactivate iface
 
 @enduml

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SandboxManager -> SandboxStore -> SandboxDirectory -> HostShell
+' CSR Chain: User -> CLI Process -> ServerRouter -> SandboxPolicy
 ' SM States: IDLE (#78909C)
 ' ============================================================
 
@@ -21,23 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Sandbox Group (Service)" #FFF3E0
-  participant "SandboxManager" as mgr
-end box
-box "Sandbox Group (Repository)" #E8F5E9
-  participant "SandboxStore" as store
-end box
-database "SandboxDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "HostShell" as HostShell
+box "Sandbox Group (Infrastructure)" #F3E5F5
+  participant "SandboxPolicy" as mgr
 end box
-
 
 
 == SBX-02 APPLY Sandbox Policy ==
@@ -50,15 +40,8 @@ router -> mgr : sbx02 APPLY Sandbox Policy(policy_path)
 activate mgr
 
 alt policy applied
-  mgr -> store : sbx02 APPLY Sandbox Policy(policy_path)
-  activate store
-  store -> dir : sbx02 APPLY Sandbox Policy(policy_path)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#78909C>IDLE</back>)
+  ref over mgr : SBX-02 TRANSITION State
+    ' SM States: IDLE (#78909C)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

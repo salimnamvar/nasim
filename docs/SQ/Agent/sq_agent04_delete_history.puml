@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationHistory
 ' SM States: CREATED (#BBDEFB)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Agent Group (Service)" #FFF3E0
-  participant "AgentManager" as mgr
+  participant "ConversationHistory" as history
 end box
-box "Agent Group (Repository)" #E8F5E9
-  participant "AgentStore" as store
-end box
-database "AgentDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == AGT-04 DELETE History ==
 
@@ -46,28 +35,22 @@ user -> iface : DELETE /v1/agents/{agent_id}/history
 activate iface
 iface -> router : DELETE /v1/agents/{agent_id}/history
 activate router
-router -> mgr : AGT-04 DELETE History({agent_id})
-activate mgr
+router -> history : AGT-04 DELETE History({agent_id})
+activate history
 
 alt delete succeeds
-      mgr -> mgr : TRANSITION State(<back:#BBDEFB>CREATED</back>)
-  mgr -> store : AGT-04 DELETE History({agent_id})
-  activate store
-  store -> dir : AGT-04 DELETE History({agent_id})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over history : AGT-04 DELETE History
+    ' State: <back:#BBDEFB>CREATED</back>
+    ' Owned by: AGT-04 (SM/README.md)
+  history --> router : 200 OK
+  deactivate history
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else history not found
-  mgr --> router : 404 Not Found
-  deactivate mgr
+  history --> router : 404 Not Found
+  deactivate history
   router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router

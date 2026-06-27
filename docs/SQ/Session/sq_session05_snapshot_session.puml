@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
-' SM States: ACTIVE (#43A047)
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionVersioning -> SessionStore -> SessionStorage
+' SM States: (no state change — snapshot is versioning operation)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,16 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Group (Service)" #FFF3E0
-  participant "SessionManager" as mgr
-end box
+
 box "Session Group (Repository)" #E8F5E9
+  participant "SessionVersioning" as versioning
   participant "SessionStore" as store
 end box
-database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
+database "SessionStorage" as storage
 
 == SSN-05 SNAPSHOT Session ==
 
@@ -47,82 +39,71 @@ activate iface
 iface -> router : POST /sessions/{session_id}:snapshot
 activate router
 
-router -> mgr : ssn05 SNAPSHOT Session({session_id})
+router -> versioning : SSN-05 SNAPSHOT Session({session_id})
+activate versioning
 
 alt session_id is empty
     router --> iface : 400 INVALID_ARGUMENT
-    router --> iface : 400 Bad Request
     iface --> user : 400 Bad Request
     deactivate router
     deactivate iface
-    end
 end
 
-activate mgr
-
-mgr -> store : READ Session({session_id})
+versioning -> store : SSN-05 SNAPSHOT Session({session_id})
 activate store
 
-break Session not found
-    store --> mgr : 404 NOT_FOUND
-    mgr --> router : 404 NOT_FOUND
-    router --> iface : 404 NOT_FOUND
+alt session not found
+    store --> versioning : 404 NOT_FOUND
+    versioning --> router : 404 NOT_FOUND
     router --> iface : 404 Not Found
     iface --> user : 404 Not Found
     deactivate store
-    deactivate mgr
+    deactivate versioning
     deactivate router
     deactivate iface
-    end
 end
 
-store --> mgr : 200 OK
-deactivate store
+store -> storage : SSN-05 SNAPSHOT Session({session_id})
+activate storage
 
-mgr -> store : INSERT Snapshot({session_id})
-activate store
-
-alt serialization error
-    store --> mgr : 500 INTERNAL
-    mgr --> router : 500 INTERNAL
-    router --> iface : 500 INTERNAL
+alt disk read error
+    storage --> store : IOError
+    deactivate storage
+    store --> versioning : 500 INTERNAL
+    versioning --> router : 500 INTERNAL
     router --> iface : 500 Internal Error
     iface --> user : 500 Internal Error
     deactivate store
-    deactivate mgr
+    deactivate versioning
     deactivate router
     deactivate iface
-    end
 end
 
-store -> dir : INSERT SnapshotFile({session_id}/{snapshot_id}.json)
-activate dir
+storage --> store : 200 OK
+deactivate storage
+
+store --> versioning : 200 OK — {session_data}
+deactivate store
+
+versioning -> storage : SSN-05 SNAPSHOT Session({session_id}, {snapshot_id})
+activate storage
 
 alt disk write error
-    dir --> store : IOError
-    deactivate dir
-    store --> store : rollback
-    store --> mgr : 500 INTERNAL
-    mgr --> router : 500 INTERNAL
-    router --> iface : 500 INTERNAL
+    storage --> versioning : IOError
+    deactivate storage
+    versioning --> router : 500 INTERNAL
     router --> iface : 500 Internal Error
     iface --> user : 500 Internal Error
-    deactivate store
-    deactivate mgr
+    deactivate versioning
     deactivate router
     deactivate iface
-    end
 end
 
-dir --> store : 200 OK
-deactivate dir
+storage --> versioning : 200 OK
+deactivate storage
 
-    store -> store : TRANSITION State(<back:#43A047>ACTIVE</back>)
-
-store --> mgr : 200 OK — {snapshot_id}
-deactivate store
-mgr --> router : 200 OK — {snapshot_id}
-deactivate mgr
+versioning --> router : 200 OK — {snapshot_id}
+deactivate versioning
 router --> iface : 200 OK — {snapshot_id}
 iface --> user : 200 OK — {snapshot_id}
 deactivate router

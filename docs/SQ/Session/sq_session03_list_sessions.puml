@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
-' SM States: SAVED (#1565C0)
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionStore -> SessionStorage
+' SM States: (no state change — read-only)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,15 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Group (Service)" #FFF3E0
-  participant "SessionManager" as mgr
-end box
+
 box "Session Group (Repository)" #E8F5E9
   participant "SessionStore" as store
 end box
-database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
+database "SessionStorage" as storage
 
 == SSN-03 LIST Sessions ==
 
@@ -47,37 +38,28 @@ activate iface
 iface -> router : GET /sessions
 activate router
 
-router -> mgr : ssn03 LIST Sessions({page_size}, {page_token})
-
-activate mgr
-
-mgr -> store : LIST Sessions({page_size}, {page_token})
+router -> store : SSN-03 LIST Sessions({page_size}, {page_token})
 activate store
 
-store -> dir : SCAN SessionDirectory({pattern})
-activate dir
+store -> storage : SSN-03 LIST Sessions({page_size}, {page_token})
+activate storage
 
-alt Directory not found
-    dir --> store : FileNotFoundError
-    deactivate dir
-    store --> mgr : 200 OK — [] (empty list)
-    mgr --> router : 200 OK — [] (empty list)
+alt directory not found
+    storage --> store : FileNotFoundError
+    deactivate storage
+    store --> router : 200 OK — [] (empty list)
     router --> iface : 200 OK — [] (empty list)
     iface --> user : 200 OK — [] (empty list)
     deactivate store
-    deactivate mgr
     deactivate router
     deactivate iface
-    end
 end
 
-dir --> store : 200 OK — [{session_id, created_at, message_count}]
-deactivate dir
+storage --> store : 200 OK — [{session_id, created_at, message_count}]
+deactivate storage
 
-store --> mgr : 200 OK — [{session_id, created_at, message_count}]
+store --> router : 200 OK — [{session_id, created_at, message_count}]
 deactivate store
-mgr --> router : 200 OK — [{session_id, created_at, message_count}]
-deactivate mgr
 router --> iface : 200 OK — [{session_id, created_at, message_count}]
 iface --> user : 200 OK — [{session_id, created_at, message_count}]
 deactivate router

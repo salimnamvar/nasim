@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ApiManager -> ApiStore -> ApiDirectory -> FileSystem
-' SM States: —
+' CSR Chain: User -> CLI Process -> ServerRouter -> ToolRegistry
+' SM States: (no state change — read-only)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service" #FFF3E0
-  participant "ToolManager" as mgr
-end box
-box "Repository" #E8F5E9
-  participant "ToolRegistry" as store
-end box
-database "ToolDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "Tool Group (Repository)" #E8F5E9
+  participant "ToolRegistry" as registry
 end box
-
-
 
 == API-09 GET Tool ==
 
@@ -46,31 +35,24 @@ user -> iface : GET /v1/tools/{name}
 activate iface
 iface -> router : GET /v1/tools/{name}
 activate router
-router -> mgr : API-09 GET Tool({name})
-activate mgr
 
-alt validation succeeds
-  mgr -> store : API-09 GET Tool({name})
-  activate store
-  store -> dir : API-09 GET Tool({name})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
-  deactivate router
-  deactivate iface
+router -> registry : API-09 GET Tool({name})
+activate registry
+
+alt tool not found
+    registry --> router : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
+    deactivate registry
+    deactivate router
+    deactivate iface
 end
+
+registry --> router : 200 OK — {name, description, parameters, safe}
+deactivate registry
+router --> iface : 200 OK — {name, description, parameters, safe}
+iface --> user : 200 OK — {name, description, parameters, safe}
+deactivate router
+deactivate iface
 
 @enduml

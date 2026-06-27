@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ApiManager -> ApiStore -> ApiDirectory -> FileSystem
-' SM States: —
+' CSR Chain: User -> CLI Process -> ServerRouter -> ConfigLoader -> ConfigStorage
+' SM States: (no state change — config is not an entity lifecycle)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,15 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service" #FFF3E0
-  participant "ConfigManager" as mgr
-end box
-box "Repository" #E8F5E9
-  participant "ConfigLoader" as store
-end box
-database "ConfigDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "Config Group (Repository)" #E8F5E9
+  participant "ConfigLoader" as loader
 end box
 
-
+database "ConfigStorage" as storage
 
 == API-11 UPDATE Config ==
 
@@ -46,31 +37,41 @@ user -> iface : PATCH /v1/config
 activate iface
 iface -> router : PATCH /v1/config
 activate router
-router -> mgr : api11 UPDATE Config({patchData})
-activate mgr
 
-alt validation succeeds
-  mgr -> store : api11 UPDATE Config({patchData})
-  activate store
-  store -> dir : api11 UPDATE Config({patchData})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
-  deactivate router
-  deactivate iface
+router -> loader : API-11 UPDATE Config({patchData})
+activate loader
+
+alt validation fails
+    loader --> router : 422 Unprocessable
+    router --> iface : 422 Unprocessable
+    iface --> user : 422 Unprocessable
+    deactivate loader
+    deactivate router
+    deactivate iface
 end
+
+loader -> storage : API-11 UPDATE Config({patchData})
+activate storage
+
+alt disk write error
+    storage --> loader : IOError
+    deactivate storage
+    loader --> router : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
+    deactivate loader
+    deactivate router
+    deactivate iface
+end
+
+storage --> loader : 200 OK
+deactivate storage
+
+loader --> router : 200 OK
+deactivate loader
+router --> iface : 200 OK
+iface --> user : 200 OK
+deactivate router
+deactivate iface
 
 @enduml

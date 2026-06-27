@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> WirelogManager -> WirelogStore -> WirelogDirectory -> FileSystem
-' SM States: RESTORED (#1E88E5)
+' CSR Chain: User -> CLI Process -> ServerRouter -> WireLog -> WireReader -> FileSystem
+' SM States: (no session state change — seek is read-only)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,16 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "WireLog Group (Service)" #FFF3E0
-  participant "WireLogManager" as mgr
-end box
-box "WireLog Group (Repository)" #E8F5E9
-  participant "WireLogStore" as store
-end box
-database "WireLogDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "WireLog Group (Infrastructure)" #F3E5F5
+  participant "WireLog" as wl
+  participant "WireReader" as reader
 end box
 
-
+database "WireLogStorage" as storage
 
 == WRL-03 SEEK Turn ==
 
@@ -46,28 +38,27 @@ user -> iface : GET /wirelog/turns/{turn}
 activate iface
 iface -> router : GET /wirelog/turns/{turn}
 activate router
-router -> mgr : wrl03 SEEK Turn(target_turn_number)
-activate mgr
+router -> wl : WRL-03 SEEK Turn(target_turn_number)
+activate wl
 
 alt turn found
-  mgr -> store : wrl03 SEEK Turn(target_turn_number)
-  activate store
-  store -> dir : wrl03 SEEK Turn(target_turn_number)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#1E88E5>RESTORED</back>)
-  mgr --> router : 200 OK
-  deactivate mgr
+  wl -> reader : WRL-03 SEEK Turn(target_turn_number)
+  activate reader
+  reader -> storage : WRL-03 SEEK Turn(target_turn_number)
+  activate storage
+  storage --> reader : 200 OK
+  deactivate storage
+  reader --> wl : 200 OK
+  deactivate reader
+  wl --> router : 200 OK
+  deactivate wl
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else turn not found
-  mgr --> router : 404 Not Found
-  deactivate mgr
+  wl --> router : 404 Not Found
+  deactivate wl
   router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router

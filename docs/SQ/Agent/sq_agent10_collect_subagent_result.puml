@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> SubagentCoordinator
 ' SM States: COMPLETED (#2E7D32)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Agent Group (Service)" #FFF3E0
-  participant "AgentManager" as mgr
+  participant "SubagentCoordinator" as subagent
 end box
-box "Agent Group (Repository)" #E8F5E9
-  participant "AgentStore" as store
-end box
-database "AgentDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == AGT-10 COLLECT Subagent Result ==
 
@@ -46,28 +35,22 @@ user -> iface : POST /v1/agents/{agent_id}:collect-subagent
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:collect-subagent
 activate router
-router -> mgr : AGT-10 COLLECT Subagent Result({child_id, timeout})
-activate mgr
+router -> subagent : AGT-10 COLLECT Subagent Result({child_id, timeout})
+activate subagent
 
 alt result available
-      mgr -> mgr : TRANSITION State(<back:#2E7D32>COMPLETED</back>)
-  mgr -> store : AGT-10 COLLECT Subagent Result({child_id, timeout})
-  activate store
-  store -> dir : AGT-10 COLLECT Subagent Result({child_id, timeout})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over subagent : AGT-10 COLLECT Subagent Result
+    ' State: <back:#2E7D32>COMPLETED</back>
+    ' Owned by: AGT-10 (SM/README.md)
+  subagent --> router : 200 OK
+  deactivate subagent
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else child not found
-  mgr --> router : 404 Not Found
-  deactivate mgr
+  subagent --> router : 404 Not Found
+  deactivate subagent
   router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router

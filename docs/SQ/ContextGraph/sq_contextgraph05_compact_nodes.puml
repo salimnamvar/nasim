@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ContextgraphManager -> ContextgraphStore -> ContextgraphDirectory -> TokenBudget
+' CSR Chain: User -> CLI Process -> ServerRouter -> CompactionProcessor
 ' SM States: COMPACTING (#E0F2F1)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Context Graph Group (Service)" #FFF3E0
-  participant "ContextGraphManager" as mgr
-end box
-box "Context Graph Group (Repository)" #E8F5E9
-  participant "ContextGraphStore" as store
-end box
-database "ContextGraphDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "TokenBudget" as TokenBudget
+box "ContextGraph Group" #FFF3E0
+  participant "CompactionProcessor" as compact
 end box
-
-
 
 == CTX-05 COMPACT Nodes ==
 
@@ -46,28 +35,20 @@ user -> iface : POST /contextgraph/compact
 activate iface
 iface -> router : POST /contextgraph/compact
 activate router
-router -> mgr : CTX-05 COMPACT Nodes({nodes, strategy})
-activate mgr
+router -> compact : CTX-05 COMPACT Nodes({nodes, strategy})
+activate compact
 
 alt compaction succeeds
-  mgr -> store : CTX-05 COMPACT Nodes({nodes, strategy})
-  activate store
-  store -> dir : CTX-05 COMPACT Nodes({nodes, strategy})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#E0F2F1>COMPACTING</back>)
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over compact : TRANSITION State(<back:#E0F2F1>COMPACTING</back>)
+  compact --> router : 200 OK
+  deactivate compact
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else compaction fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
+  compact --> router : 422 Unprocessable
+  deactivate compact
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

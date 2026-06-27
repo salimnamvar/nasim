@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> MemoryManager -> MemoryStore -> MemoryDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> MemoryStore
 ' SM States: —
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Memory Group (Service)" #FFF3E0
-  participant "MemoryManager" as mgr
-end box
+
 box "Memory Group (Repository)" #E8F5E9
   participant "MemoryStore" as store
 end box
-database "MemoryDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == MEM-04 SCOPE Knowledge ==
 
@@ -46,31 +35,14 @@ user -> iface : GET /knowledge:scope
 activate iface
 iface -> router : GET /knowledge:scope
 activate router
-router -> mgr : MEM-04 SCOPE Knowledge({query, scope})
-activate mgr
+router -> store : MEM-04 SCOPE Knowledge({query, scope})
+activate store
 
-alt validation succeeds
-  mgr -> store : MEM-04 SCOPE Knowledge({query, scope})
-  activate store
-  store -> dir : MEM-04 SCOPE Knowledge({query, scope})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
-  deactivate router
-  deactivate iface
-end
+store --> router : 200 OK
+deactivate store
+router --> iface : 200 OK
+iface --> user : 200 OK
+deactivate router
+deactivate iface
 
 @enduml

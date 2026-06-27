@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> RouterManager -> RouterStore -> RouterDirectory -> ModelBackend
+' CSR Chain: User -> CLI Process -> ServerRouter -> ModelRouter
 ' SM States: SWITCHING (#FF8F00)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Router Group (Service)" #FFF3E0
-  participant "RouterManager" as mgr
+  participant "ModelRouter" as mgr
 end box
-box "Router Group (Repository)" #E8F5E9
-  participant "RouterStore" as store
-end box
-database "RouterDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "ModelBackend" as ModelBackend
-end box
-
-
 
 == RTG-04 SWITCH Model ==
 
@@ -50,15 +39,9 @@ router -> mgr : rtg04 SWITCH Model(target_model)
 activate mgr
 
 alt switch succeeds
-  mgr -> store : rtg04 SWITCH Model(target_model)
-  activate store
-  store -> dir : rtg04 SWITCH Model(target_model)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#FF8F00>SWITCHING</back>)
+  ref over mgr : RTG-04 SWITCH Model
+    ' Router lifecycle: → SWITCHING (#FF8F00)
+    ' Owned by: RTG-04 SWITCH Model (SM/README.md)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ObservabilityManager -> ObservabilityStore -> ObservabilityDirectory -> MetricsBackend
+' CSR Chain: User -> CLI Process -> ServerRouter -> OTelExporter
 ' SM States: —
 ' ============================================================
 
@@ -21,23 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Observability Group (Service)" #FFF3E0
-  participant "ObservabilityManager" as mgr
-end box
-box "Observability Group (Repository)" #E8F5E9
-  participant "ObservabilityStore" as store
-end box
-database "ObservabilityDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "MetricsBackend" as MetricsBackend
+box "Observability Group (Infrastructure)" #F3E5F5
+  participant "OTelExporter" as mgr
 end box
-
 
 
 == OBS-06 EXPORT OTLP ==
@@ -50,14 +40,6 @@ router -> mgr : OBS-06 EXPORT OTLP({})
 activate mgr
 
 alt validation succeeds
-  mgr -> store : OBS-06 EXPORT OTLP({})
-  activate store
-  store -> dir : OBS-06 EXPORT OTLP({})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

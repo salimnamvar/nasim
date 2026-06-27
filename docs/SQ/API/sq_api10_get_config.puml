@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ApiManager -> ApiStore -> ApiDirectory -> FileSystem
-' SM States: —
+' CSR Chain: User -> CLI Process -> ServerRouter -> ConfigLoader -> ConfigStorage
+' SM States: (no state change — read-only)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,15 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
-box "Entry Gate" #E3F2FD
+box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service" #FFF3E0
-  participant "ConfigManager" as mgr
-end box
-box "Repository" #E8F5E9
-  participant "ConfigLoader" as store
-end box
-database "ConfigDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+box "Config Group (Repository)" #E8F5E9
+  participant "ConfigLoader" as loader
 end box
 
-
+database "ConfigStorage" as storage
 
 == API-10 GET Config ==
 
@@ -46,31 +37,32 @@ user -> iface : GET /v1/config
 activate iface
 iface -> router : GET /v1/config
 activate router
-router -> mgr : API-10 GET Config()
-activate mgr
 
-alt validation succeeds
-  mgr -> store : API-10 GET Config()
-  activate store
-  store -> dir : API-10 GET Config()
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
-  deactivate router
-  deactivate iface
+router -> loader : API-10 GET Config()
+activate loader
+
+loader -> storage : API-10 GET Config()
+activate storage
+
+alt config not found
+    storage --> loader : FileNotFoundError
+    deactivate storage
+    loader --> router : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
+    deactivate loader
+    deactivate router
+    deactivate iface
 end
+
+storage --> loader : 200 OK — {config}
+deactivate storage
+
+loader --> router : 200 OK — {config}
+deactivate loader
+router --> iface : 200 OK — {config}
+iface --> user : 200 OK — {config}
+deactivate router
+deactivate iface
 
 @enduml

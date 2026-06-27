@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ProviderManager -> ProviderStore -> ProviderDirectory -> LLMBackend
+' CSR Chain: User -> CLI Process -> ServerRouter -> Provider
 ' SM States: SELECTING (#FBC02D), ERROR (#E64A19)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Provider Group (Service)" #FFF3E0
-  participant "ProviderManager" as mgr
+  participant "Provider" as mgr
 end box
-box "Provider Group (Repository)" #E8F5E9
-  participant "ProviderStore" as store
-end box
-database "ProviderDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "LLMBackend" as LLMBackend
-end box
-
-
 
 == PRV-04 SELECT Provider Backend ==
 
@@ -50,15 +39,9 @@ router -> mgr : PRV-04 SELECT Provider Backend({provider_name})
 activate mgr
 
 alt validation succeeds
-  mgr -> store : PRV-04 SELECT Provider Backend({provider_name})
-  activate store
-  store -> dir : PRV-04 SELECT Provider Backend({provider_name})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#FBC02D>SELECTING</back>)
+  ref over mgr : PRV-04 SELECT Provider Backend
+    ' Provider lifecycle: → SELECTING (#FBC02D)
+    ' Owned by: PRV-04 SELECT Provider Backend (SM/README.md)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ToolManager -> ToolStore -> ToolDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> ToolRegistry
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Tool Group (Service)" #FFF3E0
-  participant "ToolOrchestrator" as orch
-end box
+
 box "Tool Group (Repository)" #E8F5E9
-  participant "ToolRegistry" as registry
+  participant "ToolRegistry" as tool
 end box
-database "ToolDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == TL-14 LIST Registered Tools ==
 
@@ -46,36 +35,30 @@ user -> iface : POST /tools/list_registered:execute
 activate iface
 iface -> router : POST /tools/list_registered:execute
 activate router
-router -> mgr : TL-14 LIST Registered Tools(pageSize, pageToken)
-router -> orch : TL-14 LIST Registered Tools(pageSize, pageToken)
-activate orch
+
+router -> tool : TL-14 LIST Registered Tools(pageSize, pageToken)
+activate tool
 
 alt validation succeeds
-  orch -> registry : TL-14 LIST Registered Tools(pageSize, pageToken)
-  activate registry
-  registry -> dir : TL-14 LIST Registered Tools(pageSize, pageToken)
-  activate dir
-  dir --> registry : 200 OK
-  deactivate dir
-  registry --> orch : 200 OK
-  deactivate registry
-      orch -> orch : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
-  orch --> router : 200 OK
-  deactivate orch
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TL-14 LIST Registered Tools
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TL-14 LIST Registered Tools (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else registry unavailable
-  orch --> router : 503 Service Unavailable
-  deactivate orch
+  tool --> router : 503 Service Unavailable
+  deactivate tool
   router --> iface : 503 Service Unavailable
   iface --> user : 503 Service Unavailable
   deactivate router
   deactivate iface
 else invalid pagination
-  orch --> router : 400 Bad Request
-  deactivate orch
+  tool --> router : 400 Bad Request
+  deactivate tool
   router --> iface : 400 Bad Request
   iface --> user : 400 Bad Request
   deactivate router

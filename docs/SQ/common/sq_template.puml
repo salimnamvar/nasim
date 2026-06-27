@@ -1,0 +1,110 @@
+@startuml sq_template
+' ============================================================
+' Title:     {UC_ID} — {VERB} {Resource}({params})
+' Boundary:  nasim code agent
+' Purpose:   {one-line description of what this UC accomplishes}
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLI Process -> ServerRouter -> {C4_Component} -> {C4_Component} -> {Storage}
+' SM States: {STATE} (#{hex})[, {STATE2} (#{hex2})]
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- {UC_ID} {VERB} {Resource}({params})
+
+actor "User" as user
+
+box "Interface Layer" #E3F2FD
+  participant "CLI Process" as iface
+end box
+
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
+end box
+
+' --- CSR Layer Box ---
+' Use correct CSR color for your group:
+'   Controller (API/CLI): #E3F2FD  (blue)
+'   Service (Agent, Router, Safety, etc.): #FFF3E0  (orange)
+'   Repository (Session, Tool, Memory, etc.): #E8F5E9  (green)
+'   Infrastructure (MCP, Sandbox, Observability, Wire Log, Hooks, Plugins): #F3E5F5  (purple)
+'
+' Use ONLY C4-authoritative component names. See ENTITIES.md for the registry.
+' DO NOT invent managers, orchestrators, or stores that don't exist in C4.
+
+box "{Group} ({CSR_Layer})" #{CSR_Color}
+  participant "{C4_Component}" as alias
+end box
+
+' If the group has multiple C4 components, add them in separate boxes
+' or in the same box if they share the CSR layer:
+'
+' box "{Group} ({CSR_Layer})" #{CSR_Color}
+'   participant "{C4_Component_1}" as alias1
+'   participant "{C4_Component_2}" as alias2
+' end box
+
+' For external storage (not C4 components), use database notation:
+' database "StorageName" as storage_alias
+
+
+' ============================================================
+' BODY — Collaboration order
+' ============================================================
+
+' --- Step 1: Entry chain (always the same) ---
+' user -> iface : {HTTP_VERB} /{resource}
+' activate iface
+' iface -> router : {HTTP_VERB} /{resource}
+' activate router
+' router -> component : {uc_id} {VERB} {Resource}({params})
+' activate component
+
+' --- Step 2: alt/else for failure paths ---
+' alt {success_condition}
+'   ' Success path
+'   component -> sub_component : {uc_id} {VERB} {Resource}({params})
+'   activate sub_component
+'   sub_component --> component : 200 OK
+'   deactivate sub_component
+'
+'   ' --- Step 3: State write via ref block (NOT self-call) ---
+'   ref over component : {uc_id} {VERB} {Resource}({params})
+'     ' State: <back:#HEX>FROM_STATE</back> → <back:#HEX2>TO_STATE</back>
+'     ' This ref block delegates to the lifecycle-write UC
+'     ' that owns this state transition (see SM/README.md)
+'
+'   component --> router : 200 OK
+'   deactivate component
+'   router --> iface : 200 OK
+'   iface --> user : 200 OK
+'   deactivate router
+'   deactivate iface
+'
+' else {failure_condition}
+'   component --> router : {error_code} {error_message}
+'   deactivate component
+'   router --> iface : {error_code} {error_message}
+'   iface --> user : {error_code} {error_message}
+'   deactivate router
+'   deactivate iface
+' end
+
+' ============================================================
+' RULES:
+' 1. Every activate MUST have a matching deactivate (P08)
+' 2. State writes use ref blocks, NOT self-calls (AD-06, P12)
+' 3. Use ONLY C4-authoritative component names (ENTITIES.md)
+' 4. CSR box colors must match the group's layer (AD-03)
+' 5. No note/hnote blocks (AD-02, P01)
+' 6. Every message uses ROD format: UC_ID VERB Resource(params) (P02)
+' 7. Every return arrow carries HTTP status code (P05)
+' 8. break for early exits, alt for branching (P06, P17)
+' 9. User always connects to Interface before API (AD-05, P09)
+' 10. SQ title must match UC description 1:1 (AD-07, P10)
+' ============================================================
+
+@enduml

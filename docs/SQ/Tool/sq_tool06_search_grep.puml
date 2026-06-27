@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ToolManager -> ToolStore -> ToolDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> GrepTool
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Tool Group (Service)" #FFF3E0
-  participant "ToolOrchestrator" as orch
-end box
+
 box "Tool Group (Repository)" #E8F5E9
-  participant "ToolRegistry" as registry
+  participant "GrepTool" as tool
 end box
-database "ToolDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == TL-06 SEARCH Grep ==
 
@@ -46,36 +35,30 @@ user -> iface : POST /tools/search_grep:execute
 activate iface
 iface -> router : POST /tools/search_grep:execute
 activate router
-router -> mgr : TL-06 SEARCH Grep(pattern, path, caseSensitive, includeGlob)
-router -> orch : TL-06 SEARCH Grep(pattern, path, caseSensitive, includeGlob)
-activate orch
+
+router -> tool : TL-06 SEARCH Grep(pattern, path, caseSensitive, includeGlob)
+activate tool
 
 alt validation succeeds
-  orch -> registry : TL-06 SEARCH Grep(pattern, path, caseSensitive, includeGlob)
-  activate registry
-  registry -> dir : TL-06 SEARCH Grep(pattern, path, caseSensitive, includeGlob)
-  activate dir
-  dir --> registry : 200 OK
-  deactivate dir
-  registry --> orch : 200 OK
-  deactivate registry
-      orch -> orch : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
-  orch --> router : 200 OK
-  deactivate orch
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TL-06 SEARCH Grep
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TL-06 SEARCH Grep (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else no matches
-  orch --> router : 404 Not Found
-  deactivate orch
+  tool --> router : 404 Not Found
+  deactivate tool
   router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router
   deactivate iface
 else path error
-  orch --> router : 400 Bad Request
-  deactivate orch
+  tool --> router : 400 Bad Request
+  deactivate tool
   router --> iface : 400 Bad Request
   iface --> user : 400 Bad Request
   deactivate router

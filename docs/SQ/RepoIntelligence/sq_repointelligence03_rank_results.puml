@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> RepoIntelligenceManager -> RepoIntelligenceStore -> RepoIntelligenceDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> RankingService
 ' SM States: INDEXED (#7CB342)
 ' ============================================================
 
@@ -21,23 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "RepoIntelligence Group (Service)" #FFF3E0
-  participant "RepoIntelligenceManager" as mgr
-end box
+
 box "RepoIntelligence Group (Repository)" #E8F5E9
-  participant "RepoIntelligenceStore" as store
+  participant "RankingService" as mgr
 end box
-database "RepoIntelligenceDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
 
 
 == RIM-03 RANK Results ==
@@ -50,15 +40,8 @@ router -> mgr : rim03 RANK Results(graph, chat_context)
 activate mgr
 
 alt ranking succeeds
-  mgr -> store : rim03 RANK Results(graph, chat_context)
-  activate store
-  store -> dir : rim03 RANK Results(graph, chat_context)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#7CB342>INDEXED</back>)
+  ref over mgr : RIM-03 TRANSITION State
+    ' SM States: INDEXED (#7CB342)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

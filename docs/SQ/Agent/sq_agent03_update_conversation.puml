@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationHistory
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Agent Group (Service)" #FFF3E0
-  participant "AgentManager" as mgr
+  participant "ConversationHistory" as history
 end box
-box "Agent Group (Repository)" #E8F5E9
-  participant "AgentStore" as store
-end box
-database "AgentDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == AGT-03 UPDATE Conversation ==
 
@@ -46,28 +35,22 @@ user -> iface : PATCH /v1/agents/{agent_id}/conversation
 activate iface
 iface -> router : PATCH /v1/agents/{agent_id}/conversation
 activate router
-router -> mgr : AGT-03 UPDATE Conversation({msg, updateMask})
-activate mgr
+router -> history : AGT-03 UPDATE Conversation({msg, updateMask})
+activate history
 
 alt token within budget
-      mgr -> mgr : TRANSITION State(<back:#43A047>RUNNING</back>)
-  mgr -> store : AGT-03 UPDATE Conversation({msg, updateMask})
-  activate store
-  store -> dir : AGT-03 UPDATE Conversation({msg, updateMask})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over history : AGT-03 UPDATE Conversation
+    ' State: <back:#43A047>RUNNING</back>
+    ' Owned by: AGT-03 (SM/README.md)
+  history --> router : 200 OK
+  deactivate history
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else budget exceeded
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
+  history --> router : 422 Unprocessable
+  deactivate history
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

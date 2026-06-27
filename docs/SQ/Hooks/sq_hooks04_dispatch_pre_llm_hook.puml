@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> HooksManager -> HooksStore -> HooksDirectory -> HookRuntime
+' CSR Chain: User -> CLI Process -> ServerRouter -> HookManager
 ' SM States: HOOK_RUNNING (#FFFDE7)
 ' ============================================================
 
@@ -21,23 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Hooks Group (Service)" #FFF3E0
-  participant "HooksManager" as mgr
-end box
-box "Hooks Group (Repository)" #E8F5E9
-  participant "HooksStore" as store
-end box
-database "HooksDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "HookRuntime" as HookRuntime
+box "Hooks Group (Infrastructure)" #F3E5F5
+  participant "HookManager" as mgr
 end box
-
 
 
 == HK-04 DISPATCH Pre-LLM Hook ==
@@ -50,15 +40,8 @@ router -> mgr : HK-04 DISPATCH Pre-LLM Hook({messages})
 activate mgr
 
 alt validation succeeds
-  mgr -> store : HK-04 DISPATCH Pre-LLM Hook({messages})
-  activate store
-  store -> dir : HK-04 DISPATCH Pre-LLM Hook({messages})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#FFFDE7>HOOK_RUNNING</back>)
+  ref over mgr : HK-04 TRANSITION State
+    ' SM States: HOOK_RUNNING (#FFFDE7)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

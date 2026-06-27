@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SafetyManager -> SafetyStore -> SafetyDirectory -> PolicyEngine
+' CSR Chain: User -> CLI Process -> ServerRouter -> SafetyCoordinator
 ' SM States: AWAITING_APPROVAL (#FFF9C4)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Safety Group (Service)" #FFF3E0
-  participant "SafetyManager" as mgr
+  participant "SafetyCoordinator" as mgr
 end box
-box "Safety Group (Repository)" #E8F5E9
-  participant "SafetyStore" as store
-end box
-database "SafetyDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "PolicyEngine" as PolicyEngine
-end box
-
-
 
 == SAF-02 REQUEST Approval ==
 
@@ -50,15 +39,9 @@ router -> mgr : saf02 REQUEST Approval(tool_name, args)
 activate mgr
 
 alt user approves
-  mgr -> store : saf02 REQUEST Approval(tool_name, args)
-  activate store
-  store -> dir : saf02 REQUEST Approval(tool_name, args)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#FFF9C4>AWAITING_APPROVAL</back>)
+  ref over mgr : SAF-02 REQUEST Approval
+    ' Safety lifecycle: → AWAITING_APPROVAL (#FFF9C4)
+    ' Owned by: SAF-02 REQUEST Approval (SM/README.md)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

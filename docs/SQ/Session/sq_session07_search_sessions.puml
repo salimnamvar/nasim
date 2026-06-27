@@ -7,8 +7,8 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
-' SM States: —
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionSearch -> SessionStorage
+' SM States: (no state change — read-only search)
 ' ============================================================
 
 !include ../common/sq_styles.puml
@@ -21,24 +21,15 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Group (Service)" #FFF3E0
-  participant "SessionManager" as mgr
-end box
+
 box "Session Group (Repository)" #E8F5E9
-  participant "SessionStore" as store
-end box
-database "SessionDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
+  participant "SessionSearch" as search
 end box
 
-
+database "SessionStorage" as storage
 
 == SSN-07 SEARCH Sessions ==
 
@@ -47,38 +38,32 @@ activate iface
 iface -> router : GET /sessions:search?q={query}
 activate router
 
-router -> mgr : ssn07 SEARCH Sessions({query}, {page_size}, {page_token})
+router -> search : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
+activate search
 
-activate mgr
+search -> storage : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
+activate storage
 
-mgr -> store : SEARCH Sessions({query}, {page_size}, {page_token})
-activate store
-
-store -> dir : QUERY Index({query})
-activate dir
-
-alt Index not available
-    dir --> store : IndexError
-    deactivate dir
-    store -> store : ssn07 SEARCH Sessions({query}, fallback)
-    store --> mgr : 200 OK — [{session_id, snippet, score}]
-    mgr --> router : 200 OK — [{session_id, snippet, score}]
+alt index not available
+    storage --> search : IndexError
+    deactivate storage
+    search -> storage : SSN-07 SEARCH Sessions({query}, fallback)
+    activate storage
+    storage --> search : 200 OK — [{session_id, snippet, score}]
+    deactivate storage
+    search --> router : 200 OK — [{session_id, snippet, score}]
+    deactivate search
     router --> iface : 200 OK — [{session_id, snippet, score}]
     iface --> user : 200 OK — [{session_id, snippet, score}]
-    deactivate store
-    deactivate mgr
     deactivate router
     deactivate iface
-    end
 end
 
-dir --> store : 200 OK — [{session_id, snippet, rank}]
-deactivate dir
+storage --> search : 200 OK — [{session_id, snippet, rank}]
+deactivate storage
 
-store --> mgr : 200 OK — [{session_id, snippet, score}]
-deactivate store
-mgr --> router : 200 OK — [{session_id, snippet, score}]
-deactivate mgr
+search --> router : 200 OK — [{session_id, snippet, score}]
+deactivate search
 router --> iface : 200 OK — [{session_id, snippet, score}]
 iface --> user : 200 OK — [{session_id, snippet, score}]
 deactivate router

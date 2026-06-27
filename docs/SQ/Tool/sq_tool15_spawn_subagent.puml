@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ToolManager -> ToolStore -> ToolDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> SubagentTool
 ' SM States: SPAWNING (#FFAB91), RUNNING (#BCAAA4)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Tool Group (Service)" #FFF3E0
-  participant "ToolOrchestrator" as orch
-end box
+
 box "Tool Group (Repository)" #E8F5E9
-  participant "ToolRegistry" as registry
+  participant "SubagentTool" as tool
 end box
-database "ToolDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == TL-15 SPAWN Subagent ==
 
@@ -46,37 +35,30 @@ user -> iface : POST /tools/spawn_subagent:execute
 activate iface
 iface -> router : POST /tools/spawn_subagent:execute
 activate router
-router -> mgr : TL-15 SPAWN Subagent(prompt, subagentType)
-router -> orch : TL-15 SPAWN Subagent(prompt, subagentType)
-activate orch
+
+router -> tool : TL-15 SPAWN Subagent(prompt, subagentType)
+activate tool
 
 alt validation succeeds
-  orch -> registry : TL-15 SPAWN Subagent(prompt, subagentType)
-  activate registry
-  registry -> dir : TL-15 SPAWN Subagent(prompt, subagentType)
-  activate dir
-  dir --> registry : 200 OK
-  deactivate dir
-  registry --> orch : 200 OK
-  deactivate registry
-      orch -> orch : TRANSITION State(<back:#FFAB91>SPAWNING</back>)
-      orch -> orch : TRANSITION State(<back:#BCAAA4>RUNNING</back>)
-  orch --> router : 200 OK
-  deactivate orch
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TL-15 SPAWN Subagent
+    ' State: <back:#FFAB91>SPAWNING</back> → <back:#BCAAA4>RUNNING</back>
+    ' Owned by: TL-15 SPAWN Subagent (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else spawn limit reached
-  orch --> router : 429 Too Many Requests
-  deactivate orch
+  tool --> router : 429 Too Many Requests
+  deactivate tool
   router --> iface : 429 Too Many Requests
   iface --> user : 429 Too Many Requests
   deactivate router
   deactivate iface
 else spawn failed
-  orch --> router : 500 Internal Server Error
-  deactivate orch
+  tool --> router : 500 Internal Server Error
+  deactivate tool
   router --> iface : 500 Internal Server Error
   iface --> user : 500 Internal Server Error
   deactivate router

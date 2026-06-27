@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> McpManager -> McpStore -> McpDirectory -> MCPServer
+' CSR Chain: User -> CLI Process -> ServerRouter -> MCPServerRuntime
 ' SM States: STARTING (#FFA726), RUNNING (#66BB6A), ERROR (#FFCDD2)
 ' ============================================================
 
@@ -21,23 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "MCP Group (Service)" #FFF3E0
-  participant "MCPManager" as mgr
-end box
-box "MCP Group (Repository)" #E8F5E9
-  participant "MCPStore" as store
-end box
-database "MCPDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "MCPServer" as MCPServer
+box "MCP Group (Infrastructure)" #F3E5F5
+  participant "MCPServerRuntime" as mgr
 end box
-
 
 
 == MCP-04 EXPOSE nasim Tools ==
@@ -50,15 +40,8 @@ router -> mgr : MCP-04 EXPOSE nasim Tools({})
 activate mgr
 
 alt validation succeeds
-  mgr -> store : MCP-04 EXPOSE nasim Tools({})
-  activate store
-  store -> dir : MCP-04 EXPOSE nasim Tools({})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#FFA726>STARTING</back> → <back:#66BB6A>RUNNING</back>)
+  ref over mgr : MCP-04 TRANSITION State
+    ' SM States: STARTING (#FFA726), RUNNING (#66BB6A)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

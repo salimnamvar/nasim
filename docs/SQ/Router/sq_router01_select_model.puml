@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> RouterManager -> RouterStore -> RouterDirectory -> ModelBackend
+' CSR Chain: User -> CLI Process -> ServerRouter -> ModelRouter
 ' SM States: SELECTING (#3F51B5)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Router Group (Service)" #FFF3E0
-  participant "RouterManager" as mgr
+  participant "ModelRouter" as mgr
 end box
-box "Router Group (Repository)" #E8F5E9
-  participant "RouterStore" as store
-end box
-database "RouterDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "ModelBackend" as ModelBackend
-end box
-
-
 
 == RTG-01 SELECT Model ==
 
@@ -50,15 +39,9 @@ router -> mgr : rtg01 SELECT Model(task_classification)
 activate mgr
 
 alt model found
-  mgr -> store : rtg01 SELECT Model(task_classification)
-  activate store
-  store -> dir : rtg01 SELECT Model(task_classification)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#3F51B5>SELECTING</back>)
+  ref over mgr : RTG-01 SELECT Model
+    ' Router lifecycle: → SELECTING (#3F51B5)
+    ' Owned by: RTG-01 SELECT Model (SM/README.md)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

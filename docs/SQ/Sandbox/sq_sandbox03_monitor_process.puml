@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SandboxManager -> SandboxStore -> SandboxDirectory -> HostShell
+' CSR Chain: User -> CLI Process -> ServerRouter -> SandboxMonitor
 ' SM States: MONITORING (#64B5F6)
 ' ============================================================
 
@@ -21,23 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Sandbox Group (Service)" #FFF3E0
-  participant "SandboxManager" as mgr
-end box
-box "Sandbox Group (Repository)" #E8F5E9
-  participant "SandboxStore" as store
-end box
-database "SandboxDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "HostShell" as HostShell
+box "Sandbox Group (Infrastructure)" #F3E5F5
+  participant "SandboxMonitor" as mgr
 end box
-
 
 
 == SBX-03 MONITOR Process ==
@@ -50,15 +40,8 @@ router -> mgr : sbx03 MONITOR Process(process_id, limits)
 activate mgr
 
 alt normal completion
-  mgr -> store : sbx03 MONITOR Process(process_id, limits)
-  activate store
-  store -> dir : sbx03 MONITOR Process(process_id, limits)
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#64B5F6>MONITORING</back>)
+  ref over mgr : SBX-03 TRANSITION State
+    ' SM States: MONITORING (#64B5F6)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

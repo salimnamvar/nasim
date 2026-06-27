@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> PluginsManager -> PluginsStore -> PluginsDirectory -> PluginRuntime
+' CSR Chain: User -> CLI Process -> ServerRouter -> PluginLoader
 ' SM States: DISABLED (#CE93D8), ERROR (#EF5350)
 ' ============================================================
 
@@ -21,23 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Plugins Group (Service)" #FFF3E0
-  participant "PluginManager" as mgr
-end box
-box "Plugins Group (Repository)" #E8F5E9
-  participant "PluginStore" as store
-end box
-database "PluginDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "PluginRuntime" as PluginRuntime
+box "Plugins Group (Infrastructure)" #F3E5F5
+  participant "PluginLoader" as mgr
 end box
-
 
 
 == PLG-06 DISABLE Plugin ==
@@ -50,15 +40,8 @@ router -> mgr : PLG-06 DISABLE Plugin({plugin_id})
 activate mgr
 
 alt validation succeeds
-  mgr -> store : PLG-06 DISABLE Plugin({plugin_id})
-  activate store
-  store -> dir : PLG-06 DISABLE Plugin({plugin_id})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#CE93D8>DISABLED</back>)
+  ref over mgr : PLG-06 TRANSITION State
+    ' SM States: DISABLED (#CE93D8), ERROR (#EF5350)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionStore -> SessionStorage
 ' SM States: SAVED (#1565C0), RESTORED (#1E88E5)
 ' ============================================================
 
@@ -21,24 +21,15 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Session Group (Service)" #FFF3E0
-  participant "SessionManager" as mgr
-end box
+
 box "Session Group (Repository)" #E8F5E9
   participant "SessionStore" as store
 end box
-database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
+database "SessionStorage" as storage
 
 == SSN-02 READ Session ==
 
@@ -47,62 +38,48 @@ activate iface
 iface -> router : GET /sessions/{session_id}
 activate router
 
-router -> mgr : ssn02 READ Session({session_id})
+router -> store : SSN-02 READ Session({session_id})
+activate store
 
 alt session_id is empty
     router --> iface : 400 INVALID_ARGUMENT
-    router --> iface : 400 Bad Request
     iface --> user : 400 Bad Request
     deactivate router
     deactivate iface
-    end
 end
 
-activate mgr
-
-mgr -> store : READ Session({session_id})
-activate store
-
-break Session not found
-    store --> mgr : 404 NOT_FOUND
-    mgr --> router : 404 NOT_FOUND
-    router --> iface : 404 NOT_FOUND
+alt session not found
+    store --> router : 404 NOT_FOUND
     router --> iface : 404 Not Found
     iface --> user : 404 Not Found
     deactivate store
-    deactivate mgr
     deactivate router
     deactivate iface
-    end
 end
 
-store -> dir : READ SessionFile({session_id}.jsonl)
-activate dir
+store -> storage : SSN-02 READ Session({session_id})
+activate storage
 
-break Disk read error
-    dir --> store : IOError
-    deactivate dir
-    store --> mgr : 500 INTERNAL
-    mgr --> router : 500 INTERNAL
-    router --> iface : 500 INTERNAL
+alt disk read error
+    storage --> store : IOError
+    deactivate storage
+    store --> router : 500 INTERNAL
     router --> iface : 500 Internal Error
     iface --> user : 500 Internal Error
     deactivate store
-    deactivate mgr
     deactivate router
     deactivate iface
-    end
 end
 
-dir --> store : 200 OK
-deactivate dir
+storage --> store : 200 OK
+deactivate storage
 
-    store -> store : TRANSITION State(<back:#1565C0>SAVED</back> → <back:#1E88E5>RESTORED</back>)
+ref over store : SSN-02 READ Session
+  ' Session lifecycle: SAVED → RESTORED (#1E88E5)
+  ' Owned by: API-03 GET Session (SM/README.md)
 
-store --> mgr : 200 OK
+store --> router : 200 OK
 deactivate store
-mgr --> router : 200 OK
-deactivate mgr
 router --> iface : 200 OK
 iface --> user : 200 OK
 deactivate router

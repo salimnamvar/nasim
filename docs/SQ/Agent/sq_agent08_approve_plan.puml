@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
+' CSR Chain: User -> CLI Process -> ServerRouter -> PlanSession
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
+
 box "Agent Group (Service)" #FFF3E0
-  participant "AgentManager" as mgr
+  participant "PlanSession" as plan
 end box
-box "Agent Group (Repository)" #E8F5E9
-  participant "AgentStore" as store
-end box
-database "AgentDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "FileSystem" as FileSystem
-end box
-
-
 
 == AGT-08 APPROVE Plan ==
 
@@ -46,28 +35,22 @@ user -> iface : POST /v1/agents/{agent_id}:approve-plan
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:approve-plan
 activate router
-router -> mgr : AGT-08 APPROVE Plan({agent_id})
-activate mgr
+router -> plan : AGT-08 APPROVE Plan({agent_id})
+activate plan
 
 alt plan approved
-      mgr -> mgr : TRANSITION State(<back:#43A047>RUNNING</back>)
-  mgr -> store : AGT-08 APPROVE Plan({agent_id})
-  activate store
-  store -> dir : AGT-08 APPROVE Plan({agent_id})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-  mgr --> router : 200 OK
-  deactivate mgr
+  ref over plan : AGT-08 APPROVE Plan
+    ' State: <back:#43A047>RUNNING</back>
+    ' Owned by: AGT-08 (SM/README.md)
+  plan --> router : 200 OK
+  deactivate plan
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else plan empty
-  mgr --> router : 422 Unprocessable
-  deactivate mgr
+  plan --> router : 422 Unprocessable
+  deactivate plan
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

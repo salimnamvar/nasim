@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> GitManager -> GitStore -> GitDirectory -> GitRepository
+' CSR Chain: User -> CLI Process -> ServerRouter -> GitIntegration
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -21,24 +21,13 @@ box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-
-
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Git Group (Service)" #FFF3E0
-  participant "GitManager" as mgr
-end box
+
 box "Git Group (Repository)" #E8F5E9
-  participant "GitStore" as store
+  participant "GitIntegration" as mgr
 end box
-database "GitDirectory" as dir
-
-box "Infrastructure Layer" #ECEFF1
-  participant "GitRepository" as GitRepository
-end box
-
-
 
 == VCS-02 INSERT Commit ==
 
@@ -50,15 +39,9 @@ router -> mgr : VCS-02 INSERT Commit({repo_path, message, files})
 activate mgr
 
 alt validation succeeds
-  mgr -> store : VCS-02 INSERT Commit({repo_path, message, files})
-  activate store
-  store -> dir : VCS-02 INSERT Commit({repo_path, message, files})
-  activate dir
-  dir --> store : 200 OK
-  deactivate dir
-  store --> mgr : 200 OK
-  deactivate store
-      mgr -> mgr : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
+  ref over mgr : VCS-02 INSERT Commit
+    ' Git lifecycle: → TOOL_EXEC (#B2DFDB)
+    ' Owned by: VCS-02 INSERT Commit (SM/README.md)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
