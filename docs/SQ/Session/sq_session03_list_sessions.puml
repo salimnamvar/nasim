@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
 ' SM States: SAVED (#1565C0)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- SSN-03 LIST Sessions
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "SessionAPI" as api
 end box
 box "Session Group (Service)" #FFF3E0
   participant "SessionManager" as mgr
@@ -31,15 +40,27 @@ box "Session Group (Repository)" #E8F5E9
 end box
 database "SessionDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == SSN-03 LIST Sessions ==
 
-user -> router : GET /sessions
+user -> iface : GET /sessions
+activate iface
+iface -> router : GET /sessions
 activate router
 
-router -> api : ssn03 LIST Sessions({page_size}, {page_token})
-activate api
+router -> mgr : ssn03 LIST Sessions({page_size}, {page_token})
 
-api -> mgr : ssn03 LIST Sessions({page_size}, {page_token})
 activate mgr
 
 mgr -> store : LIST Sessions({page_size}, {page_token})
@@ -52,13 +73,14 @@ alt Directory not found
     dir --> store : FileNotFoundError
     deactivate dir
     store --> mgr : 200 OK — [] (empty list)
-    mgr --> api : 200 OK — [] (empty list)
-    api --> router : 200 OK — [] (empty list)
-    router --> user : 200 OK — [] (empty list)
+    mgr --> router : 200 OK — [] (empty list)
+    router --> iface : 200 OK — [] (empty list)
+    router --> iface : 200 OK — [] (empty list)
+    iface --> user : 200 OK — [] (empty list)
     deactivate store
     deactivate mgr
-    deactivate api
     deactivate router
+    deactivate iface
     end
 end
 
@@ -67,11 +89,12 @@ deactivate dir
 
 store --> mgr : 200 OK — [{session_id, created_at, message_count}]
 deactivate store
-mgr --> api : 200 OK — [{session_id, created_at, message_count}]
+mgr --> router : 200 OK — [{session_id, created_at, message_count}]
 deactivate mgr
-api --> router : 200 OK — [{session_id, created_at, message_count}]
-deactivate api
-router --> user : 200 OK — [{session_id, created_at, message_count}]
+router --> iface : 200 OK — [{session_id, created_at, message_count}]
+router --> iface : 200 OK — [{session_id, created_at, message_count}]
+iface --> user : 200 OK — [{session_id, created_at, message_count}]
 deactivate router
+deactivate iface
 
 @enduml

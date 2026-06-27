@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> ObservabilityAPI -> ObservabilityManager -> ObservabilityStore -> ObservabilityDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ObservabilityManager -> ObservabilityStore -> ObservabilityDirectory -> MetricsBackend
 ' SM States: —
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- OBS-02 RECORD Metrics
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "ObservabilityAPI" as api
 end box
 box "Observability Group (Service)" #FFF3E0
   participant "ObservabilityManager" as mgr
@@ -31,13 +40,25 @@ box "Observability Group (Repository)" #E8F5E9
 end box
 database "ObservabilityDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "MetricsBackend" as MetricsBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "MetricsBackend" as MetricsBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "MetricsBackend" as MetricsBackend
+end box
+
 == OBS-02 RECORD Metrics ==
 
-user -> router : POST /metrics
+user -> iface : POST /metrics
+activate iface
+iface -> router : POST /metrics
 activate router
-router -> api : OBS-02 RECORD Metrics({metric_data})
-activate api
-api -> mgr : OBS-02 RECORD Metrics({metric_data})
+router -> mgr : OBS-02 RECORD Metrics({metric_data})
 activate mgr
 
 alt validation succeeds
@@ -49,19 +70,21 @@ alt validation succeeds
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else validation fails
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml

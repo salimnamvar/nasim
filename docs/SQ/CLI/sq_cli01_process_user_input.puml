@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIRouter -> CLIController -> CLIExecutor -> CLIStore
+' CSR Chain: User -> CLI Process -> ServerRouter -> CliManager -> CliStore -> CliDirectory -> FileSystem
 ' SM States: LISTENING (#E8EAF6), THINKING (#D7CCC8), RESPONDING (#D1C4E9), IDLE (#ECEFF1)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- CLI-01 PROCESS User Input
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "Entry Gate" #E3F2FD
   participant "CLIRouter" as router
-end box
-box "Controller" #FFF3E0
-  participant "CLIController" as ctrl
 end box
 box "Service" #FFF3E0
   participant "CLIExecutor" as exec
@@ -31,25 +40,39 @@ box "Repository" #E8F5E9
 end box
 database "CLIDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == CLI-01 PROCESS User Input ==
 
-user -> router : CLI-01 PROCESS Input({input})
+user -> iface : CLI-01 PROCESS Input({input})
+activate iface
+iface -> router : CLI-01 PROCESS Input({input})
 activate router
-router -> ctrl : CLI-01 PROCESS Input({input})
-activate ctrl
+router -> router : CLI-01 PROCESS Input({input})
 
-ctrl -> ctrl : CLI-01 PARSE Input({input})
+router -> router : CLI-01 PARSE Input({input})
 alt is slash command
-  ref over ctrl
+  ref over router
     CLI-02: DISPATCH Slash Command
   end ref
-  ctrl --> router : 200 OK
-  deactivate ctrl
-  router --> user : 200 OK
+  router --> router : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
   ... hnote over user : IDLE (#ECEFF1) ...
 else normal input
-  ctrl -> exec : CLI-01 EXECUTE Input({input})
+  router -> exec : CLI-01 EXECUTE Input({input})
   activate exec
   ... hnote over exec : LISTENING (#E8EAF6) ...
   exec -> store : CLI-01 PROCESS Input({input})
@@ -65,12 +88,13 @@ else normal input
     API-06: DISPATCH Message
   end ref
   ... hnote over exec : RESPONDING (#D1C4E9) ...
-  exec --> ctrl : 200 OK
+  exec --> router : 200 OK
   deactivate exec
-  ctrl --> router : 200 OK
-  deactivate ctrl
-  router --> user : 200 OK
+  router --> router : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 end
 
 @enduml

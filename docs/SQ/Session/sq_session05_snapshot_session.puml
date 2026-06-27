@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
 ' SM States: ACTIVE (#43A047)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- SSN-05 SNAPSHOT Session
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "SessionAPI" as api
 end box
 box "Session Group (Service)" #FFF3E0
   participant "SessionManager" as mgr
@@ -31,23 +40,36 @@ box "Session Group (Repository)" #E8F5E9
 end box
 database "SessionDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == SSN-05 SNAPSHOT Session ==
 
-user -> router : POST /sessions/{session_id}:snapshot
+user -> iface : POST /sessions/{session_id}:snapshot
+activate iface
+iface -> router : POST /sessions/{session_id}:snapshot
 activate router
 
-router -> api : ssn05 SNAPSHOT Session({session_id})
-activate api
+router -> mgr : ssn05 SNAPSHOT Session({session_id})
 
 alt session_id is empty
-    api --> router : 400 INVALID_ARGUMENT
-    router --> user : 400 Bad Request
-    deactivate api
+    router --> iface : 400 INVALID_ARGUMENT
+    router --> iface : 400 Bad Request
+    iface --> user : 400 Bad Request
     deactivate router
+    deactivate iface
     end
 end
 
-api -> mgr : ssn05 SNAPSHOT Session({session_id})
 activate mgr
 
 mgr -> store : READ Session({session_id})
@@ -55,13 +77,14 @@ activate store
 
 break Session not found
     store --> mgr : 404 NOT_FOUND
-    mgr --> api : 404 NOT_FOUND
-    api --> router : 404 NOT_FOUND
-    router --> user : 404 Not Found
+    mgr --> router : 404 NOT_FOUND
+    router --> iface : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
     deactivate store
     deactivate mgr
-    deactivate api
     deactivate router
+    deactivate iface
     end
 end
 
@@ -73,13 +96,14 @@ activate store
 
 alt serialization error
     store --> mgr : 500 INTERNAL
-    mgr --> api : 500 INTERNAL
-    api --> router : 500 INTERNAL
-    router --> user : 500 Internal Error
+    mgr --> router : 500 INTERNAL
+    router --> iface : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
     deactivate store
     deactivate mgr
-    deactivate api
     deactivate router
+    deactivate iface
     end
 end
 
@@ -91,13 +115,14 @@ alt disk write error
     deactivate dir
     store --> store : rollback
     store --> mgr : 500 INTERNAL
-    mgr --> api : 500 INTERNAL
-    api --> router : 500 INTERNAL
-    router --> user : 500 Internal Error
+    mgr --> router : 500 INTERNAL
+    router --> iface : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
     deactivate store
     deactivate mgr
-    deactivate api
     deactivate router
+    deactivate iface
     end
 end
 
@@ -108,11 +133,12 @@ hnote over store : ACTIVE(#43A047) snapshot point created
 
 store --> mgr : 200 OK — {snapshot_id}
 deactivate store
-mgr --> api : 200 OK — {snapshot_id}
+mgr --> router : 200 OK — {snapshot_id}
 deactivate mgr
-api --> router : 200 OK — {snapshot_id}
-deactivate api
-router --> user : 200 OK — {snapshot_id}
+router --> iface : 200 OK — {snapshot_id}
+router --> iface : 200 OK — {snapshot_id}
+iface --> user : 200 OK — {snapshot_id}
 deactivate router
+deactivate iface
 
 @enduml

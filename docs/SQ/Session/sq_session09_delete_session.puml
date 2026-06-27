@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
 ' SM States: ACTIVE (#43A047), SAVED (#1565C0), CLOSED (#757575)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- SSN-09 DELETE Session
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "SessionAPI" as api
 end box
 box "Session Group (Service)" #FFF3E0
   participant "SessionManager" as mgr
@@ -31,23 +40,36 @@ box "Session Group (Repository)" #E8F5E9
 end box
 database "SessionDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == SSN-09 DELETE Session ==
 
-user -> router : DELETE /sessions/{session_id}
+user -> iface : DELETE /sessions/{session_id}
+activate iface
+iface -> router : DELETE /sessions/{session_id}
 activate router
 
-router -> api : ssn09 DELETE Session({session_id})
-activate api
+router -> mgr : ssn09 DELETE Session({session_id})
 
 alt session_id is empty
-    api --> router : 400 INVALID_ARGUMENT
-    router --> user : 400 Bad Request
-    deactivate api
+    router --> iface : 400 INVALID_ARGUMENT
+    router --> iface : 400 Bad Request
+    iface --> user : 400 Bad Request
     deactivate router
+    deactivate iface
     end
 end
 
-api -> mgr : ssn09 DELETE Session({session_id})
 activate mgr
 
 mgr -> store : DELETE Session({session_id})
@@ -55,13 +77,14 @@ activate store
 
 break Session not found
     store --> mgr : 404 NOT_FOUND
-    mgr --> api : 404 NOT_FOUND
-    api --> router : 404 NOT_FOUND
-    router --> user : 404 Not Found
+    mgr --> router : 404 NOT_FOUND
+    router --> iface : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
     deactivate store
     deactivate mgr
-    deactivate api
     deactivate router
+    deactivate iface
     end
 end
 
@@ -72,13 +95,14 @@ break Permission denied
     dir --> store : PermissionError
     deactivate dir
     store --> mgr : 403 FORBIDDEN
-    mgr --> api : 403 FORBIDDEN
-    api --> router : 403 FORBIDDEN
-    router --> user : 403 Forbidden
+    mgr --> router : 403 FORBIDDEN
+    router --> iface : 403 FORBIDDEN
+    router --> iface : 403 Forbidden
+    iface --> user : 403 Forbidden
     deactivate store
     deactivate mgr
-    deactivate api
     deactivate router
+    deactivate iface
     end
 end
 
@@ -89,11 +113,12 @@ hnote over store : ACTIVE(#43A047) -> CLOSED(#757575)
 
 store --> mgr : 200 OK — delete_confirmed({session_id})
 deactivate store
-mgr --> api : 200 OK — delete_confirmed({session_id})
+mgr --> router : 200 OK — delete_confirmed({session_id})
 deactivate mgr
-api --> router : 200 OK — delete_confirmed({session_id})
-deactivate api
-router --> user : 200 OK — delete_confirmed({session_id})
+router --> iface : 200 OK — delete_confirmed({session_id})
+router --> iface : 200 OK — delete_confirmed({session_id})
+iface --> user : 200 OK — delete_confirmed({session_id})
 deactivate router
+deactivate iface
 
 @enduml

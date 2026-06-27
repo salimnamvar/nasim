@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
 ' SM States: COMPLETED (#2E7D32)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- AGT-10 COLLECT Subagent Result
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "AgentAPI" as api
 end box
 box "Agent Group (Service)" #FFF3E0
   participant "AgentManager" as mgr
@@ -31,13 +40,25 @@ box "Agent Group (Repository)" #E8F5E9
 end box
 database "AgentDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == AGT-10 COLLECT Subagent Result ==
 
-user -> router : POST /v1/agents/{agent_id}:collect-subagent
+user -> iface : POST /v1/agents/{agent_id}:collect-subagent
+activate iface
+iface -> router : POST /v1/agents/{agent_id}:collect-subagent
 activate router
-router -> api : AGT-10 COLLECT Subagent Result({child_id, timeout})
-activate api
-api -> mgr : AGT-10 COLLECT Subagent Result({child_id, timeout})
+router -> mgr : AGT-10 COLLECT Subagent Result({child_id, timeout})
 activate mgr
 
 alt result available
@@ -50,19 +71,21 @@ alt result available
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else child not found
-  mgr --> api : 404 Not Found
+  mgr --> router : 404 Not Found
   deactivate mgr
-  api --> router : 404 Not Found
-  deactivate api
-  router --> user : 404 Not Found
+  router --> iface : 404 Not Found
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
   deactivate router
+  deactivate iface
 end
 
 @enduml

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ToolManager -> ToolStore -> ToolDirectory -> FileSystem
 ' SM States: SPAWNING (#FFAB91), RUNNING (#BCAAA4)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- TL-15 SPAWN Subagent
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "ToolAPI" as api
 end box
 box "Tool Group (Service)" #FFF3E0
   participant "ToolOrchestrator" as orch
@@ -31,13 +40,26 @@ box "Tool Group (Repository)" #E8F5E9
 end box
 database "ToolDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == TL-15 SPAWN Subagent ==
 
-user -> router : POST /tools/spawn_subagent:execute
+user -> iface : POST /tools/spawn_subagent:execute
+activate iface
+iface -> router : POST /tools/spawn_subagent:execute
 activate router
-router -> api : TL-15 SPAWN Subagent(prompt, subagentType)
-activate api
-api -> orch : TL-15 SPAWN Subagent(prompt, subagentType)
+router -> mgr : TL-15 SPAWN Subagent(prompt, subagentType)
+router -> orch : TL-15 SPAWN Subagent(prompt, subagentType)
 activate orch
 
 alt validation succeeds
@@ -51,25 +73,28 @@ alt validation succeeds
   deactivate registry
   hnote over orch : SPAWNING (#FFAB91)
   hnote over orch : RUNNING (#BCAAA4)
-  orch --> api : 200 OK
+  orch --> router : 200 OK
   deactivate orch
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else spawn limit reached
-  orch --> api : 429 Too Many Requests
+  orch --> router : 429 Too Many Requests
   deactivate orch
-  api --> router : 429 Too Many Requests
-  deactivate api
-  router --> user : 429 Too Many Requests
+  router --> iface : 429 Too Many Requests
+  router --> iface : 429 Too Many Requests
+  iface --> user : 429 Too Many Requests
   deactivate router
+  deactivate iface
 else spawn failed
-  orch --> api : 500 Internal Server Error
+  orch --> router : 500 Internal Server Error
   deactivate orch
-  api --> router : 500 Internal Server Error
-  deactivate api
-  router --> user : 500 Internal Server Error
+  router --> iface : 500 Internal Server Error
+  router --> iface : 500 Internal Server Error
+  iface --> user : 500 Internal Server Error
   deactivate router
+  deactivate iface
 end
 @enduml

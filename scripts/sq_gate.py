@@ -208,8 +208,9 @@ def main():
         findings = gfunc(sq_files)
         results.append({"gate": gid, "name": gname, "findings": findings})
 
-    # Run lint
-    lint_result = run_lint(sq_files)
+    # Run lint (exclude shared styles — not a standalone diagram)
+    lint_files = [f for f in sq_files if "sq_styles" not in f.name]
+    lint_result = run_lint(lint_files)
     lint_violations = parse_violations(lint_result["stdout"])
 
     # Count

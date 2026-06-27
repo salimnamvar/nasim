@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> SafetyAPI -> SafetyManager -> SafetyStore -> SafetyDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> SafetyManager -> SafetyStore -> SafetyDirectory -> PolicyEngine
 ' SM States: PERMISSIVE (#9CCC65), ERROR (#F4511E)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- SAF-01 CHECK Permission
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "SafetyAPI" as api
 end box
 box "Safety Group (Service)" #FFF3E0
   participant "SafetyManager" as mgr
@@ -31,13 +40,25 @@ box "Safety Group (Repository)" #E8F5E9
 end box
 database "SafetyDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "PolicyEngine" as PolicyEngine
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "PolicyEngine" as PolicyEngine
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "PolicyEngine" as PolicyEngine
+end box
+
 == SAF-01 CHECK Permission ==
 
-user -> router : GET /permissions/check/{tool}
+user -> iface : GET /permissions/check/{tool}
+activate iface
+iface -> router : GET /permissions/check/{tool}
 activate router
-router -> api : saf01 CHECK Permission(tool_name, safety_mode)
-activate api
-api -> mgr : saf01 CHECK Permission(tool_name, safety_mode)
+router -> mgr : saf01 CHECK Permission(tool_name, safety_mode)
 activate mgr
 
 alt permission allowed
@@ -50,19 +71,21 @@ alt permission allowed
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : PERMISSIVE (#9CCC65)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else permission denied
-  mgr --> api : 403 Forbidden
+  mgr --> router : 403 Forbidden
   deactivate mgr
-  api --> router : 403 Forbidden
-  deactivate api
-  router --> user : 403 Forbidden
+  router --> iface : 403 Forbidden
+  router --> iface : 403 Forbidden
+  iface --> user : 403 Forbidden
   deactivate router
+  deactivate iface
 end
 
 @enduml

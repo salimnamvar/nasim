@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> SandboxAPI -> SandboxManager -> SandboxStore -> SandboxDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> SandboxManager -> SandboxStore -> SandboxDirectory -> HostShell
 ' SM States: EXECUTING (#2196F3)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- SBX-01 ISOLATE Command
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "SandboxAPI" as api
 end box
 box "Sandbox Group (Service)" #FFF3E0
   participant "SandboxManager" as mgr
@@ -31,13 +40,25 @@ box "Sandbox Group (Repository)" #E8F5E9
 end box
 database "SandboxDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "HostShell" as HostShell
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "HostShell" as HostShell
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "HostShell" as HostShell
+end box
+
 == SBX-01 ISOLATE Command ==
 
-user -> router : POST /sandbox/isolate
+user -> iface : POST /sandbox/isolate
+activate iface
+iface -> router : POST /sandbox/isolate
 activate router
-router -> api : sbx01 ISOLATE Command(command, policy)
-activate api
-api -> mgr : sbx01 ISOLATE Command(command, policy)
+router -> mgr : sbx01 ISOLATE Command(command, policy)
 activate mgr
 
 alt execution succeeds
@@ -50,19 +71,21 @@ alt execution succeeds
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : EXECUTING (#2196F3)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else timeout or violation
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml

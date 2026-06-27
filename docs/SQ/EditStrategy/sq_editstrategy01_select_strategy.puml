@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> EditAPI -> EditManager -> EditStore -> EditDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> EditstrategyManager -> EditstrategyStore -> EditstrategyDirectory -> FileSystem
 ' SM States: THINKING (#D7CCC8)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- EDT-01 SELECT Strategy
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "EditAPI" as api
 end box
 box "Edit Strategy Group (Service)" #FFF3E0
   participant "EditManager" as mgr
@@ -31,13 +40,25 @@ box "Edit Strategy Group (Repository)" #E8F5E9
 end box
 database "EditDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == EDT-01 SELECT Strategy ==
 
-user -> router : GET /editstrategy/strategy
+user -> iface : GET /editstrategy/strategy
+activate iface
+iface -> router : GET /editstrategy/strategy
 activate router
-router -> api : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
-activate api
-api -> mgr : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
+router -> mgr : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
 activate mgr
 
 alt strategy found
@@ -50,19 +71,21 @@ alt strategy found
   store --> mgr : 200 OK
   deactivate store
   ... hnote over mgr : THINKING (#D7CCC8) ...
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else strategy not found
-  mgr --> api : 404 Not Found
+  mgr --> router : 404 Not Found
   deactivate mgr
-  api --> router : 404 Not Found
-  deactivate api
-  router --> user : 404 Not Found
+  router --> iface : 404 Not Found
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
   deactivate router
+  deactivate iface
 end
 
 @enduml

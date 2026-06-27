@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> ProviderAPI -> ProviderManager -> ProviderStore -> ProviderDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ProviderManager -> ProviderStore -> ProviderDirectory -> LLMBackend
 ' SM States: SELECTING (#FBC02D), ERROR (#E64A19)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- PRV-04 SELECT Provider Backend
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "ProviderAPI" as api
 end box
 box "Provider Group (Service)" #FFF3E0
   participant "ProviderManager" as mgr
@@ -31,13 +40,25 @@ box "Provider Group (Repository)" #E8F5E9
 end box
 database "ProviderDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "LLMBackend" as LLMBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "LLMBackend" as LLMBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "LLMBackend" as LLMBackend
+end box
+
 == PRV-04 SELECT Provider Backend ==
 
-user -> router : POST /providers:select
+user -> iface : POST /providers:select
+activate iface
+iface -> router : POST /providers:select
 activate router
-router -> api : PRV-04 SELECT Provider Backend({provider_name})
-activate api
-api -> mgr : PRV-04 SELECT Provider Backend({provider_name})
+router -> mgr : PRV-04 SELECT Provider Backend({provider_name})
 activate mgr
 
 alt validation succeeds
@@ -50,19 +71,21 @@ alt validation succeeds
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : SELECTING (#FBC02D)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else provider not found
-  mgr --> api : 404 Not Found
+  mgr --> router : 404 Not Found
   deactivate mgr
-  api --> router : 404 Not Found
-  deactivate api
-  router --> user : 404 Not Found
+  router --> iface : 404 Not Found
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
   deactivate router
+  deactivate iface
 end
 
 @enduml

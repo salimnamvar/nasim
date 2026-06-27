@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> RouterAPI -> RouterManager -> RouterStore -> RouterDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> RouterManager -> RouterStore -> RouterDirectory -> ModelBackend
 ' SM States: FALLBACK (#EF6C00)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- RTG-02 APPLY Fallback
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "RouterAPI" as api
 end box
 box "Router Group (Service)" #FFF3E0
   participant "RouterManager" as mgr
@@ -31,13 +40,25 @@ box "Router Group (Repository)" #E8F5E9
 end box
 database "RouterDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "ModelBackend" as ModelBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "ModelBackend" as ModelBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "ModelBackend" as ModelBackend
+end box
+
 == RTG-02 APPLY Fallback ==
 
-user -> router : POST /models/fallback
+user -> iface : POST /models/fallback
+activate iface
+iface -> router : POST /models/fallback
 activate router
-router -> api : rtg02 APPLY Fallback(primary_model, chain)
-activate api
-api -> mgr : rtg02 APPLY Fallback(primary_model, chain)
+router -> mgr : rtg02 APPLY Fallback(primary_model, chain)
 activate mgr
 
 alt fallback succeeds
@@ -50,19 +71,21 @@ alt fallback succeeds
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : FALLBACK (#EF6C00)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else all models unavailable
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml

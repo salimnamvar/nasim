@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIRouter -> CLIController -> CLIExecutor -> CLIStore
+' CSR Chain: User -> CLI Process -> ServerRouter -> CliManager -> CliStore -> CliDirectory -> FileSystem
 ' SM States: —
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- CLI-02 DISPATCH Slash Command
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "Entry Gate" #E3F2FD
   participant "CLIRouter" as router
-end box
-box "Controller" #FFF3E0
-  participant "CLIController" as ctrl
 end box
 box "Service" #FFF3E0
   participant "CLIExecutor" as exec
@@ -31,15 +40,28 @@ box "Repository" #E8F5E9
 end box
 database "CLIDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == CLI-02 DISPATCH Slash Command ==
 
-user -> router : CLI-02 DISPATCH SlashCommand({input})
+user -> iface : CLI-02 DISPATCH SlashCommand({input})
+activate iface
+iface -> router : CLI-02 DISPATCH SlashCommand({input})
 activate router
-router -> ctrl : CLI-02 PARSE SlashCommand({input})
-activate ctrl
+router -> router : CLI-02 PARSE SlashCommand({input})
 
-ctrl -> ctrl : CLI-02 PARSE CommandName({input})
-ctrl -> exec : CLI-02 DISPATCH Command({command, args})
+router -> router : CLI-02 PARSE CommandName({input})
+router -> exec : CLI-02 DISPATCH Command({command, args})
 activate exec
 
 alt command recognised
@@ -51,19 +73,21 @@ alt command recognised
   deactivate dir
   store --> exec : 200 OK
   deactivate store
-  exec --> ctrl : 200 OK
+  exec --> router : 200 OK
   deactivate exec
-  ctrl --> router : 200 OK
-  deactivate ctrl
-  router --> user : 200 OK
+  router --> router : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else unknown command
-  exec --> ctrl : 404 Not Found
+  exec --> router : 404 Not Found
   deactivate exec
-  ctrl --> router : 404 Not Found
-  deactivate ctrl
-  router --> user : 404 Not Found
+  router --> router : 404 Not Found
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
   deactivate router
+  deactivate iface
 end
 
 @enduml

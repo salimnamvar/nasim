@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> MCPAPI -> MCPManager -> MCPStore -> MCPDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> McpManager -> McpStore -> McpDirectory -> MCPServer
 ' SM States: CONNECTED (#00BCD4)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- MCP-03 ADAPT MCP Tool
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "MCPAPI" as api
 end box
 box "MCP Group (Service)" #FFF3E0
   participant "MCPManager" as mgr
@@ -31,13 +40,25 @@ box "MCP Group (Repository)" #E8F5E9
 end box
 database "MCPDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "MCPServer" as MCPServer
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "MCPServer" as MCPServer
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "MCPServer" as MCPServer
+end box
+
 == MCP-03 ADAPT MCP Tool ==
 
-user -> router : POST /mcp/tools:adapt
+user -> iface : POST /mcp/tools:adapt
+activate iface
+iface -> router : POST /mcp/tools:adapt
 activate router
-router -> api : MCP-03 ADAPT MCP Tool({tool_definition})
-activate api
-api -> mgr : MCP-03 ADAPT MCP Tool({tool_definition})
+router -> mgr : MCP-03 ADAPT MCP Tool({tool_definition})
 activate mgr
 
 alt validation succeeds
@@ -50,19 +71,21 @@ alt validation succeeds
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : CONNECTED (#00BCD4)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else validation fails
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml

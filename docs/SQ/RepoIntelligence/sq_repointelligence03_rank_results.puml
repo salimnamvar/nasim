@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> RepoIntelligenceAPI -> RepoIntelligenceManager -> RepoIntelligenceStore -> RepoIntelligenceDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> RepoIntelligenceManager -> RepoIntelligenceStore -> RepoIntelligenceDirectory -> FileSystem
 ' SM States: INDEXED (#7CB342)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- RIM-03 RANK Results
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "RepoIntelligenceAPI" as api
 end box
 box "RepoIntelligence Group (Service)" #FFF3E0
   participant "RepoIntelligenceManager" as mgr
@@ -31,13 +40,25 @@ box "RepoIntelligence Group (Repository)" #E8F5E9
 end box
 database "RepoIntelligenceDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == RIM-03 RANK Results ==
 
-user -> router : GET /symbols/ranked?query={query}
+user -> iface : GET /symbols/ranked?query={query}
+activate iface
+iface -> router : GET /symbols/ranked?query={query}
 activate router
-router -> api : rim03 RANK Results(graph, chat_context)
-activate api
-api -> mgr : rim03 RANK Results(graph, chat_context)
+router -> mgr : rim03 RANK Results(graph, chat_context)
 activate mgr
 
 alt ranking succeeds
@@ -50,19 +71,21 @@ alt ranking succeeds
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : INDEXED (#7CB342)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else empty graph
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml

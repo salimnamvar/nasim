@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> AgentManager -> AgentStore -> AgentDirectory -> FileSystem
 ' SM States: FAILED (#EF5350)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- AGT-14 HANDLE Error
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "AgentAPI" as api
 end box
 box "Agent Group (Service)" #FFF3E0
   participant "AgentManager" as mgr
@@ -31,13 +40,25 @@ box "Agent Group (Repository)" #E8F5E9
 end box
 database "AgentDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == AGT-14 HANDLE Error ==
 
-user -> router : POST /v1/agents/{agent_id}:handle-error
+user -> iface : POST /v1/agents/{agent_id}:handle-error
+activate iface
+iface -> router : POST /v1/agents/{agent_id}:handle-error
 activate router
-router -> api : AGT-14 HANDLE Error({error})
-activate api
-api -> mgr : AGT-14 HANDLE Error({error})
+router -> mgr : AGT-14 HANDLE Error({error})
 activate mgr
 
 alt retryable error
@@ -50,19 +71,21 @@ alt retryable error
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else unrecoverable
-  mgr --> api : 500 Server Error
+  mgr --> router : 500 Server Error
   deactivate mgr
-  api --> router : 500 Server Error
-  deactivate api
-  router --> user : 500 Server Error
+  router --> iface : 500 Server Error
+  router --> iface : 500 Server Error
+  iface --> user : 500 Server Error
   deactivate router
+  deactivate iface
 end
 
 @enduml

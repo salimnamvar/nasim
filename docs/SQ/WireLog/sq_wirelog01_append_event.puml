@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> WireLogAPI -> WireLogManager -> WireLogStore -> WireLogDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> WirelogManager -> WirelogStore -> WirelogDirectory -> FileSystem
 ' SM States: ACTIVE (#43A047)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- WRL-01 APPEND Event
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "WireLogAPI" as api
 end box
 box "WireLog Group (Service)" #FFF3E0
   participant "WireLogManager" as mgr
@@ -31,13 +40,25 @@ box "WireLog Group (Repository)" #E8F5E9
 end box
 database "WireLogDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == WRL-01 APPEND Event ==
 
-user -> router : POST /wirelog/events
+user -> iface : POST /wirelog/events
+activate iface
+iface -> router : POST /wirelog/events
 activate router
-router -> api : wrl01 APPEND Event(event_data)
-activate api
-api -> mgr : wrl01 APPEND Event(event_data)
+router -> mgr : wrl01 APPEND Event(event_data)
 activate mgr
 
 alt append succeeds
@@ -50,19 +71,21 @@ alt append succeeds
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : ACTIVE (#43A047)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else write failure
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml

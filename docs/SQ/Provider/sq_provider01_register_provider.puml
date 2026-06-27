@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> ProviderAPI -> ProviderManager -> ProviderStore -> ProviderDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ProviderManager -> ProviderStore -> ProviderDirectory -> LLMBackend
 ' SM States: REGISTERING (#29B6F6), ACTIVE (#03A9F4), ERROR (#E64A19)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- PRV-01 REGISTER Provider
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "ProviderAPI" as api
 end box
 box "Provider Group (Service)" #FFF3E0
   participant "ProviderManager" as mgr
@@ -31,13 +40,25 @@ box "Provider Group (Repository)" #E8F5E9
 end box
 database "ProviderDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "LLMBackend" as LLMBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "LLMBackend" as LLMBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "LLMBackend" as LLMBackend
+end box
+
 == PRV-01 REGISTER Provider ==
 
-user -> router : POST /providers:register
+user -> iface : POST /providers:register
+activate iface
+iface -> router : POST /providers:register
 activate router
-router -> api : PRV-01 REGISTER Provider({config})
-activate api
-api -> mgr : PRV-01 REGISTER Provider({config})
+router -> mgr : PRV-01 REGISTER Provider({config})
 activate mgr
 
 alt validation succeeds
@@ -50,19 +71,21 @@ alt validation succeeds
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : REGISTERING (#29B6F6) -> ACTIVE (#03A9F4)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else validation fails
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml

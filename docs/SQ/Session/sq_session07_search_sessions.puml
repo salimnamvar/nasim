@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionDirectory -> FileSystem
 ' SM States: —
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- SSN-07 SEARCH Sessions
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "SessionAPI" as api
 end box
 box "Session Group (Service)" #FFF3E0
   participant "SessionManager" as mgr
@@ -31,15 +40,27 @@ box "Session Group (Repository)" #E8F5E9
 end box
 database "SessionDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == SSN-07 SEARCH Sessions ==
 
-user -> router : GET /sessions:search?q={query}
+user -> iface : GET /sessions:search?q={query}
+activate iface
+iface -> router : GET /sessions:search?q={query}
 activate router
 
-router -> api : ssn07 SEARCH Sessions({query}, {page_size}, {page_token})
-activate api
+router -> mgr : ssn07 SEARCH Sessions({query}, {page_size}, {page_token})
 
-api -> mgr : ssn07 SEARCH Sessions({query}, {page_size}, {page_token})
 activate mgr
 
 mgr -> store : SEARCH Sessions({query}, {page_size}, {page_token})
@@ -53,13 +74,14 @@ alt Index not available
     deactivate dir
     store -> store : ssn07 SEARCH Sessions({query}, fallback)
     store --> mgr : 200 OK — [{session_id, snippet, score}]
-    mgr --> api : 200 OK — [{session_id, snippet, score}]
-    api --> router : 200 OK — [{session_id, snippet, score}]
-    router --> user : 200 OK — [{session_id, snippet, score}]
+    mgr --> router : 200 OK — [{session_id, snippet, score}]
+    router --> iface : 200 OK — [{session_id, snippet, score}]
+    router --> iface : 200 OK — [{session_id, snippet, score}]
+    iface --> user : 200 OK — [{session_id, snippet, score}]
     deactivate store
     deactivate mgr
-    deactivate api
     deactivate router
+    deactivate iface
     end
 end
 
@@ -68,11 +90,12 @@ deactivate dir
 
 store --> mgr : 200 OK — [{session_id, snippet, score}]
 deactivate store
-mgr --> api : 200 OK — [{session_id, snippet, score}]
+mgr --> router : 200 OK — [{session_id, snippet, score}]
 deactivate mgr
-api --> router : 200 OK — [{session_id, snippet, score}]
-deactivate api
-router --> user : 200 OK — [{session_id, snippet, score}]
+router --> iface : 200 OK — [{session_id, snippet, score}]
+router --> iface : 200 OK — [{session_id, snippet, score}]
+iface --> user : 200 OK — [{session_id, snippet, score}]
 deactivate router
+deactivate iface
 
 @enduml

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> RouterAPI -> RouterManager -> RouterStore -> RouterDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> RouterManager -> RouterStore -> RouterDirectory -> ModelBackend
 ' SM States: SELECTING (#3F51B5)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- RTG-01 SELECT Model
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "RouterAPI" as api
 end box
 box "Router Group (Service)" #FFF3E0
   participant "RouterManager" as mgr
@@ -31,13 +40,25 @@ box "Router Group (Repository)" #E8F5E9
 end box
 database "RouterDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "ModelBackend" as ModelBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "ModelBackend" as ModelBackend
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "ModelBackend" as ModelBackend
+end box
+
 == RTG-01 SELECT Model ==
 
-user -> router : GET /models/select?task={task_type}
+user -> iface : GET /models/select?task={task_type}
+activate iface
+iface -> router : GET /models/select?task={task_type}
 activate router
-router -> api : rtg01 SELECT Model(task_classification)
-activate api
-api -> mgr : rtg01 SELECT Model(task_classification)
+router -> mgr : rtg01 SELECT Model(task_classification)
 activate mgr
 
 alt model found
@@ -50,19 +71,21 @@ alt model found
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : SELECTING (#3F51B5)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else no supported model
-  mgr --> api : 404 Not Found
+  mgr --> router : 404 Not Found
   deactivate mgr
-  api --> router : 404 Not Found
-  deactivate api
-  router --> user : 404 Not Found
+  router --> iface : 404 Not Found
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
   deactivate router
+  deactivate iface
 end
 
 @enduml

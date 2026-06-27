@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> HooksAPI -> HooksManager -> HooksStore -> HooksDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> HooksManager -> HooksStore -> HooksDirectory -> HookRuntime
 ' SM States: HOOK_RUNNING (#FFFDE7)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- HK-02 DISPATCH Pre-Tool Hook
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "HooksAPI" as api
 end box
 box "Hooks Group (Service)" #FFF3E0
   participant "HooksManager" as mgr
@@ -31,13 +40,25 @@ box "Hooks Group (Repository)" #E8F5E9
 end box
 database "HooksDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "HookRuntime" as HookRuntime
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "HookRuntime" as HookRuntime
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "HookRuntime" as HookRuntime
+end box
+
 == HK-02 DISPATCH Pre-Tool Hook ==
 
-user -> router : POST /hooks/{id}:dispatch
+user -> iface : POST /hooks/{id}:dispatch
+activate iface
+iface -> router : POST /hooks/{id}:dispatch
 activate router
-router -> api : HK-02 DISPATCH Pre-Tool Hook({tool_name, args})
-activate api
-api -> mgr : HK-02 DISPATCH Pre-Tool Hook({tool_name, args})
+router -> mgr : HK-02 DISPATCH Pre-Tool Hook({tool_name, args})
 activate mgr
 
 alt validation succeeds
@@ -50,19 +71,21 @@ alt validation succeeds
   store --> mgr : 200 OK
   deactivate store
   hnote over mgr : HOOK_RUNNING (#FFFDE7)
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else validation fails
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml

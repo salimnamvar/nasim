@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ToolManager -> ToolStore -> ToolDirectory -> FileSystem
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- TL-01 READ File
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "ToolAPI" as api
 end box
 box "Tool Group (Service)" #FFF3E0
   participant "ToolOrchestrator" as orch
@@ -31,13 +40,26 @@ box "Tool Group (Repository)" #E8F5E9
 end box
 database "ToolDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == TL-01 READ File ==
 
-user -> router : POST /tools/read_file:execute
+user -> iface : POST /tools/read_file:execute
+activate iface
+iface -> router : POST /tools/read_file:execute
 activate router
-router -> api : TL-01 READ File(path, offset, limit)
-activate api
-api -> orch : TL-01 READ File(path, offset, limit)
+router -> mgr : TL-01 READ File(path, offset, limit)
+router -> orch : TL-01 READ File(path, offset, limit)
 activate orch
 
 alt validation succeeds
@@ -50,25 +72,28 @@ alt validation succeeds
   registry --> orch : 200 OK
   deactivate registry
   hnote over orch : TOOL_EXEC (#B2DFDB)
-  orch --> api : 200 OK
+  orch --> router : 200 OK
   deactivate orch
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else file not found
-  orch --> api : 404 Not Found
+  orch --> router : 404 Not Found
   deactivate orch
-  api --> router : 404 Not Found
-  deactivate api
-  router --> user : 404 Not Found
+  router --> iface : 404 Not Found
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
   deactivate router
+  deactivate iface
 else permission denied
-  orch --> api : 403 Forbidden
+  orch --> router : 403 Forbidden
   deactivate orch
-  api --> router : 403 Forbidden
-  deactivate api
-  router --> user : 403 Forbidden
+  router --> iface : 403 Forbidden
+  router --> iface : 403 Forbidden
+  iface --> user : 403 Forbidden
   deactivate router
+  deactivate iface
 end
 @enduml

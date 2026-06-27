@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ToolManager -> ToolStore -> ToolDirectory -> FileSystem
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- TL-14 LIST Registered Tools
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "ToolAPI" as api
 end box
 box "Tool Group (Service)" #FFF3E0
   participant "ToolOrchestrator" as orch
@@ -31,13 +40,26 @@ box "Tool Group (Repository)" #E8F5E9
 end box
 database "ToolDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "FileSystem" as FileSystem
+end box
+
 == TL-14 LIST Registered Tools ==
 
-user -> router : POST /tools/list_registered:execute
+user -> iface : POST /tools/list_registered:execute
+activate iface
+iface -> router : POST /tools/list_registered:execute
 activate router
-router -> api : TL-14 LIST Registered Tools(pageSize, pageToken)
-activate api
-api -> orch : TL-14 LIST Registered Tools(pageSize, pageToken)
+router -> mgr : TL-14 LIST Registered Tools(pageSize, pageToken)
+router -> orch : TL-14 LIST Registered Tools(pageSize, pageToken)
 activate orch
 
 alt validation succeeds
@@ -50,25 +72,28 @@ alt validation succeeds
   registry --> orch : 200 OK
   deactivate registry
   hnote over orch : TOOL_EXEC (#B2DFDB)
-  orch --> api : 200 OK
+  orch --> router : 200 OK
   deactivate orch
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else registry unavailable
-  orch --> api : 503 Service Unavailable
+  orch --> router : 503 Service Unavailable
   deactivate orch
-  api --> router : 503 Service Unavailable
-  deactivate api
-  router --> user : 503 Service Unavailable
+  router --> iface : 503 Service Unavailable
+  router --> iface : 503 Service Unavailable
+  iface --> user : 503 Service Unavailable
   deactivate router
+  deactivate iface
 else invalid pagination
-  orch --> api : 400 Bad Request
+  orch --> router : 400 Bad Request
   deactivate orch
-  api --> router : 400 Bad Request
-  deactivate api
-  router --> user : 400 Bad Request
+  router --> iface : 400 Bad Request
+  router --> iface : 400 Bad Request
+  iface --> user : 400 Bad Request
   deactivate router
+  deactivate iface
 end
 @enduml

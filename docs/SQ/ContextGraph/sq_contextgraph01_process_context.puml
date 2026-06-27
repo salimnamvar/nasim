@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> ServerRouter -> ContextGraphAPI -> ContextGraphManager -> ContextGraphStore -> ContextGraphDirectory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ContextgraphManager -> ContextgraphStore -> ContextgraphDirectory -> TokenBudget
 ' SM States: COMPACTING (#E0F2F1)
 ' ============================================================
 
@@ -17,11 +17,20 @@ title nasim -- CTX-01 PROCESS Context
 
 actor "User" as user
 
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Interface Layer" #INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
-end box
-box "API Group (Controller)" #FFF3E0
-  participant "ContextGraphAPI" as api
 end box
 box "Context Graph Group (Service)" #FFF3E0
   participant "ContextGraphManager" as mgr
@@ -31,13 +40,25 @@ box "Context Graph Group (Repository)" #E8F5E9
 end box
 database "ContextGraphDirectory" as dir
 
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "TokenBudget" as TokenBudget
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "TokenBudget" as TokenBudget
+end box
+
+box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+  participant "TokenBudget" as TokenBudget
+end box
+
 == CTX-01 PROCESS Context ==
 
-user -> router : POST /contextgraph/process
+user -> iface : POST /contextgraph/process
+activate iface
+iface -> router : POST /contextgraph/process
 activate router
-router -> api : CTX-01 PROCESS Context({graph, token_budget})
-activate api
-api -> mgr : CTX-01 PROCESS Context({graph, token_budget})
+router -> mgr : CTX-01 PROCESS Context({graph, token_budget})
 activate mgr
 
 alt processing succeeds
@@ -50,19 +71,21 @@ alt processing succeeds
   store --> mgr : 200 OK
   deactivate store
   ... hnote over mgr : COMPACTING (#E0F2F1) ...
-  mgr --> api : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  api --> router : 200 OK
-  deactivate api
-  router --> user : 200 OK
+  router --> iface : 200 OK
+  router --> iface : 200 OK
+  iface --> user : 200 OK
   deactivate router
+  deactivate iface
 else processing fails
-  mgr --> api : 422 Unprocessable
+  mgr --> router : 422 Unprocessable
   deactivate mgr
-  api --> router : 422 Unprocessable
-  deactivate api
-  router --> user : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
   deactivate router
+  deactivate iface
 end
 
 @enduml
