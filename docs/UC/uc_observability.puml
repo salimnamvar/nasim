@@ -84,7 +84,10 @@ rectangle "nasim" {
 ' ------------------------------------------------------------
 
 
+User --> OBS01
+User --> OBS02
 User --> OBS05
+User --> OBS06
 Platform --> OBS05 : scrapes
 
 

@@ -86,7 +86,7 @@ usecase "PRV-03\nSTREAM Chat\n[uc_provider]" as PRV03_ext <<extref>>
 
 rectangle "nasim" {
   package "Agent Group (AGT)" {
-    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop:\nprovider call, tool dispatch" <<master>> as AGT01
+    usecase "**AGT-01 PROCESS User Task**\n--\nCore agentic loop:\nprovider call, tool dispatch" <<include>> as AGT01
     usecase "**AGT-02 DISPATCH Tool Call**\n--\nRoute tool call to registry" <<include>> as AGT02
     usecase "**AGT-03 UPDATE Conversation**\n--\nManage message list and token count" <<include>> as AGT03
     usecase "**AGT-04 DELETE History**\n--\nReset conversation history" <<master>> as AGT04
@@ -109,7 +109,6 @@ rectangle "nasim" {
 ' ============================================================
 
 
-User --> AGT01
 User --> AGT04
 User --> AGT06
 User --> AGT08
