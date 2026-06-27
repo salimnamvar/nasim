@@ -17,23 +17,23 @@ title nasim — Subagent Lifecycle
 
 [*] --> IDLE : AGT-09
 
-state "IDLE" as IDLE #ECEFF1
+state "IDLE" as IDLE #CFD8DC
 IDLE : No child agent active.
 IDLE : Default state.
 
-state "SPAWNING" as SPAWNING #FFCCBC
+state "SPAWNING" as SPAWNING #FFAB91
 SPAWNING : Child agent process initializing.
 SPAWNING : Session created, orchestrator assigned.
 
-state "RUNNING" as RUNNING #D7CCC8
+state "RUNNING" as RUNNING #BCAAA4
 RUNNING : Child agent executing task.
 RUNNING : Provider calls, tool dispatches in progress.
 
-state "COMPLETED" as COMPLETED #D1C4E9
+state "COMPLETED" as COMPLETED #80CBC4
 COMPLETED : Child agent finished successfully.
 COMPLETED : Results aggregated to parent.
 
-state "FAILED" as FAILED #FFEBEE
+state "FAILED" as FAILED #EF9A9A
 FAILED : Child agent encountered unrecoverable error.
 FAILED : Error reported to parent, child cleaned up.
 

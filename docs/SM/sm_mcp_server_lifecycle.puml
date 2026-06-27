@@ -1,0 +1,50 @@
+@startuml sm_mcp_server_lifecycle
+!include common/sm_styles.puml
+' ============================================================
+' Title:     nasim — MCP Server Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Serving lifecycle for MCPServerRuntime.
+'            States: STOPPED → STARTING → RUNNING → STOPPING
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md (MCP-04)
+' Review:    CAR audit 2026-06-27
+' Convention: All transitions are triggered by the corresponding UC ID
+'             as listed in docs/UC/README.md.
+' ============================================================
+
+title nasim — MCP Server Lifecycle
+
+[*] --> STOPPED : MCP-04
+
+state "STOPPED" as STOPPED #616161
+STOPPED : MCP server not running.
+STOPPED : Default state.
+
+state "STARTING" as STARTING #FFA726
+STARTING : Server starting up.
+STARTING : MCP-04 EXPOSE nasim Tools.
+
+state "RUNNING" as RUNNING #66BB6A
+RUNNING : Server running, serving tools to MCP clients.
+RUNNING : MCP-04 EXPOSE nasim Tools.
+
+state "STOPPING" as STOPPING #FF7043
+STOPPING : Server shutting down.
+STOPPING : MCP-04 EXPOSE nasim Tools.
+
+state "ERROR" as ERROR #FFCDD2
+ERROR : Server startup or runtime failure.
+ERROR : MCP-04 EXPOSE nasim Tools.
+
+STOPPED --> STARTING : MCP-04
+STARTING --> RUNNING : MCP-04
+STARTING --> ERROR : MCP-04
+RUNNING --> STOPPING : MCP-04
+STOPPING --> STOPPED : MCP-04
+RUNNING --> ERROR : MCP-04
+ERROR --> STOPPED : MCP-04
+
+STOPPED --> [*] : MCP-04
+
+@enduml

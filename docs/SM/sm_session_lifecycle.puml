@@ -19,7 +19,7 @@ state "CREATED" as CREATED #BBDEFB
 CREATED : Session record initialized.
 CREATED : API-02 CREATE Session.
 
-state "ACTIVE" as ACTIVE #2E7D32
+state "ACTIVE" as ACTIVE #43A047
 ACTIVE : Session accepting messages.
 ACTIVE : API-03 GET Session, API-06 DISPATCH Message.
 

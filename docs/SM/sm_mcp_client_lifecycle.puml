@@ -1,0 +1,51 @@
+@startuml sm_mcp_client_lifecycle
+!include common/sm_styles.puml
+' ============================================================
+' Title:     nasim — MCP Client Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Connection lifecycle for MCPClientRuntime.
+'            States: DISCONNECTED → CONNECTING → CONNECTED → DISCOVERING
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md (MCP-01, MCP-02)
+' Review:    CAR audit 2026-06-27
+' Convention: All transitions are triggered by the corresponding UC ID
+'             as listed in docs/UC/README.md.
+' ============================================================
+
+title nasim — MCP Client Lifecycle
+
+[*] --> DISCONNECTED : MCP-01
+
+state "DISCONNECTED" as DISCONNECTED #B0BEC5
+DISCONNECTED : No connection to MCP server.
+DISCONNECTED : Default state.
+
+state "CONNECTING" as CONNECTING #FFCA28
+CONNECTING : Connection to MCP server in progress.
+CONNECTING : MCP-01 CONNECT MCP Server.
+
+state "CONNECTED" as CONNECTED #00BCD4
+CONNECTED : Connected to MCP server.
+CONNECTED : MCP-01 CONNECT MCP Server.
+
+state "DISCOVERING" as DISCOVERING #A1887F
+DISCOVERING : Discovering tools from connected server.
+DISCOVERING : MCP-02 DISCOVER MCP Tools.
+
+state "ERROR" as ERROR #E57373
+ERROR : Connection or discovery failed.
+ERROR : MCP-01 CONNECT MCP Server or MCP-02 DISCOVER MCP Tools.
+
+DISCONNECTED --> CONNECTING : MCP-01
+CONNECTING --> CONNECTED : MCP-01
+CONNECTING --> ERROR : MCP-01
+CONNECTED --> DISCOVERING : MCP-02
+DISCOVERING --> CONNECTED : MCP-02
+DISCOVERING --> ERROR : MCP-02
+CONNECTED --> DISCONNECTED : MCP-01
+ERROR --> DISCONNECTED : MCP-01
+
+DISCONNECTED --> [*] : MCP-01
+
+@enduml

@@ -1,0 +1,64 @@
+@startuml sm_index_lifecycle
+!include common/sm_styles.puml
+' ============================================================
+' Title:     nasim — Repository Index Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Index lifecycle for RepoIntelligenceManager.
+'            States: UNINDEXED → INDEXING → INDEXED → BUILDING_GRAPH | EMBEDDING
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md (RIM-01, RIM-02, RIM-05)
+' Review:    CAR audit 2026-06-27
+' Convention: All transitions are triggered by the corresponding UC ID
+'             as listed in docs/UC/README.md.
+' ============================================================
+
+title nasim — Repository Index Lifecycle
+
+[*] --> UNINDEXED : RIM-01
+
+state "UNINDEXED" as UNINDEXED #424242
+UNINDEXED : No repository index exists.
+UNINDEXED : Default state.
+
+state "INDEXING" as INDEXING #4FC3F7
+INDEXING : AST indexing via tree-sitter in progress.
+INDEXING : RIM-01 INDEX Codebase.
+
+state "INDEXED" as INDEXED #7CB342
+INDEXED : Repository fully indexed.
+INDEXED : RIM-01 INDEX Codebase.
+
+state "BUILDING_GRAPH" as BUILDING_GRAPH #9C27B0
+BUILDING_GRAPH : Cross-file symbol reference graph in progress.
+BUILDING_GRAPH : RIM-02 BUILD Symbol Graph.
+
+state "EMBEDDING" as EMBEDDING #E6EE9C
+EMBEDDING : Generating vector embeddings for code.
+EMBEDDING : RIM-05 EMBED Code.
+
+state "STALE" as STALE #FFECB3
+STALE : Index outdated, needs re-index.
+STALE : Source files changed since last index.
+
+state "ERROR" as ERROR #DD2C00
+ERROR : Indexing, graph building, or embedding failed.
+ERROR : Unrecoverable processing error.
+
+UNINDEXED --> INDEXING : RIM-01
+INDEXING --> INDEXED : RIM-01
+INDEXING --> ERROR : RIM-01
+INDEXED --> BUILDING_GRAPH : RIM-02
+BUILDING_GRAPH --> INDEXED : RIM-02
+BUILDING_GRAPH --> ERROR : RIM-02
+INDEXED --> EMBEDDING : RIM-05
+EMBEDDING --> INDEXED : RIM-05
+EMBEDDING --> ERROR : RIM-05
+INDEXED --> STALE : RIM-01
+STALE --> INDEXING : RIM-01
+ERROR --> UNINDEXED : RIM-01
+
+INDEXED --> [*] : RIM-01
+UNINDEXED --> [*] : RIM-01
+
+@enduml

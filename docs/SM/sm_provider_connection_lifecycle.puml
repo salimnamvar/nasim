@@ -1,0 +1,51 @@
+@startuml sm_provider_connection_lifecycle
+!include common/sm_styles.puml
+' ============================================================
+' Title:     nasim — Provider Connection Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Connection lifecycle for LiteLLMProxy.
+'            States: UNREGISTERED → REGISTERING → ACTIVE → SELECTING
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md (PRV-01, PRV-04)
+' Review:    CAR audit 2026-06-27
+' Convention: All transitions are triggered by the corresponding UC ID
+'             as listed in docs/UC/README.md.
+' ============================================================
+
+title nasim — Provider Connection Lifecycle
+
+[*] --> UNREGISTERED : PRV-01
+
+state "UNREGISTERED" as UNREGISTERED #455A64
+UNREGISTERED : No provider registered.
+UNREGISTERED : Default state.
+
+state "REGISTERING" as REGISTERING #29B6F6
+REGISTERING : Provider registration in progress.
+REGISTERING : PRV-01 REGISTER Provider.
+
+state "ACTIVE" as ACTIVE #03A9F4
+ACTIVE : Provider registered and ready for chat.
+ACTIVE : PRV-02 REQUEST Chat, PRV-03 STREAM Chat.
+
+state "SELECTING" as SELECTING #FBC02D
+SELECTING : Backend selection in progress.
+SELECTING : PRV-04 SELECT Provider Backend.
+
+state "ERROR" as ERROR #E64A19
+ERROR : Registration or selection failed.
+ERROR : Provider unavailable or invalid.
+
+UNREGISTERED --> REGISTERING : PRV-01
+REGISTERING --> ACTIVE : PRV-01
+REGISTERING --> ERROR : PRV-01
+ACTIVE --> SELECTING : PRV-04
+SELECTING --> ACTIVE : PRV-04
+SELECTING --> ERROR : PRV-04
+ACTIVE --> UNREGISTERED : PRV-01
+ERROR --> UNREGISTERED : PRV-01
+
+UNREGISTERED --> [*] : PRV-01
+
+@enduml

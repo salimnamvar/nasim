@@ -1,0 +1,63 @@
+@startuml sm_sandbox_execution_lifecycle
+!include common/sm_styles.puml
+' ============================================================
+' Title:     nasim — Sandbox Execution Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Process lifecycle for SandboxExecutor sandboxed commands.
+'            States: IDLE → EXECUTING → COMPLETED | TIMEOUT | FAILED
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md (SBX-01, SBX-03, SBX-04)
+' Review:    CAR audit 2026-06-27
+' Convention: All transitions are triggered by the corresponding UC ID
+'             as listed in docs/UC/README.md.
+' ============================================================
+
+title nasim — Sandbox Execution Lifecycle
+
+[*] --> IDLE : SBX-01
+
+state "IDLE" as IDLE #78909C
+IDLE : No process running in sandbox.
+IDLE : Default state.
+
+state "EXECUTING" as EXECUTING #2196F3
+EXECUTING : Process running in sandbox.
+EXECUTING : SBX-01 ISOLATE Command.
+
+state "MONITORING" as MONITORING #64B5F6
+MONITORING : Process being monitored for resource usage.
+MONITORING : SBX-03 MONITOR Process.
+
+state "COMPLETED" as COMPLETED #8BC34A
+COMPLETED : Process finished successfully.
+COMPLETED : SBX-01 ISOLATE Command.
+
+state "TIMEOUT" as TIMEOUT #FFB74D
+TIMEOUT : Process exceeded time limit.
+TIMEOUT : SBX-03 MONITOR Process.
+
+state "FAILED" as FAILED #D32F2F
+FAILED : Process crashed or was killed.
+FAILED : SBX-01 ISOLATE Command.
+
+state "RESOURCE_EXCEEDED" as RESOURCE_EXCEEDED #FF5722
+RESOURCE_EXCEEDED : Process exceeded CPU, memory, or disk quota.
+RESOURCE_EXCEEDED : SBX-04 LIMIT Resources.
+
+IDLE --> EXECUTING : SBX-01
+EXECUTING --> MONITORING : SBX-03
+MONITORING --> EXECUTING : SBX-03
+EXECUTING --> COMPLETED : SBX-01
+EXECUTING --> FAILED : SBX-01
+EXECUTING --> TIMEOUT : SBX-03
+EXECUTING --> RESOURCE_EXCEEDED : SBX-04
+MONITORING --> TIMEOUT : SBX-03
+MONITORING --> RESOURCE_EXCEEDED : SBX-04
+TIMEOUT --> IDLE : SBX-01
+FAILED --> IDLE : SBX-01
+RESOURCE_EXCEEDED --> IDLE : SBX-04
+
+COMPLETED --> [*] : SBX-01
+
+@enduml

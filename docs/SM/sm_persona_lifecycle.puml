@@ -1,0 +1,51 @@
+@startuml sm_persona_lifecycle
+!include common/sm_styles.puml
+' ============================================================
+' Title:     nasim — Persona Lifecycle State Machine
+' Boundary:  nasim code agent
+' Purpose:   Entity lifecycle for PersonaManager persona roles.
+'            States: UNLOADED → LOADING → ACTIVE ↔ SWITCHING
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/UC/README.md (AGT-11, AGT-12, AGT-13)
+' Review:    CAR audit 2026-06-27
+' Convention: All transitions are triggered by the corresponding UC ID
+'             as listed in docs/UC/README.md.
+' ============================================================
+
+title nasim — Persona Lifecycle
+
+[*] --> UNLOADED : AGT-12
+
+state "UNLOADED" as UNLOADED #9E9E9E
+UNLOADED : No persona loaded.
+UNLOADED : Default state.
+
+state "LOADING" as LOADING #FFC107
+LOADING : Persona configuration being loaded.
+LOADING : AGT-12 LOAD Persona.
+
+state "ACTIVE" as ACTIVE #4DB6AC
+ACTIVE : Persona active and available for delegation.
+ACTIVE : AGT-11 DELEGATE to Persona.
+
+state "SWITCHING" as SWITCHING #FF9800
+SWITCHING : Switching to different persona at runtime.
+SWITCHING : AGT-13 SWITCH Persona.
+
+state "ERROR" as ERROR #F44336
+ERROR : Persona load or switch failed.
+ERROR : Load error or switch failure.
+
+UNLOADED --> LOADING : AGT-12
+LOADING --> ACTIVE : AGT-12
+LOADING --> ERROR : AGT-12
+ACTIVE --> SWITCHING : AGT-13
+SWITCHING --> ACTIVE : AGT-13
+SWITCHING --> ERROR : AGT-13
+ACTIVE --> UNLOADED : AGT-11
+ERROR --> UNLOADED : AGT-12
+
+UNLOADED --> [*] : AGT-12
+
+@enduml

@@ -14,11 +14,11 @@ title nasim — Plan Lifecycle
 
 [*] --> EMPTY : AGT-07
 
-state "EMPTY" as EMPTY #ECEFF1
+state "EMPTY" as EMPTY #F5F5F5
 EMPTY : No plan active.
 EMPTY : Default state.
 
-state "BUILDING" as BUILDING #FFF3E0
+state "BUILDING" as BUILDING #FFE0B2
 BUILDING : Plan being constructed.
 BUILDING : AGT-07 QUEUE Plan.
 
@@ -26,7 +26,7 @@ state "QUEUED" as QUEUED #E3F2FD
 QUEUED : Plan queued for approval.
 QUEUED : Plan construction complete.
 
-state "APPROVED" as APPROVED #2E7D32
+state "APPROVED" as APPROVED #388E3C
 APPROVED : Plan approved by user.
 APPROVED : AGT-08 APPROVE Plan.
 
