@@ -1,6 +1,11 @@
 ' ============================================================
-' nasim — SM Common Styles
-' Include via: !include common/sm_styles.puml
+' Title:     nasim — SM Common Styles
+' Source:    docs/SM/common/sm_styles.puml
+' Purpose:   Shared skinparam declarations for all SM diagrams.
+'            Include via: !include common/sm_styles.puml
+' Milestone: v1.0
+' Version:   1.0.0
+' Review:    —
 ' ============================================================
 skinparam state {
   BackgroundColor #FFFFFF

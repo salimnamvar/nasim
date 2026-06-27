@@ -29,8 +29,18 @@ box "Edit Group" #FFF3E0
 end box
 
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+note over user
+  Scope:          EVL-04 Validate With LLM — LLM-as-judge scoring for edit quality
+  Preconditions:  Original and edited files exist; LLM provider is configured
+  Contexts:       Called by EvaluationEngine for quality assessment
+  Excludes:       Success checks (EVL-03); test suite (EVL-05); retry (EVL-06)
+  Rollback:       Review is read-only; no state change
+  Design:         LLM scores edit quality 1-10; compares original vs edited files
+  Returns:
+    - Success: 200 OK — ReviewResult(score, feedback, passed)
+    - Failure: 503 SERVICE_UNAVAILABLE: provider unreachable
+end note
+
 
 == EVL-04 Validate With LLM ==
 
@@ -63,5 +73,12 @@ deactivate reviewer
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EVL-04 → agent → reviewer → fs(read original) → fs(read edited) → format prompt → provider(chat) → parse score → validate → Done
+  State:   No state change
+  Success: 200 OK — ReviewResult(score, feedback, passed)
+  Failure: 503 SERVICE_UNAVAILABLE: provider unreachable — skip review
+end note
 
 @enduml

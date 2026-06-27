@@ -27,6 +27,18 @@ end box
 participant "LSP Server" as lsp
 
 
+note over user
+  Scope:          TL-13 READ LSP — Query LSP server for hover, definition, or references
+  Preconditions:  LSP server running for the target language; file/position provided
+  Contexts:       Called by code intelligence, navigation, documentation lookup
+  Excludes:       Code editing, diagnostics, formatting, refactoring
+  Rollback:       LSP unreachable → ToolResult(success=False); Empty result → ToolResult(success=False); no state change
+  Design:         Supports hover/definition/references queries; delegates to LSP server
+  Returns:
+    - Success: ToolResult(success=True, result)
+    - Failure: ToolResult(success=False) — LSP unavailable, no results
+end note
+
 == TL-13 Read LSP ==
 
 user -> router : types input
@@ -66,5 +78,12 @@ deactivate tool
 deactivate registry
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    TL-13 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → LspTool → LSP Server
+  State:   No state change
+  Success: 200 + ToolResult(success=True, result)
+  Failure: ToolResult(success=False): LSP unavailable | no results
+end note
 
 @enduml

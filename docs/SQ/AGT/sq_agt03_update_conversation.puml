@@ -26,6 +26,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          AGT-03 UPDATE Conversation — Message list management
+  Preconditions:  ConversationHistory initialized, token_count tracked
+  Contexts:       AGT-01 PROCESS User Task, AGT-06 COMPACT Context
+  Excludes:       Context compaction logic (CTX-02), Token budget configuration
+  Rollback:       Token budget exceeded → trigger CTX-02 COMPACT Context
+  Design:         Append-only message list with token estimation, auto-compact trigger
+  Returns:
+    - Success: 200 messages list
+    - Failure: 400 COMPACT_NEEDED when budget exceeded
+end note
+
 == AGT-03 UPDATE Conversation ==
 
 user -> router : types input
@@ -53,5 +65,12 @@ deactivate history
 agent --> router : AgentEvent(Done)
 deactivate agent
 
+
+note over user
+  Flow:    AGT-03 → append msg → check tokens → (optional) CTX-02
+  State:   No state change (operational substep)
+  Success: 200 messages list with updated token_count
+  Failure: 400 COMPACT_NEEDED when token_count > context_budget
+end note
 
 @enduml

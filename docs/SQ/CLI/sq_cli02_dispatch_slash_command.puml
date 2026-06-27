@@ -12,7 +12,17 @@
 
 actor "User" as user
 
-box "CLI Interface Container" #E3F2FD
+note over user
+  Scope:          CLI-02 — Dispatch Slash Command
+  Preconditions:  REPLSession active, user authenticated
+  Contexts:       Called by CLI-01 when input starts with '/'
+  Excludes:       Normal message processing (CLI-01), plan mode toggle (CLI-05), model switch (CLI-07)
+  Rollback:       Unknown command → display error message to user
+  Design:         Centralized routing through SlashCommandHandler, each command has dedicated handler
+  Returns:
+    - Success: Confirmation or display rendered to terminal
+    - Failure: Unknown command error message
+end note #E3F2FD
   participant "REPLSession" as repl
 end box
 box "API Group (Entry Gate)" #E3F2FD
@@ -79,5 +89,12 @@ end
 
 deactivate cmd
 deactivate repl
+
+note over user
+  Flow:    user → REPLSession → SlashCommandHandler → [command handler] → Renderer → user
+  State:   No state change (routing only, state managed by sub-commands)
+  Success: Command executed, result displayed (help text, confirmation, error)
+  Failure: Unknown command: display error message
+end note
 
 @enduml

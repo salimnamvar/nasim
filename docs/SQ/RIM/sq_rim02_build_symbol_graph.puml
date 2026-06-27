@@ -26,6 +26,18 @@ box "Repo Intelligence Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          RIM-02 BUILD Symbol Graph — build cross-file symbol reference graph
+  Preconditions:  AST index available from RIM-01; source files parseable
+  Contexts:       Called by AgentOrchestrator after RIM-01 or on index refresh
+  Excludes:       Codebase indexing, symbol ranking, embedding, semantic search
+  Rollback:       Reference resolution failure → returns PartialGraph(unresolved_refs) — partial success
+  Design:         Extracts symbols per file, resolves cross-file references, builds edges (defines, references, imports)
+  Returns:
+    - Success: 200 OK — SymbolGraph(symbols, edges)
+    - Failure: (partial) PartialGraph with unresolved_refs
+end note
+
 == RIM-02 BUILD SymbolGraph ==
 
 user -> router : RIM-02 BUILD SymbolGraph(ast_index)
@@ -57,5 +69,11 @@ agent --> router : SymbolGraph(symbols, edges)
 deactivate agent
 deactivate router
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → SymbolGraph → extract → resolve → build edges → Result
+  State:   No state change (builds in-memory graph)
+  Success: 200 OK — SymbolGraph(symbols, edges)
+  Failure: (partial) PartialGraph — unresolved references logged, graph usable with degraded accuracy
+end note
 
 @enduml

@@ -26,6 +26,17 @@ box "Hooks Group" #F3E5F5
   participant "HookManager" as hm
 end box
 
+note over user
+  Scope:          PLG-05 Enable Plugin — Loads plugin and activates its tools and hooks
+  Preconditions:  Plugin manifest loaded, plugin in DISABLED or idle state
+  Contexts:       Root entry point for enabling a plugin
+  Excludes:       Plugin discovery, manifest loading
+  Rollback:       Tool or hook registration failure → set state ERROR, log failure
+  Design:         Delegates to PLG-03 and PLG-04, sets ENABLED on success, ERROR on failure
+  Returns:
+    - Success: 200 + plugin enabled
+    - Failure: 200 + state set to ERROR
+end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -48,5 +59,11 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    PLG-05 → PLG-03 register_tools → PLG-04 register_hooks → set ENABLED
+  State:   DISABLED → ENABLED (or → ERROR on failure)
+  Success: 200 + plugin enabled
+  Failure: 200 + state ERROR — tool/hook registration failed, logged
+end note
 
 @enduml

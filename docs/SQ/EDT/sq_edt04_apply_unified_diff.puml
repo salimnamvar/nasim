@@ -29,6 +29,19 @@ box "Repository Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          EDT-04 APPLY Unified Diff — Apply unified diff format edit to file
+  Preconditions:  EditStrategy from EDT-01 selected unified diff format; target file exists
+  Contexts:       Invoked via dynamic dispatch from EDT-01
+  Excludes:       Strategy selection (EDT-01); sandbox validation (EDT-07); linter checks
+  Rollback:       File unchanged if hunk application fails
+  Design:         Applies hunks sequentially; breaks on first mismatch
+  Returns:
+    - Success: 200 OK — ToolResult(success=True)
+    - Failure: 400 BAD_REQUEST: DiffError(hunk_mismatch)
+end note
+
+
 == EDT-04 APPLY Unified Diff ==
 
 user -> router : types input
@@ -56,5 +69,12 @@ deactivate mgr
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EDT-04 → user input → router → agent → mgr → coder(parse hunks, apply) → fs(write) → Done
+  State:   No state change
+  Success: 200 OK — ToolResult(success=True)
+  Failure: 400 BAD_REQUEST: hunk_mismatch — file unchanged
+end note
 
 @enduml

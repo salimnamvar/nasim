@@ -24,6 +24,18 @@ box "Tool Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          TL-16 INSERT Todo — Add a new todo item via TodoTool
+  Preconditions:  TodoTool initialized; title provided
+  Contexts:       Called by task tracking, work item creation, backlog management
+  Excludes:       Todo updates, deletions, bulk operations
+  Rollback:       No failure path in diagram (assumed always succeeds)
+  Design:         Generates unique ID; sets initial status to OPEN
+  Returns:
+    - Success: ToolResult(success=True, todo_id)
+    - Failure: N/A — no failure path in diagram
+end note
+
 == TL-16 Insert Todo ==
 
 user -> router : types input
@@ -43,5 +55,12 @@ agent --> router : AgentEvent(Done)
 deactivate registry
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    TL-16 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → TodoTool (generate ID, set OPEN)
+  State:   No state change
+  Success: 200 + ToolResult(success=True, todo_id)
+  Failure: N/A — no failure path
+end note
 
 @enduml

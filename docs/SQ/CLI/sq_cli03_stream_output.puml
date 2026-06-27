@@ -12,7 +12,17 @@
 
 actor "User" as user
 
-box "CLI Interface Container" #E3F2FD
+note over user
+  Scope:          CLI-03 — Stream Output
+  Preconditions:  Agent processing active, AgentEvent stream available
+  Contexts:       Called by CLI-01 after agent dispatch
+  Excludes:       Input processing, slash command routing, error recovery
+  Rollback:       Error event → red highlight displayed, Done event → stream completes
+  Design:         Event-driven streaming with rich terminal formatting, output stored in SessionStore
+  Returns:
+    - Success: Streamed tokens rendered to terminal
+    - Failure: Error event rendered in red highlight
+end note #E3F2FD
   participant "REPLSession" as repl
 end box
 box "Controller Group" #E3F2FD
@@ -60,5 +70,12 @@ store --> renderer : stored
 deactivate store
 
 deactivate renderer
+
+note over user
+  Flow:    AgentEvent stream → Renderer → user, output stored in SessionStore
+  State:   No state change
+  Success: All events rendered (TextChunk, ToolStart, ToolResult, Done)
+  Failure: Error event: agent error — red highlight displayed
+end note
 
 @enduml

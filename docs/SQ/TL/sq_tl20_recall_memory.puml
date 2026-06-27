@@ -25,6 +25,18 @@ end box
 participant "MemoryStore" as mem
 
 
+note over user
+  Scope:          TL-20 RECALL Memory — Recall knowledge from memory via MemoryTool
+  Preconditions:  MemoryTool initialized; query provided
+  Contexts:       Called by knowledge retrieval, context loading, learning application
+  Excludes:       Memory persistence, deletion, scope management
+  Rollback:       No matching knowledge → ToolResult(success=False); no state change
+  Design:         Delegates to MEM-02 recall; optional scope filter
+  Returns:
+    - Success: ToolResult(success=True, knowledge)
+    - Failure: ToolResult(success=False) — no match
+end note
+
 == TL-20 Recall Memory ==
 
 user -> router : types input
@@ -56,5 +68,12 @@ deactivate tool
 deactivate registry
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    TL-20 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → MemoryTool → MemoryStore (MEM-02 recall)
+  State:   No state change
+  Success: 200 + ToolResult(success=True, knowledge)
+  Failure: ToolResult(success=False): no match
+end note
 
 @enduml

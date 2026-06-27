@@ -12,7 +12,17 @@
 
 actor "User" as user
 
-box "Controller Group" #E3F2FD
+note over user
+  Scope:          CLI-04 — Read CLI Arguments
+  Preconditions:  CLI process started
+  Contexts:       Entry point, called at CLI startup
+  Excludes:       Runtime input processing, slash commands, output streaming
+  Rollback:       Invalid arguments → exit(1), Invalid config → ConfigError displayed
+  Design:         Config priority: CLI args > env vars > project config > global config
+  Returns:
+    - Success: Config object, start REPL or single-shot mode
+    - Failure: exit(1) for invalid args, ConfigError message for invalid config
+end note #E3F2FD
   participant "ArgParser" as parser
 end box
 box "Service Group" #FFF3E0
@@ -53,5 +63,12 @@ end
 parser --> user : Config ready, start REPL or single-shot
 
 deactivate parser
+
+note over user
+  Flow:    user → ArgParser → ConfigLoader → Config object → start REPL
+  State:   No state change
+  Success: Config object created, REPL or single-shot mode initialized
+  Failure: Invalid arguments: exit(1); Invalid config: ConfigError displayed
+end note
 
 @enduml

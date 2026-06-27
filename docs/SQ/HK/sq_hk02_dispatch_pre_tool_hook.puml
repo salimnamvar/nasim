@@ -31,6 +31,17 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
+note over user
+  Scope:          HK-02 Dispatch Pre-Tool Hook — Execute hooks before tool execution
+  Preconditions:  Hooks registered for PreToolCall event; tool_name and args are valid
+  Contexts:       Called by AgentOrchestrator before tool execution
+  Excludes:       Hook registration (HK-01), Post-tool dispatch (HK-03), LLM hooks (HK-04, HK-05)
+  Rollback:       DENY action → tool execution aborted, HookResult returned immediately
+  Design:         Hooks execute in priority order; DENY action breaks the loop early
+  Returns:
+    - Success: 200 HookResult(action=ALLOW, modified_args?)
+    - Failure: 200 HookResult(action=DENY, reason)
+end note
 
 == HK-02 DISPATCH Pre-Tool Hook ==
 
@@ -60,5 +71,11 @@ agent --> router : HookResult(action=ALLOW)
 deactivate agent
 deactivate router
 
+note over user
+  Flow:    HK-02 → invoke agent → find hooks → loop priority → execute hook → DENY or continue
+  State:   No state change
+  Success: 200 HookResult(action=ALLOW, modified_args?)
+  Failure: 200: DENY action — tool execution aborted, reason returned
+end note
 
 @enduml

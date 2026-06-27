@@ -23,6 +23,17 @@ box "Plugins Group" #F3E5F5
 end box
 participant "Host Filesystem" as fs
 
+note over user
+  Scope:          PLG-01 Discover Plugins — Scans plugin directory, loads manifests
+  Preconditions:  Plugin directory exists on host filesystem
+  Contexts:       Root entry point
+  Excludes:       Plugin enablement, tool/hook registration
+  Rollback:       Manifest load failure → skip plugin, log warning
+  Design:         Iterates plugin directories, delegates manifest parsing to PLG-02
+  Returns:
+    - Success: 200 + list of PluginManifests
+    - Failure: 200 with partial list (failed plugins skipped)
+end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -52,5 +63,11 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    PLG-01 → scan plugin_dir → loop: PLG-02 load_manifest → append to list → return list
+  State:   No state change
+  Success: 200 + list of PluginManifests
+  Failure: 200 with partial list — skipped plugins logged as warnings
+end note
 
 @enduml

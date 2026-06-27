@@ -17,9 +17,25 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
+end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
+
+note over user
+  Scope:          API-02 INSERT Session
+  Preconditions:  None
+  Contexts:       Parent: HTTP Client request
+  Excludes:       Session update, deletion, message dispatch
+  Rollback:       No partial state on failure; store write is atomic
+  Design:         Controller validates structure; Service orchestrates create
+  Returns:
+    - Success: 201 Created — {id, created_at, model, state}
+    - Failure: 400 INVALID_ARGUMENT — structural validation failed
+    - Failure: 500 INTERNAL — store write failure
+end note
 
 
 == API-02 INSERT Session ==
@@ -32,20 +48,34 @@ alt Structural validation failed [400]
   router --> user : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid request", status: "INVALID_ARGUMENT"}}
 end
 
-router -> store : API-02 INSERT Session(sessionData)
+router -> svc : API-02 INSERT Session(sessionData)
+activate svc
+
+svc -> store : API-02 INSERT Session(sessionData)
 activate store
 
 store --> store : generateResourceId()
 store --> store : save(SessionEntity)
-store --> router : SessionEntity
+store --> svc : SessionEntity
 deactivate store
 
 break Store write fails [500]
+  svc --> router : 500 INTERNAL
   router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to create session", status: "INTERNAL"}}
 end
 
+svc --> router : SessionEntity
+deactivate svc
 router --> user : 201 Created {id, created_at, model, state}
 deactivate router
+
+note over user
+  Flow:    API-02 → router → svc → store → svc → router → user
+  State:   No state change (INSERT creates initial state)
+  Success: 201 Created — {id, created_at, model, state}
+  Failure: 400 INVALID_ARGUMENT: structural validation — fix request body
+  Failure: 500 INTERNAL: store write failure — retry later
+end note
 
 
 @enduml

@@ -23,6 +23,17 @@ box "Plugins Group" #F3E5F5
 end box
 participant "Host Filesystem" as fs
 
+note over user
+  Scope:          PLG-02 Load Manifest — Reads and parses a plugin's manifest.yaml
+  Preconditions:  Plugin directory exists with manifest.yaml file
+  Contexts:       Called by PLG-01 Discover Plugins
+  Excludes:       Plugin enablement, tool/hook registration
+  Rollback:       File not found → PluginSkipped; YAML parse error → PluginSkipped
+  Design:         Single file read, schema validation before return
+  Returns:
+    - Success: 200 + PluginManifest object
+    - Failure: 200 + PluginSkipped event with reason
+end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -60,5 +71,11 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    PLG-02 → read manifest.yaml → validate YAML schema → parse metadata → return PluginManifest
+  State:   No state change
+  Success: 200 + PluginManifest
+  Failure: 200 + PluginSkipped — file not found or invalid YAML, plugin skipped by caller
+end note
 
 @enduml

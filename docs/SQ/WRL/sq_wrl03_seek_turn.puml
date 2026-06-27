@@ -29,6 +29,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          WRL-03 SEEK Turn — seek to a specific turn in the wire log
+  Preconditions:  Wire log indexed; valid turn_number requested
+  Contexts:       Called by AgentOrchestrator for time-travel debugging or replay from specific turn
+  Excludes:       Full log scan, event appending, session forking
+  Rollback:       Turn not found → 404 NOT_FOUND — turn not in index
+  Design:         Uses TurnIndex for O(1) lookup; WireReader fetches events at offset
+  Returns:
+    - Success: 200 OK — WireEvents[turn]
+    - Failure: 404 NOT_FOUND — turn not in index
+end note
+
 == WRL-03 SEEK Turn ==
 
 user -> router : types input
@@ -55,5 +67,11 @@ idx --> agent : 200 OK — WireEvents[turn]
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → TurnIndex → lookup → WireReader → read from store → Result
+  State:   No state change (read-only)
+  Success: 200 OK — AgentEvent(Done) with WireEvents[turn]
+  Failure: 404 NOT_FOUND: turn not in index — propagate error to user
+end note
 
 @enduml

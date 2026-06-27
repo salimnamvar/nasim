@@ -28,6 +28,17 @@ box "External" #F5F5F5
   participant "Sandbox Runtime" as runtime
 end box
 
+note over user
+  Scope:          SBX-01 Isolate Command — Execute command in OS-level sandbox
+  Preconditions:  Sandbox policy loaded (SBX-02); resource limits set (SBX-04)
+  Contexts:       Called by TL-02 (tool dispatch) for shell/exec commands
+  Excludes:       Policy loading, resource limiting, process monitoring
+  Rollback:       Timeout/violation → Result(success=false, error="timeout")
+  Design:         OS-level isolation via namespace/cgroup; policy-driven rules; spawn + wait pattern
+  Returns:
+    - Success: Result(success=true, data={output, exit_code})
+    - Failure: Result(success=false, error="timeout")
+end note
 
 == SBX-01 ISOLATE Command ==
 
@@ -59,6 +70,13 @@ executor --> agent : Result(success=true, data={output, exit_code})
 deactivate executor
 
 agent --> router : AgentEvent(Done)
+
+note over user
+  Flow:    SBX-01 → apply rules → create sandbox → spawn process → 200 OK or error
+  State:   No state change
+  Success: Result(success=true, data={output, exit_code})
+  Failure: Result(success=false, error="timeout"): timeout or resource violation — process killed
+end note
 
 
 @enduml

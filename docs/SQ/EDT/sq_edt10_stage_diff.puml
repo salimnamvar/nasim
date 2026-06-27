@@ -28,6 +28,19 @@ box "Sandbox Group" #F3E5F5
 end box
 
 
+note over user
+  Scope:          EDT-10 STAGE Diff — Stage edit for review before sandbox-validated apply
+  Preconditions:  Edit result available from EDT-02..09; staging area has capacity
+  Contexts:       Internal step of edit flow; called before EDT-07
+  Excludes:       Actual file modification; sandbox validation; strategy selection
+  Rollback:       No staging slot allocated; edit not staged
+  Design:         Process decomposition; stages edits for later validation with diff summary
+  Returns:
+    - Success: 200 OK — StagedEdit(edit_id, diff_summary)
+    - Failure: 400 BAD_REQUEST: staging slot allocation failure
+end note
+
+
 == EDT-10 STAGE Diff ==
 
 user -> router : types input
@@ -54,5 +67,12 @@ deactivate diff_mgr
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EDT-10 → user input → router → agent → diff_mgr → staging(allocate → store → compute diff) → Done
+  State:   No state change
+  Success: 200 OK — StagedEdit(edit_id, diff_summary)
+  Failure: 400 BAD_REQUEST: slot allocation failure — edit not staged
+end note
 
 @enduml

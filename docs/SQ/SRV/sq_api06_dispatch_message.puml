@@ -30,6 +30,21 @@ box "Observability Group" #F3E5F5
   participant "TraceCorrelator" as trace
 end box
 
+note over user
+  Scope:          API-06 DISPATCH Message
+  Preconditions:  Session must exist and be active
+  Contexts:       Parent: HTTP Client request; ref: AGT-01 PROCESS User Task
+  Excludes:       Session management, tool discovery
+  Rollback:       Agent error routes through ErrorBoundary; session state preserved
+  Design:         Controller validates structure; Service orchestrates agent loop;
+                  SSE streaming for real-time response
+  Returns:
+    - Success: 200 OK — SSE event stream (TextChunk, ToolStart, ToolResult, Done)
+    - Failure: 400 INVALID_ARGUMENT — structural validation failed
+    - Failure: 404 NOT_FOUND — session does not exist
+    - Failure: 502 UNAVAILABLE — agent error
+end note
+
 
 == API-06 SEND Message ==
 
@@ -86,6 +101,15 @@ deactivate sse
 
 router --> user : 200 OK (stream complete)
 deactivate router
+
+note over user
+  Flow:    API-06 → router → agent → store → agent → AGT-01 → agent → router → sse → user
+  State:   No state change (active session preserved)
+  Success: 200 OK — SSE event stream
+  Failure: 400 INVALID_ARGUMENT: structural validation — fix request body
+  Failure: 404 NOT_FOUND: session does not exist — verify session ID
+  Failure: 502 UNAVAILABLE: agent error — retry or check agent health
+end note
 
 
 @enduml

@@ -17,9 +17,24 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
+end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
+
+note over user
+  Scope:          API-01 LIST Sessions
+  Preconditions:  None
+  Contexts:       Parent: HTTP Client request
+  Excludes:       Session creation, message history
+  Rollback:       No state change on failure
+  Design:         Paginated collection read via Service layer
+  Returns:
+    - Success: 200 OK — {sessions: [...], next_page_token: string}
+    - Failure: 500 INTERNAL — store read failure
+end note
 
 
 == API-01 LIST Sessions ==
@@ -27,26 +42,40 @@ end box
 user -> router : GET /v1/sessions?page_size=10&page_token=abc
 activate router
 
-router -> store : API-01 LIST Sessions(pageSize=10, pageToken="abc")
+router -> svc : API-01 LIST Sessions(pageSize=10, pageToken="abc")
+activate svc
+
+svc -> store : API-01 LIST Sessions(pageSize=10, pageToken="abc")
 activate store
 
 break Store read failure [500]
-    store --> router : 500 INTERNAL
+    store --> svc : 500 INTERNAL
     deactivate store
+    svc --> router : 500 INTERNAL
     router --> user : 500 INTERNAL {error: {code: "INTERNAL", message: "Failed to list sessions", status: "INTERNAL"}}
 end
 
 alt Sessions exist
-    store --> router : 200 OK {sessions, nextPageToken}
+    store --> svc : 200 OK {sessions, nextPageToken}
     deactivate store
+    svc --> router : 200 OK {sessions, nextPageToken}
     router --> user : 200 OK {sessions: [...], next_page_token: "def"}
 else No sessions
-    store --> router : 200 OK {sessions: [], nextPageToken: ""}
+    store --> svc : 200 OK {sessions: [], nextPageToken: ""}
     deactivate store
+    svc --> router : 200 OK {sessions: [], nextPageToken: ""}
     router --> user : 200 OK {sessions: [], next_page_token: null}
 end
 
+deactivate svc
 deactivate router
+
+note over user
+  Flow:    API-01 → router → svc → store → svc → router → user
+  State:   No state change
+  Success: 200 OK — {sessions: [...], next_page_token: string}
+  Failure: 500 INTERNAL: store read failure — retry later
+end note
 
 
 @enduml

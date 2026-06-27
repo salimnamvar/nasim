@@ -24,6 +24,18 @@ box "Repository Group" #E8F5E9
   participant "ConfigLoader" as config
 end box
 
+note over user
+  Scope:          API-10 READ Config
+  Preconditions:  Config must be loaded
+  Contexts:       Parent: HTTP Client request
+  Excludes:       Config update, config validation
+  Rollback:       No state change on failure
+  Design:         Read-only config fetch via Service layer
+  Returns:
+    - Success: 200 OK — {config: {provider, model, safety_mode}}
+    - Failure: 500 INTERNAL — config read failure
+end note
+
 
 == API-10 READ Config ==
 
@@ -50,6 +62,13 @@ svc --> router : ConfigResponseDTO
 deactivate svc
 router --> user : 200 OK {config: {provider: "...", model: "...", safety_mode: "..."}}
 deactivate router
+
+note over user
+  Flow:    API-10 → router → svc → config → svc → router → user
+  State:   No state change
+  Success: 200 OK — {config: {provider, model, safety_mode}}
+  Failure: 500 INTERNAL: config read failure — retry later
+end note
 
 
 @enduml

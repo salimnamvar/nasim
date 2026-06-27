@@ -17,9 +17,24 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
+end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
+
+note over user
+  Scope:          API-03 READ Session
+  Preconditions:  Session must exist
+  Contexts:       Parent: HTTP Client request
+  Excludes:       Session creation, update, deletion
+  Rollback:       No state change on failure
+  Design:         Read-only; 404 if session does not exist
+  Returns:
+    - Success: 200 OK — {session: {id, messages, created_at, updated_at}}
+    - Failure: 404 NOT_FOUND — session does not exist
+end note
 
 
 == API-03 READ Session ==
@@ -27,20 +42,34 @@ end box
 user -> router : GET /v1/sessions/{id}
 activate router
 
-router -> store : API-03 READ Session(sessionId)
+router -> svc : API-03 READ Session(sessionId)
+activate svc
+
+svc -> store : API-03 READ Session(sessionId)
 activate store
 
 break Session not found [404]
-  store --> router : 404 NOT_FOUND
+  store --> svc : 404 NOT_FOUND
   deactivate store
+  svc --> router : 404 NOT_FOUND
   router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
 end
 
-store --> router : SessionEntity
+store --> svc : SessionEntity
 deactivate store
+
+svc --> router : SessionEntity
+deactivate svc
 
 router --> user : 200 OK {session: {id, messages, created_at, updated_at}}
 deactivate router
+
+note over user
+  Flow:    API-03 → router → svc → store → svc → router → user
+  State:   No state change
+  Success: 200 OK — {session: {id, messages, created_at, updated_at}}
+  Failure: 404 NOT_FOUND: session does not exist — verify session ID
+end note
 
 
 @enduml

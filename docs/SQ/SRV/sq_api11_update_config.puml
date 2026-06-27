@@ -24,6 +24,18 @@ box "Repository Group" #E8F5E9
   participant "ConfigLoader" as config
 end box
 
+note over user
+  Scope:          API-11 UPDATE Config
+  Preconditions:  Config must be loaded
+  Contexts:       Parent: HTTP Client request
+  Excludes:       Config read, config validation
+  Rollback:       Config update is atomic; invalid config rejected before apply
+  Design:         Controller validates structure; Service validates business rules
+  Returns:
+    - Success: 200 OK — {config: {updated_fields: [...]}}
+    - Failure: 400 INVALID_ARGUMENT — structural validation or invalid config value
+end note
+
 
 == API-11 UPDATE Config ==
 
@@ -56,6 +68,13 @@ svc --> router : ConfigResponseDTO
 deactivate svc
 router --> user : 200 OK {config: {updated_fields: [...]}}
 deactivate router
+
+note over user
+  Flow:    API-11 → router → svc → config → svc → router → user
+  State:   No state change (config applied atomically)
+  Success: 200 OK — {config: {updated_fields: [...]}}
+  Failure: 400 INVALID_ARGUMENT: structural validation or invalid config — fix request
+end note
 
 
 @enduml

@@ -32,6 +32,17 @@ box "Repository Group" #E8F5E9
   participant "ObservabilityRepository" as obs_repo
 end box
 
+note over user
+  Scope:          OBS-04 Redact Sensitive Data — Strip secrets before emission to structured logs or wire
+  Preconditions:  Config with redaction rules loaded
+  Contexts:       Called by OBS-01 (log stream) and WireAppender (wire events)
+  Excludes:       Log streaming (OBS-01), trace correlation (OBS-03)
+  Rollback:       None (redaction always applies rules; missing rules → no-op)
+  Design:         Pattern-based redaction; configurable rules; sets redacted flag
+  Returns:
+    - Success: SanitizedRecord / SanitizedPayload (redacted=true)
+    - Failure: (none — always succeeds)
+end note
 
 == OBS-04 REDACT SensitiveData (structured log) ==
 
@@ -83,6 +94,13 @@ deactivate redactor
 agent --> router : None
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    OBS-04 → load rules → apply patterns → set flag → sanitized output
+  State:   No state change
+  Success: SanitizedRecord(redacted=true)
+  Failure: (none — always succeeds; missing rules → no-op)
+end note
 
 
 @enduml

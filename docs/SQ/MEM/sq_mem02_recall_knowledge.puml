@@ -10,19 +10,33 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
+title nasim — MEM-02 RECALL Knowledge
+
 actor "User" as user
 
-box "API Group (Entry Gate)" #E3F2FD
+box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
+box "Service Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Memory Group" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "MemoryStore" as store
   participant "MemoryScope" as scope
   participant "MemoryIndex" as index
 end box
+
+note over user
+  Scope:          MEM-02 RECALL Knowledge
+  Preconditions:  MemoryStore accessible
+  Contexts:       Called by AgentOrchestrator during task processing
+  Excludes:       Knowledge persist, search, scope filtering
+  Rollback:       Key not found returns null
+  Design:         Scope-filtered lookup via index
+  Returns:
+    - Success: recalled_entry
+    - Failure: null (key not found)
+end note
 
 
 user -> router : types input
@@ -51,6 +65,13 @@ store --> agent : recalled_entry
 deactivate store
 
 agent --> router : AgentEvent(Done)
+
+note over user
+  Flow:    MEM-02 → agent → store → scope → store → index → store → agent
+  State:   No state change
+  Success: recalled_entry
+  Failure: null — key not found in scope
+end note
 
 
 @enduml

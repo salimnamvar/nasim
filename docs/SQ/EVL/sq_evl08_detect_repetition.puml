@@ -27,8 +27,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+note over user
+  Scope:          EVL-08 DETECT Repetition — Tool-call loop detection
+  Preconditions:  Tool call history exists; at least 5 recent calls available
+  Contexts:       Called by AgentOrchestrator each turn
+  Excludes:       Retry coordination (EVL-06); turn budget (EVL-09)
+  Rollback:       Detection is read-only; no state change
+  Design:         Window of 5 recent calls; threshold=3 for same-tool repeat; checks oscillation and stuck patterns
+  Returns:
+    - Success: 200 OK — RepetitionResult(detected=false, confidence)
+    - Failure: 409 CONFLICT: LoopDetected(pattern, repeat_count)
+end note
+
 
 == EVL-08 DETECT Repetition ==
 
@@ -58,5 +68,12 @@ deactivate detector
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EVL-08 → agent → detector → history(get recent calls) → analyze → check repeats → check oscillation → check stuck → Done
+  State:   No state change
+  Success: 200 OK — RepetitionResult(detected=false, confidence)
+  Failure: 409 CONFLICT: LoopDetected — agent breaks loop
+end note
 
 @enduml

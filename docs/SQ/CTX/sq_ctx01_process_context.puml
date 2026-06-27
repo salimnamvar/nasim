@@ -29,6 +29,17 @@ box "Repository Group" #E8F5E9
   participant "ContextStore" as ctx_store
 end box
 
+note over user
+  Scope:          CTX-01 PROCESS Context — orchestrate context processing pipeline
+  Preconditions:  AgentOrchestrator initialized; ContextGraph populated with message nodes
+  Contexts:       Root entry point — called by AgentOrchestrator
+  Excludes:       Individual pipeline stage internals (CTX-02 through CTX-06)
+  Rollback:       No explicit failure path; pipeline stages handle their own errors internally
+  Design:         Pipeline stages run in sequence: TRACK → COMPACT → score priorities → TRUNCATE → DISTILL → INJECT → store
+  Returns:
+    - Success: 200 + ProcessedContext
+    - Failure: N/A (no failure path)
+end note
 
 == CTX-01 PROCESS Context ==
 
@@ -66,5 +77,11 @@ deactivate pipeline
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    CTX-01 → TRACK Token Budget → COMPACT Nodes → score priorities → TRUNCATE Nodes → DISTILL Nodes → INJECT Context → store
+  State:   No state change (pipeline stages mutate ContextGraph internally)
+  Success: 200 + ProcessedContext
+  Failure: N/A (no failure path)
+end note
 
 @enduml

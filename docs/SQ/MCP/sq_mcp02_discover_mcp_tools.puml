@@ -33,6 +33,19 @@ box "External" #F5F5F5
 end box
 
 
+note over user
+  Scope:          MCP-02 DISCOVER McpTools — Discover and register tools from connected MCP server
+  Preconditions:  MCP server connection established (MCP-01); server is active
+  Contexts:       Called after MCP-01 connection established
+  Excludes:       Connection (MCP-01); tool execution; nasim tool exposure (MCP-04)
+  Rollback:       No tools registered if discovery fails
+  Design:         Each MCP tool wrapped via MCP-03 ADAPT before registration in ToolRegistry
+  Returns:
+    - Success: 200 OK — ToolResult(success=true, content="DiscoveryComplete")
+    - Failure: 500 INTERNAL: discovery failed
+end note
+
+
 == MCP-02 DISCOVER McpTools ==
 
 user -> router : types input
@@ -68,5 +81,12 @@ deactivate mcp
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    MCP-02 → user → router → agent → mcp → discovery → server(list tools) → loop: adapt → register → Done
+  State:   No state change
+  Success: 200 OK — ToolResult(success=true, content="DiscoveryComplete")
+  Failure: 500 INTERNAL: discovery failed — no tools registered
+end note
 
 @enduml

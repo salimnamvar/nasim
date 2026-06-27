@@ -27,6 +27,19 @@ box "Tool Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          EDT-03 VALIDATE Edit — Verify edit applied correctly
+  Preconditions:  Edit has been applied by EDT-02..09; target file exists with new content
+  Contexts:       Called after EDT-02..09 to verify edit correctness
+  Excludes:       Edit execution; file writing; strategy selection
+  Rollback:       Validation is read-only; no changes made on failure
+  Design:         Runs linter and syntax check; verifies diff applies correctly; checks for unintended changes
+  Returns:
+    - Success: 200 OK — ValidationResult(passed, reasons[])
+    - Failure: 400 BAD_REQUEST: validation failed
+end note
+
+
 == edt03 VALIDATE Edit ==
 
 user -> router : types input
@@ -55,5 +68,12 @@ deactivate validator
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EDT-03 → user input → router → agent → validator → fs(read) → verify_diff → tool(linter) → syntax_check → verify_no_unintended → Done
+  State:   No state change
+  Success: 200 OK — ValidationResult(passed, reasons[])
+  Failure: 400 BAD_REQUEST: validation failed — retry or rollback edit
+end note
 
 @enduml

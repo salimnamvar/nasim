@@ -25,6 +25,18 @@ end box
 participant "Host Shell" as shell
 
 
+note over user
+  Scope:          TL-11 READ Git Status — Git operations: status, diff, commit
+  Preconditions:  Git repo exists at working directory; git command available
+  Contexts:       Called by code review, commit preparation, change tracking
+  Excludes:       Branch management, merge operations, remote operations
+  Rollback:       Not a git repo → ToolResult(success=False); Nothing to commit → ToolResult(success=False); no partial state
+  Design:         Supports status/diff/commit actions via subprocess; uses --porcelain for status
+  Returns:
+    - Success: ToolResult(success=True, content=git_output)
+    - Failure: ToolResult(success=False) — not a git repo, nothing to commit
+end note
+
 == TL-11 READ Git Status ==
 
 user -> router : types input
@@ -79,5 +91,12 @@ agent --> router : AgentEvent(Done)
 deactivate registry
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    TL-11 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → GitTool → Host Shell (git status/diff/commit)
+  State:   No state change
+  Success: 200 + ToolResult(success=True, content=formatted_status|diff_text|commit_confirmation)
+  Failure: ToolResult(success=False): not a git repository | Nothing to commit
+end note
 
 @enduml

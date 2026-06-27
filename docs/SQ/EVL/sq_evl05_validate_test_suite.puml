@@ -30,8 +30,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+note over user
+  Scope:          EVL-05 VALIDATE Test Suite — Run test suite and collect pass/fail/skip results
+  Preconditions:  Test command and project path are configured; tests exist
+  Contexts:       Called by EvaluationEngine after edit application
+  Excludes:       Success checks (EVL-03); LLM validation (EVL-04); retry (EVL-06)
+  Rollback:       Test execution is read-only; no state change
+  Design:         Parses test output; classifies into pass/fail/skip; 120s timeout
+  Returns:
+    - Success: 200 OK — TestSuiteResult(total, passed, failed, skipped, errors[])
+    - Failure: 400 BAD_REQUEST: test failures detected
+end note
+
 
 == EVL-05 VALIDATE Test Suite ==
 
@@ -58,5 +68,12 @@ deactivate engine
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EVL-05 → agent → engine → runner → shell(execute test_command) → parse_results → classify → Done
+  State:   No state change
+  Success: 200 OK — TestSuiteResult(total, passed, failed, skipped, errors[])
+  Failure: 400 BAD_REQUEST: test failures — trigger retry (EVL-06)
+end note
 
 @enduml

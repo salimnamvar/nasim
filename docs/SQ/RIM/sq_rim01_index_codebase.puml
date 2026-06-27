@@ -30,6 +30,18 @@ box "External" #F5F5F5
 end box
 
 
+note over user
+  Scope:          RIM-01 INDEX Codebase — build AST index and symbol graph from project source
+  Preconditions:  Project root accessible; source files present
+  Contexts:       Called by AgentOrchestrator at startup or on codebase refresh
+  Excludes:       Symbol ranking, embedding, semantic search, repo-map injection
+  Rollback:       Parse error on individual file → skip file, continue indexing others; returns partial IndexStats
+  Design:         Per-file AST parse → symbol extraction → relationship linking → adjacency index build
+  Returns:
+    - Success: 200 OK — IndexStats(files, symbols, edges)
+    - Failure: (partial) ParseError per file — skipped, not fatal
+end note
+
 == RIM-01 INDEX Codebase ==
 
 user -> router : RIM-01 INDEX Codebase(project_root)
@@ -79,5 +91,11 @@ agent --> router : IndexStats(files, symbols, edges)
 deactivate agent
 deactivate router
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → RepoIntelligenceManager → list files → parse loop → extract symbols → link relationships → build adjacency → Result
+  State:   No state change (builds in-memory index; no persistent state mutation)
+  Success: 200 OK — IndexStats(files, symbols, edges)
+  Failure: (partial) ParseError per file — file skipped, indexing continues with remaining files
+end note
 
 @enduml

@@ -32,6 +32,19 @@ box "FileSystem Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          EDT-07 APPLY Diff Sandbox — Apply diff in isolated sandbox before committing
+  Preconditions:  EditStrategy from EDT-01; target file exists; sandbox environment available
+  Contexts:       Invoked via dynamic dispatch from EDT-01
+  Excludes:       Strategy selection; direct file writes without sandbox
+  Rollback:       Sandbox discarded; original file untouched
+  Design:         Isolated sandbox prevents partial writes; commit only after validation
+  Returns:
+    - Success: 200 OK — EditResult(success, file_path)
+    - Failure: 400 BAD_REQUEST: sandbox validation failed; original preserved
+end note
+
+
 == EDT-07 APPLY Diff Sandbox ==
 
 user -> router : types input
@@ -92,5 +105,12 @@ deactivate esm
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EDT-07 → user input → router → agent → esm → dsc → dsm(create sandbox) → dsm(apply_diff) → dsm(validate) → pass: commit / fail: discard → Done
+  State:   No state change
+  Success: 200 OK — EditResult(success, file_path)
+  Failure: 400 BAD_REQUEST: validation failed — sandbox discarded, original preserved
+end note
 
 @enduml

@@ -26,6 +26,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          AGT-07 QUEUE Plan — Queue tool calls in plan mode
+  Preconditions:  Plan mode active, tool_call received from LLM
+  Contexts:       AGT-01 PROCESS User Task (when plan mode enabled)
+  Excludes:       Tool execution (AGT-02), Plan approval (AGT-08)
+  Rollback:       Tool call queued without execution, displayed to user
+  Design:         Non-executing queue with plan display, user approval required
+  Returns:
+    - Success: 200 AgentEvent(PlanDisplay) with queued tools
+    - Failure: N/A (always succeeds)
+end note
+
 == AGT-07 QUEUE Plan ==
 
 user -> router : types input
@@ -46,5 +58,12 @@ deactivate plan
 agent --> router : AgentEvent(PlanDisplay)
 deactivate agent
 
+
+note over user
+  Flow:    AGT-07 → QUEUE Plan → DISPLAY Plan
+  State:   THINKING → PLAN_QUEUED → THINKING
+  Success: 200 AgentEvent(PlanDisplay) with formatted plan text
+  Failure: N/A (always succeeds)
+end note
 
 @enduml

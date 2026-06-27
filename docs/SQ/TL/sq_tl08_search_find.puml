@@ -24,6 +24,18 @@ box "Tool Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          TL-08 SEARCH Find — Find files by name pattern with depth limit
+  Preconditions:  Name pattern and path provided by user; path exists
+  Contexts:       Called by file discovery, project structure exploration
+  Excludes:       Content search, glob patterns, binary file filtering
+  Rollback:       Path not found → ToolResult(success=False); no state change
+  Design:         Uses os.walk with depth tracking; fnmatch for pattern matching; respects max_depth
+  Returns:
+    - Success: ToolResult(success=True, content=matching_paths)
+    - Failure: ToolResult(success=False) — path not found
+end note
+
 == TL-08 FIND Files ==
 
 user -> router : types input
@@ -52,5 +64,12 @@ agent --> router : AgentEvent(Done)
 deactivate registry
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    TL-08 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → FindFileTool → os.walk() + fnmatch
+  State:   No state change
+  Success: 200 + ToolResult(success=True, content=matching_paths)
+  Failure: ToolResult(success=False): path not found
+end note
 
 @enduml

@@ -31,6 +31,17 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
+note over user
+  Scope:          HK-03 Dispatch Post-Tool Hook — Execute hooks after tool execution
+  Preconditions:  Tool has executed and returned a result; hooks registered for PostToolCall event
+  Contexts:       Called by AgentOrchestrator after tool execution
+  Excludes:       Hook registration (HK-01), Pre-tool dispatch (HK-02), LLM hooks (HK-04, HK-05)
+  Rollback:       DENY action → result suppressed, HookResult returned immediately
+  Design:         Tool runs first, then hooks loop in priority order; DENY action breaks the loop early
+  Returns:
+    - Success: 200 HookResult(action=ALLOW, modified_result?)
+    - Failure: 200 HookResult(action=DENY, reason)
+end note
 
 == HK-03 DISPATCH Post-Tool Hook ==
 
@@ -65,5 +76,11 @@ agent --> router : HookResult(action=ALLOW)
 deactivate agent
 deactivate router
 
+note over user
+  Flow:    HK-03 → invoke agent → execute tool → find hooks → loop priority → execute hook → DENY or continue
+  State:   No state change
+  Success: 200 HookResult(action=ALLOW, modified_result?)
+  Failure: 200: DENY action — result suppressed, reason returned
+end note
 
 @enduml

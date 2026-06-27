@@ -27,6 +27,17 @@ box "External" #F5F5F5
   participant "Host Filesystem" as fs
 end box
 
+note over user
+  Scope:          SSN-09 Delete Session — Permanently delete a session and its associated data
+  Preconditions:  Session may or may not exist
+  Contexts:       Called by user-facing delete command
+  Excludes:       Soft delete, backup, snapshot preservation
+  Rollback:       Session not found → 404; permission denied → 403
+  Design:         Hard delete via filesystem removal; clears session index; irreversible
+  Returns:
+    - Success: 200 OK — delete_confirmed(session_id)
+    - Failure: 404 NOT_FOUND / 403 FORBIDDEN
+end note
 
 == SSN-09 DELETE Session ==
 
@@ -61,6 +72,13 @@ store --> agent : 200 OK — delete_confirmed(session_id)
 deactivate store
 
 agent --> router : AgentEvent(Done)
+
+note over user
+  Flow:    SSN-09 → validate exists → remove directory → clear index → 200 OK
+  State:   No state change
+  Success: 200 OK — delete_confirmed(session_id)
+  Failure: 404 NOT_FOUND: session not found; 403 FORBIDDEN: permission denied
+end note
 
 
 @enduml

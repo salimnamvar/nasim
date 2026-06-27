@@ -14,7 +14,17 @@ title nasim — CLI-05 ENABLE Plan Mode
 
 actor "User" as user
 
-box "CLI Interface Container" #E3F2FD
+note over user
+  Scope:          CLI-05 — Enable Plan Mode
+  Preconditions:  REPLSession active, AgentOrchestrator available
+  Contexts:       Called via /plan slash command from CLI-01
+  Excludes:       Model switching (CLI-07), session management, output streaming
+  Rollback:       Toggle error → CommandError returned
+  Design:         Toggle via SlashCommandHandler, state managed by AgentOrchestrator
+  Returns:
+    - Success: CommandResult with confirmation message
+    - Failure: CommandError on toggle failure
+end note #E3F2FD
   participant "REPLSession" as repl
 end box
 box "API Group (Entry Gate)" #E3F2FD
@@ -48,5 +58,11 @@ break Toggle error
     cmd --> repl : CommandError
 end
 
+note over user
+  Flow:    user → REPLSession → SlashCommandHandler → AgentOrchestrator → REPLSession
+  State:   IDLE → PLANNING or PLANNING → IDLE
+  Success: CommandResult with confirmation ("Plan mode: ON/OFF")
+  Failure: Toggle error: CommandError
+end note
 
 @enduml

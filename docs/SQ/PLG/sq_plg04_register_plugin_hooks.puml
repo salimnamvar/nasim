@@ -25,6 +25,17 @@ box "Hooks Group" #F3E5F5
   participant "HookManager" as hm
 end box
 
+note over user
+  Scope:          PLG-04 Register Plugin Hooks — Registers all hooks declared in a plugin manifest
+  Preconditions:  Plugin manifest loaded and parsed successfully
+  Contexts:       Called by PLG-05 Enable Plugin
+  Excludes:       Tool registration, plugin discovery
+  Rollback:       Registration failure → log warning, skip hook
+  Design:         Iterates manifest hooks, registers each into HookManager with event/handler/priority
+  Returns:
+    - Success: 200 + all hooks registered
+    - Failure: 200 with skipped hooks logged as warnings
+end note
 
 user -> router : types input
 router -> agent : PROCESS(user_input)
@@ -52,5 +63,11 @@ deactivate loader
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    PLG-04 → enumerate hooks → loop: register(event, handler, priority) → return
+  State:   No state change
+  Success: 200 + all hooks registered
+  Failure: 200 — registration failure: log warning, skip hook
+end note
 
 @enduml

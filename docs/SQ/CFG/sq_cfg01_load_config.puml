@@ -26,6 +26,18 @@ database "Project YAML" as project_yaml
 database "Env Vars" as env_vars
 
 
+note over user
+  Scope:          CFG-01 Load Config — Read and merge config from all sources (global, project, env, CLI)
+  Preconditions:  ~/.nasim/config.yaml exists; optional .nasim/config.yaml and NASIM_* env vars
+  Contexts:       Root entry point
+  Excludes:       Config validation (delegated to CFG-02), file persistence
+  Rollback:       ConfigError returned on invalid YAML or missing required fields; no partial state
+  Design:         Layered merge with skip-None precedence; validation immediately after merge
+  Returns:
+    - Success: 200 Config object
+    - Failure: ConfigError
+end note
+
 == CFG-01 Load Config ==
 
 user -> router : invoke agent
@@ -53,5 +65,12 @@ agent --> router : Config object
 deactivate agent
 deactivate router
 
+
+note over user
+  Flow:    CFG-01 → read global → read project → read env → merge layers → validate → return
+  State:   No state change
+  Success: 200 Config object
+  Failure: ConfigError — invalid YAML or missing fields
+end note
 
 @enduml

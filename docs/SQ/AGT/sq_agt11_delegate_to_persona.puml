@@ -29,6 +29,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          AGT-11 DELEGATE to Persona — Select and apply persona
+  Preconditions:  PersonaRegistry populated, task and persona_hint provided
+  Contexts:       AGT-01 PROCESS User Task (persona selection required)
+  Excludes:       Persona configuration details (AGT-12), Task execution
+  Rollback:       Persona not found → fallback to default persona
+  Design:         Hint-based lookup with default fallback, prompt injection
+  Returns:
+    - Success: 200 PersonaDelegated with persona config
+    - Failure: N/A (always succeeds with default fallback)
+end note
+
 == AGT-11 DELEGATE to Persona ==
 
 user -> router : types input
@@ -57,5 +69,12 @@ deactivate pm
 agent --> router : AgentEvent(Done)
 deactivate agent
 
+
+note over user
+  Flow:    AGT-11 → lookup persona → load config → apply to agent
+  State:   THINKING → PERSONA_ACTIVE → THINKING
+  Success: 200 PersonaDelegated with applied persona config
+  Failure: N/A (always succeeds with default persona fallback)
+end note
 
 @enduml

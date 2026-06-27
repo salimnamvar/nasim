@@ -25,6 +25,17 @@ box "Sandbox Group" #F3E5F5
   participant "ResourceLimiter" as limiter
 end box
 
+note over user
+  Scope:          SBX-04 Limit Resources — Enforce CPU, memory, and disk quotas per sandbox instance
+  Preconditions:  Cgroup hierarchy support available
+  Contexts:       Called at startup; called when resource limits are updated
+  Excludes:       Command isolation (SBX-01), monitoring (SBX-03), policy loading (SBX-02)
+  Rollback:       Cgroup setup fails → Result(success=false, error="cgroup_setup_failed")
+  Design:         Linux cgroup v2; separate CPU/memory/IO quotas; per-instance hierarchy
+  Returns:
+    - Success: Result(success=true, data={cgroup_id})
+    - Failure: Result(success=false, error="cgroup_setup_failed")
+end note
 
 == SBX-04 LIMIT Resources ==
 
@@ -56,6 +67,13 @@ executor --> agent : Result(success=true, data={cgroup_id})
 deactivate executor
 
 agent --> router : AgentEvent(Done)
+
+note over user
+  Flow:    SBX-04 → create cgroup → set CPU → set memory → set IO → 200 OK
+  State:   No state change
+  Success: Result(success=true, data={cgroup_id})
+  Failure: Result(success=false, error="cgroup_setup_failed"): cgroup setup failed
+end note
 
 
 @enduml

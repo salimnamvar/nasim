@@ -25,6 +25,17 @@ box "Session Group" #E8F5E9
 end box
 database "FTS5 Index" as fts
 
+note over user
+  Scope:          SSN-07 Search Sessions — Full-text search across session history
+  Preconditions:  FTS5 index available (or fallback to linear scan)
+  Contexts:       Called by user-facing search command
+  Excludes:       Session modification, deletion, branching
+  Rollback:       Index not available → fallback to linear scan, still returns results
+  Design:         FTS5 for performance; graceful degradation to linear scan; ranked results with snippets
+  Returns:
+    - Success: 200 OK — SearchResult[] + nextPageToken
+    - Failure: 200 OK — fallback to linear scan (degraded)
+end note
 
 == SSN-07 Search Sessions ==
 
@@ -53,6 +64,13 @@ break Index not available
     search --> agent : 200 OK — SearchResult[linear_scan_results]
     agent --> router : AgentEvent(Done)
 end
+
+note over user
+  Flow:    SSN-07 → FTS5 query → rank → format → 200 OK
+  State:   No state change
+  Success: 200 OK — SearchResult[session_id, turn_id, snippet, score], nextPageToken
+  Failure: IndexError: index unavailable — fallback to linear scan (200 OK)
+end note
 
 
 @enduml

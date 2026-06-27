@@ -31,6 +31,19 @@ box "Tool Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          EVL-01 EVALUATE Task — Evaluate task completion via success checks and quality signals
+  Preconditions:  Task has been executed; check_commands are defined
+  Contexts:       Called by AgentOrchestrator after edit application
+  Excludes:       LLM-based validation (EVL-04); test suite execution (EVL-05)
+  Rollback:       Results are read-only; no state change on failure
+  Design:         Runs each check_command with 30s timeout; aggregates pass/fail
+  Returns:
+    - Success: 200 OK — CheckResult(passed, results[])
+    - Failure: 400 BAD_REQUEST: one or more checks failed
+end note
+
+
 user -> router : types input
 router -> agent : PROCESS(user_input)
 
@@ -59,5 +72,12 @@ deactivate checker
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EVL-01 → agent → checker → shell(execute, loop) → aggregate_results → Done
+  State:   No state change
+  Success: 200 OK — CheckResult(passed, results[])
+  Failure: 400 BAD_REQUEST: check failed — trigger retry (EVL-06)
+end note
 
 @enduml

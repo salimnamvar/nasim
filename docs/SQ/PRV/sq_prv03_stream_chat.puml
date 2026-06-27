@@ -31,6 +31,19 @@ box "Repository Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          PRV-03 STREAM ProviderChat — Streaming LLM chat completion via provider abstraction
+  Preconditions:  Provider registered (PRV-01); messages and tools are prepared
+  Contexts:       Called by AgentOrchestrator for streaming completions
+  Excludes:       Synchronous chat (PRV-02); provider registration (PRV-01); backend selection (PRV-04)
+  Rollback:       Partial stream discarded; agent enters ERROR state
+  Design:         Streaming response; tool calls accumulated by index; chunks yielded to agent
+  Returns:
+    - Success: 200 OK — StreamComplete
+    - Failure: 503 SERVICE_UNAVAILABLE: stream interrupted
+end note
+
+
 == PRV-03 STREAM ProviderChat ==
 
 user -> router : PRV-03 STREAM ProviderChat(messages, tools)
@@ -70,5 +83,12 @@ agent --> router : StreamComplete
 deactivate agent
 deactivate router
 
+
+note over user
+  Flow:    PRV-03 → user → router → agent → provider → api(HTTP POST stream) → loop chunks → yield text/tool_calls → chat_store(store) → Done
+  State:   No state change
+  Success: 200 OK — StreamComplete
+  Failure: 503 SERVICE_UNAVAILABLE: stream interrupted — agent enters ERROR state
+end note
 
 @enduml

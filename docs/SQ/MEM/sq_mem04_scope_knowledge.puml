@@ -10,18 +10,32 @@
 ' Review:    docs/SQ/README.md
 ' ============================================================
 
+title nasim — MEM-04 SCOPE Knowledge
+
 actor "User" as user
 
-box "API Group (Entry Gate)" #E3F2FD
+box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
+box "Service Group" #FFF3E0
   participant "AgentOrchestrator" as agent
 end box
-box "Memory Group" #E8F5E9
+box "Repository Group" #E8F5E9
   participant "MemoryScope" as scope
   participant "MemoryStore" as store
 end box
+
+note over user
+  Scope:          MEM-04 SCOPE Knowledge
+  Preconditions:  MemoryStore accessible
+  Contexts:       Called by AgentOrchestrator during task processing
+  Excludes:       Knowledge persist, recall, search
+  Rollback:       Invalid scope falls back to global scope
+  Design:         Hierarchical scope resolution with fallback
+  Returns:
+    - Success: scoped_entries
+    - Failure: global scope entries (fallback on invalid scope)
+end note
 
 
 user -> router : types input
@@ -49,6 +63,13 @@ scope --> agent : scoped_entries
 deactivate scope
 
 agent --> router : AgentEvent(Done)
+
+note over user
+  Flow:    MEM-04 → agent → scope → store → scope → agent
+  State:   No state change
+  Success: scoped_entries
+  Failure: global scope entries — fallback on invalid scope
+end note
 
 
 @enduml

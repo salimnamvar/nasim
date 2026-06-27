@@ -23,6 +23,18 @@ box "Agent Group" #FFF3E0
 end box
 
 
+note over user
+  Scope:          AGT-04 DELETE History — Clear conversation history
+  Preconditions:  Session exists, ConversationHistory initialized
+  Contexts:       /reset API endpoint
+  Excludes:       System prompt preservation logic, Token budget reset
+  Rollback:       History cleared to system_prompt only, token_count reset
+  Design:         Hard reset to system_prompt baseline, preserves session identity
+  Returns:
+    - Success: 200 history cleared
+    - Failure: N/A (always succeeds)
+end note
+
 == AGT-04 DELETE History ==
 
 user -> router : /reset
@@ -39,5 +51,12 @@ deactivate history
 agent --> router : AgentEvent(Done)
 deactivate agent
 
+
+note over user
+  Flow:    AGT-04 → DELETE History → reset to system_prompt
+  State:   Any → THINKING (fresh conversation)
+  Success: 200 history cleared, token_count reset to system_prompt tokens
+  Failure: N/A (always succeeds)
+end note
 
 @enduml

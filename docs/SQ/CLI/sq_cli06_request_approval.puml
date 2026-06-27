@@ -14,7 +14,17 @@ title nasim — CLI-06 REQUEST Approval
 
 actor "User" as user
 
-box "Controller Group" #E3F2FD
+note over user
+  Scope:          CLI-06 — Request Approval
+  Preconditions:  AgentOrchestrator active, tool call pending approval
+  Contexts:       Called by agent during tool execution when safety requires approval
+  Excludes:       Normal message flow, slash commands, output streaming
+  Rollback:       Timeout or denial → tool call denied
+  Design:         Interactive approval with timeout, SafetyCoordinator determines approval requirement
+  Returns:
+    - Success: Approved, tool call proceeds
+    - Failure: Denied (user rejection or timeout)
+end note #E3F2FD
   participant "Renderer" as renderer
 end box
 box "Service Group" #FFF3E0
@@ -51,5 +61,11 @@ end
 
 deactivate renderer
 
+note over user
+  Flow:    AgentOrchestrator → SafetyCoordinator → Renderer → user → Renderer → AgentOrchestrator
+  State:   No state change
+  Success: Approved, tool call proceeds
+  Failure: Denied: user rejection or timeout — tool call blocked
+end note
 
 @enduml

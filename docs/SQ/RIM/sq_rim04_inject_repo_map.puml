@@ -30,6 +30,18 @@ box "Context Group" #FFF3E0
 end box
 
 
+note over user
+  Scope:          RIM-04 INJECT RepoMap — token-budgeted repo-map injection into LLM context
+  Preconditions:  Ranked symbols available from RIM-03; token budget specified
+  Contexts:       Called by AgentOrchestrator before LLM inference to provide codebase context
+  Excludes:       Codebase indexing, embedding, semantic search, symbol ranking
+  Rollback:       (No explicit failure path — always produces repo map within budget)
+  Design:         Splits budget [60% structure, 25% snippets, 15% reserve]; truncates to max_tokens; prepends to conversation
+  Returns:
+    - Success: 200 OK — RepoMapContext(text, token_count)
+    - Failure: (none — always returns within budget)
+end note
+
 == RIM-04 INJECT RepoMap ==
 
 user -> router : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
@@ -73,5 +85,11 @@ agent --> router : RepoMapContext(text, token_count)
 deactivate agent
 deactivate router
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → RepoMapInjector → get budget → split budget → get top symbols → get snippets → format → truncate → prepend context → Result
+  State:   No state change (mutates conversation history with injected context)
+  Success: 200 OK — RepoMapContext(text, token_count)
+  Failure: (none — always returns within token budget)
+end note
 
 @enduml

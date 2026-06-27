@@ -29,6 +29,18 @@ box "External" #F5F5F5
 end box
 
 
+note over user
+  Scope:          WRL-01 APPEND Event — append event to wire log
+  Preconditions:  Wire log session initialized; event payload valid
+  Contexts:       Called by AgentOrchestrator for every user/agent interaction turn
+  Excludes:       Log reading, seeking, forking, checkpointing
+  Rollback:       Write failure (IOError) → 500 INTERNAL — AppendError("write failed")
+  Design:         Append-only log; metadata (session_id, timestamp) auto-injected; sequential offset tracking
+  Returns:
+    - Success: 200 OK — AppendResult(event_id, offset)
+    - Failure: 500 INTERNAL — AppendError("write failed")
+end note
+
 == WRL-01 APPEND Event ==
 
 user -> router : types input
@@ -61,5 +73,11 @@ deactivate wirelog
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → WireLog → serialize → add metadata → fs append → Result
+  State:   No state change (append-only log mutation)
+  Success: 200 OK — AgentEvent(Done) with AppendResult(event_id, offset)
+  Failure: 500 INTERNAL: write failed — propagate error to caller; no retry
+end note
 
 @enduml

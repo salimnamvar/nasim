@@ -23,6 +23,17 @@ box "Session Group" #E8F5E9
 end box
 database "Session Directory" as dir
 
+note over user
+  Scope:          SSN-01 Persist Session — Save conversation messages to disk as JSONL
+  Preconditions:  Session exists in memory with messages; disk writable
+  Contexts:       Called by AGT-15 (agent process loop) after each turn; called internally by SSN-04
+  Excludes:       Snapshot versioning, index updates, search indexing
+  Rollback:       Disk write failure → 500 INTERNAL, log warning, session data preserved in memory
+  Design:         JSONL format for append-friendly writes; single file per session; no partial writes
+  Returns:
+    - Success: 200 OK — save complete
+    - Failure: 500 INTERNAL — disk write error
+end note
 
 == SSN-01 Save Session ==
 
@@ -50,5 +61,12 @@ agent --> router : AgentEvent(Done)
 deactivate store
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    SSN-01 → serialize messages → write session.jsonl → 200 OK
+  State:   No state change
+  Success: 200 OK — save complete
+  Failure: 500 INTERNAL: disk write error — session data preserved in memory, warning logged
+end note
 
 @enduml

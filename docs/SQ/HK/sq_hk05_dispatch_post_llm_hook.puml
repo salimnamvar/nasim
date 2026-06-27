@@ -28,6 +28,17 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
+note over user
+  Scope:          HK-05 Dispatch Post-LLM Hook — Execute hooks after LLM call completes
+  Preconditions:  LLM call has completed and returned a result; hooks registered for PostLLMCall event
+  Contexts:       Called by AgentOrchestrator after LLM invocation
+  Excludes:       Hook registration (HK-01), Tool hooks (HK-02, HK-03), Pre-LLM dispatch (HK-04)
+  Rollback:       DENY action → LLM result discarded, HookResult returned immediately
+  Design:         Hooks execute in priority order; DENY action breaks the loop early
+  Returns:
+    - Success: 200 HookResult(action=ALLOW, modified_data?)
+    - Failure: 200 HookResult(action=DENY, reason)
+end note
 
 == HK-05 DISPATCH Post-LLM Hook ==
 
@@ -57,5 +68,11 @@ agent --> router : HookResult(action=ALLOW)
 deactivate agent
 deactivate router
 
+note over user
+  Flow:    HK-05 → invoke agent → find hooks → loop priority → execute hook → DENY or continue
+  State:   No state change
+  Success: 200 HookResult(action=ALLOW, modified_data?)
+  Failure: 200: DENY action — LLM result discarded, reason returned
+end note
 
 @enduml

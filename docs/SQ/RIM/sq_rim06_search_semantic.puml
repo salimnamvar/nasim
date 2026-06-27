@@ -31,6 +31,18 @@ box "Storage Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          RIM-06 SEARCH Semantic — embedding-based code similarity search across repository
+  Preconditions:  Embeddings indexed via RIM-05; query text provided
+  Contexts:       Called by AgentOrchestrator for semantic code discovery and retrieval
+  Excludes:       Codebase indexing, symbol ranking, repo-map injection, embedding generation
+  Rollback:       (No explicit failure path — returns empty results if no matches above threshold)
+  Design:         Embeds query, cosine similarity search, filters by min_sim=0.3, paginates with page_size=20
+  Returns:
+    - Success: 200 OK — SearchResultList(results, scores, snippets, nextPageToken)
+    - Failure: (none — returns empty list if no matches)
+end note
+
 == RIM-06 SEARCH Semantic ==
 
 user -> router : RIM-06 SEARCH Semantic(query, top_k, page_size=20, page_token="abc")
@@ -62,5 +74,11 @@ agent --> router : SearchResultList(results, scores, snippets)
 deactivate agent
 deactivate router
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → SemanticSearch → embed query → cosine search → filter → format snippets → Result
+  State:   No state change (read-only search)
+  Success: 200 OK — SearchResultList(results, scores, snippets, nextPageToken)
+  Failure: (none — returns empty list when no matches above threshold)
+end note
 
 @enduml

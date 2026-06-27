@@ -36,6 +36,18 @@ box "Observability Group" #F3E5F5
 end box
 
 
+note over user
+  Scope:          AGT-01 PROCESS User Task — Core agentic loop
+  Preconditions:  Session exists, user authenticated, AgentOrchestrator initialized
+  Contexts:       API-06 DISPATCH Message entry point
+  Excludes:       Tool execution details (AGT-02), Context compaction (AGT-06)
+  Rollback:       LLM failure → append error message → AgentEvent(Error)
+  Design:         Single entry point via ServerRouter, SSE streaming response
+  Returns:
+    - Success: 200 AgentEvent(Done) with SSE stream
+    - Failure: 500 AgentEvent(Error) on LLM/tool failure
+end note
+
 == AGT-01 PROCESS User Task (API-First) ==
 
 user -> router : API-06 DISPATCH Message(session_id, message)
@@ -99,5 +111,12 @@ deactivate agent
 router --> user : SSE stream (AgentEvents)
 deactivate router
 
+
+note over user
+  Flow:    AGT-01 → API-06 → OBS-03 → AGT-03 → HK-04 → PRV-02 → HK-05 → AGT-02/AGT-03
+  State:   THINKING → TOOL_EXEC (if tools) → THINKING → DONE
+  Success: 200 AgentEvent(Done) with SSE stream of AgentEvents
+  Failure: 500 AgentEvent(Error) on LLM failure or tool execution errors
+end note
 
 @enduml

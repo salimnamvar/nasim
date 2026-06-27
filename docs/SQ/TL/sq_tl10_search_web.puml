@@ -25,6 +25,18 @@ end box
 participant "Search Backend" as backend
 
 
+note over user
+  Scope:          TL-10 SEARCH Web — Search the web for information
+  Preconditions:  Search query provided by user; search backend available
+  Contexts:       Called by research, documentation lookup, problem investigation
+  Excludes:       Direct URL fetching, authenticated searches, search history
+  Rollback:       Backend unavailable → ToolResult(success=False); no state change
+  Design:         Delegates to external search backend; returns title + url + snippet results
+  Returns:
+    - Success: ToolResult(success=True, content=formatted_results)
+    - Failure: ToolResult(success=False) — backend unavailable
+end note
+
 == TL-10 SEARCH Web ==
 
 user -> router : types input
@@ -57,5 +69,12 @@ deactivate search
 deactivate registry
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    TL-10 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → WebSearchTool → Search Backend
+  State:   No state change
+  Success: 200 + ToolResult(success=True, content=formatted_results)
+  Failure: ToolResult(success=False): search backend unavailable
+end note
 
 @enduml

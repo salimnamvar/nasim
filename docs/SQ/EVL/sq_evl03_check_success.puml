@@ -30,8 +30,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+note over user
+  Scope:          EVL-03 CHECK Success — Run user-defined success checks and return pass/fail
+  Preconditions:  Edit has been applied; check_commands are defined in config
+  Contexts:       Called by EvaluationEngine after edit application
+  Excludes:       LLM-based validation (EVL-04); test suite execution (EVL-05)
+  Rollback:       Checks are read-only; no state change
+  Design:         Runs shell commands with 30s timeout; aggregates exit codes
+  Returns:
+    - Success: 200 OK — SuccessCheckResult(passed, results[])
+    - Failure: 400 BAD_REQUEST: check command failed
+end note
+
 
 == EVL-03 CHECK Success ==
 
@@ -64,5 +74,12 @@ deactivate engine
 
 agent --> router : AgentEvent(Done)
 
+
+note over user
+  Flow:    EVL-03 → agent → engine → runner → shell(execute, loop) → aggregate_results → Done
+  State:   No state change
+  Success: 200 OK — SuccessCheckResult(passed, results[])
+  Failure: 400 BAD_REQUEST: check failed — trigger retry (EVL-06)
+end note
 
 @enduml

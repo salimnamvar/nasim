@@ -27,6 +27,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          AGT-06 COMPACT Context — Token budget compaction
+  Preconditions:  Token budget exceeded, messages list populated
+  Contexts:       AGT-03 UPDATE Conversation (triggered by COMPACT_NEEDED)
+  Excludes:       Message content preservation guarantees, Specific compaction algorithm
+  Rollback:       Compaction applied, messages shortened to fit budget
+  Design:         ContextCompactor handles summarization, preserves system prompt
+  Returns:
+    - Success: 200 shortened messages within budget
+    - Failure: 500 compaction algorithm failure
+end note
+
 == AGT-06 COMPACT Context ==
 
 user -> router : types input
@@ -56,5 +68,12 @@ deactivate history
 agent --> router : AgentEvent(Done)
 deactivate agent
 
+
+note over user
+  Flow:    AGT-06 → check budget → CTX-02 → replace messages
+  State:   THINKING → TOOL_EXEC (compaction) → THINKING
+  Success: 200 shortened messages within token budget
+  Failure: 500 compaction algorithm failure
+end note
 
 @enduml

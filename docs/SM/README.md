@@ -90,6 +90,119 @@
 - **API-First:** All entry/exit transitions in Agent SM use `API-06` as the sole entry gate.
   Session lifecycle mutations use API UCs (API-02 through API-05).
 
+## Transition Matrices
+
+### Agent Lifecycle Transition Matrix
+
+| From | To | UC-ID | Condition |
+|------|----|-------|-----------|
+| [*] | IDLE | AGT-01 | Process startup |
+| IDLE | LISTENING | API-06 | DISPATCH Message received |
+| IDLE | SERVING | API-06 | API request received |
+| IDLE | PLANNING | AGT-07 | /plan command entered |
+| LISTENING | THINKING | API-06 | Input parsed, messages built |
+| SERVING | THINKING | API-06 | API request processed |
+| SERVING | IDLE | API-06 | API request complete |
+| THINKING | RESPONDING | PRV-02 | LLM returns text only |
+| THINKING | TOOL_EXEC | PRV-02 | LLM returns tool_calls |
+| THINKING | COMPACTING | AGT-06 | token_count > context_budget |
+| THINKING | ROUTING | RTG-01 | ModelRouter resolving model |
+| THINKING | ERROR | PRV-02 | Provider call failed |
+| THINKING | EVALUATING | EVL-01 | task_complete AND evaluation_enabled |
+| ROUTING | THINKING | RTG-01 | Model selected |
+| TOOL_EXEC | THINKING | AGT-02 | Tool call complete |
+| TOOL_EXEC | AWAITING_APPROVAL | SAF-02 | safety_mode=ask AND unsafe tool |
+| TOOL_EXEC | HOOK_RUNNING | HK-02 | Pre/post hook configured |
+| TOOL_EXEC | ERROR | AGT-02 | Tool execution failed |
+| TOOL_EXEC | STAGING | EDT-10 | diff_sandbox mode active |
+| HOOK_RUNNING | TOOL_EXEC | HK-02 | Hook execution complete |
+| HOOK_RUNNING | IDLE | HK-02 | Hook execution complete (no tool) |
+| AWAITING_APPROVAL | TOOL_EXEC | SAF-02 | User approves |
+| AWAITING_APPROVAL | IDLE | SAF-02 | User denies |
+| COMPACTING | THINKING | AGT-06 | Context compacted |
+| RESPONDING | IDLE | API-06 | Response streamed to user |
+| ERROR | IDLE | AGT-14 | Error handled |
+| PLANNING | IDLE | AGT-07 | Plan mode exited |
+| EVALUATING | REVIEWING | EVL-01 | Evaluation passed |
+| EVALUATING | RETRYING | EVL-01 | Evaluation failed |
+| EVALUATING | THINKING | EVL-01 | Retry with feedback |
+| REVIEWING | THINKING | EVL-04 | LLM review passed |
+| REVIEWING | RETRYING | EVL-04 | LLM review rejected |
+| RETRYING | THINKING | EVL-06 | Retry with feedback |
+| RETRYING | ERROR | EVL-06 | Retry exhausted |
+| STAGING | AWAITING_DIFF_APPROVAL | EDT-10 | Diff computed successfully |
+| STAGING | ERROR | EDT-10 | Diff computation failed |
+| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAF-02 | User approves diff |
+| AWAITING_DIFF_APPROVAL | IDLE | SAF-02 | User rejects diff |
+
+### Session Lifecycle Transition Matrix
+
+| From | To | UC-ID | Condition |
+|------|----|-------|-----------|
+| [*] | CREATED | API-02 | Session record initialized |
+| CREATED | ACTIVE | API-02 | Session ready for messages |
+| ACTIVE | SAVED | API-04 | Session persisted to disk |
+| ACTIVE | BRANCHED | WRL-04 | Session forked from parent |
+| ACTIVE | CLOSED | API-05 | Session terminated |
+| SAVED | RESTORED | API-03 | Session loaded from disk |
+| SAVED | CLOSED | API-05 | Session terminated |
+| RESTORED | ACTIVE | API-02 | Session ready for messages |
+| RESTORED | SAVED | API-04 | Session persisted to disk |
+| RESTORED | CLOSED | API-05 | Session terminated |
+| BRANCHED | ACTIVE | API-02 | Session ready for messages |
+| BRANCHED | CLOSED | API-05 | Session terminated |
+| CLOSED | [*] | — | Terminal state |
+
+### Plan Lifecycle Transition Matrix
+
+| From | To | UC-ID | Condition |
+|------|----|-------|-----------|
+| [*] | EMPTY | AGT-07 | No plan active |
+| EMPTY | BUILDING | AGT-07 | /plan command entered |
+| BUILDING | QUEUED | AGT-07 | Plan construction complete |
+| BUILDING | EMPTY | AGT-07 | Plan cancelled |
+| QUEUED | APPROVED | AGT-08 | User approves plan |
+| QUEUED | REJECTED | AGT-08 | User rejects plan |
+| APPROVED | EXECUTING | AGT-08 | Execution started |
+| EXECUTING | COMPLETED | AGT-01 | All plan steps finished |
+| EXECUTING | EMPTY | AGT-14 | Execution failed or cancelled |
+| COMPLETED | [*] | AGT-01 | Terminal state |
+| REJECTED | [*] | AGT-08 | Terminal state |
+
+### Plugin Lifecycle Transition Matrix
+
+| From | To | UC-ID | Condition |
+|------|----|-------|-----------|
+| [*] | DISCOVERED | PLG-01 | Plugin found on filesystem |
+| DISCOVERED | LOADING | PLG-02 | Manifest parsing starts |
+| DISCOVERED | ERROR | PLG-01 | Plugin discovery failed |
+| LOADING | LOADED | PLG-03 | Manifest parsed, tools registered |
+| LOADING | ERROR | PLG-02 | Manifest parsing failed |
+| LOADED | ENABLED | PLG-05 | Plugin activated |
+| LOADED | DISABLED | PLG-06 | Plugin deactivated |
+| LOADED | ERROR | PLG-03 | Tool registration failed |
+| ENABLED | DISABLED | PLG-06 | Plugin deactivated |
+| ENABLED | ERROR | PLG-01 | Runtime exception |
+| ENABLED | [*] | PLG-06 | Plugin unloaded |
+| DISABLED | ENABLED | PLG-05 | Plugin activated |
+| DISABLED | [*] | PLG-06 | Plugin unloaded |
+| ERROR | DISCOVERED | PLG-01 | Re-discovery (recovery) |
+
+### Subagent Lifecycle Transition Matrix
+
+| From | To | UC-ID | Condition |
+|------|----|-------|-----------|
+| [*] | IDLE | AGT-09 | Default state |
+| IDLE | SPAWNING | AGT-09 | Child agent spawn requested |
+| SPAWNING | RUNNING | AGT-09 | Child agent initialized |
+| SPAWNING | FAILED | AGT-09 | Spawn failed |
+| RUNNING | COMPLETED | AGT-10 | Task finished successfully |
+| RUNNING | FAILED | AGT-14 | Unrecoverable error |
+| COMPLETED | IDLE | AGT-10 | Results aggregated to parent |
+| COMPLETED | [*] | AGT-10 | Terminal state |
+| FAILED | IDLE | AGT-14 | Error reported, cleanup done |
+| FAILED | [*] | AGT-14 | Terminal state |
+
 ## Lifecycle-Write UC Mapping (SMT Ownership)
 
 One lifecycle-write UC per target state. This table is the authoritative reference.

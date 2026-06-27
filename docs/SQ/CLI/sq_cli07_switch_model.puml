@@ -14,7 +14,17 @@ title nasim — CLI-07 UPDATE Model
 
 actor "User" as user
 
-box "CLI Interface Container" #E3F2FD
+note over user
+  Scope:          CLI-07 — Switch Model
+  Preconditions:  REPLSession active, model available in routing table
+  Contexts:       Called via /model slash command from CLI-01
+  Excludes:       Plan mode (CLI-05), session management, output streaming
+  Rollback:       Model not found → CommandError returned
+  Design:         Model validation via RTGModelRouter, update active model pointer
+  Returns:
+    - Success: CommandResult with confirmation ("Switched to {model_name}")
+    - Failure: CommandError on model not found
+end note #E3F2FD
   participant "REPLSession" as repl
 end box
 box "API Group (Entry Gate)" #E3F2FD
@@ -57,5 +67,11 @@ break Model not found
     cmd --> repl : CommandError
 end
 
+note over user
+  Flow:    user → REPLSession → SlashCommandHandler → RTGModelRouter → SlashCommandHandler → REPLSession
+  State:   No state change (model pointer updated)
+  Success: CommandResult with "Switched to {model_name}"
+  Failure: Model not found: CommandError
+end note
 
 @enduml

@@ -29,6 +29,18 @@ box "External" #F5F5F5
 end box
 
 
+note over user
+  Scope:          VCS-02 INSERT Commit — create commit with conventional message
+  Preconditions:  Git repository initialized; files staged via git add
+  Contexts:       Called by AgentOrchestrator after user confirms commit or auto-commit triggers
+  Excludes:       Staging files, diff computation, push operations
+  Rollback:       No staged files → error "no_staged_files"; invalid message → error "invalid_commit_message"
+  Design:         Validates conventional commit format before executing git commit
+  Returns:
+    - Success: 200 OK — {hash, files}
+    - Failure: 400 Bad Request — no_staged_files | invalid_commit_message
+end note
+
 == VCS-02 INSERT Commit ==
 
 user -> router : types input
@@ -64,5 +76,11 @@ deactivate commit
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → GitCommit → read staged → validate message → git commit → Result
+  State:   No state change (creates commit in git history)
+  Success: 200 OK — AgentEvent(Done) with {hash, files}
+  Failure: 400 Bad Request: no_staged_files — prompt user to stage files; 400 Bad Request: invalid_commit_message — prompt for valid format
+end note
 
 @enduml

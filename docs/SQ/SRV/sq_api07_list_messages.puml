@@ -17,9 +17,24 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
+end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
+
+note over user
+  Scope:          API-07 LIST Messages
+  Preconditions:  Session must exist
+  Contexts:       Parent: HTTP Client request
+  Excludes:       Session management, message dispatch
+  Rollback:       No state change on failure
+  Design:         Paginated message read; session existence check via Service
+  Returns:
+    - Success: 200 OK — {messages: [...], next_page_token: string}
+    - Failure: 404 NOT_FOUND — session does not exist
+end note
 
 
 == API-07 LIST Messages ==
@@ -27,20 +42,33 @@ end box
 user -> router : GET /v1/sessions/{id}/messages?page_size=50&page_token=abc
 activate router
 
-router -> store : API-07 LIST Messages(sessionId, pageSize=50, pageToken="abc")
+router -> svc : API-07 LIST Messages(sessionId, pageSize=50, pageToken="abc")
+activate svc
+
+svc -> store : API-07 LIST Messages(sessionId, pageSize=50, pageToken="abc")
 activate store
 
 alt Session exists
-    store --> router : 200 OK {messages: [...], nextPageToken: "def"}
+    store --> svc : 200 OK {messages: [...], nextPageToken: "def"}
     deactivate store
+    svc --> router : 200 OK {messages: [...], nextPageToken: "def"}
     router --> user : 200 OK {messages: [...], next_page_token: "def"}
 else Session not found [404]
-    store --> router : 404 NOT_FOUND
+    store --> svc : 404 NOT_FOUND
     deactivate store
+    svc --> router : 404 NOT_FOUND
     router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
 end
 
+deactivate svc
 deactivate router
+
+note over user
+  Flow:    API-07 → router → svc → store → svc → router → user
+  State:   No state change
+  Success: 200 OK — {messages: [...], next_page_token: string}
+  Failure: 404 NOT_FOUND: session does not exist — verify session ID
+end note
 
 
 @enduml

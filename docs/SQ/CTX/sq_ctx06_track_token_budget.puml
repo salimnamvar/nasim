@@ -20,6 +20,17 @@ box "Agent Group" #FFF3E0
   participant "ConversationHistory" as history
 end box
 
+note over user
+  Scope:          CTX-06 TRACK Token Budget — track token count as messages are added
+  Preconditions:  ConversationHistory initialized; context_budget configured
+  Contexts:       Called by CTX-01 via ref
+  Excludes:       Message truncation, distillation, context injection
+  Rollback:       token_count > budget → triggers CTX-02 COMPACT; otherwise no failure path
+  Design:         Token estimation is additive; budget check on every message add
+  Returns:
+    - Success: 200 + ok (within budget)
+    - Failure: 200 + COMPACT_NEEDED (exceeds budget, triggers CTX-02)
+end note
 
 == CTX-01 Track Token Count ==
 
@@ -45,5 +56,12 @@ agent --> router : AgentEvent(Done)
 
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    CTX-06 → append message → estimate tokens → check budget → ok or trigger CTX-02
+  State:   No state change (token_count updated in ConversationHistory)
+  Success: 200 + ok (within budget)
+  Failure: 200: token_count > context_budget — trigger CTX-02 COMPACT
+end note
 
 @enduml

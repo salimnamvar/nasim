@@ -29,6 +29,18 @@ box "Repository Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          AGT-12 LOAD Persona — Load persona configuration
+  Preconditions:  PersonaRegistry populated, persona_name provided
+  Contexts:       AGT-11 DELEGATE to Persona, Direct persona load
+  Excludes:       Persona switching (AGT-13), Tool execution with persona
+  Rollback:       Invalid config → PersonaLoadError
+  Design:         Config validation with system prompt and tool allowlist extraction
+  Returns:
+    - Success: 200 PersonaLoaded with parsed config
+    - Failure: 400 PersonaLoadError on invalid config
+end note
+
 == AGT-12 LOAD Persona ==
 
 user -> router : types input
@@ -57,5 +69,12 @@ deactivate pm
 agent --> router : AgentEvent(Done)
 deactivate agent
 
+
+note over user
+  Flow:    AGT-12 → get_persona_config → parse prompt → extract allowlist
+  State:   THINKING → PERSONA_ACTIVE → THINKING
+  Success: 200 PersonaLoaded with system prompt and tool allowlist
+  Failure: 400 PersonaLoadError on invalid or missing config
+end note
 
 @enduml

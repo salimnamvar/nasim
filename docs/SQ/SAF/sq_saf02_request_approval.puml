@@ -23,6 +23,17 @@ box "Agent Group" #FFF3E0
   participant "PermissionGate" as gate
 end box
 
+note over user
+  Scope:          SAF-02 Request Approval — Display approval prompt for unsafe tool execution
+  Preconditions:  SAF-01 returned SafetyViolation with safety_mode="ask"
+  Contexts:       Called by SAF-01 when tool is unsafe and mode is "ask"
+  Excludes:       Permission check (SAF-01), safety mode config (SAF-03)
+  Rollback:       User rejection → tool execution blocked
+  Design:         Interactive y/N prompt; user choice respected immediately
+  Returns:
+    - Success: approved (y)
+    - Failure: rejected (N)
+end note
 
 == SAF-02 Prompt User Approval ==
 
@@ -51,6 +62,13 @@ end
 
 deactivate gate
 deactivate renderer
+
+note over user
+  Flow:    SAF-02 → display prompt → user choice → approved or rejected
+  State:   No state change
+  Success: approved — tool execution proceeds
+  Failure: rejected (N) — tool execution blocked
+end note
 
 
 @enduml

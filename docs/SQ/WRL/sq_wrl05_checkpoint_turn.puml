@@ -29,6 +29,18 @@ box "FileSystem Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          WRL-05 CHECKPOINT Turn — index current turn and persist checkpoint for resumption
+  Preconditions:  Turn data available; wire log session active
+  Contexts:       Called by AgentOrchestrator at end of each turn for persistence
+  Excludes:       Event appending, log reading, seeking, session forking
+  Rollback:       (No explicit failure path in diagram — assumes filesystem persistence succeeds)
+  Design:         Extracts turn metadata, builds checkpoint index, persists to filesystem
+  Returns:
+    - Success: 200 OK — CheckpointResult(turn_id, offset)
+    - Failure: (implicit — returns error if filesystem write fails)
+end note
+
 == WRL-05 CHECKPOINT Turn ==
 
 user -> router : types input
@@ -57,5 +69,11 @@ deactivate wl
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → WireLog → TurnIndex → extract metadata → build index → persist → Result
+  State:   No state change (checkpoint persistence; turn indexed for future resume)
+  Success: 200 OK — AgentEvent(Done) with CheckpointResult(turn_id, offset)
+  Failure: (implicit) filesystem write fails — propagate error to caller
+end note
 
 @enduml

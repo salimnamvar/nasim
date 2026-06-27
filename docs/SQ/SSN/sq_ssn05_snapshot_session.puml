@@ -25,6 +25,17 @@ box "Session Group" #E8F5E9
 end box
 database "Snapshot Store" as snap
 
+note over user
+  Scope:          SSN-05 Snapshot Session — Create a point-in-time snapshot of session state
+  Preconditions:  Session exists with messages
+  Contexts:       Called periodically during session; called before destructive operations
+  Excludes:       Revert, branch, search
+  Rollback:       Disk write error → 500 INTERNAL, snapshot not created
+  Design:         Immutable snapshot copies; separate snapshot store; snapshot_id returned
+  Returns:
+    - Success: 200 OK — SnapshotCreated(snapshot_id)
+    - Failure: 500 INTERNAL — disk write error
+end note
 
 == SSN-05 Snapshot Session ==
 
@@ -50,6 +61,13 @@ break Disk write error
     ver --> agent : 500 INTERNAL — SnapshotError
     agent --> router : AgentEvent(Error)
 end
+
+note over user
+  Flow:    SSN-05 → serialize messages → write snapshot → 200 OK
+  State:   No state change
+  Success: 200 OK — SnapshotCreated(snapshot_id)
+  Failure: 500 INTERNAL: disk write error — snapshot not created
+end note
 
 
 @enduml

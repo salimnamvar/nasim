@@ -17,9 +17,25 @@ actor "User" as user
 box "Controller Group" #E3F2FD
   participant "ServerRouter" as router
 end box
+box "Service Group" #FFF3E0
+  participant "SessionService" as svc
+end box
 box "Repository Group" #E8F5E9
   participant "SessionStore" as store
 end box
+
+note over user
+  Scope:          API-05 DELETE Session
+  Preconditions:  Session must exist
+  Contexts:       Parent: HTTP Client request
+  Excludes:       Session creation, update, message dispatch
+  Rollback:       Delete is not reversible; state guard prevents invalid transitions
+  Design:         Service validates state transition (ACTIVE → CLOSED) before delete
+  Returns:
+    - Success: 200 OK — {retired: true}
+    - Failure: 404 NOT_FOUND — session does not exist
+    - Failure: 409 FAILED_PRECONDITION — invalid state transition
+end note
 
 
 == API-05 DELETE Session ==
@@ -27,27 +43,41 @@ end box
 user -> router : DELETE /v1/sessions/{id}
 activate router
 
-router -> store : API-05 READ Session(sessionId)
+router -> svc : API-05 DELETE Session(sessionId)
+activate svc
+
+svc -> store : API-05 READ Session(sessionId)
 activate store
 
 break Session not found [404]
-  store --> router : 404 NOT_FOUND
+  store --> svc : 404 NOT_FOUND
   deactivate store
+  svc --> router : 404 NOT_FOUND
   router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
 end
 
-store --> router : SessionEntity
+store --> svc : SessionEntity
 deactivate store
 
-router -> router : validateStateTransition(ACTIVE → CLOSED)
+svc -> svc : validateStateTransition(ACTIVE → CLOSED)
 
-router -> store : API-05 DELETE Session(sessionId)
+svc -> store : API-05 DELETE Session(sessionId)
 activate store
-store --> router : deleted
+store --> svc : deleted
 deactivate store
 
+svc --> router : 200 OK {retired: true}
+deactivate svc
 router --> user : 200 OK {retired: true}
 deactivate router
+
+note over user
+  Flow:    API-05 → router → svc → store(read) → svc → store(delete) → router → user
+  State:   ACTIVE → CLOSED
+  Success: 200 OK — {retired: true}
+  Failure: 404 NOT_FOUND: session does not exist — verify session ID
+  Failure: 409 FAILED_PRECONDITION: invalid state transition — check session state
+end note
 
 
 @enduml

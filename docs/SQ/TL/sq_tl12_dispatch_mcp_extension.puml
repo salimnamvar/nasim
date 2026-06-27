@@ -25,6 +25,18 @@ end box
 participant "MCP Server" as server
 
 
+note over user
+  Scope:          TL-12 DISPATCH MCP Extension — Invoke tools from MCP server extensions
+  Preconditions:  MCP server configured and running; tool name registered
+  Contexts:       Called by any UC requiring MCP-provided capabilities
+  Excludes:       Direct tool invocation, MCP server management, tool registration
+  Rollback:       Server not running → ToolResult(success=False); Tool not found → ToolResult(success=False); no state change
+  Design:         Communicates via stdio/SSE; wraps results in ToolResult; delegates to MCP server
+  Returns:
+    - Success: ToolResult(success=True, content=mcp_result)
+    - Failure: ToolResult(success=False) — server unreachable, tool not found
+end note
+
 == TL-12 Dispatch MCP Extension ==
 
 user -> router : types input
@@ -65,5 +77,12 @@ deactivate mcp
 deactivate registry
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    TL-12 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → MCPToolAdapter → MCP Server
+  State:   No state change
+  Success: 200 + ToolResult(success=True, content=result)
+  Failure: ToolResult(success=False): MCP server not reachable | tool not found on MCP server
+end note
 
 @enduml

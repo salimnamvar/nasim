@@ -25,6 +25,18 @@ box "Tool Group" #E8F5E9
 end box
 
 
+note over user
+  Scope:          TL-06 SEARCH Grep — Search file contents by regex pattern
+  Preconditions:  Pattern and optional path provided by user; search path exists
+  Contexts:       Called by code exploration, bug investigation, feature search
+  Excludes:       Binary file search, file name search, content modification
+  Rollback:       No matches found → ToolResult(success=False); Permission denied / path error → ToolResult(success=False); no state change
+  Design:         Prefers ripgrep (rg) for performance; falls back to Python os.walk + re.search; formats as file:line:content
+  Returns:
+    - Success: ToolResult(success=True, content=formatted_matches)
+    - Failure: ToolResult(success=False) — no matches, permission denied
+end note
+
 == TL-06 GREP Search ==
 
 user -> router : types input
@@ -66,5 +78,12 @@ deactivate grep
 deactivate registry
 deactivate agent
 deactivate router
+
+note over user
+  Flow:    TL-06 → User types input → ServerRouter → AgentOrchestrator → ToolRegistry → GrepTool → ShellTool (ripgrep) or Python fallback
+  State:   No state change
+  Success: 200 + ToolResult(success=True, content=formatted_matches)
+  Failure: ToolResult(success=False): No matches found for pattern | permission denied / path not found
+end note
 
 @enduml

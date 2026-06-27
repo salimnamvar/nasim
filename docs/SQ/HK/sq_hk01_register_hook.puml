@@ -31,6 +31,17 @@ box "Repository Group" #E8F5E9
   participant "HookRepository" as hook_repo
 end box
 
+note over user
+  Scope:          HK-01 Register Hook — Register a hook in the HookManager
+  Preconditions:  HookManager is initialized; hook_spec is valid
+  Contexts:       Root entry point
+  Excludes:       Hook validation (HK-06), Hook dispatch (HK-02..HK-05)
+  Rollback:       Duplicate name → warning logged, hook not added
+  Design:         Duplicate hook names produce a warning and are skipped; new hooks are appended to the registry
+  Returns:
+    - Success: 200 Hook registered
+    - Failure: 200 Warning logged (duplicate name)
+end note
 
 == HK-01 REGISTER Hook ==
 
@@ -62,5 +73,11 @@ agent --> router : hook registered
 deactivate agent
 deactivate router
 
+note over user
+  Flow:    HK-01 → invoke agent → register hook → duplicate check → append or skip
+  State:   No state change
+  Success: 200 Hook registered
+  Failure: 200: duplicate name — warning logged, hook skipped
+end note
 
 @enduml

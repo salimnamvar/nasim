@@ -28,6 +28,19 @@ box "Provider Group" #FFF3E0
 end box
 
 
+note over user
+  Scope:          PRV-04 SELECT ProviderBackend — Map config.provider string to provider class
+  Preconditions:  Config file contains provider field; ProviderFactory is initialized
+  Contexts:       Called by ProviderFactory during provider registration (PRV-01)
+  Excludes:       Provider instantiation (PRV-01); chat requests (PRV-02/03)
+  Rollback:       No provider class returned; error propagated
+  Design:         Registry-based lookup; decouples config from provider implementation
+  Returns:
+    - Success: 200 OK — provider_class
+    - Failure: 400 BAD_REQUEST: unknown provider
+end note
+
+
 == PRV-04 SELECT ProviderBackend ==
 
 user -> router : PRV-04 SELECT ProviderBackend(provider_name)
@@ -57,5 +70,12 @@ agent --> router : provider_class
 deactivate agent
 deactivate router
 
+
+note over user
+  Flow:    PRV-04 → user → router → agent → cfg(read provider) → factory(registry lookup) → Done
+  State:   No state change
+  Success: 200 OK — provider_class
+  Failure: 400 BAD_REQUEST: unknown provider — error propagated to caller
+end note
 
 @enduml

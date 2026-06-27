@@ -28,6 +28,18 @@ box "External" #F5F5F5
 end box
 
 
+note over user
+  Scope:          VCS-03 READ Diff — read diff of staged or unstaged changes
+  Preconditions:  Git repository initialized; changes exist in working tree
+  Contexts:       Called by AgentOrchestrator to inspect changes before commit or review
+  Excludes:       Commit creation, file staging, conflict resolution
+  Rollback:       No changes detected → return empty diff result (success=true, empty_diff)
+  Design:         Accepts scope parameter (staged/unstaged/all); returns parsed hunks
+  Returns:
+    - Success: 200 OK — {files, hunks} or {empty_diff}
+    - Failure: 400 Bad Request — invalid_scope
+end note
+
 == VCS-03 READ Diff ==
 
 user -> router : types input
@@ -53,5 +65,11 @@ deactivate status
 
 agent --> router : AgentEvent(Done)
 
+note over user
+  Flow:    User → ServerRouter → AgentOrchestrator → GitStatus → git diff → parse → Result
+  State:   No state change (read-only)
+  Success: 200 OK — AgentEvent(Done) with {files, hunks} or {empty_diff}
+  Failure: 400 Bad Request: invalid_scope — prompt for valid scope parameter
+end note
 
 @enduml
