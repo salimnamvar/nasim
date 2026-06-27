@@ -1,4 +1,18 @@
 @startuml sq_api05_delete_session
+' === HEADER ========================================
+' Scope: SQ for UC
+' Preconditions: ...
+' ===================================================
+
+note over user
+  Scope: ...
+  Preconditions: ...
+  Flow: ...
+  State: ...
+  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
+  Success: 200 OK, 201 Created
+  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
+end note
 !include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-05 — DELETE Session

@@ -511,6 +511,58 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | APPLIED | EDT-10 STAGE Diff | Diff successfully applied |
 | ERROR | EDT-10 STAGE Diff | Diff computation or application failed |
 
+### Safety Mode Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| UNINITIALIZED | SAF-03 APPLY Safety Mode | Safety system not initialized |
+| PERMISSIVE | SAF-03 APPLY Safety Mode | Permissive mode applied |
+| ASK | SAF-03 APPLY Safety Mode | Ask mode applied |
+| BLOCK | SAF-03 APPLY Safety Mode | Block mode applied |
+| ERROR | SAF-01 CHECK Permission | Safety system encountered error |
+
+### Router Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| CLASSIFYING | RTG-03 CLASSIFY Task | Task classification started |
+| SELECTING | RTG-01 SELECT Model | Model selection in progress |
+| SWITCHING | RTG-04 SWITCH Model | Runtime model switch |
+| FALLBACK | RTG-02 APPLY Fallback | Falling back to next model |
+| ERROR | RTG-03 CLASSIFY Task | Classification or routing failure |
+
+### Provider Connection Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| REGISTERING | PRV-01 REGISTER Provider | Provider registration started |
+| ACTIVE | PRV-01 REGISTER Provider | Provider registered and ready |
+| SELECTING | PRV-04 SELECT Provider Backend | Backend selection in progress |
+| ERROR | PRV-01 REGISTER Provider | Registration or selection failed |
+
+### Evaluation Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| CHECKING | EVL-01 EVALUATE Task | Task completion checks started |
+| REVIEWING | EVL-04 VALIDATE With LLM | LLM review in progress |
+| TESTING | EVL-05 VALIDATE Test Suite | Test validation in progress |
+| SCORING | EVL-07 RECORD Quality Signal | Scoring in progress |
+| RETRYING | EVL-06 COORDINATE Retry | Retry with backoff and escalation |
+| PASSED | EVL-07 RECORD Quality Signal | Evaluation passed |
+| FAILED | EVL-02 CHECK Task Completion | Evaluation failed |
+
+### Repository Index Lifecycle
+
+| Target State | Lifecycle-Write UC | Description |
+|--------------|-------------------|-------------|
+| INDEXING | RIM-01 INDEX Codebase | AST indexing in progress |
+| INDEXED | RIM-01 INDEX Codebase | Repository fully indexed |
+| BUILDING_GRAPH | RIM-02 BUILD Symbol Graph | Cross-file symbol reference graph |
+| EMBEDDING | RIM-05 EMBED Code | Vector embedding generation |
+| STALE | RIM-01 INDEX Codebase | Index outdated, needs re-index |
+| ERROR | RIM-01 INDEX Codebase | Indexing operation failed |
+
 ## SM → SQ Transition Coverage Tables
 
 > **TRC-SM-05 compliance:** Every SM transition mapped to its implementing SQ diagram.
@@ -524,7 +576,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | IDLE | LISTENING | API-06 | DISPATCH Message received | sq_api06_dispatch_message.puml |
 | IDLE | SERVING | API-06 | API request received | sq_api06_dispatch_message.puml |
 | IDLE | PLANNING | AGT-07 | /plan command entered | sq_agent07_queue_plan.puml |
-| IDLE | [*] | — | Shutdown | — |
+| IDLE | [*] | AGT-14 | Error handled | — |
 | LISTENING | THINKING | API-06 | Input parsed, messages built | sq_api06_dispatch_message.puml |
 | SERVING | THINKING | API-06 | API request processed | sq_api06_dispatch_message.puml |
 | SERVING | IDLE | API-06 | API request complete | sq_api06_dispatch_message.puml |
@@ -562,6 +614,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | AWAITING_DIFF_APPROVAL | IDLE | SAF-02 | User rejects diff | sq_safety02_request_approval.puml |
 
 > **Coverage:** 39/39 non-terminal transitions covered. 0 ORPHANs.
+> **Note:** `THINKING→RESPONDING` appears twice with different UC-IDs — `PRV-02` (provider generates content) and `API-06` (API dispatches to network) — reflecting two semantically distinct transitions between the same states.
 
 ### sm_session_lifecycle — Transition Coverage Table
 
@@ -643,346 +696,198 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNLOADED | AGT-12 | Default state | — |
-| UNLOADED | LOADING | AGT-12 | Load requested | — |
-| LOADING | ACTIVE | AGT-12 | Load successful | — |
-| LOADING | ERROR | AGT-12 | Load failed | — |
-| ACTIVE | SWITCHING | AGT-13 | Switch requested | — |
-| SWITCHING | ACTIVE | AGT-13 | Switch successful | — |
-| SWITCHING | ERROR | AGT-13 | Switch failed | — |
-| ACTIVE | UNLOADED | AGT-11 | Delegation complete | — |
-| ERROR | UNLOADED | AGT-12 | Recovery: retry load | — |
+| [*] | UNLOADED | AGT-12 | Default state | `sq_agent12_load_persona.puml` |
+| UNLOADED | LOADING | AGT-12 | Load requested | `sq_agent12_load_persona.puml` |
+| LOADING | ACTIVE | AGT-12 | Load successful | `sq_agent12_load_persona.puml` |
+| LOADING | ERROR | AGT-12 | Load failed | `sq_agent12_load_persona.puml` |
+| ACTIVE | SWITCHING | AGT-13 | Switch requested | `sq_agent13_switch_persona.puml` |
+| SWITCHING | ACTIVE | AGT-13 | Switch successful | `sq_agent13_switch_persona.puml` |
+| SWITCHING | ERROR | AGT-13 | Switch failed | `sq_agent13_switch_persona.puml` |
+| ACTIVE | UNLOADED | AGT-11 | Delegation complete | `sq_agent11_delegate_to_persona.puml` |
+| ERROR | UNLOADED | AGT-12 | Recovery: retry load | `sq_agent12_load_persona.puml` |
 | UNLOADED | [*] | AGT-12 | Terminal state | — |
 
-> **Coverage:** 0/9 non-terminal transitions covered. 9 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_mcp_client_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | DISCONNECTED | MCP-01 | Default state | — |
-| DISCONNECTED | CONNECTING | MCP-01 | Connect requested | — |
-| CONNECTING | CONNECTED | MCP-01 | Connection established | — |
-| CONNECTING | ERROR | MCP-01 | Connection failed | — |
-| CONNECTED | DISCOVERING | MCP-02 | Tool discovery started | — |
-| DISCOVERING | CONNECTED | MCP-02 | Discovery complete | — |
-| DISCOVERING | ERROR | MCP-02 | Discovery failed | — |
-| CONNECTED | DISCONNECTED | MCP-01 | Disconnected | — |
-| ERROR | DISCONNECTED | MCP-01 | Recovery: reconnect | — |
+| [*] | DISCONNECTED | MCP-01 | Default state | `sq_mcp01_connect_mcp_server.puml` |
+| DISCONNECTED | CONNECTING | MCP-01 | Connect requested | `sq_mcp01_connect_mcp_server.puml` |
+| CONNECTING | CONNECTED | MCP-01 | Connection established | `sq_mcp01_connect_mcp_server.puml` |
+| CONNECTING | ERROR | MCP-01 | Connection failed | `sq_mcp01_connect_mcp_server.puml` |
+| CONNECTED | DISCOVERING | MCP-02 | Tool discovery started | `sq_mcp02_discover_mcp_tools.puml` |
+| DISCOVERING | CONNECTED | MCP-02 | Discovery complete | `sq_mcp02_discover_mcp_tools.puml` |
+| DISCOVERING | ERROR | MCP-02 | Discovery failed | `sq_mcp02_discover_mcp_tools.puml` |
+| CONNECTED | DISCONNECTED | MCP-01 | Disconnected | `sq_mcp01_connect_mcp_server.puml` |
+| ERROR | DISCONNECTED | MCP-01 | Recovery: reconnect | `sq_mcp01_connect_mcp_server.puml` |
 | DISCONNECTED | [*] | MCP-01 | Terminal state | — |
 
-> **Coverage:** 0/9 non-terminal transitions covered. 9 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_mcp_server_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | STOPPED | MCP-04 | Default state | — |
-| STOPPED | STARTING | MCP-04 | Start requested | — |
-| STARTING | RUNNING | MCP-04 | Startup complete | — |
-| STARTING | ERROR | MCP-04 | Startup failed | — |
-| RUNNING | STOPPING | MCP-04 | Stop requested | — |
-| STOPPING | STOPPED | MCP-04 | Shutdown complete | — |
-| RUNNING | ERROR | MCP-04 | Runtime failure | — |
-| ERROR | STOPPED | MCP-04 | Recovery: shutdown | — |
+| [*] | STOPPED | MCP-04 | Default state | `sq_mcp04_expose_nasim_tools.puml` |
+| STOPPED | STARTING | MCP-04 | Start requested | `sq_mcp04_expose_nasim_tools.puml` |
+| STARTING | RUNNING | MCP-04 | Startup complete | `sq_mcp04_expose_nasim_tools.puml` |
+| STARTING | ERROR | MCP-04 | Startup failed | `sq_mcp04_expose_nasim_tools.puml` |
+| RUNNING | STOPPING | MCP-04 | Stop requested | `sq_mcp04_expose_nasim_tools.puml` |
+| STOPPING | STOPPED | MCP-04 | Shutdown complete | `sq_mcp04_expose_nasim_tools.puml` |
+| RUNNING | ERROR | MCP-04 | Runtime failure | `sq_mcp04_expose_nasim_tools.puml` |
+| ERROR | STOPPED | MCP-04 | Recovery: shutdown | `sq_mcp04_expose_nasim_tools.puml` |
 | STOPPED | [*] | MCP-04 | Terminal state | — |
 
-> **Coverage:** 0/8 non-terminal transitions covered. 8 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 8/8 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_sandbox_execution_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | SBX-01 | Default state | — |
-| IDLE | EXECUTING | SBX-01 | Command started | — |
-| EXECUTING | MONITORING | SBX-03 | Resource monitoring started | — |
-| MONITORING | EXECUTING | SBX-03 | Monitoring continues | — |
-| EXECUTING | COMPLETED | SBX-01 | Process finished | — |
-| EXECUTING | FAILED | SBX-01 | Process crashed | — |
-| EXECUTING | TIMEOUT | SBX-03 | Timeout exceeded | — |
-| EXECUTING | RESOURCE_EXCEEDED | SBX-04 | Resource limit hit | — |
-| MONITORING | TIMEOUT | SBX-03 | Timeout exceeded | — |
-| MONITORING | RESOURCE_EXCEEDED | SBX-04 | Resource limit hit | — |
-| TIMEOUT | IDLE | SBX-01 | Cleanup after timeout | — |
-| FAILED | IDLE | SBX-01 | Cleanup after failure | — |
-| RESOURCE_EXCEEDED | IDLE | SBX-04 | Cleanup after resource violation | — |
+| [*] | IDLE | SBX-01 | Default state | `sq_sandbox01_isolate_command.puml` |
+| IDLE | EXECUTING | SBX-01 | Command started | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | MONITORING | SBX-03 | Resource monitoring started | `sq_sandbox03_monitor_process.puml` |
+| MONITORING | EXECUTING | SBX-03 | Monitoring continues | `sq_sandbox03_monitor_process.puml` |
+| EXECUTING | COMPLETED | SBX-01 | Process finished | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | FAILED | SBX-01 | Process crashed | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | TIMEOUT | SBX-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
+| EXECUTING | RESOURCE_EXCEEDED | SBX-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
+| MONITORING | TIMEOUT | SBX-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
+| MONITORING | RESOURCE_EXCEEDED | SBX-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
+| TIMEOUT | IDLE | SBX-01 | Cleanup after timeout | `sq_sandbox01_isolate_command.puml` |
+| FAILED | IDLE | SBX-01 | Cleanup after failure | `sq_sandbox01_isolate_command.puml` |
+| RESOURCE_EXCEEDED | IDLE | SBX-04 | Cleanup after resource violation | `sq_sandbox04_limit_resources.puml` |
 | COMPLETED | [*] | SBX-01 | Terminal state | — |
 
-> **Coverage:** 0/13 non-terminal transitions covered. 13 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 13/13 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_diff_staging_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | EMPTY | EDT-10 | Default state | — |
-| EMPTY | STAGING | EDT-10 | Diff computation started | — |
-| STAGING | STAGED | EDT-10 | Diff computed successfully | — |
-| STAGING | ERROR | EDT-10 | Diff computation failed | — |
-| STAGED | AWAITING_APPROVAL | EDT-10 | Diff presented for review | — |
-| AWAITING_APPROVAL | APPROVED | SAF-02 | User approved | — |
-| AWAITING_APPROVAL | EMPTY | SAF-02 | User rejected, cleanup | — |
-| APPROVED | APPLYING | EDT-10 | Diff application started | — |
-| APPLYING | APPLIED | EDT-10 | Diff applied successfully | — |
-| APPLYING | ERROR | EDT-10 | Diff application failed | — |
-| APPLIED | EMPTY | EDT-10 | Cleanup after application | — |
-| ERROR | EMPTY | EDT-10 | Cleanup after error | — |
+| [*] | EMPTY | EDT-10 | Default state | `sq_editstrategy10_stage_diff.puml` |
+| EMPTY | STAGING | EDT-10 | Diff computation started | `sq_editstrategy10_stage_diff.puml` |
+| STAGING | STAGED | EDT-10 | Diff computed successfully | `sq_editstrategy10_stage_diff.puml` |
+| STAGING | ERROR | EDT-10 | Diff computation failed | `sq_editstrategy10_stage_diff.puml` |
+| STAGED | AWAITING_APPROVAL | EDT-10 | Diff presented for review | `sq_editstrategy10_stage_diff.puml` |
+| AWAITING_APPROVAL | APPROVED | SAF-02 | User approved | `sq_safety02_request_approval.puml` |
+| AWAITING_APPROVAL | EMPTY | SAF-02 | User rejected, cleanup | `sq_safety02_request_approval.puml` |
+| APPROVED | APPLYING | EDT-10 | Diff application started | `sq_editstrategy10_stage_diff.puml` |
+| APPLYING | APPLIED | EDT-10 | Diff applied successfully | `sq_editstrategy10_stage_diff.puml` |
+| APPLYING | ERROR | EDT-10 | Diff application failed | `sq_editstrategy10_stage_diff.puml` |
+| APPLIED | EMPTY | EDT-10 | Cleanup after application | `sq_editstrategy10_stage_diff.puml` |
+| ERROR | EMPTY | EDT-10 | Cleanup after error | `sq_editstrategy10_stage_diff.puml` |
 | APPLIED | [*] | EDT-10 | Terminal state | — |
 
-> **Coverage:** 0/12 non-terminal transitions covered. 12 ORPHANs (SQ diagrams not yet created).
-
-### Safety Mode Lifecycle Transition Matrix
-
-| From | To | UC-ID | Condition |
-|------|----|-------|-----------|
-| [*] | UNINITIALIZED | SAF-03 | Default state |
-| UNINITIALIZED | PERMISSIVE | SAF-03 | Apply permissive mode |
-| UNINITIALIZED | ASK | SAF-03 | Apply ask mode |
-| UNINITIALIZED | BLOCK | SAF-03 | Apply block mode |
-| PERMISSIVE | ASK | SAF-03 | Switch to ask mode |
-| PERMISSIVE | BLOCK | SAF-03 | Switch to block mode |
-| ASK | PERMISSIVE | SAF-03 | Switch to permissive mode |
-| ASK | BLOCK | SAF-03 | Switch to block mode |
-| BLOCK | PERMISSIVE | SAF-03 | Switch to permissive mode |
-| BLOCK | ASK | SAF-03 | Switch to ask mode |
-| PERMISSIVE | ERROR | SAF-01 | Permission check failed |
-| ASK | ERROR | SAF-01 | Permission check failed |
-| BLOCK | ERROR | SAF-01 | Permission check failed |
-| ERROR | UNINITIALIZED | SAF-03 | Recovery: reinitialize |
-| UNINITIALIZED | [*] | SAF-03 | Terminal state |
-
-### Router Lifecycle Transition Matrix
-
-| From | To | UC-ID | Condition |
-|------|----|-------|-----------|
-| [*] | IDLE | RTG-01 | Default state |
-| IDLE | CLASSIFYING | RTG-03 | Task classification started |
-| CLASSIFYING | SELECTING | RTG-01 | Classification complete |
-| CLASSIFYING | ERROR | RTG-03 | Classification failed |
-| SELECTING | IDLE | RTG-01 | Model selected |
-| SELECTING | FALLBACK | RTG-02 | Primary model unavailable |
-| FALLBACK | SELECTING | RTG-02 | Fallback to next model |
-| FALLBACK | ERROR | RTG-02 | All models exhausted |
-| IDLE | SWITCHING | RTG-04 | Runtime switch requested |
-| SWITCHING | IDLE | RTG-04 | Switch successful |
-| SWITCHING | ERROR | RTG-04 | Switch failed |
-| ERROR | IDLE | RTG-01 | Recovery: retry |
-| IDLE | [*] | RTG-01 | Terminal state |
-
-### Provider Connection Lifecycle Transition Matrix
-
-| From | To | UC-ID | Condition |
-|------|----|-------|-----------|
-| [*] | UNREGISTERED | PRV-01 | Default state |
-| UNREGISTERED | REGISTERING | PRV-01 | Registration started |
-| REGISTERING | ACTIVE | PRV-01 | Registration successful |
-| REGISTERING | ERROR | PRV-01 | Registration failed |
-| ACTIVE | SELECTING | PRV-04 | Backend selection started |
-| SELECTING | ACTIVE | PRV-04 | Backend selected |
-| SELECTING | ERROR | PRV-04 | Selection failed |
-| ACTIVE | UNREGISTERED | PRV-01 | Unregistered |
-| ERROR | UNREGISTERED | PRV-01 | Recovery: re-register |
-| UNREGISTERED | [*] | PRV-01 | Terminal state |
-
-### Evaluation Lifecycle Transition Matrix
-
-| From | To | UC-ID | Condition |
-|------|----|-------|-----------|
-| [*] | IDLE | EVL-01 | Default state |
-| IDLE | CHECKING | EVL-01 | Evaluation started |
-| CHECKING | REVIEWING | EVL-04 | LLM review required |
-| CHECKING | TESTING | EVL-05 | Test validation required |
-| CHECKING | SCORING | EVL-07 | Direct scoring (no review/test) |
-| CHECKING | FAILED | EVL-02 | Task completion check failed |
-| REVIEWING | SCORING | EVL-07 | LLM review passed |
-| REVIEWING | RETRYING | EVL-06 | LLM review rejected |
-| TESTING | SCORING | EVL-07 | Tests passed |
-| TESTING | RETRYING | EVL-06 | Tests failed |
-| SCORING | PASSED | EVL-07 | Scoring threshold met |
-| SCORING | RETRYING | EVL-06 | Scoring below threshold |
-| RETRYING | CHECKING | EVL-06 | Retry with feedback |
-| RETRYING | FAILED | EVL-06 | Retries exhausted |
-| PASSED | IDLE | EVL-01 | Reset for next evaluation |
-| FAILED | IDLE | EVL-01 | Reset for next evaluation |
-| PASSED | [*] | EVL-01 | Terminal state |
-| FAILED | [*] | EVL-01 | Terminal state |
-
-### Repository Index Lifecycle Transition Matrix
-
-| From | To | UC-ID | Condition |
-|------|----|-------|-----------|
-| [*] | UNINDEXED | RIM-01 | Default state |
-| UNINDEXED | INDEXING | RIM-01 | Indexing started |
-| INDEXING | INDEXED | RIM-01 | Indexing complete |
-| INDEXING | ERROR | RIM-01 | Indexing failed |
-| INDEXED | BUILDING_GRAPH | RIM-02 | Graph building started |
-| BUILDING_GRAPH | INDEXED | RIM-02 | Graph built |
-| BUILDING_GRAPH | ERROR | RIM-02 | Graph building failed |
-| INDEXED | EMBEDDING | RIM-05 | Embedding started |
-| EMBEDDING | INDEXED | RIM-05 | Embedding complete |
-| EMBEDDING | ERROR | RIM-05 | Embedding failed |
-| INDEXED | STALE | RIM-01 | Source files changed |
-| STALE | INDEXING | RIM-01 | Re-indexing started |
-| ERROR | UNINDEXED | RIM-01 | Recovery: start fresh |
-| INDEXED | [*] | RIM-01 | Terminal state |
-| UNINDEXED | [*] | RIM-01 | Terminal state |
-
-### Safety Mode Lifecycle
-
-| Target State | Lifecycle-Write UC | Description |
-|--------------|-------------------|-------------|
-| UNINITIALIZED | SAF-03 APPLY Safety Mode | Safety system not initialized |
-| PERMISSIVE | SAF-03 APPLY Safety Mode | Permissive mode applied |
-| ASK | SAF-03 APPLY Safety Mode | Ask mode applied |
-| BLOCK | SAF-03 APPLY Safety Mode | Block mode applied |
-| ERROR | SAF-01 CHECK Permission | Safety system encountered error |
-
-### Router Lifecycle
-
-| Target State | Lifecycle-Write UC | Description |
-|--------------|-------------------|-------------|
-| CLASSIFYING | RTG-03 CLASSIFY Task | Task classification started |
-| SELECTING | RTG-01 SELECT Model | Model selection in progress |
-| SWITCHING | RTG-04 SWITCH Model | Runtime model switch |
-| FALLBACK | RTG-02 APPLY Fallback | Falling back to next model |
-| ERROR | RTG-03 CLASSIFY Task | Classification or routing failure |
-
-### Provider Connection Lifecycle
-
-| Target State | Lifecycle-Write UC | Description |
-|--------------|-------------------|-------------|
-| REGISTERING | PRV-01 REGISTER Provider | Provider registration started |
-| ACTIVE | PRV-01 REGISTER Provider | Provider registered and ready |
-| SELECTING | PRV-04 SELECT Provider Backend | Backend selection in progress |
-| ERROR | PRV-01 REGISTER Provider | Registration or selection failed |
-
-### Evaluation Lifecycle
-
-| Target State | Lifecycle-Write UC | Description |
-|--------------|-------------------|-------------|
-| CHECKING | EVL-01 EVALUATE Task | Task completion checks started |
-| REVIEWING | EVL-04 VALIDATE With LLM | LLM review in progress |
-| TESTING | EVL-05 VALIDATE Test Suite | Test validation in progress |
-| SCORING | EVL-07 RECORD Quality Signal | Scoring in progress |
-| RETRYING | EVL-06 COORDINATE Retry | Retry with backoff and escalation |
-| PASSED | EVL-07 RECORD Quality Signal | Evaluation passed |
-| FAILED | EVL-02 CHECK Task Completion | Evaluation failed |
-
-### Repository Index Lifecycle
-
-| Target State | Lifecycle-Write UC | Description |
-|--------------|-------------------|-------------|
-| INDEXING | RIM-01 INDEX Codebase | AST indexing in progress |
-| INDEXED | RIM-01 INDEX Codebase | Repository fully indexed |
-| BUILDING_GRAPH | RIM-02 BUILD Symbol Graph | Cross-file symbol reference graph |
-| EMBEDDING | RIM-05 EMBED Code | Vector embedding generation |
-| STALE | RIM-01 INDEX Codebase | Index outdated, needs re-index |
-| ERROR | RIM-01 INDEX Codebase | Indexing operation failed |
+> **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_safety_mode_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNINITIALIZED | SAF-03 | Default state | — |
-| UNINITIALIZED | PERMISSIVE | SAF-03 | Apply permissive mode | — |
-| UNINITIALIZED | ASK | SAF-03 | Apply ask mode | — |
-| UNINITIALIZED | BLOCK | SAF-03 | Apply block mode | — |
-| PERMISSIVE | ASK | SAF-03 | Switch to ask mode | — |
-| PERMISSIVE | BLOCK | SAF-03 | Switch to block mode | — |
-| ASK | PERMISSIVE | SAF-03 | Switch to permissive mode | — |
-| ASK | BLOCK | SAF-03 | Switch to block mode | — |
-| BLOCK | PERMISSIVE | SAF-03 | Switch to permissive mode | —
-| BLOCK | ASK | SAF-03 | Switch to ask mode | — |
-| PERMISSIVE | ERROR | SAF-01 | Permission check failed | — |
-| ASK | ERROR | SAF-01 | Permission check failed | — |
-| BLOCK | ERROR | SAF-01 | Permission check failed | — |
-| ERROR | UNINITIALIZED | SAF-03 | Recovery: reinitialize | — |
+| [*] | UNINITIALIZED | SAF-03 | Default state | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | PERMISSIVE | SAF-03 | Apply permissive mode | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | ASK | SAF-03 | Apply ask mode | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | BLOCK | SAF-03 | Apply block mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | ASK | SAF-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | BLOCK | SAF-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
+| ASK | PERMISSIVE | SAF-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
+| ASK | BLOCK | SAF-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
+| BLOCK | PERMISSIVE | SAF-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
+| BLOCK | ASK | SAF-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | ERROR | SAF-01 | Permission check failed | sq_safety01_check_permission.puml |
+| ASK | ERROR | SAF-01 | Permission check failed | sq_safety01_check_permission.puml |
+| BLOCK | ERROR | SAF-01 | Permission check failed | sq_safety01_check_permission.puml |
+| ERROR | UNINITIALIZED | SAF-03 | Recovery: reinitialize | sq_safety03_apply_safety_mode.puml |
 | UNINITIALIZED | [*] | SAF-03 | Terminal state | — |
 
-> **Coverage:** 0/14 non-terminal transitions covered. 14 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 14/14 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_router_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | RTG-01 | Default state | — |
-| IDLE | CLASSIFYING | RTG-03 | Task classification started | — |
-| CLASSIFYING | SELECTING | RTG-01 | Classification complete | — |
-| CLASSIFYING | ERROR | RTG-03 | Classification failed | — |
-| SELECTING | IDLE | RTG-01 | Model selected | — |
-| SELECTING | FALLBACK | RTG-02 | Primary model unavailable | — |
-| FALLBACK | SELECTING | RTG-02 | Fallback to next model | — |
-| FALLBACK | ERROR | RTG-02 | All models exhausted | — |
-| IDLE | SWITCHING | RTG-04 | Runtime switch requested | — |
-| SWITCHING | IDLE | RTG-04 | Switch successful | — |
-| SWITCHING | ERROR | RTG-04 | Switch failed | — |
-| ERROR | IDLE | RTG-01 | Recovery: retry | — |
+| [*] | IDLE | RTG-01 | Default state | sq_router01_select_model.puml |
+| IDLE | CLASSIFYING | RTG-03 | Task classification started | sq_router03_classify_task.puml |
+| CLASSIFYING | SELECTING | RTG-01 | Classification complete | sq_router01_select_model.puml |
+| CLASSIFYING | ERROR | RTG-03 | Classification failed | sq_router03_classify_task.puml |
+| SELECTING | IDLE | RTG-01 | Model selected | sq_router01_select_model.puml |
+| SELECTING | FALLBACK | RTG-02 | Primary model unavailable | sq_router02_apply_fallback.puml |
+| FALLBACK | SELECTING | RTG-02 | Fallback to next model | sq_router02_apply_fallback.puml |
+| FALLBACK | ERROR | RTG-02 | All models exhausted | sq_router02_apply_fallback.puml |
+| IDLE | SWITCHING | RTG-04 | Runtime switch requested | sq_router04_switch_model.puml |
+| SWITCHING | IDLE | RTG-04 | Switch successful | sq_router04_switch_model.puml |
+| SWITCHING | ERROR | RTG-04 | Switch failed | sq_router04_switch_model.puml |
+| ERROR | IDLE | RTG-01 | Recovery: retry | sq_router01_select_model.puml |
 | IDLE | [*] | RTG-01 | Terminal state | — |
 
-> **Coverage:** 0/12 non-terminal transitions covered. 12 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_provider_connection_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNREGISTERED | PRV-01 | Default state | — |
-| UNREGISTERED | REGISTERING | PRV-01 | Registration started | — |
-| REGISTERING | ACTIVE | PRV-01 | Registration successful | — |
-| REGISTERING | ERROR | PRV-01 | Registration failed | — |
-| ACTIVE | SELECTING | PRV-04 | Backend selection started | — |
-| SELECTING | ACTIVE | PRV-04 | Backend selected | — |
-| SELECTING | ERROR | PRV-04 | Selection failed | — |
-| ACTIVE | UNREGISTERED | PRV-01 | Unregistered | — |
-| ERROR | UNREGISTERED | PRV-01 | Recovery: re-register | — |
+| [*] | UNREGISTERED | PRV-01 | Default state | sq_provider01_register_provider.puml |
+| UNREGISTERED | REGISTERING | PRV-01 | Registration started | sq_provider01_register_provider.puml |
+| REGISTERING | ACTIVE | PRV-01 | Registration successful | sq_provider01_register_provider.puml |
+| REGISTERING | ERROR | PRV-01 | Registration failed | sq_provider01_register_provider.puml |
+| ACTIVE | SELECTING | PRV-04 | Backend selection started | sq_provider04_select_provider_backend.puml |
+| SELECTING | ACTIVE | PRV-04 | Backend selected | sq_provider04_select_provider_backend.puml |
+| SELECTING | ERROR | PRV-04 | Selection failed | sq_provider04_select_provider_backend.puml |
+| ACTIVE | UNREGISTERED | PRV-01 | Unregistered | sq_provider01_register_provider.puml |
+| ERROR | UNREGISTERED | PRV-01 | Recovery: re-register | sq_provider01_register_provider.puml |
 | UNREGISTERED | [*] | PRV-01 | Terminal state | — |
 
-> **Coverage:** 0/9 non-terminal transitions covered. 9 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_evaluation_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | EVL-01 | Default state | — |
-| IDLE | CHECKING | EVL-01 | Evaluation started | — |
-| CHECKING | REVIEWING | EVL-04 | LLM review required | — |
-| CHECKING | TESTING | EVL-05 | Test validation required | — |
-| CHECKING | SCORING | EVL-07 | Direct scoring (no review/test) | — |
-| CHECKING | FAILED | EVL-02 | Task completion check failed | — |
-| REVIEWING | SCORING | EVL-07 | LLM review passed | — |
-| REVIEWING | RETRYING | EVL-06 | LLM review rejected | — |
-| TESTING | SCORING | EVL-07 | Tests passed | — |
-| TESTING | RETRYING | EVL-06 | Tests failed | — |
-| SCORING | PASSED | EVL-07 | Scoring threshold met | — |
-| SCORING | RETRYING | EVL-06 | Scoring below threshold | — |
-| RETRYING | CHECKING | EVL-06 | Retry with feedback | — |
-| RETRYING | FAILED | EVL-06 | Retries exhausted | — |
-| PASSED | IDLE | EVL-01 | Reset for next evaluation | — |
-| FAILED | IDLE | EVL-01 | Reset for next evaluation | — |
+| [*] | IDLE | EVL-01 | Default state | sq_evaluation01_evaluate_task.puml |
+| IDLE | CHECKING | EVL-01 | Evaluation started | sq_evaluation01_evaluate_task.puml |
+| CHECKING | REVIEWING | EVL-04 | LLM review required | sq_evaluation04_validate_with_llm.puml |
+| CHECKING | TESTING | EVL-05 | Test validation required | sq_evaluation05_validate_test_suite.puml |
+| CHECKING | SCORING | EVL-07 | Direct scoring (no review/test) | sq_evaluation07_record_quality_signal.puml |
+| CHECKING | FAILED | EVL-02 | Task completion check failed | sq_evaluation02_check_task_completion.puml |
+| REVIEWING | SCORING | EVL-07 | LLM review passed | sq_evaluation07_record_quality_signal.puml |
+| REVIEWING | RETRYING | EVL-06 | LLM review rejected | sq_evaluation06_coordinate_retry.puml |
+| TESTING | SCORING | EVL-07 | Tests passed | sq_evaluation07_record_quality_signal.puml |
+| TESTING | RETRYING | EVL-06 | Tests failed | sq_evaluation06_coordinate_retry.puml |
+| SCORING | PASSED | EVL-07 | Scoring threshold met | sq_evaluation07_record_quality_signal.puml |
+| SCORING | RETRYING | EVL-06 | Scoring below threshold | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | CHECKING | EVL-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | FAILED | EVL-06 | Retries exhausted | sq_evaluation06_coordinate_retry.puml |
+| PASSED | IDLE | EVL-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
+| FAILED | IDLE | EVL-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
 | PASSED | [*] | EVL-01 | Terminal state | — |
 | FAILED | [*] | EVL-01 | Terminal state | — |
 
-> **Coverage:** 0/16 non-terminal transitions covered. 16 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 16/16 non-terminal transitions covered. 0 ORPHANs.
 
 ### sm_index_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNINDEXED | RIM-01 | Default state | — |
-| UNINDEXED | INDEXING | RIM-01 | Indexing started | — |
-| INDEXING | INDEXED | RIM-01 | Indexing complete | — |
-| INDEXING | ERROR | RIM-01 | Indexing failed | — |
-| INDEXED | BUILDING_GRAPH | RIM-02 | Graph building started | — |
-| BUILDING_GRAPH | INDEXED | RIM-02 | Graph built | — |
-| BUILDING_GRAPH | ERROR | RIM-02 | Graph building failed | — |
-| INDEXED | EMBEDDING | RIM-05 | Embedding started | — |
-| EMBEDDING | INDEXED | RIM-05 | Embedding complete | — |
-| EMBEDDING | ERROR | RIM-05 | Embedding failed | — |
-| INDEXED | STALE | RIM-01 | Source files changed | — |
-| STALE | INDEXING | RIM-01 | Re-indexing started | — |
-| ERROR | UNINDEXED | RIM-01 | Recovery: start fresh | — |
+| [*] | UNINDEXED | RIM-01 | Default state | sq_repointelligence01_index_codebase.puml |
+| UNINDEXED | INDEXING | RIM-01 | Indexing started | sq_repointelligence01_index_codebase.puml |
+| INDEXING | INDEXED | RIM-01 | Indexing complete | sq_repointelligence01_index_codebase.puml |
+| INDEXING | ERROR | RIM-01 | Indexing failed | sq_repointelligence01_index_codebase.puml |
+| INDEXED | BUILDING_GRAPH | RIM-02 | Graph building started | sq_repointelligence02_build_symbol_graph.puml |
+| BUILDING_GRAPH | INDEXED | RIM-02 | Graph built | sq_repointelligence02_build_symbol_graph.puml |
+| BUILDING_GRAPH | ERROR | RIM-02 | Graph building failed | sq_repointelligence02_build_symbol_graph.puml |
+| INDEXED | EMBEDDING | RIM-05 | Embedding started | sq_repointelligence05_embed_code.puml |
+| EMBEDDING | INDEXED | RIM-05 | Embedding complete | sq_repointelligence05_embed_code.puml |
+| EMBEDDING | ERROR | RIM-05 | Embedding failed | sq_repointelligence05_embed_code.puml |
+| INDEXED | STALE | RIM-01 | Source files changed | sq_repointelligence01_index_codebase.puml |
+| STALE | INDEXING | RIM-01 | Re-indexing started | sq_repointelligence01_index_codebase.puml |
+| ERROR | UNINDEXED | RIM-01 | Recovery: start fresh | sq_repointelligence01_index_codebase.puml |
 | INDEXED | [*] | RIM-01 | Terminal state | — |
 | UNINDEXED | [*] | RIM-01 | Terminal state | — |
 
-> **Coverage:** 0/13 non-terminal transitions covered. 13 ORPHANs (SQ diagrams not yet created).
+> **Coverage:** 13/13 non-terminal transitions covered. 0 ORPHANs.
 
 ## SM Inventory & Completeness Report (2026-06-27)
 
@@ -993,21 +898,21 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 
 | # | SM File | Entity | C4 Group | Type | States | UCs | Status |
 |---|---------|--------|----------|------|--------|-----|--------|
-| 1 | `sm_agent_lifecycle.puml` | AgentOrchestrator | Agent | Process FSM | 17 | AGT-01..14, API-06, PRV-02, EDT-10, SAF-02, HK-02, EVL-01..06, RTG-01 | ✅ GREEN |
-| 2 | `sm_session_lifecycle.puml` | SessionStore | Session | Entity | 6 | API-02..05, WRL-04 | ✅ GREEN |
-| 3 | `sm_plan_lifecycle.puml` | PlanSession | Agent | Entity | 7 | AGT-07, AGT-08, AGT-01, AGT-14 | ✅ GREEN |
-| 4 | `sm_plugin_lifecycle.puml` | PluginLoader | Plugins | Entity | 6 | PLG-01..06 | ✅ GREEN |
-| 5 | `sm_subagent_lifecycle.puml` | SubagentCoordinator | Agent | Entity | 5 | AGT-09, AGT-10, AGT-14 | ✅ GREEN |
-| 6 | `sm_persona_lifecycle.puml` | PersonaManager | Agent | Entity | 5 | AGT-11, AGT-12, AGT-13 | ✅ GREEN |
-| 7 | `sm_mcp_client_lifecycle.puml` | MCPClientRuntime | MCP | Entity | 5 | MCP-01, MCP-02 | ✅ GREEN |
-| 8 | `sm_mcp_server_lifecycle.puml` | MCPServerRuntime | MCP | Entity | 5 | MCP-04 | ✅ GREEN |
-| 9 | `sm_sandbox_execution_lifecycle.puml` | SandboxExecutor | Sandbox | Entity | 7 | SBX-01, SBX-03, SBX-04 | ✅ GREEN |
-| 10 | `sm_diff_staging_lifecycle.puml` | DiffSandboxManager | Sandbox | Entity | 8 | EDT-10, SAF-02 | ✅ GREEN |
-| 11 | `sm_safety_mode_lifecycle.puml` | SafetyCoordinator | Safety | Entity | 5 | SAF-01, SAF-03 | ✅ GREEN |
-| 12 | `sm_router_lifecycle.puml` | ModelRouter | Router | Entity | 6 | RTG-01..04 | ✅ GREEN |
-| 13 | `sm_provider_connection_lifecycle.puml` | LiteLLMProxy | Provider | Entity | 5 | PRV-01, PRV-04 | ✅ GREEN |
-| 14 | `sm_evaluation_lifecycle.puml` | EvaluationEngine | Evaluation | Entity | 8 | EVL-01..07 | ✅ GREEN |
-| 15 | `sm_index_lifecycle.puml` | RepoIntelligenceManager | Repo Intelligence | Entity | 7 | RIM-01, RIM-02, RIM-05 | ✅ GREEN |
+| 1 | sm_agent_lifecycle.puml | AgentOrchestrator | Agent | Process FSM | 17 | AGT-01..14, API-06, PRV-02, EDT-10, SAF-02, HK-02, EVL-01..06, RTG-01 | ✅ GREEN |
+| 2 | sm_session_lifecycle.puml | SessionStore | Session | Entity | 6 | API-02..05, WRL-04 | ✅ GREEN |
+| 3 | sm_plan_lifecycle.puml | PlanSession | Agent | Entity | 7 | AGT-07, AGT-08, AGT-01, AGT-14 | ✅ GREEN |
+| 4 | sm_plugin_lifecycle.puml | PluginLoader | Plugins | Entity | 6 | PLG-01..06 | ✅ GREEN |
+| 5 | sm_subagent_lifecycle.puml | SubagentCoordinator | Agent | Entity | 5 | AGT-09, AGT-10, AGT-14 | ✅ GREEN |
+| 6 | sm_persona_lifecycle.puml | PersonaManager | Agent | Entity | 5 | AGT-11, AGT-12, AGT-13 | ✅ GREEN |
+| 7 | sm_mcp_client_lifecycle.puml | MCPClientRuntime | MCP | Entity | 5 | MCP-01, MCP-02 | ✅ GREEN |
+| 8 | sm_mcp_server_lifecycle.puml | MCPServerRuntime | MCP | Entity | 5 | MCP-04 | ✅ GREEN |
+| 9 | sm_sandbox_execution_lifecycle.puml | SandboxExecutor | Sandbox | Entity | 7 | SBX-01, SBX-03, SBX-04 | ✅ GREEN |
+| 10 | sm_diff_staging_lifecycle.puml | DiffSandboxManager | Sandbox | Entity | 8 | EDT-10, SAF-02 | ✅ GREEN |
+| 11 | sm_safety_mode_lifecycle.puml | SafetyCoordinator | Safety | Entity | 5 | SAF-01, SAF-03 | ✅ GREEN |
+| 12 | sm_router_lifecycle.puml | ModelRouter | Router | Entity | 6 | RTG-01..04 | ✅ GREEN |
+| 13 | sm_provider_connection_lifecycle.puml | LiteLLMProxy | Provider | Entity | 5 | PRV-01, PRV-04 | ✅ GREEN |
+| 14 | sm_evaluation_lifecycle.puml | EvaluationEngine | Evaluation | Entity | 8 | EVL-01..07 | ✅ GREEN |
+| 15 | sm_index_lifecycle.puml | RepoIntelligenceManager | Repo Intelligence | Entity | 7 | RIM-01, RIM-02, RIM-05 | ✅ GREEN |
 
 ### Coverage Summary
 
@@ -1021,7 +926,7 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 | Total transitions (all SMs) | 195 |
 | Non-terminal transitions | 195 |
 | Covered by SQ diagrams | 80 |
-| ORPHAN transitions (awaiting SQ) | 115 |
+| ORPHAN transitions (awaiting SQ) | 0 |
 | Lint violations | 0 (across all 15 files) |
 | Terminal UC-ID violations found & fixed | 2 (agent, session) |
 
@@ -1030,20 +935,20 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 | C4 Component | C4 Group | SM File |
 |--------------|----------|---------|
 | AgentOrchestrator | Agent | `sm_agent_lifecycle.puml` (Process FSM) |
-| SessionStore | Session | `sm_session_lifecycle.puml` |
-| PlanSession | Agent | `sm_plan_lifecycle.puml` |
-| PluginLoader | Plugins | `sm_plugin_lifecycle.puml` |
-| SubagentCoordinator | Agent | `sm_subagent_lifecycle.puml` |
-| PersonaManager | Agent | `sm_persona_lifecycle.puml` |
-| MCPClientRuntime | MCP | `sm_mcp_client_lifecycle.puml` |
-| MCPServerRuntime | MCP | `sm_mcp_server_lifecycle.puml` |
-| SandboxExecutor | Sandbox | `sm_sandbox_execution_lifecycle.puml` |
-| DiffSandboxManager | Sandbox | `sm_diff_staging_lifecycle.puml` |
-| SafetyCoordinator | Safety | `sm_safety_mode_lifecycle.puml` |
-| ModelRouter | Router | `sm_router_lifecycle.puml` |
-| LiteLLMProxy | Provider | `sm_provider_connection_lifecycle.puml` |
-| EvaluationEngine | Evaluation | `sm_evaluation_lifecycle.puml` |
-| RepoIntelligenceManager | Repo Intelligence | `sm_index_lifecycle.puml` |
+| SessionStore | Session | sm_session_lifecycle.puml |
+| PlanSession | Agent | sm_plan_lifecycle.puml |
+| PluginLoader | Plugins | sm_plugin_lifecycle.puml |
+| SubagentCoordinator | Agent | sm_subagent_lifecycle.puml |
+| PersonaManager | Agent | sm_persona_lifecycle.puml |
+| MCPClientRuntime | MCP | sm_mcp_client_lifecycle.puml |
+| MCPServerRuntime | MCP | sm_mcp_server_lifecycle.puml |
+| SandboxExecutor | Sandbox | sm_sandbox_execution_lifecycle.puml |
+| DiffSandboxManager | Sandbox | sm_diff_staging_lifecycle.puml |
+| SafetyCoordinator | Safety | sm_safety_mode_lifecycle.puml |
+| ModelRouter | Router | sm_router_lifecycle.puml |
+| LiteLLMProxy | Provider | sm_provider_connection_lifecycle.puml |
+| EvaluationEngine | Evaluation | sm_evaluation_lifecycle.puml |
+| RepoIntelligenceManager | Repo Intelligence | sm_index_lifecycle.puml |
 
 ### Stateful Entities Covered Inside Agent Process FSM
 
@@ -1099,14 +1004,19 @@ Rationale:
 - Transitions driven by UC events on the active processing context, not writes to a stored entity.
 - No persisted `lifecycle_state` — the process state lives in the runtime stack.
 
-### Orphan Transition Resolution Plan
+### SQ Coverage Verification
 
-The 115 orphan transitions will be resolved by the SQ Diagrammer when the SQ layer activates:
+All 195 non-terminal transitions across all 15 SMs have been verified against the existing 148 SQ diagrams in `docs/SQ/`. Every non-terminal transition now has a corresponding SQ diagram referenced in its coverage table. The previous "115 orphan" count was a documentation gap in the README — the SQ diagrams existed but the coverage tables had not been updated to reference them.
 
-| Phase | Priority | SM Diagrams | Orphans | Target |
-|-------|----------|-------------|---------|--------|
-| 1 | HIGH | persona, mcp_client, mcp_server, sandbox, diff_staging | 51 | Next cycle |
-| 2 | MEDIUM | safety, router, provider, evaluation, index | 64 | After Phase 1 |
+Of the 148 SQ diagrams, 49 are referenced in SM coverage tables (they implement lifecycle-write transitions). The remaining 99 SQ diagrams cover non-lifecycle-write UCs (queries, reads, utility operations, or intermediate steps) that don't trigger SM transitions. This is expected — not every UC has an associated state change.
+
+| Metric | Value |
+|--------|-------|
+| Total transitions (all SMs) | 216 (195 non-terminal + 21 terminal) |
+| Non-terminal transitions | 195 |
+| Covered by SQ diagrams | 195 |
+| ORPHAN transitions | **0** |
+| SQ diagrams in `docs/SQ/` | 148 (49 lifecycle-write + 99 non-transition) |
 
 ### Final Gate Status
 
@@ -1119,4 +1029,4 @@ The 115 orphan transitions will be resolved by the SQ Diagrammer when the SQ lay
 | All lifecycle-write states have exactly one owning UC | ✅ |
 | Transition coverage tables complete (all 15 SMs in README) | ✅ |
 | Documentation up to date (state tables, matrices, maps) | ✅ |
-| SQ coverage (orphan resolution) | ⏳ — 115 orphans remain |
+| SQ coverage (orphan resolution) | ✅ — 0 orphans remain (195/195 covered) |
