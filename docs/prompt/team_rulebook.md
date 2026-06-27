@@ -1,49 +1,22 @@
-# nasim Design Chain — Team Rulebook & Task Assignment (2026-06-27)
+# nasim Design Chain — Team Rulebook
 
-**Objective:** Achieve a clean, consistent, and renderable design chain (C4 → UC → SM → SQ) with zero architectural defects and zero PlantUML rendering errors.
+## Mandatory Validation (All Gates)
 
-## Team Roles
+Before claiming any gate is ready, the following **must** pass:
 
-### Tech Lead (Orchestrator)
-- Maintain Kanban and assign focused tasks.
-- Personally gate every batch.
-- Stop the loop only when **all** criteria below are met.
+1. **PlantUML Rendering Test** — All modified diagrams render with exit code 0.
+2. **No Notes in SQ** — SQ diagrams contain no `note over` blocks.
+3. **Proper CSR + ROD Flow** — SQ diagrams show full Actor → API → Controller → Service → Repository path with ROD method names.
+4. **SM Initial/Terminal States** — All SM diagrams have correct `[*] -->` and `--> [*]`.
+5. **Linter + Cross-Reference** — All relevant linters pass on `--strict`.
 
-### SM Modeller (Current Highest Priority)
-**Tasks:**
-- Fix initial and terminal states in all 5 SM diagrams.
-- Create full transition matrices in `SM/README.md`.
-- Split SM palette from CSR colours.
-- Extract common `sm_styles.puml`.
-- Verify all SM diagrams render cleanly.
+## Team Composition
 
-### SQ Diagrammer
-**Tasks:**
-- Verify all 148 SQ diagrams render without PlantUML errors.
-- Normalise box colours to CSR palette.
-- Ensure common `sq_styles.puml` is included in all files.
+- Tech Lead (Orchestrator)
+- C4 Architect
+- SM Modeller
+- SQ Diagrammer
+- UC Modeller
+- **Evolutionizer** (runs after major batches to generalize rules)
 
-### C4 Architect
-**Tasks:**
-- Create missing `entities.md`.
-- Move headers before `@startuml`.
-- Fix legend mechanism.
-- Verify all C4 diagrams render cleanly.
-
-### UC Modeller
-- Re-run cross-reference checks when requested by Tech Lead.
-
-## Mandatory Validation Before Claiming "Done"
-
-Before any specialist says a gate is ready, the following **must** pass:
-
-1. **PlantUML Rendering Test** — Every modified `.puml` renders without errors.
-2. **SM Specific Checks** — Clear initial (`[*] --> State`) and terminal (`State --> [*]`) transitions in all 5 SMs.
-3. **Linter + Cross-Reference** — All layer linters pass + Appendix-A scripts return 0 errors.
-4. **Common Styles** — All SQ and SM diagrams include their respective common style files.
-
-## Loop Rule
-
-Run in **non-stop iterations**. Only move to the next priority when the current specialist confirms **rendering + linter + correctness** are clean. Tech Lead makes the final decision.
-
-**Starting Priority (Now):** SM Modeller on initial/terminal states + rendering.
+**Current Priority:** SQ flow/ROD compliance + final SM rendering verification.
