@@ -239,3 +239,131 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | ENABLED | PLG-05 ENABLE Plugin | Plugin active and available |
 | DISABLED | PLG-06 DISABLE Plugin | Plugin deactivated |
 | ERROR | PLG-01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |
+
+## SM → SQ Transition Coverage Tables
+
+> **TRC-SM-05 compliance:** Every SM transition mapped to its implementing SQ diagram.
+> Terminal (`[*]`) transitions are state diagram syntax, not implementable transitions — marked `—`.
+
+### sm_agent_lifecycle — Transition Coverage Table
+
+| From State | To State | UC-ID | Trigger | SQ Diagram |
+|------------|----------|-------|---------|------------|
+| [*] | IDLE | AGT-01 | Process startup | sq_agent01_process_user_task.puml |
+| IDLE | LISTENING | API-06 | DISPATCH Message received | sq_api06_dispatch_message.puml |
+| IDLE | SERVING | API-06 | API request received | sq_api06_dispatch_message.puml |
+| IDLE | PLANNING | AGT-07 | /plan command entered | sq_agent07_queue_plan.puml |
+| IDLE | [*] | — | Shutdown | — |
+| LISTENING | THINKING | API-06 | Input parsed, messages built | sq_api06_dispatch_message.puml |
+| SERVING | THINKING | API-06 | API request processed | sq_api06_dispatch_message.puml |
+| SERVING | IDLE | API-06 | API request complete | sq_api06_dispatch_message.puml |
+| THINKING | RESPONDING | PRV-02 | LLM returns text only | sq_provider02_request_chat.puml |
+| THINKING | TOOL_EXEC | PRV-02 | LLM returns tool_calls | sq_provider02_request_chat.puml |
+| THINKING | COMPACTING | AGT-06 | token_count > context_budget | sq_agent06_compact_context.puml |
+| THINKING | ROUTING | RTG-01 | ModelRouter resolving model | sq_router01_select_model.puml |
+| THINKING | ERROR | PRV-02 | Provider call failed | sq_provider02_request_chat.puml |
+| THINKING | RESPONDING | API-06 | Response dispatched | sq_api06_dispatch_message.puml |
+| THINKING | EVALUATING | EVL-01 | task_complete AND evaluation_enabled | sq_evaluation01_evaluate_task.puml |
+| ROUTING | THINKING | RTG-01 | Model selected | sq_router01_select_model.puml |
+| TOOL_EXEC | THINKING | AGT-02 | Tool call complete | sq_agent02_dispatch_tool_call.puml |
+| TOOL_EXEC | AWAITING_APPROVAL | SAF-02 | safety_mode=ask AND unsafe tool | sq_safety02_request_approval.puml |
+| TOOL_EXEC | HOOK_RUNNING | HK-02 | Pre/post hook configured | sq_hooks02_dispatch_pre_tool_hook.puml |
+| TOOL_EXEC | ERROR | AGT-02 | Tool execution failed | sq_agent02_dispatch_tool_call.puml |
+| TOOL_EXEC | STAGING | EDT-10 | diff_sandbox mode active | sq_editstrategy10_stage_diff.puml |
+| HOOK_RUNNING | TOOL_EXEC | HK-02 | Hook execution complete | sq_hooks02_dispatch_pre_tool_hook.puml |
+| HOOK_RUNNING | IDLE | HK-02 | Hook execution complete (no tool) | sq_hooks02_dispatch_pre_tool_hook.puml |
+| AWAITING_APPROVAL | TOOL_EXEC | SAF-02 | User approves | sq_safety02_request_approval.puml |
+| AWAITING_APPROVAL | IDLE | SAF-02 | User denies | sq_safety02_request_approval.puml |
+| COMPACTING | THINKING | AGT-06 | Context compacted | sq_agent06_compact_context.puml |
+| RESPONDING | IDLE | API-06 | Response streamed to user | sq_api06_dispatch_message.puml |
+| ERROR | IDLE | AGT-14 | Error handled | sq_agent14_handle_error.puml |
+| PLANNING | IDLE | AGT-07 | Plan mode exited | sq_agent07_queue_plan.puml |
+| EVALUATING | REVIEWING | EVL-01 | Evaluation passed | sq_evaluation01_evaluate_task.puml |
+| EVALUATING | RETRYING | EVL-01 | Evaluation failed | sq_evaluation01_evaluate_task.puml |
+| EVALUATING | THINKING | EVL-01 | Retry with feedback | sq_evaluation01_evaluate_task.puml |
+| REVIEWING | THINKING | EVL-04 | LLM review passed | sq_evaluation04_validate_with_llm.puml |
+| REVIEWING | RETRYING | EVL-04 | LLM review rejected | sq_evaluation04_validate_with_llm.puml |
+| RETRYING | THINKING | EVL-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | ERROR | EVL-06 | Retry exhausted | sq_evaluation06_coordinate_retry.puml |
+| STAGING | AWAITING_DIFF_APPROVAL | EDT-10 | Diff computed successfully | sq_editstrategy10_stage_diff.puml |
+| STAGING | ERROR | EDT-10 | Diff computation failed | sq_editstrategy10_stage_diff.puml |
+| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAF-02 | User approves diff | sq_safety02_request_approval.puml |
+| AWAITING_DIFF_APPROVAL | IDLE | SAF-02 | User rejects diff | sq_safety02_request_approval.puml |
+
+> **Coverage:** 39/39 non-terminal transitions covered. 0 ORPHANs.
+
+### sm_session_lifecycle — Transition Coverage Table
+
+| From State | To State | UC-ID | Trigger | SQ Diagram |
+|------------|----------|-------|---------|------------|
+| [*] | CREATED | API-02 | Session record initialized | sq_api02_create_session.puml |
+| CREATED | ACTIVE | API-02 | Session ready for messages | sq_api02_create_session.puml |
+| ACTIVE | SAVED | API-04 | Session persisted to disk | sq_api04_update_session.puml |
+| ACTIVE | BRANCHED | WRL-04 | Session forked from parent | sq_wirelog04_fork_session.puml |
+| ACTIVE | CLOSED | API-05 | Session terminated | sq_api05_delete_session.puml |
+| SAVED | RESTORED | API-03 | Session loaded from disk | sq_api03_get_session.puml |
+| SAVED | CLOSED | API-05 | Session terminated | sq_api05_delete_session.puml |
+| RESTORED | ACTIVE | API-02 | Session ready for messages | sq_api02_create_session.puml |
+| RESTORED | SAVED | API-04 | Session persisted to disk | sq_api04_update_session.puml |
+| RESTORED | CLOSED | API-05 | Session terminated | sq_api05_delete_session.puml |
+| BRANCHED | ACTIVE | API-02 | Session ready for messages | sq_api02_create_session.puml |
+| BRANCHED | CLOSED | API-05 | Session terminated | sq_api05_delete_session.puml |
+| CLOSED | [*] | — | Terminal state | — |
+
+> **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
+
+### sm_subagent_lifecycle — Transition Coverage Table
+
+| From State | To State | UC-ID | Trigger | SQ Diagram |
+|------------|----------|-------|---------|------------|
+| [*] | IDLE | AGT-09 | Default state | sq_agent09_spawn_subagent.puml |
+| IDLE | SPAWNING | AGT-09 | Child agent spawn requested | sq_agent09_spawn_subagent.puml |
+| SPAWNING | RUNNING | AGT-09 | Child agent initialized | sq_agent09_spawn_subagent.puml |
+| SPAWNING | FAILED | AGT-09 | Spawn failed | sq_agent09_spawn_subagent.puml |
+| RUNNING | COMPLETED | AGT-10 | Task finished successfully | sq_agent10_collect_subagent_result.puml |
+| RUNNING | FAILED | AGT-14 | Unrecoverable error | sq_agent14_handle_error.puml |
+| COMPLETED | IDLE | AGT-10 | Results aggregated to parent | sq_agent10_collect_subagent_result.puml |
+| COMPLETED | [*] | AGT-10 | Terminal state | — |
+| FAILED | IDLE | AGT-14 | Error reported, cleanup done | sq_agent14_handle_error.puml |
+| FAILED | [*] | AGT-14 | Terminal state | — |
+
+> **Coverage:** 8/8 non-terminal transitions covered. 0 ORPHANs.
+
+### sm_plugin_lifecycle — Transition Coverage Table
+
+| From State | To State | UC-ID | Trigger | SQ Diagram |
+|------------|----------|-------|---------|------------|
+| [*] | DISCOVERED | PLG-01 | Plugin found on filesystem | sq_plugins01_discover_plugins.puml |
+| DISCOVERED | LOADING | PLG-02 | Manifest parsing starts | sq_plugins02_load_manifest.puml |
+| DISCOVERED | ERROR | PLG-01 | Plugin discovery failed | sq_plugins01_discover_plugins.puml |
+| LOADING | LOADED | PLG-03 | Manifest parsed, tools registered | sq_plugins03_register_plugin_tools.puml |
+| LOADING | ERROR | PLG-02 | Manifest parsing failed | sq_plugins02_load_manifest.puml |
+| LOADED | ENABLED | PLG-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
+| LOADED | DISABLED | PLG-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
+| LOADED | ERROR | PLG-03 | Tool registration failed | sq_plugins03_register_plugin_tools.puml |
+| ENABLED | DISABLED | PLG-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
+| ENABLED | ERROR | PLG-01 | Runtime exception | sq_plugins01_discover_plugins.puml |
+| ENABLED | [*] | PLG-06 | Plugin unloaded | — |
+| DISABLED | ENABLED | PLG-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
+| DISABLED | [*] | PLG-06 | Plugin unloaded | — |
+| ERROR | DISCOVERED | PLG-01 | Re-discovery (recovery) | sq_plugins01_discover_plugins.puml |
+
+> **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
+
+### sm_plan_lifecycle — Transition Coverage Table
+
+| From State | To State | UC-ID | Trigger | SQ Diagram |
+|------------|----------|-------|---------|------------|
+| [*] | EMPTY | AGT-07 | No plan active | sq_agent07_queue_plan.puml |
+| EMPTY | BUILDING | AGT-07 | /plan command entered | sq_agent07_queue_plan.puml |
+| BUILDING | QUEUED | AGT-07 | Plan construction complete | sq_agent07_queue_plan.puml |
+| BUILDING | EMPTY | AGT-07 | Plan cancelled | sq_agent07_queue_plan.puml |
+| QUEUED | APPROVED | AGT-08 | User approves plan | sq_agent08_approve_plan.puml |
+| QUEUED | REJECTED | AGT-08 | User rejects plan | sq_agent08_approve_plan.puml |
+| APPROVED | EXECUTING | AGT-08 | Execution started | sq_agent08_approve_plan.puml |
+| EXECUTING | COMPLETED | AGT-01 | All plan steps finished | sq_agent01_process_user_task.puml |
+| EXECUTING | EMPTY | AGT-14 | Execution failed or cancelled | sq_agent14_handle_error.puml |
+| COMPLETED | [*] | AGT-01 | Terminal state | — |
+| REJECTED | [*] | AGT-08 | Terminal state | — |
+
+> **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
