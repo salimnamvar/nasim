@@ -1,80 +1,68 @@
 @startuml sq_hooks01_register_hook
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-01 — REGISTER Hook
 ' Boundary:  nasim code agent
 ' Purpose:   Register a hook in the HookManager
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> HooksAPI -> HooksManager -> HooksStore -> HooksDirectory
+' SM States: HOOK_RUNNING (#FFFDE7)
 ' ============================================================
 
-title nasim — HK-01 REGISTER Hook
+!include ../common/sq_styles.puml
+
+title nasim -- HK-01 REGISTER Hook
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "HooksAPI" as api
 end box
-box "Plugins Group" #F3E5F5
-  participant "PluginLoader" as loader
+box "Hooks Group (Service)" #FFF3E0
+  participant "HooksManager" as mgr
 end box
-box "Hooks Group" #F3E5F5
-  participant "HookManager" as hooks
-  participant "Hook" as hook
+box "Hooks Group (Repository)" #E8F5E9
+  participant "HooksStore" as store
 end box
-box "Repository Group" #E8F5E9
-  participant "HookRepository" as hook_repo
-end box
-
+database "HooksDirectory" as dir
 
 == HK-01 REGISTER Hook ==
 
-user -> router : invoke agent
+user -> router : POST /hooks
 activate router
-router -> agent : hk01 REGISTER Hook(hook_spec)
-activate agent
-agent -> loader : hk01 REGISTER Hook(hook_spec)
-activate loader
-loader -> hooks : hk01 REGISTER Hook(event, handler, priority)
-activate hooks
-hooks -> hook : hk01 CREATE Hook(name, event, handler, priority)
-activate hook
-hook --> hooks : hook instance
-deactivate hook
+router -> api : HK-01 REGISTER Hook({hook_spec})
+activate api
+api -> mgr : HK-01 REGISTER Hook({hook_spec})
+activate mgr
 
-alt Duplicate hook name
-    hooks --> loader : warning logged, skip
-    loader --> agent : warning logged
-else New hook
-    hooks --> hooks : hk01 APPEND To Registry(hook)
-    hooks --> loader : registered
+alt validation succeeds
+  mgr -> store : HK-01 REGISTER Hook({hook_spec})
+  activate store
+  store -> dir : HK-01 REGISTER Hook({hook_spec})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : HOOK_RUNNING (#FFFDE7)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-deactivate hooks
-
-loader --> agent : registered
-deactivate loader
-agent --> router : hook registered
-deactivate agent
-deactivate router
-
 
 @enduml

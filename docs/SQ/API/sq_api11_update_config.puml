@@ -1,77 +1,67 @@
 @startuml sq_api11_update_config
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-11 — UPDATE Config
-' Boundary:  nasim code agent HTTP API
+' Boundary:  nasim code agent
 ' Purpose:   Update agent configuration at runtime
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ConfigAPI -> ConfigManager -> ConfigLoader
+' SM States: —
 ' ============================================================
 
-title nasim — API-11 UPDATE Config
+!include ../common/sq_styles.puml
+
+title nasim -- API-11 UPDATE Config
 
 actor "User" as user
 
-box "Controller Group" #E3F2FD
+box "Entry Gate" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "ConfigService" as svc
+box "Controller" #FFF3E0
+  participant "ConfigAPI" as api
 end box
-box "Repository Group" #E8F5E9
-  participant "ConfigLoader" as config
+box "Service" #FFF3E0
+  participant "ConfigManager" as mgr
 end box
-
-
+box "Repository" #E8F5E9
+  participant "ConfigLoader" as store
+end box
+database "ConfigDirectory" as dir
 
 == API-11 UPDATE Config ==
 
 user -> router : PATCH /v1/config
 activate router
+router -> api : api11 UPDATE Config({patchData})
+activate api
+api -> mgr : api11 UPDATE Config({patchData})
+activate mgr
 
-router -> router : Phase 1: validate patch body
-alt Structural validation failed [400]
-  router --> user : 400 INVALID_ARGUMENT
+alt validation succeeds
+  mgr -> store : api11 UPDATE Config({patchData})
+  activate store
+  store -> dir : api11 UPDATE Config({patchData})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-router -> svc : API-11 UPDATE Config(patchData, updateMask)
-activate svc
-
-svc -> svc : Phase 2: validate business rules
-svc -> config : updateConfig(patch)
-activate config
-
-break Invalid config [400]
-  config --> svc : ConfigError(invalid_value)
-  deactivate config
-  svc --> router : 400 INVALID_ARGUMENT
-  router --> user : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid config", status: "INVALID_ARGUMENT"}}
-end
-
-config --> svc : applied
-deactivate config
-
-svc --> router : ConfigResponseDTO
-deactivate svc
-router --> user : 200 OK {config: {updated_fields: [...]}}
-deactivate router
-
-
 
 @enduml

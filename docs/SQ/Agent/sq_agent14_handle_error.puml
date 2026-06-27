@@ -1,81 +1,68 @@
 @startuml sq_agent14_handle_error
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-14 — HANDLE Error
 ' Boundary:  nasim code agent
 ' Purpose:   Classify errors and determine recovery action
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' SM States: FAILED (#EF5350)
 ' ============================================================
 
-title nasim — AGT-14 HANDLE Error
+!include ../common/sq_styles.puml
+
+title nasim -- AGT-14 HANDLE Error
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "ErrorBoundary" as eb
+box "API Group (Controller)" #FFF3E0
+  participant "AgentAPI" as api
 end box
-box "Safety Group" #FFF3E0
-  participant "SafetyCoordinator" as safety
+box "Agent Group (Service)" #FFF3E0
+  participant "AgentManager" as mgr
 end box
-box "Repository Group" #E8F5E9
-  participant "MemoryRepository" as memory
+box "Agent Group (Repository)" #E8F5E9
+  participant "AgentStore" as store
 end box
-
-
+database "AgentDirectory" as dir
 
 == AGT-14 HANDLE Error ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
-activate agent
+user -> router : POST /v1/agents/{agent_id}:handle-error
+activate router
+router -> api : AGT-14 HANDLE Error({error})
+activate api
+api -> mgr : AGT-14 HANDLE Error({error})
+activate mgr
 
-agent -> eb : agt14 HANDLE Error({error})
-activate eb
-
-eb -> eb : classify error type
-eb -> eb : determine severity
-
-alt retryable error (transient)
-    eb -> eb : set retry policy (backoff + max retries)
-    eb --> agent : RecoveryAction(retry)
-else recoverable error (config)
-    eb -> safety : check safety constraints
-    activate safety
-    safety --> eb : safety_status
-    deactivate safety
-    eb -> eb : determine fallback strategy
-    eb --> agent : RecoveryAction(fallback)
-else unrecoverable error
-    eb -> eb : log error details
-    eb --> agent : RecoveryAction(abort)
+alt retryable error
+  hnote over mgr : FAILED (#EF5350)
+  mgr -> store : AGT-14 HANDLE Error({error})
+  activate store
+  store -> dir : AGT-14 HANDLE Error({error})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else unrecoverable
+  mgr --> api : 500 Server Error
+  deactivate mgr
+  api --> router : 500 Server Error
+  deactivate api
+  router --> user : 500 Server Error
+  deactivate router
 end
-
-deactivate eb
-
-agent --> router : AgentEvent(Error)
-deactivate agent
-
-
 
 @enduml

@@ -1,64 +1,68 @@
-@startuml sq_contextgraph06_track_token_budget
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_ctx06_track_token_budget
 ' ============================================================
-' Title:     CTX-06 — Track Token Budget
-' Boundary:  nasim code agent CLI
-' Purpose:   Track token count as messages are added
+' Title:     CTX-06 — TRACK Token Budget
+' Boundary:  nasim code agent
+' Purpose:   Track token consumption against allocated budget
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ContextGraphAPI -> ContextGraphManager -> ContextGraphStore -> ContextGraphDirectory
+' SM States: COMPACTING (#E0F2F1)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- CTX-06 TRACK Token Budget
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "ConversationHistory" as history
+box "API Group (Controller)" #FFF3E0
+  participant "ContextGraphAPI" as api
 end box
+box "Context Graph Group (Service)" #FFF3E0
+  participant "ContextGraphManager" as mgr
+end box
+box "Context Graph Group (Repository)" #E8F5E9
+  participant "ContextGraphStore" as store
+end box
+database "ContextGraphDirectory" as dir
 
+== CTX-06 TRACK Token Budget ==
 
-== CTX-01 Track Token Count ==
-
-user -> router : types input
+user -> router : GET /contextgraph/budget
 activate router
-router -> agent : PROCESS(user_input)
-activate agent
-agent -> history : CTX-06 ADD_MESSAGE(msg)
-activate history
-history -> history : self.messages.append(msg)
-history -> history : self.token_count += estimate_tokens(msg)
+router -> api : CTX-06 TRACK Token Budget({used_tokens, total_budget})
+activate api
+api -> mgr : CTX-06 TRACK Token Budget({used_tokens, total_budget})
+activate mgr
 
-alt token_count > context_budget
-    history --> agent : COMPACT_NEEDED
-    deactivate history
-    agent -> agent : trigger CTX-02 (COMPACT Context)
-else within budget
-    history --> agent : ok
-    deactivate history
+alt budget sufficient
+  mgr -> store : CTX-06 TRACK Token Budget({used_tokens, total_budget})
+  activate store
+  store -> dir : CTX-06 TRACK Token Budget({used_tokens, total_budget})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : COMPACTING (#E0F2F1) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else budget exceeded
+  mgr --> api : 429 Too Many Requests
+  deactivate mgr
+  api --> router : 429 Too Many Requests
+  deactivate api
+  router --> user : 429 Too Many Requests
+  deactivate router
 end
-
-agent --> router : AgentEvent(Done)
-
-deactivate agent
-deactivate router
-
 
 @enduml

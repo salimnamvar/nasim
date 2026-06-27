@@ -1,86 +1,74 @@
 @startuml sq_tool13_read_lsp
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     TL-13 — Read LSP
+' Title:     TL-13 — READ LSP
 ' Boundary:  nasim code agent
 ' Purpose:   Query LSP server for hover, definition, or references
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
-title nasim — TL-13 READ LSP
+!include ../common/sq_styles.puml
+
+title nasim -- TL-13 READ LSP
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "LspTool" as tool
 end box
-participant "LSP Server" as lsp
+database "ToolDirectory" as dir
 
+== TL-13 READ LSP ==
 
-
-== TL-13 Read LSP ==
-
-user -> router : types input
+user -> router : POST /tools/read_lsp:execute
 activate router
-router -> agent : TL-13 PROCESS(user_input)
-activate agent
-agent -> registry : TL-13 Read LSP(query, params)
-activate registry
-registry -> tool : TL-13 Read LSP(query, params)
-activate tool
-tool -> lsp : send request(query, params)
-activate lsp
+router -> api : TL-13 READ LSP(query, params)
+activate api
+api -> orch : TL-13 READ LSP(query, params)
+activate orch
 
-break LSP server unreachable or times out
-    lsp --> tool : ConnectionError / TimeoutError
-    deactivate lsp
-    tool --> registry : ToolResult(success=False, error="LSP unavailable")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  orch -> registry : TL-13 READ LSP(query, params)
+  activate registry
+  registry -> dir : TL-13 READ LSP(query, params)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else server unreachable
+  orch --> api : 502 Bad Gateway
+  deactivate orch
+  api --> router : 502 Bad Gateway
+  deactivate api
+  router --> user : 502 Bad Gateway
+  deactivate router
+else no results
+  orch --> api : 404 Not Found
+  deactivate orch
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-break Query returns no results
-    lsp --> tool : empty result
-    deactivate lsp
-    tool --> registry : ToolResult(success=False, error="no results")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
-end
-
-lsp --> tool : hover/definition/references result
-deactivate lsp
-tool --> registry : ToolResult(success=True, result)
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-deactivate tool
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

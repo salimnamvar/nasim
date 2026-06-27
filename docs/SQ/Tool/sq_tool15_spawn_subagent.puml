@@ -1,76 +1,75 @@
 @startuml sq_tool15_spawn_subagent
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     TL-15 — Spawn Subagent
+' Title:     TL-15 — SPAWN Subagent
 ' Boundary:  nasim code agent
 ' Purpose:   Create a child subagent via SubagentTool
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: SPAWNING (#FFAB91), RUNNING (#BCAAA4)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TL-15 SPAWN Subagent
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "SubagentTool" as tool
 end box
-participant "SubagentCoordinator" as coord
+database "ToolDirectory" as dir
 
+== TL-15 SPAWN Subagent ==
 
-
-== TL-15 Spawn Subagent ==
-
-user -> router : types input
+user -> router : POST /tools/spawn_subagent:execute
 activate router
-router -> agent : TL-15 PROCESS(user_input)
-activate agent
-agent -> registry : TL-15 Spawn Subagent(prompt, subagent_type)
-activate registry
-registry -> tool : TL-15 Spawn Subagent(prompt, subagent_type)
-activate tool
-tool -> coord : create_child(prompt, subagent_type)
-activate coord
+router -> api : TL-15 SPAWN Subagent(prompt, subagentType)
+activate api
+api -> orch : TL-15 SPAWN Subagent(prompt, subagentType)
+activate orch
 
-break Coordinator unavailable or limit reached
-    coord --> tool : CapacityError
-    deactivate coord
-    tool --> registry : ToolResult(success=False, error="spawn limit reached")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  orch -> registry : TL-15 SPAWN Subagent(prompt, subagentType)
+  activate registry
+  registry -> dir : TL-15 SPAWN Subagent(prompt, subagentType)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : SPAWNING (#FFAB91)
+  hnote over orch : RUNNING (#BCAAA4)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else spawn limit reached
+  orch --> api : 429 Too Many Requests
+  deactivate orch
+  api --> router : 429 Too Many Requests
+  deactivate api
+  router --> user : 429 Too Many Requests
+  deactivate router
+else spawn failed
+  orch --> api : 500 Internal Server Error
+  deactivate orch
+  api --> router : 500 Internal Server Error
+  deactivate api
+  router --> user : 500 Internal Server Error
+  deactivate router
 end
-
-coord --> tool : child_id
-deactivate coord
-tool --> registry : ToolResult(success=True, child_id=child_id)
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-deactivate tool
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

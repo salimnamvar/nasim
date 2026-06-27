@@ -1,74 +1,68 @@
 @startuml sq_wirelog03_seek_turn
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-03 — SEEK Turn
 ' Boundary:  nasim code agent
 ' Purpose:   Seek to a specific turn in the wire log
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> WireLogAPI -> WireLogManager -> WireLogStore -> WireLogDirectory
+' SM States: RESTORED (#1E88E5)
 ' ============================================================
 
-title nasim — WRL-03 READ Turn
+!include ../common/sq_styles.puml
+
+title nasim -- WRL-03 SEEK Turn
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "WireLogAPI" as api
 end box
-box "Wire Log Group" #F3E5F5
-  participant "TurnIndex" as idx
-  participant "WireReader" as reader
+box "WireLog Group (Service)" #FFF3E0
+  participant "WireLogManager" as mgr
 end box
-box "Repository Group" #E8F5E9
-  participant "WireLogStore" as wrl
+box "WireLog Group (Repository)" #E8F5E9
+  participant "WireLogStore" as store
 end box
-
-
+database "WireLogDirectory" as dir
 
 == WRL-03 SEEK Turn ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+user -> router : GET /wirelog/turns/{turn}
+activate router
+router -> api : wrl03 SEEK Turn(target_turn_number)
+activate api
+api -> mgr : wrl03 SEEK Turn(target_turn_number)
+activate mgr
 
-agent -> idx : wrl03 SEEK Turn(turn_number)
-
-idx -> idx : LOOKUP turn_number
-idx -> reader : wrl03 READ Wire Events(offset)
-activate reader
-reader -> wrl : read events from store
-wrl --> reader : events
-
-break Turn not found
-  reader --> idx : 404 NOT_FOUND
-  idx --> agent : 404 NOT_FOUND — turn not in index
-  agent --> router : AgentEvent(Error)
+alt turn found
+  mgr -> store : wrl03 SEEK Turn(target_turn_number)
+  activate store
+  store -> dir : wrl03 SEEK Turn(target_turn_number)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : RESTORED (#1E88E5)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else turn not found
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-reader --> idx : 200 OK — WireEvents[turn]
-deactivate reader
-
-idx --> agent : 200 OK — WireEvents[turn]
-
-agent --> router : AgentEvent(Done)
-
 
 @enduml

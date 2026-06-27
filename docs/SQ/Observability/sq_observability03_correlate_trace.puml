@@ -1,90 +1,67 @@
 @startuml sq_observability03_correlate_trace
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-03 — CORRELATE Trace
 ' Boundary:  nasim code agent
 ' Purpose:   Generate and propagate trace context across nasim surfaces
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ObservabilityAPI -> ObservabilityManager -> ObservabilityStore -> ObservabilityDirectory
+' SM States: —
 ' ============================================================
 
-title nasim — OBS-03 CORRELATE Trace
+!include ../common/sq_styles.puml
+
+title nasim -- OBS-03 CORRELATE Trace
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ObservabilityAPI" as api
 end box
-box "Observability Group" #F3E5F5
-  participant "TraceCorrelator" as trace
-  participant "ContextPropagator" as propagator
+box "Observability Group (Service)" #FFF3E0
+  participant "ObservabilityManager" as mgr
 end box
-box "Provider Group" #FFF3E0
-  participant "Provider" as provider
+box "Observability Group (Repository)" #E8F5E9
+  participant "ObservabilityStore" as store
 end box
-box "Tool Group" #E8F5E9
-  participant "ToolRegistry" as tools
-end box
-box "Repository Group" #E8F5E9
-  participant "ObservabilityRepository" as obs_repo
-end box
+database "ObservabilityDirectory" as dir
 
+== OBS-03 CORRELATE Trace ==
 
-== OBS-03 CORRELATE Trace (CLI turn) ==
-
-user -> router : OBS-03 CORRELATE Trace(cli_turn)
+user -> router : POST /traces
 activate router
-router -> agent : OBS-03 CORRELATE Trace(cli_turn)
-activate agent
+router -> api : OBS-03 CORRELATE Trace({trace_event})
+activate api
+api -> mgr : OBS-03 CORRELATE Trace({trace_event})
+activate mgr
 
-agent -> trace : OBS-03 NEW Trace(cli_turn)
-activate trace
-trace -> trace : generate trace_id (uuid4)
-trace -> trace : generate span_id (uuid4hex)
-trace -> trace : bind to contextvars
-trace --> agent : TraceContext(trace_id, span_id)
-deactivate trace
-
-agent -> propagator : propagator.propagate()
-activate propagator
-propagator --> agent : TraceContext(trace_id, span_id, parent_span_id)
-deactivate propagator
-
-agent -> provider : PRV-03 STREAM ProviderChat(messages, trace_ctx)
-activate provider
-provider -> provider : create child_span("llm.chat")
-provider --> agent : Stream(TextChunk)
-deactivate provider
-
-agent -> tools : TL-02 DISPATCH ToolCall(tool_call, trace_ctx)
-activate tools
-tools -> tools : create child_span("tool.exec")
-tools --> agent : ToolResult(result)
-deactivate tools
-
-agent --> router : AgentEvent stream
-deactivate agent
-deactivate router
-
-
+alt validation succeeds
+  mgr -> store : OBS-03 CORRELATE Trace({trace_event})
+  activate store
+  store -> dir : OBS-03 CORRELATE Trace({trace_event})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

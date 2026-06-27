@@ -1,72 +1,74 @@
 @startuml sq_tool08_search_find
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-08 — SEARCH Find
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Find files by name pattern with depth limit
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TL-08 SEARCH Find
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "FindFileTool" as find
 end box
+database "ToolDirectory" as dir
 
+== TL-08 SEARCH Find ==
 
-
-== TL-08 FIND Files ==
-
-user -> router : types input
+user -> router : POST /tools/search_find:execute
 activate router
-router -> agent : TL-08 PROCESS(user_input)
-activate agent
-agent -> registry : TL-08 FIND Files(name_pattern, path, max_depth)
-activate registry
-registry -> find : TL-08 FIND Files(name_pattern, path, max_depth)
-activate find
-find -> find : os.walk(path) with depth tracking
-find -> find : fnmatch.fnmatch(filename, pattern)
+router -> api : TL-08 SEARCH Find(namePattern, path, maxDepth)
+activate api
+api -> orch : TL-08 SEARCH Find(namePattern, path, maxDepth)
+activate orch
 
-break Path not found
-    find --> registry : ToolResult(success=False, error="Error: path not found: path")
-    deactivate find
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  orch -> registry : TL-08 SEARCH Find(namePattern, path, maxDepth)
+  activate registry
+  registry -> dir : TL-08 SEARCH Find(namePattern, path, maxDepth)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else path not found
+  orch --> api : 404 Not Found
+  deactivate orch
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
+else permission denied
+  orch --> api : 403 Forbidden
+  deactivate orch
+  api --> router : 403 Forbidden
+  deactivate api
+  router --> user : 403 Forbidden
+  deactivate router
 end
-
-find --> registry : ToolResult(success=True, content=matching_paths)
-deactivate find
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

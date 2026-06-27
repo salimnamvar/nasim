@@ -1,69 +1,68 @@
 @startuml sq_router04_switch_model
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     RTG-04 — Switch Model
+' Title:     RTG-04 — SWITCH Model
 ' Boundary:  nasim code agent
 ' Purpose:   Change the active model at runtime
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> RouterAPI -> RouterManager -> RouterStore -> RouterDirectory
+' SM States: SWITCHING (#FF8F00)
 ' ============================================================
 
-title nasim — RTG-04 UPDATE Model
+!include ../common/sq_styles.puml
+
+title nasim -- RTG-04 SWITCH Model
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "RouterAPI" as api
 end box
-box "Router Group" #FFF3E0
-  participant "ModelRouter" as router
+box "Router Group (Service)" #FFF3E0
+  participant "RouterManager" as mgr
 end box
+box "Router Group (Repository)" #E8F5E9
+  participant "RouterStore" as store
+end box
+database "RouterDirectory" as dir
 
+== RTG-04 SWITCH Model ==
 
-
-== RTG-04 Switch Model ==
-
-user -> router : types input
+user -> router : PATCH /models/active
 activate router
-router -> agent : RTG-04 PROCESS(user_input)
-activate agent
+router -> api : rtg04 SWITCH Model(target_model)
+activate api
+api -> mgr : rtg04 SWITCH Model(target_model)
+activate mgr
 
-agent -> router : RTG-04 SWITCH Model(target_model, updateMask)
-activate router
-
-break Model not in catalog
-    router --> agent : Error("model not available")
-    agent --> router : AgentEvent(Error)
+alt switch succeeds
+  mgr -> store : rtg04 SWITCH Model(target_model)
+  activate store
+  store -> dir : rtg04 SWITCH Model(target_model)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : SWITCHING (#FF8F00)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else model not in catalog
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-router -> router : RTG-04 VALIDATE ModelAvailability(target_model)
-router -> router : RTG-04 UPDATE ActiveModelConfig(target_model)
-
-router --> agent : Result(success=true, data={previous_model, new_model})
-
-agent --> router : AgentEvent(Done)
-
-deactivate agent
-deactivate router
-
 
 @enduml

@@ -1,113 +1,69 @@
 @startuml sq_agent02_dispatch_tool_call
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-02 — DISPATCH Tool Call
 ' Boundary:  nasim code agent
-' Purpose:   Tool dispatch with Safety Pipeline (no God Object)
+' Purpose:   Route tool call to ToolRegistry via safety pipeline
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    Meta-Software Designer audit 2026-06-21
-' Pattern:   Service (AgentOrchestrator) -> Safety (SafetyCoordinator) -> Repository (ToolRegistry)
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' SM States: RUNNING (#43A047), WAITING (#CE93D8)
 ' ============================================================
 
-title nasim — AGT-02 DISPATCH Tool Call
+!include ../common/sq_styles.puml
+
+title nasim -- AGT-02 DISPATCH Tool Call
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "ErrorBoundary" as eb
+box "API Group (Controller)" #FFF3E0
+  participant "AgentAPI" as api
 end box
-box "Safety Group" #FFF3E0
-  participant "SafetyCoordinator" as safety
-  participant "PermissionGate" as gate
-  participant "InjectionScanner" as inj
-  participant "EgressInspector" as egr
+box "Agent Group (Service)" #FFF3E0
+  participant "AgentManager" as mgr
 end box
-box "Tool Group" #E8F5E9
-  participant "ToolRegistry" as registry
-  participant "Tool" as tool
+box "Agent Group (Repository)" #E8F5E9
+  participant "AgentStore" as store
 end box
-box "Observability Group" #F3E5F5
-  participant "StructuredLogger" as logger
-end box
-
-
+database "AgentDirectory" as dir
 
 == AGT-02 DISPATCH Tool Call ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
-activate agent
+user -> router : POST /v1/agents/{agent_id}:dispatch-tool
+activate router
+router -> api : AGT-02 DISPATCH Tool Call({tool_name, args})
+activate api
+api -> mgr : AGT-02 DISPATCH Tool Call({tool_name, args})
+activate mgr
 
-agent -> agent : receive tool_call from LLM response
-
-hnote over agent #FFF9C4 : **State: AWAITING_APPROVAL** (if unsafe)
-
-' --- NO GOD OBJECT: Delegate to SafetyCoordinator (AGT-15) ---
-agent -> safety : agt15 DISPATCH Safety Pipeline({tool_call})
-activate safety
-ref over safety
-  AGT-15: DISPATCH Safety Pipeline (injection, egress, permission)
-end ref
-safety --> agent : SafetyResult(approved/denied)
-deactivate safety
-
-alt safety denied
-    agent -> agent : ToolResult(success=false, error="safety violation")
-    ref over agent, logger
-      OBS-01: STREAM Structured Log (tool blocked by safety)
-    end ref
-else safety approved
-    hnote over agent #F3E5F5 : **State: TOOL_EXEC**
-
-    agent -> registry : find(tool_call.name)
-    activate registry
-    alt tool not found
-        registry --> agent : null
-        agent -> eb : handle(UnknownTool)
-        activate eb
-        eb --> agent : RecoveryAction(abort)
-        deactivate eb
-        agent -> agent : ToolResult(success=false, error="unknown tool")
-    else tool found
-        registry --> tool : tool
-        deactivate registry
-        activate tool
-        agent -> tool : execute(tool_call.arguments)
-        tool --> agent : ToolResult
-        deactivate tool
-        ref over agent, logger
-          OBS-01: STREAM Structured Log (tool execution result)
-        end ref
-    end
+alt safety approved
+  hnote over mgr : RUNNING (#43A047)
+  mgr -> store : AGT-02 DISPATCH Tool Call({tool_name, args})
+  activate store
+  store -> dir : AGT-02 DISPATCH Tool Call({tool_name, args})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else safety violation
+  hnote over mgr : WAITING (#CE93D8)
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-agent -> agent : append ToolResult to messages
-
-hnote over agent #FFF3E0 : **State: THINKING**
-
-agent --> router : AgentEvent(Done)
-deactivate agent
-
-
 
 @enduml

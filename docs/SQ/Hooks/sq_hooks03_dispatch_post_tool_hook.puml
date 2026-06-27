@@ -1,83 +1,68 @@
 @startuml sq_hooks03_dispatch_post_tool_hook
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     HK-03 — DISPATCH Post-Tool Hook
 ' Boundary:  nasim code agent
 ' Purpose:   Execute hooks after tool execution
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> HooksAPI -> HooksManager -> HooksStore -> HooksDirectory
+' SM States: HOOK_RUNNING (#FFFDE7)
 ' ============================================================
 
-title nasim — HK-03 DISPATCH Post-Tool Hook
+!include ../common/sq_styles.puml
+
+title nasim -- HK-03 DISPATCH Post-Tool Hook
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "HooksAPI" as api
 end box
-box "Tool Group" #E8F5E9
-  participant "ToolRegistry" as tools
+box "Hooks Group (Service)" #FFF3E0
+  participant "HooksManager" as mgr
 end box
-box "Hooks Group" #F3E5F5
-  participant "HookManager" as hooks
-  participant "Hook" as hook
+box "Hooks Group (Repository)" #E8F5E9
+  participant "HooksStore" as store
 end box
-box "Repository Group" #E8F5E9
-  participant "HookRepository" as hook_repo
-end box
-
+database "HooksDirectory" as dir
 
 == HK-03 DISPATCH Post-Tool Hook ==
 
-user -> router : invoke agent
+user -> router : POST /hooks/{id}:dispatch
 activate router
-router -> agent : hk03 DISPATCH Post-Tool Hook(tool_name, result)
-activate agent
-agent -> tools : agt02 EXECUTE Tool(tool_name, args)
-activate tools
-tools --> agent : ToolResult
-deactivate tools
+router -> api : HK-03 DISPATCH Post-Tool Hook({tool_name, result})
+activate api
+api -> mgr : HK-03 DISPATCH Post-Tool Hook({tool_name, result})
+activate mgr
 
-agent -> hooks : hk03 DISPATCH Post-Tool Hook(tool_name, result)
-activate hooks
-hooks -> hooks : hk03 FIND Hooks For Event(PostToolCall)
-
-loop for each hook in priority order
-    hooks -> hook : hk03 EXECUTE Hook(tool_name, result)
-    activate hook
-    hook --> hooks : HookResult(action, data?)
-    deactivate hook
-
-    break action == DENY
-        hooks --> agent : HookResult(action=DENY, reason)
-        agent --> router : HookResult(action=DENY)
-    end
+alt validation succeeds
+  mgr -> store : HK-03 DISPATCH Post-Tool Hook({tool_name, result})
+  activate store
+  store -> dir : HK-03 DISPATCH Post-Tool Hook({tool_name, result})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : HOOK_RUNNING (#FFFDE7)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-hooks --> agent : HookResult(action=ALLOW, modified_result?)
-deactivate hooks
-agent --> router : HookResult(action=ALLOW)
-deactivate agent
-deactivate router
-
 
 @enduml

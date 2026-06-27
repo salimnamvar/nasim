@@ -1,61 +1,68 @@
 @startuml sq_safety03_apply_safety_mode
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     SAF-03 — Apply Safety Mode
-' Boundary:  nasim code agent CLI
+' Title:     SAF-03 — APPLY Safety Mode
+' Boundary:  nasim code agent
 ' Purpose:   Configure safety mode from config
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> SafetyAPI -> SafetyManager -> SafetyStore -> SafetyDirectory
+' SM States: ASK (#FDD835), PERMISSIVE (#9CCC65), BLOCK (#E91E63)
 ' ============================================================
 
-title nasim — SAF-03 UPDATE Safety Mode
+!include ../common/sq_styles.puml
+
+title nasim -- SAF-03 APPLY Safety Mode
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "PermissionGate" as gate
+box "API Group (Controller)" #FFF3E0
+  participant "SafetyAPI" as api
 end box
-box "Config Group" #E8F5E9
-  participant "ConfigLoader" as cfg
+box "Safety Group (Service)" #FFF3E0
+  participant "SafetyManager" as mgr
 end box
+box "Safety Group (Repository)" #E8F5E9
+  participant "SafetyStore" as store
+end box
+database "SafetyDirectory" as dir
 
+== SAF-03 APPLY Safety Mode ==
 
-== SAF-03 Apply Safety Mode ==
+user -> router : PATCH /safety/mode
+activate router
+router -> api : saf03 APPLY Safety Mode(safety_mode)
+activate api
+api -> mgr : saf03 APPLY Safety Mode(safety_mode)
+activate mgr
 
-user -> router : types input
-router -> agent : SAF-03 PROCESS(user_input)
-
-agent -> cfg : SAF-03 READ SafetyModeConfig()
-activate cfg
-cfg --> agent : config.safety_mode
-deactivate cfg
-
-agent -> gate : SAF-03 APPLY SafetyMode(config.safety_mode, updateMask)
-gate -> gate : SAF-03 SET self.mode(config.safety_mode)
-
-gate --> agent : Result(success=true, data={safety_mode})
-
-agent --> router : AgentEvent(Done)
-
+alt mode applied
+  mgr -> store : saf03 APPLY Safety Mode(safety_mode)
+  activate store
+  store -> dir : saf03 APPLY Safety Mode(safety_mode)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : ASK (#FDD835)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else invalid mode
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

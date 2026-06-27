@@ -1,87 +1,68 @@
 @startuml sq_provider02_request_chat
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PRV-02 — REQUEST Chat
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Synchronous LLM chat completion via provider abstraction
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ProviderAPI -> ProviderManager -> ProviderStore -> ProviderDirectory
+' SM States: THINKING (#D7CCC8), ERROR (#FFEBEE)
 ' ============================================================
 
-title nasim — PRV-02 REQUEST Chat
+!include ../common/sq_styles.puml
+
+title nasim -- PRV-02 REQUEST Chat
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ProviderAPI" as api
 end box
-box "Provider Group" #FFF3E0
-  participant "Provider" as provider
+box "Provider Group (Service)" #FFF3E0
+  participant "ProviderManager" as mgr
 end box
-box "External" #F5F5F5
-  participant "LLM Provider API" as api
+box "Provider Group (Repository)" #E8F5E9
+  participant "ProviderStore" as store
 end box
-box "Repository Group" #E8F5E9
-  participant "ChatStore" as chat_store
-end box
-
-
-
+database "ProviderDirectory" as dir
 
 == PRV-02 REQUEST Chat ==
 
-user -> router : PRV-02 REQUEST Chat(messages, tools)
+user -> router : POST /providers/{id}:chat
 activate router
-router -> agent : PRV-02 REQUEST Chat(messages, tools)
-activate agent
-
-hnote over provider #FFF3E0 : **State: THINKING**
-
-agent -> provider : PRV-02 REQUEST Chat(messages, tools)
-activate provider
-
-provider -> api : HTTP POST /api/chat {model, messages, tools, stream:false}
+router -> api : PRV-02 REQUEST Chat({messages, tools})
 activate api
+api -> mgr : PRV-02 REQUEST Chat({messages, tools})
+activate mgr
 
-break HTTP error or timeout
-    api --> provider : connection error / timeout
-    provider --> agent : ProviderError("Connection failed")
-    agent -> agent : handle error -> ERROR state
+alt validation succeeds
+  mgr -> store : PRV-02 REQUEST Chat({messages, tools})
+  activate store
+  store -> dir : PRV-02 REQUEST Chat({messages, tools})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : THINKING (#D7CCC8)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-api --> provider : JSON response
-deactivate api
-
-provider -> provider : parse response -> LLMResponse
-
-provider -> chat_store : store LLM response
-chat_store --> provider : stored
-provider --> agent : LLMResponse(content, tool_calls)
-deactivate provider
-
-agent --> router : LLMResponse(content, tool_calls)
-deactivate agent
-deactivate router
-
-
 
 @enduml

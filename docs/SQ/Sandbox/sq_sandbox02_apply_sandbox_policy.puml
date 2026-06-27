@@ -1,82 +1,68 @@
 @startuml sq_sandbox02_apply_sandbox_policy
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SBX-02 — APPLY Sandbox Policy
 ' Boundary:  nasim code agent
 ' Purpose:   Load and apply sandbox security policy
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> SandboxAPI -> SandboxManager -> SandboxStore -> SandboxDirectory
+' SM States: IDLE (#78909C)
 ' ============================================================
 
-title nasim — SBX-02 UPDATE Sandbox Policy
+!include ../common/sq_styles.puml
+
+title nasim -- SBX-02 APPLY Sandbox Policy
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "SandboxAPI" as api
 end box
-box "Sandbox Group" #F3E5F5
-  participant "SandboxExecutor" as executor
-  participant "SandboxPolicy" as policy
+box "Sandbox Group (Service)" #FFF3E0
+  participant "SandboxManager" as mgr
 end box
-
+box "Sandbox Group (Repository)" #E8F5E9
+  participant "SandboxStore" as store
+end box
+database "SandboxDirectory" as dir
 
 == SBX-02 APPLY Sandbox Policy ==
 
-user -> router : types input
-router -> agent : SBX-02 PROCESS(user_input)
+user -> router : PATCH /sandbox/policy
+activate router
+router -> api : sbx02 APPLY Sandbox Policy(policy_path)
+activate api
+api -> mgr : sbx02 APPLY Sandbox Policy(policy_path)
+activate mgr
 
-agent -> executor : SBX-02 APPLY SandboxPolicy(policy_path, updateMask)
-activate executor
-
-executor -> policy : SBX-02 LOAD Policy(policy_path)
-activate policy
-
-policy -> policy : SBX-02 READ PolicyFile(policy_path)
-
-break Policy file not found
-    policy --> executor : default policy applied
-    executor --> agent : Result(success=true, data={rules_count, fallback=true})
-    agent --> router : AgentEvent(Done)
+alt policy applied
+  mgr -> store : sbx02 APPLY Sandbox Policy(policy_path)
+  activate store
+  store -> dir : sbx02 APPLY Sandbox Policy(policy_path)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : IDLE (#78909C)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else invalid policy
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-policy -> policy : SBX-02 VALIDATE Rules(rules)
-
-break Invalid policy rules
-    policy --> executor : revert to defaults, log error
-    executor --> agent : Result(success=false, error="policy_invalid")
-    agent --> router : AgentEvent(Error)
-end
-
-policy -> policy : SBX-02 APPLY ToSandbox(instance)
-
-policy --> executor : Result(success=true, data={rules_count})
-deactivate policy
-
-executor --> agent : Result(success=true, data={rules_count})
-deactivate executor
-
-agent --> router : AgentEvent(Done)
-
-
 
 @enduml

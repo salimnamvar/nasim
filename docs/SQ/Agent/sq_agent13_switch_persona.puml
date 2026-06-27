@@ -1,81 +1,68 @@
 @startuml sq_agent13_switch_persona
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-13 — SWITCH Persona
 ' Boundary:  nasim code agent
-' Purpose:   Unload current persona and load a new one
+' Purpose:   Unload current persona and activate a new one
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' SM States: RUNNING (#43A047)
 ' ============================================================
 
-title nasim — AGT-13 UPDATE Persona
+!include ../common/sq_styles.puml
+
+title nasim -- AGT-13 SWITCH Persona
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "PersonaManager" as pm
+box "API Group (Controller)" #FFF3E0
+  participant "AgentAPI" as api
 end box
-box "Config Group" #E8F5E9
-  participant "PersonaRegistry" as reg
+box "Agent Group (Service)" #FFF3E0
+  participant "AgentManager" as mgr
 end box
-box "Repository Group" #E8F5E9
-  participant "MemoryRepository" as memory
+box "Agent Group (Repository)" #E8F5E9
+  participant "AgentStore" as store
 end box
-
-
+database "AgentDirectory" as dir
 
 == AGT-13 SWITCH Persona ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
-activate agent
+user -> router : POST /v1/agents/{agent_id}:switch-persona
+activate router
+router -> api : AGT-13 SWITCH Persona({new_persona_name})
+activate api
+api -> mgr : AGT-13 SWITCH Persona({new_persona_name})
+activate mgr
 
-agent -> pm : agt13 SWITCH Persona({new_persona_name}, updateMask)
-activate pm
-
-pm -> pm : unload current persona
-pm -> pm : clear system prompt
-pm -> pm : clear tool allowlist
-
-pm -> reg : get_persona_config(new_persona_name)
-activate reg
-reg --> pm : new_config
-deactivate reg
-
-alt new config valid
-    pm -> pm : parse new system prompt
-    pm -> pm : apply new config
-    pm --> agent : PersonaSwitched(new_persona)
-else new config invalid
-    pm -> pm : reload previous persona config
-    pm --> agent : PersonaSwitchFailed(retained previous)
+alt switch succeeds
+  hnote over mgr : RUNNING (#43A047)
+  mgr -> store : AGT-13 SWITCH Persona({new_persona_name})
+  activate store
+  store -> dir : AGT-13 SWITCH Persona({new_persona_name})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else switch fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-deactivate pm
-
-agent --> router : AgentEvent(Done)
-deactivate agent
-
-
 
 @enduml

@@ -1,78 +1,68 @@
-@startuml sq_contextgraph02_truncate_nodes
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_ctx02_truncate_nodes
 ' ============================================================
 ' Title:     CTX-02 — TRUNCATE Nodes
 ' Boundary:  nasim code agent
-' Purpose:   Truncate context when token budget exceeded
+' Purpose:   Truncate low-priority context nodes to fit budget
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ContextGraphAPI -> ContextGraphManager -> ContextGraphStore -> ContextGraphDirectory
+' SM States: COMPACTING (#E0F2F1)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- CTX-02 TRUNCATE Nodes
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "ConversationHistory" as history
-  participant "ContextCompactor" as compactor
+box "API Group (Controller)" #FFF3E0
+  participant "ContextGraphAPI" as api
 end box
-box "Provider Group" #FFF3E0
-  participant "Provider" as provider
+box "Context Graph Group (Service)" #FFF3E0
+  participant "ContextGraphManager" as mgr
 end box
-
+box "Context Graph Group (Repository)" #E8F5E9
+  participant "ContextGraphStore" as store
+end box
+database "ContextGraphDirectory" as dir
 
 == CTX-02 TRUNCATE Nodes ==
 
-user -> router : types input
+user -> router : POST /contextgraph/truncate
 activate router
-router -> agent : PROCESS(user_input)
-activate agent
-agent -> history : CTX-02 TRUNCATE(messages, budget)
-activate history
-compactor -> compactor : query ContextPrioritizer for node importance scores
-compactor -> compactor : sort nodes by ascending importance (lowest first)
-compactor -> compactor : protect system prompt nodes (never truncated)
-compactor -> compactor : drop lowest-importance nodes until within budget
-compactor -> compactor : build summarization prompt
+router -> api : CTX-02 TRUNCATE Nodes({nodes, target_tokens})
+activate api
+api -> mgr : CTX-02 TRUNCATE Nodes({nodes, target_tokens})
+activate mgr
 
-compactor -> provider : chat([summary_prompt + selected_messages])
-activate provider
-
-break Secondary LLM call fails
-    provider --> compactor : ProviderError
-    deactivate provider
-    compactor -> compactor : fallback: truncate oldest messages
-    compactor --> history : shortened messages (truncated)
+alt truncation succeeds
+  mgr -> store : CTX-02 TRUNCATE Nodes({nodes, target_tokens})
+  activate store
+  store -> dir : CTX-02 TRUNCATE Nodes({nodes, target_tokens})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : COMPACTING (#E0F2F1) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else truncation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-provider --> compactor : summary text
-deactivate provider
-compactor -> compactor : create summary message
-compactor -> compactor : replace selected messages with summary
-compactor --> history : shortened messages (summarized)
-
-agent --> router : AgentEvent(Done)
-
-deactivate agent
-deactivate router
-
 
 @enduml

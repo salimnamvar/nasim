@@ -1,82 +1,68 @@
 @startuml sq_router03_classify_task
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     RTG-03 — Classify Task
+' Title:     RTG-03 — CLASSIFY Task
 ' Boundary:  nasim code agent
 ' Purpose:   Classify task type and select optimal model
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> RouterAPI -> RouterManager -> RouterStore -> RouterDirectory
+' SM States: CLASSIFYING (#5C6BC0)
 ' ============================================================
 
-title nasim — RTG-03 Classify Task
+!include ../common/sq_styles.puml
+
+title nasim -- RTG-03 CLASSIFY Task
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "RouterAPI" as api
 end box
-box "Router Group" #FFF3E0
-  participant "ModelRouter" as router
+box "Router Group (Service)" #FFF3E0
+  participant "RouterManager" as mgr
 end box
-box "Repository Group" #E8F5E9
-  participant "ModelRepository" as model_repo
+box "Router Group (Repository)" #E8F5E9
+  participant "RouterStore" as store
 end box
+database "RouterDirectory" as dir
 
+== RTG-03 CLASSIFY Task ==
 
-
-== RTG-03 Classify Task ==
-
-user -> router : types input
+user -> router : POST /tasks/classify
 activate router
-router -> agent : RTG-03 PROCESS(user_input)
-activate agent
+router -> api : rtg03 CLASSIFY Task(task_description, context)
+activate api
+api -> mgr : rtg03 CLASSIFY Task(task_description, context)
+activate mgr
 
-agent -> router : RTG-03 CLASSIFY Task(task_description, context)
-activate router
-
-break Classification fails (confidence < 0.6)
-    router --> agent : default_model
-    agent --> router : AgentEvent(Done)
+alt classification succeeds
+  mgr -> store : rtg03 CLASSIFY Task(task_description, context)
+  activate store
+  store -> dir : rtg03 CLASSIFY Task(task_description, context)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : CLASSIFYING (#5C6BC0)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else confidence too low
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-router -> router : RTG-03 EXTRACT Signals(input_length, keywords, traceback, file_content)
-router -> router : RTG-03 SCORE TaskType(keyword * 0.4 + context * 0.4 + length * 0.2)
-router -> router : RTG-03 SELECT HighestScoring()
-
-router -> router : RTG-03 MAP ModelTier(task_type, ModelCatalog)
-router -> router : RTG-03 VERIFY ProviderCapabilities(selected_model)
-
-break Model unavailable
-    router -> router : RTG-03 RESOLVE NextModel(FallbackChain)
-    router --> agent : Result(success=true, data={selected_model, task_type})
-    agent --> router : AgentEvent(Done)
-end
-
-router --> agent : Result(success=true, data={selected_model, task_type})
-
-agent --> router : AgentEvent(Done)
-
-deactivate agent
-deactivate router
-
 
 @enduml

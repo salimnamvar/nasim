@@ -1,78 +1,74 @@
 @startuml sq_tool22_update_plan
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     TL-22 — Update Plan
+' Title:     TL-22 — UPDATE Plan
 ' Boundary:  nasim code agent
 ' Purpose:   Update status or content of an existing plan step
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TL-22 UPDATE Plan
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "PlanTool" as tool
 end box
+database "ToolDirectory" as dir
 
+== TL-22 UPDATE Plan ==
 
-
-== TL-22 Update Plan ==
-
-user -> router : types input
+user -> router : POST /tools/update_plan:execute
 activate router
-router -> agent : TL-22 PROCESS(user_input)
-activate agent
-agent -> registry : TL-22 Update Plan(step_id, status, description, updateMask)
-activate registry
-registry -> tool : TL-22 Update Plan(step_id, status, description, updateMask)
-activate tool
+router -> api : TL-22 UPDATE Plan(stepId, status, description, updateMask)
+activate api
+api -> orch : TL-22 UPDATE Plan(stepId, status, description, updateMask)
+activate orch
 
-break Step not found
-    tool --> registry : ToolResult(success=False, error="step not found")
-    deactivate tool
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  orch -> registry : TL-22 UPDATE Plan(stepId, status, description, updateMask)
+  activate registry
+  registry -> dir : TL-22 UPDATE Plan(stepId, status, description, updateMask)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else step not found
+  orch --> api : 404 Not Found
+  deactivate orch
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
+else invalid transition
+  orch --> api : 422 Unprocessable
+  deactivate orch
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-break Invalid status transition
-    tool --> registry : ToolResult(success=False, error="invalid transition")
-    deactivate tool
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
-end
-
-tool -> tool : update fields
-tool --> registry : ToolResult(success=True, step)
-deactivate tool
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

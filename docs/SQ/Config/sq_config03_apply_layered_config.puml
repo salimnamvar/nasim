@@ -1,67 +1,68 @@
-@startuml sq_config03_apply_layered_config
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_cfg03_apply_layered_config
 ' ============================================================
 ' Title:     CFG-03 — APPLY Layered Config
-' Boundary:  nasim code agent CLI
-' Purpose:   Config layer merge with precedence
+' Boundary:  nasim code agent
+' Purpose:   Apply layered configuration merging global, project, env, and CLI
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ConfigAPI -> ConfigManager -> ConfigStore -> ConfigDirectory
+' SM States: SERVING (#E0F7FA)
 ' ============================================================
 
-title nasim — CFG-03 UPDATE Layered Config
+!include ../common/sq_styles.puml
+
+title nasim -- CFG-03 APPLY Layered Config
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ConfigAPI" as api
 end box
-box "Config Group" #E8F5E9
-  participant "ConfigLoader" as cfg
+box "Config Group (Service)" #FFF3E0
+  participant "ConfigManager" as mgr
 end box
-box "Repository Group" #E8F5E9
-  participant "ConfigRepository" as cfg_repo
+box "Config Group (Repository)" #E8F5E9
+  participant "ConfigStore" as store
 end box
-
-
+database "ConfigDirectory" as dir
 
 == CFG-03 APPLY Layered Config ==
 
-user -> router : invoke agent
+user -> router : POST /config/apply
 activate router
-router -> agent : cfg03 APPLY Layered Config(sources)
-activate agent
-agent -> cfg : cfg03 APPLY Layered Config(sources, updateMask)
-activate cfg
-cfg -> cfg : cfg03 MERGE Global Defaults(start)
-cfg -> cfg : cfg03 MERGE Project Overrides(skip None)
-cfg -> cfg : cfg03 MERGE Env Overrides(skip None)
-cfg -> cfg : cfg03 MERGE CLI Args(skip None)
-cfg -> cfg : cfg03 RETURN Merged Config
+router -> api : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+activate api
+api -> mgr : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+activate mgr
 
-cfg --> agent : Config merged
-agent --> router : Config merged
-deactivate agent
-deactivate router
-
-
+alt merge succeeds
+  mgr -> store : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+  activate store
+  store -> dir : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : SERVING (#E0F7FA) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else merge fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

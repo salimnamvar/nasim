@@ -1,87 +1,67 @@
 @startuml sq_observability01_stream_log
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-01 — STREAM Structured Log
 ' Boundary:  nasim code agent
 ' Purpose:   Emit structured JSON log record to stdout
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ObservabilityAPI -> ObservabilityManager -> ObservabilityStore -> ObservabilityDirectory
+' SM States: —
 ' ============================================================
 
-title nasim — OBS-01 STREAM StructuredLog
+!include ../common/sq_styles.puml
+
+title nasim -- OBS-01 STREAM Structured Log
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ObservabilityAPI" as api
 end box
-box "Observability Group" #F3E5F5
-  participant "StructuredLogger" as logger
-  participant "LogRedactor" as redactor
-  participant "TraceCorrelator" as trace
-  participant "DualOutputAdapter" as adapter
+box "Observability Group (Service)" #FFF3E0
+  participant "ObservabilityManager" as mgr
 end box
-box "External" #F5F5F5
-  participant "Stdout" as stdout
+box "Observability Group (Repository)" #E8F5E9
+  participant "ObservabilityStore" as store
 end box
+database "ObservabilityDirectory" as dir
 
+== OBS-01 STREAM Structured Log ==
 
-== OBS-01 STREAM StructuredLog ==
-
-user -> router : OBS-01 STREAM StructuredLog(msg, level, extra)
+user -> router : POST /logs
 activate router
-router -> agent : OBS-01 STREAM StructuredLog(msg, level, extra)
-activate agent
+router -> api : OBS-01 STREAM Structured Log({msg, level, extra})
+activate api
+api -> mgr : OBS-01 STREAM Structured Log({msg, level, extra})
+activate mgr
 
-agent -> logger : OBS-01 STREAM StructuredLog(msg, level, extra)
-activate logger
-
-logger -> trace : trace.current_span()
-activate trace
-trace --> logger : TraceContext(trace_id, span_id, parent_span_id)
-deactivate trace
-
-logger -> logger : build_record(msg, level, trace_ctx, extra)
-
-logger -> redactor : OBS-04 REDACT SensitiveData(record)
-activate redactor
-redactor --> logger : SanitizedRecord
-deactivate redactor
-
-logger -> adapter : OBS-01 EMIT LogRecord(sanitized_record)
-activate adapter
-
-adapter -> adapter : serialize_json(record)
-adapter -> stdout : write_json(record)
-
-adapter --> logger : None
-deactivate adapter
-
-deactivate logger
-
-agent --> router : None
-deactivate agent
-deactivate router
-
-
+alt validation succeeds
+  mgr -> store : OBS-01 STREAM Structured Log({msg, level, extra})
+  activate store
+  store -> dir : OBS-01 STREAM Structured Log({msg, level, extra})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

@@ -1,92 +1,68 @@
 @startuml sq_repointelligence04_inject_repo_map
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-04 — INJECT RepoMap
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Token-budgeted repo-map injection into LLM context
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> RepoIntelligenceAPI -> RepoIntelligenceManager -> RepoIntelligenceStore -> RepoIntelligenceDirectory
+' SM States: INDEXED (#7CB342)
 ' ============================================================
 
-title nasim — RIM-04 INJECT RepoMap
+!include ../common/sq_styles.puml
+
+title nasim -- RIM-04 INJECT RepoMap
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "RepoIntelligenceAPI" as api
 end box
-box "Repo Intelligence Group" #E8F5E9
-  participant "RepoMapInjector" as injector
-  participant "SymbolRanker" as ranker
+box "RepoIntelligence Group (Service)" #FFF3E0
+  participant "RepoIntelligenceManager" as mgr
 end box
-box "Context Group" #FFF3E0
-  participant "TokenBudget" as budget
-  participant "ConversationHistory" as history
+box "RepoIntelligence Group (Repository)" #E8F5E9
+  participant "RepoIntelligenceStore" as store
 end box
-
-
+database "RepoIntelligenceDirectory" as dir
 
 == RIM-04 INJECT RepoMap ==
 
-user -> router : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
+user -> router : POST /repomap/inject
 activate router
-router -> agent : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
-activate agent
+router -> api : rim04 INJECT RepoMap(budget_tokens, ranked_symbols)
+activate api
+api -> mgr : rim04 INJECT RepoMap(budget_tokens, ranked_symbols)
+activate mgr
 
-agent -> injector : RIM-04 INJECT RepoMap(budget_tokens, ranked_symbols)
-activate injector
-
-injector -> budget : budget.get_available_budget()
-activate budget
-budget --> injector : available_tokens
-deactivate budget
-
-injector -> injector : split_budget(available_tokens, ratios=[0.6, 0.25, 0.15])
-
-injector -> ranker : ranker.get_top_symbols(structure_budget)
-activate ranker
-ranker --> injector : structure_symbols[]
-deactivate ranker
-
-injector -> ranker : ranker.get_relevant_snippets(snippet_budget)
-activate ranker
-ranker --> injector : snippet_symbols[]
-deactivate ranker
-
-injector -> injector : format_repo_map(structure_symbols, snippet_symbols)
-
-injector -> injector : truncate_to_budget(formatted_map, max_tokens)
-
-injector -> history : history.prepend_context(repo_map_text)
-activate history
-history --> injector : context_injected
-deactivate history
-
-injector --> agent : RepoMapContext(text, token_count)
-deactivate injector
-
-agent --> router : RepoMapContext(text, token_count)
-deactivate agent
-deactivate router
-
+alt inject succeeds
+  mgr -> store : rim04 INJECT RepoMap(budget_tokens, ranked_symbols)
+  activate store
+  store -> dir : rim04 INJECT RepoMap(budget_tokens, ranked_symbols)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : INDEXED (#7CB342)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else budget exhausted
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

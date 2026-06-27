@@ -1,81 +1,68 @@
 @startuml sq_repointelligence06_search_semantic
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-06 — SEARCH Semantic
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Embedding-based code similarity search across repository
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> RepoIntelligenceAPI -> RepoIntelligenceManager -> RepoIntelligenceStore -> RepoIntelligenceDirectory
+' SM States: INDEXED (#7CB342)
 ' ============================================================
 
-title nasim — RIM-06 LIST Semantic
+!include ../common/sq_styles.puml
+
+title nasim -- RIM-06 SEARCH Semantic
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "RepoIntelligenceAPI" as api
 end box
-box "Repo Intelligence Group" #E8F5E9
-  participant "SemanticSearch" as search
+box "RepoIntelligence Group (Service)" #FFF3E0
+  participant "RepoIntelligenceManager" as mgr
 end box
-box "Provider Group" #FFF3E0
-  participant "Provider" as provider
+box "RepoIntelligence Group (Repository)" #E8F5E9
+  participant "RepoIntelligenceStore" as store
 end box
-box "Storage Group" #E8F5E9
-  participant "EmbeddingStore" as embeddings
-end box
-
-
+database "RepoIntelligenceDirectory" as dir
 
 == RIM-06 SEARCH Semantic ==
 
-user -> router : RIM-06 SEARCH Semantic(query, top_k, page_size=20, page_token="abc")
+user -> router : GET /semantic/search?q={query}
 activate router
-router -> agent : RIM-06 SEARCH Semantic(query, top_k, page_size=20, page_token="abc")
-activate agent
+router -> api : rim06 SEARCH Semantic(query, top_k)
+activate api
+api -> mgr : rim06 SEARCH Semantic(query, top_k)
+activate mgr
 
-agent -> search : RIM-06 SEARCH Semantic(query, top_k, page_size=20, page_token="abc")
-activate search
-
-search -> provider : provider.embed(query_text)
-activate provider
-provider --> search : query_embedding
-deactivate provider
-
-search -> embeddings : embeddings.cosine_search(query_embedding, top_k, offset=0)
-activate embeddings
-embeddings --> search : raw_results[], next_page_token
-deactivate embeddings
-
-search -> search : filter_by_threshold(results, min_sim=0.3)
-
-search -> search : format_snippets(filtered_results)
-
-search --> agent : SearchResultList(results, scores, snippets, nextPageToken)
-deactivate search
-
-agent --> router : SearchResultList(results, scores, snippets)
-deactivate agent
-deactivate router
-
+alt search succeeds
+  mgr -> store : rim06 SEARCH Semantic(query, top_k)
+  activate store
+  store -> dir : rim06 SEARCH Semantic(query, top_k)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : INDEXED (#7CB342)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else no results
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
+end
 
 @enduml

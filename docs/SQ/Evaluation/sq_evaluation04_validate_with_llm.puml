@@ -1,81 +1,68 @@
-@startuml sq_evaluation04_validate_with_llm
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_evl04_validate_with_llm
 ' ============================================================
-' Title:     EVL-04 — Validate With LLM
-' Boundary:  nasim code agent CLI
-' Purpose:   LLM-as-judge scoring for edit quality
+' Title:     EVL-04 — VALIDATE With LLM
+' Boundary:  nasim code agent
+' Purpose:   Validate task results using an LLM reviewer
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EvaluationAPI -> EvaluationManager -> EvaluationStore -> EvaluationDirectory
+' SM States: REVIEWING (#AB47BC)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EVL-04 VALIDATE With LLM
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EvaluationAPI" as api
 end box
-box "Evaluation Group" #FFF3E0
-  participant "LLMReviewer" as reviewer
+box "Evaluation Group (Service)" #FFF3E0
+  participant "EvaluationManager" as mgr
 end box
-box "Provider Group" #FFF3E0
-  participant "Provider" as provider
+box "Evaluation Group (Repository)" #E8F5E9
+  participant "EvaluationStore" as store
 end box
-box "Edit Group" #FFF3E0
-  participant "FileSystem" as fs
-end box
+database "EvaluationDirectory" as dir
 
+== EVL-04 VALIDATE With LLM ==
 
+user -> router : POST /evaluation/llm-review
+activate router
+router -> api : EVL-04 VALIDATE With LLM({task_id, artifact})
+activate api
+api -> mgr : EVL-04 VALIDATE With LLM({task_id, artifact})
+activate mgr
 
-
-== EVL-04 Validate With LLM ==
-
-agent -> reviewer : EVL-04 REVIEW_EDIT(original_file, edited_file)
-activate reviewer
-
-reviewer -> fs : read_file(original_file)
-activate fs
-fs --> reviewer : original_content
-deactivate fs
-
-reviewer -> fs : read_file(edited_file)
-activate fs
-fs --> reviewer : edited_content
-deactivate fs
-
-reviewer -> reviewer : format_review_prompt(original_content, edited_content)
-
-reviewer -> provider : chat(review_prompt)
-activate provider
-provider --> reviewer : review_response
-deactivate provider
-
-reviewer -> reviewer : parse_score_and_feedback(review_response)
-
-reviewer -> reviewer : validate_score(score, min=1, max=10)
-
-reviewer --> agent : ReviewResult(score, feedback, passed)
-deactivate reviewer
-
-agent --> router : AgentEvent(Done)
-
-
+alt review passes
+  mgr -> store : EVL-04 VALIDATE With LLM({task_id, artifact})
+  activate store
+  store -> dir : EVL-04 VALIDATE With LLM({task_id, artifact})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : REVIEWING (#AB47BC) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else review fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

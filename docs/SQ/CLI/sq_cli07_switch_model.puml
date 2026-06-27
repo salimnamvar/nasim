@@ -1,81 +1,68 @@
 @startuml sq_cli07_switch_model
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-07 — SWITCH Model
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Switch active model via slash command
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIRouter -> CLIController -> CLIExecutor -> CLIStore
+' SM States: ROUTING (#EDE7F6)
 ' ============================================================
 
-title nasim — CLI-07 SWITCH Model
+!include ../common/sq_styles.puml
+
+title nasim -- CLI-07 SWITCH Model
 
 actor "User" as user
 
-box "CLI Interface Container" #E3F2FD
-  participant "REPLSession" as repl
-  participant "SlashCommandHandler" as cmdhandler
+box "Entry Gate" #E3F2FD
+  participant "CLIRouter" as router
 end box
-box "API Group (Entry Gate)" #E3F2FD
-  participant "ServerRouter" as router
+box "Controller" #FFF3E0
+  participant "CLIController" as ctrl
 end box
-box "Router Group" #FFF3E0
-  participant "ModelRouter" as mrouter
+box "Service" #FFF3E0
+  participant "CLIExecutor" as exec
 end box
-
+box "Repository" #E8F5E9
+  participant "CLIStore" as store
+end box
+database "CLIDirectory" as dir
 
 == CLI-07 SWITCH Model ==
 
-user -> repl : /model {model_name}
-activate repl
-
-repl -> cmdhandler : cli02 PARSE SlashCommand({input})
-activate cmdhandler
-
-cmdhandler -> router : cli07 SWITCH Model({model_name})
+user -> router : CLI-07 SWITCH Model({modelName})
 activate router
+router -> ctrl : CLI-07 SWITCH Model({modelName})
+activate ctrl
+ctrl -> exec : CLI-07 SWITCH Model({modelName})
+activate exec
+... hnote over exec : ROUTING (#EDE7F6) ...
 
-router -> mrouter : rtg04 SWITCH Model({model_name})
-activate mrouter
-
-mrouter -> mrouter : rtg04 VALIDATE ModelAvailability({model_name})
-
-break model not in catalog
-    mrouter --> router : Error("model not available")
-    router --> cmdhandler : 404 NOT_FOUND — Model not in catalog
-    cmdhandler --> repl : CommandResult(Error)
-    repl --> user : "Error: model {model_name} not available"
+alt model available
+  exec -> store : CLI-07 SWITCH Model({modelName})
+  activate store
+  store -> dir : CLI-07 SWITCH Model({modelName})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> exec : 200 OK
+  deactivate store
+  exec --> ctrl : 200 OK
+  deactivate exec
+  ctrl --> router : 200 OK
+  deactivate ctrl
+  router --> user : 200 OK
+  deactivate router
+else model not available
+  exec --> ctrl : 404 Not Found
+  deactivate exec
+  ctrl --> router : 404 Not Found
+  deactivate ctrl
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-mrouter -> mrouter : rtg04 UPDATE ActiveModelConfig({model_name})
-
-mrouter --> router : 200 OK — {previous_model, new_model}
-deactivate mrouter
-
-router --> cmdhandler : 200 OK — ModelSwitched
-deactivate router
-
-cmdhandler --> repl : CommandResult(ModelSwitched)
-deactivate cmdhandler
-
-repl --> user : "Model switched: {previous_model} → {new_model}"
-deactivate repl
-
 
 @enduml

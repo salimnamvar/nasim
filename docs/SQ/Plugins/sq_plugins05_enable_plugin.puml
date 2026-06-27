@@ -1,66 +1,68 @@
 @startuml sq_plugins05_enable_plugin
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     PLG-05 — Enable Plugin
+' Title:     PLG-05 — ENABLE Plugin
 ' Boundary:  nasim code agent
 ' Purpose:   Load plugin and activate its tools and hooks
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> PluginAPI -> PluginManager -> PluginStore -> PluginDirectory
+' SM States: ENABLED (#4CAF50), ERROR (#EF5350)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- PLG-05 ENABLE Plugin
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "PluginAPI" as api
 end box
-box "Tool Group" #E8F5E9
-  participant "PluginLoader" as loader
-  participant "ToolRegistry" as registry
+box "Plugins Group (Service)" #FFF3E0
+  participant "PluginManager" as mgr
 end box
-box "Hooks Group" #F3E5F5
-  participant "HookManager" as hm
+box "Plugins Group (Repository)" #E8F5E9
+  participant "PluginStore" as store
 end box
+database "PluginDirectory" as dir
 
+== PLG-05 ENABLE Plugin ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+user -> router : POST /plugins/{id}:enable
+activate router
+router -> api : PLG-05 ENABLE Plugin({plugin_id})
+activate api
+api -> mgr : PLG-05 ENABLE Plugin({plugin_id})
+activate mgr
 
-== PLG-05 Enable Plugin ==
-
-agent -> loader : PLG-05 ENABLE_PLUGIN(plugin_id)
-activate loader
-
-loader -> loader : PLG-03 register_plugin_tools()
-loader -> loader : PLG-04 register_plugin_hooks()
-loader -> loader : set state ENABLED
-
-break Tool or hook registration fails
-    loader -> loader : set state ERROR, log failure
+alt validation succeeds
+  mgr -> store : PLG-05 ENABLE Plugin({plugin_id})
+  activate store
+  store -> dir : PLG-05 ENABLE Plugin({plugin_id})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : ENABLED (#4CAF50)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else activation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-loader --> agent : plugin enabled
-deactivate loader
-
-agent --> router : AgentEvent(Done)
-
 
 @enduml

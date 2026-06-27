@@ -1,72 +1,67 @@
 @startuml sq_cli04_read_cli_arguments
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-04 — READ CLI Arguments
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Startup argument parsing and config initialization
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIRouter -> CLIController -> CLIExecutor -> CLIStore
+' SM States: —
 ' ============================================================
 
-title nasim — CLI-04 READ CLI Arguments
+!include ../common/sq_styles.puml
+
+title nasim -- CLI-04 READ CLI Arguments
 
 actor "User" as user
 
-box "CLI Interface Container" #E3F2FD
-  participant "ArgParser" as argparser
+box "Entry Gate" #E3F2FD
+  participant "CLIRouter" as router
 end box
-box "Config Group" #E8F5E9
-  participant "ConfigLoader" as config
+box "Controller" #FFF3E0
+  participant "CLIController" as ctrl
 end box
-
+box "Service" #FFF3E0
+  participant "CLIExecutor" as exec
+end box
+box "Repository" #E8F5E9
+  participant "CLIStore" as store
+end box
+database "CLIDirectory" as dir
 
 == CLI-04 READ CLI Arguments ==
 
-user -> argparser : pass CLI arguments (argv)
-activate argparser
+user -> router : CLI-04 PARSE Argv({argv})
+activate router
+router -> ctrl : CLI-04 PARSE Argv({argv})
+activate ctrl
+ctrl -> exec : CLI-04 PARSE Argv({argv})
+activate exec
 
-argparser -> argparser : cli04 PARSE Argv({argv})
-argparser -> argparser : validate required flags
-
-alt invalid arguments
-    argparser --> user : error: invalid argument — {detail}
-else valid arguments
-    argparser -> config : cfg01 LOAD Config({cli_args})
-    activate config
-
-    config -> config : cfg01 READ Global Defaults(~/.nasim/config.yaml)
-    config -> config : cfg01 READ Project Overrides(.nasim/config.yaml)
-    config -> config : cfg01 READ Env Overrides(NASIM_*)
-    config -> config : cfg03 APPLY Layered Config(global, project, env, cli)
-
-    break invalid YAML or missing required fields
-        config --> argparser : ConfigError({detail})
-        argparser --> user : error: config load failed — {detail}
-    end
-
-    config --> argparser : Config object
-    deactivate config
-
-    argparser --> user : Config loaded — nasim ready
+alt valid arguments
+  exec -> store : CLI-04 LOAD Config({parsedArgs})
+  activate store
+  store -> dir : CLI-04 LOAD Config({parsedArgs})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> exec : 200 OK
+  deactivate store
+  exec --> ctrl : 200 OK
+  deactivate exec
+  ctrl --> router : 200 OK
+  deactivate ctrl
+  router --> user : 200 OK
+  deactivate router
+else invalid arguments
+  exec --> ctrl : 422 Unprocessable
+  deactivate exec
+  ctrl --> router : 422 Unprocessable
+  deactivate ctrl
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-deactivate argparser
-
 
 @enduml

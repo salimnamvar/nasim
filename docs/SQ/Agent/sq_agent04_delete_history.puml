@@ -1,59 +1,68 @@
 @startuml sq_agent04_delete_history
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-04 — DELETE History
 ' Boundary:  nasim code agent
-' Purpose:   Clear conversation history
+' Purpose:   Reset conversation history to initial state
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' SM States: CREATED (#BBDEFB)
 ' ============================================================
 
-title nasim — AGT-04 DELETE History
+!include ../common/sq_styles.puml
+
+title nasim -- AGT-04 DELETE History
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "ConversationHistory" as history
+box "API Group (Controller)" #FFF3E0
+  participant "AgentAPI" as api
 end box
-
-
+box "Agent Group (Service)" #FFF3E0
+  participant "AgentManager" as mgr
+end box
+box "Agent Group (Repository)" #E8F5E9
+  participant "AgentStore" as store
+end box
+database "AgentDirectory" as dir
 
 == AGT-04 DELETE History ==
 
-user -> router : /reset
-router -> agent : DELETE_History()
-activate agent
+user -> router : DELETE /v1/agents/{agent_id}/history
+activate router
+router -> api : AGT-04 DELETE History({agent_id})
+activate api
+api -> mgr : AGT-04 DELETE History({agent_id})
+activate mgr
 
-agent -> history : agt04 DELETE History()
-activate history
-history -> history : self.messages = [system_prompt]
-history -> history : self.token_count = estimate_tokens(system_prompt)
-history --> agent : history cleared
-deactivate history
-
-agent --> router : AgentEvent(Done)
-deactivate agent
-
-
+alt delete succeeds
+  hnote over mgr : CREATED (#BBDEFB)
+  mgr -> store : AGT-04 DELETE History({agent_id})
+  activate store
+  store -> dir : AGT-04 DELETE History({agent_id})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else history not found
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
+end
 
 @enduml

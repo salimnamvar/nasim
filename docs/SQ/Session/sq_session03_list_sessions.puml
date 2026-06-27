@@ -1,69 +1,77 @@
 @startuml sq_session03_list_sessions
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     SSN-03 — List Sessions
-' Boundary:  nasim code agent CLI
+' Title:     SSN-03 — LIST Sessions
+' Boundary:  nasim code agent
 ' Purpose:   List available saved sessions
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' SM States: SAVED (#1565C0)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SSN-03 LIST Sessions
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Session Group" #E8F5E9
+box "Session Group (Service)" #FFF3E0
+  participant "SessionManager" as mgr
+end box
+box "Session Group (Repository)" #E8F5E9
   participant "SessionStore" as store
 end box
-database "Session Directory" as dir
+database "SessionDirectory" as dir
 
+== SSN-03 LIST Sessions ==
 
-== SSN-03 List Sessions ==
-
-user -> router : types input
+user -> router : GET /sessions
 activate router
-router -> agent : PROCESS(user_input)
-activate agent
 
-agent -> store : ssn03 LIST Sessions(pageSize=20, pageToken="abc")
+router -> api : ssn03 LIST Sessions({page_size}, {page_token})
+activate api
+
+api -> mgr : ssn03 LIST Sessions({page_size}, {page_token})
+activate mgr
+
+mgr -> store : LIST Sessions({page_size}, {page_token})
 activate store
-store -> dir : scan ~/.nasim/sessions/
+
+store -> dir : SCAN SessionDirectory({pattern})
 activate dir
 
-break No sessions directory
+alt Directory not found
     dir --> store : FileNotFoundError
     deactivate dir
-    store --> agent : 404 NOT_FOUND — [] (empty list)
-    agent --> router : AgentEvent(Done)
+    store --> mgr : 200 OK — [] (empty list)
+    mgr --> api : 200 OK — [] (empty list)
+    api --> router : 200 OK — [] (empty list)
+    router --> user : 200 OK — [] (empty list)
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
 end
 
-store -> store : read metadata from each session
-store --> agent : 200 OK — [(id, created_at, message_count), ...], nextPageToken
-agent --> router : AgentEvent(Done)
+dir --> store : 200 OK — [{session_id, created_at, message_count}]
+deactivate dir
 
+store --> mgr : 200 OK — [{session_id, created_at, message_count}]
 deactivate store
-deactivate agent
+mgr --> api : 200 OK — [{session_id, created_at, message_count}]
+deactivate mgr
+api --> router : 200 OK — [{session_id, created_at, message_count}]
+deactivate api
+router --> user : 200 OK — [{session_id, created_at, message_count}]
 deactivate router
-
 
 @enduml

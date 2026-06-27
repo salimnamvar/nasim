@@ -1,69 +1,118 @@
 @startuml sq_session01_persist_session
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     SSN-01 — Persist Session
-' Boundary:  nasim code agent CLI
-' Purpose:   Persist conversation history to disk
+' Title:     SSN-01 — PERSIST Session
+' Boundary:  nasim code agent
+' Purpose:   Persist session messages to disk via SessionStore
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' SM States: ACTIVE (#43A047), SAVED (#2E7D32)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SSN-01 PERSIST Session
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Session Group" #E8F5E9
+box "Session Group (Service)" #FFF3E0
+  participant "SessionManager" as mgr
+end box
+box "Session Group (Repository)" #E8F5E9
   participant "SessionStore" as store
 end box
-database "Session Directory" as dir
+database "SessionDirectory" as dir
 
+== SSN-01 PERSIST Session ==
 
-== SSN-01 Save Session ==
-
-user -> router : types input
+user -> router : POST /sessions/{session_id}:persist
 activate router
-router -> agent : PROCESS(user_input)
-activate agent
 
-agent -> store : ssn01 PERSIST Session(session_id, messages)
-activate store
-store -> store : serialize messages to JSON Lines
-store -> dir : write session.jsonl
-activate dir
+router -> api : ssn01 PERSIST Session({session_id})
+activate api
 
-break Disk write error
-    dir --> store : IOError
-    deactivate dir
-    store --> agent : 500 INTERNAL — log warning("Session save failed")
-    agent --> router : AgentEvent(Error)
+alt session_id is empty
+    api --> router : 400 INVALID_ARGUMENT
+    router --> user : 400 Bad Request
+    deactivate api
+    deactivate router
+    end
 end
 
-store --> agent : 200 OK — save complete
-agent --> router : AgentEvent(Done)
+api -> mgr : ssn01 PERSIST Session({session_id})
+activate mgr
 
+mgr -> store : READ Session({session_id})
+activate store
+
+break Session not found
+    store --> mgr : 404 NOT_FOUND
+    mgr --> api : 404 NOT_FOUND
+    api --> router : 404 NOT_FOUND
+    router --> user : 404 Not Found
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+store --> mgr : 200 OK
 deactivate store
-deactivate agent
-deactivate router
 
+mgr -> store : INSERT SessionSnapshot({session_id}, {messages})
+activate store
+
+alt serialization error
+    store --> mgr : 500 INTERNAL
+    mgr --> api : 500 INTERNAL
+    api --> router : 500 INTERNAL
+    router --> user : 500 Internal Error
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+store -> dir : INSERT SessionFile({session_id}.jsonl)
+activate dir
+
+alt disk write error
+    dir --> store : IOError
+    deactivate dir
+    store --> store : rollback
+    store --> mgr : 500 INTERNAL
+    mgr --> api : 500 INTERNAL
+    api --> router : 500 INTERNAL
+    router --> user : 500 Internal Error
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+dir --> store : 200 OK
+deactivate dir
+
+hnote over store : ACTIVE(#43A047) -> SAVED(#2E7D32)
+
+store --> mgr : 200 OK
+deactivate store
+mgr --> api : 200 OK
+deactivate mgr
+api --> router : 200 OK
+deactivate api
+router --> user : 200 OK
+deactivate router
 
 @enduml

@@ -1,57 +1,67 @@
 @startuml sq_observability05_expose_metrics
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     OBS-05 — EXPOSE Metrics
+' Title:     OBS-05 — EXPOSE /metrics
 ' Boundary:  nasim code agent
 ' Purpose:   Serve /metrics endpoint for Prometheus pull scrape
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ObservabilityAPI -> ObservabilityManager -> ObservabilityStore -> ObservabilityDirectory
+' SM States: —
 ' ============================================================
 
-title nasim — OBS-05 EXPOSE Metrics
+!include ../common/sq_styles.puml
+
+title nasim -- OBS-05 EXPOSE /metrics
 
 actor "User" as user
 
-box "Controller Group" #E3F2FD
-  participant "ServerApp" as server
+box "API Group (Entry Gate)" #E3F2FD
+  participant "ServerRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "MetricsCollector" as metrics
+box "API Group (Controller)" #FFF3E0
+  participant "ObservabilityAPI" as api
 end box
-box "Repository Group" #E8F5E9
-  participant "ObservabilityRepository" as obs_repo
+box "Observability Group (Service)" #FFF3E0
+  participant "ObservabilityManager" as mgr
 end box
+box "Observability Group (Repository)" #E8F5E9
+  participant "ObservabilityStore" as store
+end box
+database "ObservabilityDirectory" as dir
 
+== OBS-05 EXPOSE /metrics ==
 
-== OBS-05 EXPOSE Metrics (HTTP mode) ==
+user -> router : GET /metrics
+activate router
+router -> api : OBS-05 EXPOSE Metrics({})
+activate api
+api -> mgr : OBS-05 EXPOSE Metrics({})
+activate mgr
 
-user -> server : GET /metrics
-activate server
-
-server -> metrics : OBS-05 EXPOSE Metrics()
-activate metrics
-metrics -> metrics : collect all metric families
-metrics --> server : MetricsText(format=prometheus)
-deactivate metrics
-
-server --> user : 200 OK — Content-Type: text/plain; version=0.0.4
-deactivate server
-
+alt collection succeeds
+  mgr -> store : OBS-05 EXPOSE Metrics({})
+  activate store
+  store -> dir : OBS-05 EXPOSE Metrics({})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else collection fails
+  mgr --> api : 500 Internal Server Error
+  deactivate mgr
+  api --> router : 500 Internal Server Error
+  deactivate api
+  router --> user : 500 Internal Server Error
+  deactivate router
+end
 
 @enduml

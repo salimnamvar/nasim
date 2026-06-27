@@ -1,79 +1,118 @@
 @startuml sq_session08_branch_session
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     SSN-08 — Branch Session
-' Boundary:  nasim code agent CLI
+' Title:     SSN-08 — BRANCH Session
+' Boundary:  nasim code agent
 ' Purpose:   Fork session into a new branch for parallel exploration
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' SM States: ACTIVE (#43A047), BRANCHED (#7B1FA2)
 ' ============================================================
 
-title nasim — SSN-08 INSERT Session
+!include ../common/sq_styles.puml
+
+title nasim -- SSN-08 BRANCH Session
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Session Group" #E8F5E9
-  participant "SessionFork" as fork
+box "Session Group (Service)" #FFF3E0
+  participant "SessionManager" as mgr
 end box
-database "Session Store" as store
+box "Session Group (Repository)" #E8F5E9
+  participant "SessionStore" as store
+end box
+database "SessionDirectory" as dir
 
+== SSN-08 BRANCH Session ==
 
-== SSN-08 Branch Session ==
+user -> router : POST /sessions/{session_id}:branch
+activate router
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+router -> api : ssn08 BRANCH Session({session_id}, {from_turn})
+activate api
 
-agent -> fork : ssn08 BRANCH Session(session_id, from_turn)
-activate fork
-
-fork -> store : load messages up to from_turn
-activate store
-store --> fork : messages_subset
-deactivate store
-
-fork -> fork : generate new session_id
-fork -> store : create branch session
-activate store
-store --> fork : branch_session_id
-deactivate store
-
-fork -> fork : copy messages to branch
-fork -> fork : create parent-child link
-fork -> fork : call WRL-04 (FORK Session) for wire log fork
-
-fork --> agent : 200 OK — BranchCreated(branch_session_id, parent_id)
-deactivate fork
-
-agent --> router : AgentEvent(Done)
-
-break Copy failure
-    store --> fork : IOError
-    fork --> agent : 500 INTERNAL — BranchError
-    agent --> router : AgentEvent(Error)
+alt session_id is empty
+    api --> router : 400 INVALID_ARGUMENT
+    router --> user : 400 Bad Request
+    deactivate api
+    deactivate router
+    end
 end
 
+api -> mgr : ssn08 BRANCH Session({session_id}, {from_turn})
+activate mgr
 
+mgr -> store : READ Session({session_id})
+activate store
+
+break Session not found
+    store --> mgr : 404 NOT_FOUND
+    mgr --> api : 404 NOT_FOUND
+    api --> router : 404 NOT_FOUND
+    router --> user : 404 Not Found
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+store --> mgr : 200 OK — {session_data}
+deactivate store
+
+hnote over mgr : ACTIVE(#43A047) -> BRANCHED(#7B1FA2)
+
+mgr -> store : INSERT BranchSession({session_id}, {branch_id}, {from_turn})
+activate store
+
+alt Copy failure
+    store --> mgr : 500 INTERNAL
+    mgr --> api : 500 INTERNAL
+    api --> router : 500 INTERNAL
+    router --> user : 500 Internal Error
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+store -> dir : INSERT SessionFile({branch_id}.jsonl)
+activate dir
+
+alt Disk write error
+    dir --> store : IOError
+    deactivate dir
+    store --> store : rollback
+    store --> mgr : 500 INTERNAL
+    mgr --> api : 500 INTERNAL
+    api --> router : 500 INTERNAL
+    router --> user : 500 Internal Error
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+dir --> store : 200 OK
+deactivate dir
+
+store --> mgr : 200 OK — {branch_id}
+deactivate store
+mgr --> api : 200 OK — {branch_id}
+deactivate mgr
+api --> router : 200 OK — {branch_id}
+deactivate api
+router --> user : 200 OK — {branch_id}
+deactivate router
 
 @enduml

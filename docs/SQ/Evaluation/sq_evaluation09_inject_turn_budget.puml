@@ -1,82 +1,68 @@
-@startuml sq_evaluation09_inject_turn_budget
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_evl09_inject_turn_budget
 ' ============================================================
-' Title:     EVL-09 — Inject Turn Budget
-' Boundary:  nasim code agent CLI
-' Purpose:   Turn budget injection per-turn
+' Title:     EVL-09 — INJECT Turn Budget
+' Boundary:  nasim code agent
+' Purpose:   Inject remaining turn budget into the conversation
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EvaluationAPI -> EvaluationManager -> EvaluationStore -> EvaluationDirectory
+' SM States: CHECKING (#C5CAE9)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EVL-09 INJECT Turn Budget
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EvaluationAPI" as api
 end box
-box "Evaluation Group" #FFF3E0
-  participant "TurnBudgetInjector" as injector
-  participant "TurnBudget" as budget
+box "Evaluation Group (Service)" #FFF3E0
+  participant "EvaluationManager" as mgr
 end box
-box "Context Group" #FFF3E0
-  participant "ConversationHistory" as history
+box "Evaluation Group (Repository)" #E8F5E9
+  participant "EvaluationStore" as store
 end box
-box "Repository Group" #E8F5E9
-  participant "EvaluationRepository" as eval_repo
-end box
-
-
-
+database "EvaluationDirectory" as dir
 
 == EVL-09 INJECT Turn Budget ==
 
-agent -> injector : EVL-09 INJECT_BUDGET(current_turn)
-activate injector
+user -> router : POST /evaluation/turn-budget
+activate router
+router -> api : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
+activate api
+api -> mgr : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
+activate mgr
 
-injector -> budget : get_max_turns()
-activate budget
-budget --> injector : max_turns
-deactivate budget
-
-injector -> injector : compute_remaining(current_turn, max_turns)
-
-injector -> injector : check_warning_threshold(remaining, threshold=0.2)
-
-alt remaining > 0
-    injector -> injector : format_budget_message(remaining, warning)
-
-    injector -> history : prepend_system_message(budget_message)
-    activate history
-    history --> injector : message_injected
-    deactivate history
-
-    injector --> agent : BudgetStatus(remaining, warning, continue=true)
-else remaining <= 0
-    injector --> agent : BudgetExhausted(current_turn, max_turns)
+alt injection succeeds
+  mgr -> store : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
+  activate store
+  store -> dir : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : CHECKING (#C5CAE9) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else budget exceeded
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-deactivate injector
-
-agent --> router : AgentEvent(Done)
-
-
 
 @enduml

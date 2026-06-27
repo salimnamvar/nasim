@@ -1,76 +1,68 @@
-@startuml sq_evaluation08_detect_repetition
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_evl08_detect_repetition
 ' ============================================================
 ' Title:     EVL-08 — DETECT Repetition
 ' Boundary:  nasim code agent
-' Purpose:   Tool-call loop detection
+' Purpose:   Detect repetitive tool call or response patterns
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EvaluationAPI -> EvaluationManager -> EvaluationStore -> EvaluationDirectory
+' SM States: CHECKING (#C5CAE9)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EVL-08 DETECT Repetition
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EvaluationAPI" as api
 end box
-box "Evaluation Group" #FFF3E0
-  participant "RepetitionDetector" as detector
-  participant "ToolCallHistory" as history
+box "Evaluation Group (Service)" #FFF3E0
+  participant "EvaluationManager" as mgr
 end box
-box "Repository Group" #E8F5E9
-  participant "EvaluationRepository" as eval_repo
+box "Evaluation Group (Repository)" #E8F5E9
+  participant "EvaluationStore" as store
 end box
-
-
-
+database "EvaluationDirectory" as dir
 
 == EVL-08 DETECT Repetition ==
 
-agent -> detector : EVL-08 CHECK_REPETITION(tool_call, call_history)
-activate detector
+user -> router : GET /evaluation/repetition
+activate router
+router -> api : EVL-08 DETECT Repetition({task_id, recent_calls})
+activate api
+api -> mgr : EVL-08 DETECT Repetition({task_id, recent_calls})
+activate mgr
 
-detector -> history : get_recent_calls(window=5)
-activate history
-history --> detector : recent_calls[]
-deactivate history
-
-detector -> detector : analyze_pattern(recent_calls)
-
-detector -> detector : check_same_tool_repeat(tool_call, recent_calls, threshold=3)
-
-detector -> detector : check_oscillation_pattern(recent_calls)
-
-detector -> detector : check_stuck_pattern(recent_calls)
-
-alt loop_detected
-    detector --> agent : LoopDetected(pattern, repeat_count)
-else no_loop
-    detector --> agent : RepetitionResult(detected=false, confidence)
+alt no repetition
+  mgr -> store : EVL-08 DETECT Repetition({task_id, recent_calls})
+  activate store
+  store -> dir : EVL-08 DETECT Repetition({task_id, recent_calls})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : CHECKING (#C5CAE9) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else repetition detected
+  mgr --> api : 409 Conflict
+  deactivate mgr
+  api --> router : 409 Conflict
+  deactivate api
+  router --> user : 409 Conflict
+  deactivate router
 end
-
-deactivate detector
-
-agent --> router : AgentEvent(Done)
-
-
 
 @enduml

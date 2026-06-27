@@ -1,85 +1,74 @@
 @startuml sq_tool01_read_file
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     TL-01 — Read File
-' Boundary:  nasim code agent CLI
-' Purpose:   File read tool execution
+' Title:     TL-01 — READ File
+' Boundary:  nasim code agent
+' Purpose:   Read file contents with line numbers and offset/limit
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TL-01 READ File
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "ReadFileTool" as ft
 end box
-participant "Host Filesystem" as fs
-
-
+database "ToolDirectory" as dir
 
 == TL-01 READ File ==
 
-user -> router : types input
+user -> router : POST /tools/read_file:execute
 activate router
-router -> agent : TL-01 PROCESS(user_input)
-activate agent
-agent -> registry : TL-01 READ File(path, offset, limit)
-activate registry
-registry -> ft : TL-01 READ File(path, offset, limit)
-activate ft
-ft -> fs : Path(path).read_text()
-activate fs
+router -> api : TL-01 READ File(path, offset, limit)
+activate api
+api -> orch : TL-01 READ File(path, offset, limit)
+activate orch
 
-break File not found or not a file
-    fs --> ft : FileNotFoundError / IsADirectoryError
-    deactivate fs
-    ft --> registry : ToolResult(success=False, error="file not found")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  orch -> registry : TL-01 READ File(path, offset, limit)
+  activate registry
+  registry -> dir : TL-01 READ File(path, offset, limit)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else file not found
+  orch --> api : 404 Not Found
+  deactivate orch
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
+else permission denied
+  orch --> api : 403 Forbidden
+  deactivate orch
+  api --> router : 403 Forbidden
+  deactivate api
+  router --> user : 403 Forbidden
+  deactivate router
 end
-
-break Read error (encoding, permissions)
-    fs --> ft : PermissionError / UnicodeDecodeError
-    deactivate fs
-    ft --> registry : ToolResult(success=False, error="Error reading path")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
-end
-
-fs --> ft : file content
-deactivate fs
-ft -> ft : add line numbers, apply offset/limit
-ft --> registry : ToolResult(success=True, content=numbered_content)
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-deactivate ft
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

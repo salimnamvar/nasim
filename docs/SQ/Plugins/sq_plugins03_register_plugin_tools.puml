@@ -1,68 +1,68 @@
 @startuml sq_plugins03_register_plugin_tools
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     PLG-03 — Register Plugin Tools
+' Title:     PLG-03 — REGISTER Plugin Tools
 ' Boundary:  nasim code agent
 ' Purpose:   Register all tools declared in a plugin manifest
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> PluginAPI -> PluginManager -> PluginStore -> PluginDirectory
+' SM States: LOADED (#90CAF9)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- PLG-03 REGISTER Plugin Tools
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "PluginAPI" as api
 end box
-box "Tool Group" #E8F5E9
-  participant "PluginLoader" as loader
-  participant "ToolRegistry" as registry
+box "Plugins Group (Service)" #FFF3E0
+  participant "PluginManager" as mgr
 end box
+box "Plugins Group (Repository)" #E8F5E9
+  participant "PluginStore" as store
+end box
+database "PluginDirectory" as dir
 
+== PLG-03 REGISTER Plugin Tools ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+user -> router : POST /plugins/{id}/tools:register
+activate router
+router -> api : PLG-03 REGISTER Plugin Tools({manifest})
+activate api
+api -> mgr : PLG-03 REGISTER Plugin Tools({manifest})
+activate mgr
 
-== PLG-03 Register Plugin Tools ==
-
-agent -> loader : PLG-03 REGISTER_PLUGIN_TOOLS(manifest)
-activate loader
-
-loader -> loader : enumerate tools from PluginManifest
-
-loop for each tool in manifest
-    loader -> registry : register(plugin::tool_name, handler)
-
-    break Name collision
-        registry --> loader : CollisionError
-        loader --> loader : log warning, skip tool
-    end
-
-    registry --> loader : registered
+alt validation succeeds
+  mgr -> store : PLG-03 REGISTER Plugin Tools({manifest})
+  activate store
+  store -> dir : PLG-03 REGISTER Plugin Tools({manifest})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : LOADED (#90CAF9)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else collision detected
+  mgr --> api : 409 Conflict
+  deactivate mgr
+  api --> router : 409 Conflict
+  deactivate api
+  router --> user : 409 Conflict
+  deactivate router
 end
-
-loader --> agent : all tools registered
-deactivate loader
-
-agent --> router : AgentEvent(Done)
-
 
 @enduml

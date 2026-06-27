@@ -1,78 +1,72 @@
 @startuml sq_cli06_request_approval
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-06 — REQUEST Approval
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Display approval prompt and collect developer decision
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIRouter -> CLIController -> CLIExecutor -> CLIStore
+' SM States: AWAITING_APPROVAL (#FFF9C4)
 ' ============================================================
 
-title nasim — CLI-06 REQUEST Approval
+!include ../common/sq_styles.puml
+
+title nasim -- CLI-06 REQUEST Approval
 
 actor "User" as user
 
-box "CLI Interface Container" #E3F2FD
-  participant "REPLSession" as repl
+box "Entry Gate" #E3F2FD
+  participant "CLIRouter" as router
 end box
-box "API Group (Entry Gate)" #E3F2FD
-  participant "ServerRouter" as router
+box "Controller" #FFF3E0
+  participant "CLIController" as ctrl
 end box
-box "Agent Group" #FFF3E0
-  participant "SafetyCoordinator" as safety
+box "Service" #FFF3E0
+  participant "CLIExecutor" as exec
 end box
-
+box "Repository" #E8F5E9
+  participant "CLIStore" as store
+end box
+database "CLIDirectory" as dir
 
 == CLI-06 REQUEST Approval ==
 
-user -> repl : await approval prompt
-activate repl
-
-repl -> router : cli06 REQUEST Approval({tool_name}, {args})
+user -> router : CLI-06 REQUEST Approval({toolName, args})
 activate router
+router -> ctrl : CLI-06 REQUEST Approval({toolName, args})
+activate ctrl
+ctrl -> exec : CLI-06 REQUEST Approval({toolName, args})
+activate exec
+... hnote over exec : AWAITING_APPROVAL (#FFF9C4) ...
 
-router -> safety : saf02 REQUEST Approval({tool_name}, {args})
-activate safety
-
-safety -> repl : saf02 DISPLAY Approval({tool_name}, {args})
-
-hnote over safety #FFF9C4 : **State: AWAITING_APPROVAL**
-
-repl --> user : "Allow {tool_name}({args})? [y/N]"
-
-user -> repl : y or N
-
-alt user = y
-    repl -> safety : saf02 APPROVE Action({tool_name})
-    safety --> router : approved
-    router --> repl : 200 OK — Approved
-    repl --> user : "Approved — executing {tool_name}"
-else user = N
-    repl -> safety : saf02 REJECT Action({tool_name})
-    safety --> router : rejected
-    router --> repl : 403 PERMISSION_DENIED — Rejected by user
-    repl --> user : "Rejected — {tool_name} will not execute"
+alt user approves
+  exec -> store : CLI-06 APPROVE Action({toolName})
+  activate store
+  store -> dir : CLI-06 APPROVE Action({toolName})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> exec : 200 OK
+  deactivate store
+  exec --> ctrl : 200 OK
+  deactivate exec
+  ctrl --> router : 200 OK
+  deactivate ctrl
+  router --> user : 200 OK
+  deactivate router
+else user rejects
+  exec -> store : CLI-06 REJECT Action({toolName})
+  activate store
+  store --> exec : 200 OK
+  deactivate store
+  exec --> ctrl : 403 Forbidden
+  deactivate exec
+  ctrl --> router : 403 Forbidden
+  deactivate ctrl
+  router --> user : 403 Forbidden
+  deactivate router
 end
-
-deactivate safety
-deactivate router
-deactivate repl
-
 
 @enduml

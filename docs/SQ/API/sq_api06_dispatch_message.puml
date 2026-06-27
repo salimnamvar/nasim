@@ -1,107 +1,72 @@
 @startuml sq_api06_dispatch_message
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-06 — DISPATCH Message
-' Boundary:  nasim code agent HTTP API
+' Boundary:  nasim code agent
 ' Purpose:   Dispatch a user message through the agent and stream SSE response
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    Meta-Software Designer audit 2026-06-21
-' Pattern:   Controller (ServerRouter) -> Service (AgentOrchestrator) -> Repository (SessionStore)
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> DispatchAPI -> AgentOrchestrator -> SessionStore
+' SM States: SERVING (#E0F7FA), THINKING (#D7CCC8), RESPONDING (#D1C4E9)
 ' ============================================================
 
-title nasim — API-06 DISPATCH Message
+!include ../common/sq_styles.puml
+
+title nasim -- API-06 DISPATCH Message
 
 actor "User" as user
 
-box "Controller Group" #E3F2FD
+box "Entry Gate" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "ErrorBoundary" as eb
+box "Controller" #FFF3E0
+  participant "DispatchAPI" as api
 end box
-box "Repository Group" #E8F5E9
+box "Service" #FFF3E0
+  participant "AgentOrchestrator" as mgr
+end box
+box "Repository" #E8F5E9
   participant "SessionStore" as store
 end box
-box "Observability Group" #F3E5F5
-  participant "SSEHandler" as sse
-  participant "TraceCorrelator" as trace
-end box
+database "SessionDirectory" as dir
 
-
-
-== API-06 SEND Message ==
-
-ref over agent, trace
-  OBS-03: CORRELATE Trace
-end ref
+== API-06 DISPATCH Message ==
 
 user -> router : POST /v1/sessions/{id}:dispatch
 activate router
+router -> api : api06 DISPATCH Message({sessionId, message})
+activate api
+api -> mgr : api06 DISPATCH Message({sessionId, message})
+activate mgr
 
-router -> router : Phase 1: validate request body
-alt Structural validation failed [400]
-  router --> user : 400 INVALID_ARGUMENT {error: {code: "INVALID_ARGUMENT", message: "Invalid request", status: "INVALID_ARGUMENT"}}
+alt validation succeeds
+  mgr -> store : api06 DISPATCH Message({sessionId, message})
+  activate store
+  store -> dir : api06 DISPATCH Message({sessionId, message})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : THINKING (#D7CCC8) ...
+  ref over mgr
+    AGT-01: PROCESS User Task
+  end ref
+  ... hnote over mgr : RESPONDING (#D1C4E9) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-router -> agent : API-06 SEND Message(sessionId, message)
-activate agent
-
-agent -> store : readSessionExists(sessionId)
-activate store
-store --> agent : SessionEntity
-deactivate store
-
-break Session not found [404]
-  agent --> router : 404 NOT_FOUND
-  router --> user : 404 NOT_FOUND
-end
-
-hnote over agent #FFF3E0 : **State: THINKING**
-
-ref over agent
-  AGT-01: PROCESS User Task
-end ref
-
-break Agent error [502]
-  agent -> eb : handle(AgentError)
-  activate eb
-  eb --> agent : RecoveryAction(retry/abort)
-  deactivate eb
-  agent --> router : 502 UNAVAILABLE
-  router --> user : 502 UNAVAILABLE {error: {code: "UNAVAILABLE", message: "Agent error", status: "UNAVAILABLE"}}
-end
-
-agent --> router : AgentEventStream
-deactivate agent
-
-hnote over sse #E8F5E9 : **State: RESPONDING**
-
-router -> sse : stream(events)
-activate sse
-sse --> user : Content-Type: text/event-stream
-sse --> user : SSE: TextChunk, ToolStart, ToolResult, Done
-deactivate sse
-
-router --> user : 200 OK (stream complete)
-deactivate router
-
-
 
 @enduml

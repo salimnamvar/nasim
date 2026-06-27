@@ -1,76 +1,68 @@
 @startuml sq_wirelog05_checkpoint_turn
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     WRL-05 — CHECKPOINT Turn
 ' Boundary:  nasim code agent
 ' Purpose:   Index current turn and persist checkpoint for resumption
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> WireLogAPI -> WireLogManager -> WireLogStore -> WireLogDirectory
+' SM States: SAVED (#1565C0)
 ' ============================================================
 
-title nasim — WRL-05 INSERT Turn
+!include ../common/sq_styles.puml
+
+title nasim -- WRL-05 CHECKPOINT Turn
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "WireLogAPI" as api
 end box
-box "Wire Log Group" #F3E5F5
-  participant "WireLog" as wl
-  participant "TurnIndex" as ti
+box "WireLog Group (Service)" #FFF3E0
+  participant "WireLogManager" as mgr
 end box
-box "FileSystem Group" #E8F5E9
-  participant "FileSystem" as fs
+box "WireLog Group (Repository)" #E8F5E9
+  participant "WireLogStore" as store
 end box
-
-
+database "WireLogDirectory" as dir
 
 == WRL-05 CHECKPOINT Turn ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+user -> router : POST /wirelog/checkpoint
+activate router
+router -> api : wrl05 CHECKPOINT Turn(turn_data)
+activate api
+api -> mgr : wrl05 CHECKPOINT Turn(turn_data)
+activate mgr
 
-agent -> wl : wrl05 CHECKPOINT Turn(turn_data)
-activate wl
-
-wl -> ti : index_turn(turn_data)
-activate ti
-
-ti -> ti : extract_turn_metadata(turn_data)
-
-ti -> ti : build_checkpoint_index(metadata)
-
-ti -> fs : persist_checkpoint(checkpoint_index)
-activate fs
-fs --> ti : persist_result
-deactivate fs
-
-ti --> wl : CheckpointResult(turn_id, offset)
-deactivate ti
-
-wl --> agent : 200 OK — CheckpointResult
-deactivate wl
-
-agent --> router : AgentEvent(Done)
-
+alt checkpoint succeeds
+  mgr -> store : wrl05 CHECKPOINT Turn(turn_data)
+  activate store
+  store -> dir : wrl05 CHECKPOINT Turn(turn_data)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : SAVED (#1565C0)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else persist failure
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

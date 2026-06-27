@@ -1,70 +1,118 @@
 @startuml sq_session05_snapshot_session
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     SSN-05 — Snapshot Session
-' Boundary:  nasim code agent CLI
+' Title:     SSN-05 — SNAPSHOT Session
+' Boundary:  nasim code agent
 ' Purpose:   Create a point-in-time snapshot of session state
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' SM States: ACTIVE (#43A047)
 ' ============================================================
 
-title nasim — SSN-05 INSERT Session
+!include ../common/sq_styles.puml
+
+title nasim -- SSN-05 SNAPSHOT Session
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Session Group" #E8F5E9
-  participant "SessionVersioning" as ver
+box "Session Group (Service)" #FFF3E0
+  participant "SessionManager" as mgr
 end box
-database "Snapshot Store" as snap
+box "Session Group (Repository)" #E8F5E9
+  participant "SessionStore" as store
+end box
+database "SessionDirectory" as dir
 
+== SSN-05 SNAPSHOT Session ==
 
-== SSN-05 Snapshot Session ==
+user -> router : POST /sessions/{session_id}:snapshot
+activate router
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+router -> api : ssn05 SNAPSHOT Session({session_id})
+activate api
 
-agent -> ver : ssn05 SNAPSHOT Session(session_id)
-activate ver
-
-ver -> ver : serialize current messages
-ver -> snap : write snapshot (immutable copy)
-activate snap
-snap --> ver : snapshot_id
-deactivate snap
-
-ver --> agent : 200 OK — SnapshotCreated(snapshot_id)
-deactivate ver
-
-agent --> router : AgentEvent(Done)
-
-break Disk write error
-    snap --> ver : IOError
-    ver --> agent : 500 INTERNAL — SnapshotError
-    agent --> router : AgentEvent(Error)
+alt session_id is empty
+    api --> router : 400 INVALID_ARGUMENT
+    router --> user : 400 Bad Request
+    deactivate api
+    deactivate router
+    end
 end
 
+api -> mgr : ssn05 SNAPSHOT Session({session_id})
+activate mgr
 
+mgr -> store : READ Session({session_id})
+activate store
+
+break Session not found
+    store --> mgr : 404 NOT_FOUND
+    mgr --> api : 404 NOT_FOUND
+    api --> router : 404 NOT_FOUND
+    router --> user : 404 Not Found
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+store --> mgr : 200 OK
+deactivate store
+
+mgr -> store : INSERT Snapshot({session_id})
+activate store
+
+alt serialization error
+    store --> mgr : 500 INTERNAL
+    mgr --> api : 500 INTERNAL
+    api --> router : 500 INTERNAL
+    router --> user : 500 Internal Error
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+store -> dir : INSERT SnapshotFile({session_id}/{snapshot_id}.json)
+activate dir
+
+alt disk write error
+    dir --> store : IOError
+    deactivate dir
+    store --> store : rollback
+    store --> mgr : 500 INTERNAL
+    mgr --> api : 500 INTERNAL
+    api --> router : 500 INTERNAL
+    router --> user : 500 Internal Error
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+dir --> store : 200 OK
+deactivate dir
+
+hnote over store : ACTIVE(#43A047) snapshot point created
+
+store --> mgr : 200 OK — {snapshot_id}
+deactivate store
+mgr --> api : 200 OK — {snapshot_id}
+deactivate mgr
+api --> router : 200 OK — {snapshot_id}
+deactivate api
+router --> user : 200 OK — {snapshot_id}
+deactivate router
 
 @enduml

@@ -1,71 +1,68 @@
-@startuml sq_evaluation07_record_quality_signal
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_evl07_record_quality_signal
 ' ============================================================
 ' Title:     EVL-07 — RECORD Quality Signal
 ' Boundary:  nasim code agent
-' Purpose:   Record accept/reject quality signal with feedback
+' Purpose:   Record and persist quality signals for scoring
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EvaluationAPI -> EvaluationManager -> EvaluationStore -> EvaluationDirectory
+' SM States: SCORING (#FF8A65)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EVL-07 RECORD Quality Signal
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EvaluationAPI" as api
 end box
-box "Evaluation Group" #FFF3E0
-  participant "EvaluationEngine" as engine
-  participant "QualitySignal" as signal
+box "Evaluation Group (Service)" #FFF3E0
+  participant "EvaluationManager" as mgr
 end box
-box "Storage Group" #E8F5E9
-  participant "SignalStore" as store
+box "Evaluation Group (Repository)" #E8F5E9
+  participant "EvaluationStore" as store
 end box
-
-
-
+database "EvaluationDirectory" as dir
 
 == EVL-07 RECORD Quality Signal ==
 
-agent -> engine : EVL-07 RECORD_SIGNAL(task_id, decision, feedback?)
-activate engine
+user -> router : POST /evaluation/quality-signal
+activate router
+router -> api : EVL-07 RECORD Quality Signal({task_id, score, signals})
+activate api
+api -> mgr : EVL-07 RECORD Quality Signal({task_id, score, signals})
+activate mgr
 
-engine -> signal : record_quality_signal(task_id, decision, feedback)
-activate signal
-
-signal -> signal : build_signal_record(task_id, decision, feedback, timestamp)
-
-signal -> store : persist_signal(signal_record)
-activate store
-store --> signal : persist_result
-deactivate store
-
-signal --> engine : SignalRecorded(signal_id)
-deactivate signal
-
-engine --> agent : SignalRecorded
-deactivate engine
-
-agent --> router : AgentEvent(Done)
-
-
+alt recording succeeds
+  mgr -> store : EVL-07 RECORD Quality Signal({task_id, score, signals})
+  activate store
+  store -> dir : EVL-07 RECORD Quality Signal({task_id, score, signals})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : SCORING (#FF8A65) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else recording fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

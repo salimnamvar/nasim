@@ -1,85 +1,74 @@
 @startuml sq_tool05_dispatch_shell_command
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     TL-05 — Dispatch Shell Command
-' Boundary:  nasim code agent CLI
+' Title:     TL-05 — DISPATCH Shell Command
+' Boundary:  nasim code agent
 ' Purpose:   Shell command execution with timeout
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TL-05 DISPATCH Shell Command
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "ShellTool" as st
 end box
-participant "Host Shell" as shell
+database "ToolDirectory" as dir
 
+== TL-05 DISPATCH Shell Command ==
 
-
-== TL-05 EXECUTE Shell Command ==
-
-user -> router : types input
+user -> router : POST /tools/dispatch_shell:execute
 activate router
-router -> agent : TL-05 PROCESS(user_input)
-activate agent
-agent -> registry : TL-05 EXECUTE Shell Command(command, timeout)
-activate registry
-registry -> st : TL-05 EXECUTE Shell Command(command, timeout)
-activate st
-st -> shell : subprocess.run(command, shell=True, timeout=timeout)
-activate shell
+router -> api : TL-05 DISPATCH Shell Command(command, timeout)
+activate api
+api -> orch : TL-05 DISPATCH Shell Command(command, timeout)
+activate orch
 
-break Timeout
-    shell --> st : TimeoutExpired
-    deactivate shell
-    st --> registry : ToolResult(success=False, error="command timed out after Ns")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  orch -> registry : TL-05 DISPATCH Shell Command(command, timeout)
+  activate registry
+  registry -> dir : TL-05 DISPATCH Shell Command(command, timeout)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else timeout
+  orch --> api : 408 Request Timeout
+  deactivate orch
+  api --> router : 408 Request Timeout
+  deactivate api
+  router --> user : 408 Request Timeout
+  deactivate router
+else execution error
+  orch --> api : 500 Internal Server Error
+  deactivate orch
+  api --> router : 500 Internal Server Error
+  deactivate api
+  router --> user : 500 Internal Server Error
+  deactivate router
 end
-
-break Execution error
-    shell --> st : Exception
-    deactivate shell
-    st --> registry : ToolResult(success=False, error="Error executing command")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
-end
-
-shell --> st : CompletedProcess(stdout, stderr, returncode)
-deactivate shell
-st -> st : format output (stdout + stderr + exit code)
-st --> registry : ToolResult(success=True, content=command_output)
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-deactivate st
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

@@ -1,73 +1,68 @@
-@startuml sq_config01_load_config
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_cfg01_load_config
 ' ============================================================
-' Title:     CFG-01 — Load Config
-' Boundary:  nasim code agent CLI
-' Purpose:   Layered config loading from all sources
+' Title:     CFG-01 — LOAD Config
+' Boundary:  nasim code agent
+' Purpose:   Load configuration from layered sources
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ConfigAPI -> ConfigManager -> ConfigStore -> ConfigDirectory
+' SM States: SERVING (#E0F7FA)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- CFG-01 LOAD Config
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ConfigAPI" as api
 end box
-box "Config Group" #E8F5E9
-  participant "ConfigLoader" as cfg
+box "Config Group (Service)" #FFF3E0
+  participant "ConfigManager" as mgr
 end box
-database "Global YAML" as global_yaml
-database "Project YAML" as project_yaml
-database "Env Vars" as env_vars
+box "Config Group (Repository)" #E8F5E9
+  participant "ConfigStore" as store
+end box
+database "ConfigDirectory" as dir
 
+== CFG-01 LOAD Config ==
 
-
-== CFG-01 Load Config ==
-
-user -> router : invoke agent
+user -> router : GET /config
 activate router
-router -> agent : cfg01 LOAD Config(cli_args=argv)
-activate agent
-agent -> cfg : cfg01 LOAD Config(cli_args=argv)
-activate cfg
-cfg -> global_yaml : cfg01 READ Global Defaults(~/.nasim/config.yaml)
-global_yaml --> cfg : global_defaults
-cfg -> project_yaml : cfg01 READ Project Overrides(.nasim/config.yaml)
-project_yaml --> cfg : project_overrides
-cfg -> env_vars : cfg01 READ Env Overrides(NASIM_*)
-env_vars --> cfg : env_overrides
-cfg -> cfg : cfg01 APPLY Layered Config(global, project, env, CLI)
-cfg -> cfg : cfg02 VALIDATE Config(fields)
+router -> api : CFG-01 LOAD Config({cli_args})
+activate api
+api -> mgr : CFG-01 LOAD Config({cli_args})
+activate mgr
 
-break Invalid YAML or missing required fields
-    cfg --> agent : ConfigError("details")
-    agent --> router : ConfigError
+alt validation succeeds
+  mgr -> store : CFG-01 LOAD Config({cli_args})
+  activate store
+  store -> dir : CFG-01 LOAD Config({cli_args})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : SERVING (#E0F7FA) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-cfg --> agent : Config object
-agent --> router : Config object
-deactivate agent
-deactivate router
-
-
 
 @enduml

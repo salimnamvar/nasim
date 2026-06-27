@@ -1,80 +1,68 @@
-@startuml sq_evaluation01_evaluate_task
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_evl01_evaluate_task
 ' ============================================================
 ' Title:     EVL-01 — EVALUATE Task
 ' Boundary:  nasim code agent
 ' Purpose:   Evaluate task completion via success checks and quality signals
-' Note: EVL-01 is a process-decomposition step that runs success checks
-' via ShellRunner. EVL-02..09 are separate Evaluation UCs that follow
-' different architectural paths (EvaluationEngine/TaskEvaluator).
-' Refs would introduce misleading lifelines not present in this flow.
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EvaluationAPI -> EvaluationManager -> EvaluationStore -> EvaluationDirectory
+' SM States: CHECKING (#C5CAE9)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EVL-01 EVALUATE Task
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EvaluationAPI" as api
 end box
-box "Evaluation Group" #FFF3E0
-  participant "SuccessChecker" as checker
-  participant "ShellRunner" as shell
+box "Evaluation Group (Service)" #FFF3E0
+  participant "EvaluationManager" as mgr
 end box
-box "Tool Group" #E8F5E9
-  participant "ToolRegistry" as tool
+box "Evaluation Group (Repository)" #E8F5E9
+  participant "EvaluationStore" as store
 end box
-
-
-
-
-user -> router : types input
-router -> agent : PROCESS(user_input)
+database "EvaluationDirectory" as dir
 
 == EVL-01 EVALUATE Task ==
 
-agent -> checker : EVL-01 RUN_CHECKS(file_path, check_commands[])
-activate checker
+user -> router : POST /evaluation/evaluate
+activate router
+router -> api : EVL-01 EVALUATE Task({task_id, check_commands})
+activate api
+api -> mgr : EVL-01 EVALUATE Task({task_id, check_commands})
+activate mgr
 
-loop for each check_command
-    checker -> shell : execute(check_command, timeout=30s)
-    activate shell
-    alt exit_code == 0
-        shell --> checker : CheckOutput(exit_code=0, stdout, stderr="")
-    else exit_code != 0
-        shell --> checker : CheckOutput(exit_code, stdout, stderr)
-    end
-    deactivate shell
-
-    checker -> checker : record_result(check_command, output)
+alt evaluation succeeds
+  mgr -> store : EVL-01 EVALUATE Task({task_id, check_commands})
+  activate store
+  store -> dir : EVL-01 EVALUATE Task({task_id, check_commands})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : CHECKING (#C5CAE9) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else evaluation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-checker -> checker : aggregate_results()
-
-checker --> agent : CheckResult(passed, results[])
-deactivate checker
-
-agent --> router : AgentEvent(Done)
-
-
 
 @enduml

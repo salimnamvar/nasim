@@ -1,75 +1,68 @@
 @startuml sq_wirelog02_read_log
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     WRL-02 — READ Log (Sequential Scan for Replay)
-' Boundary:  nasim code agent CLI
+' Title:     WRL-02 — READ Log
+' Boundary:  nasim code agent
 ' Purpose:   Sequential scan for replay
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> WireLogAPI -> WireLogManager -> WireLogStore -> WireLogDirectory
+' SM States: ACTIVE (#43A047)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- WRL-02 READ Log
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "WireLogAPI" as api
 end box
-box "Wire Log Group" #F3E5F5
-  participant "WireLogger" as logger
-  participant "EventDeserializer" as deserializer
+box "WireLog Group (Service)" #FFF3E0
+  participant "WireLogManager" as mgr
 end box
-box "FileSystem Group" #E8F5E9
-  participant "FileSystem" as fs
+box "WireLog Group (Repository)" #E8F5E9
+  participant "WireLogStore" as store
 end box
+database "WireLogDirectory" as dir
 
+== WRL-02 READ Log ==
 
+user -> router : GET /wirelog/events
+activate router
+router -> api : wrl02 READ Log(session_id, filter)
+activate api
+api -> mgr : wrl02 READ Log(session_id, filter)
+activate mgr
 
-== wrl02 READ Log ==
-
-user -> router : types input
-router -> agent : PROCESS(user_input)
-
-agent -> logger : wrl02 READ Log(session_id, filter)
-activate logger
-
-logger -> fs : read_file(log_path)
-activate fs
-fs --> logger : raw_lines[]
-deactivate fs
-
-loop for each raw_line
-    logger -> deserializer : deserialize(raw_line)
-    activate deserializer
-    deserializer --> logger : event
-    deactivate deserializer
-
-    logger -> logger : apply_filter(event, session_id, filter)
+alt read succeeds
+  mgr -> store : wrl02 READ Log(session_id, filter)
+  activate store
+  store -> dir : wrl02 READ Log(session_id, filter)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : ACTIVE (#43A047)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else no events found
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-logger -> logger : collect_matching_events()
-
-logger --> agent : 200 OK — EventStream(events[], count, truncated)
-deactivate logger
-
-agent --> router : AgentEvent(Done)
-
 
 @enduml

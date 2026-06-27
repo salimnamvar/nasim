@@ -1,94 +1,68 @@
 @startuml sq_router01_select_model
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RTG-01 — SELECT Model
 ' Boundary:  nasim code agent
 ' Purpose:   Model selection and fallback routing
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> RouterAPI -> RouterManager -> RouterStore -> RouterDirectory
+' SM States: SELECTING (#3F51B5)
 ' ============================================================
 
-title nasim — RTG-01 SELECT Model
+!include ../common/sq_styles.puml
+
+title nasim -- RTG-01 SELECT Model
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "RouterAPI" as api
 end box
-box "Router Group" #FFF3E0
-  participant "ModelRouter" as router
-  participant "FallbackChain" as fallback
-  participant "ProviderCapabilities" as caps
+box "Router Group (Service)" #FFF3E0
+  participant "RouterManager" as mgr
 end box
-box "Config Group" #E8F5E9
-  participant "ConfigLoader" as cfg
+box "Router Group (Repository)" #E8F5E9
+  participant "RouterStore" as store
 end box
-box "Provider Group" #FFF3E0
-  participant "LiteLLMProxy" as provider
-end box
-box "Repository Group" #E8F5E9
-  participant "ModelRepository" as model_repo
-end box
-
-
+database "RouterDirectory" as dir
 
 == RTG-01 SELECT Model ==
 
-user -> router : types input
-router -> agent : RTG-01 PROCESS(user_input)
-
-agent -> router : RTG-01 SELECT Model(task_type)
+user -> router : GET /models/select?task={task_type}
 activate router
+router -> api : rtg01 SELECT Model(task_classification)
+activate api
+api -> mgr : rtg01 SELECT Model(task_classification)
+activate mgr
 
-router -> cfg : RTG-01 READ ModelConfig()
-activate cfg
-cfg --> router : Config(model, fallback_chain)
-deactivate cfg
-
-router -> router : RTG-01 CLASSIFY Task(input)
-
-router -> caps : RTG-01 READ Capabilities(model)
-activate caps
-caps --> router : supported_models
-deactivate caps
-
-break No supported model found
-    router -> fallback : RTG-01 READ DefaultModel()
-    activate fallback
-    fallback --> router : default_model
-    deactivate fallback
-    router --> agent : Result(success=false, error="no_supported_model")
-    agent --> router : AgentEvent(Error)
+alt model found
+  mgr -> store : rtg01 SELECT Model(task_classification)
+  activate store
+  store -> dir : rtg01 SELECT Model(task_classification)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : SELECTING (#3F51B5)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else no supported model
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-router -> fallback : RTG-01 RESOLVE Model(primary_model, fallback_chain)
-activate fallback
-fallback --> router : selected_model
-deactivate fallback
-
-router --> agent : Result(success=true, data=selected_model)
-deactivate router
-
-agent --> router : AgentEvent(Done)
-
 
 @enduml

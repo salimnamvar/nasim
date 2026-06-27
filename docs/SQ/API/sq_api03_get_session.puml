@@ -1,72 +1,68 @@
 @startuml sq_api03_get_session
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-03 — GET Session
-' Boundary:  nasim code agent HTTP API
+' Boundary:  nasim code agent
 ' Purpose:   Read a session's current state and messages
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore
+' SM States: RESTORED (#1E88E5)
 ' ============================================================
 
-title nasim — API-03 GET Session
+!include ../common/sq_styles.puml
+
+title nasim -- API-03 GET Session
 
 actor "User" as user
 
-box "Controller Group" #E3F2FD
+box "Entry Gate" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "SessionService" as svc
+box "Controller" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Repository Group" #E8F5E9
+box "Service" #FFF3E0
+  participant "SessionManager" as mgr
+end box
+box "Repository" #E8F5E9
   participant "SessionStore" as store
 end box
+database "SessionDirectory" as dir
 
-
-
-== API-03 READ Session ==
+== API-03 GET Session ==
 
 user -> router : GET /v1/sessions/{id}
 activate router
+router -> api : api03 GET Session({sessionId})
+activate api
+api -> mgr : api03 GET Session({sessionId})
+activate mgr
 
-router -> svc : API-03 READ Session(sessionId)
-activate svc
-
-svc -> store : API-03 READ Session(sessionId)
-activate store
-
-break Session not found [404]
-  store --> svc : 404 NOT_FOUND
+alt validation succeeds
+  mgr -> store : api03 GET Session({sessionId})
+  activate store
+  store -> dir : api03 GET Session({sessionId})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
   deactivate store
-  svc --> router : 404 NOT_FOUND
-  router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
+  ... hnote over mgr : RESTORED (#1E88E5) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-store --> svc : SessionEntity
-deactivate store
-
-svc --> router : SessionEntity
-deactivate svc
-
-router --> user : 200 OK {session: {id, messages, created_at, updated_at}}
-deactivate router
-
-
 
 @enduml

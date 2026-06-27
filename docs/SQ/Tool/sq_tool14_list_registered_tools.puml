@@ -1,60 +1,74 @@
 @startuml sq_tool14_list_registered_tools
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     TL-14 — List Registered Tools
+' Title:     TL-14 — LIST Registered Tools
 ' Boundary:  nasim code agent
 ' Purpose:   Return list of all tools registered in the ToolRegistry
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
-title nasim — TL-14 LIST Registered Tools
+!include ../common/sq_styles.puml
+
+title nasim -- TL-14 LIST Registered Tools
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
 end box
+database "ToolDirectory" as dir
 
+== TL-14 LIST Registered Tools ==
 
-
-== TL-14 List Registered Tools ==
-
-user -> router : types input
+user -> router : POST /tools/list_registered:execute
 activate router
-router -> agent : TL-14 PROCESS(user_input)
-activate agent
-agent -> registry : TL-14 List Registered Tools(pageSize=100, pageToken="abc")
-activate registry
-registry -> registry : enumerate registered tools (limit=100, offset=0)
-registry --> agent : ToolResult(success=True, tools=[...], nextPageToken)
-deactivate registry
-agent --> router : AgentEvent(Done)
+router -> api : TL-14 LIST Registered Tools(pageSize, pageToken)
+activate api
+api -> orch : TL-14 LIST Registered Tools(pageSize, pageToken)
+activate orch
 
-deactivate agent
-deactivate router
-
-
+alt validation succeeds
+  orch -> registry : TL-14 LIST Registered Tools(pageSize, pageToken)
+  activate registry
+  registry -> dir : TL-14 LIST Registered Tools(pageSize, pageToken)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else registry unavailable
+  orch --> api : 503 Service Unavailable
+  deactivate orch
+  api --> router : 503 Service Unavailable
+  deactivate api
+  router --> user : 503 Service Unavailable
+  deactivate router
+else invalid pagination
+  orch --> api : 400 Bad Request
+  deactivate orch
+  api --> router : 400 Bad Request
+  deactivate api
+  router --> user : 400 Bad Request
+  deactivate router
+end
 @enduml

@@ -1,98 +1,68 @@
 @startuml sq_repointelligence01_index_codebase
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     RIM-01 — INDEX Codebase
 ' Boundary:  nasim code agent
 ' Purpose:   Build AST index and symbol graph from project source
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> RepoIntelligenceAPI -> RepoIntelligenceManager -> RepoIntelligenceStore -> RepoIntelligenceDirectory
+' SM States: INDEXING (#4FC3F7)
 ' ============================================================
 
-title nasim — RIM-01 INDEX Codebase
+!include ../common/sq_styles.puml
+
+title nasim -- RIM-01 INDEX Codebase
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "RepoIntelligenceAPI" as api
 end box
-box "Repo Intelligence Group" #E8F5E9
-  participant "RepoIntelligenceManager" as rim
-  participant "ASTIndexAdapter" as ast
-  participant "SymbolGraph" as graph
+box "RepoIntelligence Group (Service)" #FFF3E0
+  participant "RepoIntelligenceManager" as mgr
 end box
-box "External" #F5F5F5
-  participant "Host Filesystem" as fs
+box "RepoIntelligence Group (Repository)" #E8F5E9
+  participant "RepoIntelligenceStore" as store
 end box
-
-
+database "RepoIntelligenceDirectory" as dir
 
 == RIM-01 INDEX Codebase ==
 
-user -> router : RIM-01 INDEX Codebase(project_root)
+user -> router : POST /project/{root}:index
 activate router
-router -> agent : RIM-01 INDEX Codebase(project_root)
-activate agent
+router -> api : rim01 INDEX Codebase(project_root)
+activate api
+api -> mgr : rim01 INDEX Codebase(project_root)
+activate mgr
 
-agent -> rim : RIM-01 INDEX Codebase(project_root)
-activate rim
-
-rim -> fs : rim.list_source_files(project_root)
-activate fs
-fs --> rim : source_files[]
-deactivate fs
-
-loop for each source_file
-    rim -> ast : ast.parse(source_file)
-    activate ast
-
-    break Parse error
-        ast --> rim : ParseError(file, reason)
-    end
-
-    ast --> rim : ASTNode[]
-    deactivate ast
-
-    rim -> graph : graph.extract_symbols(ast_nodes)
-    activate graph
-    graph --> rim : symbols[]
-    deactivate graph
-
-    rim -> graph : graph.link_relationships(symbols)
-    activate graph
-    graph --> rim : edges[]
-    deactivate graph
+alt indexing succeeds
+  mgr -> store : rim01 INDEX Codebase(project_root)
+  activate store
+  store -> dir : rim01 INDEX Codebase(project_root)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : INDEXING (#4FC3F7)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else parse failure
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-rim -> graph : graph.build_adjacency_index()
-activate graph
-graph --> rim : adjacency_map
-deactivate graph
-
-rim --> agent : IndexStats(files, symbols, edges)
-deactivate rim
-
-agent --> router : IndexStats(files, symbols, edges)
-deactivate agent
-deactivate router
-
 
 @enduml

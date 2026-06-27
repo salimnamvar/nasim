@@ -1,81 +1,99 @@
 @startuml sq_session09_delete_session
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     SSN-09 — DELETE Session
 ' Boundary:  nasim code agent
 ' Purpose:   Permanently delete a session and its associated data
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' SM States: ACTIVE (#43A047), SAVED (#1565C0), CLOSED (#757575)
 ' ============================================================
 
-title nasim — SSN-09 DELETE Session
+!include ../common/sq_styles.puml
+
+title nasim -- SSN-09 DELETE Session
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Session Group" #E8F5E9
+box "Session Group (Service)" #FFF3E0
+  participant "SessionManager" as mgr
+end box
+box "Session Group (Repository)" #E8F5E9
   participant "SessionStore" as store
 end box
-box "External" #F5F5F5
-  participant "Host Filesystem" as fs
-end box
-
+database "SessionDirectory" as dir
 
 == SSN-09 DELETE Session ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+user -> router : DELETE /sessions/{session_id}
+activate router
 
-agent -> store : ssn09 DELETE Session(session_id)
+router -> api : ssn09 DELETE Session({session_id})
+activate api
+
+alt session_id is empty
+    api --> router : 400 INVALID_ARGUMENT
+    router --> user : 400 Bad Request
+    deactivate api
+    deactivate router
+    end
+end
+
+api -> mgr : ssn09 DELETE Session({session_id})
+activate mgr
+
+mgr -> store : DELETE Session({session_id})
 activate store
 
-store -> store : validate_session_exists(session_id)
-
 break Session not found
-    store --> agent : 404 NOT_FOUND — DeleteError("session not found")
-    agent --> router : AgentEvent(Error)
+    store --> mgr : 404 NOT_FOUND
+    mgr --> api : 404 NOT_FOUND
+    api --> router : 404 NOT_FOUND
+    router --> user : 404 Not Found
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
 end
 
-store -> fs : ssn09 REMOVE Directory(session_path)
-activate fs
+store -> dir : REMOVE SessionFile({session_id}.jsonl)
+activate dir
 
 break Permission denied
-    fs --> store : PermissionError
-    store --> agent : 403 FORBIDDEN — DeleteError("permission denied")
-    agent --> router : AgentEvent(Error)
+    dir --> store : PermissionError
+    deactivate dir
+    store --> mgr : 403 FORBIDDEN
+    mgr --> api : 403 FORBIDDEN
+    api --> router : 403 FORBIDDEN
+    router --> user : 403 Forbidden
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
 end
 
-fs --> store : 200 OK — removed
-deactivate fs
+dir --> store : 200 OK — removed
+deactivate dir
 
-store -> store : clear_session_index(session_id)
+hnote over store : ACTIVE(#43A047) -> CLOSED(#757575)
 
-store --> agent : 200 OK — delete_confirmed(session_id)
+store --> mgr : 200 OK — delete_confirmed({session_id})
 deactivate store
-
-agent --> router : AgentEvent(Done)
-
-
+mgr --> api : 200 OK — delete_confirmed({session_id})
+deactivate mgr
+api --> router : 200 OK — delete_confirmed({session_id})
+deactivate api
+router --> user : 200 OK — delete_confirmed({session_id})
+deactivate router
 
 @enduml

@@ -1,77 +1,68 @@
 @startuml sq_agent11_delegate_to_persona
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-11 — DELEGATE to Persona
 ' Boundary:  nasim code agent
-' Purpose:   Select and delegate task execution to a persona
+' Purpose:   Assign task execution to a specialized persona role
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' SM States: RUNNING (#43A047)
 ' ============================================================
 
-title nasim — AGT-11 DELEGATE to Persona
+!include ../common/sq_styles.puml
+
+title nasim -- AGT-11 DELEGATE to Persona
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "PersonaManager" as pm
+box "API Group (Controller)" #FFF3E0
+  participant "AgentAPI" as api
 end box
-box "Config Group" #E8F5E9
-  participant "PersonaRegistry" as reg
+box "Agent Group (Service)" #FFF3E0
+  participant "AgentManager" as mgr
 end box
-box "Repository Group" #E8F5E9
-  participant "MemoryRepository" as memory
+box "Agent Group (Repository)" #E8F5E9
+  participant "AgentStore" as store
 end box
-
-
+database "AgentDirectory" as dir
 
 == AGT-11 DELEGATE to Persona ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
-activate agent
+user -> router : POST /v1/agents/{agent_id}:delegate-persona
+activate router
+router -> api : AGT-11 DELEGATE to Persona({task, persona_hint})
+activate api
+api -> mgr : AGT-11 DELEGATE to Persona({task, persona_hint})
+activate mgr
 
-agent -> pm : agt11 DELEGATE to Persona({task}, {persona_hint})
-activate pm
-
-pm -> reg : lookup persona(hint)
-activate reg
-reg --> pm : persona_config
-deactivate reg
-
-alt persona found
-    pm -> pm : load persona system prompt
-    pm -> pm : apply persona to agent context
-    pm --> agent : PersonaDelegated
+alt delegation succeeds
+  hnote over mgr : RUNNING (#43A047)
+  mgr -> store : AGT-11 DELEGATE to Persona({task, persona_hint})
+  activate store
+  store -> dir : AGT-11 DELEGATE to Persona({task, persona_hint})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
 else persona not found
-    pm -> pm : fallback to default persona
-    pm --> agent : PersonaDelegated(default)
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-deactivate pm
-
-agent --> router : AgentEvent(Done)
-deactivate agent
-
-
 
 @enduml

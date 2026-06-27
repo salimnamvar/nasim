@@ -1,92 +1,68 @@
-@startuml sq_editstrategy06_apply_function_level
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_edt06_apply_function_level
 ' ============================================================
 ' Title:     EDT-06 — APPLY Function-Level
 ' Boundary:  nasim code agent
-' Purpose:   Edit a single function via AST-aware replace
+' Purpose:   Apply a function-level edit to a file
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EditAPI -> EditManager -> EditStore -> EditDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
-title nasim — EDT-06 UPDATE Function-Level
+!include ../common/sq_styles.puml
+
+title nasim -- EDT-06 APPLY Function-Level
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EditAPI" as api
 end box
-box "Edit Strategy Group" #FFF3E0
-  participant "EditStrategyManager" as esm
-  participant "FunctionLevelCoder" as flc
+box "Edit Strategy Group (Service)" #FFF3E0
+  participant "EditManager" as mgr
 end box
-box "Tool Group" #E8F5E9
-  participant "ASTParser" as ast
+box "Edit Strategy Group (Repository)" #E8F5E9
+  participant "EditStore" as store
 end box
-box "FileSystem Group" #E8F5E9
-  participant "FileSystem" as fs
-end box
-
-
-
+database "EditDirectory" as dir
 
 == EDT-06 APPLY Function-Level ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
-agent -> esm : EDT-06 APPLY_FUNCTION_LEVEL(file_path, function_name, new_body, updateMask)
-activate esm
+user -> router : POST /editstrategy/function-level
+activate router
+router -> api : EDT-06 APPLY Function-Level({file_path, function_name, new_body})
+activate api
+api -> mgr : EDT-06 APPLY Function-Level({file_path, function_name, new_body})
+activate mgr
 
-esm -> flc : code_function_edit(file_path, function_name, new_body)
-activate flc
-
-flc -> fs : read_file(file_path)
-activate fs
-fs --> flc : source_content
-deactivate fs
-
-flc -> ast : parse(source_content)
-activate ast
-ast --> flc : ast_root
-deactivate ast
-
-flc -> flc : locate_function_node(ast_root, function_name)
-
-flc -> flc : replace_function_body(node, new_body)
-
-flc -> flc : validate_ast_integrity(ast_root)
-
-flc -> fs : write_file(file_path, modified_source)
-activate fs
-fs --> flc : write_result
-deactivate fs
-
-flc --> esm : EditResult(success, file_path, function_name)
-deactivate flc
-
-esm --> agent : EditResult
-deactivate esm
-
-agent --> router : AgentEvent(Done)
-
-
+alt validation succeedt
+  mgr -> store : EDT-06 APPLY Function-Level({file_path, function_name, new_body})
+  activate store
+  store -> dir : EDT-06 APPLY Function-Level({file_path, function_name, new_body})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : TOOL_EXEC (#B2DFDB) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

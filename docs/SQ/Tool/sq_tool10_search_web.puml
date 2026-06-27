@@ -1,77 +1,74 @@
 @startuml sq_tool10_search_web
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-10 — SEARCH Web
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Search the web for information
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TL-10 SEARCH Web
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "WebSearchTool" as search
 end box
-participant "Search Backend" as backend
-
-
+database "ToolDirectory" as dir
 
 == TL-10 SEARCH Web ==
 
-user -> router : types input
+user -> router : POST /tools/search_web:execute
 activate router
-router -> agent : TL-10 PROCESS(user_input)
-activate agent
-agent -> registry : TL-10 SEARCH Web(query, num_results)
-activate registry
-registry -> search : TL-10 SEARCH Web(query, num_results)
-activate search
-search -> backend : search(query, num_results)
-activate backend
+router -> api : TL-10 SEARCH Web(query, numResults)
+activate api
+api -> orch : TL-10 SEARCH Web(query, numResults)
+activate orch
 
-break Backend unavailable
-    backend --> search : ConnectionError
-    deactivate backend
-    search --> registry : ToolResult(success=False, error="Error: search backend unavailable")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  orch -> registry : TL-10 SEARCH Web(query, numResults)
+  activate registry
+  registry -> dir : TL-10 SEARCH Web(query, numResults)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else backend unavailable
+  orch --> api : 503 Service Unavailable
+  deactivate orch
+  api --> router : 503 Service Unavailable
+  deactivate api
+  router --> user : 503 Service Unavailable
+  deactivate router
+else invalid query
+  orch --> api : 400 Bad Request
+  deactivate orch
+  api --> router : 400 Bad Request
+  deactivate api
+  router --> user : 400 Bad Request
+  deactivate router
 end
-
-backend --> search : results [{title, url, snippet}, ...]
-deactivate backend
-search -> search : format results
-search --> registry : ToolResult(success=True, content=formatted_results)
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-deactivate search
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

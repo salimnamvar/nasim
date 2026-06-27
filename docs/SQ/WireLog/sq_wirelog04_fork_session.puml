@@ -1,81 +1,68 @@
 @startuml sq_wirelog04_fork_session
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     WRL-04 — Fork Session
-' Boundary:  nasim code agent CLI
+' Title:     WRL-04 — FORK Session
+' Boundary:  nasim code agent
 ' Purpose:   Fork session at any turn
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> WireLogAPI -> WireLogManager -> WireLogStore -> WireLogDirectory
+' SM States: BRANCHED (#7B1FA2)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- WRL-04 FORK Session
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "WireLogAPI" as api
 end box
-box "Wire Log Group" #F3E5F5
-  participant "WireLogger" as logger
-  participant "SessionForker" as forker
+box "WireLog Group (Service)" #FFF3E0
+  participant "WireLogManager" as mgr
 end box
-box "Session Group" #E8F5E9
-  participant "SessionManager" as session
+box "WireLog Group (Repository)" #E8F5E9
+  participant "WireLogStore" as store
 end box
-box "Repository Group" #E8F5E9
-  participant "WireLogStore" as wrl
-end box
+database "WireLogDirectory" as dir
 
+== WRL-04 FORK Session ==
 
+user -> router : POST /wirelog/fork
+activate router
+router -> api : wrl04 FORK Session(source_session_id, fork_turn)
+activate api
+api -> mgr : wrl04 FORK Session(source_session_id, fork_turn)
+activate mgr
 
-== wrl03 FORK Session ==
-
-user -> router : types input
-router -> agent : PROCESS(user_input)
-
-agent -> forker : wrl04 FORK Session(source_session_id, fork_turn)
-activate forker
-
-forker -> logger : wrl02 READ Log(source_session_id, up_to_turn=fork_turn)
-activate logger
-logger --> forker : 200 OK — events[]
-deactivate logger
-
-forker -> session : wrl04 CREATE Session(forked_from=source_session_id)
-activate session
-session --> forker : 200 OK — new_session_id
-deactivate session
-
-forker -> forker : copy_events_to_session(events, new_session_id)
-
-forker -> logger : wrl01 APPEND Event(ForkEvent(source, fork_point, new_session_id))
-activate logger
-logger -> wrl : persist wire events
-wrl --> logger : persisted
-logger --> forker : 200 OK — append_success
-deactivate logger
-
-forker --> agent : 200 OK — ForkResult(new_session_id, fork_turn, event_count)
-deactivate forker
-
-agent --> router : AgentEvent(Done)
-
+alt fork succeeds
+  mgr -> store : wrl04 FORK Session(source_session_id, fork_turn)
+  activate store
+  store -> dir : wrl04 FORK Session(source_session_id, fork_turn)
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : BRANCHED (#7B1FA2)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else source not found
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
+end
 
 @enduml

@@ -1,79 +1,136 @@
 @startuml sq_session06_revert_turn
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     SSN-06 — Revert Turn
-' Boundary:  nasim code agent CLI
+' Title:     SSN-06 — REVERT Turn
+' Boundary:  nasim code agent
 ' Purpose:   Restore session to a previous snapshot or turn
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' SM States: ACTIVE (#43A047)
 ' ============================================================
 
-title nasim — SSN-06 UPDATE Turn
+!include ../common/sq_styles.puml
+
+title nasim -- SSN-06 REVERT Turn
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Session Group" #E8F5E9
-  participant "SessionVersioning" as ver
+box "Session Group (Service)" #FFF3E0
+  participant "SessionManager" as mgr
 end box
-database "Snapshot Store" as snap
+box "Session Group (Repository)" #E8F5E9
+  participant "SessionStore" as store
+end box
+database "SessionDirectory" as dir
 
+== SSN-06 REVERT Turn ==
 
-== SSN-06 Revert Turn ==
+user -> router : POST /sessions/{session_id}:revert
+activate router
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+router -> api : ssn06 REVERT Session({session_id}, {target_turn})
+activate api
 
-agent -> ver : ssn06 REVERT Session(session_id, snapshot_id, updateMask)
-activate ver
-
-ver -> snap : ssn06 READ Snapshot(snapshot_id)
-activate snap
-alt snapshot found
-    snap --> ver : 200 OK — snapshot_messages
-    deactivate snap
-else snapshot not found
-    snap --> ver : 404 NOT_FOUND
-    deactivate snap
-    ver --> agent : 404 NOT_FOUND — RevertError("snapshot not found")
-    agent --> router : AgentEvent(Error)
+alt session_id is empty
+    api --> router : 400 INVALID_ARGUMENT
+    router --> user : 400 Bad Request
+    deactivate api
+    deactivate router
+    end
 end
 
-ver -> ver : replace current messages with snapshot
-ver -> ver : truncate messages after snapshot point
+api -> mgr : ssn06 REVERT Session({session_id}, {target_turn})
+activate mgr
 
-ver --> agent : 200 OK — Reverted(snapshot_id, turn_count)
-deactivate ver
+mgr -> store : READ Session({session_id})
+activate store
 
-agent --> router : AgentEvent(Done)
-
-break Snapshot load error
-    snap --> ver : IOError
-    ver --> agent : 500 INTERNAL — RevertError("snapshot unreadable")
-    agent --> router : AgentEvent(Error)
+break Session not found
+    store --> mgr : 404 NOT_FOUND
+    mgr --> api : 404 NOT_FOUND
+    api --> router : 404 NOT_FOUND
+    router --> user : 404 Not Found
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
 end
 
+store --> mgr : 200 OK
+deactivate store
 
+mgr -> store : READ Snapshot({session_id}, {target_turn})
+activate store
+
+break Snapshot not found
+    store --> mgr : 404 NOT_FOUND
+    mgr --> api : 404 NOT_FOUND
+    api --> router : 404 NOT_FOUND
+    router --> user : 404 Not Found
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+store -> dir : READ SnapshotFile({session_id}/{snapshot_id}.json)
+activate dir
+
+break Disk read error
+    dir --> store : IOError
+    deactivate dir
+    store --> mgr : 500 INTERNAL
+    mgr --> api : 500 INTERNAL
+    api --> router : 500 INTERNAL
+    router --> user : 500 Internal Error
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+dir --> store : 200 OK
+deactivate dir
+
+store --> mgr : 200 OK — {snapshot_messages}
+deactivate store
+
+mgr -> store : UPDATE SessionMessages({session_id}, {messages})
+activate store
+
+alt Update error
+    store --> mgr : 500 INTERNAL
+    mgr --> api : 500 INTERNAL
+    api --> router : 500 INTERNAL
+    router --> user : 500 Internal Error
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
+end
+
+store --> mgr : 200 OK
+deactivate store
+
+hnote over mgr : ACTIVE(#43A047) reverted to turn {target_turn}
+
+mgr --> api : 200 OK
+deactivate mgr
+api --> router : 200 OK
+deactivate api
+router --> user : 200 OK
+deactivate router
 
 @enduml

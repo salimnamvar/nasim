@@ -1,93 +1,69 @@
 @startuml sq_cli02_dispatch_slash_command
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     CLI-02 — DISPATCH Slash Command
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Slash command routing and execution
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIRouter -> CLIController -> CLIExecutor -> CLIStore
+' SM States: —
 ' ============================================================
 
-title nasim — CLI-02 DISPATCH Slash Command
+!include ../common/sq_styles.puml
+
+title nasim -- CLI-02 DISPATCH Slash Command
 
 actor "User" as user
 
-box "CLI Interface Container" #E3F2FD
-  participant "REPLSession" as repl
-  participant "SlashCommandHandler" as cmdhandler
+box "Entry Gate" #E3F2FD
+  participant "CLIRouter" as router
 end box
-box "API Group (Entry Gate)" #E3F2FD
-  participant "ServerRouter" as router
+box "Controller" #FFF3E0
+  participant "CLIController" as ctrl
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "Service" #FFF3E0
+  participant "CLIExecutor" as exec
 end box
-box "Config Group" #E8F5E9
-  participant "ConfigLoader" as config
+box "Repository" #E8F5E9
+  participant "CLIStore" as store
 end box
-
+database "CLIDirectory" as dir
 
 == CLI-02 DISPATCH Slash Command ==
 
-user -> repl : enter slash command
-activate repl
-repl -> repl : check for slash command prefix
+user -> router : CLI-02 DISPATCH SlashCommand({input})
+activate router
+router -> ctrl : CLI-02 PARSE SlashCommand({input})
+activate ctrl
 
-repl -> cmdhandler : cli02 PARSE SlashCommand({input})
-activate cmdhandler
-cmdhandler -> cmdhandler : extract command name and args
+ctrl -> ctrl : CLI-02 PARSE CommandName({input})
+ctrl -> exec : CLI-02 DISPATCH Command({command, args})
+activate exec
 
-alt /sessions command
-    cmdhandler -> router : api01 LIST Sessions({filters})
-    activate router
-    router --> cmdhandler : 200 OK — SessionList
-    deactivate router
-    cmdhandler --> repl : CommandResult(SessionsList)
-else /config command
-    cmdhandler -> config : cfg01 READ Config()
-    activate config
-    config --> cmdhandler : 200 OK — Config
-    deactivate config
-    cmdhandler --> repl : CommandResult(ConfigDisplay)
-else /plan command
-    cmdhandler -> router : cli05 ENABLE Plan Mode()
-    activate router
-    router -> agent : agt07 QUEUE Plan()
-    activate agent
-    agent --> router : PlanSession(queued)
-    deactivate agent
-    router --> cmdhandler : 200 OK — PlanEnabled
-    deactivate router
-    cmdhandler --> repl : CommandResult(PlanMode)
-else /model command
-    cmdhandler -> router : cli07 SWITCH Model({model_name})
-    activate router
-    router --> cmdhandler : 200 OK — ModelSwitched
-    deactivate router
-    cmdhandler --> repl : CommandResult(ModelSwitched)
+alt command recognised
+  exec -> store : CLI-02 ROUTE Command({command, args})
+  activate store
+  store -> dir : CLI-02 ROUTE Command({command, args})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> exec : 200 OK
+  deactivate store
+  exec --> ctrl : 200 OK
+  deactivate exec
+  ctrl --> router : 200 OK
+  deactivate ctrl
+  router --> user : 200 OK
+  deactivate router
 else unknown command
-    cmdhandler --> repl : CommandResult(UnknownCommand)
+  exec --> ctrl : 404 Not Found
+  deactivate exec
+  ctrl --> router : 404 Not Found
+  deactivate ctrl
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-repl --> user : display command result
-deactivate cmdhandler
-deactivate repl
-
 
 @enduml

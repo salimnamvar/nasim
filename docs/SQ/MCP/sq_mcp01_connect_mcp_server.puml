@@ -1,80 +1,68 @@
 @startuml sq_mcp01_connect_mcp_server
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     MCP-01 — CONNECT MCP Server
 ' Boundary:  nasim code agent
 ' Purpose:   Connect to external MCP server via stdio/SSE
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    CAR audit 2026-06-26 (refactored to API-First entry chain)
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> MCPAPI -> MCPManager -> MCPStore -> MCPDirectory
+' SM States: CONNECTING (#FFCA28), CONNECTED (#00BCD4), ERROR (#E57373)
 ' ============================================================
 
-title nasim — MCP-01 CONNECT McpServer
+!include ../common/sq_styles.puml
+
+title nasim -- MCP-01 CONNECT MCP Server
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "MCPAPI" as api
 end box
-box "MCP Group" #F3E5F5
-  participant "MCPClientRuntime" as mcp
+box "MCP Group (Service)" #FFF3E0
+  participant "MCPManager" as mgr
 end box
-box "External" #F5F5F5
-  participant "MCP Server" as server
+box "MCP Group (Repository)" #E8F5E9
+  participant "MCPStore" as store
 end box
+database "MCPDirectory" as dir
 
+== MCP-01 CONNECT MCP Server ==
 
+user -> router : POST /mcp/servers/{id}:connect
+activate router
+router -> api : MCP-01 CONNECT MCP Server({endpoint, transport})
+activate api
+api -> mgr : MCP-01 CONNECT MCP Server({endpoint, transport})
+activate mgr
 
-
-== MCP-01 CONNECT McpServer ==
-
-user -> router : types input
-router -> agent : PROCESS(user_input)
-agent -> mcp : MCP-01 CONNECT McpServer(endpoint, transport)
-activate mcp
-
-mcp -> server : MCP-01 CONNECT McpServer(endpoint, transport)
-activate server
-
-break Connection refused / timeout
-    server --> mcp : ConnectionError
-    mcp --> agent : ToolResult(success=false, error="MCP Server unreachable")
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  mgr -> store : MCP-01 CONNECT MCP Server({endpoint, transport})
+  activate store
+  store -> dir : MCP-01 CONNECT MCP Server({endpoint, transport})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : CONNECTING (#FFCA28) -> CONNECTED (#00BCD4)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-server --> mcp : connection established
-deactivate server
-
-mcp -> server : MCP-01 INITIALIZE Handshake(capabilities)
-activate server
-server --> mcp : HandshakeResponse(server_capabilities)
-deactivate server
-
-mcp -> mcp : store connection state
-
-mcp --> agent : ToolResult(success=true, content="ConnectionActive")
-deactivate mcp
-
-agent --> router : AgentEvent(Done)
-
-
 
 @enduml

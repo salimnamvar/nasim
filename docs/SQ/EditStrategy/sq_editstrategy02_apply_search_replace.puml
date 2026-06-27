@@ -1,76 +1,68 @@
-@startuml sq_editstrategy02_apply_search_replace
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_edt02_apply_search_replace
 ' ============================================================
 ' Title:     EDT-02 — APPLY Search-Replace
 ' Boundary:  nasim code agent
-' Purpose:   Execute edit via search-replace strategy
+' Purpose:   Apply a search-and-replace edit to a file
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    CAR audit 2026-06-26 (removed EditApplier phantom, fixed box naming)
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EditAPI -> EditManager -> EditStore -> EditDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
-title nasim — EDT-02 APPLY Search-Replace
+!include ../common/sq_styles.puml
+
+title nasim -- EDT-02 APPLY Search-Replace
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EditAPI" as api
 end box
-box "Edit Strategy Group" #FFF3E0
-  participant "SearchReplaceCoder" as strategy
+box "Edit Strategy Group (Service)" #FFF3E0
+  participant "EditManager" as mgr
 end box
-participant "Host Filesystem" as fs
-
-
-
+box "Edit Strategy Group (Repository)" #E8F5E9
+  participant "EditStore" as store
+end box
+database "EditDirectory" as dir
 
 == EDT-02 APPLY Search-Replace ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+user -> router : POST /editstrategy/search-replace
+activate router
+router -> api : EDT-02 APPLY Search-Replace({file_path, old_text, new_text})
+activate api
+api -> mgr : EDT-02 APPLY Search-Replace({file_path, old_text, new_text})
+activate mgr
 
-agent -> fs : read_file(file_path)
-activate fs
-fs --> agent : original_content
-deactivate fs
-
-agent -> fs : create_backup(file_path)
-activate fs
-fs --> agent : backup_path
-deactivate fs
-
-agent -> strategy : apply(original_content)
-activate strategy
-strategy --> agent : modified_content
-deactivate strategy
-
-agent -> fs : write_file(file_path, modified_content)
-activate fs
-fs --> agent : write_success
-deactivate fs
-
-agent -> agent : compute_diff(original_content, modified_content)
-
-agent --> router : AgentEvent(Done)
-
-
+alt validation succeedt
+  mgr -> store : EDT-02 APPLY Search-Replace({file_path, old_text, new_text})
+  activate store
+  store -> dir : EDT-02 APPLY Search-Replace({file_path, old_text, new_text})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : TOOL_EXEC (#B2DFDB) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

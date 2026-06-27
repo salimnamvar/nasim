@@ -1,119 +1,68 @@
 @startuml sq_agent01_process_user_task
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     AGT-01 — PROCESS User Task (API-First)
+' Title:     AGT-01 — PROCESS User Task
 ' Boundary:  nasim code agent
-' Purpose:   Core agentic loop: LLM call -> tool dispatch -> repeat
-'            Entry via API (ServerRouter). No interface bypass.
+' Purpose:   Primary orchestrator — core agentic loop
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' SM States: RUNNING (#43A047)
 ' ============================================================
 
-title nasim — AGT-01 PROCESS User Task (API-First)
+!include ../common/sq_styles.puml
+
+title nasim -- AGT-01 PROCESS User Task
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "ConversationHistory" as history
+box "API Group (Controller)" #FFF3E0
+  participant "AgentAPI" as api
 end box
-box "Provider Group" #FFF3E0
-  participant "LiteLLMProxy" as provider
+box "Agent Group (Service)" #FFF3E0
+  participant "AgentManager" as mgr
 end box
-box "Tool Group" #E8F5E9
-  participant "ToolRegistry" as tool
+box "Agent Group (Repository)" #E8F5E9
+  participant "AgentStore" as store
 end box
-box "Safety Group" #FFF3E0
-  participant "SafetyCoordinator" as safety
-end box
-box "Observability Group" #F3E5F5
-  participant "TraceCorrelator" as trace
-end box
+database "AgentDirectory" as dir
 
+== AGT-01 PROCESS User Task ==
 
-
-== AGT-01 PROCESS User Task (API-First) ==
-
-user -> router : API-06 DISPATCH Message(session_id, message)
+user -> router : POST /v1/agents/{agent_id}:process
 activate router
+router -> api : AGT-01 PROCESS Task({session_id, message})
+activate api
+api -> mgr : AGT-01 PROCESS Task({session_id, message})
+activate mgr
 
-router -> agent : dispatchMessage(session_id, message)
-activate agent
-
-ref over agent, trace
-  OBS-03: CORRELATE Trace
-end ref
-
-ref over agent, history
-  AGT-03: UPDATE Conversation (append user message)
-end ref
-
-ref over agent, provider
-  HK-04: DISPATCH Pre-LLM Hook
-end ref
-
-ref over agent, provider
-  PRV-02: REQUEST Chat (or PRV-03: STREAM)
-end ref
-
-ref over agent, provider
-  HK-05: DISPATCH Post-LLM Hook
-end ref
-
-alt LLM returns text only
-    ref over agent, history
-      AGT-03: UPDATE Conversation (append assistant message)
-    end ref
-    agent --> router : AgentEvent(Done)
-else LLM returns tool calls
-    ref over agent, history
-      AGT-03: UPDATE Conversation (append assistant message with tool_calls)
-    end ref
-    loop for each tool_call
-        ref over agent, tool
-          AGT-02: DISPATCH Tool Call
-        end ref
-    end
-    ref over agent, provider
-      PRV-02: Call Provider Chat [recurse — agt01 loops]
-    end ref
-    ref over agent, history
-      AGT-03: UPDATE Conversation (append assistant message)
-    end ref
-    agent --> router : AgentEvent(Done)
+alt task accepted
+  hnote over mgr : RUNNING (#43A047)
+  mgr -> store : AGT-01 PROCESS Task({session_id, message})
+  activate store
+  store -> dir : AGT-01 PROCESS Task({session_id, message})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-break LLM call fails or tool execution errors
-    ref over agent, history
-      AGT-03: UPDATE Conversation (append error message)
-    end ref
-    agent --> router : AgentEvent(Error)
-end
-
-deactivate agent
-
-router --> user : SSE stream (AgentEvents)
-deactivate router
-
-
 
 @enduml

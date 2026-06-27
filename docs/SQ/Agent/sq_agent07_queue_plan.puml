@@ -1,66 +1,68 @@
 @startuml sq_agent07_queue_plan
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-07 — QUEUE Plan
 ' Boundary:  nasim code agent
 ' Purpose:   Queue tool calls in plan mode without executing
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' SM States: WAITING (#CE93D8)
 ' ============================================================
 
-title nasim — AGT-07 INSERT Plan
+!include ../common/sq_styles.puml
+
+title nasim -- AGT-07 QUEUE Plan
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "PlanSession" as plan
+box "API Group (Controller)" #FFF3E0
+  participant "AgentAPI" as api
 end box
-box "Repository Group" #E8F5E9
-  participant "MemoryRepository" as memory
+box "Agent Group (Service)" #FFF3E0
+  participant "AgentManager" as mgr
 end box
-
-
+box "Agent Group (Repository)" #E8F5E9
+  participant "AgentStore" as store
+end box
+database "AgentDirectory" as dir
 
 == AGT-07 QUEUE Plan ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
-activate agent
+user -> router : POST /v1/agents/{agent_id}:queue-plan
+activate router
+router -> api : AGT-07 QUEUE Plan({tool_name, args})
+activate api
+api -> mgr : AGT-07 QUEUE Plan({tool_name, args})
+activate mgr
 
-agent -> plan : agt07 QUEUE Plan({tool_name}, {args})
-activate plan
-plan -> plan : append to pending_calls list
-plan --> agent : queued
-deactivate plan
-
-agent -> plan : agt07 DISPLAY Plan()
-activate plan
-plan --> agent : formatted plan text
-deactivate plan
-
-agent --> router : AgentEvent(PlanDisplay)
-deactivate agent
-
-
+alt plan queued
+  hnote over mgr : WAITING (#CE93D8)
+  mgr -> store : AGT-07 QUEUE Plan({tool_name, args})
+  activate store
+  store -> dir : AGT-07 QUEUE Plan({tool_name, args})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else queue full
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+end
 
 @enduml

@@ -1,85 +1,74 @@
 @startuml sq_tool09_fetch_web_content
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     TL-09 — FETCH Web Content
-' Boundary:  nasim code agent CLI
+' Boundary:  nasim code agent
 ' Purpose:   Fetch URL content and convert to markdown
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TL-09 FETCH Web Content
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "WebFetchTool" as fetch
 end box
-participant "Web" as web
-
-
+database "ToolDirectory" as dir
 
 == TL-09 FETCH Web Content ==
 
-user -> router : types input
+user -> router : POST /tools/fetch_web:execute
 activate router
-router -> agent : TL-09 PROCESS(user_input)
-activate agent
-agent -> registry : TL-09 FETCH Web Content(url, timeout)
-activate registry
-registry -> fetch : TL-09 FETCH Web Content(url, timeout)
-activate fetch
-fetch -> web : httpx GET url (timeout=timeout)
-activate web
+router -> api : TL-09 FETCH Web Content(url, timeout)
+activate api
+api -> orch : TL-09 FETCH Web Content(url, timeout)
+activate orch
 
-break HTTP error (4xx, 5xx)
-    web --> fetch : HTTPError
-    deactivate web
-    fetch --> registry : ToolResult(success=False, error="Error: HTTP {status_code} for {url}")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
+alt validation succeeds
+  orch -> registry : TL-09 FETCH Web Content(url, timeout)
+  activate registry
+  registry -> dir : TL-09 FETCH Web Content(url, timeout)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else http error
+  orch --> api : 502 Bad Gateway
+  deactivate orch
+  api --> router : 502 Bad Gateway
+  deactivate api
+  router --> user : 502 Bad Gateway
+  deactivate router
+else timeout
+  orch --> api : 504 Gateway Timeout
+  deactivate orch
+  api --> router : 504 Gateway Timeout
+  deactivate api
+  router --> user : 504 Gateway Timeout
+  deactivate router
 end
-
-break Timeout
-    web --> fetch : TimeoutException
-    deactivate web
-    fetch --> registry : ToolResult(success=False, error="Error: timeout fetching {url}")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
-end
-
-web --> fetch : HTML content
-deactivate web
-fetch -> fetch : html2text.convert(html) -> markdown
-fetch --> registry : ToolResult(success=True, content=markdown)
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-deactivate fetch
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

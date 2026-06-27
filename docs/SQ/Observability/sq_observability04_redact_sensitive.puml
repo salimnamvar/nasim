@@ -1,103 +1,67 @@
 @startuml sq_observability04_redact_sensitive
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-04 — REDACT Sensitive Data
 ' Boundary:  nasim code agent
 ' Purpose:   Strip secrets before emission to structured logs or wire
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ObservabilityAPI -> ObservabilityManager -> ObservabilityStore -> ObservabilityDirectory
+' SM States: —
 ' ============================================================
 
-title nasim — OBS-04 REDACT SensitiveData
+!include ../common/sq_styles.puml
+
+title nasim -- OBS-04 REDACT Sensitive Data
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ObservabilityAPI" as api
 end box
-box "Observability Group" #F3E5F5
-  participant "StructuredLogger" as logger
-  participant "WireAppender" as wire
-  participant "LogRedactor" as redactor
+box "Observability Group (Service)" #FFF3E0
+  participant "ObservabilityManager" as mgr
 end box
-box "Config Group" #E8F5E9
-  participant "Config" as config
+box "Observability Group (Repository)" #E8F5E9
+  participant "ObservabilityStore" as store
 end box
-box "Repository Group" #E8F5E9
-  participant "ObservabilityRepository" as obs_repo
-end box
+database "ObservabilityDirectory" as dir
 
+== OBS-04 REDACT Sensitive Data ==
 
-== OBS-04 REDACT SensitiveData (structured log) ==
-
-user -> router : OBS-04 REDACT SensitiveData(record)
+user -> router : POST /redact
 activate router
-router -> agent : OBS-04 REDACT SensitiveData(record)
-activate agent
+router -> api : OBS-04 REDACT Sensitive Data({record})
+activate api
+api -> mgr : OBS-04 REDACT Sensitive Data({record})
+activate mgr
 
-agent -> logger : OBS-04 REDACT SensitiveData(record)
-activate logger
-
-logger -> redactor : OBS-04 REDACT SensitiveData(record)
-activate redactor
-
-redactor -> config : config.load_redaction_rules()
-activate config
-config --> redactor : rules[]
-deactivate config
-
-loop for each rule in rules
-    redactor -> redactor : apply_pattern(record, rule.pattern, rule.replacement)
+alt validation succeeds
+  mgr -> store : OBS-04 REDACT Sensitive Data({record})
+  activate store
+  store -> dir : OBS-04 REDACT Sensitive Data({record})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-redactor -> redactor : set_redacted_flag(record)
-
-redactor --> logger : SanitizedRecord(redacted=true)
-deactivate redactor
-
-logger --> agent : SanitizedRecord
-deactivate logger
-
-== OBS-04 REDACT SensitiveData (wire event) ==
-
-wire -> redactor : OBS-04 REDACT SensitiveData(payload)
-activate redactor
-
-redactor -> config : config.load_redaction_rules()
-activate config
-config --> redactor : rules[]
-deactivate config
-
-loop for each rule in rules
-    redactor -> redactor : apply_pattern(payload, rule.pattern, rule.replacement)
-end
-
-redactor --> wire : SanitizedPayload(redacted=true)
-deactivate redactor
-
-agent --> router : None
-deactivate agent
-deactivate router
-
-
 
 @enduml

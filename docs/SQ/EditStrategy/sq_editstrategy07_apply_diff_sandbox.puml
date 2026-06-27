@@ -1,113 +1,68 @@
-@startuml sq_editstrategy07_apply_diff_sandbox
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_edt07_apply_diff_sandbox
 ' ============================================================
 ' Title:     EDT-07 — APPLY Diff Sandbox
 ' Boundary:  nasim code agent
-' Purpose:   Apply diff in isolated sandbox before committing to real file
+' Purpose:   Apply an edit inside a sandboxed diff workspace
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EditAPI -> EditManager -> EditStore -> EditDirectory
+' SM States: STAGING (#F1F8E9)
 ' ============================================================
 
-title nasim — EDT-07 UPDATE Diff Sandbox
+!include ../common/sq_styles.puml
+
+title nasim -- EDT-07 APPLY Diff Sandbox
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EditAPI" as api
 end box
-box "Edit Strategy Group" #FFF3E0
-  participant "EditStrategyManager" as esm
-  participant "DiffSandboxCoder" as dsc
+box "Edit Strategy Group (Service)" #FFF3E0
+  participant "EditManager" as mgr
 end box
-box "Sandbox Group" #F3E5F5
-  participant "DiffSandboxManager" as dsm
+box "Edit Strategy Group (Repository)" #E8F5E9
+  participant "EditStore" as store
 end box
-box "FileSystem Group" #E8F5E9
-  participant "FileSystem" as fs
-end box
-
-
-
+database "EditDirectory" as dir
 
 == EDT-07 APPLY Diff Sandbox ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+user -> router : POST /editstrategy/diff-sandbox
+activate router
+router -> api : EDT-07 APPLY Diff Sandbox({file_path, edit_content})
+activate api
+api -> mgr : EDT-07 APPLY Diff Sandbox({file_path, edit_content})
+activate mgr
 
-agent -> esm : EDT-07 APPLY_DIFF_SANDBOX(file_path, diff_patch, updateMask)
-activate esm
-
-esm -> dsc : code_sandboxed_diff(file_path, diff_patch)
-activate dsc
-
-dsc -> dsm : create_sandbox(file_path)
-activate dsm
-dsm -> fs : copy_to_sandbox(file_path)
-activate fs
-fs --> dsm : sandbox_path
-deactivate fs
-dsm --> dsc : SandboxHandle(sandbox_path)
-deactivate dsm
-
-dsc -> dsm : apply_diff(sandbox_path, diff_patch)
-activate dsm
-dsm -> fs : apply_patch(sandbox_path, diff_patch)
-activate fs
-fs --> dsm : patch_result
-deactivate fs
-dsm --> dsc : DiffApplyResult
-deactivate dsm
-
-dsc -> dsm : validate_sandbox(sandbox_path)
-activate dsm
-dsm -> dsm : run_syntax_check(sandbox_path)
-dsm -> dsm : run_basic_validation(sandbox_path)
-dsm --> dsc : ValidationResult
-deactivate dsm
-
-alt validation passes
-    dsc -> dsm : commit_sandbox(sandbox_path, file_path)
-    activate dsm
-    dsm -> fs : move_sandbox_to_target(sandbox_path, file_path)
-    activate fs
-    fs --> dsm : write_result
-    deactivate fs
-    dsm --> dsc : CommitResult
-    deactivate dsm
+alt validation succeedt
+  mgr -> store : EDT-07 APPLY Diff Sandbox({file_path, edit_content})
+  activate store
+  store -> dir : EDT-07 APPLY Diff Sandbox({file_path, edit_content})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : STAGING (#F1F8E9) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
 else validation fails
-    dsc -> dsm : discard_sandbox(sandbox_path)
-    activate dsm
-    dsm --> dsc : DiscardResult
-    deactivate dsm
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-dsc --> esm : EditResult(success, file_path)
-deactivate dsc
-
-esm --> agent : EditResult
-deactivate esm
-
-agent --> router : AgentEvent(Done)
-
-
 
 @enduml

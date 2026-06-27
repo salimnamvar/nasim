@@ -1,84 +1,68 @@
 @startuml sq_api04_update_session
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-04 — UPDATE Session
-' Boundary:  nasim code agent HTTP API
+' Boundary:  nasim code agent
 ' Purpose:   Update session metadata or settings
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore
+' SM States: SAVED (#1565C0)
 ' ============================================================
 
-title nasim — API-04 UPDATE Session
+!include ../common/sq_styles.puml
+
+title nasim -- API-04 UPDATE Session
 
 actor "User" as user
 
-box "Controller Group" #E3F2FD
+box "Entry Gate" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "SessionService" as svc
+box "Controller" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Repository Group" #E8F5E9
+box "Service" #FFF3E0
+  participant "SessionManager" as mgr
+end box
+box "Repository" #E8F5E9
   participant "SessionStore" as store
 end box
-
-
+database "SessionDirectory" as dir
 
 == API-04 UPDATE Session ==
 
 user -> router : PATCH /v1/sessions/{id}
 activate router
+router -> api : api04 UPDATE Session({sessionId, patchData})
+activate api
+api -> mgr : api04 UPDATE Session({sessionId, patchData})
+activate mgr
 
-router -> router : Phase 1: validate patch body
-alt Structural validation failed [400]
-  router --> user : 400 INVALID_ARGUMENT
-end
-
-router -> svc : API-04 UPDATE Session(sessionId, patchData, updateMask)
-activate svc
-
-svc -> store : API-04 READ Session(sessionId)
-activate store
-
-break Session not found [404]
-  store --> svc : 404 NOT_FOUND
+alt validation succeeds
+  mgr -> store : api04 UPDATE Session({sessionId, patchData})
+  activate store
+  store -> dir : api04 UPDATE Session({sessionId, patchData})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
   deactivate store
-  svc --> router : 404 NOT_FOUND
-  router --> user : 404 NOT_FOUND {error: {code: "NOT_FOUND", message: "Session not found", status: "NOT_FOUND"}}
+  ... hnote over mgr : SAVED (#1565C0) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-store --> svc : SessionEntity
-deactivate store
-
-svc -> svc : validate business rules
-svc -> svc : applyUpdateMask(existing, patchData)
-
-svc -> store : API-04 UPDATE Session(updatedSession)
-activate store
-store --> svc : updated
-deactivate store
-
-svc --> router : 200 OK {session: {id, updated_at}}
-deactivate svc
-router --> user : 200 OK {session: {id, updated_at}}
-deactivate router
-
-
 
 @enduml

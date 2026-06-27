@@ -1,90 +1,67 @@
 @startuml sq_observability06_export_otlp
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     OBS-06 — EXPORT OTLP
 ' Boundary:  nasim code agent
 ' Purpose:   Export traces and metrics to OTel-compatible backend
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> ObservabilityAPI -> ObservabilityManager -> ObservabilityStore -> ObservabilityDirectory
+' SM States: —
 ' ============================================================
 
-title nasim — OBS-06 EXPORT Otlp
+!include ../common/sq_styles.puml
+
+title nasim -- OBS-06 EXPORT OTLP
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ObservabilityAPI" as api
 end box
-box "Observability Group" #F3E5F5
-  participant "OTelExporter" as otel
-  participant "TraceCorrelator" as trace
-  participant "MetricsCollector" as metrics
+box "Observability Group (Service)" #FFF3E0
+  participant "ObservabilityManager" as mgr
 end box
-box "External" #F5F5F5
-  participant "OTel Backend" as backend
+box "Observability Group (Repository)" #E8F5E9
+  participant "ObservabilityStore" as store
 end box
-box "Repository Group" #E8F5E9
-  participant "ObservabilityRepository" as obs_repo
-end box
+database "ObservabilityDirectory" as dir
 
+== OBS-06 EXPORT OTLP ==
 
-== OBS-06 EXPORT Otlp ==
-
-user -> router : OBS-06 EXPORT Otlp()
+user -> router : POST /export
 activate router
-router -> agent : OBS-06 EXPORT Otlp()
-activate agent
+router -> api : OBS-06 EXPORT OTLP({})
+activate api
+api -> mgr : OBS-06 EXPORT OTLP({})
+activate mgr
 
-agent -> otel : OBS-06 EXPORT Otlp()
-activate otel
-
-otel -> trace : trace.export_spans()
-activate trace
-trace --> otel : SpanBatch(spans[])
-deactivate trace
-
-otel -> metrics : metrics.export_metrics()
-activate metrics
-metrics --> otel : MetricBatch(metrics[])
-deactivate metrics
-
-otel -> backend : OBS-06 POST /v1/traces + /v1/metrics
-activate backend
-
-break Backend unreachable
-  backend --> otel : ConnectionError
-  otel -> otel : buffer for retry
+alt validation succeeds
+  mgr -> store : OBS-06 EXPORT OTLP({})
+  activate store
+  store -> dir : OBS-06 EXPORT OTLP({})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-backend --> otel : 200 OK
-deactivate backend
-
-otel --> agent : OtlpExportResult(traces, metrics)
-deactivate otel
-
-agent --> router : None
-deactivate agent
-deactivate router
-
-
 
 @enduml

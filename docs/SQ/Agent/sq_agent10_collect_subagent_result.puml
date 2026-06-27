@@ -1,89 +1,68 @@
 @startuml sq_agent10_collect_subagent_result
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     AGT-10 — COLLECT Subagent Result
 ' Boundary:  nasim code agent
-' Purpose:   Wait for child agent completion and aggregate result
+' Purpose:   Gather results from child agent process
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> AgentAPI -> AgentManager -> AgentStore -> AgentDirectory
+' SM States: COMPLETED (#2E7D32)
 ' ============================================================
 
-title nasim — AGT-10 COLLECT Subagent Result
+!include ../common/sq_styles.puml
+
+title nasim -- AGT-10 COLLECT Subagent Result
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
-  participant "SubagentCoordinator" as coord
+box "API Group (Controller)" #FFF3E0
+  participant "AgentAPI" as api
 end box
-box "Session Group" #E8F5E9
-  participant "SessionStore" as store
+box "Agent Group (Service)" #FFF3E0
+  participant "AgentManager" as mgr
 end box
-
-
+box "Agent Group (Repository)" #E8F5E9
+  participant "AgentStore" as store
+end box
+database "AgentDirectory" as dir
 
 == AGT-10 COLLECT Subagent Result ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
-activate agent
+user -> router : POST /v1/agents/{agent_id}:collect-subagent
+activate router
+router -> api : AGT-10 COLLECT Subagent Result({child_id, timeout})
+activate api
+api -> mgr : AGT-10 COLLECT Subagent Result({child_id, timeout})
+activate mgr
 
-agent -> coord : agt10 COLLECT Subagent Result({child_id}, {timeout})
-activate coord
-
-coord -> store : get child session status
-activate store
-store --> coord : child_status (running | completed | failed)
-deactivate store
-
-alt child completed
-    coord -> store : get child result
-    activate store
-    store --> coord : child_result
-    deactivate store
-    coord -> coord : aggregate result into parent context
-    coord --> agent : result
-else child still running
-    coord -> coord : wait with timeout
-    alt timeout exceeded
-        coord -> coord : cancel child execution
-        coord --> agent : PartialResult(timeout)
-    else child completes in time
-        coord -> store : get child result
-        activate store
-        store --> coord : child_result
-        deactivate store
-        coord --> agent : result
-    end
-else child failed
-    coord -> coord : collect error details
-    coord --> agent : ChildError
+alt result available
+  hnote over mgr : COMPLETED (#2E7D32)
+  mgr -> store : AGT-10 COLLECT Subagent Result({child_id, timeout})
+  activate store
+  store -> dir : AGT-10 COLLECT Subagent Result({child_id, timeout})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else child not found
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-deactivate coord
-
-agent --> router : AgentEvent(Done)
-deactivate agent
-
-
 
 @enduml

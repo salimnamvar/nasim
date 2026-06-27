@@ -1,92 +1,68 @@
-@startuml sq_editstrategy01_select_strategy
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
+@startuml sq_edt01_select_strategy
 ' ============================================================
 ' Title:     EDT-01 — SELECT Strategy
 ' Boundary:  nasim code agent
 ' Purpose:   Choose optimal edit format for the target model
-' Note: EDT-01 is a strategy selector, not a sub-UC orchestrator.
-' It selects one strategy from EDT-02..10; ref would show all paths
-' simultaneously, which is misleading. Conditional ref is not supported
-' in PlantUML. The selected strategy is invoked via dynamic dispatch.
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> EditAPI -> EditManager -> EditStore -> EditDirectory
+' SM States: THINKING (#D7CCC8)
 ' ============================================================
 
-title nasim — EDT-01 SELECT Strategy
+!include ../common/sq_styles.puml
+
+title nasim -- EDT-01 SELECT Strategy
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "EditAPI" as api
 end box
-box "Edit Strategy Group" #FFF3E0
-  participant "StrategySelector" as selector
-  participant "EditStrategy" as strategy
+box "Edit Strategy Group (Service)" #FFF3E0
+  participant "EditManager" as mgr
 end box
-box "Config Group" #E8F5E9
-  participant "ConfigLoader" as config
+box "Edit Strategy Group (Repository)" #E8F5E9
+  participant "EditStore" as store
 end box
-
-
-
+database "EditDirectory" as dir
 
 == EDT-01 SELECT Strategy ==
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
-agent -> selector : EDT-01 SELECT_STRATEGY(file_path, edit_description, model_id)
-activate selector
+user -> router : GET /editstrategy/strategy
+activate router
+router -> api : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
+activate api
+api -> mgr : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
+activate mgr
 
-selector -> config : get_supported_formats(model_id)
-activate config
-config --> selector : supported_formats[]
-deactivate config
-
-selector -> selector : estimate_diff_size(edit_description)
-
-alt diff_size <= 5 lines
-    selector -> strategy : CREATE_SEARCH_REPLACE(file_path, edit_description)
-    activate strategy
-    strategy --> selector : SearchReplaceEdit
-    deactivate strategy
-else diff_size <= 50 lines
-    selector -> strategy : CREATE_UNIFIED_DIFF(file_path, edit_description)
-    activate strategy
-    strategy --> selector : UnifiedDiffEdit
-    deactivate strategy
-else diff_size > 50 lines
-    selector -> strategy : CREATE_FULL_REWRITE(file_path, edit_description)
-    activate strategy
-    strategy --> selector : FullRewriteEdit
-    deactivate strategy
+alt strategy found
+  mgr -> store : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
+  activate store
+  store -> dir : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  ... hnote over mgr : THINKING (#D7CCC8) ...
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else strategy not found
+  mgr --> api : 404 Not Found
+  deactivate mgr
+  api --> router : 404 Not Found
+  deactivate api
+  router --> user : 404 Not Found
+  deactivate router
 end
-
-selector -> selector : validate_format_compatibility(strategy, model_id)
-
-selector --> agent : EditStrategy(format, parameters, confidence)
-deactivate selector
-
-agent --> router : AgentEvent(Done)
-
-
 
 @enduml

@@ -1,99 +1,74 @@
 @startuml sq_tool11_read_git_status
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     TL-11 — Read Git Status
-' Boundary:  nasim code agent CLI
+' Title:     TL-11 — READ Git Status
+' Boundary:  nasim code agent
 ' Purpose:   Git operations: status, diff, commit
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
+' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
+' CSR Chain: User -> ServerRouter -> ToolAPI -> ToolOrchestrator -> ToolRegistry -> ToolDirectory
+' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TL-11 READ Git Status
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "ToolAPI" as api
 end box
-box "Tool Group" #E8F5E9
+box "Tool Group (Service)" #FFF3E0
+  participant "ToolOrchestrator" as orch
+end box
+box "Tool Group (Repository)" #E8F5E9
   participant "ToolRegistry" as registry
-  participant "GitTool" as git
 end box
-participant "Host Shell" as shell
-
-
+database "ToolDirectory" as dir
 
 == TL-11 READ Git Status ==
 
-user -> router : types input
+user -> router : POST /tools/read_git_status:execute
 activate router
-router -> agent : TL-11 PROCESS(user_input)
-activate agent
-agent -> registry : TL-11 READ Git Status(action, args)
-activate registry
-registry -> git : TL-11 READ Git Status(action, args)
-activate git
+router -> api : TL-11 READ Git Status(action, args)
+activate api
+api -> orch : TL-11 READ Git Status(action, args)
+activate orch
 
-alt action = "status"
-    git -> shell : subprocess: git status --porcelain
-    activate shell
-    shell --> git : status output
-    deactivate shell
-    git --> registry : ToolResult(success=True, content=formatted_status)
-else action = "diff"
-    git -> shell : subprocess: git diff [args]
-    activate shell
-    shell --> git : diff output
-    deactivate shell
-    git --> registry : ToolResult(success=True, content=diff_text)
-else action = "commit"
-    git -> shell : subprocess: git add -A && git commit -m msg
-    activate shell
-    shell --> git : commit output
-    deactivate shell
-    git --> registry : ToolResult(success=True, content=commit_confirmation)
+alt validation succeeds
+  orch -> registry : TL-11 READ Git Status(action, args)
+  activate registry
+  registry -> dir : TL-11 READ Git Status(action, args)
+  activate dir
+  dir --> registry : 200 OK
+  deactivate dir
+  registry --> orch : 200 OK
+  deactivate registry
+  hnote over orch : TOOL_EXEC (#B2DFDB)
+  orch --> api : 200 OK
+  deactivate orch
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else not a git repo
+  orch --> api : 422 Unprocessable
+  deactivate orch
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
+else git error
+  orch --> api : 500 Internal Server Error
+  deactivate orch
+  api --> router : 500 Internal Server Error
+  deactivate api
+  router --> user : 500 Internal Server Error
+  deactivate router
 end
-
-break Not a git repo
-    shell --> git : fatal: not a git repository
-    deactivate shell
-    git --> registry : ToolResult(success=False, error="Error: not a git repository")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
-end
-
-break Nothing to commit
-    shell --> git : nothing to commit
-    deactivate shell
-    git --> registry : ToolResult(success=False, error="Nothing to commit")
-    registry --> agent : ToolResult
-    agent --> router : AgentEvent(Error)
-end
-
-registry --> agent : ToolResult
-agent --> router : AgentEvent(Done)
-
-    deactivate git
-deactivate registry
-deactivate agent
-deactivate router
-
-
 @enduml

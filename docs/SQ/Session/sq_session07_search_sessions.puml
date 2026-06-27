@@ -1,73 +1,78 @@
 @startuml sq_session07_search_sessions
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     SSN-07 — Search Sessions
-' Boundary:  nasim code agent CLI
+' Title:     SSN-07 — SEARCH Sessions
+' Boundary:  nasim code agent
 ' Purpose:   Full-text search across session history
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> SessionAPI -> SessionManager -> SessionStore -> SessionDirectory
+' SM States: —
 ' ============================================================
 
-title nasim — SSN-07 LIST Sessions
+!include ../common/sq_styles.puml
+
+title nasim -- SSN-07 SEARCH Sessions
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "SessionAPI" as api
 end box
-box "Session Group" #E8F5E9
-  participant "SessionSearch" as search
+box "Session Group (Service)" #FFF3E0
+  participant "SessionManager" as mgr
 end box
-database "FTS5 Index" as fts
+box "Session Group (Repository)" #E8F5E9
+  participant "SessionStore" as store
+end box
+database "SessionDirectory" as dir
 
+== SSN-07 SEARCH Sessions ==
 
-== SSN-07 Search Sessions ==
+user -> router : GET /sessions:search?q={query}
+activate router
 
-user -> router : types input
-router -> agent : PROCESS(user_input)
+router -> api : ssn07 SEARCH Sessions({query}, {page_size}, {page_token})
+activate api
 
-agent -> search : ssn07 SEARCH Session History(query, pageSize=20, pageToken="abc")
-activate search
+api -> mgr : ssn07 SEARCH Sessions({query}, {page_size}, {page_token})
+activate mgr
 
-search -> fts : FTS5 query(query, limit=20, offset=0)
-activate fts
-fts --> search : raw_results [session_id, turn_id, snippet, rank], next_page_token
-deactivate fts
+mgr -> store : SEARCH Sessions({query}, {page_size}, {page_token})
+activate store
 
-search -> search : rank results by relevance
-search -> search : format snippets
+store -> dir : QUERY Index({query})
+activate dir
 
-search --> agent : 200 OK — SearchResult[session_id, turn_id, snippet, score], nextPageToken
-deactivate search
-
-agent --> router : AgentEvent(Done)
-
-break Index not available
-    fts --> search : IndexError
-    search -> search : fallback: linear scan
-    search --> agent : 200 OK — SearchResult[linear_scan_results]
-    agent --> router : AgentEvent(Done)
+alt Index not available
+    dir --> store : IndexError
+    deactivate dir
+    store -> store : ssn07 SEARCH Sessions({query}, fallback)
+    store --> mgr : 200 OK — [{session_id, snippet, score}]
+    mgr --> api : 200 OK — [{session_id, snippet, score}]
+    api --> router : 200 OK — [{session_id, snippet, score}]
+    router --> user : 200 OK — [{session_id, snippet, score}]
+    deactivate store
+    deactivate mgr
+    deactivate api
+    deactivate router
+    end
 end
 
+dir --> store : 200 OK — [{session_id, snippet, rank}]
+deactivate dir
 
+store --> mgr : 200 OK — [{session_id, snippet, score}]
+deactivate store
+mgr --> api : 200 OK — [{session_id, snippet, score}]
+deactivate mgr
+api --> router : 200 OK — [{session_id, snippet, score}]
+deactivate api
+router --> user : 200 OK — [{session_id, snippet, score}]
+deactivate router
 
 @enduml

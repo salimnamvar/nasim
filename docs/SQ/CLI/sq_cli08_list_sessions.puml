@@ -1,71 +1,67 @@
 @startuml sq_cli08_list_sessions
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
-' Title:     CLI-08 — List Sessions
-' Boundary:  nasim code agent CLI
+' Title:     CLI-08 — LIST Sessions
+' Boundary:  nasim code agent
 ' Purpose:   List sessions via slash command
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIRouter -> CLIController -> CLIExecutor -> CLIStore
+' SM States: —
 ' ============================================================
 
-title nasim — CLI-08 LIST Sessions
+!include ../common/sq_styles.puml
+
+title nasim -- CLI-08 LIST Sessions
 
 actor "User" as user
 
-box "Controller Group" #E3F2FD
-  participant "ServerRouter" as router
-  participant "SlashCommandHandler" as cmd
+box "Entry Gate" #E3F2FD
+  participant "CLIRouter" as router
 end box
-box "Service Group" #FFF3E0
-  participant "SessionService" as svc
+box "Controller" #FFF3E0
+  participant "CLIController" as ctrl
 end box
-box "Repository Group" #E8F5E9
-  participant "SessionStore" as ssn
+box "Service" #FFF3E0
+  participant "CLIExecutor" as exec
 end box
-
-
+box "Repository" #E8F5E9
+  participant "CLIStore" as store
+end box
+database "CLIDirectory" as dir
 
 == CLI-08 LIST Sessions ==
 
-user -> router : "/sessions"
+user -> router : CLI-08 LIST Sessions()
 activate router
-router -> cmd : dispatch("/sessions")
-activate cmd
+router -> ctrl : CLI-08 LIST Sessions({pageSize, pageToken})
+activate ctrl
+ctrl -> exec : CLI-08 LIST Sessions({pageSize, pageToken})
+activate exec
 
-cmd -> svc : CLI-08 LIST Sessions(pageSize=100, pageToken="")
-activate svc
-
-ref over svc, ssn
-  SSN-03: LIST Sessions
-end ref
-
-svc --> cmd : SessionList{sessions, nextPageToken}
-deactivate svc
-
-cmd -> cmd : format session table
-
-cmd --> router : CommandResult(formatted_table)
-deactivate cmd
-
-router --> user : displayed session list
-deactivate router
-
-
+alt sessions found
+  exec -> store : CLI-08 LIST Sessions({pageSize, pageToken})
+  activate store
+  store -> dir : CLI-08 LIST Sessions({pageSize, pageToken})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> exec : 200 OK
+  deactivate store
+  exec --> ctrl : 200 OK
+  deactivate exec
+  ctrl --> router : 200 OK
+  deactivate ctrl
+  router --> user : 200 OK
+  deactivate router
+else no sessions
+  exec --> ctrl : 404 Not Found
+  deactivate exec
+  ctrl --> router : 404 Not Found
+  deactivate ctrl
+  router --> user : 404 Not Found
+  deactivate router
+end
 
 @enduml

@@ -1,70 +1,68 @@
 @startuml sq_plugins01_discover_plugins
-' === HEADER ========================================
-' Scope: SQ for UC
-' Preconditions: ...
-' ===================================================
-
-note over user
-  Scope: ...
-  Preconditions: ...
-  Flow: ...
-  State: ...
-  Failure: 400 Bad Request, 404 Not Found, 422 Unprocessable, 500 Internal Server Error
-  Success: 200 OK, 201 Created
-  Returns: 200 OK, 400 Bad Request, 500 Internal Server Error
-end note
-!include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     PLG-01 — DISCOVER Plugins
 ' Boundary:  nasim code agent
 ' Purpose:   Discover plugins from plugin directory
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    docs/SQ/README.md
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> ServerRouter -> PluginAPI -> PluginManager -> PluginStore -> PluginDirectory
+' SM States: DISCOVERED (#E0E0E0)
 ' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- PLG-01 DISCOVER Plugins
 
 actor "User" as user
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
 end box
-box "Agent Group" #FFF3E0
-  participant "AgentOrchestrator" as agent
+box "API Group (Controller)" #FFF3E0
+  participant "PluginAPI" as api
 end box
-box "Plugins Group" #F3E5F5
-  participant "PluginLoader" as loader
+box "Plugins Group (Service)" #FFF3E0
+  participant "PluginManager" as mgr
 end box
-participant "Host Filesystem" as fs
-
-
-user -> router : types input
-router -> agent : PROCESS(user_input)
+box "Plugins Group (Repository)" #E8F5E9
+  participant "PluginStore" as store
+end box
+database "PluginDirectory" as dir
 
 == PLG-01 DISCOVER Plugins ==
 
-agent -> loader : PLG-01 DISCOVER(plugin_dir)
-activate loader
+user -> router : GET /plugins:discover
+activate router
+router -> api : PLG-01 DISCOVER Plugins({plugin_dir})
+activate api
+api -> mgr : PLG-01 DISCOVER Plugins({plugin_dir})
+activate mgr
 
-loader -> fs : scan(plugin_dir)
-activate fs
-fs --> loader : plugin_directories[]
-deactivate fs
-
-loop for each plugin directory
-    loader -> loader : PLG-02 load_manifest()
-
-    break Manifest load fails
-        loader --> loader : skip plugin, log warning
-    end
-
-    loader --> loader : append to discovered list
+alt validation succeeds
+  mgr -> store : PLG-01 DISCOVER Plugins({plugin_dir})
+  activate store
+  store -> dir : PLG-01 DISCOVER Plugins({plugin_dir})
+  activate dir
+  dir --> store : 200 OK
+  deactivate dir
+  store --> mgr : 200 OK
+  deactivate store
+  hnote over mgr : DISCOVERED (#E0E0E0)
+  mgr --> api : 200 OK
+  deactivate mgr
+  api --> router : 200 OK
+  deactivate api
+  router --> user : 200 OK
+  deactivate router
+else validation fails
+  mgr --> api : 422 Unprocessable
+  deactivate mgr
+  api --> router : 422 Unprocessable
+  deactivate api
+  router --> user : 422 Unprocessable
+  deactivate router
 end
-
-loader --> agent : list[PluginManifest]
-deactivate loader
-
-agent --> router : AgentEvent(Done)
-
 
 @enduml
