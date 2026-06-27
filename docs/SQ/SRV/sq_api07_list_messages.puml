@@ -1,4 +1,4 @@
-@startuml sq_srv07_list_messages
+@startuml sq_api07_list_messages
 !include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-07 — LIST Messages

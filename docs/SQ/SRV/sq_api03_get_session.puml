@@ -1,4 +1,4 @@
-@startuml sq_srv03_read_session
+@startuml sq_api03_get_session
 !include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-03 — GET Session

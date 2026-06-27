@@ -1,4 +1,4 @@
-@startuml sq_srv06_dispatch_message
+@startuml sq_api06_dispatch_message
 !include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-06 — DISPATCH Message

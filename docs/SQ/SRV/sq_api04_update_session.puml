@@ -1,4 +1,4 @@
-@startuml sq_srv04_update_session
+@startuml sq_api04_update_session
 !include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-04 — UPDATE Session

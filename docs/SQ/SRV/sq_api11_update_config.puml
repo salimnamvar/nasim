@@ -1,4 +1,4 @@
-@startuml sq_srv11_update_config
+@startuml sq_api11_update_config
 !include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-11 — UPDATE Config

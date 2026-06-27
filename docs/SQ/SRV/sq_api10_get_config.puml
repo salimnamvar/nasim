@@ -1,4 +1,4 @@
-@startuml sq_srv10_read_config
+@startuml sq_api10_get_config
 !include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-10 — GET Config

@@ -1,4 +1,4 @@
-@startuml sq_srv01_list_sessions
+@startuml sq_api01_list_sessions
 !include ../common/sq_styles.puml
 ' ============================================================
 ' Title:     API-01 — LIST Sessions
