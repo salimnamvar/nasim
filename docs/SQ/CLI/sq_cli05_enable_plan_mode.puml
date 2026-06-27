@@ -17,17 +17,11 @@ title nasim -- CLI-05 ENABLE Plan Mode
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "Entry Gate" #E3F2FD
   participant "CLIRouter" as router
@@ -40,17 +34,11 @@ box "Repository" #E8F5E9
 end box
 database "CLIDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == CLI-05 ENABLE Plan Mode ==
 
@@ -61,7 +49,7 @@ activate router
 router -> router : CLI-05 ENABLE Plan Mode()
 router -> exec : CLI-05 ENABLE Plan Mode()
 activate exec
-... hnote over exec : PLANNING (#FFCCBC) ...
+    exec -> exec : TRANSITION State(<back:#FFCCBC>PLANNING</back>)
 
 alt plan mode enabled
   exec -> store : CLI-05 ENABLE Plan Mode()

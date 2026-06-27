@@ -17,17 +17,11 @@ title nasim -- TL-05 DISPATCH Shell Command
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Tool Group (Repository)" #E8F5E9
 end box
 database "ToolDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == TL-05 DISPATCH Shell Command ==
 
@@ -71,10 +59,9 @@ alt validation succeeds
   deactivate dir
   registry --> orch : 200 OK
   deactivate registry
-  hnote over orch : TOOL_EXEC (#B2DFDB)
+      orch -> orch : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
   orch --> router : 200 OK
   deactivate orch
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -83,14 +70,12 @@ else timeout
   orch --> router : 408 Request Timeout
   deactivate orch
   router --> iface : 408 Request Timeout
-  router --> iface : 408 Request Timeout
   iface --> user : 408 Request Timeout
   deactivate router
   deactivate iface
 else execution error
   orch --> router : 500 Internal Server Error
   deactivate orch
-  router --> iface : 500 Internal Server Error
   router --> iface : 500 Internal Server Error
   iface --> user : 500 Internal Server Error
   deactivate router

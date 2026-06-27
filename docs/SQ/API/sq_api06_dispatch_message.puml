@@ -17,17 +17,11 @@ title nasim -- API-06 DISPATCH Message
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "Entry Gate" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Repository" #E8F5E9
 end box
 database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == API-06 DISPATCH Message ==
 
@@ -70,14 +58,13 @@ alt validation succeeds
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  ... hnote over mgr : THINKING (#D7CCC8) ...
+      mgr -> mgr : TRANSITION State(<back:#D7CCC8>THINKING</back>)
   ref over mgr
     AGT-01: PROCESS User Task
   end ref
-  ... hnote over mgr : RESPONDING (#D1C4E9) ...
+      mgr -> mgr : TRANSITION State(<back:#D1C4E9>RESPONDING</back>)
   mgr --> router : 200 OK
   deactivate mgr
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -85,7 +72,6 @@ alt validation succeeds
 else validation fails
   mgr --> router : 422 Unprocessable
   deactivate mgr
-  router --> iface : 422 Unprocessable
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

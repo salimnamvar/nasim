@@ -17,17 +17,11 @@ title nasim -- AGT-14 HANDLE Error
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Agent Group (Repository)" #E8F5E9
 end box
 database "AgentDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == AGT-14 HANDLE Error ==
 
@@ -62,7 +50,7 @@ router -> mgr : AGT-14 HANDLE Error({error})
 activate mgr
 
 alt retryable error
-  hnote over mgr : FAILED (#EF5350)
+      mgr -> mgr : TRANSITION State(<back:#EF5350>FAILED</back>)
   mgr -> store : AGT-14 HANDLE Error({error})
   activate store
   store -> dir : AGT-14 HANDLE Error({error})
@@ -74,14 +62,12 @@ alt retryable error
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
-  router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else unrecoverable
   mgr --> router : 500 Server Error
   deactivate mgr
-  router --> iface : 500 Server Error
   router --> iface : 500 Server Error
   iface --> user : 500 Server Error
   deactivate router

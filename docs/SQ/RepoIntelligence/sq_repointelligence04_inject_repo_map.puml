@@ -17,17 +17,11 @@ title nasim -- RIM-04 INJECT RepoMap
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "RepoIntelligence Group (Repository)" #E8F5E9
 end box
 database "RepoIntelligenceDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == RIM-04 INJECT RepoMap ==
 
@@ -70,10 +58,9 @@ alt inject succeeds
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  hnote over mgr : INDEXED (#7CB342)
+      mgr -> mgr : TRANSITION State(<back:#7CB342>INDEXED</back>)
   mgr --> router : 200 OK
   deactivate mgr
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -81,7 +68,6 @@ alt inject succeeds
 else budget exhausted
   mgr --> router : 422 Unprocessable
   deactivate mgr
-  router --> iface : 422 Unprocessable
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

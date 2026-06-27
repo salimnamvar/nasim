@@ -17,17 +17,11 @@ title nasim -- CLI-01 PROCESS User Input
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "Entry Gate" #E3F2FD
   participant "CLIRouter" as router
@@ -40,17 +34,11 @@ box "Repository" #E8F5E9
 end box
 database "CLIDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == CLI-01 PROCESS User Input ==
 
@@ -70,11 +58,11 @@ alt is slash command
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-  ... hnote over user : IDLE (#ECEFF1) ...
+      user -> user : TRANSITION State(<back:#ECEFF1>IDLE</back>)
 else normal input
   router -> exec : CLI-01 EXECUTE Input({input})
   activate exec
-  ... hnote over exec : LISTENING (#E8EAF6) ...
+      exec -> exec : TRANSITION State(<back:#E8EAF6>LISTENING</back>)
   exec -> store : CLI-01 PROCESS Input({input})
   activate store
   store -> dir : CLI-01 PROCESS Input({input})
@@ -83,11 +71,11 @@ else normal input
   deactivate dir
   store --> exec : 200 OK
   deactivate store
-  ... hnote over exec : THINKING (#D7CCC8) ...
+      exec -> exec : TRANSITION State(<back:#D7CCC8>THINKING</back>)
   ref over exec
     API-06: DISPATCH Message
   end ref
-  ... hnote over exec : RESPONDING (#D1C4E9) ...
+      exec -> exec : TRANSITION State(<back:#D1C4E9>RESPONDING</back>)
   exec --> router : 200 OK
   deactivate exec
   router --> router : 200 OK

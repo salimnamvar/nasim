@@ -17,17 +17,11 @@ title nasim -- SSN-03 LIST Sessions
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Session Group (Repository)" #E8F5E9
 end box
 database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == SSN-03 LIST Sessions ==
 
@@ -75,7 +63,6 @@ alt Directory not found
     store --> mgr : 200 OK — [] (empty list)
     mgr --> router : 200 OK — [] (empty list)
     router --> iface : 200 OK — [] (empty list)
-    router --> iface : 200 OK — [] (empty list)
     iface --> user : 200 OK — [] (empty list)
     deactivate store
     deactivate mgr
@@ -91,7 +78,6 @@ store --> mgr : 200 OK — [{session_id, created_at, message_count}]
 deactivate store
 mgr --> router : 200 OK — [{session_id, created_at, message_count}]
 deactivate mgr
-router --> iface : 200 OK — [{session_id, created_at, message_count}]
 router --> iface : 200 OK — [{session_id, created_at, message_count}]
 iface --> user : 200 OK — [{session_id, created_at, message_count}]
 deactivate router

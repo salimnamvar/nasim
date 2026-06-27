@@ -17,17 +17,11 @@ title nasim -- API-09 GET Tool
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "Entry Gate" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Repository" #E8F5E9
 end box
 database "ToolDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == API-09 GET Tool ==
 
@@ -73,14 +61,12 @@ alt validation succeeds
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
-  router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else validation fails
   mgr --> router : 422 Unprocessable
   deactivate mgr
-  router --> iface : 422 Unprocessable
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

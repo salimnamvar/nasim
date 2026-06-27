@@ -17,17 +17,11 @@ title nasim -- TL-17 UPDATE Todo
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Tool Group (Repository)" #E8F5E9
 end box
 database "ToolDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == TL-17 UPDATE Todo ==
 
@@ -71,10 +59,9 @@ alt validation succeeds
   deactivate dir
   registry --> orch : 200 OK
   deactivate registry
-  hnote over orch : TOOL_EXEC (#B2DFDB)
+      orch -> orch : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
   orch --> router : 200 OK
   deactivate orch
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -83,14 +70,12 @@ else todo not found
   orch --> router : 404 Not Found
   deactivate orch
   router --> iface : 404 Not Found
-  router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router
   deactivate iface
 else invalid transition
   orch --> router : 422 Unprocessable
   deactivate orch
-  router --> iface : 422 Unprocessable
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

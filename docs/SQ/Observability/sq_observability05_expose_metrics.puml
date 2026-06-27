@@ -17,17 +17,11 @@ title nasim -- OBS-05 EXPOSE /metrics
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Observability Group (Repository)" #E8F5E9
 end box
 database "ObservabilityDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "MetricsBackend" as MetricsBackend
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "MetricsBackend" as MetricsBackend
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "MetricsBackend" as MetricsBackend
-end box
 
 == OBS-05 EXPOSE /metrics ==
 
@@ -73,14 +61,12 @@ alt collection succeeds
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
-  router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else collection fails
   mgr --> router : 500 Internal Server Error
   deactivate mgr
-  router --> iface : 500 Internal Server Error
   router --> iface : 500 Internal Server Error
   iface --> user : 500 Internal Server Error
   deactivate router

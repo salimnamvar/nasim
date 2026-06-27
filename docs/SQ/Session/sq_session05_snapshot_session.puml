@@ -17,17 +17,11 @@ title nasim -- SSN-05 SNAPSHOT Session
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Session Group (Repository)" #E8F5E9
 end box
 database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == SSN-05 SNAPSHOT Session ==
 
@@ -129,13 +117,12 @@ end
 dir --> store : 200 OK
 deactivate dir
 
-hnote over store : ACTIVE(#43A047) snapshot point created
+    store -> store : TRANSITION State(<back:#43A047>ACTIVE</back>)
 
 store --> mgr : 200 OK — {snapshot_id}
 deactivate store
 mgr --> router : 200 OK — {snapshot_id}
 deactivate mgr
-router --> iface : 200 OK — {snapshot_id}
 router --> iface : 200 OK — {snapshot_id}
 iface --> user : 200 OK — {snapshot_id}
 deactivate router

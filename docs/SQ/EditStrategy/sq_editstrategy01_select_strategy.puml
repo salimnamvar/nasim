@@ -17,17 +17,11 @@ title nasim -- EDT-01 SELECT Strategy
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Edit Strategy Group (Repository)" #E8F5E9
 end box
 database "EditDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == EDT-01 SELECT Strategy ==
 
@@ -70,10 +58,9 @@ alt strategy found
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  ... hnote over mgr : THINKING (#D7CCC8) ...
+      mgr -> mgr : TRANSITION State(<back:#D7CCC8>THINKING</back>)
   mgr --> router : 200 OK
   deactivate mgr
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -81,7 +68,6 @@ alt strategy found
 else strategy not found
   mgr --> router : 404 Not Found
   deactivate mgr
-  router --> iface : 404 Not Found
   router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router

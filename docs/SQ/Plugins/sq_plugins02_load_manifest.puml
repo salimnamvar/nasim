@@ -17,17 +17,11 @@ title nasim -- PLG-02 LOAD Manifest
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Plugins Group (Repository)" #E8F5E9
 end box
 database "PluginDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "PluginRuntime" as PluginRuntime
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "PluginRuntime" as PluginRuntime
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "PluginRuntime" as PluginRuntime
-end box
 
 == PLG-02 LOAD Manifest ==
 
@@ -70,10 +58,9 @@ alt validation succeeds
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  hnote over mgr : LOADING (#FFCC80) -> LOADED (#90CAF9)
+      mgr -> mgr : TRANSITION State(<back:#FFCC80>LOADING</back> → <back:#90CAF9>LOADED</back>)
   mgr --> router : 200 OK
   deactivate mgr
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -81,7 +68,6 @@ alt validation succeeds
 else manifest invalid
   mgr --> router : 422 Unprocessable
   deactivate mgr
-  router --> iface : 422 Unprocessable
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

@@ -17,17 +17,11 @@ title nasim -- SAF-01 CHECK Permission
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Safety Group (Repository)" #E8F5E9
 end box
 database "SafetyDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "PolicyEngine" as PolicyEngine
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "PolicyEngine" as PolicyEngine
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "PolicyEngine" as PolicyEngine
-end box
 
 == SAF-01 CHECK Permission ==
 
@@ -70,10 +58,9 @@ alt permission allowed
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  hnote over mgr : PERMISSIVE (#9CCC65)
+      mgr -> mgr : TRANSITION State(<back:#9CCC65>PERMISSIVE</back>)
   mgr --> router : 200 OK
   deactivate mgr
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -81,7 +68,6 @@ alt permission allowed
 else permission denied
   mgr --> router : 403 Forbidden
   deactivate mgr
-  router --> iface : 403 Forbidden
   router --> iface : 403 Forbidden
   iface --> user : 403 Forbidden
   deactivate router

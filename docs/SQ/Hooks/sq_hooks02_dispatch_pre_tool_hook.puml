@@ -17,17 +17,11 @@ title nasim -- HK-02 DISPATCH Pre-Tool Hook
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Hooks Group (Repository)" #E8F5E9
 end box
 database "HooksDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "HookRuntime" as HookRuntime
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "HookRuntime" as HookRuntime
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "HookRuntime" as HookRuntime
-end box
 
 == HK-02 DISPATCH Pre-Tool Hook ==
 
@@ -70,10 +58,9 @@ alt validation succeeds
   deactivate dir
   store --> mgr : 200 OK
   deactivate store
-  hnote over mgr : HOOK_RUNNING (#FFFDE7)
+      mgr -> mgr : TRANSITION State(<back:#FFFDE7>HOOK_RUNNING</back>)
   mgr --> router : 200 OK
   deactivate mgr
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -81,7 +68,6 @@ alt validation succeeds
 else validation fails
   mgr --> router : 422 Unprocessable
   deactivate mgr
-  router --> iface : 422 Unprocessable
   router --> iface : 422 Unprocessable
   iface --> user : 422 Unprocessable
   deactivate router

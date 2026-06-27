@@ -17,17 +17,11 @@ title nasim -- TL-15 SPAWN Subagent
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Tool Group (Repository)" #E8F5E9
 end box
 database "ToolDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == TL-15 SPAWN Subagent ==
 
@@ -71,11 +59,10 @@ alt validation succeeds
   deactivate dir
   registry --> orch : 200 OK
   deactivate registry
-  hnote over orch : SPAWNING (#FFAB91)
-  hnote over orch : RUNNING (#BCAAA4)
+      orch -> orch : TRANSITION State(<back:#FFAB91>SPAWNING</back>)
+      orch -> orch : TRANSITION State(<back:#BCAAA4>RUNNING</back>)
   orch --> router : 200 OK
   deactivate orch
-  router --> iface : 200 OK
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
@@ -84,14 +71,12 @@ else spawn limit reached
   orch --> router : 429 Too Many Requests
   deactivate orch
   router --> iface : 429 Too Many Requests
-  router --> iface : 429 Too Many Requests
   iface --> user : 429 Too Many Requests
   deactivate router
   deactivate iface
 else spawn failed
   orch --> router : 500 Internal Server Error
   deactivate orch
-  router --> iface : 500 Internal Server Error
   router --> iface : 500 Internal Server Error
   iface --> user : 500 Internal Server Error
   deactivate router

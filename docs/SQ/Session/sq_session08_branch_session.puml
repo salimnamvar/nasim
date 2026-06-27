@@ -17,17 +17,11 @@ title nasim -- SSN-08 BRANCH Session
 
 actor "User" as user
 
-box "Interface Layer" #INTERFACE_COLOR
+box "Interface Layer" #E3F2FD
   participant "CLI Process" as iface
 end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
-box "Interface Layer" #INTERFACE_COLOR
-  participant "CLI Process" as iface
-end box
 
 box "API Group (Entry Gate)" #E3F2FD
   participant "ServerRouter" as router
@@ -40,17 +34,11 @@ box "Session Group (Repository)" #E8F5E9
 end box
 database "SessionDirectory" as dir
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
+box "Infrastructure Layer" #ECEFF1
   participant "FileSystem" as FileSystem
 end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
-box "Infrastructure Layer" #INFRASTRUCTURE_COLOR
-  participant "FileSystem" as FileSystem
-end box
 
 == SSN-08 BRANCH Session ==
 
@@ -91,7 +79,7 @@ end
 store --> mgr : 200 OK — {session_data}
 deactivate store
 
-hnote over mgr : ACTIVE(#43A047) -> BRANCHED(#7B1FA2)
+    mgr -> mgr : TRANSITION State(<back:#43A047>ACTIVE</back> → <back:#7B1FA2>BRANCHED</back>)
 
 mgr -> store : INSERT BranchSession({session_id}, {branch_id}, {from_turn})
 activate store
@@ -135,7 +123,6 @@ store --> mgr : 200 OK — {branch_id}
 deactivate store
 mgr --> router : 200 OK — {branch_id}
 deactivate mgr
-router --> iface : 200 OK — {branch_id}
 router --> iface : 200 OK — {branch_id}
 iface --> user : 200 OK — {branch_id}
 deactivate router
