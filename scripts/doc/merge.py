@@ -1,67 +1,79 @@
 import argparse
-import os
+import sys
 from pathlib import Path
 
 
-def merge_documents(input_paths, output_file):
-    with open(output_file, "w", encoding="utf-8") as outfile:
-        for path_str in input_paths:
-            root_dir = Path(path_str)
+class DocumentMerger:
+    def __init__(self, input_dir: Path, output_file: Path):
+        self.input_dir = input_dir
+        self.output_file = output_file
 
-            if not root_dir.exists():
-                print(f"Warning: {path_str} does not exist. Skipping.")
-                continue
+    def merge(self):
+        self.output_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.output_file, "w", encoding="utf-8") as out:
+            self._walk(self.input_dir, out)
 
-            # Walk through the directory
-            for root, dirs, files in os.walk(root_dir):
-                current_path = Path(root)
+    def _walk(self, directory: Path, out):
+        entries = sorted(directory.iterdir(), key=lambda p: (p.is_dir(), p.name))
 
-                # Identify README files and other files
-                readme_files = [f for f in files if f.lower().startswith("readme")]
-                other_files = [f for f in files if not f.lower().startswith("readme")]
+        readme = [e for e in entries if e.is_file() and e.name.lower().startswith("readme")]
+        common = [e for e in entries if e.is_dir() and e.name == "common"]
+        rest_files = [e for e in entries if e.is_file() and not e.name.lower().startswith("readme")]
+        rest_dirs = [e for e in entries if e.is_dir() and e.name != "common"]
 
-                # Process READMEs first in this directory
-                for file_name in readme_files:
-                    write_to_master(current_path / file_name, outfile)
+        for f in readme:
+            self._emit(f, out)
+        for d in common:
+            self._walk(d, out)
+        for f in rest_files:
+            self._emit(f, out)
+        for d in rest_dirs:
+            self._walk(d, out)
 
-                # Process remaining files
-                for file_name in other_files:
-                    write_to_master(current_path / file_name, outfile)
+    def _emit(self, path: Path, out):
+        try:
+            content = path.read_text(encoding="utf-8", errors="ignore")
+            out.write(f"\n\n--- SOURCE: {path} ---\n\n")
+            out.write(content)
+            out.write("\n")
+        except Exception as e:
+            print(f"Warning: could not read {path}: {e}", file=sys.stderr)
 
 
-def write_to_master(file_path, outfile):
-    try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as infile:
-            outfile.write(f"\n\n--- SOURCE: {file_path} ---\n\n")
-            outfile.write(infile.read())
-            outfile.write("\n")
-    except Exception as e:
-        print(f"Could not read {file_path}: {e}")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_INPUTS = ["docs/C4", "docs/SQ", "docs/UC", "docs/SM"]
+DEFAULT_OUTPUTS = [PROJECT_ROOT / f"{Path(d).name}.md" for d in DEFAULT_INPUTS]
+
+
+def parse_args(argv=None):
+    p = argparse.ArgumentParser(
+        description="Merge doc directories into separate .md files."
+    )
+    p.add_argument(
+        "-i", "--input", nargs="+", default=DEFAULT_INPUTS,
+        help="Input directories (one per merge)",
+    )
+    p.add_argument(
+        "-o", "--output", nargs="+", default=DEFAULT_OUTPUTS,
+        help="Output .md files (one per input, same order)",
+    )
+    args = p.parse_args(argv)
+    if len(args.input) != len(args.output):
+        p.error("Number of --input and --output must match")
+    return args
+
+
+def main(argv=None):
+    args = parse_args(argv)
+    for in_dir, out_file in zip(args.input, args.output):
+        in_path, out_path = Path(in_dir), Path(out_file)
+        if not in_path.is_dir():
+            print(f"Warning: {in_dir} is not a directory. Skipping.", file=sys.stderr)
+            continue
+        merger = DocumentMerger(in_path, out_path)
+        merger.merge()
+        print(f"Merged {in_dir} -> {out_file}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Merge directory contents into one MD file.")
-
-    # Define a default path based on a likely location
-    default_input = ["/home/salim/prj/salim/nasim/code/nasim/docs/C4"]
-
-    parser.add_argument(
-        "inputs",
-        nargs="*",  # Changed from "+" to "*" so it's truly optional
-        help="List of directories or files to process",
-        default=default_input,
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        help="Path to the output master .md file",
-        default="/home/salim/prj/salim/nasim/code/nasim/C4.md",
-    )
-
-    args = parser.parse_args()
-
-    # If the user provided no inputs, ensure we use the default
-    inputs_to_process = args.inputs if args.inputs else default_input
-
-    merge_documents(inputs_to_process, args.output)
-    print(f"Successfully merged into {os.path.abspath(args.output)}")
+    main()

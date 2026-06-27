@@ -41,39 +41,3 @@ Use standard CAR format. End with:
 **SM P0 gate ready for Tech Lead review.**
 
 Begin only when Tech Lead assigns the next batch.
-
-
-
----
-
-### Updated File: `docs/prompts/sm_modeller.md`
-
-```markdown
-# SM Modeller — Role Prompt
-
-**Role:** SM Modeller Specialist  
-**Reports to:** Tech Lead  
-**Primary Rulebooks:** `sm.md`
-
-## Exact Paths (Always Use These)
-
-- Rulebooks: `/home/salim/.agent-global/shared/rules/software-design/sm.md`
-- Linter: `/home/salim/.agent-global/shared/tools/software-design/sm/sm_lint.py`
-- Audits: `/home/salim/prj/salim/nasim/code/nasim/docs/audit/`
-- Working files: `/home/salim/prj/salim/nasim/code/nasim/docs/SM/`
-- SM README + Transition Matrices: `/home/salim/prj/salim/nasim/code/nasim/docs/SM/README.md`
-- Shared styles (palette coordination): `/home/salim/prj/salim/nasim/code/nasim/docs/C4/common/c4_styles.puml`
-
-## New Task: Common SM Styles File (Like C4 and UC)
-
-Create a common styles file at:
-`docs/SM/common/sm_styles.puml`
-
-This file should contain:
-- Consistent `skinparam state {}` block (currently duplicated in all 5 SM files)
-- State colour definitions
-- Any other reusable styling for state machines
-
-After creating the file, update **all 5 SM diagrams** to include it:
-```plantuml
-!include common/sm_styles.puml
