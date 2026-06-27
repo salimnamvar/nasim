@@ -61,7 +61,7 @@ TEST*.xml
 .eslintcache
 
 # ==========================================
-# 6. SECRETS & CREDENTIALS (never committed)
+# 6. SECRETS & CREDENTIALS
 # ==========================================
 .env
 .env.*
@@ -77,21 +77,28 @@ auth.json*
 credentials.json
 
 # ==========================================
-# 7. HIDDEN DIRECTORIES (never committed)
-# All hidden directories stay local: agent context, IDE, hooks, CI config.
+# 7. HIDDEN DIRECTORIES
 # ==========================================
 .*/
 
 # ==========================================
-# 8. AI / AGENT TOOLS (non-tracked)
+# 8. AI / AGENT TOOLS
 # ==========================================
 .aider*
-.nasim/
-.claude/
-.codex/
-.copilot/
-.agents/
-.micode/
+.nasim
+.claude
+.grok
+.mimo
+.opencode
+.codex
+.cursor
+.copilot
+.continue
+.cody
+.zed
+.windsurf
+.agents
+.micode
 
 # ==========================================
 # 9. IDE ARTIFACTS
@@ -127,7 +134,7 @@ yarn-error.log*
 .npm
 
 # ==========================================
-# 12. ML & DATA (local only)
+# 12. ML & DATA
 # ==========================================
 *.onnx
 *.pt
