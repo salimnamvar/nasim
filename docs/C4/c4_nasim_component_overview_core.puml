@@ -19,6 +19,8 @@
 ' Review:    —
 ' Date:      2026-06-25
 ' ============================================================
+' SIM-01 EXCEPTION: 39 elements — cross-cutting overview of all 15 core groups; splitting would lose the orchestration path visibility
+' ============================================================
 
 @startuml c4_nasim_component_overview_core
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml

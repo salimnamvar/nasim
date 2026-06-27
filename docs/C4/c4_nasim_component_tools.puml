@@ -9,6 +9,8 @@
 ' Review:    CAR audit 2026-06-26
 ' Date:      2026-06-26
 ' ============================================================
+' SIM-01 EXCEPTION: 25 elements — single-group component diagram showing all 16 tool sub-components + 8 external dependencies; splitting by tool category would lose the registry-ABC-inheritance pattern
+' ============================================================
 
 @startuml c4_nasim_component_tools
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml

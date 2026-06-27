@@ -9,6 +9,8 @@
 ' Review:    CAR audit 2026-06-26
 ' Date:      2026-06-26
 ' ============================================================
+' SIM-01 EXCEPTION: 14 elements — single-group component diagram showing 11 strategy sub-components + references; splitting by strategy type would lose the inheritance and selection structure
+' ============================================================
 
 @startuml c4_nasim_component_edit_strategy
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
