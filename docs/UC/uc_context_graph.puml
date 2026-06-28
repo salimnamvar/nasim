@@ -13,7 +13,7 @@
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_ctx01..sq_ctx06
+' SQ:        sq_contextgraph01..sq_contextgraph06
 ' ============================================================
 
 
