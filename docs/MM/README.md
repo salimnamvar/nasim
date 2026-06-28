@@ -32,12 +32,12 @@ C4 → UC → SM → SQ → ERD → CL → CT/DATA → CT/API → Code
 
 | Layer | Status | Artifacts | Notes |
 | ----- | ------ | --------- | ----- |
-| C4 | Frozen | 24 diagrams | Context + container + 21 component groups |
-| UC | Frozen | 22 UC files + inventory | 148 UCs across 21 groups |
-| SM | Frozen | 4 diagrams + inventory | Agent, session, plan, plugin lifecycles |
-| SQ | Frozen | 148 diagrams | 1:1 with UCs, across 21 groups |
-| ERD | Frozen | 5 diagrams + inventory | Session, memory, observability, repo intelligence, wire log |
-| CL | Frozen | 1 diagram + inventory | Runtime class model (90+ classes) |
-| CT/DATA | Frozen | 5 contract diagrams + 2 YAML | ODCS v3.1.0 data contracts |
-| CT/API | Frozen | 6 API diagrams + OpenAPI + ROD | OAS 3.1.0 HTTP API surface |
+| C4 | In progress | 24 diagrams | Context + container + 21 component groups |
+| UC | In progress | 25 UC files + inventory | 148 UCs across 21 groups |
+| SM | In progress | 15 diagrams + inventory | Agent, session, plan, plugin, and more |
+| SQ | In progress | 149 diagrams | 1:1 with UCs, across 21 groups |
+| ERD | In progress | 5 diagrams + inventory | Session, memory, observability, repo intelligence, wire log |
+| CL | In progress | 1 diagram + inventory | Runtime class model (90+ classes) |
+| CT/DATA | In progress | 5 contract diagrams + 2 YAML | ODCS v3.1.0 data contracts |
+| CT/API | In progress | 6 API diagrams + OpenAPI + ROD | OAS 3.1.0 HTTP API surface |
 | RDM | Active | 10 milestone docs | Implementation roadmap |
