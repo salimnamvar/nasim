@@ -36,6 +36,10 @@ activate iface
 iface -> router : POST /v1/agents/{agent_id}:process
 activate router
 router -> orchestrator : AGT-01 PROCESS Task({session_id, message})
+' --- Internal processing ---
+activate orchestrator
+orchestrator -> orchestrator : PROCESS Task
+' orchestrator interacts with sub-components
 activate orchestrator
 
 alt task accepted

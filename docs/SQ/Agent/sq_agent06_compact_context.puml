@@ -36,6 +36,10 @@ activate iface
 iface -> router : POST /v1/agents/{agent_id}:compact
 activate router
 router -> compactor : AGT-06 COMPACT Context({agent_id, budget})
+' --- Internal processing ---
+activate compactor
+compactor -> compactor : COMPACT Context
+' compactor interacts with sub-components
 activate compactor
 
 alt compaction succeeds

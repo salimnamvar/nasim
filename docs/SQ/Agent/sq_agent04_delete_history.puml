@@ -36,6 +36,10 @@ activate iface
 iface -> router : DELETE /v1/agents/{agent_id}/history
 activate router
 router -> history : AGT-04 DELETE History({agent_id})
+' --- Internal processing ---
+activate history
+history -> history : DELETE History
+' history interacts with sub-components
 activate history
 
 alt delete succeeds

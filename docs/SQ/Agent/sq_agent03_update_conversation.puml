@@ -36,6 +36,10 @@ activate iface
 iface -> router : PATCH /v1/agents/{agent_id}/conversation
 activate router
 router -> history : AGT-03 UPDATE Conversation({msg, updateMask})
+' --- Internal processing ---
+activate history
+history -> history : UPDATE Conversation
+' history interacts with sub-components
 activate history
 
 alt token within budget
