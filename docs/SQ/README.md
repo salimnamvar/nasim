@@ -1,6 +1,6 @@
 # nasim — SQ Inventory (API-First)
 
-Sequence diagrams organised by UC group. 148 diagrams across 21 groups.
+Sequence diagrams organised by UC group. 149 diagrams across 21 groups.
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
 Back to [docs/](../README.md).
