@@ -1,4 +1,4 @@
-@startuml sq_evl08_detect_repetition
+@startuml sq_evaluation08_detect_repetition
 ' ============================================================
 ' Title:     EVL-08 — DETECT Repetition
 ' Boundary:  nasim code agent

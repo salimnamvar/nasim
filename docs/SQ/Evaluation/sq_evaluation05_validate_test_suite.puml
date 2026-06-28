@@ -1,4 +1,4 @@
-@startuml sq_evl05_validate_test_suite
+@startuml sq_evaluation05_validate_test_suite
 ' ============================================================
 ' Title:     EVL-05 — VALIDATE Test Suite
 ' Boundary:  nasim code agent

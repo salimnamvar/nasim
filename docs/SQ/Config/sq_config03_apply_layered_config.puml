@@ -1,4 +1,4 @@
-@startuml sq_cfg03_apply_layered_config
+@startuml sq_config03_apply_layered_config
 ' ============================================================
 ' Title:     CFG-03 — APPLY Layered Config
 ' Boundary:  nasim code agent

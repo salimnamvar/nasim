@@ -1,4 +1,4 @@
-@startuml sq_ctx03_distill_nodes
+@startuml sq_contextgraph03_distill_nodes
 ' ============================================================
 ' Title:     CTX-03 — DISTILL Nodes
 ' Boundary:  nasim code agent

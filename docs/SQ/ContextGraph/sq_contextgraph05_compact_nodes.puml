@@ -1,4 +1,4 @@
-@startuml sq_ctx05_compact_nodes
+@startuml sq_contextgraph05_compact_nodes
 ' ============================================================
 ' Title:     CTX-05 — COMPACT Nodes
 ' Boundary:  nasim code agent

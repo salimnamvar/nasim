@@ -38,11 +38,20 @@ activate router
 router -> store : MEM-04 SCOPE Knowledge({query, scope})
 activate store
 
-store --> router : 200 OK
-deactivate store
-router --> iface : 200 OK
-iface --> user : 200 OK
-deactivate router
-deactivate iface
+alt no matching scope
+  store --> router : 404 Not Found
+  deactivate store
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
+  deactivate router
+  deactivate iface
+else scoped results
+  store --> router : 200 OK
+  deactivate store
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+end
 
 @enduml

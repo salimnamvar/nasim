@@ -1,4 +1,4 @@
-@startuml sq_ctx02_truncate_nodes
+@startuml sq_contextgraph02_truncate_nodes
 ' ============================================================
 ' Title:     CTX-02 — TRUNCATE Nodes
 ' Boundary:  nasim code agent

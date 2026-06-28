@@ -38,11 +38,20 @@ activate router
 router -> store : MEM-01 PERSIST Knowledge({key, value, scope})
 activate store
 
-store --> router : 200 OK
-deactivate store
-router --> iface : 200 OK
-iface --> user : 200 OK
-deactivate router
-deactivate iface
+alt store unavailable
+  store --> router : 503 Service Unavailable
+  deactivate store
+  router --> iface : 503 Service Unavailable
+  iface --> user : 503 Service Unavailable
+  deactivate router
+  deactivate iface
+else persisted
+  store --> router : 200 OK
+  deactivate store
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+end
 
 @enduml

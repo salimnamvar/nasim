@@ -1,4 +1,4 @@
-@startuml sq_cfg01_load_config
+@startuml sq_config01_load_config
 ' ============================================================
 ' Title:     CFG-01 — LOAD Config
 ' Boundary:  nasim code agent

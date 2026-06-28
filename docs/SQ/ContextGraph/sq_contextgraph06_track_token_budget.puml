@@ -1,4 +1,4 @@
-@startuml sq_ctx06_track_token_budget
+@startuml sq_contextgraph06_track_token_budget
 ' ============================================================
 ' Title:     CTX-06 — TRACK Token Budget
 ' Boundary:  nasim code agent

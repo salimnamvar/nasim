@@ -1,4 +1,4 @@
-@startuml sq_evl04_validate_with_llm
+@startuml sq_evaluation04_validate_with_llm
 ' ============================================================
 ' Title:     EVL-04 — VALIDATE With LLM
 ' Boundary:  nasim code agent

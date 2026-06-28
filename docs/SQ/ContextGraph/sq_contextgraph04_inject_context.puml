@@ -1,4 +1,4 @@
-@startuml sq_ctx04_inject_context
+@startuml sq_contextgraph04_inject_context
 ' ============================================================
 ' Title:     CTX-04 — INJECT Context
 ' Boundary:  nasim code agent

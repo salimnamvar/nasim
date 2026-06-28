@@ -1,4 +1,4 @@
-@startuml sq_edt02_apply_search_replace
+@startuml sq_editstrategy02_apply_search_replace
 ' ============================================================
 ' Title:     EDT-02 — APPLY Search-Replace
 ' Boundary:  nasim code agent

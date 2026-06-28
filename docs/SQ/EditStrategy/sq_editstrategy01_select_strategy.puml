@@ -1,4 +1,4 @@
-@startuml sq_edt01_select_strategy
+@startuml sq_editstrategy01_select_strategy
 ' ============================================================
 ' Title:     EDT-01 — SELECT Strategy
 ' Boundary:  nasim code agent

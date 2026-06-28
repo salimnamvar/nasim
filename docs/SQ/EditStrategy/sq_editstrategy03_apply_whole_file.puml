@@ -1,4 +1,4 @@
-@startuml sq_edt03_apply_whole_file
+@startuml sq_editstrategy03_apply_whole_file
 ' ============================================================
 ' Title:     EDT-03 — APPLY Whole-File
 ' Boundary:  nasim code agent

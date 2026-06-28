@@ -1,4 +1,4 @@
-@startuml sq_vcs04_auto_commit
+@startuml sq_git04_auto_commit
 ' ============================================================
 ' Title:     VCS-04 — AUTO-COMMIT
 ' Boundary:  nasim code agent
@@ -35,7 +35,7 @@ user -> iface : POST /git/auto-commit
 activate iface
 iface -> router : POST /git/auto-commit
 activate router
-router -> mgr : VCS-04 AUTO-COMMIT({repo_path, stage_all})
+router -> mgr : VCS-04 AUTOCOMMIT Repo({repo_path, stage_all})
 activate mgr
 
 alt validation succeeds

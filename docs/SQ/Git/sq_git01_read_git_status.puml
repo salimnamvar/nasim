@@ -1,4 +1,4 @@
-@startuml sq_vcs01_read_git_status
+@startuml sq_git01_read_git_status
 ' ============================================================
 ' Title:     VCS-01 — READ Git Status
 ' Boundary:  nasim code agent

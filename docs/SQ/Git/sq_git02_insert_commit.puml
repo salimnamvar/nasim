@@ -1,4 +1,4 @@
-@startuml sq_vcs02_insert_commit
+@startuml sq_git02_insert_commit
 ' ============================================================
 ' Title:     VCS-02 — INSERT Commit
 ' Boundary:  nasim code agent

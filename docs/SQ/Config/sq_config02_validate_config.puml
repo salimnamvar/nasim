@@ -1,4 +1,4 @@
-@startuml sq_cfg02_validate_config
+@startuml sq_config02_validate_config
 ' ============================================================
 ' Title:     CFG-02 — VALIDATE Config
 ' Boundary:  nasim code agent

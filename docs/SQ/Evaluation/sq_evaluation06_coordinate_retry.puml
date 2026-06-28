@@ -1,4 +1,4 @@
-@startuml sq_evl06_coordinate_retry
+@startuml sq_evaluation06_coordinate_retry
 ' ============================================================
 ' Title:     EVL-06 — COORDINATE Retry
 ' Boundary:  nasim code agent

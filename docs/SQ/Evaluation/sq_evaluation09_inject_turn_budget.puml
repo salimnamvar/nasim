@@ -1,4 +1,4 @@
-@startuml sq_evl09_inject_turn_budget
+@startuml sq_evaluation09_inject_turn_budget
 ' ============================================================
 ' Title:     EVL-09 — INJECT Turn Budget
 ' Boundary:  nasim code agent

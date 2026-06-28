@@ -1,4 +1,4 @@
-@startuml sq_evl02_check_task_completion
+@startuml sq_evaluation02_check_task_completion
 ' ============================================================
 ' Title:     EVL-02 — CHECK Task Completion
 ' Boundary:  nasim code agent
