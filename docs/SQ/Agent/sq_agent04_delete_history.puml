@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationHistory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationHistory -> SessionStore -> SessionStorage
 ' SM States: CREATED (#BBDEFB)
 ' ============================================================
 
@@ -29,6 +29,12 @@ box "Service" SERVICE_COLOR
   participant "ConversationHistory" as history
 end box
 
+box "Repository" REPOSITORY_COLOR
+  participant "SessionStore" as store
+end box
+
+database "SessionStorage" as storage
+
 == AGT-04 DELETE History ==
 
 user -> iface : AGT-04 DELETE History({agent_id})
@@ -40,6 +46,14 @@ activate history
 
 alt history_exists
   ref over history : AGT-04 DELETE History({agent_id}) <back:#BBDEFB>CREATED</back>
+  history -> store : AGT-04 DELETE History({session_id})
+  activate store
+  store -> storage : AGT-04 DELETE History({session_id})
+  activate storage
+  storage --> store : 200 OK
+  deactivate storage
+  store --> history : 200 OK
+  deactivate store
   history --> router : 200 OK
   deactivate history
   router --> iface : 200 OK

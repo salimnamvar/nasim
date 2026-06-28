@@ -25,33 +25,42 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "PluginManager" as svc
+end box
+
 box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "PluginLoader" as mgr
 end box
 
 == PLG-03 REGISTER Plugin Tools ==
 
-user -> iface : POST /plugins/{id}/tools:register
+user -> iface : PLG-03 REGISTER Plugin Tools({manifest})
 activate iface
-iface -> router : POST /plugins/{id}/tools:register
+iface -> router : PLG-03 REGISTER Plugin Tools({manifest})
 activate router
-router -> mgr : PLG-03 REGISTER Plugin Tools({manifest})
+router -> svc : PLG-03 REGISTER Plugin Tools({manifest})
+activate svc
+svc -> mgr : PLG-03 REGISTER Plugin Tools({manifest})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PLG-03 TRANSITION State
-    ' SM States: LOADED (#90CAF9)
-  mgr --> router : 200 OK
+  ref over mgr : PLG-03 REGISTER Plugin Tools <back:#90CAF9>LOADED</back> <back:#90CAF9>LOADED</back>
+  mgr --> svc : 200 OK
   deactivate mgr
+  svc --> router : 200 OK
+  deactivate svc
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else collision detected
-  mgr --> router : 409 Conflict
+  mgr --> svc : 409 CONFLICT\n{error: {code: "PLG-03_TOOL_COLLISION", message: "Tool collision detected", status: 409}}
   deactivate mgr
-  router --> iface : 409 Conflict
-  iface --> user : 409 Conflict
+  svc --> router : 409 CONFLICT\n{error: {code: "PLG-03_TOOL_COLLISION", message: "Tool collision detected", status: 409}}
+  deactivate svc
+  router --> iface : 409 CONFLICT\n{error: {code: "PLG-03_TOOL_COLLISION", message: "Tool collision detected", status: 409}}
+  iface --> user : 409 CONFLICT\n{error: {code: "PLG-03_TOOL_COLLISION", message: "Tool collision detected", status: 409}}
   deactivate router
   deactivate iface
 end

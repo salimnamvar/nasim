@@ -31,15 +31,15 @@ end box
 
 == EDT-01 SELECT Strategy ==
 
-user -> iface : GET /editstrategy/strategy
+user -> iface : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
 activate iface
-iface -> router : GET /editstrategy/strategy
+iface -> router : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
 activate router
 router -> sel : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
 activate sel
 
 alt strategy found
-  ref over sel : TRANSITION State(<back:#D7CCC8>THINKING</back>)
+  ref over sel : EDT-01 SELECT Strategy <back:#D7CCC8>THINKING</back>
   sel --> router : 200 OK
   deactivate sel
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt strategy found
   deactivate router
   deactivate iface
 else strategy not found
-  sel --> router : 404 Not Found
+  sel --> router : {error: {code: "EDT-01_NOT_FOUND", message: "Strategy not found", status: 404}}
   deactivate sel
-  router --> iface : 404 Not Found
-  iface --> user : 404 Not Found
+  router --> iface : {error: {code: "EDT-01_NOT_FOUND", message: "Strategy not found", status: 404}}
+  iface --> user : {error: {code: "EDT-01_NOT_FOUND", message: "Strategy not found", status: 404}}
   deactivate router
   deactivate iface
 end

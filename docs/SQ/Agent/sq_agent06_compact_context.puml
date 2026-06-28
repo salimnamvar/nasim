@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ContextCompactor
+' CSR Chain: User -> CLI Process -> ServerRouter -> ContextCompactor -> SessionStore -> SessionStorage
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -29,6 +29,12 @@ box "Service" SERVICE_COLOR
   participant "ContextCompactor" as compactor
 end box
 
+box "Repository" REPOSITORY_COLOR
+  participant "SessionStore" as store
+end box
+
+database "SessionStorage" as storage
+
 == AGT-06 COMPACT Context ==
 
 user -> iface : AGT-06 COMPACT Context({agent_id, budget})
@@ -40,6 +46,14 @@ activate compactor
 
 alt summary_quality acceptable
   ref over compactor : AGT-06 COMPACT Context({agent_id, budget}) <back:#43A047>RUNNING</back>
+  compactor -> store : AGT-06 PERSIST Compacted({session_id, compacted_context})
+  activate store
+  store -> storage : AGT-06 PERSIST Compacted({session_id, compacted_context})
+  activate storage
+  storage --> store : 200 OK
+  deactivate storage
+  store --> compactor : 200 OK
+  deactivate store
   compactor --> router : 200 OK
   deactivate compactor
   router --> iface : 200 OK

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationHistory
+' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationHistory -> SessionStore -> SessionStorage
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -29,6 +29,12 @@ box "Service" SERVICE_COLOR
   participant "ConversationHistory" as history
 end box
 
+box "Repository" REPOSITORY_COLOR
+  participant "SessionStore" as store
+end box
+
+database "SessionStorage" as storage
+
 == AGT-03 UPDATE Conversation ==
 
 user -> iface : AGT-03 UPDATE Conversation({msg, updateMask})
@@ -40,6 +46,14 @@ activate history
 
 alt token_count <= budget
   ref over history : AGT-03 UPDATE Conversation({msg, updateMask}) <back:#43A047>RUNNING</back>
+  history -> store : AGT-03 PERSIST History({session_id, messages})
+  activate store
+  store -> storage : AGT-03 PERSIST History({session_id, messages})
+  activate storage
+  storage --> store : 200 OK
+  deactivate storage
+  store --> history : 200 OK
+  deactivate store
   history --> router : 200 OK
   deactivate history
   router --> iface : 200 OK

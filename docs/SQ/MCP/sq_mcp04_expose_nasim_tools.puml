@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> MCPServerRuntime
+' CSR Chain: User -> CLI Process -> ServerRouter -> MCPToolAdapter -> MCPServerRuntime
 ' SM States: STARTING (#FFA726), RUNNING (#66BB6A), ERROR (#FFCDD2)
 ' ============================================================
 
@@ -25,6 +25,10 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "MCPToolAdapter" as svc
+end box
+
 box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "MCPServerRuntime" as mgr
 end box
@@ -35,20 +39,26 @@ user -> iface : MCP-04 EXPOSE nasim Tools({})
 activate iface
 iface -> router : MCP-04 EXPOSE nasim Tools({})
 activate router
-router -> mgr : MCP-04 EXPOSE nasim Tools({})
+router -> svc : MCP-04 EXPOSE nasim Tools({})
+activate svc
+svc -> mgr : MCP-04 EXPOSE nasim Tools({})
 activate mgr
 
 alt server_started
   ref over mgr : MCP-04 EXPOSE nasim Tools
-  mgr --> router : 200 OK
+  mgr --> svc : 200 OK
   deactivate mgr
+  svc --> router : 200 OK
+  deactivate svc
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else server_failed
-  mgr --> router : 500 INTERNAL\n{error: {code: "MCP-04_SERVER_START_FAILED", message: "MCP server runtime failed to start", status: 500}}
+  mgr --> svc : 500 INTERNAL\n{error: {code: "MCP-04_SERVER_START_FAILED", message: "MCP server runtime failed to start", status: 500}}
   deactivate mgr
+  svc --> router : 500 INTERNAL
+  deactivate svc
   router --> iface : 500 INTERNAL
   iface --> user : 500 INTERNAL
   deactivate router

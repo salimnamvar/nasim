@@ -31,15 +31,15 @@ end box
 
 == EDT-05 APPLY Fenced Block ==
 
-user -> iface : POST /editstrategy/fenced-block
+user -> iface : EDT-05 APPLY Fenced Block({file_path, block_language, block_content})
 activate iface
-iface -> router : POST /editstrategy/fenced-block
+iface -> router : EDT-05 APPLY Fenced Block({file_path, block_language, block_content})
 activate router
 router -> coder : EDT-05 APPLY Fenced Block({file_path, block_language, block_content})
 activate coder
 
 alt validation succeeds
-  ref over coder : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
+  ref over coder : EDT-05 APPLY Fenced Block <back:#B2DFDB>TOOL_EXEC</back>
   coder --> router : 200 OK
   deactivate coder
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  coder --> router : 422 Unprocessable
+  coder --> router : {error: {code: "EDT-05_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate coder
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : {error: {code: "EDT-05_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  iface --> user : {error: {code: "EDT-05_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate router
   deactivate iface
 end

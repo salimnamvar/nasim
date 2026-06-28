@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentOrchestrator
+' CSR Chain: User -> CLI Process -> ServerRouter -> AgentOrchestrator -> SessionStore -> SessionStorage
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -30,6 +30,12 @@ box "Service" SERVICE_COLOR
   participant "Provider" as provider
 end box
 
+box "Repository" REPOSITORY_COLOR
+  participant "SessionStore" as store
+end box
+
+database "SessionStorage" as storage
+
 == AGT-01 PROCESS User Task ==
 
 user -> iface : AGT-01 PROCESS UserTask({session_id, message})
@@ -45,6 +51,14 @@ alt task_input validates without error
   activate provider
   provider --> orchestrator : 200 OK
   deactivate provider
+  orchestrator -> store : AGT-01 PERSIST History({session_id, messages})
+  activate store
+  store -> storage : AGT-01 PERSIST History({session_id, messages})
+  activate storage
+  storage --> store : 200 OK
+  deactivate storage
+  store --> orchestrator : 200 OK
+  deactivate store
   orchestrator --> router : 200 OK
   deactivate orchestrator
   router --> iface : 200 OK

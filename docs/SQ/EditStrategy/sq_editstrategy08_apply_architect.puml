@@ -31,15 +31,15 @@ end box
 
 == EDT-08 APPLY Architect ==
 
-user -> iface : POST /editstrategy/architect
+user -> iface : EDT-08 APPLY Architect({file_path, structural_changes})
 activate iface
-iface -> router : POST /editstrategy/architect
+iface -> router : EDT-08 APPLY Architect({file_path, structural_changes})
 activate router
 router -> coder : EDT-08 APPLY Architect({file_path, structural_changes})
 activate coder
 
 alt validation succeeds
-  ref over coder : TRANSITION State(<back:#B2DFDB>TOOL_EXEC</back>)
+  ref over coder : EDT-08 APPLY Architect <back:#B2DFDB>TOOL_EXEC</back>
   coder --> router : 200 OK
   deactivate coder
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  coder --> router : 422 Unprocessable
+  coder --> router : {error: {code: "EDT-08_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate coder
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : {error: {code: "EDT-08_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  iface --> user : {error: {code: "EDT-08_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate router
   deactivate iface
 end

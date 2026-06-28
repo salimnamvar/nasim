@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> MCPDiscovery
+' CSR Chain: User -> CLI Process -> ServerRouter -> MCPDiscovery -> MCPClientRuntime
 ' SM States: DISCOVERING (#A1887F), CONNECTED (#00BCD4), ERROR (#E57373)
 ' ============================================================
 
@@ -25,8 +25,12 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "MCPDiscovery" as svc
+end box
+
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "MCPDiscovery" as mgr
+  participant "MCPClientRuntime" as mgr
 end box
 
 == MCP-02 DISCOVER MCP Tools ==
@@ -35,20 +39,26 @@ user -> iface : MCP-02 DISCOVER MCP Tools({connection})
 activate iface
 iface -> router : MCP-02 DISCOVER MCP Tools({connection})
 activate router
-router -> mgr : MCP-02 DISCOVER MCP Tools({connection})
+router -> svc : MCP-02 DISCOVER MCP Tools({connection})
+activate svc
+svc -> mgr : MCP-02 DISCOVER MCP Tools({connection})
 activate mgr
 
 alt tools_discovered
   ref over mgr : MCP-02 DISCOVER MCP Tools
-  mgr --> router : 200 OK
+  mgr --> svc : 200 OK
   deactivate mgr
+  svc --> router : 200 OK
+  deactivate svc
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else discovery_failed
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "MCP-02_DISCOVERY_FAILED", message: "MCP tool discovery failed", status: 422}}
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "MCP-02_DISCOVERY_FAILED", message: "MCP tool discovery failed", status: 422}}
   deactivate mgr
+  svc --> router : 422 UNPROCESSABLE
+  deactivate svc
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE
   deactivate router

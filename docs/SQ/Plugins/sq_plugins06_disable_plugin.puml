@@ -25,33 +25,42 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "PluginManager" as svc
+end box
+
 box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "PluginLoader" as mgr
 end box
 
 == PLG-06 DISABLE Plugin ==
 
-user -> iface : POST /plugins/{id}:disable
+user -> iface : PLG-06 DISABLE Plugin({plugin_id})
 activate iface
-iface -> router : POST /plugins/{id}:disable
+iface -> router : PLG-06 DISABLE Plugin({plugin_id})
 activate router
-router -> mgr : PLG-06 DISABLE Plugin({plugin_id})
+router -> svc : PLG-06 DISABLE Plugin({plugin_id})
+activate svc
+svc -> mgr : PLG-06 DISABLE Plugin({plugin_id})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PLG-06 TRANSITION State
-    ' SM States: DISABLED (#CE93D8), ERROR (#EF5350)
-  mgr --> router : 200 OK
+  ref over mgr : PLG-06 DISABLE Plugin <back:#CE93D8>DISABLED</back>
+  mgr --> svc : 200 OK
   deactivate mgr
+  svc --> router : 200 OK
+  deactivate svc
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else deactivation fails
-  mgr --> router : 422 Unprocessable
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLG-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLG-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
+  deactivate svc
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLG-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLG-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
   deactivate router
   deactivate iface
 end

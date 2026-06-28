@@ -8,7 +8,7 @@
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
 ' CSR Chain: User -> CLI Process -> ServerRouter -> CompactionProcessor
-' SM States: COMPACTING (#E0F2F1)
+' SM States: (stateless — COMPACTING owned by AGT-06)
 ' ============================================================
 
 !include ../common/sq_styles.puml

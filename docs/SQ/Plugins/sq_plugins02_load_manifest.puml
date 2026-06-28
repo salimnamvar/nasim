@@ -25,33 +25,42 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "PluginManager" as svc
+end box
+
 box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "PluginLoader" as mgr
 end box
 
 == PLG-02 LOAD Manifest ==
 
-user -> iface : GET /plugins/{id}:load
+user -> iface : PLG-02 LOAD Manifest({manifest_path})
 activate iface
-iface -> router : GET /plugins/{id}:load
+iface -> router : PLG-02 LOAD Manifest({manifest_path})
 activate router
-router -> mgr : PLG-02 LOAD Manifest({manifest_path})
+router -> svc : PLG-02 LOAD Manifest({manifest_path})
+activate svc
+svc -> mgr : PLG-02 LOAD Manifest({manifest_path})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PLG-02 TRANSITION State
-    ' SM States: LOADING (#FFCC80), LOADED (#90CAF9)
-  mgr --> router : 200 OK
+  ref over mgr : PLG-02 LOAD Manifest <back:#FFCC80>LOADING</back>
+  mgr --> svc : 200 OK
   deactivate mgr
+  svc --> router : 200 OK
+  deactivate svc
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else manifest invalid
-  mgr --> router : 422 Unprocessable
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLG-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLG-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
+  deactivate svc
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLG-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLG-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
   deactivate router
   deactivate iface
 end

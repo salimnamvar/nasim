@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> MCPToolAdapter
+' CSR Chain: User -> CLI Process -> ServerRouter -> MCPToolAdapter -> MCPClientRuntime
 ' SM States: CONNECTED (#00BCD4)
 ' ============================================================
 
@@ -25,8 +25,12 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "MCPToolAdapter" as svc
+end box
+
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "MCPToolAdapter" as mgr
+  participant "MCPClientRuntime" as mgr
 end box
 
 == MCP-03 ADAPT MCP Tool ==
@@ -35,20 +39,26 @@ user -> iface : MCP-03 ADAPT MCP Tool({tool_definition})
 activate iface
 iface -> router : MCP-03 ADAPT MCP Tool({tool_definition})
 activate router
-router -> mgr : MCP-03 ADAPT MCP Tool({tool_definition})
+router -> svc : MCP-03 ADAPT MCP Tool({tool_definition})
+activate svc
+svc -> mgr : MCP-03 ADAPT MCP Tool({tool_definition})
 activate mgr
 
 alt tool_compatible
-  ref over mgr : MCP-03 ADAPT MCP Tool
-  mgr --> router : 200 OK
+  ref over svc : MCP-03 ADAPT MCP Tool
+  mgr --> svc : 200 OK
   deactivate mgr
+  svc --> router : 200 OK
+  deactivate svc
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else tool_incompatible
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "MCP-03_ADAPTATION_FAILED", message: "MCP tool adaptation failed", status: 422}}
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "MCP-03_ADAPTATION_FAILED", message: "MCP tool adaptation failed", status: 422}}
   deactivate mgr
+  svc --> router : 422 UNPROCESSABLE
+  deactivate svc
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE
   deactivate router
