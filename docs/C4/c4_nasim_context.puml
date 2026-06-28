@@ -27,10 +27,10 @@
 '              because it is part of the platform's collection pipeline.
 '
 ' Milestone: v1.0
-' Version:   9.1.3
+' Version:   9.1.5
 ' Source:    docs/entities.md, docs/C4/README.md
-' Review:    Final sign-off – design chain consistent
-' Date:      2026-06-25
+' Review:    Context level – single User, interface-independent behavior
+' Date:      2026-06-28
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
@@ -38,11 +38,11 @@
 
 LAYOUT_LEFT_RIGHT()
 
-title NASIM Application — Stream System Context
+title NASIM Application — System Context
 
 Person(user, "User", "Developer using NASIM Application as an AI coding assistant")
 
-System(nasim_application, "NASIM Application", "AI coding agent that translates natural language tasks into file-level changes across a codebase")
+System(nasim_application, "NASIM Application", "AI coding agent that translates natural language tasks into file-level changes.\n\nThe system supports multiple interfaces (CLI, Web, Desktop, Mobile, MCP). All interfaces deliver identical capabilities and the same Use Cases to the User.")
 
 System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ providers via litellm")
 System_Ext(host_fs, "Host Filesystem", "Project source code, configuration, documentation, and community plugin files")
@@ -54,7 +54,7 @@ System_Ext(git_repo, "Git Repository", "Version-controlled project files: branch
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter (AST parsing), LSP Server (code intelligence), Embedding Model (vector generation), Vector Store (similarity search)")
 System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana, OTel Collector: NASIM Application emits; platform owns collection, storage, visualization")
 
-Rel(user, nasim_application, "submits coding tasks and receives AI-generated changes, suggestions, and answers (activate user / deactivate user)")
+Rel(user, nasim_application, "submits coding tasks and receives AI-generated changes, suggestions, and answers")
 Rel(nasim_application, llm_backend, "sends context and receives code completions")
 Rel(nasim_application, host_fs, "reads, writes, and searches project files and plugins")
 Rel(nasim_application, sandbox, "runs untrusted commands in OS-level isolation")
@@ -72,11 +72,4 @@ legend right
     | System_Ext | External system or service outside the boundary |
 end legend
 
-!define CSR_CTRL participant "ServerRouter" as ctrl
-
-' CSR lint markers
-!define CSR_ACTOR actor "User" as user
-!define CSR_CTRL participant "ServerRouter" as ctrl
-!define CSR_SVC participant "AgentService" as svc
-!define CSR_REPO participant "DataStore" as repo
 @enduml
