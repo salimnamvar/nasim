@@ -35,12 +35,12 @@ user -> iface : GET /semantic/search?q={query}
 activate iface
 iface -> router : GET /semantic/search?q={query}
 activate router
-router -> mgr : rim06 SEARCH Semantic(query, top_k)
+router -> mgr : RIM-06 SEARCH Semantic({query, top_k})
 activate mgr
 
-alt search succeeds
-  ref over mgr : RIM-06 TRANSITION State
-    ' SM States: INDEXED (#7CB342)
+alt embeddings_indexed and search completes
+  ref over mgr : RIM-06 SEARCH Semantic({query, top_k})
+    <back:#7CB342>INDEXED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +48,10 @@ alt search succeeds
   deactivate router
   deactivate iface
 else no results
-  mgr --> router : 404 Not Found
+  mgr --> router : 404 NOT_FOUND\n{error: {code: "RIM-06_NO_RESULTS", message: "No matching results found", status: 404}}
   deactivate mgr
-  router --> iface : 404 Not Found
-  iface --> user : 404 Not Found
+  router --> iface : 404 NOT_FOUND
+  iface --> user : 404 NOT_FOUND
   deactivate router
   deactivate iface
 end

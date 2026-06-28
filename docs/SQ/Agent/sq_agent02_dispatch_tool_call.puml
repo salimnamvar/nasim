@@ -41,10 +41,9 @@ activate orchestrator
 orchestrator -> safety : AGT-02 DISPATCH Safety Check({tool_name, args})
 activate safety
 
-alt safety approved
-  ref over orchestrator : AGT-02 DISPATCH Tool Call
-    ' State: <back:#43A047>RUNNING</back>
-    ' Owned by: AGT-02 (SM/README.md)
+alt safety_approved
+  ref over orchestrator : AGT-02 DISPATCH ToolCall({tool_name, args})
+    <back:#43A047>RUNNING</back>
   safety --> orchestrator : 200 OK Approved
   deactivate safety
   orchestrator --> router : 200 OK
@@ -53,16 +52,15 @@ alt safety approved
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else safety violation
-  ref over orchestrator : AGT-02 DISPATCH Tool Call
-    ' State: <back:#CE93D8>WAITING</back>
-    ' Owned by: AGT-02 (SM/README.md)
-  safety --> orchestrator : 422 Unprocessable
+else safety_violation
+  ref over orchestrator : AGT-02 DISPATCH ToolCall({tool_name, args})
+    <back:#CE93D8>WAITING</back>
+  safety --> orchestrator : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
   deactivate safety
-  orchestrator --> router : 422 Unprocessable
+  orchestrator --> router : 403 PERMISSION_DENIED
   deactivate orchestrator
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 403 PERMISSION_DENIED
+  iface --> user : 403 PERMISSION_DENIED
   deactivate router
   deactivate iface
 end

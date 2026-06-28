@@ -38,10 +38,9 @@ activate router
 router -> plan : AGT-07 QUEUE Plan({tool_name, args})
 activate plan
 
-alt plan queued
-  ref over plan : AGT-07 QUEUE Plan
-    ' State: <back:#CE93D8>WAITING</back>
-    ' Owned by: AGT-07 (SM/README.md)
+alt plan queued without error
+  ref over plan : AGT-07 QUEUE Plan({tool_name, args})
+    <back:#CE93D8>WAITING</back>
   plan --> router : 200 OK
   deactivate plan
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt plan queued
   deactivate router
   deactivate iface
 else queue full
-  plan --> router : 422 Unprocessable
+  plan --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGT-07_QUEUE_FULL", message: "Plan queue capacity exceeded", status: 409}}
   deactivate plan
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 409 FAILED_PRECONDITION
+  iface --> user : 409 FAILED_PRECONDITION
   deactivate router
   deactivate iface
 end

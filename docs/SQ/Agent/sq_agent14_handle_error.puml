@@ -39,20 +39,19 @@ router -> boundary : AGT-14 HANDLE Error({error})
 activate boundary
 
 alt retryable error
-  ref over boundary : AGT-14 HANDLE Error
-    ' State: <back:#EF5350>FAILED</back>
-    ' Owned by: AGT-14 (SM/README.md)
+  ref over boundary : AGT-14 HANDLE Error({error})
+    <back:#EF5350>FAILED</back>
   boundary --> router : 200 OK
   deactivate boundary
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else unrecoverable
-  boundary --> router : 500 Server Error
+else unrecoverable error
+  boundary --> router : 500 INTERNAL\n{error: {code: "AGT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
   deactivate boundary
-  router --> iface : 500 Server Error
-  iface --> user : 500 Server Error
+  router --> iface : 500 INTERNAL
+  iface --> user : 500 INTERNAL
   deactivate router
   deactivate iface
 end

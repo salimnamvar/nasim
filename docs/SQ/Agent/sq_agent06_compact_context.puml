@@ -36,16 +36,11 @@ activate iface
 iface -> router : POST /v1/agents/{agent_id}:compact
 activate router
 router -> compactor : AGT-06 COMPACT Context({agent_id, budget})
-' --- Internal processing ---
-activate compactor
-compactor -> compactor : COMPACT Context
-' compactor interacts with sub-components
 activate compactor
 
-alt compaction succeeds
-  ref over compactor : AGT-06 COMPACT Context
-    ' State: <back:#43A047>RUNNING</back>
-    ' Owned by: AGT-06 (SM/README.md)
+alt summary_quality acceptable
+  ref over compactor : AGT-06 COMPACT Context({agent_id, budget})
+    <back:#43A047>RUNNING</back>
   compactor --> router : 200 OK
   deactivate compactor
   router --> iface : 200 OK
@@ -53,10 +48,10 @@ alt compaction succeeds
   deactivate router
   deactivate iface
 else compaction fails
-  compactor --> router : 422 Unprocessable
+  compactor --> router : 500 INTERNAL\n{error: {code: "AGT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
   deactivate compactor
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 500 INTERNAL
+  iface --> user : 500 INTERNAL
   deactivate router
   deactivate iface
 end

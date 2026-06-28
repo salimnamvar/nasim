@@ -38,10 +38,9 @@ activate router
 router -> persona : AGT-12 LOAD Persona({persona_name})
 activate persona
 
-alt load succeeds
-  ref over persona : AGT-12 LOAD Persona
-    ' State: <back:#43A047>RUNNING</back>
-    ' Owned by: AGT-12 (SM/README.md)
+alt load succeeds without error
+  ref over persona : AGT-12 LOAD Persona({persona_name})
+    <back:#43A047>RUNNING</back>
   persona --> router : 200 OK
   deactivate persona
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt load succeeds
   deactivate router
   deactivate iface
 else config invalid
-  persona --> router : 422 Unprocessable
+  persona --> router : 422 INVALID_ARGUMENT\n{error: {code: "AGT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
   deactivate persona
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 INVALID_ARGUMENT
+  iface --> user : 422 INVALID_ARGUMENT
   deactivate router
   deactivate iface
 end

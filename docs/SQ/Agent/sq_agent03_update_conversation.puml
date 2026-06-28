@@ -36,16 +36,11 @@ activate iface
 iface -> router : PATCH /v1/agents/{agent_id}/conversation
 activate router
 router -> history : AGT-03 UPDATE Conversation({msg, updateMask})
-' --- Internal processing ---
-activate history
-history -> history : UPDATE Conversation
-' history interacts with sub-components
 activate history
 
-alt token within budget
-  ref over history : AGT-03 UPDATE Conversation
-    ' State: <back:#43A047>RUNNING</back>
-    ' Owned by: AGT-03 (SM/README.md)
+alt token_count <= budget
+  ref over history : AGT-03 UPDATE Conversation({msg, updateMask})
+    <back:#43A047>RUNNING</back>
   history --> router : 200 OK
   deactivate history
   router --> iface : 200 OK
@@ -53,10 +48,10 @@ alt token within budget
   deactivate router
   deactivate iface
 else budget exceeded
-  history --> router : 422 Unprocessable
+  history --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
   deactivate history
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 409 FAILED_PRECONDITION
+  iface --> user : 409 FAILED_PRECONDITION
   deactivate router
   deactivate iface
 end

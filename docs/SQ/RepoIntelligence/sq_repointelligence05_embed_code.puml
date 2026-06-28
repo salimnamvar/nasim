@@ -35,12 +35,12 @@ user -> iface : POST /embeddings
 activate iface
 iface -> router : POST /embeddings
 activate router
-router -> mgr : rim05 EMBED Code(code_fragments)
+router -> mgr : RIM-05 EMBED Code({code_fragments})
 activate mgr
 
-alt embed succeeds
-  ref over mgr : RIM-05 TRANSITION State
-    ' SM States: EMBEDDING (#E6EE9C)
+alt embedding_model available and embed completes
+  ref over mgr : RIM-05 EMBED Code({code_fragments})
+    <back:#E6EE9C>EMBEDDING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +48,10 @@ alt embed succeeds
   deactivate router
   deactivate iface
 else provider error
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 503 UNAVAILABLE\n{error: {code: "RIM-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 503 UNAVAILABLE
+  iface --> user : 503 UNAVAILABLE
   deactivate router
   deactivate iface
 end

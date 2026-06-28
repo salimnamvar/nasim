@@ -38,10 +38,9 @@ activate router
 router -> subagent : AGT-09 SPAWN Subagent({task_prompt, parent_id})
 activate subagent
 
-alt spawn succeeds
-  ref over subagent : AGT-09 SPAWN Subagent
-    ' State: <back:#CE93D8>WAITING</back>
-    ' Owned by: AGT-09 (SM/README.md)
+alt spawn succeeds without error
+  ref over subagent : AGT-09 SPAWN Subagent({task_prompt, parent_id})
+    <back:#CE93D8>WAITING</back>
   subagent --> router : 200 OK
   deactivate subagent
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt spawn succeeds
   deactivate router
   deactivate iface
 else spawn fails
-  subagent --> router : 422 Unprocessable
+  subagent --> router : 500 INTERNAL\n{error: {code: "AGT-09_SPAWN_FAILED", message: "Subagent spawn failed", status: 500}}
   deactivate subagent
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 500 INTERNAL
+  iface --> user : 500 INTERNAL
   deactivate router
   deactivate iface
 end

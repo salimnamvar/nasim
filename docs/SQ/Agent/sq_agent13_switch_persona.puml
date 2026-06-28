@@ -38,10 +38,9 @@ activate router
 router -> persona : AGT-13 SWITCH Persona({new_persona_name})
 activate persona
 
-alt switch succeeds
-  ref over persona : AGT-13 SWITCH Persona
-    ' State: <back:#43A047>RUNNING</back>
-    ' Owned by: AGT-13 (SM/README.md)
+alt switch succeeds without error
+  ref over persona : AGT-13 SWITCH Persona({new_persona_name})
+    <back:#43A047>RUNNING</back>
   persona --> router : 200 OK
   deactivate persona
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt switch succeeds
   deactivate router
   deactivate iface
 else switch fails
-  persona --> router : 422 Unprocessable
+  persona --> router : 404 NOT_FOUND\n{error: {code: "AGT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
   deactivate persona
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 404 NOT_FOUND
+  iface --> user : 404 NOT_FOUND
   deactivate router
   deactivate iface
 end

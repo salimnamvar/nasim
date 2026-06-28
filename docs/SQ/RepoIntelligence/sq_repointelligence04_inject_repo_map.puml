@@ -35,12 +35,12 @@ user -> iface : POST /repomap/inject
 activate iface
 iface -> router : POST /repomap/inject
 activate router
-router -> mgr : rim04 INJECT RepoMap(budget_tokens, ranked_symbols)
+router -> mgr : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
 activate mgr
 
-alt inject succeeds
-  ref over mgr : RIM-04 TRANSITION State
-    ' SM States: INDEXED (#7CB342)
+alt budget_sufficient and injection completes
+  ref over mgr : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
+    <back:#7CB342>INDEXED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +48,10 @@ alt inject succeeds
   deactivate router
   deactivate iface
 else budget exhausted
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 409 FAILED_PRECONDITION\n{error: {code: "RIM-04_BUDGET_EXCEEDED", message: "Token budget exhausted", status: 409}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 409 FAILED_PRECONDITION
+  iface --> user : 409 FAILED_PRECONDITION
   deactivate router
   deactivate iface
 end

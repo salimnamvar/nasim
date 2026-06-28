@@ -38,10 +38,9 @@ activate router
 router -> subagent : AGT-10 COLLECT Subagent Result({child_id, timeout})
 activate subagent
 
-alt result available
-  ref over subagent : AGT-10 COLLECT Subagent Result
-    ' State: <back:#2E7D32>COMPLETED</back>
-    ' Owned by: AGT-10 (SM/README.md)
+alt result available without error
+  ref over subagent : AGT-10 COLLECT SubagentResult({child_id, timeout})
+    <back:#2E7D32>COMPLETED</back>
   subagent --> router : 200 OK
   deactivate subagent
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt result available
   deactivate router
   deactivate iface
 else child not found
-  subagent --> router : 404 Not Found
+  subagent --> router : 404 NOT_FOUND\n{error: {code: "AGT-10_NOT_FOUND", message: "Child agent not found", status: 404}}
   deactivate subagent
-  router --> iface : 404 Not Found
-  iface --> user : 404 Not Found
+  router --> iface : 404 NOT_FOUND
+  iface --> user : 404 NOT_FOUND
   deactivate router
   deactivate iface
 end

@@ -35,12 +35,12 @@ user -> iface : POST /symbol/graph
 activate iface
 iface -> router : POST /symbol/graph
 activate router
-router -> mgr : rim02 BUILD Symbol Graph(ast_index)
+router -> mgr : RIM-02 BUILD SymbolGraph({ast_index})
 activate mgr
 
-alt build succeeds
-  ref over mgr : RIM-02 TRANSITION State
-    ' SM States: BUILDING_GRAPH (#9C27B0)
+alt reference_resolution completes without error
+  ref over mgr : RIM-02 BUILD SymbolGraph({ast_index})
+    <back:#9C27B0>BUILDING_GRAPH</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +48,10 @@ alt build succeeds
   deactivate router
   deactivate iface
 else reference resolution fails
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 500 INTERNAL\n{error: {code: "RIM-02_GRAPH_ERROR", message: "Symbol graph construction failed", status: 500}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 500 INTERNAL
+  iface --> user : 500 INTERNAL
   deactivate router
   deactivate iface
 end

@@ -27,6 +27,7 @@ end box
 
 box "Repository" REPOSITORY_COLOR
   participant "RepoIntelligenceManager" as mgr
+  participant "ASTIndexAdapter" as ast
 end box
 
 == RIM-01 INDEX Codebase ==
@@ -35,23 +36,27 @@ user -> iface : POST /project/{root}:index
 activate iface
 iface -> router : POST /project/{root}:index
 activate router
-router -> mgr : rim01 INDEX Codebase(project_root)
+router -> mgr : RIM-01 INDEX Codebase({project_root})
 activate mgr
 
-alt indexing succeeds
-  ref over mgr : RIM-01 TRANSITION State
-    ' SM States: INDEXING (#4FC3F7)
+alt ast_extraction completes without error
+  ref over mgr : RIM-01 INDEX Codebase({project_root})
+    <back:#4FC3F7>INDEXING</back>
+  mgr -> ast : RIM-01 INDEX Codebase({project_root})
+  activate ast
+  ast --> mgr : 200 OK
+  deactivate ast
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else parse failure
-  mgr --> router : 422 Unprocessable
+else parse validation fails
+  mgr --> router : 400 BAD_REQUEST\n{error: {code: "RIM-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 400 BAD_REQUEST
+  iface --> user : 400 BAD_REQUEST
   deactivate router
   deactivate iface
 end

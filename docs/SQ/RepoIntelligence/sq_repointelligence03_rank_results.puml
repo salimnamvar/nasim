@@ -35,12 +35,12 @@ user -> iface : GET /symbols/ranked?query={query}
 activate iface
 iface -> router : GET /symbols/ranked?query={query}
 activate router
-router -> mgr : rim03 RANK Results(graph, chat_context)
+router -> mgr : RIM-03 RANK Results({graph, chat_context})
 activate mgr
 
-alt ranking succeeds
-  ref over mgr : RIM-03 TRANSITION State
-    ' SM States: INDEXED (#7CB342)
+alt graph_not_empty and ranking completes
+  ref over mgr : RIM-03 RANK Results({graph, chat_context})
+    <back:#7CB342>INDEXED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +48,10 @@ alt ranking succeeds
   deactivate router
   deactivate iface
 else empty graph
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 409 FAILED_PRECONDITION\n{error: {code: "RIM-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 409 FAILED_PRECONDITION
+  iface --> user : 409 FAILED_PRECONDITION
   deactivate router
   deactivate iface
 end

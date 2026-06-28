@@ -38,10 +38,9 @@ activate router
 router -> persona : AGT-11 DELEGATE to Persona({task, persona_hint})
 activate persona
 
-alt delegation succeeds
-  ref over persona : AGT-11 DELEGATE to Persona
-    ' State: <back:#43A047>RUNNING</back>
-    ' Owned by: AGT-11 (SM/README.md)
+alt delegation succeeds without error
+  ref over persona : AGT-11 DELEGATE Persona({task, persona_hint})
+    <back:#43A047>RUNNING</back>
   persona --> router : 200 OK
   deactivate persona
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt delegation succeeds
   deactivate router
   deactivate iface
 else persona not found
-  persona --> router : 404 Not Found
+  persona --> router : 404 NOT_FOUND\n{error: {code: "AGT-11_NOT_FOUND", message: "Persona not found", status: 404}}
   deactivate persona
-  router --> iface : 404 Not Found
-  iface --> user : 404 Not Found
+  router --> iface : 404 NOT_FOUND
+  iface --> user : 404 NOT_FOUND
   deactivate router
   deactivate iface
 end
