@@ -39,7 +39,7 @@ router -> mgr : VCS-02 INSERT Commit({repo_path, message, files})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : VCS-02 INSERT Commit
+  ref over mgr : VCS-02 INSERT Commit({repo_path, message, files}) <back:#B2DFDB>TOOL_EXEC</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

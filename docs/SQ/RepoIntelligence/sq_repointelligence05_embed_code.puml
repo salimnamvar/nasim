@@ -39,7 +39,7 @@ router -> mgr : RIM-05 EMBED Code({code_fragments})
 activate mgr
 
 alt embedding_model available and embed completes
-  ref over mgr : RIM-05 EMBED Code({code_fragments})
+  ref over mgr : RIM-05 EMBED Code({code_fragments}) <back:#E6EE9C>EMBEDDING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

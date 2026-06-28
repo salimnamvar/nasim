@@ -39,9 +39,7 @@ router -> mgr : PRV-02 REQUEST Chat({messages, tools})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PRV-02 REQUEST Chat
-    ' Provider lifecycle: → THINKING (#D7CCC8)
-    ' Owned by: PRV-02 REQUEST Chat (SM/README.md)
+  ref over mgr : PRV-02 REQUEST Chat({messages, tools}) <back:#D7CCC8>THINKING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

@@ -39,7 +39,7 @@ router -> detector : EVL-08 DETECT Repetition({task_id, recent_calls})
 activate detector
 
 alt no repetition
-  ref over detector : EVL-08 DETECT Repetition({task_id, recent_calls})
+  ref over detector : EVL-08 DETECT Repetition({task_id, recent_calls}) <back:#C5CAE9>CHECKING</back>({task_id, recent_calls})
   detector --> router : 200 OK
   deactivate detector
   router --> iface : 200 OK

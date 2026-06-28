@@ -39,7 +39,7 @@ router -> mgr : SAF-02 REQUEST Approval(tool_name, args)
 activate mgr
 
 alt user approves
-  ref over mgr : SAF-02 REQUEST Approval <back:#FFF9C4>AWAITING_APPROVAL</back>
+  ref over mgr : SAF-02 REQUEST Approval(tool_name, args) <back:#FFF9C4>AWAITING_APPROVAL</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

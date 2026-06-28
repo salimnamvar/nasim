@@ -39,7 +39,7 @@ router -> mgr : SAF-01 CHECK Permission(tool_name, safety_mode)
 activate mgr
 
 alt permission allowed
-  ref over mgr : SAF-01 CHECK Permission <back:#9CCC65>PERMISSIVE</back>
+  ref over mgr : SAF-01 CHECK Permission(tool_name, safety_mode) <back:#9CCC65>PERMISSIVE</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

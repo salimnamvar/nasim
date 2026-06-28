@@ -74,9 +74,7 @@ end
 storage --> store : 200 OK
 deactivate storage
 
-ref over store : SSN-04 RESTORE Session
-  ' Session lifecycle: SAVED → RESTORED (#1E88E5) → ACTIVE (#43A047)
-  ' Owned by: API-03 GET Session (SM/README.md)
+ref over store : SSN-04 RESTORE Session({session_id}) <back:#43A047>ACTIVE</back>
 
 store --> router : 200 OK
 deactivate store

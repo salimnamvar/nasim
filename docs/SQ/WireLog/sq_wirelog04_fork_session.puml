@@ -51,9 +51,7 @@ alt fork succeeds
   fork_mgr --> wl : 200 OK
   deactivate fork_mgr
 
-  ref over fork_mgr : WRL-04 FORK Session
-    ' Session lifecycle: ACTIVE → BRANCHED (#7B1FA2)
-    ' Owned by: WRL-04 FORK Session (SM/README.md)
+  ref over fork_mgr : WRL-04 FORK Session({source_session_id, fork_turn}) <back:#7B1FA2>BRANCHED</back>
 
   wl --> router : 200 OK
   deactivate wl

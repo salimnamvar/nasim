@@ -39,7 +39,7 @@ router -> mgr : SBX-04 LIMIT Resources({cgroup_id, quotas})
 activate mgr
 
 alt limits set
-  ref over mgr : SBX-04 LIMIT Resources({cgroup_id, quotas})
+  ref over mgr : SBX-04 LIMIT Resources({cgroup_id, quotas}) <back:#FF5722>RESOURCE_EXCEEDED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

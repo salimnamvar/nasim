@@ -39,7 +39,7 @@ router -> injector : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_tu
 activate injector
 
 alt injection succeeds
-  ref over injector : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
+  ref over injector : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns}) <back:#C5CAE9>CHECKING</back>({task_id, remaining_turns, max_turns})
   injector --> router : 200 OK
   deactivate injector
   router --> iface : 200 OK

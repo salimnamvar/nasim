@@ -39,7 +39,7 @@ router -> mgr : VCS-01 READ Git Status({repo_path})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : VCS-01 READ Git Status
+  ref over mgr : VCS-01 READ Git Status({repo_path}) <back:#B2DFDB>TOOL_EXEC</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

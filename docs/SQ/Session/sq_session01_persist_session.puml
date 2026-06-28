@@ -74,9 +74,7 @@ end
 storage --> store : 200 OK
 deactivate storage
 
-ref over store : SSN-01 PERSIST Session
-  ' Session lifecycle: ACTIVE → SAVED (#1565C0)
-  ' Owned by: API-04 UPDATE Session (SM/README.md)
+ref over store : SSN-01 PERSIST Session({session_id}) <back:#1565C0>SAVED</back>
 
 store --> router : 200 OK
 deactivate store

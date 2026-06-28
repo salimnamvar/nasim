@@ -39,7 +39,7 @@ router -> coord : EVL-06 COORDINATE Retry({task_id, attempt})
 activate coord
 
 alt retry_succeeds
-  ref over coord : EVL-06 COORDINATE Retry
+  ref over coord : EVL-06 COORDINATE Retry({task_id, retry_count}) <back:#C62828>RETRYING</back>
   coord --> router : 200 OK
   deactivate coord
   router --> iface : 200 OK

@@ -39,9 +39,7 @@ router -> mgr : PRV-01 REGISTER Provider({config})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PRV-01 REGISTER Provider
-    ' Provider lifecycle: REGISTERING (#29B6F6) → ACTIVE (#03A9F4)
-    ' Owned by: PRV-01 REGISTER Provider (SM/README.md)
+  ref over mgr : PRV-01 REGISTER Provider({config}) <back:#03A9F4>ACTIVE</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

@@ -39,7 +39,7 @@ router -> runner : EVL-05 VALIDATE Test Suite({task_id, test_commands})
 activate runner
 
 alt tests_pass
-  ref over runner : EVL-05 VALIDATE Test Suite
+  ref over runner : EVL-05 VALIDATE Test Suite({task_id, test_commands}) <back:#D4E157>TESTING</back>
   runner --> router : 200 OK
   deactivate runner
   router --> iface : 200 OK

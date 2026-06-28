@@ -66,9 +66,7 @@ end
 store --> fork : 200 OK — {session_data}
 deactivate store
 
-ref over fork : SSN-08 BRANCH Session
-  ' Session lifecycle: ACTIVE → BRANCHED (#7B1FA2)
-  ' Owned by: WRL-04 FORK Session (SM/README.md)
+ref over fork : SSN-08 BRANCH Session({session_id}, {from_turn}) <back:#7B1FA2>BRANCHED</back>
 
 fork -> store : SSN-08 INSERT BranchSession({session_id}, {branch_id}, {from_turn})
 activate store

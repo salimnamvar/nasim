@@ -39,7 +39,7 @@ router -> mgr : RTG-03 CLASSIFY Task(task_description, context)
 activate mgr
 
 alt classification succeeds
-  ref over mgr : RTG-03 CLASSIFY Task <back:#5C6BC0>CLASSIFYING</back>
+  ref over mgr : RTG-03 CLASSIFY Task(task_description) <back:#5C6BC0>CLASSIFYING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

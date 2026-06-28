@@ -74,9 +74,7 @@ end
 storage --> store : 200 OK — removed
 deactivate storage
 
-ref over store : SSN-09 DELETE Session
-  ' Session lifecycle: ACTIVE → CLOSED (#757575)
-  ' Owned by: API-05 DELETE Session (SM/README.md)
+ref over store : SSN-09 DELETE Session({session_id}) <back:#757575>CLOSED</back>
 
 store --> router : 200 OK — delete_confirmed({session_id})
 deactivate store

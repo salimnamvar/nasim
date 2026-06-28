@@ -39,7 +39,7 @@ router -> mgr : HK-04 DISPATCH Pre-LLM Hook({messages})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : HK-04 DISPATCH Pre-LLM Hook({messages})
+  ref over mgr : HK-04 DISPATCH Pre-LLM Hook({messages}) <back:#FFFDE7>HOOK_RUNNING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

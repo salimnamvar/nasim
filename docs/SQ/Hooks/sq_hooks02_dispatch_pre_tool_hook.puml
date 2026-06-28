@@ -39,7 +39,7 @@ router -> mgr : HK-02 DISPATCH Pre-Tool Hook({tool_name, args})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : HK-02 DISPATCH Pre-Tool Hook({tool_name, args})
+  ref over mgr : HK-02 DISPATCH Pre-Tool Hook({tool_name, args}) <back:#FFFDE7>HOOK_RUNNING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

@@ -39,7 +39,7 @@ router -> reviewer : EVL-04 VALIDATE With LLM({task_id, artifact})
 activate reviewer
 
 alt llm_approves
-  ref over reviewer : EVL-04 VALIDATE With LLM
+  ref over reviewer : EVL-04 VALIDATE With LLM({task_id, prompt}) <back:#AB47BC>REVIEWING</back>
   reviewer --> router : 200 OK
   deactivate reviewer
   router --> iface : 200 OK

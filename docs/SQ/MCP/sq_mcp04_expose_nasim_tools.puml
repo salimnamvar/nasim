@@ -45,7 +45,7 @@ svc -> mgr : MCP-04 EXPOSE nasim Tools({})
 activate mgr
 
 alt server_started
-  ref over mgr : MCP-04 EXPOSE nasim Tools
+  ref over mgr : MCP-04 EXPOSE nasim Tools({}) <back:#66BB6A>RUNNING</back>
   mgr --> svc : 200 OK
   deactivate mgr
   svc --> router : 200 OK

@@ -39,7 +39,7 @@ router -> mgr : SBX-03 MONITOR Process({process_id, limits})
 activate mgr
 
 alt normal completion
-  ref over mgr : SBX-03 MONITOR Process({process_id, limits})
+  ref over mgr : SBX-03 MONITOR Process({process_id, limits}) <back:#64B5F6>MONITORING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

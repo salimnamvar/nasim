@@ -39,7 +39,7 @@ router -> mgr : SBX-01 ISOLATE Command({command, policy})
 activate mgr
 
 alt execution succeeds
-  ref over mgr : SBX-01 ISOLATE Command({command, policy})
+  ref over mgr : SBX-01 ISOLATE Command({command, policy}) <back:#2196F3>EXECUTING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

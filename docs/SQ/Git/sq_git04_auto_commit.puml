@@ -39,7 +39,7 @@ router -> mgr : VCS-04 AUTO-COMMIT Repo({repo_path, stage_all})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : VCS-04 AUTO-COMMIT
+  ref over mgr : VCS-04 AUTO-COMMIT({repo_path, stage_all}) <back:#B2DFDB>TOOL_EXEC</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

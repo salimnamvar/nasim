@@ -39,7 +39,7 @@ router -> signal : EVL-07 RECORD Quality Signal({task_id, score, signals})
 activate signal
 
 alt recording succeeds
-  ref over signal : EVL-07 RECORD Quality Signal({task_id, score, signals})
+  ref over signal : EVL-07 RECORD Quality Signal({task_id, score, signals}) <back:#FF8A65>SCORING</back>({task_id, score, signals})
   signal --> router : 200 OK
   deactivate signal
   router --> iface : 200 OK

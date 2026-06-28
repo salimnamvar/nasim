@@ -39,7 +39,7 @@ router -> eng : EVL-01 EVALUATE Task({task_id, check_commands})
 activate eng
 
 alt all_checks_pass
-  ref over eng : EVL-01 EVALUATE Task
+  ref over eng : EVL-01 EVALUATE Task({task_id, check_commands}) <back:#C5CAE9>CHECKING</back>
   eng --> router : 200 OK
   deactivate eng
   router --> iface : 200 OK

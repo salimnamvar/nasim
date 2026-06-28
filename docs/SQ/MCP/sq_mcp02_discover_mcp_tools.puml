@@ -45,7 +45,7 @@ svc -> mgr : MCP-02 DISCOVER MCP Tools({connection})
 activate mgr
 
 alt tools_discovered
-  ref over mgr : MCP-02 DISCOVER MCP Tools
+  ref over mgr : MCP-02 DISCOVER MCP Tools({connection}) <back:#00BCD4>CONNECTED</back>
   mgr --> svc : 200 OK
   deactivate mgr
   svc --> router : 200 OK

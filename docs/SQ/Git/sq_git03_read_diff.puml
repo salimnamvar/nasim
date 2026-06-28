@@ -39,7 +39,7 @@ router -> mgr : VCS-03 READ Diff({repo_path, base, head})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : VCS-03 READ Diff
+  ref over mgr : VCS-03 READ Diff({repo_path, ref_spec}) <back:#B2DFDB>TOOL_EXEC</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

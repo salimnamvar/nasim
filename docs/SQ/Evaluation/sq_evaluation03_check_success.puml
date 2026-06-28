@@ -39,7 +39,7 @@ router -> runner : EVL-03 CHECK Success({task_id, check_criteria})
 activate runner
 
 alt all_checks_pass
-  ref over runner : EVL-03 CHECK Success
+  ref over runner : EVL-03 CHECK Success({task_id}) <back:#C5CAE9>CHECKING</back>
   runner --> router : 200 OK
   deactivate runner
   router --> iface : 200 OK

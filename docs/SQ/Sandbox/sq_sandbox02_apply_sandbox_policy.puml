@@ -39,7 +39,7 @@ router -> mgr : SBX-02 APPLY Sandbox Policy({policy_path})
 activate mgr
 
 alt policy applied
-  ref over mgr : SBX-02 APPLY Sandbox Policy({policy_path})
+  ref over mgr : SBX-02 APPLY Sandbox Policy({policy_path}) <back:#78909C>IDLE</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
