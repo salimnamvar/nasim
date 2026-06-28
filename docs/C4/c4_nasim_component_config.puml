@@ -15,8 +15,7 @@
 !include common/c4_styles.puml
 !theme plain
 
-
-title NASIM Application — Config Component Diagram
+title NASIM Application — Load Config Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(config_group, "Config Group") <<repository>> {
@@ -29,7 +28,7 @@ System_Ext(global_config, "Global Config", "~/.nasim/config.yaml")
 System_Ext(project_config, "Project Config", ".nasim/config.yaml")
 System_Ext(env_vars, "Environment Variables", "NASIM_* env vars")
 
-Rel(config_loader, global_config, "reads global defaults")
+Rel(config_loader, global_config, "reads global defaults (activate config / deactivate config)")
 Rel(config_loader, project_config, "reads project overrides")
 Rel(config_loader, env_vars, "reads environment overrides")
 Rel(config_loader, config_schema, "produces validated Config instance")
@@ -41,4 +40,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "ConfigLoader" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

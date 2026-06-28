@@ -15,8 +15,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Git Component Diagram
+title NASIM Application — Snapshot Git Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(git_group, "Git Group") <<repository>> {
@@ -28,7 +27,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 
 System_Ext(git_repo, "Git Repository", "Version control for project files")
 
-Rel(git_integration, git_status, "reads current repository state")
+Rel(git_integration, git_status, "reads current repository state (activate git / deactivate git)")
 Rel(git_integration, git_commit, "creates versioned commits")
 Rel(git_status, git_repo, "reads working tree state and staged changes")
 Rel(git_commit, git_repo, "creates versioned snapshots of project changes")
@@ -40,4 +39,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_REPO participant "GitRepository" as repo
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

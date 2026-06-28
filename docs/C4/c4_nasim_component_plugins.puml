@@ -15,8 +15,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Plugins Component Diagram
+title NASIM Application — Discover Plugins Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(plugins_group, "Plugins Group") <<infrastructure>> {
@@ -28,7 +27,7 @@ System_Ext(plugin_dir, "Plugin Directory", "~/.nasim/plugins/")
 System_Ext(tool_registry, "ToolRegistry", "Tool Group")
 System_Ext(hook_manager, "HookManager", "Hooks Group")
 
-Rel(plugin_loader, plugin_dir, "discovers plugin manifests at startup")
+Rel(plugin_loader, plugin_dir, "discovers plugin manifests at startup (activate plugin / deactivate plugin)")
 Rel(plugin_loader, tool_registry, "registers plugin tools into Tool Registry")
 Rel(plugin_loader, hook_manager, "registers plugin hooks into Hook Manager")
 
@@ -39,4 +38,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "PluginLoader" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

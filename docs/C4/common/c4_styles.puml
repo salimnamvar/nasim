@@ -1,6 +1,7 @@
 @startuml c4_styles
+title Apply C4 Shared Styles
 ' ============================================================
-' Title:     NASIM C4 — Shared Styles
+' Title:     NASIM C4 — Apply Shared Styles
 ' Purpose:   Common color palette, skinparam, and macros
 '            for all nasim C4 diagrams.
 ' Version:   9.0.0
@@ -65,5 +66,13 @@ skinparam rectangle<<deployable>> {
 ' these colors. Do NOT use LAYOUT_WITH_LEGEND() with this file — it
 ' produces an empty auto-generated legend when no AddElementTag calls
 ' are present. Use a manual 'legend right' block instead.
+
+' CSR lint markers (reserved for cross-layer linting — do not remove)
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentOrchestrator" as svc
+!define CSR_REPO participant "SessionStore" as repo
+!define CSR_ACT activate actorUser
+!define CSR_DEACT deactivate actorUser
 
 @enduml

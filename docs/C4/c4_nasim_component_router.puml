@@ -15,8 +15,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Router Component Diagram
+title NASIM Application — Request Router Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(router_group, "Router Group") <<service>> {
@@ -28,7 +27,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 System_Ext(provider, "Provider", "Provider Group")
 
-Rel(agent_orch, model_router, "route model selection")
+Rel(agent_orch, model_router, "route model selection (activate router / deactivate router)")
 Rel(model_router, provider, "route to provider")
 Rel(model_router, fallback_chain, "trigger failover")
 Rel(fallback_chain, provider, "failover to next provider")
@@ -40,4 +39,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "ModelRouter" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

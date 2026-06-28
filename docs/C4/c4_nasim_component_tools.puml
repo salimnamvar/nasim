@@ -17,8 +17,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Tools Component Diagram
+title NASIM Application — Dispatch Tools Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(tool_group, "Tool Group") <<repository>> {
@@ -50,7 +49,7 @@ System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
 System_Ext(git_repo, "Git Repository", "Version-controlled project files")
 System_Ext(lsp_server, "LSP Server", "Language server for code intelligence")
 
-Rel(tool_registry, tool_abc, "manages tool instances via ABC interface")
+Rel(tool_registry, tool_abc, "manages tool instances via ABC interface (activate tool / deactivate tool)")
 Rel(file_tools, tool_abc, "extends")
 Rel(search_tools, tool_abc, "extends")
 Rel(shell_tool, tool_abc, "extends")
@@ -84,4 +83,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_REPO participant "ToolRegistry" as repo
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

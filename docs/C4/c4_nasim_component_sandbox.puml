@@ -15,8 +15,7 @@
 !include common/c4_styles.puml
 !theme plain
 
-
-title NASIM Application — Sandbox Component Diagram
+title NASIM Application — Isolate Sandbox Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(sandbox_group, "Sandbox Group") <<infrastructure>> {
@@ -34,7 +33,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 System_Ext(host_shell, "Host Shell", "subprocess execution")
 System_Ext(host_fs, "Host Filesystem", "restricted mount points")
 
-Rel(sandbox_executor, sandbox_policy, "applies policy constraints before execution")
+Rel(sandbox_executor, sandbox_policy, "applies policy constraints before execution (activate sandbox / deactivate sandbox)")
 Rel(sandbox_executor, sandbox_monitor, "monitors running process for timeout and resources")
 Rel(sandbox_executor, resource_limiter, "configures resource limits before execution")
 Rel(sandbox_policy, resource_limiter, "defines quota rules for resource enforcement")
@@ -58,4 +57,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "SandboxExecutor" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

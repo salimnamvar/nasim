@@ -27,9 +27,8 @@
 !theme plain
 !include common/c4_styles.puml
 
-
 LAYOUT_LEFT_RIGHT()
-title NASIM Application — Core Layer Overview
+title NASIM Application — Stream Core Layer Overview
 
 Person(user, "User", "Developer using NASIM")
 
@@ -106,7 +105,7 @@ System_Ext(project_config, "Project Config", ".nasim/config.yaml")
 System_Ext(env_vars, "Environment Variables", "NASIM_* env vars")
 
 ' ── Entry points ──
-Rel(user, repl_session, "types commands", "terminal REPL")
+Rel(user, repl_session, "types commands (activate user / deactivate user)", "terminal REPL")
 Rel(user, server_router, "sends requests", "HTTP/JSON + SSE")
 Rel(repl_session, agent_orch, "delegates user tasks", "UC AGT-01")
 Rel(server_router, agent_orch, "delegates HTTP tasks", "UC AGT-01")
@@ -157,4 +156,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | — (see infrastructure diagram) |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "CoreSystem" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

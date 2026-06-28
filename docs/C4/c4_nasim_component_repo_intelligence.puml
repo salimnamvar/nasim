@@ -22,8 +22,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Repo Intelligence Component Diagram
+title NASIM Application — Index Repo Intelligence Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(repo_intel_group, "Repo Intelligence Group") <<repository>> {
@@ -41,7 +40,7 @@ System_Ext(embedding_model, "Embedding Model", "Code embedding model (local or A
 System_Ext(vector_store, "Vector Store", "Persistent vector storage for code embeddings")
 System_Ext(host_fs, "Host Filesystem", "Source code files to index")
 
-Rel(repo_intel_mgr, ast_index_adapter, "indexes source files for symbol extraction")
+Rel(repo_intel_mgr, ast_index_adapter, "indexes source files for symbol extraction (activate repo / deactivate repo)")
 Rel(repo_intel_mgr, symbol_graph, "builds cross-file reference graph")
 Rel(repo_intel_mgr, embedding_adapter, "generates code embeddings for vectors")
 Rel(repo_intel_mgr, semantic_search_svc, "performs vector search with relevance ranking")
@@ -63,4 +62,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_REPO participant "SymbolGraph" as repo
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

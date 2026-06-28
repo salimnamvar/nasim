@@ -17,8 +17,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Provider Component Diagram
+title NASIM Application — Register Provider Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(provider_group, "Provider Group") <<service>> {
@@ -32,7 +31,7 @@ System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 System_Ext(model_router, "ModelRouter", "Router Group")
 System_Ext(all_llm_backends, "LLM Backends", "Unified via litellm: OpenAI, Anthropic, Google, DeepSeek, Ollama, vLLM, and 100+ providers via model string prefix")
 
-Rel(agent_orch, provider, "invokes LLM inference via provider protocol")
+Rel(agent_orch, provider, "invokes LLM inference via provider protocol (activate provider / deactivate provider)")
 Rel(model_router, provider_caps, "queries capabilities for model selection")
 Rel(provider, litellm_proxy, "delegates all LLM calls to universal proxy")
 Rel(provider, provider_caps, "exposes capability metadata to callers")
@@ -45,4 +44,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "ProviderFactory" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

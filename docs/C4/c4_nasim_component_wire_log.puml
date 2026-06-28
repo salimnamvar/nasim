@@ -15,8 +15,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Wire Log Component Diagram
+title NASIM Application — Record Wire Log Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(wire_log_group, "Wire Log Group") <<infrastructure>> {
@@ -30,7 +29,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 System_Ext(session_store, "SessionStore", "Session Group")
 System_Ext(wire_log_dir, "Wire Log Storage", "~/.nasim/wire-logs/<session-id>/")
 
-Rel(wire_log, wire_appender, "delegates entry appending to appender")
+Rel(wire_log, wire_appender, "delegates entry appending to appender (activate wirelog / deactivate wirelog)")
 Rel(wire_log, wire_reader, "delegates entry reading to reader")
 Rel(wire_log, session_fork_mgr, "enables session forking from recorded turns")
 Rel(wire_appender, wire_log_dir, "writes log files to storage")
@@ -44,4 +43,13 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "StructuredLogger" as svc
+!define CSR_REPO participant "WireLog" as repo
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

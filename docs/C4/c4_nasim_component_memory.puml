@@ -15,8 +15,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Memory Component Diagram
+title NASIM Application — Persist Memory Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(memory_group, "Memory Group") <<repository>> {
@@ -33,7 +32,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 
 System_Ext(memory_backend, "Memory Backend", "Persistent storage for knowledge entries")
 
-Rel(memory_store, memory_index, "indexes new entries for search")
+Rel(memory_store, memory_index, "indexes new entries for search (activate memory / deactivate memory)")
 Rel(memory_store, memory_backend, "reads and writes persistent storage")
 Rel(memory_scope, memory_store, "filters entries by scope")
 Rel(episodic_mem_adapter, memory_store, "persists episodic memory entries")
@@ -51,4 +50,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_REPO participant "MemoryStore" as repo
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

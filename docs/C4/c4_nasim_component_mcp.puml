@@ -15,8 +15,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — MCP Component Diagram
+title NASIM Application — Connect MCP Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(mcp_group, "MCP Group") <<infrastructure>> {
@@ -31,7 +30,7 @@ System_Ext(mcp_server, "MCP Server", "External extension tools")
 System_Ext(mcp_client, "MCP Client", "External tool consumers")
 System_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
-Rel(mcp_client_rt, mcp_server, "invokes extension tool operations on external MCP servers")
+Rel(mcp_client_rt, mcp_server, "invokes extension tool operations on external MCP servers (activate mcp / deactivate mcp)")
 Rel(mcp_client_rt, mcp_discovery, "discovers available tools at startup")
 Rel(mcp_discovery, mcp_tool_adapter, "registers discovered tools for adaptation")
 Rel(mcp_tool_adapter, tool_registry, "registers adapted tools into Tool Registry")
@@ -45,4 +44,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "MCPDiscovery" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

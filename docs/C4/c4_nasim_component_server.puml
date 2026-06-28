@@ -17,8 +17,7 @@
 !include common/c4_styles.puml
 !theme plain
 
-
-title NASIM Application — API Component Diagram
+title NASIM Application — Stream API Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(api_group, "API Group") <<controller>> {
@@ -35,7 +34,7 @@ Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
 Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application")
 Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application")
 
-Rel(webapp, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
+Rel(webapp, server_router, "submits coding tasks and streams AI responses (activate api / deactivate api)", "HTTP/JSON + SSE")
 Rel(desktop_app, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 Rel(mobile_app, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
 
@@ -52,4 +51,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "SessionManager" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

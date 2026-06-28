@@ -41,7 +41,7 @@ class DocumentMerger:
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_INPUTS = ["docs/C4", "docs/SQ", "docs/UC", "docs/SM"]
+DEFAULT_INPUTS = ["docs/C4", "docs/SQ", "docs/UC", "docs/SM", "/home/salim/prj/salim/nasim/code/nasim/.nasim/agents/team-one"]
 DEFAULT_OUTPUTS = [PROJECT_ROOT / f"{Path(d).name}_Diagrams.md" for d in DEFAULT_INPUTS]
 
 

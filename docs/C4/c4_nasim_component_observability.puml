@@ -17,8 +17,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Observability Component Diagram
+title NASIM Application — Track Observability Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(observability_group, "Observability Group") <<infrastructure>> {
@@ -44,7 +43,7 @@ System_Ext(stdout, "stdout", "Standard output stream")
 System_Ext(otel_collector, "OTel Collector", "OTLP/gRPC endpoint for optional trace and metric export")
 System_Ext(prometheus, "Prometheus", "Metrics collection and storage")
 
-Rel(agent_orch, structured_logger, "emits agent lifecycle events to structured log")
+Rel(agent_orch, structured_logger, "emits agent lifecycle events to structured log (activate log / deactivate log)")
 Rel(agent_orch, metrics_collector, "records token usage, latency, and tool call metrics")
 Rel(agent_orch, context_propagator, "obtains trace context for event correlation")
 Rel(agent_orch, wire_log, "appends domain events to wire log")
@@ -87,4 +86,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "StructuredLogger" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

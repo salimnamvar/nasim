@@ -18,8 +18,7 @@
 !include common/c4_styles.puml
 !theme plain
 
-
-title NASIM Application — CLI Component Diagram
+title NASIM Application — Process CLI Component Diagram
 
 Person(user, "User", "Developer using NASIM Application")
 
@@ -35,7 +34,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 System_Ext(config_loader, "ConfigLoader", "Config Group")
 
-Rel(user, repl_session, "types commands", "terminal REPL")
+Rel(user, repl_session, "types commands (activate user / deactivate user)", "terminal REPL")
 Rel(repl_session, agent_orch, "delegates agent tasks to orchestrator")
 Rel(repl_session, renderer, "converts AgentEvents to terminal output")
 Rel(repl_session, slash_handler, "forwards parsed /cmd to dispatch handler")
@@ -49,4 +48,11 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ArgParser" as ctrl
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

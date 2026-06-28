@@ -26,9 +26,8 @@
 !theme plain
 !include common/c4_styles.puml
 
-
 LAYOUT_LEFT_RIGHT()
-title NASIM Application — Infrastructure Layer Overview
+title NASIM Application — Stream Infrastructure Layer Overview
 
 Person(user, "User", "Developer using NASIM")
 
@@ -86,7 +85,7 @@ System_Ext(session_store, "SessionStore", "Session Group")
 System_Ext(config_loader, "ConfigLoader", "Config Group")
 
 ' ── Entry points ──
-Rel(user, repl_session, "types commands", "terminal REPL")
+Rel(user, repl_session, "types commands (activate user / deactivate user)", "terminal REPL")
 Rel(user, server_router, "sends requests", "HTTP/JSON + SSE")
 Rel(repl_session, agent_orch, "delegates user tasks", "UC AGT-01")
 Rel(server_router, agent_orch, "delegates HTTP tasks", "UC AGT-01")
@@ -130,4 +129,12 @@ legend right
     Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "InfraSystem" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

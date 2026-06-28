@@ -15,8 +15,7 @@
 !include common/c4_styles.puml
 !theme plain
 
-
-title NASIM Application — Safety Component Diagram
+title NASIM Application — Validate Safety Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(safety_group, "Safety Group") <<service>> {
@@ -30,7 +29,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 System_Ext(tool_registry, "ToolRegistry", "Tool Group")
 
-Rel(agent_orch, safety_coord, "validates before tool dispatch")
+Rel(agent_orch, safety_coord, "validates before tool dispatch (activate safety / deactivate safety)")
 Rel(safety_coord, permission_gate, "evaluates tool safety flags against session policy")
 Rel(safety_coord, injection_scanner, "scans tool outputs for prompt injection patterns")
 Rel(safety_coord, egress_inspector, "inspects outbound data for policy violations")
@@ -43,4 +42,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "SafetyCoordinator" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

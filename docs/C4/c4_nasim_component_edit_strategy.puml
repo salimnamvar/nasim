@@ -17,8 +17,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Edit Strategy Component Diagram
+title NASIM Application — Select Edit Strategy Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(edit_strategy_group, "Edit Strategy Group") <<service>> {
@@ -39,7 +38,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 System_Ext(diff_sandbox_mgr, "DiffSandboxManager", "Sandbox Group")
 System_Ext(host_fs, "Host Filesystem", "Target files for editing")
 
-Rel(edit_strategy_mgr, strategy_selector, "queries optimal strategy for edit context")
+Rel(edit_strategy_mgr, strategy_selector, "queries optimal strategy for edit context (activate strategy / deactivate strategy)")
 Rel(edit_strategy_mgr, edit_strategy, "delegates edit execution to selected strategy ABC")
 Rel(search_replace_coder, edit_strategy, "extends")
 Rel(whole_file_coder, edit_strategy, "extends")
@@ -66,4 +65,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "StrategySelector" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

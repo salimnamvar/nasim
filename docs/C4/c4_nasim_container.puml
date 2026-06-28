@@ -18,10 +18,9 @@
 !include common/c4_styles.puml
 !theme plain
 
-
 LAYOUT_TOP_DOWN()
 
-title NASIM Application — Container Diagram
+title NASIM Application — Stream Container Diagram
 
 Person(user, "User", "Developer using NASIM Application as an AI coding assistant")
 
@@ -41,7 +40,7 @@ System_Ext(host_fs, "Host Filesystem", "Project source code, configuration, docu
 System_Ext(host_shell, "Host Shell", "OS-level subprocess execution for shell commands")
 System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM Application via Model Context Protocol")
 
-Rel(user, cli_process, "runs coding tasks", "terminal REPL")
+Rel(user, cli_process, "runs coding tasks (activate user / deactivate user)", "terminal REPL")
 Rel(user, webapp, "interacts via browser", "HTTPS")
 Rel(user, desktop_app, "interacts via desktop app", "local")
 Rel(user, mobile_app, "interacts via mobile app", "HTTPS")
@@ -66,4 +65,13 @@ legend right
     | System_Ext | External system or service outside the boundary |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentOrchestrator" as svc
+!define CSR_REPO participant "SessionStore" as repo
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

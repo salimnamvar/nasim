@@ -15,8 +15,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Session Component Diagram
+title NASIM Application — Recall Session Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(session_group, "Session Group") <<repository>> {
@@ -29,7 +28,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
 
 System_Ext(session_dir, "Session Directory", "~/.nasim/sessions/<session-id>/")
 
-Rel(session_store, session_dir, "reads and writes JSON Lines files")
+Rel(session_store, session_dir, "reads and writes JSON Lines files (activate session / deactivate session)")
 Rel(session_versioning, session_store, "creates snapshots and restores state")
 Rel(session_search, session_store, "indexes and queries session content")
 Rel(session_fork, session_store, "copies session state for branching")
@@ -41,4 +40,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_REPO participant "SessionStore" as repo
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

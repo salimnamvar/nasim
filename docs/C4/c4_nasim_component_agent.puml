@@ -19,8 +19,7 @@
 !include common/c4_styles.puml
 !theme plain
 
-
-title NASIM Application — Agent Component Diagram
+title NASIM Application — Delegate Agent Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(agent_group, "Agent Group") <<service>> {
@@ -41,7 +40,7 @@ System_Ext(memory_store, "MemoryStore", "Memory Group")
 System_Ext(structured_logger, "StructuredLogger", "Observability Group")
 System_Ext(safety_coord, "SafetyCoordinator", "Safety Group")
 
-Rel(agent_orch, provider, "invokes LLM inference for task completion")
+Rel(agent_orch, provider, "invokes LLM inference for task completion (activate agent / deactivate agent)")
 Rel(agent_orch, tool_registry, "dispatches tool calls for execution")
 Rel(agent_orch, conv_history, "persists and retrieves conversation messages")
 Rel(agent_orch, safety_coord, "validates before tool dispatch")
@@ -63,4 +62,13 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentOrchestrator" as svc
+!define CSR_REPO participant "SessionStore" as repo
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

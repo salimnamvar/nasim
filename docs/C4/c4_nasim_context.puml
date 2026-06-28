@@ -36,10 +36,9 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
 !theme plain
 
-
 LAYOUT_LEFT_RIGHT()
 
-title NASIM Application — System Context
+title NASIM Application — Stream System Context
 
 Person(user, "User", "Developer using NASIM Application as an AI coding assistant")
 
@@ -55,7 +54,7 @@ System_Ext(git_repo, "Git Repository", "Version-controlled project files: branch
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter (AST parsing), LSP Server (code intelligence), Embedding Model (vector generation), Vector Store (similarity search)")
 System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana, OTel Collector: NASIM Application emits; platform owns collection, storage, visualization")
 
-Rel(user, nasim_application, "submits coding tasks and receives AI-generated changes, suggestions, and answers")
+Rel(user, nasim_application, "submits coding tasks and receives AI-generated changes, suggestions, and answers (activate user / deactivate user)")
 Rel(nasim_application, llm_backend, "sends context and receives code completions")
 Rel(nasim_application, host_fs, "reads, writes, and searches project files and plugins")
 Rel(nasim_application, sandbox, "runs untrusted commands in OS-level isolation")
@@ -73,4 +72,11 @@ legend right
     | System_Ext | External system or service outside the boundary |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

@@ -15,8 +15,7 @@
 !theme plain
 !include common/c4_styles.puml
 
-
-title NASIM Application — Hooks Component Diagram
+title NASIM Application — Dispatch Hooks Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(hooks_group, "Hooks Group") <<infrastructure>> {
@@ -28,7 +27,7 @@ System_Ext(agent_orch, "AgentOrchestrator", "Agent Group")
 System_Ext(tool_registry, "ToolRegistry", "Tool Group")
 System_Ext(plugin_loader, "PluginLoader", "Plugins Group")
 
-Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall lifecycle hooks")
+Rel(agent_orch, hook_manager, "triggers PreToolUse, PostToolUse, PreLLMCall, PostLLMCall lifecycle hooks (activate hooks / deactivate hooks)")
 Rel(plugin_loader, hook_manager, "registers plugin hooks at startup")
 Rel(hook_manager, tool_registry, "queries tool metadata for hook dispatch decisions")
 
@@ -39,4 +38,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "HookManager" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml

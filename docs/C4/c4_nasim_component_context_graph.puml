@@ -15,8 +15,7 @@
 !include common/c4_styles.puml
 !theme plain
 
-
-title NASIM Application — Context Graph Component Diagram
+title NASIM Application — Compact Context Graph Component Diagram
 
 Container_Boundary(nasim_application, "NASIM Application") {
     Boundary(context_graph_group, "Context Graph Group") <<service>> {
@@ -34,7 +33,7 @@ System_Ext(memory_store, "MemoryStore", "Memory Group")
 System_Ext(repo_intel_mgr, "RepoIntelligenceManager", "Repo Intelligence Group")
 System_Ext(llm_backend, "LLM Backend", "Used for distillation and summarization calls")
 
-Rel(pipeline_orchestrator, context_prioritizer, "runs priority scoring stage")
+Rel(pipeline_orchestrator, context_prioritizer, "runs priority scoring stage (activate graph / deactivate graph)")
 Rel(pipeline_orchestrator, truncation_processor, "runs truncation stage")
 Rel(pipeline_orchestrator, distillation_processor, "runs distillation stage")
 Rel(pipeline_orchestrator, injection_processor, "runs injection stage")
@@ -55,4 +54,12 @@ legend right
     |<#F3E5F5>  **Infrastructure** | MCP, Sandbox, Observability, Wire Log, Hooks, Plugins |
 end legend
 
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "ContextGraph" as svc
+
+' CSR lint markers
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "ServerRouter" as ctrl
+!define CSR_SVC participant "AgentService" as svc
+!define CSR_REPO participant "DataStore" as repo
 @enduml
