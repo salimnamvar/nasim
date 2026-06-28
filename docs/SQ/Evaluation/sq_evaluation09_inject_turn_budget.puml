@@ -31,9 +31,9 @@ end box
 
 == EVL-09 INJECT Turn Budget ==
 
-user -> iface : POST /evaluation/turn-budget
+user -> iface : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
 activate iface
-iface -> router : POST /evaluation/turn-budget
+iface -> router : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
 activate router
 router -> injector : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
 activate injector

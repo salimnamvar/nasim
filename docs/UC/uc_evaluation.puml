@@ -73,9 +73,9 @@ rectangle "nasim" {
     usecase "**EVL-04 VALIDATE With LLM**\n--\nLLM-based code review\nand quality assessment" <<include>> as EVL04
     usecase "**EVL-05 VALIDATE Test Suite**\n--\nRun project test suites" <<include>> as EVL05
     usecase "**EVL-06 COORDINATE Retry**\n--\nCoordinate retry with\nbackoff and escalation" <<include>> as EVL06
-    usecase "**EVL-07 RECORD Quality Signal**\n--\nProduce accept/reject\nwith feedback" <<master>> as EVL07
-    usecase "**EVL-08 DETECT Repetition**\n--\nDetect repeated failures\nor loops" <<master>> as EVL08
-    usecase "**EVL-09 INJECT Turn Budget**\n--\nInject turn budget limits\ninto context" <<master>> as EVL09
+    usecase "**EVL-07 RECORD Quality Signal**\n--\nProduce accept/reject\nwith feedback" <<include>> as EVL07
+    usecase "**EVL-08 DETECT Repetition**\n--\nDetect repeated failures\nor loops" <<include>> as EVL08
+    usecase "**EVL-09 INJECT Turn Budget**\n--\nInject turn budget limits\ninto context" <<include>> as EVL09
   }
 }
 
@@ -86,9 +86,6 @@ rectangle "nasim" {
 
 
 User --> EVL01
-User --> EVL07
-User --> EVL08
-User --> EVL09
 
 
 ' ------------------------------------------------------------
@@ -101,6 +98,9 @@ EVL01 ..> EVL03 : <<include>>
 EVL01 ..> EVL04 : <<include>>
 EVL01 ..> EVL05 : <<include>>
 EVL01 ..> EVL06 : <<include>>
+EVL01 ..> EVL07 : <<include>>
+EVL01 ..> EVL08 : <<include>>
+EVL01 ..> EVL09 : <<include>>
 
 
 

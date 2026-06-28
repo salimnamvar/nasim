@@ -33,23 +33,23 @@ database "ConfigStorage" as storage
 
 == API-10 GET Config ==
 
-user -> iface : GET /v1/config
+user -> iface : API-10 GET Config({})
 activate iface
-iface -> router : GET /v1/config
+iface -> router : API-10 GET Config({})
 activate router
 
-router -> loader : API-10 GET Config()
+router -> loader : API-10 GET Config({})
 activate loader
 
-loader -> storage : API-10 GET Config()
+loader -> storage : API-10 GET Config({})
 activate storage
 
 alt config not found
-    storage --> loader : FileNotFoundError
+    storage --> loader : 404 NOT_FOUND\n{error: {code: "API-10_CONFIG_NOT_FOUND", message: "Configuration not found", status: 404}}
     deactivate storage
     loader --> router : 404 NOT_FOUND
-    router --> iface : 404 Not Found
-    iface --> user : 404 Not Found
+    router --> iface : 404 NOT_FOUND
+    iface --> user : 404 NOT_FOUND
     deactivate loader
     deactivate router
     deactivate iface

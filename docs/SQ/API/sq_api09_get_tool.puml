@@ -31,18 +31,18 @@ end box
 
 == API-09 GET Tool ==
 
-user -> iface : GET /v1/tools/{name}
+user -> iface : API-09 GET Tool({name})
 activate iface
-iface -> router : GET /v1/tools/{name}
+iface -> router : API-09 GET Tool({name})
 activate router
 
 router -> registry : API-09 GET Tool({name})
 activate registry
 
 alt tool not found
-    registry --> router : 404 NOT_FOUND
-    router --> iface : 404 Not Found
-    iface --> user : 404 Not Found
+    registry --> router : 404 NOT_FOUND\n{error: {code: "API-09_TOOL_NOT_FOUND", message: "Tool not found", status: 404}}
+    router --> iface : 404 NOT_FOUND
+    iface --> user : 404 NOT_FOUND
     deactivate registry
     deactivate router
     deactivate iface

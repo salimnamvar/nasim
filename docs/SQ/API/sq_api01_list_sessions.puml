@@ -33,18 +33,18 @@ database "SessionStorage" as storage
 
 == API-01 LIST Sessions ==
 
-user -> iface : GET /v1/sessions
+user -> iface : API-01 LIST Sessions({pageSize, pageToken})
 activate iface
-iface -> router : GET /v1/sessions
+iface -> router : API-01 LIST Sessions({pageSize, pageToken})
 activate router
 
 router -> store : API-01 LIST Sessions({pageSize, pageToken})
 activate store
 
 alt validation fails
-    store --> router : 422 Unprocessable
-    router --> iface : 422 Unprocessable
-    iface --> user : 422 Unprocessable
+    store --> router : 422 INVALID_ARGUMENT\n{error: {code: "API-01_VALIDATION_ERROR", message: "Invalid pagination parameters", status: 422}}
+    router --> iface : 422 INVALID_ARGUMENT
+    iface --> user : 422 INVALID_ARGUMENT
     deactivate store
     deactivate router
     deactivate iface

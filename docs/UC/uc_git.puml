@@ -69,7 +69,7 @@ rectangle "nasim" {
   package "Git Group (VCS)" {
     usecase "**VCS-01 READ Git Status**\n--\nRead working tree status and staged changes" <<master>> as VCS01
     usecase "**VCS-02 INSERT Commit**\n--\nCreate commits with conventional messages" <<include>> as VCS02
-    usecase "**VCS-03 READ Diff**\n--\nRead diff between working tree and HEAD" <<master>> as VCS03
+    usecase "**VCS-03 READ Diff**\n--\nRead diff between working tree and HEAD" <<include>> as VCS03
     usecase "**VCS-04 AUTO-COMMIT**\n--\nAuto-commit after file edits" <<master>> as VCS04
   }
 }
@@ -81,7 +81,6 @@ rectangle "nasim" {
 
 
 User --> VCS01
-User --> VCS03
 User --> VCS04
 
 
@@ -93,6 +92,7 @@ User --> VCS04
 
 
 VCS04 ..> VCS02 : <<include>>
+VCS04 ..> VCS03 : <<include>>
 
 
 

@@ -33,27 +33,27 @@ database "SessionStorage" as storage
 
 == API-07 LIST Messages ==
 
-user -> iface : GET /v1/sessions/{id}/messages
+user -> iface : API-07 LIST Messages({sessionId, pageSize, pageToken})
 activate iface
-iface -> router : GET /v1/sessions/{id}/messages
+iface -> router : API-07 LIST Messages({sessionId, pageSize, pageToken})
 activate router
 
 router -> store : API-07 LIST Messages({sessionId, pageSize, pageToken})
 activate store
 
 alt validation fails
-    store --> router : 422 Unprocessable
-    router --> iface : 422 Unprocessable
-    iface --> user : 422 Unprocessable
+    store --> router : 422 INVALID_ARGUMENT\n{error: {code: "API-07_VALIDATION_ERROR", message: "Invalid pagination parameters", status: 422}}
+    router --> iface : 422 INVALID_ARGUMENT
+    iface --> user : 422 INVALID_ARGUMENT
     deactivate store
     deactivate router
     deactivate iface
 end
 
 alt session not found
-    store --> router : 404 NOT_FOUND
-    router --> iface : 404 Not Found
-    iface --> user : 404 Not Found
+    store --> router : 404 NOT_FOUND\n{error: {code: "API-07_SESSION_NOT_FOUND", message: "Session not found", status: 404}}
+    router --> iface : 404 NOT_FOUND
+    iface --> user : 404 NOT_FOUND
     deactivate store
     deactivate router
     deactivate iface
@@ -63,11 +63,11 @@ store -> storage : API-07 LIST Messages({sessionId, pageSize, pageToken})
 activate storage
 
 alt disk read error
-    storage --> store : IOError
+    storage --> store : 500 INTERNAL\n{error: {code: "API-07_DISK_READ_ERROR", message: "Failed to read session messages", status: 500}}
     deactivate storage
     store --> router : 500 INTERNAL
-    router --> iface : 500 Internal Error
-    iface --> user : 500 Internal Error
+    router --> iface : 500 INTERNAL
+    iface --> user : 500 INTERNAL
     deactivate store
     deactivate router
     deactivate iface

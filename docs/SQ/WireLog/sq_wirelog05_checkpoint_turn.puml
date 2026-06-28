@@ -25,8 +25,11 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
-box "Infrastructure" INFRASTRUCTURE_COLOR
+box "Service" SERVICE_COLOR
   participant "WireLog" as wl
+end box
+
+box "Repository" REPOSITORY_COLOR
   participant "WireAppender" as appender
 end box
 
@@ -34,17 +37,17 @@ database "WireLogStorage" as storage
 
 == WRL-05 CHECKPOINT Turn ==
 
-user -> iface : POST /wirelog/checkpoint
+user -> iface : POST /v1/wirelogs:checkpoint
 activate iface
-iface -> router : POST /wirelog/checkpoint
+iface -> router : POST /v1/wirelogs:checkpoint
 activate router
-router -> wl : WRL-05 CHECKPOINT Turn(turn_data)
+router -> wl : WRL-05 CHECKPOINT Turn({turn_data})
 activate wl
 
 alt checkpoint succeeds
-  wl -> appender : WRL-05 CHECKPOINT Turn(turn_data)
+  wl -> appender : WRL-05 CHECKPOINT Turn({turn_data})
   activate appender
-  appender -> storage : WRL-05 CHECKPOINT Turn(turn_data)
+  appender -> storage : WRL-05 WRITE Turn({turn_data})
   activate storage
   storage --> appender : 200 OK
   deactivate storage
@@ -57,10 +60,14 @@ alt checkpoint succeeds
   deactivate router
   deactivate iface
 else persist failure
-  wl --> router : 422 Unprocessable
+  storage --> appender : 500 INTERNAL\n{error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  deactivate storage
+  appender --> wl : {error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  deactivate appender
+  wl --> router : {error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
   deactivate wl
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : {error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  iface --> user : {error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
   deactivate router
   deactivate iface
 end
