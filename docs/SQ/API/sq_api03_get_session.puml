@@ -33,18 +33,18 @@ database "SessionStorage" as storage
 
 == API-03 GET Session ==
 
-user -> iface : GET /v1/sessions/{id}
+user -> iface : API-03 GET Session({sessionId})
 activate iface
-iface -> router : GET /v1/sessions/{id}
+iface -> router : API-03 GET Session({sessionId})
 activate router
 
 router -> store : API-03 GET Session({sessionId})
 activate store
 
 alt validation fails
-    store --> router : 422 Unprocessable
-    router --> iface : 422 Unprocessable
-    iface --> user : 422 Unprocessable
+    store --> router : 422 UNPROCESSABLE\n{error: {code: "API-03_VALIDATION_ERROR", message: "Invalid session ID", status: 422}}
+    router --> iface : 422 UNPROCESSABLE
+    iface --> user : 422 UNPROCESSABLE
     deactivate store
     deactivate router
     deactivate iface
@@ -54,11 +54,11 @@ store -> storage : API-03 GET Session({sessionId})
 activate storage
 
 alt session not found
-    storage --> store : 404 NOT_FOUND
+    storage --> store : 404 NOT_FOUND\n{error: {code: "API-03_SESSION_NOT_FOUND", message: "Session not found", status: 404}}
     deactivate storage
     store --> router : 404 NOT_FOUND
-    router --> iface : 404 Not Found
-    iface --> user : 404 Not Found
+    router --> iface : 404 NOT_FOUND
+    iface --> user : 404 NOT_FOUND
     deactivate store
     deactivate router
     deactivate iface
@@ -68,8 +68,7 @@ storage --> store : 200 OK
 deactivate storage
 
 ref over store : API-03 GET Session
-  ' Session lifecycle: SAVED → RESTORED (#1E88E5)
-  ' Owned by: API-03 GET Session (SM/README.md)
+  <back:#1565C0>SAVED</back> → <back:#1E88E5>RESTORED</back>
 
 store --> router : 200 OK
 deactivate store

@@ -31,26 +31,26 @@ end box
 
 == CTX-04 INJECT Context ==
 
-user -> iface : POST /contextgraph/inject
+user -> iface : CTX-04 INJECT Context({query, max_results})
 activate iface
-iface -> router : POST /contextgraph/inject
+iface -> router : CTX-04 INJECT Context({query, max_results})
 activate router
 router -> inject : CTX-04 INJECT Context({query, max_results})
 activate inject
 
-alt injection succeeds
-  ref over inject : TRANSITION State(<back:#E0F2F1>COMPACTING</back>)
+alt relevant_context found
+  ref over inject : CTX-04 INJECT Context({query, max_results})
   inject --> router : 200 OK
   deactivate inject
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else injection fails
-  inject --> router : 422 Unprocessable
+else no_relevant_context
+  inject --> router : 404 NOT_FOUND\n{error: {code: "CTX-04_NO_RELEVANT_CONTEXT", message: "No relevant context found", status: 404}}
   deactivate inject
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 404 NOT_FOUND
+  iface --> user : 404 NOT_FOUND
   deactivate router
   deactivate iface
 end

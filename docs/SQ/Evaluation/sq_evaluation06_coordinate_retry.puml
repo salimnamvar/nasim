@@ -31,26 +31,27 @@ end box
 
 == EVL-06 COORDINATE Retry ==
 
-user -> iface : POST /evaluation/retry
+user -> iface : EVL-06 COORDINATE Retry({task_id, attempt})
 activate iface
-iface -> router : POST /evaluation/retry
+iface -> router : EVL-06 COORDINATE Retry({task_id, attempt})
 activate router
 router -> coord : EVL-06 COORDINATE Retry({task_id, attempt})
 activate coord
 
-alt retry succeeds
-  ref over coord : TRANSITION State(<back:#C62828>RETRYING</back>)
+alt retry_succeeds
+  ref over coord : EVL-06 COORDINATE Retry
+    <back:#C62828>RETRYING</back>
   coord --> router : 200 OK
   deactivate coord
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else retry exhausted
-  coord --> router : 422 Unprocessable
+else retry_exhausted
+  coord --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-06_RETRY_EXHAUSTED", message: "Retry attempts exhausted", status: 422}}
   deactivate coord
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

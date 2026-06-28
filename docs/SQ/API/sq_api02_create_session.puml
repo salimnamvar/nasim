@@ -33,18 +33,18 @@ database "SessionStorage" as storage
 
 == API-02 CREATE Session ==
 
-user -> iface : POST /v1/sessions
+user -> iface : API-02 CREATE Session({sessionData})
 activate iface
-iface -> router : POST /v1/sessions
+iface -> router : API-02 CREATE Session({sessionData})
 activate router
 
 router -> store : API-02 CREATE Session({sessionData})
 activate store
 
 alt validation fails
-    store --> router : 422 Unprocessable
-    router --> iface : 422 Unprocessable
-    iface --> user : 422 Unprocessable
+    store --> router : 422 UNPROCESSABLE\n{error: {code: "API-02_VALIDATION_ERROR", message: "Invalid session data", status: 422}}
+    router --> iface : 422 UNPROCESSABLE
+    iface --> user : 422 UNPROCESSABLE
     deactivate store
     deactivate router
     deactivate iface
@@ -54,11 +54,11 @@ store -> storage : API-02 CREATE Session({sessionData})
 activate storage
 
 alt disk write error
-    storage --> store : IOError
+    storage --> store : 500 INTERNAL\n{error: {code: "API-02_DISK_WRITE_ERROR", message: "Could not persist session", status: 500}}
     deactivate storage
     store --> router : 500 INTERNAL
-    router --> iface : 500 Internal Error
-    iface --> user : 500 Internal Error
+    router --> iface : 500 INTERNAL
+    iface --> user : 500 INTERNAL
     deactivate store
     deactivate router
     deactivate iface
@@ -68,8 +68,7 @@ storage --> store : 200 OK
 deactivate storage
 
 ref over store : API-02 CREATE Session
-  ' Session lifecycle: CREATED (#BBDEFB) → ACTIVE (#43A047)
-  ' Owned by: API-02 CREATE Session (SM/README.md)
+  <back:#BBDEFB>CREATED</back> → <back:#43A047>ACTIVE</back>
 
 store --> router : 200 OK
 deactivate store

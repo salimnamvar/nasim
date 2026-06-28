@@ -31,9 +31,9 @@ end box
 
 == RIM-03 RANK Results ==
 
-user -> iface : GET /symbols/ranked?query={query}
+user -> iface : RIM-03 RANK Results({query, chat_context})
 activate iface
-iface -> router : GET /symbols/ranked?query={query}
+iface -> router : RIM-03 RANK Results({query, chat_context})
 activate router
 router -> mgr : RIM-03 RANK Results({graph, chat_context})
 activate mgr

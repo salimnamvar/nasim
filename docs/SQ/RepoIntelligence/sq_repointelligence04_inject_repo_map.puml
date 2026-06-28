@@ -31,9 +31,9 @@ end box
 
 == RIM-04 INJECT RepoMap ==
 
-user -> iface : POST /repomap/inject
+user -> iface : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
 activate iface
-iface -> router : POST /repomap/inject
+iface -> router : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
 activate router
 router -> mgr : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
 activate mgr

@@ -31,9 +31,9 @@ end box
 
 == AGT-04 DELETE History ==
 
-user -> iface : DELETE /v1/agents/{agent_id}/history
+user -> iface : AGT-04 DELETE History({agent_id})
 activate iface
-iface -> router : DELETE /v1/agents/{agent_id}/history
+iface -> router : AGT-04 DELETE History({agent_id})
 activate router
 router -> history : AGT-04 DELETE History({agent_id})
 activate history

@@ -31,9 +31,9 @@ end box
 
 == AGT-03 UPDATE Conversation ==
 
-user -> iface : PATCH /v1/agents/{agent_id}/conversation
+user -> iface : AGT-03 UPDATE Conversation({msg, updateMask})
 activate iface
-iface -> router : PATCH /v1/agents/{agent_id}/conversation
+iface -> router : AGT-03 UPDATE Conversation({msg, updateMask})
 activate router
 router -> history : AGT-03 UPDATE Conversation({msg, updateMask})
 activate history

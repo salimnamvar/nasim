@@ -32,9 +32,9 @@ end box
 
 == RIM-01 INDEX Codebase ==
 
-user -> iface : POST /project/{root}:index
+user -> iface : RIM-01 INDEX Codebase({project_root})
 activate iface
-iface -> router : POST /project/{root}:index
+iface -> router : RIM-01 INDEX Codebase({project_root})
 activate router
 router -> mgr : RIM-01 INDEX Codebase({project_root})
 activate mgr

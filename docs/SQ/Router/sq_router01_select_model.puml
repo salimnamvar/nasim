@@ -31,17 +31,16 @@ end box
 
 == RTG-01 SELECT Model ==
 
-user -> iface : GET /models/select?task={task_type}
+user -> iface : RTG-01 SELECT Model({task_type})
 activate iface
-iface -> router : GET /models/select?task={task_type}
+iface -> router : RTG-01 SELECT Model({task_type})
 activate router
-router -> mgr : rtg01 SELECT Model(task_classification)
+router -> mgr : RTG-01 SELECT Model(task_classification)
 activate mgr
 
 alt model found
   ref over mgr : RTG-01 SELECT Model
-    ' Router lifecycle: → SELECTING (#3F51B5)
-    ' Owned by: RTG-01 SELECT Model (SM/README.md)
+    <back:#3F51B5>SELECTING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt model found
   deactivate router
   deactivate iface
 else no supported model
-  mgr --> router : 404 Not Found
+  mgr --> router : 404 NOT_FOUND\n{error: {code: "RTG-01_MODEL_NOT_FOUND", message: "No supported model for task", status: 404}}
   deactivate mgr
-  router --> iface : 404 Not Found
-  iface --> user : 404 Not Found
+  router --> iface : 404 NOT_FOUND
+  iface --> user : 404 NOT_FOUND
   deactivate router
   deactivate iface
 end

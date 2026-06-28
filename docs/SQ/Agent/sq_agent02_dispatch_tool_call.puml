@@ -32,9 +32,9 @@ end box
 
 == AGT-02 DISPATCH Tool Call ==
 
-user -> iface : POST /v1/agents/{agent_id}:dispatch-tool
+user -> iface : AGT-02 DISPATCH Tool Call({tool_name, args})
 activate iface
-iface -> router : POST /v1/agents/{agent_id}:dispatch-tool
+iface -> router : AGT-02 DISPATCH Tool Call({tool_name, args})
 activate router
 router -> orchestrator : AGT-02 DISPATCH Tool Call({tool_name, args})
 activate orchestrator

@@ -31,17 +31,16 @@ end box
 
 == SAF-01 CHECK Permission ==
 
-user -> iface : GET /permissions/check/{tool}
+user -> iface : SAF-01 CHECK Permission({tool_name, safety_mode})
 activate iface
-iface -> router : GET /permissions/check/{tool}
+iface -> router : SAF-01 CHECK Permission({tool_name, safety_mode})
 activate router
-router -> mgr : saf01 CHECK Permission(tool_name, safety_mode)
+router -> mgr : SAF-01 CHECK Permission(tool_name, safety_mode)
 activate mgr
 
 alt permission allowed
   ref over mgr : SAF-01 CHECK Permission
-    ' Safety lifecycle: → PERMISSIVE (#9CCC65)
-    ' Owned by: SAF-01 CHECK Permission (SM/README.md)
+    <back:#9CCC65>PERMISSIVE</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt permission allowed
   deactivate router
   deactivate iface
 else permission denied
-  mgr --> router : 403 Forbidden
+  mgr --> router : 403 FORBIDDEN\n{error: {code: "SAF-01_PERMISSION_DENIED", message: "Tool blocked by safety policy", status: 403}}
   deactivate mgr
-  router --> iface : 403 Forbidden
-  iface --> user : 403 Forbidden
+  router --> iface : 403 FORBIDDEN
+  iface --> user : 403 FORBIDDEN
   deactivate router
   deactivate iface
 end

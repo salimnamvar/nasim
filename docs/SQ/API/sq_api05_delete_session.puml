@@ -33,27 +33,27 @@ database "SessionStorage" as storage
 
 == API-05 DELETE Session ==
 
-user -> iface : DELETE /v1/sessions/{id}
+user -> iface : API-05 DELETE Session({sessionId})
 activate iface
-iface -> router : DELETE /v1/sessions/{id}
+iface -> router : API-05 DELETE Session({sessionId})
 activate router
 
 router -> store : API-05 DELETE Session({sessionId})
 activate store
 
 alt validation fails
-    store --> router : 422 Unprocessable
-    router --> iface : 422 Unprocessable
-    iface --> user : 422 Unprocessable
+    store --> router : 422 UNPROCESSABLE\n{error: {code: "API-05_VALIDATION_ERROR", message: "Invalid session ID", status: 422}}
+    router --> iface : 422 UNPROCESSABLE
+    iface --> user : 422 UNPROCESSABLE
     deactivate store
     deactivate router
     deactivate iface
 end
 
 alt session not found
-    store --> router : 404 NOT_FOUND
-    router --> iface : 404 Not Found
-    iface --> user : 404 Not Found
+    store --> router : 404 NOT_FOUND\n{error: {code: "API-05_SESSION_NOT_FOUND", message: "Session not found", status: 404}}
+    router --> iface : 404 NOT_FOUND
+    iface --> user : 404 NOT_FOUND
     deactivate store
     deactivate router
     deactivate iface
@@ -63,11 +63,11 @@ store -> storage : API-05 DELETE Session({sessionId})
 activate storage
 
 alt permission denied
-    storage --> store : PermissionError
+    storage --> store : 403 FORBIDDEN\n{error: {code: "API-05_PERMISSION_DENIED", message: "Cannot delete session", status: 403}}
     deactivate storage
     store --> router : 403 FORBIDDEN
-    router --> iface : 403 Forbidden
-    iface --> user : 403 Forbidden
+    router --> iface : 403 FORBIDDEN
+    iface --> user : 403 FORBIDDEN
     deactivate store
     deactivate router
     deactivate iface
@@ -77,8 +77,7 @@ storage --> store : 200 OK — removed
 deactivate storage
 
 ref over store : API-05 DELETE Session
-  ' Session lifecycle: ACTIVE → CLOSED (#757575)
-  ' Owned by: API-05 DELETE Session (SM/README.md)
+  <back:#43A047>ACTIVE</back> → <back:#757575>CLOSED</back>
 
 store --> router : 200 OK — delete_confirmed({sessionId})
 deactivate store

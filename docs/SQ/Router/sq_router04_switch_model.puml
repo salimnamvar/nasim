@@ -31,17 +31,16 @@ end box
 
 == RTG-04 SWITCH Model ==
 
-user -> iface : PATCH /models/active
+user -> iface : RTG-04 SWITCH Model({target_model})
 activate iface
-iface -> router : PATCH /models/active
+iface -> router : RTG-04 SWITCH Model({target_model})
 activate router
-router -> mgr : rtg04 SWITCH Model(target_model)
+router -> mgr : RTG-04 SWITCH Model(target_model)
 activate mgr
 
 alt switch succeeds
   ref over mgr : RTG-04 SWITCH Model
-    ' Router lifecycle: → SWITCHING (#FF8F00)
-    ' Owned by: RTG-04 SWITCH Model (SM/README.md)
+    <back:#FF8F00>SWITCHING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt switch succeeds
   deactivate router
   deactivate iface
 else model not in catalog
-  mgr --> router : 404 Not Found
+  mgr --> router : 404 NOT_FOUND\n{error: {code: "RTG-04_MODEL_NOT_IN_CATALOG", message: "Requested model not in catalog", status: 404}}
   deactivate mgr
-  router --> iface : 404 Not Found
-  iface --> user : 404 Not Found
+  router --> iface : 404 NOT_FOUND
+  iface --> user : 404 NOT_FOUND
   deactivate router
   deactivate iface
 end

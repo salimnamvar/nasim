@@ -31,26 +31,27 @@ end box
 
 == EVL-02 CHECK Task Completion ==
 
-user -> iface : GET /evaluation/completion
+user -> iface : EVL-02 CHECK Task Completion({task_id})
 activate iface
-iface -> router : GET /evaluation/completion
+iface -> router : EVL-02 CHECK Task Completion({task_id})
 activate router
 router -> eval : EVL-02 CHECK Task Completion({task_id})
 activate eval
 
-alt task complete
-  ref over eval : TRANSITION State(<back:#C5CAE9>CHECKING</back>)
+alt criteria_met
+  ref over eval : EVL-02 CHECK Task Completion
+    <back:#C5CAE9>CHECKING</back>
   eval --> router : 200 OK
   deactivate eval
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else task incomplete
-  eval --> router : 422 Unprocessable
+else criteria_unmet
+  eval --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-02_CRITERIA_UNMET", message: "Task completion criteria not met", status: 422}}
   deactivate eval
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

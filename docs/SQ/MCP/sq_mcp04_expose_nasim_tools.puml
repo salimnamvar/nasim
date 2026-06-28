@@ -31,27 +31,27 @@ end box
 
 == MCP-04 EXPOSE nasim Tools ==
 
-user -> iface : POST /mcp/server:start
+user -> iface : MCP-04 EXPOSE nasim Tools({})
 activate iface
-iface -> router : POST /mcp/server:start
+iface -> router : MCP-04 EXPOSE nasim Tools({})
 activate router
 router -> mgr : MCP-04 EXPOSE nasim Tools({})
 activate mgr
 
-alt validation succeeds
-  ref over mgr : MCP-04 TRANSITION State
-    ' SM States: STARTING (#FFA726), RUNNING (#66BB6A)
+alt server_started
+  ref over mgr : MCP-04 EXPOSE nasim Tools
+    <back:#FFA726>STARTING</back> → <back:#66BB6A>RUNNING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
+else server_failed
+  mgr --> router : 500 INTERNAL\n{error: {code: "MCP-04_SERVER_START_FAILED", message: "MCP server runtime failed to start", status: 500}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 500 INTERNAL
+  iface --> user : 500 INTERNAL
   deactivate router
   deactivate iface
 end

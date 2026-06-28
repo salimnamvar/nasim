@@ -31,9 +31,9 @@ end box
 
 == RIM-05 EMBED Code ==
 
-user -> iface : POST /embeddings
+user -> iface : RIM-05 EMBED Code({code_fragments})
 activate iface
-iface -> router : POST /embeddings
+iface -> router : RIM-05 EMBED Code({code_fragments})
 activate router
 router -> mgr : RIM-05 EMBED Code({code_fragments})
 activate mgr

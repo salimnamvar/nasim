@@ -31,26 +31,27 @@ end box
 
 == EVL-01 EVALUATE Task ==
 
-user -> iface : POST /evaluation/evaluate
+user -> iface : EVL-01 EVALUATE Task({task_id, check_commands})
 activate iface
-iface -> router : POST /evaluation/evaluate
+iface -> router : EVL-01 EVALUATE Task({task_id, check_commands})
 activate router
 router -> eng : EVL-01 EVALUATE Task({task_id, check_commands})
 activate eng
 
-alt evaluation succeeds
-  ref over eng : TRANSITION State(<back:#C5CAE9>CHECKING</back>)
+alt all_checks_pass
+  ref over eng : EVL-01 EVALUATE Task
+    <back:#C5CAE9>CHECKING</back>
   eng --> router : 200 OK
   deactivate eng
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else evaluation fails
-  eng --> router : 422 Unprocessable
+else check_fails
+  eng --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-01_CHECK_FAILED", message: "Task evaluation check failed", status: 422}}
   deactivate eng
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

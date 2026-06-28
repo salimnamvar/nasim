@@ -32,9 +32,9 @@ end box
 
 == AGT-01 PROCESS User Task ==
 
-user -> iface : POST /v1/agents/{agent_id}:process
+user -> iface : AGT-01 PROCESS UserTask({session_id, message})
 activate iface
-iface -> router : POST /v1/agents/{agent_id}:process
+iface -> router : AGT-01 PROCESS UserTask({session_id, message})
 activate router
 router -> orchestrator : AGT-01 PROCESS UserTask({session_id, message})
 activate orchestrator

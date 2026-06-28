@@ -31,17 +31,16 @@ end box
 
 == RTG-03 CLASSIFY Task ==
 
-user -> iface : POST /tasks/classify
+user -> iface : RTG-03 CLASSIFY Task({task_description, context})
 activate iface
-iface -> router : POST /tasks/classify
+iface -> router : RTG-03 CLASSIFY Task({task_description, context})
 activate router
-router -> mgr : rtg03 CLASSIFY Task(task_description, context)
+router -> mgr : RTG-03 CLASSIFY Task(task_description, context)
 activate mgr
 
 alt classification succeeds
   ref over mgr : RTG-03 CLASSIFY Task
-    ' Router lifecycle: → CLASSIFYING (#5C6BC0)
-    ' Owned by: RTG-03 CLASSIFY Task (SM/README.md)
+    <back:#5C6BC0>CLASSIFYING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt classification succeeds
   deactivate router
   deactivate iface
 else confidence too low
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "RTG-03_LOW_CONFIDENCE", message: "Task classification confidence too low", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

@@ -31,26 +31,26 @@ end box
 
 == CTX-05 COMPACT Nodes ==
 
-user -> iface : POST /contextgraph/compact
+user -> iface : CTX-05 COMPACT Nodes({nodes, strategy})
 activate iface
-iface -> router : POST /contextgraph/compact
+iface -> router : CTX-05 COMPACT Nodes({nodes, strategy})
 activate router
 router -> compact : CTX-05 COMPACT Nodes({nodes, strategy})
 activate compact
 
-alt compaction succeeds
-  ref over compact : TRANSITION State(<back:#E0F2F1>COMPACTING</back>)
+alt merge_threshold met
+  ref over compact : CTX-05 COMPACT Nodes({nodes, strategy})
   compact --> router : 200 OK
   deactivate compact
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else compaction fails
-  compact --> router : 422 Unprocessable
+else compaction_fails
+  compact --> router : 422 UNPROCESSABLE\n{error: {code: "CTX-05_COMPACTION_FAILED", message: "Node compaction failed", status: 422}}
   deactivate compact
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

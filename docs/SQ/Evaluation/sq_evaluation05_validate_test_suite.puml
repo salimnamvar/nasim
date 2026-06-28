@@ -31,26 +31,27 @@ end box
 
 == EVL-05 VALIDATE Test Suite ==
 
-user -> iface : POST /evaluation/test-suite
+user -> iface : EVL-05 VALIDATE Test Suite({task_id, test_commands})
 activate iface
-iface -> router : POST /evaluation/test-suite
+iface -> router : EVL-05 VALIDATE Test Suite({task_id, test_commands})
 activate router
 router -> runner : EVL-05 VALIDATE Test Suite({task_id, test_commands})
 activate runner
 
-alt tests pass
-  ref over runner : TRANSITION State(<back:#D4E157>TESTING</back>)
+alt tests_pass
+  ref over runner : EVL-05 VALIDATE Test Suite
+    <back:#D4E157>TESTING</back>
   runner --> router : 200 OK
   deactivate runner
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else tests fail
-  runner --> router : 422 Unprocessable
+else tests_fail
+  runner --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-05_TESTS_FAILED", message: "Test suite failed", status: 422}}
   deactivate runner
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

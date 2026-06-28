@@ -31,26 +31,26 @@ end box
 
 == CTX-01 PROCESS Context ==
 
-user -> iface : POST /contextgraph/process
+user -> iface : CTX-01 PROCESS Context({graph, token_budget})
 activate iface
-iface -> router : POST /contextgraph/process
+iface -> router : CTX-01 PROCESS Context({graph, token_budget})
 activate router
 router -> orch : CTX-01 PROCESS Context({graph, token_budget})
 activate orch
 
-alt processing succeeds
-  ref over orch : TRANSITION State(<back:#E0F2F1>COMPACTING</back>)
+alt pipeline_stages complete
+  ref over orch : CTX-01 PROCESS Context({graph, token_budget})
   orch --> router : 200 OK
   deactivate orch
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else processing fails
-  orch --> router : 422 Unprocessable
+else pipeline_error
+  orch --> router : 422 UNPROCESSABLE\n{error: {code: "CTX-01_PIPELINE_ERROR", message: "Context processing pipeline failed", status: 422}}
   deactivate orch
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

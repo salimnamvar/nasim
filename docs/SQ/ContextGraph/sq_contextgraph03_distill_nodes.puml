@@ -31,26 +31,26 @@ end box
 
 == CTX-03 DISTILL Nodes ==
 
-user -> iface : POST /contextgraph/distill
+user -> iface : CTX-03 DISTILL Nodes({nodes, max_tokens})
 activate iface
-iface -> router : POST /contextgraph/distill
+iface -> router : CTX-03 DISTILL Nodes({nodes, max_tokens})
 activate router
 router -> distill : CTX-03 DISTILL Nodes({nodes, max_tokens})
 activate distill
 
-alt distillation succeeds
-  ref over distill : TRANSITION State(<back:#E0F2F1>COMPACTING</back>)
+alt summary_quality acceptable
+  ref over distill : CTX-03 DISTILL Nodes({nodes, max_tokens})
   distill --> router : 200 OK
   deactivate distill
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else distillation fails
-  distill --> router : 422 Unprocessable
+else distillation_fails
+  distill --> router : 422 UNPROCESSABLE\n{error: {code: "CTX-03_DISTILL_FAILED", message: "Node distillation failed", status: 422}}
   deactivate distill
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

@@ -25,23 +25,22 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
-box "Service" SERVICE_COLOR
+box "Repository" REPOSITORY_COLOR
   participant "ConfigLoader" as mgr
 end box
 
 == CFG-03 APPLY Layered Config ==
 
-user -> iface : POST /config/apply
+user -> iface : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
 activate iface
-iface -> router : POST /config/apply
+iface -> router : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
 activate router
 router -> mgr : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
 activate mgr
 
 alt merge succeeds
   ref over mgr : CFG-03 APPLY Layered Config
-    ' Config lifecycle: → SERVING (#E0F7FA)
-    ' Owned by: CFG-03 APPLY Layered Config (SM/README.md)
+    <back:#E0F7FA>SERVING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,10 +48,10 @@ alt merge succeeds
   deactivate router
   deactivate iface
 else merge fails
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "CFG-03_MERGE_ERROR", message: "Layered config merge failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

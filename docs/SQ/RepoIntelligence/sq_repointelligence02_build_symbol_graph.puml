@@ -31,9 +31,9 @@ end box
 
 == RIM-02 BUILD Symbol Graph ==
 
-user -> iface : POST /symbol/graph
+user -> iface : RIM-02 BUILD Symbol Graph({ast_index})
 activate iface
-iface -> router : POST /symbol/graph
+iface -> router : RIM-02 BUILD Symbol Graph({ast_index})
 activate router
 router -> mgr : RIM-02 BUILD SymbolGraph({ast_index})
 activate mgr

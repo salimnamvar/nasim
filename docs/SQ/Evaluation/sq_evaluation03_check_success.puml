@@ -31,26 +31,27 @@ end box
 
 == EVL-03 CHECK Success ==
 
-user -> iface : GET /evaluation/success
+user -> iface : EVL-03 CHECK Success({task_id, check_criteria})
 activate iface
-iface -> router : GET /evaluation/success
+iface -> router : EVL-03 CHECK Success({task_id, check_criteria})
 activate router
 router -> runner : EVL-03 CHECK Success({task_id, check_criteria})
 activate runner
 
-alt all checks pass
-  ref over runner : TRANSITION State(<back:#C5CAE9>CHECKING</back>)
+alt all_checks_pass
+  ref over runner : EVL-03 CHECK Success
+    <back:#C5CAE9>CHECKING</back>
   runner --> router : 200 OK
   deactivate runner
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else checks fail
-  runner --> router : 422 Unprocessable
+else checks_fail
+  runner --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-03_CHECKS_FAILED", message: "Success checks failed", status: 422}}
   deactivate runner
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

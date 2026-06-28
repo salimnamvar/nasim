@@ -31,9 +31,9 @@ end box
 
 == AGT-06 COMPACT Context ==
 
-user -> iface : POST /v1/agents/{agent_id}:compact
+user -> iface : AGT-06 COMPACT Context({agent_id, budget})
 activate iface
-iface -> router : POST /v1/agents/{agent_id}:compact
+iface -> router : AGT-06 COMPACT Context({agent_id, budget})
 activate router
 router -> compactor : AGT-06 COMPACT Context({agent_id, budget})
 activate compactor

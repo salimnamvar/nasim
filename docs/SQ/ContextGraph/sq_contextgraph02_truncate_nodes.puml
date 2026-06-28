@@ -31,26 +31,26 @@ end box
 
 == CTX-02 TRUNCATE Nodes ==
 
-user -> iface : POST /contextgraph/truncate
+user -> iface : CTX-02 TRUNCATE Nodes({nodes, target_tokens})
 activate iface
-iface -> router : POST /contextgraph/truncate
+iface -> router : CTX-02 TRUNCATE Nodes({nodes, target_tokens})
 activate router
 router -> trunc : CTX-02 TRUNCATE Nodes({nodes, target_tokens})
 activate trunc
 
-alt truncation succeeds
-  ref over trunc : TRANSITION State(<back:#E0F2F1>COMPACTING</back>)
+alt priority_score threshold met
+  ref over trunc : CTX-02 TRUNCATE Nodes({nodes, target_tokens})
   trunc --> router : 200 OK
   deactivate trunc
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else truncation fails
-  trunc --> router : 422 Unprocessable
+else all_nodes_essential
+  trunc --> router : 422 UNPROCESSABLE\n{error: {code: "CTX-02_TRUNCATION_FAILED", message: "Cannot truncate — all nodes essential", status: 422}}
   deactivate trunc
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end

@@ -31,27 +31,27 @@ end box
 
 == MCP-01 CONNECT MCP Server ==
 
-user -> iface : POST /mcp/servers/{id}:connect
+user -> iface : MCP-01 CONNECT MCP Server({endpoint, transport})
 activate iface
-iface -> router : POST /mcp/servers/{id}:connect
+iface -> router : MCP-01 CONNECT MCP Server({endpoint, transport})
 activate router
 router -> mgr : MCP-01 CONNECT MCP Server({endpoint, transport})
 activate mgr
 
-alt validation succeeds
-  ref over mgr : MCP-01 TRANSITION State
-    ' SM States: CONNECTING (#FFCA28), CONNECTED (#00BCD4)
+alt connection_established
+  ref over mgr : MCP-01 CONNECT MCP Server
+    <back:#FFCA28>CONNECTING</back> → <back:#00BCD4>CONNECTED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
-else validation fails
-  mgr --> router : 422 Unprocessable
+else connection_failed
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "MCP-01_CONNECTION_FAILED", message: "MCP server connection failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
   deactivate router
   deactivate iface
 end
