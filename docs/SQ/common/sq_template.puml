@@ -17,32 +17,33 @@ title nasim -- {UC_ID} {VERB} {Resource}({params})
 
 actor "User" as user
 
-box "Interface Layer" #E3F2FD
+box "Interface" INTERFACE_COLOR
   participant "CLI Process" as iface
 end box
 
-box "API Group (Entry Gate)" #E3F2FD
+box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
 ' --- CSR Layer Box ---
-' Use correct CSR color for your group:
-'   Controller (API/CLI): #E3F2FD  (blue)
-'   Service (Agent, Router, Safety, etc.): #FFF3E0  (orange)
-'   Repository (Session, Tool, Memory, etc.): #E8F5E9  (green)
-'   Infrastructure (MCP, Sandbox, Observability, Wire Log, Hooks, Plugins): #F3E5F5  (purple)
+' Use correct CSR macro for your group:
+'   INTERFACE_COLOR   — CLI Process, WebApp, DesktopApp
+'   API_COLOR         — ServerRouter, controllers
+'   SERVICE_COLOR     — Agent, Router, Safety, Context, Edit Strategy, Evaluation, Provider
+'   REPOSITORY_COLOR  — Session, Tool, Memory, Config, Git, Repo Intelligence
+'   DATASTORE_COLOR   — SessionStorage, FileSystem, databases
+'   INFRASTRUCTURE_COLOR — MCP, Sandbox, Observability, Wire Log, Hooks, Plugins
 '
 ' Use ONLY C4-authoritative component names. See ENTITIES.md for the registry.
 ' DO NOT invent managers, orchestrators, or stores that don't exist in C4.
 
-box "{Group} ({CSR_Layer})" #{CSR_Color}
+box "Service" SERVICE_COLOR
   participant "{C4_Component}" as alias
 end box
 
-' If the group has multiple C4 components, add them in separate boxes
-' or in the same box if they share the CSR layer:
+' If the group has multiple C4 components, add them in the same box:
 '
-' box "{Group} ({CSR_Layer})" #{CSR_Color}
+' box "Service" SERVICE_COLOR
 '   participant "{C4_Component_1}" as alias1
 '   participant "{C4_Component_2}" as alias2
 ' end box

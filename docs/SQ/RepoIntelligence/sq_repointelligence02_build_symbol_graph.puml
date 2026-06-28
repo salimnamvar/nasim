@@ -17,18 +17,17 @@ title nasim -- RIM-02 BUILD Symbol Graph
 
 actor "User" as user
 
-box "Interface Layer" #E3F2FD
+box "Interface" INTERFACE_COLOR
   participant "CLI Process" as iface
 end box
 
-box "API Group (Entry Gate)" #E3F2FD
+box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
-box "RepoIntelligence Group (Repository)" #E8F5E9
+box "Repository" REPOSITORY_COLOR
   participant "SymbolGraph" as mgr
 end box
-
 
 == RIM-02 BUILD Symbol Graph ==
 

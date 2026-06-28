@@ -17,15 +17,15 @@ title nasim -- CTX-02 TRUNCATE Nodes
 
 actor "User" as user
 
-box "Interface Layer" #E3F2FD
+box "Interface" INTERFACE_COLOR
   participant "CLI Process" as iface
 end box
 
-box "API Group (Entry Gate)" #E3F2FD
+box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
-box "ContextGraph Group" #FFF3E0
+box "Service" SERVICE_COLOR
   participant "TruncationProcessor" as trunc
 end box
 

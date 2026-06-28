@@ -17,16 +17,13 @@ title nasim -- CLI-03 STREAM Output
 
 actor "User" as user
 
-box "Interface Layer" #E3F2FD
+box "Interface" INTERFACE_COLOR
   participant "CLI Process" as iface
-end box
-
-box "CLI Group" #E3F2FD
   participant "REPLSession" as repl
   participant "Renderer" as renderer
 end box
 
-box "API Group (Entry Gate)" #E3F2FD
+box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 

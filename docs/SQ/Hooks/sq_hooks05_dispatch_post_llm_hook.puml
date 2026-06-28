@@ -17,18 +17,17 @@ title nasim -- HK-05 DISPATCH Post-LLM Hook
 
 actor "User" as user
 
-box "Interface Layer" #E3F2FD
+box "Interface" INTERFACE_COLOR
   participant "CLI Process" as iface
 end box
 
-box "API Group (Entry Gate)" #E3F2FD
+box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
-box "Hooks Group (Infrastructure)" #F3E5F5
+box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "HookManager" as mgr
 end box
-
 
 == HK-05 DISPATCH Post-LLM Hook ==
 

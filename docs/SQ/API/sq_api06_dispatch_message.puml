@@ -17,19 +17,19 @@ title nasim -- API-06 DISPATCH Message
 
 actor "User" as user
 
-box "Interface Layer" #E3F2FD
+box "Interface" INTERFACE_COLOR
   participant "CLI Process" as iface
 end box
 
-box "API Group (Entry Gate)" #E3F2FD
+box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
-box "Agent Group (Service)" #FFF3E0
+box "Service" SERVICE_COLOR
   participant "AgentOrchestrator" as orchestrator
 end box
 
-box "Session Group (Repository)" #E8F5E9
+box "Repository" REPOSITORY_COLOR
   participant "SessionStore" as store
 end box
 

@@ -1,26 +1,33 @@
 ' ============================================================
 ' nasim — SQ Common Styles
-' Include via: !include common/sq_styles.puml
+' Include via: !include ../common/sq_styles.puml
 '
 ' Provides consistent skinparam and CSR colour palette for
 ' all Sequence diagrams in the nasim project.
 ' ============================================================
 
 ' ------------------------------------------------------------
-' CSR Layer Box Colours (Sequence Diagram participants)
-'   Controller    #E3F2FD  — blue   (CLI, API groups)
-'   Service       #FFF3E0  — orange (Agent, Router, Safety, Context,
-'                                    Edit Strategy, Evaluation, Provider)
-'   Repository    #E8F5E9  — green  (Session, Tool, Memory, Config, Git,
-'                                    Repo Intelligence)
-'   Infrastructure #F3E5F5 — purple (MCP, Sandbox, Observability,
-'                                    Wire Log, Hooks, Plugins)
+' CSR Layer Colours — 7 distinct layers (left-to-right order)
+'   Actor           #BBDEFB  — blue         (external user/actor)
+'   Interface       #E3F2FD  — light blue   (CLI Process, WebApp, DesktopApp)
+'   API/Controller  #C5CAE9  — indigo       (ServerRouter, controllers)
+'   Service         #FFF3E0  — orange       (Agent, Router, Safety, Context,
+'                                            Edit Strategy, Evaluation, Provider)
+'   Repository      #E8F5E9  — green        (Session, Tool, Memory, Config, Git,
+'                                            Repo Intelligence)
+'   Datastore       #F3E5F5  — purple       (SessionStorage, FileSystem,
+'                                            WireLogStorage, databases)
+'   Infrastructure  #ECEFF1  — blue-grey    (MCP, Sandbox, Observability,
+'                                            Wire Log, Hooks, Plugins)
 ' ------------------------------------------------------------
 
-!define CONTROLLER_COLOR #E3F2FD
+!define ACTOR_COLOR #BBDEFB
+!define INTERFACE_COLOR #E3F2FD
+!define API_COLOR #C5CAE9
 !define SERVICE_COLOR #FFF3E0
 !define REPOSITORY_COLOR #E8F5E9
-!define INFRASTRUCTURE_COLOR #F3E5F5
+!define DATASTORE_COLOR #F3E5F5
+!define INFRASTRUCTURE_COLOR #ECEFF1
 
 ' ------------------------------------------------------------
 ' Skinparam — base settings
