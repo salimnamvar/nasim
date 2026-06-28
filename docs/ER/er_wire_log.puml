@@ -1,4 +1,7 @@
 @startuml er_wire_log
+' Source:  docs/CT/DATA/ct_data_wire_log.puml
+' Store:   Wire Log — ~/.nasim/sessions/{session_id}/wire.jsonl (JSON Lines)
+' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Wire Log ERD
 ' Boundary:  nasim code agent CLI

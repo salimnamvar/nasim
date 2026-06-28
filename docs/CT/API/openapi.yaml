@@ -17,7 +17,7 @@ paths:
   /v1/sessions:
     get:
       operationId: listSessions
-      summary: List sessions
+      summary: "[SSN-03] LIST Sessions"
       description: Returns a paginated list of agent sessions.
       tags: [Sessions]
       parameters:
@@ -32,7 +32,7 @@ paths:
                 $ref: '#/components/schemas/ListSessionsResponse'
     post:
       operationId: createSession
-      summary: Create session
+      summary: "[SSN-01] INSERT Session"
       description: Creates a new agent session.
       tags: [Sessions]
       requestBody:
@@ -58,7 +58,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     get:
       operationId: getSession
-      summary: Get session
+      summary: "[SSN-02] READ Session"
       description: Returns the specified session.
       tags: [Sessions]
       responses:
@@ -72,7 +72,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     patch:
       operationId: updateSession
-      summary: Update session
+      summary: "[SSN-04] UPDATE Session"
       description: Updates the specified session.
       tags: [Sessions]
       parameters:
@@ -96,7 +96,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
     delete:
       operationId: deleteSession
-      summary: Delete session
+      summary: "[SSN-05] DELETE Session"
       description: Deletes the specified session.
       tags: [Sessions]
       responses:
@@ -114,7 +114,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     post:
       operationId: sendMessage
-      summary: Send message
+      summary: "[AGT-01] PROCESS User Task"
       description: |
         Custom method (AIP-136) for submitting a user message and receiving
         an agent response as an SSE stream of AgentEvents.
@@ -142,7 +142,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     get:
       operationId: listMessages
-      summary: List messages
+      summary: "[API-07] LIST Messages"
       description: Returns a paginated list of messages in the session.
       tags: [Messages]
       parameters:
@@ -161,7 +161,7 @@ paths:
   /v1/tools:
     get:
       operationId: listTools
-      summary: List tools
+      summary: "[TL-01] LIST Tools"
       description: Returns a list of registered tools.
       tags: [Tools]
       responses:
@@ -182,7 +182,7 @@ paths:
         description: Tool name
     get:
       operationId: getTool
-      summary: Get tool
+      summary: "[TL-02] READ Tool"
       description: Returns the specified tool.
       tags: [Tools]
       responses:
@@ -198,7 +198,7 @@ paths:
   /v1/config:
     get:
       operationId: getConfig
-      summary: Get config
+      summary: "[CFG-01] READ Config"
       description: Returns the agent configuration.
       tags: [Config]
       responses:
@@ -210,7 +210,7 @@ paths:
                 $ref: '#/components/schemas/Config'
     patch:
       operationId: updateConfig
-      summary: Update config
+      summary: "[CFG-02] UPDATE Config"
       description: Updates the agent configuration.
       tags: [Config]
       parameters:

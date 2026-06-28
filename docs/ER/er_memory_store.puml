@@ -1,4 +1,7 @@
 @startuml er_memory_store
+' Source:  docs/CT/DATA/ (no dedicated data contract — memory is in-process)
+' Store:   Memory Store — ~/.nasim/memory/{scope}/{key}.json (JSON Lines)
+' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Memory Store ERD
 ' Boundary:  nasim code agent CLI

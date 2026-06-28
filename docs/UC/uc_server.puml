@@ -1,0 +1,44 @@
+@startuml uc_server
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Server Group (API Entry Gate)
+' Group:     SRV (API Server)
+' Boundary:  nasim code server
+' Purpose:   Server component — all operations are documented
+'            in uc_api.puml. This stub exists for cross-layer
+'            naming alignment with c4_nasim_component_server.
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/C4/c4_nasim_component_server.puml, docs/UC/uc_api.puml
+' Review:    CAR refinement loop 2026-06-27
+' ============================================================
+
+
+title nasim — Server Use Cases (see uc_api)
+
+
+' ------------------------------------------------------------
+' Actors
+' ------------------------------------------------------------
+
+
+actor "User" as User
+
+
+' ------------------------------------------------------------
+' System Boundary
+' ------------------------------------------------------------
+
+
+rectangle "nasim" {
+  package "Server Group (SRV)" {
+    usecase "**SRV-01 API Operations**\n--\nAll server entry-point\noperations are defined\nin uc_api.puml" <<extref>> as SRV01
+  }
+}
+
+User --> SRV01
+
+@enduml

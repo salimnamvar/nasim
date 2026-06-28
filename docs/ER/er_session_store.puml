@@ -1,4 +1,7 @@
 @startuml er_session_store
+' Source:  docs/CT/DATA/nasim_session_store.datacontract.yaml
+' Store:   Session Store — ~/.nasim/sessions/{session_id}/session.jsonl (JSON Lines)
+' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Session Store ERD
 ' Boundary:  nasim code agent CLI

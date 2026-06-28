@@ -1,135 +1,122 @@
-dataContractSpecification: "3.1.0"
-id: "urn:nasim:data-contract:session-store"
-info:
-  title: "nasim Session Store Data Contract"
-  description: |
-    Data contract for nasim session persistence.
-    Defines the logical schema for session JSON Lines files.
-  version: "1.0.0"
-  contact:
-    name: Salim Namvar
-    email: salim.namvar@gmail.com
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/main/schema/odcs-json-schema-latest.json
+version: "1.0.0"
+apiVersion: "v3.1.0"
+kind: DataContract
+id: urn:datacontract:nasim:session-store-legacy
+name: "nasim Session Store (legacy representation)"
+status: draft
+domain: "nasim"
+tags:
+  - session
+  - persistence
+  - json-lines
+description:
+  purpose: >-
+    Legacy representation of the nasim session store data contract.
+    Superseded by nasim_session_store.datacontract.yaml.
+    Retained for backward compatibility and migration reference.
+  usage: >-
+    Session persistence for agent conversations. JSON Lines format
+    with one directory per session containing a single session.jsonl file.
+  limitations: >-
+    JSON Lines format, no relational constraints, no query engine.
+    Superseded by the canonical nasim_session_store.datacontract.yaml.
 
-kind: dataContract
-metadata:
-  status: active
-  owner: nasim-agent
+servers:
+  - server: session_store
+    id: session_store
+    type: local
+    description: "Session directory per session ID with session.jsonl file"
+    path: "~/.nasim/sessions/{session_id}/session.jsonl"
+    format: jsonl
 
-terms:
-  usage: "Session persistence for agent conversations"
-  limitations: "JSON Lines format, no relational constraints"
-
-schemas:
+schema:
   - id: session
-    type: avro
-    description: Agent conversation session
-    fields:
+    name: Session
+    logicalType: object
+    description: "Agent conversation session"
+    properties:
       - name: id
-        type: string
-        description: Session UUID (primary key)
+        logicalType: string
         required: true
-        unique: true
-        examples:
-          - "550e8400-e29b-41d4-a716-446655440000"
+        description: "Session UUID (primary key). Unique across all sessions."
       - name: created_at
-        type: timestamp
-        description: Creation timestamp (ISO 8601)
+        logicalType: timestamp
         required: true
-        examples:
-          - "2026-06-20T10:30:00Z"
+        description: "Creation timestamp (ISO 8601)"
       - name: model
-        type: string
-        description: LLM model name
+        logicalType: string
         required: true
-        examples:
-          - "qwen2.5-coder:14b"
+        description: "LLM model name"
       - name: provider
-        type: string
-        description: LLM provider name
+        logicalType: string
         required: false
-        examples:
-          - "ollama"
+        description: "LLM provider name"
       - name: config_snapshot
-        type: string
-        description: Config snapshot at session creation (JSON)
+        logicalType: string
         required: false
+        description: "Config snapshot at session creation (JSON)"
       - name: message_count
-        type: integer
-        description: Number of messages in session
+        logicalType: integer
         required: false
+        description: "Number of messages in session"
       - name: total_tokens
-        type: integer
-        description: Total token count across all messages
+        logicalType: integer
         required: false
+        description: "Total token count across all messages"
 
   - id: message
-    type: avro
-    description: Message within a session
-    fields:
+    name: Message
+    logicalType: object
+    description: "Message within a session"
+    properties:
       - name: session_id
-        type: string
-        description: Parent session UUID (foreign key)
+        logicalType: string
         required: true
+        description: "Parent session UUID (foreign key)"
       - name: sequence
-        type: integer
-        description: Message sequence number (ordering)
+        logicalType: integer
         required: true
+        description: "Message sequence number (ordering)"
       - name: role
-        type: string
-        description: Message role
+        logicalType: string
         required: true
+        description: "Message role. Allowed values: system | user | assistant | tool"
         constraints:
-          allowedValues:
+          enum:
             - system
             - user
             - assistant
             - tool
       - name: content
-        type: string
-        description: Message content
+        logicalType: string
         required: false
+        description: "Message content"
       - name: tool_calls
-        type: string
-        description: Tool calls JSON (for assistant messages)
+        logicalType: string
         required: false
+        description: "Tool calls JSON (for assistant messages)"
       - name: tool_call_id
-        type: string
-        description: Tool call ID (for tool responses)
+        logicalType: string
         required: false
+        description: "Tool call ID (for tool responses)"
       - name: tokens
-        type: integer
-        description: Token count for this message
+        logicalType: integer
         required: false
+        description: "Token count for this message"
       - name: timestamp
-        type: timestamp
-        description: Message timestamp (ISO 8601)
+        logicalType: timestamp
         required: false
+        description: "Message timestamp (ISO 8601)"
 
-quality:
-  - type: completeness
-    description: "All sessions must have id, created_at, model"
-    severity: critical
-  - type: uniqueness
-    description: "Session IDs must be unique"
-    severity: critical
-  - type: freshness
-    description: "Session files should be written atomically"
-    severity: high
-  - type: accuracy
-    description: "Message sequence numbers must be contiguous"
-    severity: medium
+customProperties:
+  - id: governance
+    property: governance
+    value:
+      write_authority: "SessionStore component only"
+      uniqueness:
+        - "session.id is unique across all sessions"
+      timestamp_format: "ISO 8601: YYYY-MM-DDTHH:MM:SSZ"
+      superseded_by: "nasim_session_store.datacontract.yaml — canonical contract for this store boundary"
 
-storage:
-  type: file
-  format: jsonl
-  location: "~/.nasim/sessions/{session_id}/session.jsonl"
-  description: |
-    Each session is stored as a JSON Lines file.
-    Line 1: session metadata (id, created_at, model, etc.)
-    Subsequent lines: messages in sequence order.
-    Atomic writes via temp file + rename.
-
-sla:
-  availability: "best-effort"
-  durability: "local filesystem"
-  latency: "< 100ms for read/write"
+contractCreatedTs: "2026-06-20T00:00:00Z"

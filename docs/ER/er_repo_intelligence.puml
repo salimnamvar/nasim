@@ -1,4 +1,7 @@
 @startuml er_repo_intelligence
+' Source:  docs/CT/DATA/ct_data_repo_intelligence.puml
+' Store:   Repo Intelligence — ~/.nasim/repo_index/<project_hash>/ (filesystem)
+' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Repo Intelligence ERD
 ' Boundary:  nasim code agent CLI

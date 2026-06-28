@@ -1,4 +1,7 @@
 @startuml er_observability
+' Source:  docs/CT/DATA/ (observability is emit-only — stdout + /metrics)
+' Store:   Observability — stdout + /metrics endpoint (in-memory + stdout)
+' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Observability ERD
 ' Boundary:  nasim code agent CLI
@@ -79,9 +82,7 @@ entity "redaction_rule" as rr {
     * description : TEXT <<nullable>>
 }
 
-lr }|--|| tc : "correlates via trace_id"
-mp }|--o| tc : "optional trace link"
-tc ||--o{ lr : "produces"
+tc ||--o{ lr : "produces / correlates via trace_id"
 tc ||--o{ mp : "records metrics"
 
 note bottom of lr

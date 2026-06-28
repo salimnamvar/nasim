@@ -94,7 +94,7 @@ package "Agent Layer" #E3F2FD {
         - history : ConversationHistory
         - perm_gate : PermissionGate
         - plan : PlanSession
-        - hooks : HookManager
+        - hooks : list[Hook]
         - router : ModelRouter
         + PROCESS(user_input) : Iterator[AgentEvent]
         + reset()
@@ -205,9 +205,7 @@ package "Tool Layer" #F3E5F5 {
     class LspTool {
         + execute(operation, file, position) : ToolResult
     }
-    class MCPToolAdapter {
-        + execute(tool_name, args) : ToolResult
-    }
+
 }
 
 package "Config Layer" #E0F7FA {
@@ -268,24 +266,9 @@ package "Server Layer" #E0F2F1 {
         + stream_events(events) : EventSourceResponse
     }
 
-    class APISchema {
-        + SessionCreate : BaseModel
-        + MessageCreate : BaseModel
-        + SessionResponse : BaseModel
-        + MessageResponse : BaseModel
-    }
 }
 
 package "Hook Layer" #E8EAF6 {
-    class HookManager {
-        - hooks : dict[str, list[Hook]]
-        + register(event, hook)
-        + execute_pre_tool(tool_name, args) : HookResult
-        + execute_post_tool(tool_name, result) : HookResult
-        + execute_pre_llm(messages) : HookResult
-        + execute_post_llm(response) : HookResult
-    }
-
     class Hook {
         + name : str
         + event : str
@@ -323,18 +306,6 @@ package "Plugin Layer" #FFF3E0 {
 }
 
 package "Repo Intelligence Layer" #FBE9E7 {
-    class RepoIntelligenceManager {
-        + index_repository()
-        + rank_symbols(chat_files)
-        + search_semantic(query)
-        + inject_repomap(budget) : str
-    }
-
-    class ASTIndexAdapter {
-        + extract_tags(file_path) : list[ASTTag]
-        + build_index(root_dir)
-    }
-
     class SymbolGraph {
         + add_node(symbol)
         + add_edge(source, target, type)
@@ -343,11 +314,6 @@ package "Repo Intelligence Layer" #FBE9E7 {
 
     class RankingService {
         + rank(graph, chat_files, budget) : list[RankedSymbol]
-    }
-
-    class EmbeddingAdapter {
-        + embed(text) : list[float]
-        + embed_batch(texts) : list[list[float]]
     }
 
     class SemanticSearchService {
@@ -451,10 +417,7 @@ package "Wire Log Layer" #E3F2FD {
         + add_turn(turn, offset)
     }
 
-    class SessionForkManager {
-        + fork(session_id, turn) : Session
-        + undo(session_id, turns) : Session
-    }
+
 }
 
 package "Context Graph Layer" #F3E5F5 {
@@ -503,22 +466,6 @@ package "Context Graph Layer" #F3E5F5 {
 }
 
 package "Memory Layer" #F1F8E9 {
-    class EpisodicMemoryAdapter {
-        + store(session_summary, embedding)
-        + retrieve(query_embedding, top_k) : list
-    }
-
-    class SemanticMemoryAdapter {
-        + store(fact, embedding, metadata)
-        + retrieve(query_embedding, top_k) : list
-    }
-
-    class WorkingMemoryAdapter {
-        + get(key)
-        + set(key, value)
-        + clear()
-    }
-
     class MemoryRetriever {
         + retrieve(query, scope) : list
         + hybrid_search(query) : list
@@ -531,12 +478,6 @@ package "Memory Layer" #F1F8E9 {
 }
 
 package "Sandbox Layer" #FFF8E1 {
-    class DiffSandboxManager {
-        + stage_edit(file, change)
-        + get_diff() : str
-        + apply_all()
-    }
-
     class EditStagingArea {
         + stage(file_path, content)
         + get_original(file_path) : str
@@ -575,13 +516,11 @@ AgentOrchestrator --> PermissionGate : checks
 AgentOrchestrator --> PlanSession : uses
 AgentOrchestrator --> AgentEvent : yields
 AgentOrchestrator --> SessionStore : loads/saves
-AgentOrchestrator --> HookManager : triggers hooks
 AgentOrchestrator --> ModelRouter : routes models
 AgentOrchestrator --> EditStrategyManager : selects strategy
 AgentOrchestrator --> EvaluationEngine : evaluates tasks
 AgentOrchestrator --> WireLog : appends events
 AgentOrchestrator --> ContextGraph : processes context
-AgentOrchestrator --> RepoIntelligenceManager : indexes, ranks
 
 ConversationHistory --> ContextCompactor : triggers
 ContextCompactor --> Provider : secondary call
@@ -605,7 +544,6 @@ Tool <|.. WebFetchTool
 Tool <|.. WebSearchTool
 Tool <|.. GitTool
 Tool <|.. LspTool
-Tool <|.. MCPToolAdapter
 
 ConfigLoader --> Config : produces
 SessionStore --> Session : manages
@@ -616,22 +554,10 @@ ServerRouter --> AgentOrchestrator : delegates to
 ServerRouter --> SessionStore : manages sessions
 ServerRouter --> ToolRegistry : lists tools
 
-HookManager --> Hook : manages
-HookManager --> HookResult : returns
-HookManager --> PluginLoader : loads plugin hooks
-
 PluginLoader --> PluginManifest : reads
 PluginLoader --> Plugin : creates
 Plugin --> PluginManifest : references
 
-RepoIntelligenceManager --> ASTIndexAdapter : indexes via
-RepoIntelligenceManager --> SymbolGraph : builds graph
-RepoIntelligenceManager --> RankingService : ranks via
-RepoIntelligenceManager --> SemanticSearchService : searches via
-RepoIntelligenceManager --> RepoMapBuilder : builds map
-ASTIndexAdapter --> SymbolGraph : populates
-RankingService --> SymbolGraph : ranks
-EmbeddingAdapter --> SemanticSearchService : provides embeddings
 SymbolGraph --> RepoMapBuilder : ranked symbols
 
 EditStrategyManager <|.. SearchReplaceCoder
@@ -653,7 +579,6 @@ TurnBudgetInjector --> RetryCoordinator : injects budget
 WireLog --> WireAppender : appends via
 WireLog --> WireReader : reads via
 WireReader --> TurnIndex : uses
-WireLog --> SessionForkManager : forks via
 
 ContextGraph --> ContextNode : contains
 ContextGraph --> ContextEdge : contains
@@ -663,18 +588,8 @@ DistillationProcessor --> ContextGraph : distills
 InjectionProcessor --> ContextGraph : injects
 CompactionProcessor --> ContextGraph : compacts
 TokenBudgetTracker --> ContextGraph : tracks
-ContextGraph --> RepoIntelligenceManager : injects repo-map
 ContextGraph --> MemoryRetriever : injects memory
 
-MemoryRetriever --> EpisodicMemoryAdapter : searches episodic
-MemoryRetriever --> SemanticMemoryAdapter : searches semantic
-MemoryRetriever --> WorkingMemoryAdapter : searches working
-MemoryIndexer --> EpisodicMemoryAdapter : indexes episodic
-MemoryIndexer --> SemanticMemoryAdapter : indexes semantic
 
-DiffSandboxManager --> EditStagingArea : stages via
-DiffSandboxManager --> DiffComputer : computes diff
-DiffSandboxManager --> DiffPresenter : renders diff
-DiffSandboxManager --> StagedApplicator : applies
 
 @enduml
