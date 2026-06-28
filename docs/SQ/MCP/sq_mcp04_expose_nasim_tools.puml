@@ -40,7 +40,6 @@ activate mgr
 
 alt server_started
   ref over mgr : MCP-04 EXPOSE nasim Tools
-    <back:#FFA726>STARTING</back> → <back:#66BB6A>RUNNING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

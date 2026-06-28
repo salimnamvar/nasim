@@ -39,8 +39,7 @@ router -> boundary : AGT-14 HANDLE Error({error})
 activate boundary
 
 alt retryable error
-  ref over boundary : AGT-14 HANDLE Error({error})
-    <back:#EF5350>FAILED</back>
+  ref over boundary : AGT-14 HANDLE Error({error}) <back:#EF5350>FAILED</back>
   boundary --> router : 200 OK
   deactivate boundary
   router --> iface : 200 OK

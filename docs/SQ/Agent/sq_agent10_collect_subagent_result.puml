@@ -39,8 +39,7 @@ router -> subagent : AGT-10 COLLECT Subagent Result({child_id, timeout})
 activate subagent
 
 alt result available without error
-  ref over subagent : AGT-10 COLLECT SubagentResult({child_id, timeout})
-    <back:#2E7D32>COMPLETED</back>
+  ref over subagent : AGT-10 COLLECT SubagentResult({child_id, timeout}) <back:#2E7D32>COMPLETED</back>
   subagent --> router : 200 OK
   deactivate subagent
   router --> iface : 200 OK

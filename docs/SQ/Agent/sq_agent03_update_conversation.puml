@@ -39,8 +39,7 @@ router -> history : AGT-03 UPDATE Conversation({msg, updateMask})
 activate history
 
 alt token_count <= budget
-  ref over history : AGT-03 UPDATE Conversation({msg, updateMask})
-    <back:#43A047>RUNNING</back>
+  ref over history : AGT-03 UPDATE Conversation({msg, updateMask}) <back:#43A047>RUNNING</back>
   history --> router : 200 OK
   deactivate history
   router --> iface : 200 OK

@@ -45,15 +45,15 @@ alt is slash command
   deactivate repl
   iface --> user : 200 OK
   deactivate iface
-  ref over repl : TRANSITION State(<back:#ECEFF1>IDLE</back>)
+  ref over repl : CLI-01 PROCESS Input({input})
 else normal input
   repl -> router : CLI-01 EXECUTE Input({input})
-  ref over repl : TRANSITION State(<back:#E8EAF6>LISTENING</back>)
-  ref over repl : TRANSITION State(<back:#D7CCC8>THINKING</back>)
+  ref over repl : CLI-01 EXECUTE Input({input})     <back:#E8EAF6>LISTENING</back>
+  ref over repl : CLI-01 PARSE Input({input})     <back:#D7CCC8>THINKING</back>
   ref over router
     API-06: DISPATCH Message
   end ref
-  ref over repl : TRANSITION State(<back:#D1C4E9>RESPONDING</back>)
+  ref over repl : CLI-01 STREAM Output({input})     <back:#D1C4E9>RESPONDING</back>
   router --> repl : 200 OK
   deactivate router
   repl --> iface : 200 OK

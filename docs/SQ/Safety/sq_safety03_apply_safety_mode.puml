@@ -39,8 +39,7 @@ router -> mgr : SAF-03 APPLY Safety Mode(safety_mode)
 activate mgr
 
 alt mode applied
-  ref over mgr : SAF-03 APPLY Safety Mode
-    <back:#FDD835>ASK</back>
+  ref over mgr : SAF-03 APPLY Safety Mode <back:#FDD835>ASK</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

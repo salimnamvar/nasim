@@ -40,7 +40,6 @@ activate mgr
 
 alt graph_not_empty and ranking completes
   ref over mgr : RIM-03 RANK Results({graph, chat_context})
-    <back:#7CB342>INDEXED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

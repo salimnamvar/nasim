@@ -35,12 +35,11 @@ user -> iface : PATCH /sandbox/policy
 activate iface
 iface -> router : PATCH /sandbox/policy
 activate router
-router -> mgr : sbx02 APPLY Sandbox Policy(policy_path)
+router -> mgr : SBX-02 APPLY Sandbox Policy({policy_path})
 activate mgr
 
 alt policy applied
-  ref over mgr : SBX-02 TRANSITION State
-    ' SM States: IDLE (#78909C)
+  ref over mgr : SBX-02 APPLY Sandbox Policy({policy_path})
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +47,10 @@ alt policy applied
   deactivate router
   deactivate iface
 else invalid policy
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SBX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SBX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SBX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
   deactivate router
   deactivate iface
 end

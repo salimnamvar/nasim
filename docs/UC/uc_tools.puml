@@ -20,7 +20,7 @@
 ' ============================================================
 
 
-title nasim — Tools Use Cases (see uc_tool_core / uc_tool_advanced)
+title Browse nasim — Tools Use Cases (see uc_tool_core / uc_tool_advanced)
 
 
 ' ------------------------------------------------------------
@@ -38,12 +38,12 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Tools Group (TL)" {
-    usecase "**TL-01 Core Tools**\n--\nFile operations, shell,\nsearch, web tools\nSee uc_tool_core.puml" <<extref>> as TL_CORE
-    usecase "**TL-02 Advanced Tools**\n--\nGit, MCP, LSP, subagent,\ntodo, memory, plan\nSee uc_tool_advanced.puml" <<extref>> as TL_ADV
+    usecase "**TL-01 LIST Core Tools**\n--\nFile operations, shell,\nsearch, web tools\nSee uc_tool_core.puml" <<extref>> as TL01
+    usecase "**TL-02 LIST Advanced Tools**\n--\nGit, MCP, LSP, subagent,\ntodo, memory, plan\nSee uc_tool_advanced.puml" <<extref>> as TL02
   }
 }
 
-User --> TL_CORE
-User --> TL_ADV
+User --> TL01 : browse
+User --> TL02 : browse
 
 @enduml

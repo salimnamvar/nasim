@@ -39,8 +39,7 @@ router -> mgr : CFG-02 VALIDATE Config({config_object})
 activate mgr
 
 alt validation passes
-  ref over mgr : CFG-02 VALIDATE Config
-    <back:#E0F7FA>SERVING</back>
+  ref over mgr : CFG-02 VALIDATE Config <back:#E0F7FA>SERVING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

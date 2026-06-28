@@ -39,8 +39,7 @@ router -> subagent : AGT-09 SPAWN Subagent({task_prompt, parent_id})
 activate subagent
 
 alt spawn succeeds without error
-  ref over subagent : AGT-09 SPAWN Subagent({task_prompt, parent_id})
-    <back:#CE93D8>WAITING</back>
+  ref over subagent : AGT-09 SPAWN Subagent({task_prompt, parent_id}) <back:#CE93D8>WAITING</back>
   subagent --> router : 200 OK
   deactivate subagent
   router --> iface : 200 OK

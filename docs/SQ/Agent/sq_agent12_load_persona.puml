@@ -39,8 +39,7 @@ router -> persona : AGT-12 LOAD Persona({persona_name})
 activate persona
 
 alt load succeeds without error
-  ref over persona : AGT-12 LOAD Persona({persona_name})
-    <back:#43A047>RUNNING</back>
+  ref over persona : AGT-12 LOAD Persona({persona_name}) <back:#43A047>RUNNING</back>
   persona --> router : 200 OK
   deactivate persona
   router --> iface : 200 OK

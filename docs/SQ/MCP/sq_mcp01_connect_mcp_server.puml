@@ -40,7 +40,6 @@ activate mgr
 
 alt connection_established
   ref over mgr : MCP-01 CONNECT MCP Server
-    <back:#FFCA28>CONNECTING</back> → <back:#00BCD4>CONNECTED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

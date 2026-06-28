@@ -39,8 +39,7 @@ router -> mgr : RTG-01 SELECT Model(task_classification)
 activate mgr
 
 alt model found
-  ref over mgr : RTG-01 SELECT Model
-    <back:#3F51B5>SELECTING</back>
+  ref over mgr : RTG-01 SELECT Model <back:#3F51B5>SELECTING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

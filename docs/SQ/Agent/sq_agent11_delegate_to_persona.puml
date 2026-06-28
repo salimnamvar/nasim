@@ -39,8 +39,7 @@ router -> persona : AGT-11 DELEGATE to Persona({task, persona_hint})
 activate persona
 
 alt delegation succeeds without error
-  ref over persona : AGT-11 DELEGATE Persona({task, persona_hint})
-    <back:#43A047>RUNNING</back>
+  ref over persona : AGT-11 DELEGATE Persona({task, persona_hint}) <back:#43A047>RUNNING</back>
   persona --> router : 200 OK
   deactivate persona
   router --> iface : 200 OK

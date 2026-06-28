@@ -39,8 +39,7 @@ router -> mgr : CFG-03 APPLY Layered Config({global_defaults, project_overrides,
 activate mgr
 
 alt merge succeeds
-  ref over mgr : CFG-03 APPLY Layered Config
-    <back:#E0F7FA>SERVING</back>
+  ref over mgr : CFG-03 APPLY Layered Config <back:#E0F7FA>SERVING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

@@ -67,8 +67,7 @@ end
 storage --> store : 200 OK
 deactivate storage
 
-ref over store : API-03 GET Session
-  <back:#1565C0>SAVED</back> → <back:#1E88E5>RESTORED</back>
+ref over store : API-03 GET Session <back:#1565C0>SAVED</back> → <back:#1E88E5>RESTORED</back>
 
 store --> router : 200 OK
 deactivate store

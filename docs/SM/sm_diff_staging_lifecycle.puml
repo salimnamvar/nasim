@@ -1,5 +1,5 @@
 @startuml sm_diff_staging_lifecycle
-!include common/sm_styles.puml
+!include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — Diff Staging Lifecycle State Machine
 ' Boundary:  nasim code agent

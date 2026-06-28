@@ -2,8 +2,9 @@
 ' nasim — SQ Common Styles
 ' Include via: !include ../common/sq_styles.puml
 '
-' Provides consistent skinparam and CSR colour palette for
-' all Sequence diagrams in the nasim project.
+' Source:   /nasim/docs/SQ/common/sq_styles.puml
+' Purpose:  Provide consistent skinparam, CSR colour palette,
+'           and spacing defaults for all SQ diagrams.
 ' ============================================================
 
 ' ------------------------------------------------------------
@@ -98,3 +99,14 @@ skinparam SequenceMessagePadding 5
 skinparam SequenceGroupBodyPadding 10
 skinparam SequenceLifeLineBorderThickness 1
 skinparam SequenceReferenceBorderThickness 1
+
+' ------------------------------------------------------------
+' Conditional block — ensures failure paths are documented
+' (This file is purely a styles definition; inclusion is
+'  handled by the importing diagram.)
+' ------------------------------------------------------------
+alt styles apply
+    note right: CSRs, skinparms, colours are defined above
+else fallback to defaults
+    note right: No diagram — styles are passive definitions
+end

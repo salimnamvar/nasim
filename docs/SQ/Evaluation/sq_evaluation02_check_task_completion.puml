@@ -40,7 +40,6 @@ activate eval
 
 alt criteria_met
   ref over eval : EVL-02 CHECK Task Completion
-    <back:#C5CAE9>CHECKING</back>
   eval --> router : 200 OK
   deactivate eval
   router --> iface : 200 OK

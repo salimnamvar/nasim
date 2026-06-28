@@ -39,8 +39,7 @@ router -> mgr : CFG-01 LOAD Config({cli_args})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : CFG-01 LOAD Config
-    <back:#E0F7FA>SERVING</back>
+  ref over mgr : CFG-01 LOAD Config <back:#E0F7FA>SERVING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

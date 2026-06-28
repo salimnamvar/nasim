@@ -40,8 +40,6 @@ activate mgr
 
 alt validation succeeds
   ref over mgr : VCS-03 READ Diff
-    ' Git lifecycle: → TOOL_EXEC (#B2DFDB)
-    ' Owned by: VCS-03 READ Diff (SM/README.md)
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,10 +47,10 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "VCS-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "VCS-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "VCS-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
   deactivate router
   deactivate iface
 end

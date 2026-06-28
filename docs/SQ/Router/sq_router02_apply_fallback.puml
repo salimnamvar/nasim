@@ -39,8 +39,7 @@ router -> mgr : RTG-02 APPLY Fallback(primary_model, chain)
 activate mgr
 
 alt fallback succeeds
-  ref over mgr : RTG-02 APPLY Fallback
-    <back:#EF6C00>FALLBACK</back>
+  ref over mgr : RTG-02 APPLY Fallback <back:#EF6C00>FALLBACK</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

@@ -40,7 +40,6 @@ activate runner
 
 alt tests_pass
   ref over runner : EVL-05 VALIDATE Test Suite
-    <back:#D4E157>TESTING</back>
   runner --> router : 200 OK
   deactivate runner
   router --> iface : 200 OK

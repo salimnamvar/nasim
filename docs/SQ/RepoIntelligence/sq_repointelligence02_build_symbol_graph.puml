@@ -40,7 +40,6 @@ activate mgr
 
 alt reference_resolution completes without error
   ref over mgr : RIM-02 BUILD SymbolGraph({ast_index})
-    <back:#9C27B0>BUILDING_GRAPH</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

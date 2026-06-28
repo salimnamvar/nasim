@@ -34,9 +34,9 @@ iface -> sch : CLI-05 ENABLE Plan Mode()
 activate sch
 sch -> router : CLI-05 TOGGLE Plan Mode()
 activate router
-ref over sch : TRANSITION State(<back:#FFCCBC>PLANNING</back>)
 
 alt plan mode enabled
+  ref over sch : CLI-05 ENABLE Plan Mode()
   router --> sch : 200 OK
   deactivate router
   sch --> iface : 200 OK
@@ -44,11 +44,12 @@ alt plan mode enabled
   iface --> user : 200 OK
   deactivate iface
 else plan mode failed
-  router --> sch : 503 Unavailable
+  ref over sch : CLI-05 ENABLE Plan Mode()     <back:#ECEFF1>IDLE</back>
+  router --> sch : 503 SERVICE_UNAVAILABLE\n{error: {code: "CLI-05_PLAN_MODE_FAILED", message: "Plan mode toggle failed", status: 503}}
   deactivate router
-  sch --> iface : 503 Unavailable
+  sch --> iface : 503 SERVICE_UNAVAILABLE\n{error: {code: "CLI-05_PLAN_MODE_FAILED", message: "Plan mode toggle failed", status: 503}}
   deactivate sch
-  iface --> user : 503 Unavailable
+  iface --> user : 503 SERVICE_UNAVAILABLE\n{error: {code: "CLI-05_PLAN_MODE_FAILED", message: "Plan mode toggle failed", status: 503}}
   deactivate iface
 end
 

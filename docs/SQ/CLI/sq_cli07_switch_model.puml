@@ -34,9 +34,9 @@ iface -> sch : CLI-07 SWITCH Model({modelName})
 activate sch
 sch -> router : CLI-07 SWITCH Model({modelName})
 activate router
-ref over sch : TRANSITION State(<back:#EDE7F6>ROUTING</back>)
 
 alt model available
+  ref over sch : CLI-07 SWITCH Model({modelName})
   router --> sch : 200 OK
   deactivate router
   sch --> iface : 200 OK
@@ -44,11 +44,12 @@ alt model available
   iface --> user : 200 OK
   deactivate iface
 else model not available
-  router --> sch : 404 Not Found
+  ref over sch : CLI-07 SWITCH Model({modelName})     <back:#ECEFF1>IDLE</back>
+  router --> sch : 404 NOT_FOUND\n{error: {code: "CLI-07_MODEL_NOT_FOUND", message: "Model not found", status: 404}}
   deactivate router
-  sch --> iface : 404 Not Found
+  sch --> iface : 404 NOT_FOUND\n{error: {code: "CLI-07_MODEL_NOT_FOUND", message: "Model not found", status: 404}}
   deactivate sch
-  iface --> user : 404 Not Found
+  iface --> user : 404 NOT_FOUND\n{error: {code: "CLI-07_MODEL_NOT_FOUND", message: "Model not found", status: 404}}
   deactivate iface
 end
 

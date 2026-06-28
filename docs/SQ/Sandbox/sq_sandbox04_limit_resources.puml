@@ -35,12 +35,11 @@ user -> iface : PATCH /sandbox/limits
 activate iface
 iface -> router : PATCH /sandbox/limits
 activate router
-router -> mgr : sbx04 LIMIT Resources(cgroup_id, quotas)
+router -> mgr : SBX-04 LIMIT Resources({cgroup_id, quotas})
 activate mgr
 
 alt limits set
-  ref over mgr : SBX-04 TRANSITION State
-    ' SM States: RESOURCE_EXCEEDED (#FF5722)
+  ref over mgr : SBX-04 LIMIT Resources({cgroup_id, quotas})
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +47,10 @@ alt limits set
   deactivate router
   deactivate iface
 else cgroup setup fails
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SBX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SBX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SBX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
   deactivate router
   deactivate iface
 end

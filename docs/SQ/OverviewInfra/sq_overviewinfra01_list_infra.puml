@@ -1,0 +1,41 @@
+@startuml sq_overviewinfra01_list_infra
+' ============================================================
+' Title:     OVI-01 — LIST Infrastructure Components
+' Boundary:  nasim code server
+' Purpose:   High-level overview of infrastructure components.
+'            References subsystem diagrams for details.
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/C4/c4_nasim_component_overview_infra.puml
+' Review:    Cross-layer naming alignment
+' CSR Chain: User -> CLI Process -> InfraSystem
+' SM States: — (stateless overview)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- OVI-01 LIST Infrastructure Components
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "Service" SERVICE_COLOR
+  participant "InfraSystem" as infra
+end box
+
+user -> iface : OVI-01 LIST Infrastructure()
+iface -> infra : OVI-01 LIST Infrastructure()
+activate infra
+
+alt components loaded
+  infra --> iface : 200 InfraComponent[]
+  deactivate infra
+else system unavailable
+  infra --> iface : 503 {error: {code: "OVI-01_SYSTEM_ERROR", message: "Infrastructure system unavailable", status: 503}}
+  deactivate infra
+end
+
+@enduml

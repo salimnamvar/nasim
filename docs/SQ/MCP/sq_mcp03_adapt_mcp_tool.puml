@@ -40,7 +40,6 @@ activate mgr
 
 alt tool_compatible
   ref over mgr : MCP-03 ADAPT MCP Tool
-    <back:#00BCD4>CONNECTED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

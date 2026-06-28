@@ -39,8 +39,7 @@ router -> history : AGT-04 DELETE History({agent_id})
 activate history
 
 alt history_exists
-  ref over history : AGT-04 DELETE History({agent_id})
-    <back:#BBDEFB>CREATED</back>
+  ref over history : AGT-04 DELETE History({agent_id}) <back:#BBDEFB>CREATED</back>
   history --> router : 200 OK
   deactivate history
   router --> iface : 200 OK

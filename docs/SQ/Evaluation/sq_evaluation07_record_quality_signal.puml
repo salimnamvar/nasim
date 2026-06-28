@@ -39,7 +39,7 @@ router -> signal : EVL-07 RECORD Quality Signal({task_id, score, signals})
 activate signal
 
 alt recording succeeds
-  ref over signal : TRANSITION State(<back:#FF8A65>SCORING</back>)
+  ref over signal : EVL-07 RECORD Quality Signal({task_id, score, signals})
   signal --> router : 200 OK
   deactivate signal
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt recording succeeds
   deactivate router
   deactivate iface
 else recording fails
-  signal --> router : 422 Unprocessable
+  signal --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
   deactivate signal
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "EVL-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "EVL-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
   deactivate router
   deactivate iface
 end

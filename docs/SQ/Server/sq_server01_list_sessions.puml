@@ -1,0 +1,66 @@
+@startuml sq_server01_list_sessions
+' ============================================================
+' Title:     SRV-01 — LIST API Operations
+' Boundary:  nasim code server
+' Purpose:   Server entry-point for all API operations.
+'            References uc_api.puml for detailed operations.
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/C4/c4_nasim_component_server.puml
+' Review:    Cross-layer naming alignment
+' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionStorage
+' SM States: — (stateless entry point)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SRV-01 LIST Sessions
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLI Process" as iface
+end box
+
+box "API" API_COLOR
+  participant "ServerRouter" as api
+end box
+
+box "Service" SERVICE_COLOR
+  participant "SessionManager" as svc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionStore" as repo
+end box
+
+box "Datastore" DATASTORE_COLOR
+  participant "SessionStorage" as store
+end box
+
+user -> iface : API-01 LIST Sessions()
+iface -> api : API-01 LIST Sessions()
+api -> svc : SSR-01 LIST Sessions()
+activate svc
+svc -> repo : SSR-01 LIST Sessions()
+activate repo
+repo -> store : SSR-01 LIST Sessions()
+activate store
+
+alt query succeeds
+  store --> repo : 200 Session[]
+  deactivate store
+  repo --> svc : 200 Session[]
+  deactivate repo
+  svc --> api : 200 Session[]
+  deactivate svc
+else store unavailable
+  store --> repo : 503 {error: {code: "SRV-01_STORE_ERROR", message: "Session store unavailable", status: 503}}
+  deactivate store
+  repo --> svc : 503 {error: {code: "SRV-01_STORE_ERROR", message: "Session store unavailable", status: 503}}
+  deactivate repo
+  svc --> api : 503 {error: {code: "SRV-01_STORE_ERROR", message: "Session store unavailable", status: 503}}
+  deactivate svc
+end
+
+@enduml

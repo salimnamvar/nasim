@@ -40,7 +40,6 @@ activate mgr
 
 alt tools_discovered
   ref over mgr : MCP-02 DISCOVER MCP Tools
-    <back:#A1887F>DISCOVERING</back> → <back:#00BCD4>CONNECTED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

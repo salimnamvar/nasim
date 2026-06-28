@@ -1,5 +1,5 @@
 @startuml sm_safety_mode_lifecycle
-!include common/sm_styles.puml
+!include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — Safety Mode Lifecycle State Machine
 ' Boundary:  nasim code agent

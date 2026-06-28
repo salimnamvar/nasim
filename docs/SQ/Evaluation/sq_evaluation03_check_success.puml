@@ -40,7 +40,6 @@ activate runner
 
 alt all_checks_pass
   ref over runner : EVL-03 CHECK Success
-    <back:#C5CAE9>CHECKING</back>
   runner --> router : 200 OK
   deactivate runner
   router --> iface : 200 OK

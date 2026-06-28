@@ -17,7 +17,7 @@
 ' ============================================================
 
 
-title nasim — Server Use Cases (see uc_api)
+title Browse — Server Use Cases (see uc_api)
 
 
 ' ------------------------------------------------------------
@@ -35,7 +35,7 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Server Group (SRV)" {
-    usecase "**SRV-01 API Operations**\n--\nAll server entry-point\noperations are defined\nin uc_api.puml" <<extref>> as SRV01
+    usecase "**SRV-01 LIST API Operations**\n--\nAll server entry-point\noperations are defined\nin uc_api.puml" <<extref>> as SRV01
   }
 }
 

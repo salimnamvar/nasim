@@ -39,8 +39,7 @@ router -> compactor : AGT-06 COMPACT Context({agent_id, budget})
 activate compactor
 
 alt summary_quality acceptable
-  ref over compactor : AGT-06 COMPACT Context({agent_id, budget})
-    <back:#43A047>RUNNING</back>
+  ref over compactor : AGT-06 COMPACT Context({agent_id, budget}) <back:#43A047>RUNNING</back>
   compactor --> router : 200 OK
   deactivate compactor
   router --> iface : 200 OK

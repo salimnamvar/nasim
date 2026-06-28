@@ -41,7 +41,6 @@ activate mgr
 
 alt ast_extraction completes without error
   ref over mgr : RIM-01 INDEX Codebase({project_root})
-    <back:#4FC3F7>INDEXING</back>
   mgr -> ast : RIM-01 INDEX Codebase({project_root})
   activate ast
   ast --> mgr : 200 OK

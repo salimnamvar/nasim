@@ -1,5 +1,5 @@
 @startuml sm_mcp_server_lifecycle
-!include common/sm_styles.puml
+!include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — MCP Server Lifecycle State Machine
 ' Boundary:  nasim code agent

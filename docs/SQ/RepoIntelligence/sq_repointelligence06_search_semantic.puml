@@ -40,7 +40,6 @@ activate mgr
 
 alt embeddings_indexed and search completes
   ref over mgr : RIM-06 SEARCH Semantic({query, top_k})
-    <back:#7CB342>INDEXED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

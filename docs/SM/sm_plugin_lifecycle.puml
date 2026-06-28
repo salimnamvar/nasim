@@ -1,5 +1,5 @@
 @startuml sm_plugin_lifecycle
-!include common/sm_styles.puml
+!include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — Plugin Lifecycle State Machine
 ' Boundary:  nasim code agent

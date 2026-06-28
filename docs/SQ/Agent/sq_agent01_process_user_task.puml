@@ -40,8 +40,7 @@ router -> orchestrator : AGT-01 PROCESS UserTask({session_id, message})
 activate orchestrator
 
 alt task_input validates without error
-  ref over orchestrator : AGT-01 PROCESS UserTask({session_id, message})
-    <back:#43A047>RUNNING</back>
+  ref over orchestrator : AGT-01 PROCESS UserTask({session_id, message}) <back:#43A047>RUNNING</back>
   orchestrator -> provider : AGT-01 PROCESS UserTask({session_id, message})
   activate provider
   provider --> orchestrator : 200 OK

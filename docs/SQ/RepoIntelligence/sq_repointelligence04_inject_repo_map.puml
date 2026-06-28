@@ -40,7 +40,6 @@ activate mgr
 
 alt budget_sufficient and injection completes
   ref over mgr : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
-    <back:#7CB342>INDEXED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

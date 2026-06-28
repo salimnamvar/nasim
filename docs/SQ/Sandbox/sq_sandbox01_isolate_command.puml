@@ -35,12 +35,11 @@ user -> iface : POST /sandbox/isolate
 activate iface
 iface -> router : POST /sandbox/isolate
 activate router
-router -> mgr : sbx01 ISOLATE Command(command, policy)
+router -> mgr : SBX-01 ISOLATE Command({command, policy})
 activate mgr
 
 alt execution succeeds
-  ref over mgr : SBX-01 TRANSITION State
-    ' SM States: EXECUTING (#2196F3)
+  ref over mgr : SBX-01 ISOLATE Command({command, policy})
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +47,10 @@ alt execution succeeds
   deactivate router
   deactivate iface
 else timeout or violation
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SBX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SBX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SBX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
   deactivate router
   deactivate iface
 end

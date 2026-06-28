@@ -35,12 +35,11 @@ user -> iface : GET /sandbox/monitor/{process}
 activate iface
 iface -> router : GET /sandbox/monitor/{process}
 activate router
-router -> mgr : sbx03 MONITOR Process(process_id, limits)
+router -> mgr : SBX-03 MONITOR Process({process_id, limits})
 activate mgr
 
 alt normal completion
-  ref over mgr : SBX-03 TRANSITION State
-    ' SM States: MONITORING (#64B5F6)
+  ref over mgr : SBX-03 MONITOR Process({process_id, limits})
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -48,10 +47,10 @@ alt normal completion
   deactivate router
   deactivate iface
 else timeout or resource exceeded
-  mgr --> router : 422 Unprocessable
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SBX-03_MONITOR_FAILED", message: "Process monitoring failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SBX-03_MONITOR_FAILED", message: "Process monitoring failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SBX-03_MONITOR_FAILED", message: "Process monitoring failed", status: 422}}
   deactivate router
   deactivate iface
 end

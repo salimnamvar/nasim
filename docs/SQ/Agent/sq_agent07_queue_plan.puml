@@ -39,8 +39,7 @@ router -> plan : AGT-07 QUEUE Plan({tool_name, args})
 activate plan
 
 alt plan queued without error
-  ref over plan : AGT-07 QUEUE Plan({tool_name, args})
-    <back:#CE93D8>WAITING</back>
+  ref over plan : AGT-07 QUEUE Plan({tool_name, args}) <back:#CE93D8>WAITING</back>
   plan --> router : 200 OK
   deactivate plan
   router --> iface : 200 OK

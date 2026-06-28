@@ -40,7 +40,6 @@ activate reviewer
 
 alt llm_approves
   ref over reviewer : EVL-04 VALIDATE With LLM
-    <back:#AB47BC>REVIEWING</back>
   reviewer --> router : 200 OK
   deactivate reviewer
   router --> iface : 200 OK

@@ -76,8 +76,7 @@ end
 storage --> store : 200 OK
 deactivate storage
 
-ref over store : API-04 UPDATE Session
-  <back:#43A047>ACTIVE</back> → <back:#1565C0>SAVED</back>
+ref over store : API-04 UPDATE Session <back:#43A047>ACTIVE</back> → <back:#1565C0>SAVED</back>
 
 store --> router : 200 OK
 deactivate store

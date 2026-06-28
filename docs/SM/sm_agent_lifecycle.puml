@@ -1,5 +1,5 @@
 @startuml sm_agent_lifecycle
-!include common/sm_styles.puml
+!include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — Agent Lifecycle State Machine (API-First)
 ' Boundary:  nasim code agent

@@ -39,7 +39,7 @@ router -> injector : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_tu
 activate injector
 
 alt injection succeeds
-  ref over injector : TRANSITION State(<back:#C5CAE9>CHECKING</back>)
+  ref over injector : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
   injector --> router : 200 OK
   deactivate injector
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt injection succeeds
   deactivate router
   deactivate iface
 else budget exceeded
-  injector --> router : 422 Unprocessable
+  injector --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
   deactivate injector
-  router --> iface : 422 Unprocessable
-  iface --> user : 422 Unprocessable
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "EVL-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "EVL-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
   deactivate router
   deactivate iface
 end

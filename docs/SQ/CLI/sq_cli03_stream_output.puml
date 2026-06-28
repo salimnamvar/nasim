@@ -37,9 +37,9 @@ repl -> renderer : CLI-03 STREAM Output({sessionId})
 activate renderer
 renderer -> router : CLI-03 SUBSCRIBE Stream({sessionId})
 activate router
-ref over repl : TRANSITION State(<back:#D1C4E9>RESPONDING</back>)
 
 alt stream available
+  ref over repl : CLI-03 STREAM Output({sessionId})
   router --> renderer : 200 OK
   deactivate router
   renderer --> repl : 200 OK
@@ -48,15 +48,16 @@ alt stream available
   deactivate repl
   iface --> user : 200 OK
   deactivate iface
-  ref over repl : TRANSITION State(<back:#ECEFF1>IDLE</back>)
+  ref over repl : CLI-03 STREAM Output({sessionId})     <back:#ECEFF1>IDLE</back>
 else stream unavailable
-  router --> renderer : 503 Unavailable
+  ref over repl : CLI-03 STREAM Output({sessionId})     <back:#ECEFF1>IDLE</back>
+  router --> renderer : 503 SERVICE_UNAVAILABLE\n{error: {code: "CLI-03_STREAM_UNAVAILABLE", message: "Stream unavailable", status: 503}}
   deactivate router
-  renderer --> repl : 503 Unavailable
+  renderer --> repl : 503 SERVICE_UNAVAILABLE\n{error: {code: "CLI-03_STREAM_UNAVAILABLE", message: "Stream unavailable", status: 503}}
   deactivate renderer
-  repl --> iface : 503 Unavailable
+  repl --> iface : 503 SERVICE_UNAVAILABLE\n{error: {code: "CLI-03_STREAM_UNAVAILABLE", message: "Stream unavailable", status: 503}}
   deactivate repl
-  iface --> user : 503 Unavailable
+  iface --> user : 503 SERVICE_UNAVAILABLE\n{error: {code: "CLI-03_STREAM_UNAVAILABLE", message: "Stream unavailable", status: 503}}
   deactivate iface
 end
 

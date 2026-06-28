@@ -69,8 +69,7 @@ end
 store --> orchestrator : 200 OK — {session_data}
 deactivate store
 
-ref over orchestrator : API-06 DISPATCH Message
-  <back:#E0F7FA>SERVING</back> → <back:#D7CCC8>THINKING</back> → <back:#D1C4E9>RESPONDING</back>
+ref over orchestrator : API-06 DISPATCH Message <back:#E0F7FA>SERVING</back> → <back:#D7CCC8>THINKING</back> → <back:#D1C4E9>RESPONDING</back>
 
 ref over orchestrator
   AGT-01: PROCESS User Task

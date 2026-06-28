@@ -39,7 +39,7 @@ router -> detector : EVL-08 DETECT Repetition({task_id, recent_calls})
 activate detector
 
 alt no repetition
-  ref over detector : TRANSITION State(<back:#C5CAE9>CHECKING</back>)
+  ref over detector : EVL-08 DETECT Repetition({task_id, recent_calls})
   detector --> router : 200 OK
   deactivate detector
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt no repetition
   deactivate router
   deactivate iface
 else repetition detected
-  detector --> router : 409 Conflict
+  detector --> router : 409 CONFLICT\n{error: {code: "EVL-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
   deactivate detector
-  router --> iface : 409 Conflict
-  iface --> user : 409 Conflict
+  router --> iface : 409 CONFLICT\n{error: {code: "EVL-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
+  iface --> user : 409 CONFLICT\n{error: {code: "EVL-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
   deactivate router
   deactivate iface
 end

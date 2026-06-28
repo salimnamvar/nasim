@@ -1,5 +1,5 @@
 @startuml sm_plan_lifecycle
-!include common/sm_styles.puml
+!include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — Plan Lifecycle State Machine
 ' Boundary:  nasim code agent

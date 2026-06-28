@@ -34,9 +34,9 @@ iface -> repl : CLI-06 REQUEST Approval({toolName, args})
 activate repl
 repl -> router : CLI-06 REGISTER Approval({toolName})
 activate router
-ref over repl : TRANSITION State(<back:#FFF9C4>AWAITING_APPROVAL</back>)
 
 alt user approves
+  ref over repl : CLI-06 REQUEST Approval({toolName, args})
   router --> repl : 200 OK
   deactivate router
   repl --> iface : 200 OK
@@ -44,11 +44,12 @@ alt user approves
   iface --> user : 200 OK
   deactivate iface
 else user rejects
-  router --> repl : 403 Forbidden
+  ref over repl : CLI-06 REQUEST Approval({toolName, args})     <back:#ECEFF1>IDLE</back>
+  router --> repl : 403 FORBIDDEN\n{error: {code: "CLI-06_USER_REJECTED", message: "User rejected approval", status: 403}}
   deactivate router
-  repl --> iface : 403 Forbidden
+  repl --> iface : 403 FORBIDDEN\n{error: {code: "CLI-06_USER_REJECTED", message: "User rejected approval", status: 403}}
   deactivate repl
-  iface --> user : 403 Forbidden
+  iface --> user : 403 FORBIDDEN\n{error: {code: "CLI-06_USER_REJECTED", message: "User rejected approval", status: 403}}
   deactivate iface
 end
 
