@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ErrorBoundary
+' CSR Chain: User -> CLI Process -> ServerRouter -> ErrorService -> ErrorBoundary
 ' SM States: FAILED (#EF5350)
 ' ============================================================
 
@@ -26,6 +26,10 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
+  participant "ErrorService" as errorService
+end box
+
+box "Repository" REPOSITORY_COLOR
   participant "ErrorBoundary" as boundary
 end box
 
@@ -35,22 +39,26 @@ user -> iface : POST /v1/agents/{agent_id}:handle-error
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:handle-error
 activate router
-router -> boundary : AGT-14 HANDLE Error({error})
-activate boundary
+router -> errorService : AGT-14 HANDLE Error({error})
+activate errorService
 
 alt retryable error
-  ref over boundary : AGT-14 HANDLE Error({error}) <back:#EF5350>FAILED</back>
-  boundary --> router : 200 OK
+  ref over errorService : AGT-14 HANDLE Error({error}) <back:#EF5350>FAILED</back>
+  errorService -> boundary : AGT-14 PERSIST Error({error, recovery_action})
+  activate boundary
+  boundary --> errorService : 200 OK
   deactivate boundary
+  errorService --> router : 200 OK
+  deactivate errorService
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router
   deactivate iface
 else unrecoverable error
-  boundary --> router : 500 INTERNAL\n{error: {code: "AGT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
-  deactivate boundary
-  router --> iface : 500 INTERNAL
-  iface --> user : 500 INTERNAL
+  errorService --> router : 500 INTERNAL\n{error: {code: "AGT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
+  deactivate errorService
+  router --> iface : 500 INTERNAL\n{error: {code: "AGT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
+  iface --> user : 500 INTERNAL\n{error: {code: "AGT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
   deactivate router
   deactivate iface
 end

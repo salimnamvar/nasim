@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationHistory -> SessionStore -> SessionStorage
+' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationService -> SessionStore -> SessionStorage
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -26,7 +26,7 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
-  participant "ConversationHistory" as history
+  participant "ConversationService" as history
 end box
 
 box "Repository" REPOSITORY_COLOR
@@ -63,8 +63,8 @@ alt token_count <= budget
 else budget exceeded
   history --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
   deactivate history
-  router --> iface : 409 FAILED_PRECONDITION
-  iface --> user : 409 FAILED_PRECONDITION
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "AGT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "AGT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
   deactivate router
   deactivate iface
 end

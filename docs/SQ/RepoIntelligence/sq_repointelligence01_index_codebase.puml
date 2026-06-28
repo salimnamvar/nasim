@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> RepoIntelligenceManager
+' CSR Chain: User -> CLI Process -> ServerRouter -> RepoIntelligenceService -> ASTIndexAdapter
 ' SM States: INDEXING (#4FC3F7)
 ' ============================================================
 
@@ -25,8 +25,11 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "RepoIntelligenceService" as mgr
+end box
+
 box "Repository" REPOSITORY_COLOR
-  participant "RepoIntelligenceManager" as mgr
   participant "ASTIndexAdapter" as ast
 end box
 
@@ -54,8 +57,8 @@ alt ast_extraction completes without error
 else parse validation fails
   mgr --> router : 400 BAD_REQUEST\n{error: {code: "RIM-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
   deactivate mgr
-  router --> iface : 400 BAD_REQUEST
-  iface --> user : 400 BAD_REQUEST
+  router --> iface : 400 BAD_REQUEST\n{error: {code: "RIM-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
+  iface --> user : 400 BAD_REQUEST\n{error: {code: "RIM-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
   deactivate router
   deactivate iface
 end

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SubagentCoordinator
+' CSR Chain: User -> CLI Process -> ServerRouter -> SubagentService -> SubagentRegistry
 ' SM States: COMPLETED (#2E7D32)
 ' ============================================================
 
@@ -26,7 +26,11 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SubagentCoordinator" as subagent
+  participant "SubagentService" as subagent
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SubagentRegistry" as subagentRegistry
 end box
 
 == AGT-10 COLLECT Subagent Result ==
@@ -40,6 +44,10 @@ activate subagent
 
 alt result available without error
   ref over subagent : AGT-10 COLLECT SubagentResult({child_id, timeout}) <back:#2E7D32>COMPLETED</back>
+  subagent -> subagentRegistry : AGT-10 READ SubagentResult({child_id})
+  activate subagentRegistry
+  subagentRegistry --> subagent : 200 OK
+  deactivate subagentRegistry
   subagent --> router : 200 OK
   deactivate subagent
   router --> iface : 200 OK
@@ -49,8 +57,8 @@ alt result available without error
 else child not found
   subagent --> router : 404 NOT_FOUND\n{error: {code: "AGT-10_NOT_FOUND", message: "Child agent not found", status: 404}}
   deactivate subagent
-  router --> iface : 404 NOT_FOUND
-  iface --> user : 404 NOT_FOUND
+  router --> iface : 404 NOT_FOUND\n{error: {code: "AGT-10_NOT_FOUND", message: "Child agent not found", status: 404}}
+  iface --> user : 404 NOT_FOUND\n{error: {code: "AGT-10_NOT_FOUND", message: "Child agent not found", status: 404}}
   deactivate router
   deactivate iface
 end

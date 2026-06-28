@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> PlanSession
+' CSR Chain: User -> CLI Process -> ServerRouter -> PlanService -> PlanStore
 ' SM States: WAITING (#CE93D8)
 ' ============================================================
 
@@ -26,7 +26,11 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
-  participant "PlanSession" as plan
+  participant "PlanService" as plan
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "PlanStore" as planStore
 end box
 
 == AGT-07 QUEUE Plan ==
@@ -40,6 +44,10 @@ activate plan
 
 alt plan queued without error
   ref over plan : AGT-07 QUEUE Plan({tool_name, args}) <back:#CE93D8>WAITING</back>
+  plan -> planStore : AGT-07 PERSIST Plan({agent_id, tool_name, args})
+  activate planStore
+  planStore --> plan : 200 OK
+  deactivate planStore
   plan --> router : 200 OK
   deactivate plan
   router --> iface : 200 OK
@@ -49,8 +57,8 @@ alt plan queued without error
 else queue full
   plan --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGT-07_QUEUE_FULL", message: "Plan queue capacity exceeded", status: 409}}
   deactivate plan
-  router --> iface : 409 FAILED_PRECONDITION
-  iface --> user : 409 FAILED_PRECONDITION
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "AGT-07_QUEUE_FULL", message: "Plan queue capacity exceeded", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "AGT-07_QUEUE_FULL", message: "Plan queue capacity exceeded", status: 409}}
   deactivate router
   deactivate iface
 end

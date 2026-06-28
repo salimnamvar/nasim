@@ -68,8 +68,8 @@ alt task_input validates without error
 else validation fails
   orchestrator --> router : 422 INVALID_ARGUMENT\n{error: {code: "AGT-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
   deactivate orchestrator
-  router --> iface : 422 INVALID_ARGUMENT
-  iface --> user : 422 INVALID_ARGUMENT
+  router --> iface : 422 INVALID_ARGUMENT\n{error: {code: "AGT-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
+  iface --> user : 422 INVALID_ARGUMENT\n{error: {code: "AGT-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
   deactivate router
   deactivate iface
 end

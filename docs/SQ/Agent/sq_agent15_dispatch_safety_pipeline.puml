@@ -49,8 +49,8 @@ alt all checks pass without error
 else safety violation
   safety --> router : 403 PERMISSION_DENIED\n{error: {code: "AGT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
   deactivate safety
-  router --> iface : 403 PERMISSION_DENIED
-  iface --> user : 403 PERMISSION_DENIED
+  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "AGT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
+  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "AGT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
   deactivate router
   deactivate iface
 end

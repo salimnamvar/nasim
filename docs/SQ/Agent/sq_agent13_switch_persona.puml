@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> PersonaManager
+' CSR Chain: User -> CLI Process -> ServerRouter -> PersonaService -> PersonaRepository
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -26,7 +26,11 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
-  participant "PersonaManager" as persona
+  participant "PersonaService" as persona
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "PersonaRepository" as personaRepo
 end box
 
 == AGT-13 SWITCH Persona ==
@@ -40,6 +44,10 @@ activate persona
 
 alt switch succeeds without error
   ref over persona : AGT-13 SWITCH Persona({new_persona_name}) <back:#43A047>RUNNING</back>
+  persona -> personaRepo : AGT-13 READ Persona({new_persona_name})
+  activate personaRepo
+  personaRepo --> persona : 200 OK
+  deactivate personaRepo
   persona --> router : 200 OK
   deactivate persona
   router --> iface : 200 OK
@@ -49,8 +57,8 @@ alt switch succeeds without error
 else switch fails
   persona --> router : 404 NOT_FOUND\n{error: {code: "AGT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
   deactivate persona
-  router --> iface : 404 NOT_FOUND
-  iface --> user : 404 NOT_FOUND
+  router --> iface : 404 NOT_FOUND\n{error: {code: "AGT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
+  iface --> user : 404 NOT_FOUND\n{error: {code: "AGT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
   deactivate router
   deactivate iface
 end

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ContextCompactor -> SessionStore -> SessionStorage
+' CSR Chain: User -> CLI Process -> ServerRouter -> ContextCompactionService -> SessionStore -> SessionStorage
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -26,7 +26,7 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
-  participant "ContextCompactor" as compactor
+  participant "ContextCompactionService" as compactor
 end box
 
 box "Repository" REPOSITORY_COLOR
@@ -63,8 +63,8 @@ alt summary_quality acceptable
 else compaction fails
   compactor --> router : 500 INTERNAL\n{error: {code: "AGT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
   deactivate compactor
-  router --> iface : 500 INTERNAL
-  iface --> user : 500 INTERNAL
+  router --> iface : 500 INTERNAL\n{error: {code: "AGT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
+  iface --> user : 500 INTERNAL\n{error: {code: "AGT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
   deactivate router
   deactivate iface
 end

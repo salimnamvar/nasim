@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> PlanSession
+' CSR Chain: User -> CLI Process -> ServerRouter -> PlanService -> PlanStore
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -26,7 +26,11 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
-  participant "PlanSession" as plan
+  participant "PlanService" as plan
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "PlanStore" as planStore
 end box
 
 == AGT-08 APPROVE Plan ==
@@ -40,6 +44,10 @@ activate plan
 
 alt plan approved without error
   ref over plan : AGT-08 APPROVE Plan({agent_id}) <back:#43A047>RUNNING</back>
+  plan -> planStore : AGT-08 READ Plan({agent_id})
+  activate planStore
+  planStore --> plan : 200 OK
+  deactivate planStore
   plan --> router : 200 OK
   deactivate plan
   router --> iface : 200 OK
@@ -49,8 +57,8 @@ alt plan approved without error
 else plan empty
   plan --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
   deactivate plan
-  router --> iface : 409 FAILED_PRECONDITION
-  iface --> user : 409 FAILED_PRECONDITION
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "AGT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "AGT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
   deactivate router
   deactivate iface
 end

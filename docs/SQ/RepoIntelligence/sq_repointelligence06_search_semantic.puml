@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SemanticSearchService
+' CSR Chain: User -> CLI Process -> ServerRouter -> SemanticSearchService -> EmbeddingRepository
 ' SM States: INDEXED (#7CB342)
 ' ============================================================
 
@@ -25,8 +25,12 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
-box "Repository" REPOSITORY_COLOR
+box "Service" SERVICE_COLOR
   participant "SemanticSearchService" as mgr
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "EmbeddingRepository" as embeddingRepo
 end box
 
 == RIM-06 SEARCH Semantic ==
@@ -40,6 +44,10 @@ activate mgr
 
 alt embeddings_indexed and search completes
   ref over mgr : RIM-06 SEARCH Semantic({query, top_k}) <back:#7CB342>INDEXED</back>
+  mgr -> embeddingRepo : RIM-06 SEARCH Embedding({query, top_k})
+  activate embeddingRepo
+  embeddingRepo --> mgr : 200 OK
+  deactivate embeddingRepo
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,8 +57,8 @@ alt embeddings_indexed and search completes
 else no results
   mgr --> router : 404 NOT_FOUND\n{error: {code: "RIM-06_NO_RESULTS", message: "No matching results found", status: 404}}
   deactivate mgr
-  router --> iface : 404 NOT_FOUND
-  iface --> user : 404 NOT_FOUND
+  router --> iface : 404 NOT_FOUND\n{error: {code: "RIM-06_NO_RESULTS", message: "No matching results found", status: 404}}
+  iface --> user : 404 NOT_FOUND\n{error: {code: "RIM-06_NO_RESULTS", message: "No matching results found", status: 404}}
   deactivate router
   deactivate iface
 end

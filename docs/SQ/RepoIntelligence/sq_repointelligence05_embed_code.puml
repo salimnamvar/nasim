@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> EmbeddingAdapter
+' CSR Chain: User -> CLI Process -> ServerRouter -> EmbeddingService -> EmbeddingAdapter
 ' SM States: EMBEDDING (#E6EE9C)
 ' ============================================================
 
@@ -25,8 +25,12 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "EmbeddingService" as mgr
+end box
+
 box "Repository" REPOSITORY_COLOR
-  participant "EmbeddingAdapter" as mgr
+  participant "EmbeddingAdapter" as embeddingAdapter
 end box
 
 == RIM-05 EMBED Code ==
@@ -40,6 +44,10 @@ activate mgr
 
 alt embedding_model available and embed completes
   ref over mgr : RIM-05 EMBED Code({code_fragments}) <back:#E6EE9C>EMBEDDING</back>
+  mgr -> embeddingAdapter : RIM-05 PERSIST Embedding({code_fragments})
+  activate embeddingAdapter
+  embeddingAdapter --> mgr : 200 OK
+  deactivate embeddingAdapter
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,8 +57,8 @@ alt embedding_model available and embed completes
 else provider error
   mgr --> router : 503 UNAVAILABLE\n{error: {code: "RIM-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
   deactivate mgr
-  router --> iface : 503 UNAVAILABLE
-  iface --> user : 503 UNAVAILABLE
+  router --> iface : 503 UNAVAILABLE\n{error: {code: "RIM-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
+  iface --> user : 503 UNAVAILABLE\n{error: {code: "RIM-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
   deactivate router
   deactivate iface
 end

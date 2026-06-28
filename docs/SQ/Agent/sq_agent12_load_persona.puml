@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> PersonaManager
+' CSR Chain: User -> CLI Process -> ServerRouter -> PersonaService -> PersonaRepository
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -26,7 +26,11 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
-  participant "PersonaManager" as persona
+  participant "PersonaService" as persona
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "PersonaRepository" as personaRepo
 end box
 
 == AGT-12 LOAD Persona ==
@@ -40,6 +44,10 @@ activate persona
 
 alt load succeeds without error
   ref over persona : AGT-12 LOAD Persona({persona_name}) <back:#43A047>RUNNING</back>
+  persona -> personaRepo : AGT-12 READ Persona({persona_name})
+  activate personaRepo
+  personaRepo --> persona : 200 OK
+  deactivate personaRepo
   persona --> router : 200 OK
   deactivate persona
   router --> iface : 200 OK
@@ -49,8 +57,8 @@ alt load succeeds without error
 else config invalid
   persona --> router : 422 INVALID_ARGUMENT\n{error: {code: "AGT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
   deactivate persona
-  router --> iface : 422 INVALID_ARGUMENT
-  iface --> user : 422 INVALID_ARGUMENT
+  router --> iface : 422 INVALID_ARGUMENT\n{error: {code: "AGT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
+  iface --> user : 422 INVALID_ARGUMENT\n{error: {code: "AGT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
   deactivate router
   deactivate iface
 end

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> RankingService
+' CSR Chain: User -> CLI Process -> ServerRouter -> RankingService -> SymbolGraphRepository
 ' SM States: INDEXED (#7CB342)
 ' ============================================================
 
@@ -25,8 +25,12 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
-box "Repository" REPOSITORY_COLOR
+box "Service" SERVICE_COLOR
   participant "RankingService" as mgr
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SymbolGraphRepository" as symbolRepo
 end box
 
 == RIM-03 RANK Results ==
@@ -40,6 +44,10 @@ activate mgr
 
 alt graph_not_empty and ranking completes
   ref over mgr : RIM-03 RANK Results({graph, chat_context}) <back:#7CB342>INDEXED</back>
+  mgr -> symbolRepo : RIM-03 READ SymbolGraph({project_root})
+  activate symbolRepo
+  symbolRepo --> mgr : 200 OK
+  deactivate symbolRepo
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -49,8 +57,8 @@ alt graph_not_empty and ranking completes
 else empty graph
   mgr --> router : 409 FAILED_PRECONDITION\n{error: {code: "RIM-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
   deactivate mgr
-  router --> iface : 409 FAILED_PRECONDITION
-  iface --> user : 409 FAILED_PRECONDITION
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "RIM-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "RIM-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
   deactivate router
   deactivate iface
 end

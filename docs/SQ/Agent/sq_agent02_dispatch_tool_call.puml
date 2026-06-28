@@ -55,10 +55,10 @@ else safety_violation
   ref over orchestrator : AGT-02 DISPATCH ToolCall({tool_name, args}) <back:#CE93D8>WAITING</back>
   safety --> orchestrator : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
   deactivate safety
-  orchestrator --> router : 403 PERMISSION_DENIED
+  orchestrator --> router : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
   deactivate orchestrator
-  router --> iface : 403 PERMISSION_DENIED
-  iface --> user : 403 PERMISSION_DENIED
+  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
+  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
   deactivate router
   deactivate iface
 end
