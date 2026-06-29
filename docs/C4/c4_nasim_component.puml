@@ -5,6 +5,7 @@
 ' Purpose:   Container-to-Component traceability with strict 3-layer CSR.
 '            External clients from Container diagram connect to internal
 '            adapters, which converge at AgentController (single entry).
+'            Consistent naming: Adapter/Controller, Service, Repository.
 ' Milestone: v1.0
 ' Version:   11.0.0
 ' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
@@ -53,13 +54,13 @@ Container_Boundary(nasim_application, "NASIM Application") {
         Component(history_repo, "HistoryRepository", "", "Snapshots, revert index, search index")
         Component(config_repo, "ConfigRepository", "", "YAML, env vars, CLI flags, project overrides")
         Component(memory_repo, "MemoryRepository", "", "Cross-session knowledge persistence")
-        Component(llm_client, "LLMClient", "litellm", "LLM API calls: streaming, fallback, capability matching")
-        Component(fs_adapter, "FilesystemAdapter", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep")
-        Component(sandbox_adapter, "SandboxAdapter", "subprocess", "Sandboxed command execution: timeout, isolation")
-        Component(git_adapter, "GitAdapter", "gitpython", "Git operations: status, diff, commit, branch")
-        Component(mcp_client_adapter, "MCPClientAdapter", "mcp.client", "MCP extension tools: discovery, invocation")
-        Component(repo_intel_adapter, "RepoIntelligenceAdapter", "tree-sitter + API", "AST indexing, symbol graph, semantic search")
-        Component(web_adapter, "WebAdapter", "httpx", "Web fetch: documentation, search results")
+        Component(llm_repo, "LLMRepository", "litellm", "LLM API calls: streaming, fallback, capability matching")
+        Component(fs_repo, "FilesystemRepository", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep")
+        Component(sandbox_repo, "SandboxRepository", "subprocess", "Sandboxed command execution: timeout, isolation")
+        Component(git_repo, "GitRepository", "gitpython", "Git operations: status, diff, commit, branch")
+        Component(mcp_repo, "MCPRepository", "mcp.client", "MCP extension tools: discovery, invocation")
+        Component(repo_intel_repo, "RepoIntelligenceRepository", "tree-sitter + API", "AST indexing, symbol graph, semantic search")
+        Component(web_repo, "WebRepository", "httpx", "Web fetch: documentation, search results")
     }
 }
 
@@ -111,33 +112,33 @@ Rel(task_svc, context_svc, "assembles context for LLM call")
 ' ══════════════════════════════════════════════════════════════
 
 Rel(task_svc, session_repo, "persists conversation turns")
-Rel(task_svc, llm_client, "invokes LLM inference")
+Rel(task_svc, llm_repo, "invokes LLM inference")
 Rel(session_svc, session_repo, "loads and saves sessions")
 Rel(session_svc, history_repo, "manages snapshots and revert index")
-Rel(tool_svc, fs_adapter, "reads and writes project files")
-Rel(tool_svc, sandbox_adapter, "executes commands in sandbox")
-Rel(tool_svc, git_adapter, "queries git state, creates commits")
-Rel(tool_svc, mcp_client_adapter, "invokes extension tools")
-Rel(tool_svc, web_adapter, "fetches documentation")
+Rel(tool_svc, fs_repo, "reads and writes project files")
+Rel(tool_svc, sandbox_repo, "executes commands in sandbox")
+Rel(tool_svc, git_repo, "queries git state, creates commits")
+Rel(tool_svc, mcp_repo, "invokes extension tools")
+Rel(tool_svc, web_repo, "fetches documentation")
 Rel(context_svc, memory_repo, "injects memory context")
-Rel(context_svc, repo_intel_adapter, "queries codebase intelligence")
+Rel(context_svc, repo_intel_repo, "queries codebase intelligence")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Repository → External Systems ──
 ' ══════════════════════════════════════════════════════════════
 
-Rel(llm_client, llm, "routes LLM API calls", "HTTP/JSON streaming")
-Rel(fs_adapter, host_fs, "reads and writes files", "path I/O")
-Rel(sandbox_adapter, sandbox, "executes commands", "subprocess")
-Rel(git_adapter, git, "version control operations", "git CLI")
-Rel(mcp_client_adapter, mcp_server, "invokes extension tools", "stdio / SSE")
-Rel(repo_intel_adapter, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
-Rel(web_adapter, web, "fetches documentation", "HTTPS")
+Rel(llm_repo, llm, "routes LLM API calls", "HTTP/JSON streaming")
+Rel(fs_repo, host_fs, "reads and writes files", "path I/O")
+Rel(sandbox_repo, sandbox, "executes commands", "subprocess")
+Rel(git_repo, git, "version control operations", "git CLI")
+Rel(mcp_repo, mcp_server, "invokes extension tools", "stdio / SSE")
+Rel(repo_intel_repo, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
+Rel(web_repo, web, "fetches documentation", "HTTPS")
 
 legend right
     |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
-    |<#FFF3E0>  **Service**    | Task, Tool, Session, Safety, Context |
-    |<#E8F5E9>  **Repository** | Session, History, Config, Memory, LLM, Filesystem, Sandbox, Git, MCP, Repo Intelligence, Web |
+    |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, SafetyService, ContextService |
+    |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository |
     |<#FAFAFA>  **Container_Ext** | External clients from Container diagram |
 end legend
 
