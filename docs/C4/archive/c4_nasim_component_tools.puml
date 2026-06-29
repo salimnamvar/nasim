@@ -4,6 +4,12 @@
 ' Boundary:  NASIM Application (container) — Tool Group
 ' Purpose:   Tool layer: base ABC, registry, file/search/shell/web/git/lsp tools
 '            CSR Layer: Repository
+'
+'            CONTEXT-LEVEL NOTE:
+'            At Context level (c4_nasim_context.puml), LSP Server
+'            is grouped under "Repo Intelligence Backend" for visual
+'            simplicity. This Component diagram shows the LspTool
+'            that directly consumes the LSP Server external system.
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.deep.domain.audit.md

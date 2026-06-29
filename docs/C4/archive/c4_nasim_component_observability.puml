@@ -4,6 +4,13 @@
 ' Boundary:  NASIM Application (container) — Observability Group
 ' Purpose:   Application-side logging and metrics emission (emit only)
 '            CSR Layer: Infrastructure
+'
+'            CONTEXT-LEVEL NOTE:
+'            At Context level (c4_nasim_context.puml), Log Agent,
+'            Prometheus, and Grafana are grouped under
+'            "Observability Platform" for visual simplicity.
+'            This Component diagram shows their distinct responsibilities
+'            and the internal components that consume them.
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    docs/audit/audit.2026.06.20.logging.observability.car.md

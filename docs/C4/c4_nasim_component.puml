@@ -1,0 +1,197 @@
+@startuml c4_nasim_component_application
+' ============================================================
+' Title:     NASIM Application — Full Component Diagram
+' Boundary:  NASIM Application (container)
+' Purpose:   Shows all external clients connected to NASIM API,
+'            which routes to Service and Repository groups.
+'            Unified entry point: ServerRouter handles all HTTP/SSE.
+'            CSR Pattern:
+'            - Controller:    CLI Group, API Group
+'            - Service:       Agent, Router, Safety, Context Graph,
+'                             Edit Strategy, Evaluation, Provider
+'            - Repository:    Config, Session, Tool, Memory,
+'                             Repo Intelligence, Git
+' Milestone: v1.0
+' Version:   1.0.1
+' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
+' Review:    —
+' Date:      2026-06-29
+' ============================================================
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
+!theme plain
+!include common/c4_styles.puml
+
+LAYOUT_TOP_DOWN()
+
+title NASIM Application — Full Component Diagram
+
+' ── Interface Containers (outside NASIM Application) ──
+Person(user, "Developer", "Uses NASIM as an AI coding assistant")
+
+Container_Ext(cli, "CLI", "Python 3.10+", "Terminal interface: REPL, arg parsing, slash commands")
+Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
+Container_Ext(desktop, "DesktopApp", "Electron / Tauri", "Desktop application")
+Container_Ext(mobile, "MobileApp", "React Native / Flutter", "Mobile application")
+
+' ── NASIM Application Boundary ──
+Container_Boundary(nasim_application, "NASIM Application") {
+
+    ' ── Controller Layer ──
+    Boundary(api_group, "API Group") <<controller>> {
+        Component(server_app, "ServerApp", "FastAPI", "ASGI application factory with lifespan, middleware, route mounts")
+        Component(server_router, "ServerRouter", "FastAPI Router", "ROD-compliant REST endpoints. Sole entry gate for HTTP/SSE interfaces.")
+        Component(sse_handler, "SSEHandler", "SSE", "Converts AgentEvent stream to SSE format for all interface clients")
+        Component(api_schema, "APISchema", "Pydantic", "Request/response models with AIP-193 error format")
+    }
+
+    ' ── Service Layer ──
+    Boundary(agent_group, "Agent Group") <<service>> {
+        Component(agent_orch, "AgentOrchestrator", "", "Core agentic loop: Provider call, tool dispatch, repeat")
+    }
+
+    Boundary(router_group, "Router Group") <<service>> {
+        Component(model_router, "ModelRouter", "", "Model selection, fallback, capability matching")
+    }
+
+    Boundary(safety_group, "Safety Group") <<service>> {
+        Component(safety_coord, "SafetyCoordinator", "", "Permission gating, injection scanning, egress inspection")
+    }
+
+    Boundary(context_graph_group, "Context Graph Group") <<service>> {
+        Component(pipeline_orch, "PipelineOrchestrator", "", "Context pipeline: graph construction, truncation, distillation")
+    }
+
+    Boundary(edit_strategy_group, "Edit Strategy Group") <<service>> {
+        Component(edit_strategy_mgr, "EditStrategyManager", "", "Selects and applies file-edit strategy by edit type")
+    }
+
+    Boundary(evaluation_group, "Evaluation Group") <<service>> {
+        Component(eval_engine, "EvaluationEngine", "", "Task evaluation, success checks, retry coordination")
+    }
+
+    Boundary(provider_group, "Provider Group") <<service>> {
+        Component(provider, "Provider", "Protocol", "Unified LLM interface via litellm")
+    }
+
+    ' ── Repository Layer ──
+    Boundary(config_group, "Config Group") <<repository>> {
+        Component(config_loader, "ConfigLoader", "pydantic", "Loads YAML, env vars, CLI flags; validates at load")
+    }
+
+    Boundary(session_group, "Session Group") <<repository>> {
+        Component(session_store, "SessionStore", "", "Message persistence and session lifecycle")
+    }
+
+    Boundary(tool_group, "Tool Group") <<repository>> {
+        Component(tool_registry, "ToolRegistry", "", "Tool instance management and dispatch")
+    }
+
+    Boundary(memory_group, "Memory Group") <<repository>> {
+        Component(memory_store, "MemoryStore", "", "Cross-session knowledge persistence and retrieval")
+    }
+
+    Boundary(repo_intel_group, "Repo Intelligence Group") <<repository>> {
+        Component(repo_intel_mgr, "RepoIntelligenceManager", "", "Codebase intelligence: AST indexing, search, repo mapping")
+    }
+
+    Boundary(git_group, "Git Group") <<repository>> {
+        Component(git_integration, "GitIntegration", "", "Auto-commit, branch awareness, diff tracking")
+    }
+}
+
+' ── External Systems ──
+System_Ext(llm, "LLM Backend", "Multi-provider inference via litellm")
+System_Ext(host_fs, "Host Filesystem", "Project source code and configuration")
+System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation")
+System_Ext(web, "Web", "Documentation and search engines")
+System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
+System_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP")
+System_Ext(git, "Git Repository", "Version-controlled project files")
+System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
+System_Ext(obs, "Observability Platform", "Logs, metrics, dashboards")
+
+' ══════════════════════════════════════════════════════════════
+' ── Interface → API Connections ──
+' ══════════════════════════════════════════════════════════════
+
+' User interacts with interfaces
+Rel(user, cli, "runs coding tasks", "terminal REPL")
+Rel(user, webapp, "interacts via browser", "HTTPS")
+Rel(user, desktop, "interacts via desktop app", "local")
+Rel(user, mobile, "interacts via mobile app", "HTTPS")
+
+' HTTP/SSE interfaces → API
+Rel(webapp, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
+Rel(desktop, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
+Rel(mobile, server_router, "submits coding tasks and streams AI responses", "HTTPS + SSE")
+Rel(cli, server_router, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
+
+' MCP Client → API
+Rel(mcp_client, server_router, "invokes NASIM tools via MCP", "stdio / SSE")
+
+' ══════════════════════════════════════════════════════════════
+' ── API Internal Connections ──
+' ══════════════════════════════════════════════════════════════
+
+Rel(server_app, server_router, "configures and exposes REST endpoints")
+Rel(server_router, api_schema, "validates requests and responses against schema")
+Rel(server_router, agent_orch, "delegates all HTTP requests to agent orchestrator")
+Rel(server_router, sse_handler, "streams agent events to connected clients")
+Rel(sse_handler, agent_orch, "consumes AgentEvent stream from orchestrator")
+
+' ══════════════════════════════════════════════════════════════
+' ── Agent → Service Groups ──
+' ══════════════════════════════════════════════════════════════
+
+Rel(agent_orch, safety_coord, "validates actions before tool dispatch")
+Rel(agent_orch, model_router, "selects model for inference")
+Rel(agent_orch, pipeline_orch, "processes context pipeline")
+Rel(agent_orch, provider, "invokes LLM chat and streaming")
+Rel(agent_orch, eval_engine, "triggers evaluation after task completion")
+Rel(agent_orch, edit_strategy_mgr, "delegates file edit operations")
+
+' ── Service → Service ──
+Rel(model_router, provider, "queries capabilities and routes calls")
+Rel(eval_engine, provider, "LLM-based review and scoring")
+
+' ══════════════════════════════════════════════════════════════
+' ── Agent → Repository Groups ──
+' ══════════════════════════════════════════════════════════════
+
+Rel(agent_orch, session_store, "saves and loads conversation")
+Rel(agent_orch, tool_registry, "dispatches tool execution")
+Rel(agent_orch, memory_store, "persist and retrieve knowledge")
+Rel(agent_orch, repo_intel_mgr, "queries codebase intelligence")
+Rel(agent_orch, git_integration, "reads git state and creates commits")
+
+' ── Config → core services ──
+Rel(config_loader, agent_orch, "configures orchestrator behavior")
+Rel(config_loader, model_router, "provides model config")
+Rel(config_loader, safety_coord, "configures safety mode")
+
+' ── Context Graph → Repository groups ──
+Rel(pipeline_orch, memory_store, "injects memory context")
+Rel(pipeline_orch, repo_intel_mgr, "injects repo map context")
+
+' ══════════════════════════════════════════════════════════════
+' ── External System Connections ──
+' ══════════════════════════════════════════════════════════════
+
+Rel(provider, llm, "routes LLM API calls via litellm", "HTTP/JSON")
+Rel(session_store, host_fs, "reads/writes session files", "path I/O")
+Rel(tool_registry, sandbox, "executes commands in isolation", "subprocess")
+Rel(tool_registry, web, "fetches documentation", "HTTPS")
+Rel(tool_registry, mcp_server, "invokes extension tools", "stdio / SSE")
+Rel(git_integration, git, "version control operations", "git CLI")
+Rel(repo_intel_mgr, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
+Rel(agent_orch, obs, "emits logs and metrics", "stdout / HTTP")
+
+legend right
+    |<#E3F2FD>  **Controller** | CLI Group, API Group |
+    |<#FFF3E0>  **Service**    | Agent, Router, Safety, Context Graph, Edit Strategy, Evaluation, Provider |
+    |<#E8F5E9>  **Repository** | Config, Session, Tool, Memory, Repo Intelligence, Git |
+    |<#F3E5F5>  **Infrastructure** | — (see infrastructure diagram) |
+end legend
+
+@enduml
