@@ -2,9 +2,9 @@
 ' ============================================================
 ' Title:     NASIM Application — Component Diagram
 ' Boundary:  NASIM Application
-' Purpose:   Strict 3-layer CSR: Controller → Service → Repository.
-'            Repository layer includes external system adapters.
-'            Single convergence point: AgentController.
+' Purpose:   Container-to-Component traceability with strict 3-layer CSR.
+'            External clients from Container diagram connect to internal
+'            adapters, which converge at AgentController (single entry).
 ' Milestone: v1.0
 ' Version:   11.0.0
 ' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
@@ -19,6 +19,13 @@
 LAYOUT_TOP_DOWN()
 
 title NASIM Application — Component Diagram (CSR 3-Layer)
+
+' ── External Clients (from Container diagram) ──
+Container_Ext(cli, "CLI", "Python 3.10+", "Terminal interface: REPL, arg parsing, slash commands")
+Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
+Container_Ext(desktop, "DesktopApp", "Electron / Tauri", "Desktop application")
+Container_Ext(mobile, "MobileApp", "React Native / Flutter", "Mobile application")
+Container_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP")
 
 ' ── NASIM Application Boundary ──
 Container_Boundary(nasim_application, "NASIM Application") {
@@ -64,6 +71,16 @@ System_Ext(web, "Web", "Documentation and search engines")
 System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
 System_Ext(git, "Git Repository", "Version-controlled project files")
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
+
+' ══════════════════════════════════════════════════════════════
+' ── External Clients → Adapters (Container → Component traceability) ──
+' ══════════════════════════════════════════════════════════════
+
+Rel(cli, cli_adapter, "submits tasks", "HTTP/JSON + SSE")
+Rel(webapp, http_adapter, "submits tasks", "HTTP/JSON + SSE")
+Rel(desktop, http_adapter, "submits tasks", "HTTP/JSON + SSE")
+Rel(mobile, http_adapter, "submits tasks", "HTTPS + SSE")
+Rel(mcp_client, mcp_adapter, "invokes tools", "stdio / SSE")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Adapters → Controller (single convergence point) ──
@@ -121,6 +138,7 @@ legend right
     |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
     |<#FFF3E0>  **Service**    | Task, Tool, Session, Safety, Context |
     |<#E8F5E9>  **Repository** | Session, History, Config, Memory, LLM, Filesystem, Sandbox, Git, MCP, Repo Intelligence, Web |
+    |<#FAFAFA>  **Container_Ext** | External clients from Container diagram |
 end legend
 
 @enduml
