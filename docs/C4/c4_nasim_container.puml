@@ -1,77 +1,81 @@
 @startuml c4_nasim_container
 ' ============================================================
-' Title:     NASIM Application — Container Diagram
-' Boundary:  NASIM Application
-' Purpose:   Show the 3 runtime entry points (CLI Process, HTTP
-'            API Server, Core Engine) and architecturally
-'            significant external systems they depend on.
-'            CLI and HTTP are separate entry points within a
-'            single Python process.
+' Title:     NASIM Service System — Container Diagram
+' Boundary:  NASIM Service System
+' Purpose:   Show NASIM Application with interface containers
 ' Milestone: v1.0
-' Version:   9.0.0
-' Source:    docs/entities.md
+' Version:   11.0.0
+' Source:    docs/C4/c4_nasim_context.puml (v11.0.0)
 ' Review:    —
-' Date:      2026-06-25
+' ============================================================
+' SIM-01 EXCEPTION: 22 elements — single-system-boundary view
+' of all containers and external systems; splitting breaks the
+' Container-level abstraction.
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
-!include common/c4_styles.puml
 !theme plain
+!include common/c4_styles.puml
 
 LAYOUT_TOP_DOWN()
 
-title NASIM Application — Stream Container Diagram
+title NASIM Service System — Container Diagram
 
-Person(user, "User", "Developer using NASIM Application as an AI coding assistant")
+Person(user, "Developer", "Uses NASIM as an AI coding assistant")
 
-System_Boundary(nasim_application, "NASIM Application") {
-    Container(cli_process, "CLI Process", "Python 3.10+", "Terminal interface: REPL, arg parsing, rendering. Delegates to Core Engine.")
-    Container(api_server, "HTTP API Server", "FastAPI + SSE", "REST API with Server-Sent Events streaming. Entry gate for all interface containers.")
-    Container(core_engine, "Core Engine", "Python 3.10+", "Unified agent engine: agentic loop, tool orchestration, safety, context management, business logic")
+System_Boundary(nasim_service, "NASIM Service System") {
+    Container(nasim_app, "NASIM Application", "Python 3.10+", "AI coding agent: agentic loop, tool orchestration, safety, context management")
+    Container(cli, "CLI", "Python 3.10+", "Terminal interface: REPL, arg parsing, slash commands")
+    Container(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
+    Container(desktop, "DesktopApp", "Electron / Tauri", "Desktop application")
+    Container(mobile, "MobileApp", "React Native / Flutter", "Mobile application")
 }
 
-Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface connecting to API Server via HTTP")
-Container_Ext(desktop_app, "DesktopApp", "Electron / Tauri", "Desktop application connecting to API Server via HTTP")
-Container_Ext(mobile_app, "MobileApp", "React Native / Flutter", "Mobile application connecting to API Server via HTTP")
+System_Ext(llm, "LLM Backend", "Multi-provider inference via litellm")
+System_Ext(host_fs, "Host Filesystem", "Project source code and configuration")
+System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation")
+System_Ext(web, "Web", "Documentation and search engines")
+System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
+System_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP")
+System_Ext(git, "Git Repository", "Version-controlled project files")
+System_Ext(tree_sitter, "Tree-sitter", "AST parsing for code understanding")
+System_Ext(lsp_server, "LSP Server", "Code intelligence: completions, diagnostics, references")
+System_Ext(embedding_model, "Embedding Model", "Vector generation for semantic search")
+System_Ext(vector_store, "Vector Store", "Similarity search over code embeddings")
+System_Ext(log_agent, "Log Agent", "Fluent Bit / Vector: tails stdout, parses, pushes to Loki")
+System_Ext(prometheus, "Prometheus", "Pull-scrapes /metrics endpoint")
+System_Ext(grafana, "Grafana", "Read-only visualization and alerting dashboard")
 
-System_Ext(mcp_client, "MCP Client", "External tools and IDEs that consume NASIM Application's exposed capabilities via MCP")
-System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ via litellm")
-System_Ext(host_fs, "Host Filesystem", "Project source code, configuration, documentation, and community plugin files")
-System_Ext(host_shell, "Host Shell", "OS-level subprocess execution for shell commands")
-System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM Application via Model Context Protocol")
-
-Rel(user, cli_process, "runs coding tasks (activate user / deactivate user)", "terminal REPL")
+Rel(user, cli, "runs coding tasks", "terminal REPL")
 Rel(user, webapp, "interacts via browser", "HTTPS")
-Rel(user, desktop_app, "interacts via desktop app", "local")
-Rel(user, mobile_app, "interacts via mobile app", "HTTPS")
+Rel(user, desktop, "interacts via desktop app", "local")
+Rel(user, mobile, "interacts via mobile app", "HTTPS")
+Rel(mcp_client, nasim_app, "invokes NASIM tools via MCP", "stdio / SSE")
 
-Rel(cli_process, core_engine, "delegates tasks", "in-process call")
-Rel(webapp, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
-Rel(desktop_app, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
-Rel(mobile_app, api_server, "submits coding tasks and streams AI responses", "HTTP/JSON + SSE")
-Rel(mcp_client, core_engine, "invokes NASIM Application tools via MCP protocol", "stdio / SSE")
-Rel(api_server, core_engine, "delegates to core agent engine", "in-process call")
+Rel(cli, nasim_app, "delegates tasks", "in-process call")
+Rel(webapp, nasim_app, "delegates tasks", "HTTP/JSON + SSE")
+Rel(desktop, nasim_app, "delegates tasks", "HTTP/JSON + SSE")
+Rel(mobile, nasim_app, "delegates tasks", "HTTPS + SSE")
 
-Rel(core_engine, llm_backend, "sends context and receives code completions", "HTTP/JSON streaming")
-Rel(core_engine, host_fs, "reads, writes, and searches project files", "path I/O")
-Rel(core_engine, host_shell, "executes shell commands", "subprocess")
-Rel(core_engine, mcp_server, "discovers and invokes extension tools", "stdio / SSE")
+Rel(nasim_app, llm, "sends context, receives completions", "HTTP/JSON streaming")
+Rel(nasim_app, host_fs, "reads and writes project files", "path I/O")
+Rel(nasim_app, sandbox, "runs commands in isolation", "subprocess")
+Rel(nasim_app, web, "fetches documentation", "HTTPS")
+Rel(nasim_app, mcp_server, "invokes extension tools", "stdio / SSE")
+Rel(nasim_app, git, "reads state, creates commits", "git CLI")
+Rel(nasim_app, tree_sitter, "parses source code into AST", "in-process / FFI")
+Rel(nasim_app, lsp_server, "queries code intelligence", "LSP protocol")
+Rel(nasim_app, embedding_model, "generates code embeddings", "HTTP/JSON")
+Rel(nasim_app, vector_store, "performs similarity search", "HTTP/JSON")
+Rel(nasim_app, log_agent, "emits structured logs to stdout", "stdout only")
+Rel(nasim_app, prometheus, "exposes /metrics endpoint", "HTTP GET — pull model")
+Rel(grafana, prometheus, "queries metrics", "PromQL")
 
 legend right
     |= Symbol |= Meaning |
-    | Person | Human actor (Developer) |
-    | Container | Internal runtime unit within the NASIM Application boundary |
-    | Container_Ext | External client interface (webapp, mobile, desktop) |
-    | System_Ext | External system or service outside the boundary |
+    | Person | Human actor |
+    | Container | Runtime unit within NASIM Service System |
+    | System_Ext | External system |
 end legend
 
-!define CSR_CTRL participant "ServerRouter" as ctrl
-!define CSR_SVC participant "AgentOrchestrator" as svc
-!define CSR_REPO participant "SessionStore" as repo
-
-' CSR lint markers
-!define CSR_ACTOR actor "User" as user
-!define CSR_CTRL participant "ServerRouter" as ctrl
-!define CSR_SVC participant "AgentService" as svc
-!define CSR_REPO participant "DataStore" as repo
 @enduml

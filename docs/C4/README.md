@@ -23,15 +23,15 @@ Level 3: Component  →  c4_nasim_component_overview_core.puml (core groups)
 
 ### Level 1: System Context
 
-| Diagram | Level | Description |
-|---------|-------|-------------|
-| `c4_nasim_context.puml` | Context | NASIM Application as a single system with User actor and 9 external systems |
+| Diagram | Level | Version | Description |
+|---------|-------|---------|-------------|
+| `c4_nasim_context.puml` | Context | v9.1.5 | NASIM Application as a single system with User actor and 9 external systems |
 
 ### Level 2: Containers
 
-| Diagram | Level | Description |
-|---------|-------|-------------|
-| `c4_nasim_container.puml` | Container | 3 runtime entry points: CLI Process, HTTP API Server, Core Engine + 4 external interface containers |
+| Diagram | Level | Version | Description |
+|---------|-------|---------|-------------|
+| `c4_nasim_container.puml` | Container | v10.0.1 | 4 internal containers (CLI Process, HTTP API Server, AgentController, Core Engine) + 4 external interface clients (WebApp, DesktopApp, MobileApp, MCP Client) + 13 external systems. All interfaces converge through AgentController before reaching Core Engine — no bypass paths. |
 
 ### Level 3: Components
 
@@ -117,9 +117,15 @@ Context:   Person(User) → System(NASIM Application) → System_Ext(...)
 Container: System_Boundary(nasim_application, "NASIM Application") {
                Container(cli_process, "CLI Process")
                Container(api_server, "HTTP API Server")
+               Container(agent_controller, "AgentController")
                Container(core_engine, "Core Engine")
            }
            Container_Ext(WebApp, DesktopApp, MobileApp) → Container(api_server)
+           Container_Ext(MCP Client) → Container(agent_controller)
+           Container(cli_process, api_server, mcp_client) → Container(agent_controller) → Container(core_engine)
+           System_Ext(LLM Backend, Host FS, Sandbox, Web, MCP Server,
+                      Git Repo, Tree-sitter, LSP, Embedding, Vector Store,
+                      Log Agent, Prometheus, Grafana) → Container(core_engine)
 Component: Container_Boundary(nasim_application, "NASIM Application") {
                 Boundary(cli_group) <<controller>> { ... }
                 Boundary(api_group) <<controller>> { ... }
@@ -209,13 +215,18 @@ These groupings are **Context-level simplifications only**. The distinct respons
 
 | Container | Type | Connection to NASIM Application |
 |-----------|------|---------------------------------|
-| WebApp | JavaScript SPA | HTTP/JSON + SSE to ServerRouter |
-| DesktopApp | Electron / Tauri | HTTP/JSON + SSE to ServerRouter |
-| MobileApp | React Native / Flutter | HTTP/JSON + SSE to ServerRouter |
+| WebApp | JavaScript SPA | HTTP/JSON + SSE to ServerRouter → AgentController |
+| DesktopApp | Electron / Tauri | HTTP/JSON + SSE to ServerRouter → AgentController |
+| MobileApp | React Native / Flutter | HTTPS + SSE to ServerRouter → AgentController |
+| MCP Client | External tools / IDEs | stdio / SSE to AgentController |
 
-These are separate deployable units that connect to NASIM Application's HTTP API Server. They are modeled as `Container_Ext` (outside the system boundary) because they are clients, not part of NASIM Application itself.
+WebApp, DesktopApp, and MobileApp are separate deployable units that connect to NASIM Application's HTTP API Server. They are modeled as `Container_Ext` (outside the system boundary) because they are clients, not part of NASIM Application itself.
+
+MCP Client is a separate deployable unit that connects to AgentController via MCP protocol (stdio/SSE). All interfaces converge through AgentController before reaching Core Engine.
 
 ## External Systems
+
+### Context Level (grouped)
 
 | System | Purpose |
 |--------|---------|
@@ -228,6 +239,24 @@ These are separate deployable units that connect to NASIM Application's HTTP API
 | Git Repository | Version-controlled project files: branch state, history, and commits |
 | Repo Intelligence Backend | Tree-sitter (AST parsing), LSP Server (code intelligence), Embedding Model (vector generation), Vector Store (similarity search) |
 | Observability Platform | Log agent, Prometheus, Grafana, OTel Collector: NASIM Application emits; platform owns collection, storage, visualization |
+
+### Container Level (ungrouped for precision)
+
+| System | Purpose |
+|--------|---------|
+| LLM Backend | Multi-provider inference via litellm |
+| Host Filesystem | Project source code, config, docs, plugin files |
+| Sandbox Runtime | OS-level process isolation: landlock, seccomp, bubblewrap |
+| Web | Documentation, package APIs, search engines |
+| MCP Server | Extension tools provided via MCP protocol |
+| Git Repository | Version-controlled project files |
+| Tree-sitter | AST parsing for code understanding |
+| LSP Server | Code intelligence: completions, diagnostics, references |
+| Embedding Model | Vector generation for semantic search |
+| Vector Store | Similarity search over code embeddings |
+| Log Agent | Fluent Bit / Vector: tails stdout, parses, enriches, pushes to Loki |
+| Prometheus | Pull-scrapes /metrics endpoint for time-series metrics |
+| Grafana | Read-only visualization and alerting dashboard |
 
 ## Actor / Entry-Chain Approach
 
@@ -278,12 +307,13 @@ diagrams only.
 
 - **Single process:** NASIM Application runs as one Python process. CLI and HTTP API Server share the same process boundary but are modeled as separate Containers because they are distinct runtime entry points with different responsibilities (terminal REPL vs HTTP+SSE). This is a C4 modeling choice, not a deployment choice.
 - **Container = runtime entry point OR separate deployment:** In C4, a Container does not always mean a separate process. It can also mean a distinct runtime responsibility within a shared process. CLI Process and HTTP API Server use this interpretation.
-- **Container_Ext = separate deployable unit outside the system boundary:** WebApp, DesktopApp, and MobileApp are truly separate applications with their own processes. They are clients of NASIM Application, not part of it.
+- **Container_Ext = separate deployable unit outside the system boundary:** WebApp, DesktopApp, MobileApp, and MCP Client are truly separate applications with their own processes. They are clients of NASIM Application, not part of it.
+- **Single convergence point (AgentController):** All interface containers (CLI Process, HTTP API Server, MCP Client) delegate to AgentController, which routes requests to Core Engine. This makes the convergence visually explicit and enforceable for Sequence Diagrams.
 - **CSR Pattern:** Controller (CLI Group / API Group) → Service (Agent Group, Router Group, etc.) → Repository (Session Group, Tool Group, Memory Group, Config Group). Strict delegation.
 - **One group, one Boundary:** Each component group is a `Boundary` inside `Container_Boundary(nasim_application, "NASIM Application")`. Groups are logical, not deployable.
 - **System_Ext for cross-group references:** Cross-group references inside NASIM Application use `System_Ext(alias, "ComponentName", "Group Name")` as opaque references, never `Container_Ext`.
 - **System_Ext for real externals only:** Filesystems, web, git repos, LLM backends, MCP servers, LSP servers — genuinely external infrastructure.
-- **Version consistency:** All diagram headers use Version 9.0.0.
+- **Version consistency:** Context diagram at v9.1.5, Container diagram at v10.0.1, Component diagrams at v18.0.0.
 - **Pin C4-PlantUML:** All diagrams reference v2.10.0 — never `master`.
 
 ## Shared Styles
@@ -308,7 +338,7 @@ All diagrams are traceable to the design chain:
 |---------|----------|---------------------|
 | `c4_nasim_component_overview_core.puml` | 40 | Intentional full-system overview map (core groups). Splitting defeats its purpose as a navigation aid. |
 | `c4_nasim_component_overview_infra.puml` | 25 | Infrastructure groups overview. Paired with `_core` for full-system visibility. |
-| `c4_nasim_container.puml` | 22 | Container-level view showing all external system integrations. Splitting would break the "system boundary" model. |
+| `c4_nasim_container.puml` | 22 | Container-level view showing all external system integrations and single convergence point (AgentController). Splitting would break the "system boundary" model. |
 | `c4_nasim_component_tools.puml` | 24 | 16 tool implementations + 8 externals. All tools share the same ABC interface and registry — splitting obscures the polymorphic pattern. |
 | `c4_nasim_component_observability.puml` | 17 | 8 internal components + 9 externals. Observability concerns are tightly coupled (logger ↔ metrics ↔ correlator ↔ propagator). |
 | `c4_nasim_component_agent.puml` | 13 | 7 components + 6 externals. Core agent loop components are inseparable — orchestrator, history, compactor form a single processing pipeline. |

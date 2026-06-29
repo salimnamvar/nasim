@@ -7,14 +7,14 @@
 ' Title:     nasim — UC Overview (Architecture Navigation Map)
 ' Group:     ALL (All Groups)
 ' Boundary:  nasim code agent
-' Purpose:   High-level group overview showing all 21 UC groups
-'            and their actor interactions. API Group (Entry Gate)
-'            is the central convergence point.
+' Purpose:   High-level group overview showing all 22 UC groups
+'            and their actor interactions. AgentController
+'            (Convergence Point) is the central entry gate.
 '            This is a NAVIGATION MAP — no individual UC IDs shown.
 ' Source:    docs/UC/README.md, docs/UC/*.puml
 ' Milestone: v1.0
-' Version:   9.1.0
-' Review:    CAR refinement loop 2026-06-27
+' Version:   10.0.0
+' Review:    —
 ' ============================================================
 
 
@@ -34,12 +34,13 @@ actor "Observability Platform" as Platform <<system>>
 
 
 ' ------------------------------------------------------------
-' System Boundary — 21 Group Use Cases
+' System Boundary — 22 Group Use Cases
 ' ------------------------------------------------------------
 
 
 rectangle "nasim" {
 
+  usecase "**AgentController (Convergence Point)**" <<master>> as AC_GROUP
   usecase "**API Group (Entry Gate)**" <<master>> as API_GROUP
   usecase "**CLI Group (Interface Container)**" <<master>> as CLI_GROUP
 
@@ -71,20 +72,24 @@ rectangle "nasim" {
 ' ------------------------------------------------------------
 
 
-User --> CLI_GROUP
-User --> API_GROUP
+User --> AC_GROUP
 
-MCPClient --> MCP_GROUP
+MCPClient --> AC_GROUP
 
 Platform --> OBSERVABILITY_GROUP
 
 
 ' ------------------------------------------------------------
-' Group Relationships — API-First Delegation Chain
+' Group Relationships — Convergence Point Delegation Chain
 ' ------------------------------------------------------------
 
-' Interface containers route through API
-CLI_GROUP ..> API_GROUP : <<include>>
+' All interfaces route through AgentController
+CLI_GROUP ..> AC_GROUP : <<include>>
+API_GROUP ..> AC_GROUP : <<include>>
+MCP_GROUP ..> AC_GROUP : <<include>>
+
+' AgentController → API Group (business operations)
+AC_GROUP ..> API_GROUP : <<include>>
 
 ' API Group → downstream core groups (mandatory)
 API_GROUP ..> AGENT_GROUP : <<include>>
@@ -103,7 +108,6 @@ AGENT_GROUP ..> SANDBOX_GROUP : <<include>>
 AGENT_GROUP ..> EDIT_GROUP : <<extend>>
 AGENT_GROUP ..> EVAL_GROUP : <<extend>>
 AGENT_GROUP ..> GIT_GROUP : <<extend>>
-AGENT_GROUP ..> MCP_GROUP : <<extend>>
 AGENT_GROUP ..> HOOKS_GROUP : <<extend>>
 AGENT_GROUP ..> PLUGINS_GROUP : <<extend>>
 AGENT_GROUP ..> MEMORY_GROUP : <<extend>>

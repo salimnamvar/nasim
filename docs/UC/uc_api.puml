@@ -9,13 +9,13 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Core business operations exposed via API.
 '            Sole entry point for all interface containers
-'            (CLI, WebApp, DesktopApp, MobileApp).
+'            (CLI, WebApp, DesktopApp, MobileApp, MCP).
 '            ROD-compliant REST endpoints (AIP-136/193).
-'            Entry chain: User → ServerRouter → downstream groups
+'            Entry chain: User → Interface → AgentController → ServerRouter → downstream groups
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
-' Review:    CAR refinement loop 2026-06-27
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
+' Review:    —
 ' SQ:        sq_api01..sq_api11
 ' ============================================================
 
@@ -80,13 +80,10 @@ usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
 usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
 usecase "SSN-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
 
-
 usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
-
 
 usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
 usecase "CFG-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
-
 
 usecase "TL-14\nLIST Registered Tools\n[uc_tool_advanced]" as TL14_ext <<extref>>
 

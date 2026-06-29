@@ -1,36 +1,12 @@
 @startuml c4_nasim_context
 ' ============================================================
-' Title:     NASIM Application — System Context
-' Boundary:  NASIM Application
-' Purpose:   Show NASIM Application as a code-agent system with one User actor
-'            and all external systems it depends on or is consumed by.
-'
-'            ABSTRACTION LEVEL NOTES:
-'            This is Level 1 (Context). It shows what the system IS and
-'            what it INTERACTS with — not how it works internally.
-'            No containers, no components, no protocols.
-'
-'            GROUPING DECISIONS (SIM-01 / SE-04):
-'            - Plugin Directory is grouped under Host Filesystem because
-'              plugins are accessed via filesystem reads at startup.
-'            - Host Shell is grouped under Sandbox Runtime because the
-'              sandbox mediates all shell execution; the shell is not a
-'              direct external dependency of NASIM Application.
-'            - Tree-sitter, Embedding Model, Vector Store, and LSP Server
-'              are grouped as Repo Intelligence Backend. This is a
-'              Context-level simplification: all four are consumed by the
-'              Repo Intelligence subsystem (RIM) for code understanding.
-'              Their distinct responsibilities (AST parsing vs. code
-'              intelligence vs. vector operations) are detailed in the
-'              Component diagram (c4_nasim_component_repo_intelligence.puml).
-'            - OTel Collector is grouped under Observability Platform
-'              because it is part of the platform's collection pipeline.
-'
+' Title:     NASIM Service System — Context Diagram
+' Boundary:  NASIM Service System
+' Purpose:   Show NASIM Application with users and external systems
 ' Milestone: v1.0
-' Version:   9.1.5
-' Source:    docs/entities.md, docs/C4/README.md
-' Review:    Context level – single User, interface-independent behavior
-' Date:      2026-06-28
+' Version:   11.0.0
+' Source:    docs/C4/README.md
+' Review:    —
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
@@ -38,38 +14,38 @@
 
 LAYOUT_LEFT_RIGHT()
 
-title NASIM Application — System Context
+title NASIM Service System — Context Diagram
 
-Person(user, "User", "Developer using NASIM Application as an AI coding assistant")
+Person(user, "Developer", "Uses NASIM as an AI coding assistant")
 
-System(nasim_application, "NASIM Application", "AI coding agent that translates natural language tasks into file-level changes.\n\nThe system supports multiple interfaces (CLI, Web, Desktop, Mobile, MCP). All interfaces deliver identical capabilities and the same Use Cases to the User.")
+System(nasim, "NASIM Application", "AI coding agent that translates natural language into file changes")
 
-System_Ext(llm_backend, "LLM Backend", "Multi-provider inference: Ollama, OpenAI, Anthropic, and 100+ providers via litellm")
-System_Ext(host_fs, "Host Filesystem", "Project source code, configuration, documentation, and community plugin files")
-System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation and shell execution: landlock, seccomp, bubblewrap")
-System_Ext(web, "Web", "Documentation, package APIs, and search engines for live context retrieval")
-System_Ext(mcp_server, "MCP Server", "Extension tools provided to NASIM Application via Model Context Protocol")
-System_Ext(mcp_client, "MCP Client", "External tools and IDEs that consume NASIM Application's exposed capabilities via MCP")
-System_Ext(git_repo, "Git Repository", "Version-controlled project files: branch state, history, and commits")
-System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter (AST parsing), LSP Server (code intelligence), Embedding Model (vector generation), Vector Store (similarity search)")
-System_Ext(obs_platform, "Observability Platform", "Log agent, Prometheus, Grafana, OTel Collector: NASIM Application emits; platform owns collection, storage, visualization")
+System_Ext(llm, "LLM Backend", "Multi-provider inference via litellm")
+System_Ext(host_fs, "Host Filesystem", "Project source code and configuration")
+System_Ext(sandbox, "Sandbox Runtime", "OS-level process isolation")
+System_Ext(web, "Web", "Documentation and search engines")
+System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
+System_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP")
+System_Ext(git, "Git Repository", "Version-controlled project files")
+System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
+System_Ext(obs, "Observability Platform", "Logs, metrics, dashboards")
 
-Rel(user, nasim_application, "submits coding tasks and receives AI-generated changes, suggestions, and answers")
-Rel(nasim_application, llm_backend, "sends context and receives code completions")
-Rel(nasim_application, host_fs, "reads, writes, and searches project files and plugins")
-Rel(nasim_application, sandbox, "runs untrusted commands in OS-level isolation")
-Rel(nasim_application, web, "fetches documentation and search results for task context")
-Rel(nasim_application, mcp_server, "discovers and invokes extension tools")
-Rel(mcp_client, nasim_application, "invokes NASIM Application tools via MCP protocol")
-Rel(nasim_application, git_repo, "reads repository state and creates atomic commits")
-Rel(nasim_application, repo_intel, "parses code, queries intelligence, and performs similarity search")
-Rel(nasim_application, obs_platform, "emits structured logs, traces, and metrics for collection")
+Rel(user, nasim, "submits coding tasks, receives AI-generated changes")
+Rel(nasim, llm, "sends context, receives completions")
+Rel(nasim, host_fs, "reads and writes project files")
+Rel(nasim, sandbox, "runs commands in isolation")
+Rel(nasim, web, "fetches documentation")
+Rel(nasim, mcp_server, "invokes extension tools")
+Rel(mcp_client, nasim, "consumes NASIM tools via MCP")
+Rel(nasim, git, "reads state, creates commits")
+Rel(nasim, repo_intel, "parses code, queries intelligence")
+Rel(nasim, obs, "emits logs and metrics")
 
 legend right
     |= Symbol |= Meaning |
-    | Person | Human actor (Developer) |
-    | System | The system of interest (NASIM Application) |
-    | System_Ext | External system or service outside the boundary |
+    | Person | Human actor |
+    | System | System of interest |
+    | System_Ext | External system |
 end legend
 
 @enduml

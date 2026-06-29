@@ -4,8 +4,9 @@
 
 | Group | Boundary | SQ Diagrams | Description |
 |-------|----------|:-----------:|-------------|
-| API | nasim — API Group (Entry Gate) | 11 | Core business operations exposed via API (ROD-compliant). Sole entry point for all interface containers. API is a component inside nasim. SQ files in `docs/SQ/SRV/`. |
-| CLI | Interface Container — CLI | 8 | CLI-specific interface UCs: REPL, slash commands, rendering. All business operations delegate to API component inside nasim. |
+| AC | nasim — AgentController (Convergence Point) | 4 | Single convergence point for all interface containers. Routes validated requests to Core Engine. |
+| API | nasim — API Group (Entry Gate) | 11 | Core business operations exposed via API (ROD-compliant). Delegates through AgentController. |
+| CLI | Interface Container — CLI | 8 | CLI-specific interface UCs: REPL, slash commands, rendering. All business operations delegate through AgentController. |
 | AGT | nasim — Agent Group | 14 | Core agentic loop, permissions, context, plans, subagents |
 | PRV | nasim — Provider Group | 4 | LLM provider abstraction via litellm proxy |
 | CFG | nasim — Config | 3 | Config loading and validation |
@@ -25,7 +26,18 @@
 | EDT | nasim — Edit Strategy | 10 | Polymorphic edit strategies |
 | EVL | nasim — Evaluation | 9 | Task evaluation and quality checks |
 | WRL | nasim — Wire Log | 5 | Append-only event store, fork, checkpoint |
-| **Total** | **21 groups** | **148** | **1:1 UC↔SQ mapping (100%)** |
+| **Total** | **22 groups** | **152** | **1:1 UC↔SQ mapping (100%)** |
+
+---
+
+## AgentController Group (AC) — Convergence Point
+
+| UC ID | Operation | Component Owner | SQ Diagram | Notes |
+|-------|-----------|-----------------|------------|-------|
+| AC-01 | PROCESS Request | AgentController | `sq_ac01_process_request.puml` | Route incoming request from any interface to Core Engine |
+| AC-02 | VALIDATE Request | AgentController | `sq_ac02_validate_request.puml` | Validate request format, permissions, and protocol |
+| AC-03 | ADAPT Protocol | AgentController | `sq_ac03_adapt_protocol.puml` | Adapt between interface protocols (CLI, HTTP, MCP) |
+| AC-04 | DISPATCH to Core Engine | AgentController | `sq_ac04_dispatch_to_core_engine.puml` | Forward validated request to AgentOrchestrator |
 
 ---
 
@@ -49,7 +61,7 @@
 
 ## CLI Group (Interface Container)
 
-All business operations MUST delegate through the API (ServerRouter). No direct calls to core services.
+All business operations MUST delegate through AgentController. No direct calls to core services.
 
 | UC ID | Operation | Component Owner | SQ Diagram | Notes |
 |-------|-----------|-----------------|------------|-------|
@@ -352,6 +364,7 @@ Sub-use-cases inherit the Component Owner of their parent UC and are modeled wit
 
 | Parent UC | Sub-UCs | Pattern |
 |-----------|---------|---------|
+| AC-01 (PROCESS Request) | AC-02..04 | `AC-01 ..> AC-02 : <<include>>` etc. |
 | CTX-01 (PROCESS Context) | CTX-02..06 | `CTX-01 ..> CTX-02 : <<include>>` etc. |
 | EDT-01 (SELECT Strategy) | EDT-02..10 | `EDT-01 ..> EDT-02 : <<include>>` etc. |
 | EVL-01 (EVALUATE Task) | EVL-02..09 | `EVL-01 ..> EVL-02 : <<include>>` etc. |
@@ -360,5 +373,16 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 
 ---
 
-**Total: 148 UCs** matching 148 SQ diagrams (excluding AGT-05 which is a vacant
-ID per permanence rule).
+## Traceability Matrix (Container → UC)
+
+| Container | UC Group | UC IDs | Description |
+|-----------|----------|--------|-------------|
+| AgentController | AC | AC-01..04 | Single convergence point: routes requests to Core Engine |
+| HTTP API Server | API | API-01..11 | Core business operations (ROD-compliant REST) |
+| CLI Process | CLI | CLI-01..08 | CLI-specific interface UCs |
+| Core Engine | AGT, PRV, CFG, SSN, SAF, CTX, TL, HK, PLG, RTG, OBS, MEM, VCS, SBX, RIM, EDT, EVL, WRL | Various | All business logic and domain operations |
+| MCP Client | MCP | MCP-01..04 | MCP protocol handling |
+
+---
+
+**Total: 152 UCs** (148 existing + 4 new AgentController UCs) matching 148 existing SQ diagrams + 4 new AgentController SQ diagrams (excluding AGT-05 which is a vacant ID per permanence rule).

@@ -1,0 +1,124 @@
+@startuml uc_agent_controller
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: AgentController (Convergence Point)
+' Group:     AC (AgentController)
+' Boundary:  nasim code agent
+' Purpose:   Single convergence point for all interface
+'            containers (CLI, HTTP, MCP). Routes validated
+'            requests to Core Engine. Protocol-agnostic.
+'            Entry chain: User → Interface → AgentController → Core Engine
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
+' Review:    —
+' SQ:        sq_ac01..sq_ac04
+' ============================================================
+
+
+left to right direction
+
+
+title nasim — AgentController Use Cases (Convergence Point)
+
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
+
+' ------------------------------------------------------------
+' Actors
+' ------------------------------------------------------------
+
+
+actor "User" as User
+
+
+' ------------------------------------------------------------
+' Cross-Group External References
+' ------------------------------------------------------------
+
+
+usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
+usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
+usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
+usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
+usecase "SSN-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
+usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
+usecase "CFG-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
+usecase "TL-14\nLIST Registered Tools\n[uc_tool_advanced]" as TL14_ext <<extref>>
+
+
+' ------------------------------------------------------------
+' System Boundary
+' ------------------------------------------------------------
+
+
+rectangle "nasim" {
+  package "AgentController (Convergence Point)" {
+    usecase "**AC-01 PROCESS Request**\n--\nRoute incoming request\nfrom any interface to Core Engine" <<master>> as AC01
+    usecase "**AC-02 VALIDATE Request**\n--\nValidate request format,\npermissions, and protocol" <<include>> as AC02
+    usecase "**AC-03 ADAPT Protocol**\n--\nAdapt between interface\nprotocols (CLI, HTTP, MCP)" <<include>> as AC03
+    usecase "**AC-04 DISPATCH to Core Engine**\n--\nForward validated request\nto AgentOrchestrator" <<include>> as AC04
+  }
+}
+
+
+' ------------------------------------------------------------
+' Actor -> Use Case Associations
+' ------------------------------------------------------------
+
+
+User --> AC01
+
+
+' ------------------------------------------------------------
+' Relationships (downward <<include>> only)
+' ------------------------------------------------------------
+
+
+AC01 ..> AC02 : <<include>>
+AC01 ..> AC03 : <<include>>
+AC01 ..> AC04 : <<include>>
+
+
+AC04 ..> AGT01_ext : <<include>>
+
+
+
+@enduml
