@@ -2,7 +2,7 @@
 ' ============================================================
 ' Title:     NASIM Service System — Context Diagram
 ' Boundary:  NASIM Service System
-' Purpose:   Show NASIM Application with users and external systems
+' Purpose:   Show NASIM Service with users and external systems
 ' Milestone: v1.0
 ' Version:   11.0.0
 ' Source:    docs/C4/README.md
@@ -18,7 +18,7 @@ title NASIM Service System — Context Diagram
 
 Person(user, "Developer", "Uses NASIM as an AI coding assistant")
 
-System(nasim, "NASIM Application", "AI coding agent that translates natural language into file changes")
+System(nasim_service, "NASIM Service", "AI coding agent service: translates natural language into file changes, manages tool orchestration and safety")
 
 System_Ext(llm, "LLM Backend", "Multi-provider inference via litellm")
 System_Ext(host_fs, "Host Filesystem", "Project source code and configuration")
@@ -30,16 +30,16 @@ System_Ext(git, "Git Repository", "Version-controlled project files")
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
 System_Ext(obs, "Observability Platform", "Logs, metrics, dashboards")
 
-Rel(user, nasim, "submits coding tasks, receives AI-generated changes")
-Rel(nasim, llm, "sends context, receives completions")
-Rel(nasim, host_fs, "reads and writes project files")
-Rel(nasim, sandbox, "runs commands in isolation")
-Rel(nasim, web, "fetches documentation")
-Rel(nasim, mcp_server, "invokes extension tools")
-Rel(mcp_client, nasim, "consumes NASIM tools via MCP")
-Rel(nasim, git, "reads state, creates commits")
-Rel(nasim, repo_intel, "parses code, queries intelligence")
-Rel(nasim, obs, "emits logs and metrics")
+Rel(user, nasim_service, "submits coding tasks, receives AI-generated changes")
+Rel(nasim_service, llm, "sends context, receives completions")
+Rel(nasim_service, host_fs, "reads and writes project files")
+Rel(nasim_service, sandbox, "runs commands in isolation")
+Rel(nasim_service, web, "fetches documentation")
+Rel(nasim_service, mcp_server, "invokes extension tools")
+Rel(mcp_client, nasim_service, "consumes NASIM tools via MCP")
+Rel(nasim_service, git, "reads state, creates commits")
+Rel(nasim_service, repo_intel, "parses code, queries intelligence")
+Rel(nasim_service, obs, "emits logs and metrics")
 
 legend right
     |= Symbol |= Meaning |
