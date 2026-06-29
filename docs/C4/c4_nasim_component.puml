@@ -2,12 +2,11 @@
 ' ============================================================
 ' Title:     NASIM Application — Component Diagram
 ' Boundary:  NASIM Application
-' Purpose:   Single convergence point: AgentController receives
-'            all requests from CLIAdapter, HTTPAdapter, MCPAdapter.
-'            Strict CSR layering: Controller → Service → Repository.
-'            External adapters handle system boundary interactions.
+' Purpose:   Strict 3-layer CSR: Controller → Service → Repository.
+'            Repository layer includes external system adapters.
+'            Single convergence point: AgentController.
 ' Milestone: v1.0
-' Version:   1.0.0
+' Version:   11.0.0
 ' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
 ' Review:    —
 ' Date:      2026-06-29
@@ -19,59 +18,41 @@
 
 LAYOUT_TOP_DOWN()
 
-title NASIM Application — Component Diagram (CSR)
-
-' ── External Clients ──
-Person(user, "Developer", "Uses NASIM as an AI coding assistant")
-
-Container_Ext(cli, "CLI", "Python 3.10+", "Terminal interface: REPL, arg parsing, slash commands")
-Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
-Container_Ext(desktop, "DesktopApp", "Electron / Tauri", "Desktop application")
-Container_Ext(mobile, "MobileApp", "React Native / Flutter", "Mobile application")
-Container_Ext(mcp_client_ext, "MCP Client", "External tools consuming NASIM via MCP")
+title NASIM Application — Component Diagram (CSR 3-Layer)
 
 ' ── NASIM Application Boundary ──
 Container_Boundary(nasim_application, "NASIM Application") {
 
-    ' ── Interface Adapters (entry handlers) ──
-    Boundary(adapter_layer, "Adapter Layer") <<controller>> {
-        Component(cli_adapter, "CLIAdapter", "argparse + REPL", "Handles terminal REPL session, arg parsing, slash command dispatch")
-        Component(http_adapter, "HTTPAdapter", "FastAPI", "ASGI application: routes, middleware, lifespan, SSE streaming")
-        Component(mcp_adapter, "MCPAdapter", "mcp.server", "MCP protocol handler: tool exposure, stdio/SSE transport")
-    }
-
     ' ── Controller Layer (single convergence point) ──
     Boundary(controller_layer, "Controller Layer") <<controller>> {
-        Component(agent_ctrl, "AgentController", "", "Central entry gate. Receives all requests from adapters. Delegates to TaskService. Enforces auth, validation, error shaping.")
+        Component(cli_adapter, "CLIAdapter", "argparse + REPL", "Terminal REPL session, arg parsing, slash commands")
+        Component(http_adapter, "HTTPAdapter", "FastAPI", "ASGI routes, middleware, SSE streaming")
+        Component(mcp_adapter, "MCPAdapter", "mcp.server", "MCP protocol: tool exposure, stdio/SSE transport")
+        Component(agent_ctrl, "AgentController", "", "Central entry gate. All adapters converge here. Delegates to services.")
     }
 
     ' ── Service Layer ──
     Boundary(service_layer, "Service Layer") <<service>> {
-        Component(task_svc, "TaskService", "", "Orchestrates agentic loop: LLM call, tool dispatch, context assembly, retry")
-        Component(tool_svc, "ToolService", "", "Tool registry lookup, parameter validation, execution dispatch, result formatting")
-        Component(session_svc, "SessionService", "", "Session lifecycle: create, load, save, snapshot, revert, search")
-        Component(safety_svc, "SafetyService", "", "Permission gating, injection scanning, egress inspection, content filtering")
-        Component(context_svc, "ContextService", "", "Context pipeline: graph construction, truncation, distillation, injection")
-        Component(eval_svc, "EvaluationService", "", "Task evaluation, success checks, retry coordination")
+        Component(task_svc, "TaskService", "", "Agentic loop orchestration: LLM call, tool dispatch, context assembly")
+        Component(tool_svc, "ToolService", "", "Tool registry, parameter validation, execution dispatch")
+        Component(session_svc, "SessionService", "", "Session lifecycle: create, load, save, snapshot, revert")
+        Component(safety_svc, "SafetyService", "", "Permission gating, injection scanning, egress inspection")
+        Component(context_svc, "ContextService", "", "Context pipeline: graph, truncation, distillation, injection")
     }
 
-    ' ── Repository Layer ──
+    ' ── Repository Layer (includes external adapters) ──
     Boundary(repository_layer, "Repository Layer") <<repository>> {
-        Component(session_repo, "SessionRepository", "", "Message persistence: JSON Lines read/write, turn management")
-        Component(history_repo, "HistoryRepository", "", "Cross-session history: snapshot storage, revert index, search index")
-        Component(config_repo, "ConfigRepository", "", "Configuration loading: YAML, env vars, CLI flags, project overrides")
-        Component(memory_repo, "MemoryRepository", "", "Cross-session knowledge: persist, retrieve, relevance ranking")
-    }
-
-    ' ── External Adapters (system boundary) ──
-    Boundary(external_adapter_layer, "External Adapter Layer") <<infrastructure>> {
-        Component(llm_client, "LLMClient", "litellm", "Routes LLM API calls via litellm: streaming, fallback, capability matching")
+        Component(session_repo, "SessionRepository", "", "Message persistence: JSON Lines, turn management")
+        Component(history_repo, "HistoryRepository", "", "Snapshots, revert index, search index")
+        Component(config_repo, "ConfigRepository", "", "YAML, env vars, CLI flags, project overrides")
+        Component(memory_repo, "MemoryRepository", "", "Cross-session knowledge persistence")
+        Component(llm_client, "LLMClient", "litellm", "LLM API calls: streaming, fallback, capability matching")
         Component(fs_adapter, "FilesystemAdapter", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep")
-        Component(sandbox_adapter, "SandboxAdapter", "subprocess", "Sandboxed command execution: timeout, isolation, output capture")
-        Component(git_adapter, "GitAdapter", "gitpython", "Git operations: status, diff, commit, branch, log")
-        Component(mcp_client_adapter, "MCPClientAdapter", "mcp.client", "MCP extension tools: discovery, invocation, response handling")
-        Component(repo_intel_adapter, "RepoIntelligenceAdapter", "tree-sitter + API", "Codebase intelligence: AST indexing, symbol graph, semantic search")
-        Component(web_adapter, "WebAdapter", "httpx", "Web fetch: documentation retrieval, search results, URL resolution")
+        Component(sandbox_adapter, "SandboxAdapter", "subprocess", "Sandboxed command execution: timeout, isolation")
+        Component(git_adapter, "GitAdapter", "gitpython", "Git operations: status, diff, commit, branch")
+        Component(mcp_client_adapter, "MCPClientAdapter", "mcp.client", "MCP extension tools: discovery, invocation")
+        Component(repo_intel_adapter, "RepoIntelligenceAdapter", "tree-sitter + API", "AST indexing, symbol graph, semantic search")
+        Component(web_adapter, "WebAdapter", "httpx", "Web fetch: documentation, search results")
     }
 }
 
@@ -83,21 +64,6 @@ System_Ext(web, "Web", "Documentation and search engines")
 System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
 System_Ext(git, "Git Repository", "Version-controlled project files")
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
-
-' ══════════════════════════════════════════════════════════════
-' ── External Clients → Adapters ──
-' ══════════════════════════════════════════════════════════════
-
-Rel(user, cli, "runs coding tasks", "terminal REPL")
-Rel(user, webapp, "interacts via browser", "HTTPS")
-Rel(user, desktop, "interacts via desktop app", "local")
-Rel(user, mobile, "interacts via mobile app", "HTTPS")
-
-Rel(cli, cli_adapter, "submits tasks", "HTTP/JSON + SSE")
-Rel(webapp, http_adapter, "submits tasks", "HTTP/JSON + SSE")
-Rel(desktop, http_adapter, "submits tasks", "HTTP/JSON + SSE")
-Rel(mobile, http_adapter, "submits tasks", "HTTPS + SSE")
-Rel(mcp_client_ext, mcp_adapter, "invokes tools", "stdio / SSE")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Adapters → Controller (single convergence point) ──
@@ -113,6 +79,7 @@ Rel(mcp_adapter, agent_ctrl, "delegates validated request")
 
 Rel(agent_ctrl, task_svc, "dispatches task orchestration")
 Rel(agent_ctrl, session_svc, "manages session lifecycle")
+Rel(agent_ctrl, config_repo, "loads configuration")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Services → Services (orchestration) ──
@@ -121,32 +88,25 @@ Rel(agent_ctrl, session_svc, "manages session lifecycle")
 Rel(task_svc, tool_svc, "dispatches tool execution")
 Rel(task_svc, safety_svc, "validates actions before dispatch")
 Rel(task_svc, context_svc, "assembles context for LLM call")
-Rel(task_svc, eval_svc, "triggers evaluation after completion")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Services → Repositories (CSR: Service → Repository) ──
 ' ══════════════════════════════════════════════════════════════
 
 Rel(task_svc, session_repo, "persists conversation turns")
+Rel(task_svc, llm_client, "invokes LLM inference")
 Rel(session_svc, session_repo, "loads and saves sessions")
 Rel(session_svc, history_repo, "manages snapshots and revert index")
-Rel(context_svc, memory_repo, "injects memory context")
-Rel(agent_ctrl, config_repo, "loads configuration")
-
-' ══════════════════════════════════════════════════════════════
-' ── Services / Repositories → External Adapters ──
-' ══════════════════════════════════════════════════════════════
-
-Rel(task_svc, llm_client, "invokes LLM inference")
 Rel(tool_svc, fs_adapter, "reads and writes project files")
 Rel(tool_svc, sandbox_adapter, "executes commands in sandbox")
 Rel(tool_svc, git_adapter, "queries git state, creates commits")
 Rel(tool_svc, mcp_client_adapter, "invokes extension tools")
 Rel(tool_svc, web_adapter, "fetches documentation")
+Rel(context_svc, memory_repo, "injects memory context")
 Rel(context_svc, repo_intel_adapter, "queries codebase intelligence")
 
 ' ══════════════════════════════════════════════════════════════
-' ── External Adapters → External Systems ──
+' ── Repository → External Systems ──
 ' ══════════════════════════════════════════════════════════════
 
 Rel(llm_client, llm, "routes LLM API calls", "HTTP/JSON streaming")
@@ -158,10 +118,9 @@ Rel(repo_intel_adapter, repo_intel, "parses code, queries intelligence", "in-pro
 Rel(web_adapter, web, "fetches documentation", "HTTPS")
 
 legend right
-    |<#E3F2FD>  **Controller** | Adapter Layer, Controller Layer |
-    |<#FFF3E0>  **Service**    | Task, Tool, Session, Safety, Context, Evaluation |
-    |<#E8F5E9>  **Repository** | Session, History, Config, Memory |
-    |<#F3E5F5>  **Infrastructure** | LLM, Filesystem, Sandbox, Git, MCP, Repo Intelligence, Web |
+    |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
+    |<#FFF3E0>  **Service**    | Task, Tool, Session, Safety, Context |
+    |<#E8F5E9>  **Repository** | Session, History, Config, Memory, LLM, Filesystem, Sandbox, Git, MCP, Repo Intelligence, Web |
 end legend
 
 @enduml
