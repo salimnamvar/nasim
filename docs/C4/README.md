@@ -55,7 +55,6 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | Diagram | Group | Key Components |
 |---------|-------|----------------|
 | `c4_nasim_component_agent.puml` | Agent Group | AgentOrchestrator, ConversationHistory, ContextCompactor, PlanSession, SubagentCoordinator, ErrorBoundary, PersonaManager |
-| `c4_nasim_component_context_graph.puml` | Context Graph Group | ContextGraph, PipelineOrchestrator, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor |
 
 ### Repository Layer (Green)
 
@@ -67,7 +66,7 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 
 ### Infrastructure Layer (Purple)
 
-**Total: 9 C4 diagrams (1 context + 1 container + 1 overview + 6 group components)**
+**Total: 8 C4 diagrams (1 context + 1 container + 1 overview + 5 group components)**
 
 ## CSR Layering & Visual Coding
 
@@ -76,7 +75,7 @@ Each component group is color-coded by its CSR layer:
 | Color | Layer | Groups |
 |-------|-------|--------|
 | Blue | **Controller** | CLI Group (CLIAdapter), API Group (HTTPAdapter, MCPAdapter — in main component diagram) |
-| Orange | **Service** | Agent Group, Safety Group, Context Graph Group |
+| Orange | **Service** | Agent Group, Safety Group |
 | Green | **Repository** | Session Group, Tool Group, Config Group, WireLog Group |
 | Purple | **Infrastructure** | (none — cross-cutting concerns implemented in code) |
 

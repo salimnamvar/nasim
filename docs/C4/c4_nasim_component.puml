@@ -55,7 +55,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
         Component(tool_svc, "ToolService", "", "Tool registry, parameter validation, execution dispatch; includes subagent, todo, plan, review tools, dynamic plugin-loaded tools, and lifecycle hook dispatch (PreToolUse, PostToolUse, PreLLMCall, PostLLMCall)")
         Component(session_svc, "SessionService", "", "Session lifecycle: create, load, save, snapshot, revert")
         Component(safety_svc, "SafetyService", "", "Permission gating, injection scanning, egress inspection")
-        Component(context_svc, "ContextService", "", "Context pipeline: graph, truncation, distillation, injection")
+        Component(context_svc, "ContextService", "", "Context pipeline: graph construction, truncation, distillation, injection, and compaction")
         Component(eval_svc, "EvaluationService", "", "Task evaluation: success checks, LLM review, retry coordination, repetition detection, turn budget management")
     }
 
