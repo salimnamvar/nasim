@@ -22,11 +22,25 @@ Back to [docs/](../README.md).
 
 | File | Scope | Version | Description |
 |------|-------|---------|-------------|
-| `cl_runtime_model.puml` | Runtime | 4.0.0 | Core runtime classes: Provider, Tool, AgentOrchestrator, Config, Session, AgentEvent, Server, Hooks, Plugins |
+| `cl_runtime_model.puml` | Runtime | 6.0.0 | Core runtime classes: Controller, Service, Provider, Tool, AgentOrchestrator, Config, Session, AgentEvent, Server, Hooks, Plugins, Data Stores |
 
 ---
 
 ## Class Inventory
+
+### Controller Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| CLIAdapter | `nasim/controller/cli.py` | class | CLIAdapter | Terminal REPL: input processing, arg parsing, slash commands, output streaming |
+| MCPAdapter | `nasim/controller/mcp.py` | class | MCPAdapter | MCP protocol: tool exposure, stdio/SSE transport, tool discovery |
+| AgentController | `nasim/controller/agent.py` | class | AgentController | Central entry gate. All adapters converge here. Delegates to services. |
+
+### Service Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| SessionService | `nasim/service/session.py` | class | SessionService | Session lifecycle: create, load, save, snapshot, revert |
 
 ### Provider Layer
 
@@ -94,8 +108,9 @@ Back to [docs/](../README.md).
 
 | Class | Module (planned) | Type | C4 Component | Description |
 |-------|------------------|------|-------------|-------------|
-| Session | `nasim/session/model.py` | dataclass | SessionRepository | Session data: id, created_at, messages |
+| Session | `nasim/session/model.py` | dataclass | SessionRepository | Session data: id, created_at, messages, metadata |
 | SessionStore | `nasim/session/store.py` | class | SessionRepository | Persists/loads message history to ~/.nasim/sessions/ |
+| HistoryRepository | `nasim/session/history.py` | class | HistoryRepository | Snapshots, revert index, search index |
 
 ### Server Layer
 
@@ -186,6 +201,14 @@ Back to [docs/](../README.md).
 |-------|------------------|------|-------------|-------------|
 | MemoryRetriever | `nasim/memory/retriever.py` | class | MemoryRepository | Queries cross-session knowledge |
 | MemoryIndexer | `nasim/memory/indexer.py` | class | MemoryRepository | Indexes knowledge entries |
+| MemoryStore | `nasim/memory/store.py` | class | MemoryStore | Cross-session knowledge persistence: JSON + embeddings to ~/.nasim/memory/ |
+
+### Data Store Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| WireLogStore | `nasim/wirelog/store.py` | class | WireLogStore | Append-only interaction log: JSONL storage |
+| ConfigStore | `nasim/config/store.py` | class | ConfigStore | Configuration persistence: YAML profiles, project overrides, env vars |
 
 ### Sandbox Layer
 
@@ -202,6 +225,18 @@ Back to [docs/](../README.md).
 
 | From | To | Relationship | Notes |
 |------|----| ------------ | ----- |
+| CLIAdapter | AgentController | delegates | Forwards input to central controller |
+| MCPAdapter | AgentController | delegates | Forwards MCP calls to central controller |
+| AgentController | SessionService | manages | Coordinates session lifecycle |
+| AgentController | AgentOrchestrator | delegates | Dispatches tasks to agent core |
+| AgentController | PermissionGate | enforces | Applies safety checks |
+| SessionService | SessionStore | persists | Reads/writes session data |
+| SessionService | HistoryRepository | snapshots | Creates and manages snapshots |
+| HistoryRepository | SessionStore | reads from | Loads session data for snapshots |
+| MemoryStore | MemoryRetriever | backs | Provides storage for memory queries |
+| WireLogStore | WireAppender | writes via | Backs wire log writes |
+| WireLogStore | WireReader | reads via | Backs wire log reads |
+| ConfigStore | ConfigLoader | sources from | Provides config data |
 | AgentOrchestrator | Provider | uses | Calls chat()/chat_stream() |
 | AgentOrchestrator | ToolRegistry | uses | Dispatches tool calls |
 | AgentOrchestrator | ConversationHistory | owns | Manages message list |
@@ -228,7 +263,7 @@ Back to [docs/](../README.md).
 
 | Status | Count | Notes |
 |--------|-------|-------|
-| Planned | 90+ | All module paths are planned. No Python source code exists yet. |
+| Planned | 98+ | All module paths are planned. No Python source code exists yet. |
 
 ---
 
@@ -250,4 +285,5 @@ Back to [docs/](../README.md).
 | C4 Components (source) | `docs/C4/c4_nasim_component.puml` | Maps classes to C4 components |
 | UC Inventory | `docs/UC/` | Use cases that drive class behavior |
 | SQ Diagrams | `docs/SQ/` | Sequence diagrams showing class collaboration |
-| ERD | `docs/ER/er_session_store.puml` | Session store schema |
+| ERD | `docs/ER/` | Data store schemas: Session, Memory, Wire Log, Config |
+| CT/DATA | `docs/CT/DATA/` | Data contracts mapped from ERDs |

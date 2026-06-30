@@ -4,7 +4,7 @@
 ' Boundary:  NASIM Application (C4 container)
 ' Purpose:   Core runtime classes mapped to C4 components
 ' Milestone: v1.0
-' Version:   5.0.0
+' Version:   6.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v11.3.0)
 ' Review:    —
 ' Note:      Runtime structure diagram. All classes are owned by a C4
@@ -14,6 +14,43 @@
 ' ============================================================
 
 skinparam classAttributeIconSize 0
+
+package "Controller Layer" #E8EAF6 {
+    class CLIAdapter {
+        + process_input(raw_input) : AgentEvent
+        + parse_args(argv) : Namespace
+        + dispatch_slash_command(cmd) : Response
+        + stream_output(events) : None
+        + request_approval(action) : bool
+    }
+
+    class MCPAdapter {
+        + expose_tools(registry) : list[ToolDef]
+        + handle_call(tool_name, args) : ToolResult
+        + start_transport(transport_type) : None
+        + discover_tools() : list[MCPToolDef]
+    }
+
+    class AgentController {
+        - adapters : dict[str, Adapter]
+        - services : dict[str, Service]
+        + handle_input(source, input) : Iterator[AgentEvent]
+        + delegate_to_service(service, operation, payload) : Result
+        + route_to_adapter(adapter_id) : None
+        + register_adapter(source, adapter)
+    }
+}
+
+package "Service Layer" #E8F5E9 {
+    class SessionService {
+        + create_session() : Session
+        + load_session(session_id) : Session
+        + save_session(session)
+        + snapshot_session(session_id) : str
+        + revert_session(session_id, snapshot_id)
+        + list_sessions() : list[SessionSummary]
+    }
+}
 
 package "Provider Layer" #FFF3E0 {
     interface Provider {
@@ -243,6 +280,7 @@ package "Session Layer" #F1F8E9 {
         + id : str
         + created_at : datetime
         + messages : list[dict]
+        + metadata : dict
     }
 
     class SessionStore {
@@ -250,6 +288,14 @@ package "Session Layer" #F1F8E9 {
         + load(session_id) : Session
         + load_latest() : Session
         + list_sessions() : list[tuple]
+    }
+
+    class HistoryRepository {
+        + save_snapshot(session_id, turn) : str
+        + load_snapshot(snapshot_id) : Session
+        + search_sessions(query) : list[SearchResult]
+        + revert_to(session_id, snapshot_id)
+        + list_snapshots(session_id) : list[SnapshotSummary]
     }
 }
 
@@ -481,6 +527,30 @@ package "Memory Layer" #F1F8E9 {
         + index(entry)
         + reindex()
     }
+
+    class MemoryStore {
+        + save(entry)
+        + load(key) : KnowledgeEntry
+        + search(query, top_k) : list[SearchResult]
+        + scope(session_id) : list
+    }
+}
+
+package "Data Store Layer" #FCE4EC {
+    class WireLogStore {
+        + append(event)
+        + read(from_turn, to_turn) : list[WireEvent]
+        + seek(turn) : WireEvent
+        + checkpoint(session_id)
+        + fork(session_id, from_turn) : str
+    }
+
+    class ConfigStore {
+        + load() : Config
+        + save(config)
+        + list_profiles() : list[str]
+        + switch_profile(name)
+    }
 }
 
 package "Sandbox Layer" #FFF8E1 {
@@ -597,6 +667,20 @@ CompactionProcessor --> ContextGraph : compacts
 TokenBudgetTracker --> ContextGraph : tracks
 ContextGraph --> MemoryRetriever : injects memory
 
+' Controller & Service relationships
+CLIAdapter --> AgentController : delegates input
+MCPAdapter --> AgentController : delegates calls
+AgentController --> SessionService : manages sessions
+AgentController --> AgentOrchestrator : dispatches tasks
+AgentController --> PermissionGate : enforces gates
+SessionService --> SessionStore : persists
+SessionService --> HistoryRepository : snapshots
+HistoryRepository --> SessionStore : reads from
 
+' Data Store relationships
+MemoryStore --> MemoryRetriever : backs
+WireLogStore --> WireAppender : writes via
+WireLogStore --> WireReader : reads via
+ConfigStore --> ConfigLoader : sources from
 
 @enduml

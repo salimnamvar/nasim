@@ -45,11 +45,11 @@ Back to [docs/](../README.md).
 | POST | `/v1/sessions` | createSession | SSN-01 | Create new session |
 | GET | `/v1/sessions/{session}` | getSession | SSN-02 | Get session metadata |
 | PATCH | `/v1/sessions/{session}` | updateSession | SSN-04 | Update session metadata |
-| DELETE | `/v1/sessions/{session}` | deleteSession | SSN-05 | Delete session |
-| POST | `/v1/sessions/{session}:send` | sendMessage | API-06 | Send message (SSE stream) |
+| DELETE | `/v1/sessions/{session}` | deleteSession | SSN-09 | Delete session |
+| POST | `/v1/sessions/{session}:dispatch` | sendMessage | API-06 | Send message (SSE stream) |
 | GET | `/v1/sessions/{session}/messages` | listMessages | API-07 | Get message history (paginated) |
-| GET | `/v1/tools` | listTools | TL-01 | List registered tools |
-| GET | `/v1/tools/{tool}` | getTool | TL-02 | Get tool details |
+| GET | `/v1/tools` | listTools | TL-14 | List registered tools |
+| GET | `/v1/tools/{tool}` | getTool | TL-14 | Get tool details |
 | GET | `/v1/config` | getConfig | CFG-01 | Get agent configuration |
 | PATCH | `/v1/config` | updateConfig | CFG-02 | Update agent configuration |
 | GET | `/v1/sessions/{session}/subagents` | listSubagents | AGT-09 | List child agents |
@@ -72,7 +72,7 @@ Back to [docs/](../README.md).
 | Resource | Collection Path | Methods | Owner (C4) |
 | -------- | --------------- | ------- | ---------- |
 | Session | `/v1/sessions` | List, Get, Create, Update, Delete | HTTPAdapter → SessionService |
-| Message | `/v1/sessions/{session}/messages` | List, Create (SSE via `:send`) | HTTPAdapter → AgentController |
+| Message | `/v1/sessions/{session}/messages` | List, Create (SSE via `:dispatch`) | HTTPAdapter → AgentController |
 | Tool | `/v1/tools` | List, Get | HTTPAdapter → ToolService |
 | Config | `/v1/config` | Get, Update | HTTPAdapter → ConfigRepository |
 | Subagent | `/v1/sessions/{session}/subagents` | List, Create, Get | HTTPAdapter → TaskService |

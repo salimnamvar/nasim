@@ -96,7 +96,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
     delete:
       operationId: deleteSession
-      summary: "[SSN-05] DELETE Session"
+      summary: "[SSN-09] DELETE Session"
       description: Deletes the specified session.
       tags: [Sessions]
       responses:
@@ -161,7 +161,7 @@ paths:
   /v1/tools:
     get:
       operationId: listTools
-      summary: "[TL-01] LIST Tools"
+      summary: "[TL-14] LIST Tools"
       description: Returns a list of registered tools.
       tags: [Tools]
       responses:
@@ -182,7 +182,7 @@ paths:
         description: Tool name
     get:
       operationId: getTool
-      summary: "[TL-02] READ Tool"
+      summary: "[TL-14] READ Tool"
       description: Returns the specified tool.
       tags: [Tools]
       responses:
