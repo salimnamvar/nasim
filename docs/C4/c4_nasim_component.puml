@@ -7,7 +7,7 @@
 '            adapters, which converge at AgentController (single entry).
 '            Consistent naming: Adapter/Controller, Service, Repository.
 ' Milestone: v1.0
-' Version:   11.1.0
+' Version:   11.2.0
 ' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
 ' Review:    —
 ' Date:      2026-06-29
@@ -17,6 +17,8 @@
 '            PlanTool, ReviewTool into ToolService.
 '            v11.1.0 — Added WireLogRepository for interaction recording,
 '            replay, session forking, and checkpointing.
+'            v11.2.0 — Added EditStrategyRepository for diff staging,
+'            computation, and safe application of file edits.
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
@@ -63,6 +65,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
         Component(llm_repo, "LLMRepository", "litellm", "LLM API calls: streaming, fallback, capability matching")
         Component(fs_repo, "FilesystemRepository", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep")
         Component(sandbox_repo, "SandboxRepository", "subprocess", "Sandboxed command execution: timeout, isolation")
+        Component(edit_strategy_repo, "EditStrategyRepository", "", "Diff staging, computation, and safe application: staged edits, sandboxed validation")
         Component(git_repo, "GitRepository", "gitpython", "Git operations: status, diff, commit, branch")
         Component(mcp_repo, "MCPRepository", "mcp.client", "MCP extension tools: discovery, invocation")
         Component(repo_intel_repo, "RepoIntelligenceRepository", "tree-sitter + API", "AST indexing, symbol graph, semantic search")
@@ -132,6 +135,7 @@ Rel(session_svc, session_repo, "loads and saves sessions")
 Rel(session_svc, history_repo, "manages snapshots and revert index")
 Rel(tool_svc, fs_repo, "reads and writes project files")
 Rel(tool_svc, sandbox_repo, "executes commands in sandbox")
+Rel(tool_svc, edit_strategy_repo, "stages and applies file diffs safely")
 Rel(tool_svc, git_repo, "queries git state, creates commits")
 Rel(tool_svc, mcp_repo, "invokes extension tools")
 Rel(tool_svc, web_repo, "fetches documentation")
@@ -139,6 +143,13 @@ Rel(context_svc, memory_repo, "injects memory context")
 Rel(context_svc, repo_intel_repo, "queries codebase intelligence")
 Rel(task_svc, wire_log_repo, "records agent-provider-tool interactions")
 Rel(session_svc, wire_log_repo, "forks sessions, checkpoints turns")
+
+' ══════════════════════════════════════════════════════════════
+' ── Repository → Repository (internal dependencies) ──
+' ══════════════════════════════════════════════════════════════
+
+Rel(edit_strategy_repo, sandbox_repo, "validates diffs in sandboxed environment")
+Rel(edit_strategy_repo, fs_repo, "reads original files, writes staged edits")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Repository → Data Stores (internal persistence) ──
@@ -155,6 +166,7 @@ Rel(config_repo, config_store, "reads and writes configuration", "YAML")
 
 Rel(llm_repo, llm, "routes LLM API calls", "HTTP/JSON streaming")
 Rel(fs_repo, host_fs, "reads and writes files", "path I/O")
+Rel(edit_strategy_repo, host_fs, "reads originals, writes staged edits", "path I/O")
 Rel(sandbox_repo, sandbox, "executes commands", "subprocess")
 Rel(git_repo, git, "version control operations", "git CLI")
 Rel(mcp_repo, mcp_server, "invokes extension tools", "stdio / SSE")
@@ -164,7 +176,7 @@ Rel(web_repo, web, "fetches documentation", "HTTPS")
 legend right
     |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
     |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, SafetyService, ContextService |
-    |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository, WireLogRepository |
+    |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, EditStrategyRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository, WireLogRepository |
     |<#FFFDE7>  **Data Store** | SessionStore, MemoryStore, WireLogStore, ConfigStore |
     |<#FAFAFA>  **Container_Ext** | External clients from Container diagram |
 end legend
