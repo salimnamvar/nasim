@@ -25,6 +25,10 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "TaskService" as svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "MemoryStore" as store
 end box
@@ -35,21 +39,27 @@ user -> iface : GET /knowledge/{key}
 activate iface
 iface -> router : GET /knowledge/{key}
 activate router
-router -> store : MEM-02 RECALL Knowledge({key, scope})
+router -> svc : MEM-02 RECALL Knowledge({key})
+activate svc
+svc -> store : MEM-02 RECALL Knowledge({key})
 activate store
 
 alt key not found
-  store --> router : 404 Not Found
+  store --> svc : 404 Not Found
   deactivate store
+  svc --> router : 404 Not Found
+  deactivate svc
   router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router
   deactivate iface
-else key found
-  store --> router : 200 OK
+else knowledge recalled
+  store --> svc : 200 OK — {key, value, scope}
   deactivate store
-  router --> iface : 200 OK
-  iface --> user : 200 OK
+  svc --> router : 200 OK — {key, value, scope}
+  deactivate svc
+  router --> iface : 200 OK — {key, value, scope}
+  iface --> user : 200 OK — {key, value, scope}
   deactivate router
   deactivate iface
 end

@@ -25,6 +25,10 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "SessionService" as svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "SessionVersioning" as versioning
   participant "SessionStore" as store
@@ -39,12 +43,16 @@ activate iface
 iface -> router : POST /sessions/{session_id}:revert
 activate router
 
-router -> versioning : SSN-06 REVERT Session({session_id}, {target_turn})
+router -> svc : SSN-06 REVERT Session({session_id}, {target_turn})
+activate svc
+svc -> versioning : SSN-06 REVERT Session({session_id}, {target_turn})
 activate versioning
 
 alt session_id is empty
+    svc --> router : 400 INVALID_ARGUMENT
     router --> iface : 400 INVALID_ARGUMENT
     iface --> user : 400 Bad Request
+    deactivate svc
     deactivate router
     deactivate iface
 end
@@ -54,22 +62,26 @@ activate store
 
 alt session not found
     store --> versioning : 404 NOT_FOUND
-    versioning --> router : 404 NOT_FOUND
+    versioning --> svc : 404 NOT_FOUND
+    svc --> router : 404 NOT_FOUND
     router --> iface : 404 Not Found
     iface --> user : 404 Not Found
     deactivate store
     deactivate versioning
+    deactivate svc
     deactivate router
     deactivate iface
 end
 
 alt snapshot not found
     store --> versioning : 404 NOT_FOUND
-    versioning --> router : 404 NOT_FOUND
+    versioning --> svc : 404 NOT_FOUND
+    svc --> router : 404 NOT_FOUND
     router --> iface : 404 Not Found
     iface --> user : 404 Not Found
     deactivate store
     deactivate versioning
+    deactivate svc
     deactivate router
     deactivate iface
 end
@@ -81,11 +93,13 @@ alt disk read error
     storage --> store : IOError
     deactivate storage
     store --> versioning : 500 INTERNAL
-    versioning --> router : 500 INTERNAL
+    versioning --> svc : 500 INTERNAL
+    svc --> router : 500 INTERNAL
     router --> iface : 500 Internal Error
     iface --> user : 500 Internal Error
     deactivate store
     deactivate versioning
+    deactivate svc
     deactivate router
     deactivate iface
 end
@@ -101,11 +115,13 @@ activate store
 
 alt update error
     store --> versioning : 500 INTERNAL
-    versioning --> router : 500 INTERNAL
+    versioning --> svc : 500 INTERNAL
+    svc --> router : 500 INTERNAL
     router --> iface : 500 Internal Error
     iface --> user : 500 Internal Error
     deactivate store
     deactivate versioning
+    deactivate svc
     deactivate router
     deactivate iface
 end
@@ -113,8 +129,10 @@ end
 store --> versioning : 200 OK
 deactivate store
 
-versioning --> router : 200 OK
+versioning --> svc : 200 OK
 deactivate versioning
+svc --> router : 200 OK
+deactivate svc
 router --> iface : 200 OK
 iface --> user : 200 OK
 deactivate router

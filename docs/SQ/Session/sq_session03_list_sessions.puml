@@ -25,6 +25,10 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "SessionService" as svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "SessionStore" as store
 end box
@@ -38,7 +42,9 @@ activate iface
 iface -> router : GET /sessions
 activate router
 
-router -> store : SSN-03 LIST Sessions({page_size}, {page_token})
+router -> svc : SSN-03 LIST Sessions({page_size}, {page_token})
+activate svc
+svc -> store : SSN-03 LIST Sessions({page_size}, {page_token})
 activate store
 
 store -> storage : SSN-03 LIST Sessions({page_size}, {page_token})
@@ -47,10 +53,12 @@ activate storage
 alt directory not found
     storage --> store : FileNotFoundError
     deactivate storage
-    store --> router : 200 OK — [] (empty list)
+    store --> svc : 200 OK — [] (empty list)
+    svc --> router : 200 OK — [] (empty list)
     router --> iface : 200 OK — [] (empty list)
     iface --> user : 200 OK — [] (empty list)
     deactivate store
+    deactivate svc
     deactivate router
     deactivate iface
 end
@@ -58,8 +66,10 @@ end
 storage --> store : 200 OK — [{session_id, created_at, message_count}]
 deactivate storage
 
-store --> router : 200 OK — [{session_id, created_at, message_count}]
+store --> svc : 200 OK — [{session_id, created_at, message_count}]
 deactivate store
+svc --> router : 200 OK — [{session_id, created_at, message_count}]
+deactivate svc
 router --> iface : 200 OK — [{session_id, created_at, message_count}]
 iface --> user : 200 OK — [{session_id, created_at, message_count}]
 deactivate router

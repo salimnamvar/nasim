@@ -25,31 +25,41 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "TaskService" as svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "MemoryStore" as store
 end box
 
 == MEM-03 SEARCH Knowledge ==
 
-user -> iface : GET /knowledge:search
+user -> iface : GET /knowledge?q={query}
 activate iface
-iface -> router : GET /knowledge:search
+iface -> router : GET /knowledge?q={query}
 activate router
-router -> store : MEM-03 SEARCH Knowledge({query, filters})
+router -> svc : MEM-03 SEARCH Knowledge({query, scope})
+activate svc
+svc -> store : MEM-03 SEARCH Knowledge({query, scope})
 activate store
 
-alt no results
-  store --> router : 404 Not Found
+alt search fails
+  store --> svc : 500 Internal Error
   deactivate store
-  router --> iface : 404 Not Found
-  iface --> user : 404 Not Found
+  svc --> router : 500 Internal Error
+  deactivate svc
+  router --> iface : 500 Internal Error
+  iface --> user : 500 Internal Error
   deactivate router
   deactivate iface
-else results found
-  store --> router : 200 OK
+else search results found
+  store --> svc : 200 OK — [{key, value, scope, score}]
   deactivate store
-  router --> iface : 200 OK
-  iface --> user : 200 OK
+  svc --> router : 200 OK — [{key, value, scope, score}]
+  deactivate svc
+  router --> iface : 200 OK — [{key, value, scope, score}]
+  iface --> user : 200 OK — [{key, value, scope, score}]
   deactivate router
   deactivate iface
 end

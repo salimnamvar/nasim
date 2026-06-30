@@ -25,6 +25,10 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "TaskService" as svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "MemoryStore" as store
 end box
@@ -35,19 +39,25 @@ user -> iface : POST /knowledge
 activate iface
 iface -> router : POST /knowledge
 activate router
-router -> store : MEM-01 PERSIST Knowledge({key, value, scope})
+router -> svc : MEM-01 PERSIST Knowledge({key, value, scope})
+activate svc
+svc -> store : MEM-01 PERSIST Knowledge({key, value, scope})
 activate store
 
 alt store unavailable
-  store --> router : 503 Service Unavailable
+  store --> svc : 503 Service Unavailable
   deactivate store
+  svc --> router : 503 Service Unavailable
+  deactivate svc
   router --> iface : 503 Service Unavailable
   iface --> user : 503 Service Unavailable
   deactivate router
   deactivate iface
 else persisted
-  store --> router : 200 OK
+  store --> svc : 200 OK
   deactivate store
+  svc --> router : 200 OK
+  deactivate svc
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

@@ -25,31 +25,41 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "TaskService" as svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "MemoryStore" as store
 end box
 
 == MEM-04 SCOPE Knowledge ==
 
-user -> iface : GET /knowledge:scope
+user -> iface : GET /knowledge/scope
 activate iface
-iface -> router : GET /knowledge:scope
+iface -> router : GET /knowledge/scope
 activate router
-router -> store : MEM-04 SCOPE Knowledge({query, scope})
+router -> svc : MEM-04 SCOPE Knowledge({scope})
+activate svc
+svc -> store : MEM-04 SCOPE Knowledge({scope})
 activate store
 
-alt no matching scope
-  store --> router : 404 Not Found
+alt scope not found
+  store --> svc : 404 Not Found
   deactivate store
+  svc --> router : 404 Not Found
+  deactivate svc
   router --> iface : 404 Not Found
   iface --> user : 404 Not Found
   deactivate router
   deactivate iface
-else scoped results
-  store --> router : 200 OK
+else scope found
+  store --> svc : 200 OK — {scope, entry_count}
   deactivate store
-  router --> iface : 200 OK
-  iface --> user : 200 OK
+  svc --> router : 200 OK — {scope, entry_count}
+  deactivate svc
+  router --> iface : 200 OK — {scope, entry_count}
+  iface --> user : 200 OK — {scope, entry_count}
   deactivate router
   deactivate iface
 end

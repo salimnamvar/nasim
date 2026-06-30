@@ -25,6 +25,10 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "SessionService" as svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "SessionStore" as store
 end box
@@ -38,21 +42,27 @@ activate iface
 iface -> router : GET /sessions/{session_id}
 activate router
 
-router -> store : SSN-02 READ Session({session_id})
+router -> svc : SSN-02 READ Session({session_id})
+activate svc
+svc -> store : SSN-02 READ Session({session_id})
 activate store
 
 alt session_id is empty
+    svc --> router : 400 INVALID_ARGUMENT
     router --> iface : 400 INVALID_ARGUMENT
     iface --> user : 400 Bad Request
+    deactivate svc
     deactivate router
     deactivate iface
 end
 
 alt session not found
-    store --> router : 404 NOT_FOUND
+    store --> svc : 404 NOT_FOUND
+    svc --> router : 404 NOT_FOUND
     router --> iface : 404 Not Found
     iface --> user : 404 Not Found
     deactivate store
+    deactivate svc
     deactivate router
     deactivate iface
 end
@@ -63,10 +73,12 @@ activate storage
 alt disk read error
     storage --> store : IOError
     deactivate storage
-    store --> router : 500 INTERNAL
+    store --> svc : 500 INTERNAL
+    svc --> router : 500 INTERNAL
     router --> iface : 500 Internal Error
     iface --> user : 500 Internal Error
     deactivate store
+    deactivate svc
     deactivate router
     deactivate iface
 end
@@ -76,8 +88,11 @@ deactivate storage
 
 ref over store : SSN-02 READ Session({session_id}) <back:#1E88E5>RESTORED</back>
 
-store --> router : 200 OK
+store --> svc : 200 OK
 deactivate store
+ref over svc : SSN-02 READ Session({session_id}) <back:#1E88E5>RESTORED</back>
+svc --> router : 200 OK
+deactivate svc
 router --> iface : 200 OK
 iface --> user : 200 OK
 deactivate router

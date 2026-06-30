@@ -25,6 +25,10 @@ box "API" API_COLOR
   participant "ServerRouter" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "SessionService" as svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "SessionSearch" as search
 end box
@@ -38,7 +42,9 @@ activate iface
 iface -> router : GET /sessions:search?q={query}
 activate router
 
-router -> search : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
+router -> svc : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
+activate svc
+svc -> search : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
 activate search
 
 search -> storage : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
@@ -51,8 +57,10 @@ alt index not available
     activate storage
     storage --> search : 200 OK — [{session_id, snippet, score}]
     deactivate storage
-    search --> router : 200 OK — [{session_id, snippet, score}]
+    search --> svc : 200 OK — [{session_id, snippet, score}]
     deactivate search
+    svc --> router : 200 OK — [{session_id, snippet, score}]
+    deactivate svc
     router --> iface : 200 OK — [{session_id, snippet, score}]
     iface --> user : 200 OK — [{session_id, snippet, score}]
     deactivate router
@@ -62,8 +70,10 @@ end
 storage --> search : 200 OK — [{session_id, snippet, rank}]
 deactivate storage
 
-search --> router : 200 OK — [{session_id, snippet, score}]
+search --> svc : 200 OK — [{session_id, snippet, score}]
 deactivate search
+svc --> router : 200 OK — [{session_id, snippet, score}]
+deactivate svc
 router --> iface : 200 OK — [{session_id, snippet, score}]
 iface --> user : 200 OK — [{session_id, snippet, score}]
 deactivate router
