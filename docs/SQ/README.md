@@ -1,6 +1,6 @@
 # nasim — SQ Inventory (API-First)
 
-Sequence diagrams organised by UC group. 149 diagrams across 21 groups.
+Sequence diagrams organised by UC group. 149 diagrams across 22 groups.
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
 Back to [docs/](../README.md).
@@ -55,6 +55,7 @@ ref over mgr : API-02 CREATE Session
 
 | Group | Canonical (C4) Name | Boundary | Diagrams |
 | ----- | :-----------------: | -------- | :------: |
+| AC | AgentController | Agent Controller — single convergence point for all interface containers | 4 |
 | AGT | Agent | Agent Core — orchestrator, history, permissions, plans, subagents | 14 |
 | CLI | CLI | CLI Interface Container — REPL, parsing, rendering | 8 |
 | CFG | Config | Configuration — config loading and validation | 3 |
@@ -77,7 +78,7 @@ ref over mgr : API-02 CREATE Session
 | VCS | Git | Version Control — Git status, diff, commit | 4 |
 | WRL | WireLog | Wire Log — append-only event store, fork, checkpoint | 5 |
 
-**Total: 148 SQ diagrams across 21 groups**
+**Total: 149 SQ diagrams on disk (152 expected: 148 existing + 4 AC pending; 1 stale Server/ duplicate removed from count)**
 
 ## Naming Convention
 
@@ -104,11 +105,11 @@ Each SQ diagram follows this structure:
 ### Common Styles
 
 All diagrams include `common/sq_styles.puml` for consistent CSR layer colours,
-skinparam settings, and visual output across all 148 diagrams.
+skinparam settings, and visual output across all 149 diagrams (152 expected).
 
 ### Enforcement
 
-Run `python docs/SQ/common/sq_enforce.py` to check all 148 diagrams against:
+Run `python docs/SQ/common/sq_enforce.py` to check all diagrams against:
 - E-SQ-01: C4 Name Fidelity (CRITICAL)
 - E-SQ-02: Ref Blocks for State Writes (HIGH)
 - E-SQ-03: Activation Pairs (MEDIUM)

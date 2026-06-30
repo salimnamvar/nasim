@@ -20,12 +20,12 @@ memory, and todo store data contracts. CT/API covers the HTTP API server surface
 | Directory | Layer | Status | Contents |
 | --------- | ----- | ------ | -------- |
 | [C4/](C4/README.md) | C4 Architecture | Revised | Context, container, consolidated component diagram (3 + styles) |
-| [UC/](UC/README.md) | Use Cases | In progress | 148 UCs — 22 groups |
-| [SM/](SM/README.md) | State Machine | In progress | 15 diagrams — agent, session, plan, plugin, and more |
-| [SQ/](SQ/README.md) | Sequence Diagrams | In progress | 149 diagrams across 21 groups (1:1 with UCs) |
-| [ER/](ER/README.md) | ERD | In progress | 5 store schemas |
-| [CL/](CL/README.md) | Class Diagram | In progress | Runtime class model — 98+ classes across 15 groups |
-| [CT/DATA/](CT/DATA/README.md) | Data Contracts | In progress | ODCS v3.1.0 — 5 contract diagrams + 2 YAML schemas |
+| [UC/](UC/README.md) | Use Cases | In progress | 152 UCs — 22 groups |
+| [SM/](SM/README.md) | State Machine | In progress | 15 diagrams — 195 transitions, all SQ-covered |
+| [SQ/](SQ/README.md) | Sequence Diagrams | In progress | 149 diagrams across 22 groups (4 AC pending) |
+| [ER/](ER/README.md) | ERD | In progress | 6 store schemas (4 C4 data stores + 2 informational) |
+| [CL/](CL/README.md) | Class Diagram | In progress | Runtime class model — 102 classes across 17 layers |
+| [CT/DATA/](CT/DATA/README.md) | Data Contracts | In progress | ODCS v3.1.0 — 5 contract diagrams + 3 schemas |
 | [CT/API/](CT/API/README.md) | HTTP API Surface | In progress | OAS 3.1.0 + ROD — 23 endpoints, 8 resources |
-| [RDM/](RDM/README.md) | Implementation Roadmap | Active | 10 milestone docs for coding |
+| [RDM/](RDM/README.md) | Implementation Roadmap | Active | 12 milestone docs for coding |
 | [MM/](MM/README.md) | Design Chain Maps | In progress | Summary and detail chain overview diagrams |
