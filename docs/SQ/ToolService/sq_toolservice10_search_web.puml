@@ -1,0 +1,67 @@
+@startuml sq_tool10_search_web
+' ============================================================
+' Title:     TOOLSERVICE-10 — SEARCH Web
+' Boundary:  nasim code agent
+' Purpose:   Search the web for information
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> WebSearchTool
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-10 SEARCH Web
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as tool
+end box
+
+== TOOLSERVICE-10 SEARCH Web ==
+
+user -> iface : POST /tools/search_web:execute
+activate iface
+iface -> router : POST /tools/search_web:execute
+activate router
+
+router -> tool : TOOLSERVICE-10 SEARCH Web(query, numResults)
+activate tool
+
+alt validation succeeds
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TOOLSERVICE-10 SEARCH Web
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TOOLSERVICE-10 SEARCH Web (SM/README.md)
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else backend unavailable
+  tool --> router : 503 Service Unavailable
+  deactivate tool
+  router --> iface : 503 Service Unavailable
+  iface --> user : 503 Service Unavailable
+  deactivate router
+  deactivate iface
+else invalid query
+  tool --> router : 400 Bad Request
+  deactivate tool
+  router --> iface : 400 Bad Request
+  iface --> user : 400 Bad Request
+  deactivate router
+  deactivate iface
+end
+@enduml

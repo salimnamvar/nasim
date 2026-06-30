@@ -1,0 +1,67 @@
+@startuml sq_tool13_read_lsp
+' ============================================================
+' Title:     TOOLSERVICE-13 — READ LSP
+' Boundary:  nasim code agent
+' Purpose:   Query LSP server for hover, definition, or references
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> LspTool
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-13 READ LSP
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as tool
+end box
+
+== TOOLSERVICE-13 READ LSP ==
+
+user -> iface : POST /tools/read_lsp:execute
+activate iface
+iface -> router : POST /tools/read_lsp:execute
+activate router
+
+router -> tool : TOOLSERVICE-13 READ LSP(query, params)
+activate tool
+
+alt validation succeeds
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TOOLSERVICE-13 READ LSP
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TOOLSERVICE-13 READ LSP (SM/README.md)
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else server unreachable
+  tool --> router : 502 Bad Gateway
+  deactivate tool
+  router --> iface : 502 Bad Gateway
+  iface --> user : 502 Bad Gateway
+  deactivate router
+  deactivate iface
+else no results
+  tool --> router : 404 Not Found
+  deactivate tool
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
+  deactivate router
+  deactivate iface
+end
+@enduml

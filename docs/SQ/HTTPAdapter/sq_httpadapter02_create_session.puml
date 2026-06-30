@@ -1,0 +1,80 @@
+@startuml sq_api02_create_session
+' ============================================================
+' Title:     HTTPADAPTER-02 — CREATE Session
+' Boundary:  nasim code agent
+' Purpose:   Create and persist a new agent session
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
+' @csr-exempt service
+' SM States: CREATED (#BBDEFB), ACTIVE (#43A047)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- HTTPADAPTER-02 CREATE Session
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== HTTPADAPTER-02 CREATE Session ==
+
+user -> iface : HTTPADAPTER-02 CREATE Session({sessionData})
+activate iface
+iface -> router : HTTPADAPTER-02 CREATE Session({sessionData})
+activate router
+
+router -> store : HTTPADAPTER-02 CREATE Session({sessionData})
+activate store
+
+alt validation fails
+    store --> router : 422 UNPROCESSABLE\n{error: {code: "HTTPADAPTER-02_VALIDATION_ERROR", message: "Invalid session data", status: 422}}
+    router --> iface : 422 UNPROCESSABLE
+    iface --> user : 422 UNPROCESSABLE
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+store -> storage : HTTPADAPTER-02 CREATE Session({sessionData})
+activate storage
+
+alt disk write error
+    storage --> store : 500 INTERNAL\n{error: {code: "HTTPADAPTER-02_DISK_WRITE_ERROR", message: "Could not persist session", status: 500}}
+    deactivate storage
+    store --> router : 500 INTERNAL
+    router --> iface : 500 INTERNAL
+    iface --> user : 500 INTERNAL
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK
+deactivate storage
+
+ref over store : HTTPADAPTER-02 CREATE Session <back:#BBDEFB>CREATED</back> → <back:#43A047>ACTIVE</back>
+
+store --> router : 200 OK
+deactivate store
+router --> iface : 200 OK
+iface --> user : 200 OK
+deactivate router
+deactivate iface
+
+@enduml

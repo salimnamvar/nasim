@@ -1,0 +1,129 @@
+@startuml sq_session08_branch_session
+' ============================================================
+' Title:     SESSIONSERVICE-08 — BRANCH Session
+' Boundary:  nasim code agent
+' Purpose:   Fork session into a new branch for parallel exploration
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionService -> SessionStore
+' SM States: ACTIVE (#43A047), BRANCHED (#7B1FA2)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SESSIONSERVICE-08 BRANCH Session
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "SessionService" as svc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as fork
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== SESSIONSERVICE-08 BRANCH Session ==
+
+user -> iface : POST /sessions/{session_id}:branch
+activate iface
+iface -> router : POST /sessions/{session_id}:branch
+activate router
+
+router -> svc : SESSIONSERVICE-08 BRANCH Session({session_id}, {from_turn})
+activate svc
+svc -> fork : SESSIONSERVICE-08 BRANCH Session({session_id}, {from_turn})
+activate fork
+
+alt session_id is empty
+    svc --> router : 400 INVALID_ARGUMENT
+    router --> iface : 400 INVALID_ARGUMENT
+    iface --> user : 400 Bad Request
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+fork -> store : SESSIONSERVICE-08 READ Session({session_id})
+activate store
+
+alt session not found
+    store --> fork : 404 NOT_FOUND
+    fork --> svc : 404 NOT_FOUND
+    svc --> router : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
+    deactivate store
+    deactivate fork
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+store --> fork : 200 OK — {session_data}
+deactivate store
+
+ref over fork : SESSIONSERVICE-08 BRANCH Session({session_id}, {from_turn}) <back:#7B1FA2>BRANCHED</back>
+
+fork -> store : SESSIONSERVICE-08 INSERT BranchSession({session_id}, {branch_id}, {from_turn})
+activate store
+
+alt copy failure
+    store --> fork : 500 INTERNAL
+    fork --> svc : 500 INTERNAL
+    svc --> router : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
+    deactivate store
+    deactivate fork
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+store -> storage : SESSIONSERVICE-08 INSERT SessionFile({branch_id}.jsonl)
+activate storage
+
+alt disk write error
+    storage --> store : IOError
+    deactivate storage
+    store --> fork : 500 INTERNAL
+    fork --> svc : 500 INTERNAL
+    svc --> router : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
+    deactivate store
+    deactivate fork
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK
+deactivate storage
+
+store --> fork : 200 OK — {branch_id}
+deactivate store
+fork --> svc : 200 OK — {branch_id}
+deactivate fork
+svc --> router : 200 OK — {branch_id}
+deactivate svc
+router --> iface : 200 OK — {branch_id}
+iface --> user : 200 OK — {branch_id}
+deactivate router
+deactivate iface
+
+@enduml

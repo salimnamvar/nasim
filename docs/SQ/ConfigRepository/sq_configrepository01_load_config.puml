@@ -1,0 +1,58 @@
+@startuml sq_config01_load_config
+' ============================================================
+' Title:     CONFIGREPOSITORY-01 — LOAD Config
+' Boundary:  nasim code agent
+' Purpose:   Load configuration from layered sources
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigLoader
+' SM States: SERVING (#E0F7FA)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- CONFIGREPOSITORY-01 LOAD Config
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ConfigRepository" as mgr
+end box
+
+== CONFIGREPOSITORY-01 LOAD Config ==
+
+user -> iface : CONFIGREPOSITORY-01 LOAD Config({cli_args})
+activate iface
+iface -> router : CONFIGREPOSITORY-01 LOAD Config({cli_args})
+activate router
+router -> mgr : CONFIGREPOSITORY-01 LOAD Config({cli_args})
+activate mgr
+
+alt validation succeeds
+  ref over mgr : CONFIGREPOSITORY-01 LOAD Config <back:#E0F7FA>SERVING</back>
+  mgr --> router : 200 OK
+  deactivate mgr
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else validation fails
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "CONFIGREPOSITORY-01_VALIDATION_ERROR", message: "Config validation failed", status: 422}}
+  deactivate mgr
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
+  deactivate router
+  deactivate iface
+end
+
+@enduml

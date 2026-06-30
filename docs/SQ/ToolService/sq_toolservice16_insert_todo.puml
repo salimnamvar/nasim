@@ -1,0 +1,67 @@
+@startuml sq_tool16_insert_todo
+' ============================================================
+' Title:     TOOLSERVICE-16 — INSERT Todo
+' Boundary:  nasim code agent
+' Purpose:   Add a new todo item via TodoTool
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> TodoTool
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-16 INSERT Todo
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as tool
+end box
+
+== TOOLSERVICE-16 INSERT Todo ==
+
+user -> iface : POST /tools/insert_todo:execute
+activate iface
+iface -> router : POST /tools/insert_todo:execute
+activate router
+
+router -> tool : TOOLSERVICE-16 INSERT Todo(title, description)
+activate tool
+
+alt validation succeeds
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TOOLSERVICE-16 INSERT Todo
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TOOLSERVICE-16 INSERT Todo (SM/README.md)
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else invalid input
+  tool --> router : 422 Unprocessable
+  deactivate tool
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
+  deactivate router
+  deactivate iface
+else storage error
+  tool --> router : 500 Internal Server Error
+  deactivate tool
+  router --> iface : 500 Internal Server Error
+  iface --> user : 500 Internal Server Error
+  deactivate router
+  deactivate iface
+end
+@enduml

@@ -1,0 +1,58 @@
+@startuml sq_git03_read_diff
+' ============================================================
+' Title:     GITREPOSITORY-03 — READ Diff
+' Boundary:  nasim code agent
+' Purpose:   Read diff between commits or working tree
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> GitIntegration
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- GITREPOSITORY-03 READ Diff
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "GitRepository" as mgr
+end box
+
+== GITREPOSITORY-03 READ Diff ==
+
+user -> iface : GET /git/diff
+activate iface
+iface -> router : GET /git/diff
+activate router
+router -> mgr : GITREPOSITORY-03 READ Diff({repo_path, base, head})
+activate mgr
+
+alt validation succeeds
+  ref over mgr : GITREPOSITORY-03 READ Diff({repo_path, ref_spec}) <back:#B2DFDB>TOOL_EXEC</back>
+  mgr --> router : 200 OK
+  deactivate mgr
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else validation fails
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "GITREPOSITORY-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
+  deactivate mgr
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "GITREPOSITORY-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "GITREPOSITORY-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

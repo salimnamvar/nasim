@@ -5,10 +5,10 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Mode lifecycle for SafetyService.
 '            Modes: PERMISSIVE, ASK, BLOCK.
-'            All mode transitions via SAFETY-03 APPLY Safety Mode.
+'            All mode transitions via SAFETYSERVICE-03 APPLY Safety Mode.
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (SafetyService), docs/UC/README.md (SAFETY-01, SAFETY-03)
+' Source:    C4 component diagram (SafetyService), docs/UC/README.md (SAFETYSERVICE-01, SAFETYSERVICE-03)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
@@ -16,7 +16,7 @@
 
 title nasim — Safety Mode Lifecycle
 
-[*] --> UNINITIALIZED : SAFETY-03
+[*] --> UNINITIALIZED : SAFETYSERVICE-03
 
 state "UNINITIALIZED" as UNINITIALIZED #BDBDBD
 UNINITIALIZED : Safety system not initialized.
@@ -24,34 +24,34 @@ UNINITIALIZED : Default state before first mode apply.
 
 state "PERMISSIVE" as PERMISSIVE #9CCC65
 PERMISSIVE : All operations allowed, no approval prompts.
-PERMISSIVE : SAFETY-03 APPLY Safety Mode.
+PERMISSIVE : SAFETYSERVICE-03 APPLY Safety Mode.
 
 state "ASK" as ASK #FDD835
 ASK : User approval required for sensitive operations.
-ASK : SAFETY-03 APPLY Safety Mode.
+ASK : SAFETYSERVICE-03 APPLY Safety Mode.
 
 state "BLOCK" as BLOCK #E91E63
 BLOCK : Dangerous operations blocked entirely.
-BLOCK : SAFETY-03 APPLY Safety Mode.
+BLOCK : SAFETYSERVICE-03 APPLY Safety Mode.
 
 state "ERROR" as ERROR #F4511E
 ERROR : Safety system encountered an error.
-ERROR : SAFETY-01 CHECK Permission failure.
+ERROR : SAFETYSERVICE-01 CHECK Permission failure.
 
-UNINITIALIZED --> PERMISSIVE : SAFETY-03
-UNINITIALIZED --> ASK : SAFETY-03
-UNINITIALIZED --> BLOCK : SAFETY-03
-PERMISSIVE --> ASK : SAFETY-03
-PERMISSIVE --> BLOCK : SAFETY-03
-ASK --> PERMISSIVE : SAFETY-03
-ASK --> BLOCK : SAFETY-03
-BLOCK --> PERMISSIVE : SAFETY-03
-BLOCK --> ASK : SAFETY-03
-PERMISSIVE --> ERROR : SAFETY-01
-ASK --> ERROR : SAFETY-01
-BLOCK --> ERROR : SAFETY-01
-ERROR --> UNINITIALIZED : SAFETY-03
+UNINITIALIZED --> PERMISSIVE : SAFETYSERVICE-03
+UNINITIALIZED --> ASK : SAFETYSERVICE-03
+UNINITIALIZED --> BLOCK : SAFETYSERVICE-03
+PERMISSIVE --> ASK : SAFETYSERVICE-03
+PERMISSIVE --> BLOCK : SAFETYSERVICE-03
+ASK --> PERMISSIVE : SAFETYSERVICE-03
+ASK --> BLOCK : SAFETYSERVICE-03
+BLOCK --> PERMISSIVE : SAFETYSERVICE-03
+BLOCK --> ASK : SAFETYSERVICE-03
+PERMISSIVE --> ERROR : SAFETYSERVICE-01
+ASK --> ERROR : SAFETYSERVICE-01
+BLOCK --> ERROR : SAFETYSERVICE-01
+ERROR --> UNINITIALIZED : SAFETYSERVICE-03
 
-UNINITIALIZED --> [*] : SAFETY-03
+UNINITIALIZED --> [*] : SAFETYSERVICE-03
 
 @enduml

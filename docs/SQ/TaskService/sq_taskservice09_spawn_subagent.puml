@@ -1,0 +1,66 @@
+@startuml sq_agent09_spawn_subagent
+' ============================================================
+' Title:     TASKSERVICE-09 — SPAWN Subagent
+' Boundary:  nasim code agent
+' Purpose:   Create child agent process with restricted tools
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SubagentService -> SubagentRegistry
+' SM States: WAITING (#CE93D8)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TASKSERVICE-09 SPAWN Subagent
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as subagent
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "TaskService" as subagentRegistry
+end box
+
+== TASKSERVICE-09 SPAWN Subagent ==
+
+user -> iface : POST /v1/agents/{agent_id}:spawn-subagent
+activate iface
+iface -> router : POST /v1/agents/{agent_id}:spawn-subagent
+activate router
+router -> subagent : TASKSERVICE-09 SPAWN Subagent({task_prompt, parent_id})
+activate subagent
+
+alt spawn succeeds without error
+  ref over subagent : TASKSERVICE-09 SPAWN Subagent({task_prompt, parent_id}) <back:#CE93D8>WAITING</back>
+  subagent -> subagentRegistry : TASKSERVICE-09 PERSIST Subagent({child_id, parent_id})
+  activate subagentRegistry
+  subagentRegistry --> subagent : 200 OK
+  deactivate subagentRegistry
+  subagent --> router : 200 OK
+  deactivate subagent
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else spawn fails
+  subagent --> router : 500 INTERNAL\n{error: {code: "TASKSERVICE-09_SPAWN_FAILED", message: "Subagent spawn failed", status: 500}}
+  deactivate subagent
+  router --> iface : 500 INTERNAL\n{error: {code: "TASKSERVICE-09_SPAWN_FAILED", message: "Subagent spawn failed", status: 500}}
+  iface --> user : 500 INTERNAL\n{error: {code: "TASKSERVICE-09_SPAWN_FAILED", message: "Subagent spawn failed", status: 500}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

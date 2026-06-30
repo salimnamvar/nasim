@@ -48,7 +48,7 @@ ref over alias : UC_ID VERB Resource
 ' WRONG:
 mgr -> mgr : TRANSITION State(<back:#43A047>ACTIVE</back>)
 ' CORRECT:
-ref over mgr : API-02 CREATE Session
+ref over mgr : HTTPADAPTER-02 CREATE Session
 ```
 
 ## Groups

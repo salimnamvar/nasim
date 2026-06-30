@@ -7,7 +7,7 @@
 '            States: UNLOADED → LOADING → ACTIVE ↔ SWITCHING
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/UC/README.md (AGENT-11, AGENT-12, AGENT-13)
+' Source:    docs/UC/README.md (TASKSERVICE-11, TASKSERVICE-12, TASKSERVICE-13)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
@@ -15,7 +15,7 @@
 
 title nasim — Persona Lifecycle
 
-[*] --> UNLOADED : AGENT-12
+[*] --> UNLOADED : TASKSERVICE-12
 
 state "UNLOADED" as UNLOADED #9E9E9E
 UNLOADED : No persona loaded.
@@ -23,29 +23,29 @@ UNLOADED : Default state.
 
 state "LOADING" as LOADING #FFC107
 LOADING : Persona configuration being loaded.
-LOADING : AGENT-12 LOAD Persona.
+LOADING : TASKSERVICE-12 LOAD Persona.
 
 state "ACTIVE" as ACTIVE #4DB6AC
 ACTIVE : Persona active and available for delegation.
-ACTIVE : AGENT-11 DELEGATE to Persona.
+ACTIVE : TASKSERVICE-11 DELEGATE to Persona.
 
 state "SWITCHING" as SWITCHING #FF9800
 SWITCHING : Switching to different persona at runtime.
-SWITCHING : AGENT-13 SWITCH Persona.
+SWITCHING : TASKSERVICE-13 SWITCH Persona.
 
 state "ERROR" as ERROR #F44336
 ERROR : Persona load or switch failed.
 ERROR : Load error or switch failure.
 
-UNLOADED --> LOADING : AGENT-12
-LOADING --> ACTIVE : AGENT-12
-LOADING --> ERROR : AGENT-12
-ACTIVE --> SWITCHING : AGENT-13
-SWITCHING --> ACTIVE : AGENT-13
-SWITCHING --> ERROR : AGENT-13
-ACTIVE --> UNLOADED : AGENT-11
-ERROR --> UNLOADED : AGENT-12
+UNLOADED --> LOADING : TASKSERVICE-12
+LOADING --> ACTIVE : TASKSERVICE-12
+LOADING --> ERROR : TASKSERVICE-12
+ACTIVE --> SWITCHING : TASKSERVICE-13
+SWITCHING --> ACTIVE : TASKSERVICE-13
+SWITCHING --> ERROR : TASKSERVICE-13
+ACTIVE --> UNLOADED : TASKSERVICE-11
+ERROR --> UNLOADED : TASKSERVICE-12
 
-UNLOADED --> [*] : AGENT-12
+UNLOADED --> [*] : TASKSERVICE-12
 
 @enduml

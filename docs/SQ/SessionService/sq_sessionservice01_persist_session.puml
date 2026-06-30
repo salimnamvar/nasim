@@ -1,0 +1,101 @@
+@startuml sq_session01_persist_session
+' ============================================================
+' Title:     SESSIONSERVICE-01 — PERSIST Session
+' Boundary:  nasim code agent
+' Purpose:   Persist session messages to disk via SessionService
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
+' SM States: ACTIVE (#43A047), SAVED (#1565C0)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SESSIONSERVICE-01 PERSIST Session
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "SessionService" as svc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== SESSIONSERVICE-01 PERSIST Session ==
+
+user -> iface : POST /sessions/{session_id}:persist
+activate iface
+iface -> router : POST /sessions/{session_id}:persist
+activate router
+
+router -> svc : SESSIONSERVICE-01 PERSIST Session({session_id})
+activate svc
+svc -> store : SESSIONSERVICE-01 PERSIST Session({session_id})
+activate store
+
+alt session_id is empty
+    svc --> router : 400 INVALID_ARGUMENT
+    router --> iface : 400 INVALID_ARGUMENT
+    iface --> user : 400 Bad Request
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+alt session not found
+    store --> svc : 404 NOT_FOUND
+    svc --> router : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
+    deactivate store
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+store -> storage : SESSIONSERVICE-01 PERSIST Session({session_id}, {messages})
+activate storage
+
+alt disk write error
+    storage --> store : IOError
+    deactivate storage
+    store --> svc : 500 INTERNAL
+    svc --> router : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
+    deactivate store
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK
+deactivate storage
+
+ref over store : SESSIONSERVICE-01 PERSIST Session({session_id}) <back:#1565C0>SAVED</back>
+
+store --> svc : 200 OK
+deactivate store
+ref over svc : SESSIONSERVICE-01 PERSIST Session({session_id}) <back:#1565C0>SAVED</back>
+svc --> router : 200 OK
+deactivate svc
+router --> iface : 200 OK
+iface --> user : 200 OK
+deactivate router
+deactivate iface
+
+@enduml

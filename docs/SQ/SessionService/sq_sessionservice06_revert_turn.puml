@@ -1,0 +1,141 @@
+@startuml sq_session06_revert_turn
+' ============================================================
+' Title:     SESSIONSERVICE-06 — REVERT Turn
+' Boundary:  nasim code agent
+' Purpose:   Restore session to a previous snapshot or turn
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionVersioning -> SessionService -> SessionStore
+' SM States: (no state change — revert is versioning operation)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SESSIONSERVICE-06 REVERT Turn
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "SessionService" as svc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as versioning
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== SESSIONSERVICE-06 REVERT Turn ==
+
+user -> iface : POST /sessions/{session_id}:revert
+activate iface
+iface -> router : POST /sessions/{session_id}:revert
+activate router
+
+router -> svc : SESSIONSERVICE-06 REVERT Session({session_id}, {target_turn})
+activate svc
+svc -> versioning : SESSIONSERVICE-06 REVERT Session({session_id}, {target_turn})
+activate versioning
+
+alt session_id is empty
+    svc --> router : 400 INVALID_ARGUMENT
+    router --> iface : 400 INVALID_ARGUMENT
+    iface --> user : 400 Bad Request
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+versioning -> store : SESSIONSERVICE-06 READ Snapshot({session_id}, {target_turn})
+activate store
+
+alt session not found
+    store --> versioning : 404 NOT_FOUND
+    versioning --> svc : 404 NOT_FOUND
+    svc --> router : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
+    deactivate store
+    deactivate versioning
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+alt snapshot not found
+    store --> versioning : 404 NOT_FOUND
+    versioning --> svc : 404 NOT_FOUND
+    svc --> router : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
+    deactivate store
+    deactivate versioning
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+store -> storage : SESSIONSERVICE-06 READ Snapshot({session_id}, {target_turn})
+activate storage
+
+alt disk read error
+    storage --> store : IOError
+    deactivate storage
+    store --> versioning : 500 INTERNAL
+    versioning --> svc : 500 INTERNAL
+    svc --> router : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
+    deactivate store
+    deactivate versioning
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK
+deactivate storage
+
+store --> versioning : 200 OK — {snapshot_messages}
+deactivate store
+
+versioning -> store : SESSIONSERVICE-06 UPDATE Session({session_id}, {messages})
+activate store
+
+alt update error
+    store --> versioning : 500 INTERNAL
+    versioning --> svc : 500 INTERNAL
+    svc --> router : 500 INTERNAL
+    router --> iface : 500 Internal Error
+    iface --> user : 500 Internal Error
+    deactivate store
+    deactivate versioning
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+store --> versioning : 200 OK
+deactivate store
+
+versioning --> svc : 200 OK
+deactivate versioning
+svc --> router : 200 OK
+deactivate svc
+router --> iface : 200 OK
+iface --> user : 200 OK
+deactivate router
+deactivate iface
+
+@enduml

@@ -1,0 +1,68 @@
+@startuml sq_plugins01_discover_plugins
+' ============================================================
+' Title:     TOOLSERVICE-01 — DISCOVER Plugin
+' Boundary:  nasim code agent
+' Purpose:   Discover plugins from plugin directory
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> PluginLoader
+' SM States: DISCOVERED (#E0E0E0)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-01 DISCOVER Plugin
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "ToolService" as svc
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "ToolService" as mgr
+end box
+
+== TOOLSERVICE-01 DISCOVER Plugin ==
+
+user -> iface : TOOLSERVICE-01 DISCOVER Plugin({plugin_dir})
+activate iface
+iface -> router : TOOLSERVICE-01 DISCOVER Plugin({plugin_dir})
+activate router
+router -> svc : TOOLSERVICE-01 DISCOVER Plugin({plugin_dir})
+activate svc
+svc -> mgr : TOOLSERVICE-01 DISCOVER Plugin({plugin_dir})
+activate mgr
+
+alt validation succeeds
+  ref over mgr : TOOLSERVICE-01 DISCOVER Plugin({plugin_dir}) <back:#E0E0E0>DISCOVERED</back>
+  mgr --> svc : 200 OK
+  deactivate mgr
+  svc --> router : 200 OK
+  deactivate svc
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else validation fails
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "TOOLSERVICE-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
+  deactivate mgr
+  svc --> router : 422 UNPROCESSABLE\n{error: {code: "TOOLSERVICE-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
+  deactivate svc
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "TOOLSERVICE-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "TOOLSERVICE-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

@@ -41,8 +41,8 @@
 
 | Resource | Method | HTTP | Path | UC ID | Notes |
 | -------- | ------ | ---- | ---- | ------- | ----- |
-| Session | List | GET | `/v1/sessions` | SESSION-03 | Paginated (AIP-158) |
-| Session | Get | GET | `/v1/sessions/{session_id}` | SESSION-02 | Single session by ID |
+| Session | List | GET | `/v1/sessions` | SESSIONSERVICE-03 | Paginated (AIP-158) |
+| Session | Get | GET | `/v1/sessions/{session_id}` | SESSIONSERVICE-02 | Single session by ID |
 | Session | Create | POST | `/v1/sessions` | SRV-02 | Returns 201 with session |
 | Message | List | GET | `/v1/sessions/{session_id}/messages` | SRV-05 | Ordered by sequence |
 | Message | Create | POST | `/v1/sessions/{session_id}/messages` | SRV-03 | Returns SSE stream |
@@ -198,5 +198,5 @@ All paths start with `/v1/` (AIP-185). The API version is independent of the ser
 | Tool resource | CL `Tool` ABC + `ToolRegistry`, UC group TL |
 | Config resource | CL `Config` dataclass, UC group CFG |
 | SSE streaming | SQ `sq_srv03_send_message`, SQ `sq_srv04_stream_response` |
-| Pagination | AIP-158, UC SESSION-03 (List Sessions) |
+| Pagination | AIP-158, UC SESSIONSERVICE-03 (List Sessions) |
 | Errors | AIP-193, SM error states |

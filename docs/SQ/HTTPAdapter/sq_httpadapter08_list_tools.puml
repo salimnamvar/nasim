@@ -1,0 +1,58 @@
+@startuml sq_api08_list_tools
+' ============================================================
+' Title:     HTTPADAPTER-08 — LIST Tools
+' Boundary:  nasim code agent
+' Purpose:   List all registered tools available to the agent
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> ToolRegistry
+' SM States: (no state change — read-only)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- HTTPADAPTER-08 LIST Tools
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as registry
+end box
+
+== HTTPADAPTER-08 LIST Tools ==
+
+user -> iface : HTTPADAPTER-08 LIST Tools({pageSize, pageToken})
+activate iface
+iface -> router : HTTPADAPTER-08 LIST Tools({pageSize, pageToken})
+activate router
+
+router -> registry : HTTPADAPTER-08 LIST Tools({pageSize, pageToken})
+activate registry
+
+alt validation fails
+    registry --> router : 422 INVALID_ARGUMENT\n{error: {code: "HTTPADAPTER-08_VALIDATION_ERROR", message: "Invalid pagination parameters", status: 422}}
+    router --> iface : 422 INVALID_ARGUMENT
+    iface --> user : 422 INVALID_ARGUMENT
+    deactivate registry
+    deactivate router
+    deactivate iface
+end
+
+registry --> router : 200 OK — [{name, description, parameters}]
+deactivate registry
+router --> iface : 200 OK — [{name, description, parameters}]
+iface --> user : 200 OK — [{name, description, parameters}]
+deactivate router
+deactivate iface
+
+@enduml

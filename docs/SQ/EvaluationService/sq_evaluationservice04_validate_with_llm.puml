@@ -1,0 +1,58 @@
+@startuml sq_evaluation04_validate_with_llm
+' ============================================================
+' Title:     EVALUATIONSERVICE-04 — VALIDATE With LLM
+' Boundary:  nasim code agent
+' Purpose:   Validate task results using an LLM reviewer
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> LLMReviewer
+' SM States: REVIEWING (#AB47BC)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EVALUATIONSERVICE-04 VALIDATE With LLM
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "EvaluationService" as reviewer
+end box
+
+== EVALUATIONSERVICE-04 VALIDATE With LLM ==
+
+user -> iface : EVALUATIONSERVICE-04 VALIDATE With LLM({task_id, artifact})
+activate iface
+iface -> router : EVALUATIONSERVICE-04 VALIDATE With LLM({task_id, artifact})
+activate router
+router -> reviewer : EVALUATIONSERVICE-04 VALIDATE With LLM({task_id, artifact})
+activate reviewer
+
+alt llm_approves
+  ref over reviewer : EVALUATIONSERVICE-04 VALIDATE With LLM({task_id, prompt}) <back:#AB47BC>REVIEWING</back>
+  reviewer --> router : 200 OK
+  deactivate reviewer
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else llm_rejects
+  reviewer --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATIONSERVICE-04_LLM_REJECTED", message: "LLM review failed", status: 422}}
+  deactivate reviewer
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
+  deactivate router
+  deactivate iface
+end
+
+@enduml

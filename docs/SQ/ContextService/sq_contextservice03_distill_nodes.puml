@@ -1,0 +1,58 @@
+@startuml sq_contextgraph03_distill_nodes
+' ============================================================
+' Title:     CONTEXTSERVICE-03 — DISTILL Nodes
+' Boundary:  nasim code agent
+' Purpose:   Distill chat history nodes into concise summaries
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> DistillationProcessor
+' SM States: (stateless — COMPACTING owned by TASKSERVICE-06)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- CONTEXTSERVICE-03 DISTILL Nodes
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "ContextService" as distill
+end box
+
+== CONTEXTSERVICE-03 DISTILL Nodes ==
+
+user -> iface : CONTEXTSERVICE-03 DISTILL Nodes({nodes, max_tokens})
+activate iface
+iface -> router : CONTEXTSERVICE-03 DISTILL Nodes({nodes, max_tokens})
+activate router
+router -> distill : CONTEXTSERVICE-03 DISTILL Nodes({nodes, max_tokens})
+activate distill
+
+alt summary_quality acceptable
+  ref over distill : CONTEXTSERVICE-03 DISTILL Nodes({nodes, max_tokens})
+  distill --> router : 200 OK
+  deactivate distill
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else distillation_fails
+  distill --> router : 422 UNPROCESSABLE\n{error: {code: "CONTEXTSERVICE-03_DISTILL_FAILED", message: "Node distillation failed", status: 422}}
+  deactivate distill
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
+  deactivate router
+  deactivate iface
+end
+
+@enduml

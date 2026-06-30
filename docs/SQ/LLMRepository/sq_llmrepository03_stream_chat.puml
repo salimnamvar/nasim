@@ -1,0 +1,58 @@
+@startuml sq_provider03_stream_chat
+' ============================================================
+' Title:     LLMREPOSITORY-03 — STREAM Chat
+' Boundary:  nasim code agent
+' Purpose:   Streaming LLM chat completion via provider abstraction
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> Provider
+' SM States: THINKING (#D7CCC8), RESPONDING (#D1C4E9)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- LLMREPOSITORY-03 STREAM Chat
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "LLMRepository" as mgr
+end box
+
+== LLMREPOSITORY-03 STREAM Chat ==
+
+user -> iface : POST /providers/{id}:chat/stream
+activate iface
+iface -> router : POST /providers/{id}:chat/stream
+activate router
+router -> mgr : LLMREPOSITORY-03 STREAM Chat({messages, tools})
+activate mgr
+
+alt validation succeeds
+  ref over mgr : LLMREPOSITORY-03 STREAM Chat({messages, tools}) <back:#D1C4E9>RESPONDING</back>
+  mgr --> router : 200 OK
+  deactivate mgr
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else validation fails
+  mgr --> router : 422 Unprocessable
+  deactivate mgr
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
+  deactivate router
+  deactivate iface
+end
+
+@enduml

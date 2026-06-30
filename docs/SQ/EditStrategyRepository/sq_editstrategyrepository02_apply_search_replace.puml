@@ -1,0 +1,58 @@
+@startuml sq_editstrategy02_apply_search_replace
+' ============================================================
+' Title:     EDITSTRATEGYREPOSITORY-02 — APPLY Search-Replace
+' Boundary:  nasim code agent
+' Purpose:   Apply a search-and-replace edit to a file
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> EditStrategyRepository
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EDITSTRATEGYREPOSITORY-02 APPLY Search-Replace
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "EditStrategyRepository" as coder
+end box
+
+== EDITSTRATEGYREPOSITORY-02 APPLY Search-Replace ==
+
+user -> iface : EDITSTRATEGYREPOSITORY-02 APPLY Search-Replace({file_path, old_text, new_text})
+activate iface
+iface -> router : EDITSTRATEGYREPOSITORY-02 APPLY Search-Replace({file_path, old_text, new_text})
+activate router
+router -> coder : EDITSTRATEGYREPOSITORY-02 APPLY Search-Replace({file_path, old_text, new_text})
+activate coder
+
+alt validation succeeds
+  ref over coder : EDITSTRATEGYREPOSITORY-02 APPLY Search-Replace <back:#B2DFDB>TOOL_EXEC</back>
+  coder --> router : 200 OK
+  deactivate coder
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else validation fails
+  coder --> router : {error: {code: "EDITSTRATEGYREPOSITORY-02_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  deactivate coder
+  router --> iface : {error: {code: "EDITSTRATEGYREPOSITORY-02_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  iface --> user : {error: {code: "EDITSTRATEGYREPOSITORY-02_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

@@ -1,0 +1,66 @@
+@startuml sq_agent08_approve_plan
+' ============================================================
+' Title:     TASKSERVICE-08 — APPROVE Plan
+' Boundary:  nasim code agent
+' Purpose:   Execute queued tool calls after user approval
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> PlanService -> PlanStore
+' SM States: RUNNING (#43A047)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TASKSERVICE-08 APPROVE Plan
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as plan
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "TaskService" as planStore
+end box
+
+== TASKSERVICE-08 APPROVE Plan ==
+
+user -> iface : POST /v1/agents/{agent_id}:approve-plan
+activate iface
+iface -> router : POST /v1/agents/{agent_id}:approve-plan
+activate router
+router -> plan : TASKSERVICE-08 APPROVE Plan({agent_id})
+activate plan
+
+alt plan approved without error
+  ref over plan : TASKSERVICE-08 APPROVE Plan({agent_id}) <back:#43A047>RUNNING</back>
+  plan -> planStore : TASKSERVICE-08 READ Plan({agent_id})
+  activate planStore
+  planStore --> plan : 200 OK
+  deactivate planStore
+  plan --> router : 200 OK
+  deactivate plan
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else plan empty
+  plan --> router : 409 FAILED_PRECONDITION\n{error: {code: "TASKSERVICE-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
+  deactivate plan
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "TASKSERVICE-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "TASKSERVICE-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

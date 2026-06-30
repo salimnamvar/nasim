@@ -1,0 +1,72 @@
+@startuml sq_agent04_delete_history
+' ============================================================
+' Title:     TASKSERVICE-04 — DELETE History
+' Boundary:  nasim code agent
+' Purpose:   Reset conversation history to initial state
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> ConversationService -> SessionService -> SessionStore
+' SM States: CREATED (#BBDEFB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TASKSERVICE-04 DELETE History
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as history
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== TASKSERVICE-04 DELETE History ==
+
+user -> iface : TASKSERVICE-04 DELETE History({agent_id})
+activate iface
+iface -> router : TASKSERVICE-04 DELETE History({agent_id})
+activate router
+router -> history : TASKSERVICE-04 DELETE History({agent_id})
+activate history
+
+alt history_exists
+  ref over history : TASKSERVICE-04 DELETE History({agent_id}) <back:#BBDEFB>CREATED</back>
+  history -> store : TASKSERVICE-04 DELETE History({session_id})
+  activate store
+  store -> storage : TASKSERVICE-04 DELETE History({session_id})
+  activate storage
+  storage --> store : 200 OK
+  deactivate storage
+  store --> history : 200 OK
+  deactivate store
+  history --> router : 200 OK
+  deactivate history
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else history not found
+  history --> router : 404 NOT_FOUND\n{error: {code: "TASKSERVICE-04_NOT_FOUND", message: "History not found", status: 404}}
+  deactivate history
+  router --> iface : 404 NOT_FOUND\n{error: {code: "TASKSERVICE-04_NOT_FOUND", message: "History not found", status: 404}}
+  iface --> user : 404 NOT_FOUND\n{error: {code: "TASKSERVICE-04_NOT_FOUND", message: "History not found", status: 404}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

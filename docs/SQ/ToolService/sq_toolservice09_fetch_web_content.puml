@@ -1,0 +1,67 @@
+@startuml sq_tool09_fetch_web_content
+' ============================================================
+' Title:     TOOLSERVICE-09 — FETCH Web Content
+' Boundary:  nasim code agent
+' Purpose:   Fetch URL content and convert to markdown
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> WebFetchTool
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-09 FETCH Web Content
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as tool
+end box
+
+== TOOLSERVICE-09 FETCH Web Content ==
+
+user -> iface : POST /tools/fetch_web:execute
+activate iface
+iface -> router : POST /tools/fetch_web:execute
+activate router
+
+router -> tool : TOOLSERVICE-09 FETCH Web Content(url, timeout)
+activate tool
+
+alt validation succeeds
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TOOLSERVICE-09 FETCH Web Content
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TOOLSERVICE-09 FETCH Web Content (SM/README.md)
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else http error
+  tool --> router : 502 Bad Gateway
+  deactivate tool
+  router --> iface : 502 Bad Gateway
+  iface --> user : 502 Bad Gateway
+  deactivate router
+  deactivate iface
+else timeout
+  tool --> router : 504 Gateway Timeout
+  deactivate tool
+  router --> iface : 504 Gateway Timeout
+  iface --> user : 504 Gateway Timeout
+  deactivate router
+  deactivate iface
+end
+@enduml

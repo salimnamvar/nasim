@@ -1,0 +1,77 @@
+@startuml sq_agent01_process_user_task
+' ============================================================
+' Title:     TASKSERVICE-01 — PROCESS User Task
+' Boundary:  nasim code agent
+' Purpose:   Primary orchestrator — core agentic loop
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> AgentOrchestrator -> SessionService -> SessionStore
+' SM States: RUNNING (#43A047)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TASKSERVICE-01 PROCESS User Task
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as orchestrator
+  participant "LLMRepository" as provider
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== TASKSERVICE-01 PROCESS User Task ==
+
+user -> iface : TASKSERVICE-01 PROCESS UserTask({session_id, message})
+activate iface
+iface -> router : TASKSERVICE-01 PROCESS UserTask({session_id, message})
+activate router
+router -> orchestrator : TASKSERVICE-01 PROCESS UserTask({session_id, message})
+activate orchestrator
+
+alt task_input validates without error
+  ref over orchestrator : TASKSERVICE-01 PROCESS UserTask({session_id, message}) <back:#43A047>RUNNING</back>
+  orchestrator -> provider : TASKSERVICE-01 PROCESS UserTask({session_id, message})
+  activate provider
+  provider --> orchestrator : 200 OK
+  deactivate provider
+  orchestrator -> store : TASKSERVICE-01 PERSIST History({session_id, messages})
+  activate store
+  store -> storage : TASKSERVICE-01 PERSIST History({session_id, messages})
+  activate storage
+  storage --> store : 200 OK
+  deactivate storage
+  store --> orchestrator : 200 OK
+  deactivate store
+  orchestrator --> router : 200 OK
+  deactivate orchestrator
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else validation fails
+  orchestrator --> router : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
+  deactivate orchestrator
+  router --> iface : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
+  iface --> user : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

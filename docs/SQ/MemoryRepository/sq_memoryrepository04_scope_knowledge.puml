@@ -1,0 +1,67 @@
+@startuml sq_memory04_scope_knowledge
+' ============================================================
+' Title:     MEMORYREPOSITORY-04 — SCOPE Knowledge
+' Boundary:  nasim code agent
+' Purpose:   Filter knowledge by scope (global, project, session)
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> MemoryStore
+' SM States: —
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- MEMORYREPOSITORY-04 SCOPE Knowledge
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as svc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "MemoryRepository" as store
+end box
+
+== MEMORYREPOSITORY-04 SCOPE Knowledge ==
+
+user -> iface : GET /knowledge/scope
+activate iface
+iface -> router : GET /knowledge/scope
+activate router
+router -> svc : MEMORYREPOSITORY-04 SCOPE Knowledge({scope})
+activate svc
+svc -> store : MEMORYREPOSITORY-04 SCOPE Knowledge({scope})
+activate store
+
+alt scope not found
+  store --> svc : 404 Not Found
+  deactivate store
+  svc --> router : 404 Not Found
+  deactivate svc
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
+  deactivate router
+  deactivate iface
+else scope found
+  store --> svc : 200 OK — {scope, entry_count}
+  deactivate store
+  svc --> router : 200 OK — {scope, entry_count}
+  deactivate svc
+  router --> iface : 200 OK — {scope, entry_count}
+  iface --> user : 200 OK — {scope, entry_count}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

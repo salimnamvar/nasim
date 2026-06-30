@@ -1,0 +1,68 @@
+@startuml sq_wirelog02_read_log
+' ============================================================
+' Title:     WIRELOGREPOSITORY-02 — READ Log
+' Boundary:  nasim code agent
+' Purpose:   Sequential scan for replay
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> WireLog -> WireReader -> FileSystem
+' SM States: (no session state change — read-only operation)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- WIRELOGREPOSITORY-02 READ Log
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "WireLogRepository" as wl
+  participant "WireLogRepository" as reader
+end box
+
+database "WireLogStore" as storage
+
+== WIRELOGREPOSITORY-02 READ Log ==
+
+user -> iface : GET /wirelog/events
+activate iface
+iface -> router : GET /wirelog/events
+activate router
+router -> wl : WIRELOGREPOSITORY-02 READ Log(session_id, filter)
+activate wl
+
+alt read succeeds
+  wl -> reader : WIRELOGREPOSITORY-02 READ Log(session_id, filter)
+  activate reader
+  reader -> storage : WIRELOGREPOSITORY-02 READ Log(session_id, filter)
+  activate storage
+  storage --> reader : 200 OK
+  deactivate storage
+  reader --> wl : 200 OK
+  deactivate reader
+  wl --> router : 200 OK
+  deactivate wl
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else no events found
+  wl --> router : 404 Not Found
+  deactivate wl
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
+  deactivate router
+  deactivate iface
+end
+
+@enduml

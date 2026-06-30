@@ -1,0 +1,58 @@
+@startuml sq_safety02_request_approval
+' ============================================================
+' Title:     SAFETYSERVICE-02 — REQUEST Approval
+' Boundary:  nasim code agent
+' Purpose:   Display approval prompt for unsafe tool execution
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SafetyService
+' SM States: AWAITING_APPROVAL (#FFF9C4)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SAFETYSERVICE-02 REQUEST Approval
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "SafetyService" as mgr
+end box
+
+== SAFETYSERVICE-02 REQUEST Approval ==
+
+user -> iface : SAFETYSERVICE-02 REQUEST Approval({tool_name, args})
+activate iface
+iface -> router : SAFETYSERVICE-02 REQUEST Approval({tool_name, args})
+activate router
+router -> mgr : SAFETYSERVICE-02 REQUEST Approval(tool_name, args)
+activate mgr
+
+alt user approves
+  ref over mgr : SAFETYSERVICE-02 REQUEST Approval(tool_name, args) <back:#FFF9C4>AWAITING_APPROVAL</back>
+  mgr --> router : 200 OK
+  deactivate mgr
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else user rejects
+  mgr --> router : 403 FORBIDDEN\n{error: {code: "SAFETYSERVICE-02_USER_REJECTED", message: "User rejected tool execution", status: 403}}
+  deactivate mgr
+  router --> iface : 403 FORBIDDEN
+  iface --> user : 403 FORBIDDEN
+  deactivate router
+  deactivate iface
+end
+
+@enduml

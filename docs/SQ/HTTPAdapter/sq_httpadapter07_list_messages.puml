@@ -1,0 +1,87 @@
+@startuml sq_api07_list_messages
+' ============================================================
+' Title:     HTTPADAPTER-07 — LIST Messages
+' Boundary:  nasim code agent
+' Purpose:   Retrieve message history for a session
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
+' @csr-exempt service
+' SM States: (no state change — read-only)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- HTTPADAPTER-07 LIST Messages
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== HTTPADAPTER-07 LIST Messages ==
+
+user -> iface : HTTPADAPTER-07 LIST Messages({sessionId, pageSize, pageToken})
+activate iface
+iface -> router : HTTPADAPTER-07 LIST Messages({sessionId, pageSize, pageToken})
+activate router
+
+router -> store : HTTPADAPTER-07 LIST Messages({sessionId, pageSize, pageToken})
+activate store
+
+alt validation fails
+    store --> router : 422 INVALID_ARGUMENT\n{error: {code: "HTTPADAPTER-07_VALIDATION_ERROR", message: "Invalid pagination parameters", status: 422}}
+    router --> iface : 422 INVALID_ARGUMENT
+    iface --> user : 422 INVALID_ARGUMENT
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+alt session not found
+    store --> router : 404 NOT_FOUND\n{error: {code: "HTTPADAPTER-07_SESSION_NOT_FOUND", message: "Session not found", status: 404}}
+    router --> iface : 404 NOT_FOUND
+    iface --> user : 404 NOT_FOUND
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+store -> storage : HTTPADAPTER-07 LIST Messages({sessionId, pageSize, pageToken})
+activate storage
+
+alt disk read error
+    storage --> store : 500 INTERNAL\n{error: {code: "HTTPADAPTER-07_DISK_READ_ERROR", message: "Failed to read session messages", status: 500}}
+    deactivate storage
+    store --> router : 500 INTERNAL
+    router --> iface : 500 INTERNAL
+    iface --> user : 500 INTERNAL
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK — [{message_id, role, content}]
+deactivate storage
+
+store --> router : 200 OK — [{message_id, role, content}]
+deactivate store
+router --> iface : 200 OK — [{message_id, role, content}]
+iface --> user : 200 OK — [{message_id, role, content}]
+deactivate router
+deactivate iface
+
+@enduml

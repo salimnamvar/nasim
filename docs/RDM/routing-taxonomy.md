@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-22
 **Status:** RESOLVED (DGA-05)
-**Owner:** ROUTER-03 CLASSIFY Task
+**Owner:** LLMREPOSITORY-03 CLASSIFY Task
 
 ---
 
@@ -66,7 +66,7 @@ routing:
 
 ## Design Traceability
 
-- UC: ROUTER-03 CLASSIFY Task
+- UC: LLMREPOSITORY-03 CLASSIFY Task
 - SQ: `sq_rtg03_classify_task.puml`
 - CL: `LLMRepository.classify_task()`, `RoutingStrategy`, `TaskClassifierStrategy`
 - C4: `c4_nasim_component.puml` → Service Layer (Provider group)

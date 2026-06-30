@@ -1,0 +1,66 @@
+@startuml sq_agent12_load_persona
+' ============================================================
+' Title:     TASKSERVICE-12 — LOAD Persona
+' Boundary:  nasim code agent
+' Purpose:   Load persona configuration and apply system prompt
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> PersonaService -> PersonaRepository
+' SM States: RUNNING (#43A047)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TASKSERVICE-12 LOAD Persona
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as persona
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "TaskService" as personaRepo
+end box
+
+== TASKSERVICE-12 LOAD Persona ==
+
+user -> iface : POST /v1/agents/{agent_id}:load-persona
+activate iface
+iface -> router : POST /v1/agents/{agent_id}:load-persona
+activate router
+router -> persona : TASKSERVICE-12 LOAD Persona({persona_name})
+activate persona
+
+alt load succeeds without error
+  ref over persona : TASKSERVICE-12 LOAD Persona({persona_name}) <back:#43A047>RUNNING</back>
+  persona -> personaRepo : TASKSERVICE-12 READ Persona({persona_name})
+  activate personaRepo
+  personaRepo --> persona : 200 OK
+  deactivate personaRepo
+  persona --> router : 200 OK
+  deactivate persona
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else config invalid
+  persona --> router : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
+  deactivate persona
+  router --> iface : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
+  iface --> user : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

@@ -51,7 +51,7 @@ else normal input
   ref over repl : CLI-01 EXECUTE Input({input})     <back:#E8EAF6>LISTENING</back>
   ref over repl : CLI-01 PARSE Input({input})     <back:#D7CCC8>THINKING</back>
   ref over router
-    API-06: DISPATCH Message
+    HTTPADAPTER-06: DISPATCH Message
   end ref
   ref over repl : CLI-01 STREAM Output({input})     <back:#D1C4E9>RESPONDING</back>
   router --> repl : 200 OK

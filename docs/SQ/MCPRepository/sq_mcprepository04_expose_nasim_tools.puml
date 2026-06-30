@@ -1,0 +1,68 @@
+@startuml sq_mcp04_expose_nasim_tools
+' ============================================================
+' Title:     MCPREPOSITORY-04 — EXPOSE nasim Tools
+' Boundary:  nasim code agent
+' Purpose:   Expose nasim tools to external MCP clients
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> MCPRepository -> MCPRepository
+' SM States: STARTING (#FFA726), RUNNING (#66BB6A), ERROR (#FFCDD2)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- MCPREPOSITORY-04 EXPOSE nasim Tools
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "MCPRepository" as svc
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "MCPRepository" as mgr
+end box
+
+== MCPREPOSITORY-04 EXPOSE nasim Tools ==
+
+user -> iface : MCPREPOSITORY-04 EXPOSE nasim Tools({})
+activate iface
+iface -> router : MCPREPOSITORY-04 EXPOSE nasim Tools({})
+activate router
+router -> svc : MCPREPOSITORY-04 EXPOSE nasim Tools({})
+activate svc
+svc -> mgr : MCPREPOSITORY-04 EXPOSE nasim Tools({})
+activate mgr
+
+alt server_started
+  ref over mgr : MCPREPOSITORY-04 EXPOSE nasim Tools({}) <back:#66BB6A>RUNNING</back>
+  mgr --> svc : 200 OK
+  deactivate mgr
+  svc --> router : 200 OK
+  deactivate svc
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else server_failed
+  mgr --> svc : 500 INTERNAL\n{error: {code: "MCPREPOSITORY-04_SERVER_START_FAILED", message: "MCP server runtime failed to start", status: 500}}
+  deactivate mgr
+  svc --> router : 500 INTERNAL
+  deactivate svc
+  router --> iface : 500 INTERNAL
+  iface --> user : 500 INTERNAL
+  deactivate router
+  deactivate iface
+end
+
+@enduml

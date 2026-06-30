@@ -1,0 +1,89 @@
+@startuml sq_api04_update_session
+' ============================================================
+' Title:     HTTPADAPTER-04 — UPDATE Session
+' Boundary:  nasim code agent
+' Purpose:   Update session metadata or settings
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
+' @csr-exempt service
+' SM States: ACTIVE (#43A047), SAVED (#1565C0)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- HTTPADAPTER-04 UPDATE Session
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== HTTPADAPTER-04 UPDATE Session ==
+
+user -> iface : HTTPADAPTER-04 UPDATE Session({sessionId, patchData})
+activate iface
+iface -> router : HTTPADAPTER-04 UPDATE Session({sessionId, patchData})
+activate router
+
+router -> store : HTTPADAPTER-04 UPDATE Session({sessionId, patchData})
+activate store
+
+alt validation fails
+    store --> router : 422 UNPROCESSABLE\n{error: {code: "HTTPADAPTER-04_VALIDATION_ERROR", message: "Invalid update data", status: 422}}
+    router --> iface : 422 UNPROCESSABLE
+    iface --> user : 422 UNPROCESSABLE
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+alt session not found
+    store --> router : 404 NOT_FOUND\n{error: {code: "HTTPADAPTER-04_SESSION_NOT_FOUND", message: "Session not found", status: 404}}
+    router --> iface : 404 NOT_FOUND
+    iface --> user : 404 NOT_FOUND
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+store -> storage : HTTPADAPTER-04 UPDATE Session({sessionId, patchData})
+activate storage
+
+alt disk write error
+    storage --> store : 500 INTERNAL\n{error: {code: "HTTPADAPTER-04_DISK_WRITE_ERROR", message: "Could not persist session update", status: 500}}
+    deactivate storage
+    store --> router : 500 INTERNAL
+    router --> iface : 500 INTERNAL
+    iface --> user : 500 INTERNAL
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK
+deactivate storage
+
+ref over store : HTTPADAPTER-04 UPDATE Session <back:#43A047>ACTIVE</back> → <back:#1565C0>SAVED</back>
+
+store --> router : 200 OK
+deactivate store
+router --> iface : 200 OK
+iface --> user : 200 OK
+deactivate router
+deactivate iface
+
+@enduml

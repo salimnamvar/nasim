@@ -1,0 +1,58 @@
+@startuml sq_agent15_dispatch_safety_pipeline
+' ============================================================
+' Title:     TASKSERVICE-15 — DISPATCH Safety Pipeline
+' Boundary:  nasim code agent
+' Purpose:   Run injection scan, egress inspect, and permission check
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SafetyService
+' SM States: RUNNING (#43A047)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TASKSERVICE-15 DISPATCH Safety Pipeline
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "SafetyService" as safety
+end box
+
+== TASKSERVICE-15 DISPATCH Safety Pipeline ==
+
+user -> iface : POST /v1/agents/{agent_id}:dispatch-safety
+activate iface
+iface -> router : POST /v1/agents/{agent_id}:dispatch-safety
+activate router
+router -> safety : TASKSERVICE-15 DISPATCH Safety Pipeline({tool_call})
+activate safety
+
+alt all checks pass without error
+  ref over safety : TASKSERVICE-15 DISPATCH SafetyPipeline({tool_call}) <back:#43A047>RUNNING</back>
+  safety --> router : 200 OK
+  deactivate safety
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else safety violation
+  safety --> router : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
+  deactivate safety
+  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
+  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

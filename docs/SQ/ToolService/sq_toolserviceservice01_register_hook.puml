@@ -1,0 +1,58 @@
+@startuml sq_hooks01_register_hook
+' ============================================================
+' Title:     TOOLSERVICE-01 — REGISTER Hook
+' Boundary:  nasim code agent
+' Purpose:   Register a hook in the HookManager
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> HookManager
+' SM States: HOOK_RUNNING (#FFFDE7)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-01 REGISTER Hook
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "ToolService" as mgr
+end box
+
+== TOOLSERVICE-01 REGISTER Hook ==
+
+user -> iface : POST /hooks
+activate iface
+iface -> router : POST /hooks
+activate router
+router -> mgr : TOOLSERVICE-01 REGISTER Hook({hook_spec})
+activate mgr
+
+alt validation succeeds
+  ref over mgr : TOOLSERVICE-01 REGISTER Hook({hook_spec}) <back:#FFFDE7>HOOK_RUNNING</back>
+  mgr --> router : 200 OK
+  deactivate mgr
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else validation fails
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "TOOLSERVICE-01_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
+  deactivate mgr
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "TOOLSERVICE-01_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "TOOLSERVICE-01_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

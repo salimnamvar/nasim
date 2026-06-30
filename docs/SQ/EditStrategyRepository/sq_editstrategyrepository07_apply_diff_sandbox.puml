@@ -1,0 +1,58 @@
+@startuml sq_editstrategy07_apply_diff_sandbox
+' ============================================================
+' Title:     EDITSTRATEGYREPOSITORY-07 — APPLY Diff Sandbox
+' Boundary:  nasim code agent
+' Purpose:   Apply an edit inside a sandboxed diff workspace
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> EditStrategyRepository
+' SM States: STAGING (#F1F8E9)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EDITSTRATEGYREPOSITORY-07 APPLY Diff Sandbox
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "EditStrategyRepository" as coder
+end box
+
+== EDITSTRATEGYREPOSITORY-07 APPLY Diff Sandbox ==
+
+user -> iface : EDITSTRATEGYREPOSITORY-07 APPLY Diff Sandbox({file_path, edit_content})
+activate iface
+iface -> router : EDITSTRATEGYREPOSITORY-07 APPLY Diff Sandbox({file_path, edit_content})
+activate router
+router -> coder : EDITSTRATEGYREPOSITORY-07 APPLY Diff Sandbox({file_path, edit_content})
+activate coder
+
+alt validation succeeds
+  ref over coder : EDITSTRATEGYREPOSITORY-07 APPLY Diff Sandbox <back:#F1F8E9>STAGING</back>
+  coder --> router : 200 OK
+  deactivate coder
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else validation fails
+  coder --> router : {error: {code: "EDITSTRATEGYREPOSITORY-07_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  deactivate coder
+  router --> iface : {error: {code: "EDITSTRATEGYREPOSITORY-07_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  iface --> user : {error: {code: "EDITSTRATEGYREPOSITORY-07_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

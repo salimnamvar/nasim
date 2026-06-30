@@ -1,0 +1,67 @@
+@startuml sq_tool01_read_file
+' ============================================================
+' Title:     TOOLSERVICE-01 — READ File
+' Boundary:  nasim code agent
+' Purpose:   Read file contents with line numbers and offset/limit
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> ReadFileTool
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-01 READ File
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as tool
+end box
+
+== TOOLSERVICE-01 READ File ==
+
+user -> iface : POST /tools/read_file:execute
+activate iface
+iface -> router : POST /tools/read_file:execute
+activate router
+
+router -> tool : TOOLSERVICE-01 READ File(path, offset, limit)
+activate tool
+
+alt validation succeeds
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TOOLSERVICE-01 READ File
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TOOLSERVICE-01 READ File (SM/README.md)
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else file not found
+  tool --> router : 404 Not Found
+  deactivate tool
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
+  deactivate router
+  deactivate iface
+else permission denied
+  tool --> router : 403 Forbidden
+  deactivate tool
+  router --> iface : 403 Forbidden
+  iface --> user : 403 Forbidden
+  deactivate router
+  deactivate iface
+end
+@enduml

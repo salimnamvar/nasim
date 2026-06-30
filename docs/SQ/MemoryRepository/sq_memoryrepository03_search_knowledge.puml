@@ -1,0 +1,67 @@
+@startuml sq_memory03_search_knowledge
+' ============================================================
+' Title:     MEMORYREPOSITORY-03 — SEARCH Knowledge
+' Boundary:  nasim code agent
+' Purpose:   Full-text search across knowledge store
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> MemoryStore
+' SM States: —
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- MEMORYREPOSITORY-03 SEARCH Knowledge
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as svc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "MemoryRepository" as store
+end box
+
+== MEMORYREPOSITORY-03 SEARCH Knowledge ==
+
+user -> iface : GET /knowledge?q={query}
+activate iface
+iface -> router : GET /knowledge?q={query}
+activate router
+router -> svc : MEMORYREPOSITORY-03 SEARCH Knowledge({query, scope})
+activate svc
+svc -> store : MEMORYREPOSITORY-03 SEARCH Knowledge({query, scope})
+activate store
+
+alt search fails
+  store --> svc : 500 Internal Error
+  deactivate store
+  svc --> router : 500 Internal Error
+  deactivate svc
+  router --> iface : 500 Internal Error
+  iface --> user : 500 Internal Error
+  deactivate router
+  deactivate iface
+else search results found
+  store --> svc : 200 OK — [{key, value, scope, score}]
+  deactivate store
+  svc --> router : 200 OK — [{key, value, scope, score}]
+  deactivate svc
+  router --> iface : 200 OK — [{key, value, scope, score}]
+  iface --> user : 200 OK — [{key, value, scope, score}]
+  deactivate router
+  deactivate iface
+end
+
+@enduml

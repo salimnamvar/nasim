@@ -1,0 +1,101 @@
+@startuml uc_repo_intelligence
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Repo Intelligence Group
+' Group:     RIM (Repo Intelligence)
+' Boundary:  nasim code agent
+' Purpose:   Codebase intelligence: AST indexing, symbol graph, semantic search, repo mapping
+'            Entry chain: User → ServerRouter → AgentOrchestrator → RepoIntelligence
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_repointelligence01..sq_repointelligence06
+' ============================================================
+
+
+left to right direction
+
+
+title nasim — Repo Intelligence Use Cases
+
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+' ------------------------------------------------------------
+' Actors
+' ------------------------------------------------------------
+
+
+actor "User" as User
+
+
+
+' ------------------------------------------------------------
+' System Boundary
+' ------------------------------------------------------------
+
+
+rectangle "nasim" {
+  package "Repo Intelligence Group (RIM)" {
+    usecase "**REPOINTELLIGENCEREPOSITORY-01 INDEX Codebase**\n--\nAST indexing via tree-sitter" <<master>> as RIM01
+    usecase "**REPOINTELLIGENCEREPOSITORY-02 BUILD Symbol Graph**\n--\nCross-file symbol reference graph" <<include>> as RIM02
+    usecase "**REPOINTELLIGENCEREPOSITORY-03 RANK Results**\n--\nPageRank ranking of code symbols" <<include>> as RIM03
+    usecase "**REPOINTELLIGENCEREPOSITORY-04 INJECT RepoMap**\n--\nGenerate token-budgeted repo-map" <<master>> as RIM04
+    usecase "**REPOINTELLIGENCEREPOSITORY-05 EMBED Code**\n--\nGenerate vector embeddings for code" <<master>> as RIM05
+    usecase "**REPOINTELLIGENCEREPOSITORY-06 SEARCH Semantic**\n--\nVector similarity search over embeddings" <<include>> as RIM06
+  }
+}
+
+
+' ------------------------------------------------------------
+' Actor -> Use Case Associations
+' ------------------------------------------------------------
+
+
+User --> RIM01
+User --> RIM04
+User --> RIM05
+
+' ------------------------------------------------------------
+' Relationships
+' ------------------------------------------------------------
+
+
+RIM01 ..> RIM02 : <<include>>
+RIM02 ..> RIM03 : <<include>>
+RIM05 ..> RIM06 : <<include>>
+
+
+
+
+@enduml

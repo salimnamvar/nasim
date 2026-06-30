@@ -1,0 +1,58 @@
+@startuml sq_evaluation06_coordinate_retry
+' ============================================================
+' Title:     EVALUATIONSERVICE-06 — COORDINATE Retry
+' Boundary:  nasim code agent
+' Purpose:   Coordinate task retry with backoff and escalation
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> RetryCoordinator
+' SM States: RETRYING (#C62828)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EVALUATIONSERVICE-06 COORDINATE Retry
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "EvaluationService" as coord
+end box
+
+== EVALUATIONSERVICE-06 COORDINATE Retry ==
+
+user -> iface : EVALUATIONSERVICE-06 COORDINATE Retry({task_id, attempt})
+activate iface
+iface -> router : EVALUATIONSERVICE-06 COORDINATE Retry({task_id, attempt})
+activate router
+router -> coord : EVALUATIONSERVICE-06 COORDINATE Retry({task_id, attempt})
+activate coord
+
+alt retry_succeeds
+  ref over coord : EVALUATIONSERVICE-06 COORDINATE Retry({task_id, retry_count}) <back:#C62828>RETRYING</back>
+  coord --> router : 200 OK
+  deactivate coord
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else retry_exhausted
+  coord --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATIONSERVICE-06_RETRY_EXHAUSTED", message: "Retry attempts exhausted", status: 422}}
+  deactivate coord
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
+  deactivate router
+  deactivate iface
+end
+
+@enduml

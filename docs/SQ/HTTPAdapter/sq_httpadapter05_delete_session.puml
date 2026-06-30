@@ -1,0 +1,89 @@
+@startuml sq_api05_delete_session
+' ============================================================
+' Title:     HTTPADAPTER-05 — DELETE Session
+' Boundary:  nasim code agent
+' Purpose:   Delete a session (hard delete)
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
+' @csr-exempt service
+' SM States: ACTIVE (#43A047), CLOSED (#757575)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- HTTPADAPTER-05 DELETE Session
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== HTTPADAPTER-05 DELETE Session ==
+
+user -> iface : HTTPADAPTER-05 DELETE Session({sessionId})
+activate iface
+iface -> router : HTTPADAPTER-05 DELETE Session({sessionId})
+activate router
+
+router -> store : HTTPADAPTER-05 DELETE Session({sessionId})
+activate store
+
+alt validation fails
+    store --> router : 422 UNPROCESSABLE\n{error: {code: "HTTPADAPTER-05_VALIDATION_ERROR", message: "Invalid session ID", status: 422}}
+    router --> iface : 422 UNPROCESSABLE
+    iface --> user : 422 UNPROCESSABLE
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+alt session not found
+    store --> router : 404 NOT_FOUND\n{error: {code: "HTTPADAPTER-05_SESSION_NOT_FOUND", message: "Session not found", status: 404}}
+    router --> iface : 404 NOT_FOUND
+    iface --> user : 404 NOT_FOUND
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+store -> storage : HTTPADAPTER-05 DELETE Session({sessionId})
+activate storage
+
+alt permission denied
+    storage --> store : 403 FORBIDDEN\n{error: {code: "HTTPADAPTER-05_PERMISSION_DENIED", message: "Cannot delete session", status: 403}}
+    deactivate storage
+    store --> router : 403 FORBIDDEN
+    router --> iface : 403 FORBIDDEN
+    iface --> user : 403 FORBIDDEN
+    deactivate store
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK — removed
+deactivate storage
+
+ref over store : HTTPADAPTER-05 DELETE Session <back:#43A047>ACTIVE</back> → <back:#757575>CLOSED</back>
+
+store --> router : 200 OK — delete_confirmed({sessionId})
+deactivate store
+router --> iface : 200 OK — delete_confirmed({sessionId})
+iface --> user : 200 OK — delete_confirmed({sessionId})
+deactivate router
+deactivate iface
+
+@enduml

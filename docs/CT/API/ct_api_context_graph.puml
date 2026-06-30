@@ -35,29 +35,4 @@ package "Context Graph API" #F3E5F5 {
         + check_budget(graph : ContextGraph) : bool
     }
 }
-
-note bottom of ContextGraph
-  Directed graph of context nodes and edges.
-  get_messages serializes graph to LLM-ready message list.
-  Nodes ordered by EdgeType.FOLLOWS for message sequence.
-end note
-
-note bottom of ContextProcessor
-  Single-stage processor interface.
-  Implementations: TruncationProcessor, DistillationProcessor,
-  InjectionProcessor, CompactionProcessor.
-end note
-
-note bottom of PipelineOrchestrator
-  Chains multiple ContextProcessors in sequence.
-  Order: Inject → Compact → Truncate → Distill.
-  Returns PipelineResult with observability counts.
-end note
-
-note right of TokenBudgetTracker
-  Estimates token count across all nodes.
-  check_budget returns False if over limit.
-  Triggers compaction pipeline when exceeded.
-end note
-
 @enduml

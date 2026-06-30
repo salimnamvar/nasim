@@ -60,17 +60,4 @@ package "Context Graph Data" #F3E5F5 {
     ContextEdge --> EdgeType
 }
 
-note bottom of ContextNode
-  Each node represents a unit of context.
-  token_count is estimated, not exact.
-  metadata holds node-type-specific fields
-  (e.g., tool name for TOOL_CALL, source for INJECTS).
-end note
-
-note bottom of PipelineResult
-  Returned by pipeline orchestrator after processing.
-  tokens_used tracks total against budget.
-  nodes_compacted/injected provide observability.
-end note
-
 @enduml

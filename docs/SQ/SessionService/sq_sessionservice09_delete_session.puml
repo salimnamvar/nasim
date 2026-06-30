@@ -1,0 +1,101 @@
+@startuml sq_session09_delete_session
+' ============================================================
+' Title:     SESSIONSERVICE-09 — DELETE Session
+' Boundary:  nasim code agent
+' Purpose:   Permanently delete a session and its associated data
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
+' SM States: ACTIVE (#43A047), CLOSED (#757575)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SESSIONSERVICE-09 DELETE Session
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "SessionService" as svc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "SessionService" as store
+end box
+
+database "SessionStore" as storage
+
+== SESSIONSERVICE-09 DELETE Session ==
+
+user -> iface : DELETE /sessions/{session_id}
+activate iface
+iface -> router : DELETE /sessions/{session_id}
+activate router
+
+router -> svc : SESSIONSERVICE-09 DELETE Session({session_id})
+activate svc
+svc -> store : SESSIONSERVICE-09 DELETE Session({session_id})
+activate store
+
+alt session_id is empty
+    svc --> router : 400 INVALID_ARGUMENT
+    router --> iface : 400 INVALID_ARGUMENT
+    iface --> user : 400 Bad Request
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+alt session not found
+    store --> svc : 404 NOT_FOUND
+    svc --> router : 404 NOT_FOUND
+    router --> iface : 404 Not Found
+    iface --> user : 404 Not Found
+    deactivate store
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+store -> storage : SESSIONSERVICE-09 DELETE Session({session_id})
+activate storage
+
+alt permission denied
+    storage --> store : PermissionError
+    deactivate storage
+    store --> svc : 403 FORBIDDEN
+    svc --> router : 403 FORBIDDEN
+    router --> iface : 403 Forbidden
+    iface --> user : 403 Forbidden
+    deactivate store
+    deactivate svc
+    deactivate router
+    deactivate iface
+end
+
+storage --> store : 200 OK — removed
+deactivate storage
+
+ref over store : SESSIONSERVICE-09 DELETE Session({session_id}) <back:#757575>CLOSED</back>
+
+store --> svc : 200 OK — delete_confirmed({session_id})
+deactivate store
+ref over svc : SESSIONSERVICE-09 DELETE Session({session_id}) <back:#757575>CLOSED</back>
+svc --> router : 200 OK — delete_confirmed({session_id})
+deactivate svc
+router --> iface : 200 OK — delete_confirmed({session_id})
+iface --> user : 200 OK — delete_confirmed({session_id})
+deactivate router
+deactivate iface
+
+@enduml

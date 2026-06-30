@@ -1,0 +1,58 @@
+@startuml sq_editstrategy01_select_strategy
+' ============================================================
+' Title:     EDITSTRATEGYREPOSITORY-01 — SELECT Strategy
+' Boundary:  nasim code agent
+' Purpose:   Choose optimal edit format for the target model
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> EditStrategyRepository
+' SM States: THINKING (#D7CCC8)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- EDITSTRATEGYREPOSITORY-01 SELECT Strategy
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "EditStrategyRepository" as sel
+end box
+
+== EDITSTRATEGYREPOSITORY-01 SELECT Strategy ==
+
+user -> iface : EDITSTRATEGYREPOSITORY-01 SELECT Strategy({file_path, edit_description, model_id})
+activate iface
+iface -> router : EDITSTRATEGYREPOSITORY-01 SELECT Strategy({file_path, edit_description, model_id})
+activate router
+router -> sel : EDITSTRATEGYREPOSITORY-01 SELECT Strategy({file_path, edit_description, model_id})
+activate sel
+
+alt strategy found
+  ref over sel : EDITSTRATEGYREPOSITORY-01 SELECT Strategy <back:#D7CCC8>THINKING</back>
+  sel --> router : 200 OK
+  deactivate sel
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else strategy not found
+  sel --> router : {error: {code: "EDITSTRATEGYREPOSITORY-01_NOT_FOUND", message: "Strategy not found", status: 404}}
+  deactivate sel
+  router --> iface : {error: {code: "EDITSTRATEGYREPOSITORY-01_NOT_FOUND", message: "Strategy not found", status: 404}}
+  iface --> user : {error: {code: "EDITSTRATEGYREPOSITORY-01_NOT_FOUND", message: "Strategy not found", status: 404}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

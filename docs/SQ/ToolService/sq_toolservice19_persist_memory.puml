@@ -1,0 +1,67 @@
+@startuml sq_tool19_persist_memory
+' ============================================================
+' Title:     TOOLSERVICE-19 — PERSIST Memory
+' Boundary:  nasim code agent
+' Purpose:   Persist knowledge to memory via MemoryTool
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> MemoryTool
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-19 PERSIST Memory
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as tool
+end box
+
+== TOOLSERVICE-19 PERSIST Memory ==
+
+user -> iface : POST /tools/persist_memory:execute
+activate iface
+iface -> router : POST /tools/persist_memory:execute
+activate router
+
+router -> tool : TOOLSERVICE-19 PERSIST Memory(key, value, scope)
+activate tool
+
+alt validation succeeds
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TOOLSERVICE-19 PERSIST Memory
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TOOLSERVICE-19 PERSIST Memory (SM/README.md)
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else storage failure
+  tool --> router : 500 Internal Server Error
+  deactivate tool
+  router --> iface : 500 Internal Server Error
+  iface --> user : 500 Internal Server Error
+  deactivate router
+  deactivate iface
+else invalid scope
+  tool --> router : 422 Unprocessable
+  deactivate tool
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
+  deactivate router
+  deactivate iface
+end
+@enduml

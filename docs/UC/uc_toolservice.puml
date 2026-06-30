@@ -1,0 +1,173 @@
+@startuml uc_toolservice
+
+!include common/uc_styles.puml
+
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Tool Group — Core Tools
+' Group:     TL (Tool Layer)
+' Boundary:  nasim code agent
+' Purpose:   Core tool implementations: file operations, shell execution,
+'            search tools, web tools. Entry chain: User →
+'            ServerRouter → AgentOrchestrator → ToolRegistry
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_tool01..sq_tool10
+' ============================================================
+
+
+
+!include common/uc_styles.puml
+' ============================================================
+' Title:     nasim — UC: Tool Group — Core Tools
+' Group:     TL (Tool Layer)
+' Boundary:  nasim code agent
+' Purpose:   Core tool implementations: file operations, shell execution,
+'            search tools, web tools. Entry chain: User →
+'            ServerRouter → AgentOrchestrator → ToolRegistry
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_tool01..sq_tool10
+left to right direction
+title nasim — Tool Use Cases — Core Tools
+skinparam actorStyle awesome
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+' Actors
+actor "User" as User
+' System Boundary
+rectangle "nasim" {
+  package "File Operations" as FILE_PKG {
+    usecase "**TOOLSERVICE-01 READ File**\n--\nRead file contents with offset/limit" <<master>> as TL01
+    usecase "**TOOLSERVICE-02 INSERT File**\n--\nCreate or overwrite files" <<master>> as TL02
+    usecase "**TOOLSERVICE-03 UPDATE File**\n--\nReplace exact strings in files" <<master>> as TL03
+    usecase "**TOOLSERVICE-04 LIST Directory**\n--\nList directory contents" <<master>> as TL04
+  package "Shell Execution" as SHL_PKG {
+    usecase "**TOOLSERVICE-05 DISPATCH Shell Command**\n--\nExecute shell command via sandbox" <<master>> as TL05
+  package "Search Tools" as SRCH_PKG {
+    usecase "**TOOLSERVICE-06 SEARCH Grep**\n--\nSearch file contents by regex" <<master>> as TL06
+    usecase "**TOOLSERVICE-07 SEARCH Glob**\n--\nFind files by glob pattern" <<master>> as TL07
+    usecase "**TOOLSERVICE-08 SEARCH Find**\n--\nFind files by name pattern" <<master>> as TL08
+  package "Web Tools" as WEB_PKG {
+    usecase "**TOOLSERVICE-09 FETCH Web Content**\n--\nFetch URL content as markdown" <<master>> as TL09
+    usecase "**TOOLSERVICE-10 SEARCH Web**\n--\nSearch the web for information" <<master>> as TL10
+' Actor -> Use Case Associations
+User --> TL01
+User --> TL02
+User --> TL03
+User --> TL04
+User --> TL05
+User --> TL06
+User --> TL07
+User --> TL08
+User --> TL09
+User --> TL10
+' Title:     nasim — UC: Tool Group — Advanced & Integration Tools
+' Purpose:   Advanced tool implementations: git, MCP dispatch, LSP,
+'            registry, subagent, todo, memory, plan.
+'            Entry chain: User → ServerRouter → AgentOrchestrator →
+'            ToolRegistry → Tool implementation
+' SQ:        sq_tool11..sq_tool22
+  package "Integration Tools" as INT_PKG {
+    usecase "**TOOLSERVICE-11 READ Git Status**\n--\nGit status, diff, commit operations" <<master>> as TL11
+    usecase "**TOOLSERVICE-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" <<master>> as TL12
+    usecase "**TOOLSERVICE-13 READ LSP**\n--\nLSP ops: hover, definition, references" <<master>> as TL13
+    usecase "**TOOLSERVICE-14 LIST Registered Tools**\n--\nList all registered tools" <<master>> as TL14
+  package "Agent Tools" as AGT_PKG {
+    usecase "**TOOLSERVICE-15 SPAWN Subagent**\n--\nSpawn child agent via SubagentCoordinator" <<master>> as TL15
+  package "Task Tracking" as TODO_PKG {
+    usecase "**TOOLSERVICE-16 INSERT Todo**\n--\nCreate task tracking entry" <<master>> as TL16
+    usecase "**TOOLSERVICE-17 UPDATE Todo**\n--\nUpdate task tracking entry" <<master>> as TL17
+    usecase "**TOOLSERVICE-18 READ Todos**\n--\nList task tracking entries" <<master>> as TL18
+  package "Memory" as MEM_PKG {
+    usecase "**TOOLSERVICE-19 PERSIST Memory**\n--\nStore cross-session knowledge" <<master>> as TL19
+    usecase "**TOOLSERVICE-20 RECALL Memory**\n--\nRetrieve cross-session knowledge" <<master>> as TL20
+  package "Planning" as PLAN_PKG {
+    usecase "**TOOLSERVICE-21 INSERT Plan**\n--\nCreate plan entry" <<master>> as TL21
+    usecase "**TOOLSERVICE-22 UPDATE Plan**\n--\nUpdate plan entry" <<master>> as TL22
+User --> TL11
+User --> TL12
+User --> TL13
+User --> TL14
+User --> TL15
+User --> TL16
+User --> TL17
+User --> TL18
+User --> TL19
+User --> TL20
+User --> TL21
+User --> TL22
+' Title:     nasim — UC: Tools Group
+' Boundary:  nasim code server
+' Purpose:   Tools component — covers both uc_tool_core.puml
+'            and uc_tool_advanced.puml. This stub exists for
+'            cross-layer naming alignment with
+'            c4_nasim_component_tools.
+' Source:    docs/C4/c4_nasim_component_tools.puml,
+'            docs/UC/uc_tool_core.puml,
+'            docs/UC/uc_tool_advanced.puml
+' ------------------------------------------------------------
+  package "Tools Group (TL)" {
+    usecase "**TOOLSERVICE-01 LIST Core Tools**\n--\nFile operations, shell,\nsearch, web tools\nSee uc_tool_core.puml" <<extref>> as TL01
+    usecase "**TOOLSERVICE-02 LIST Advanced Tools**\n--\nGit, MCP, LSP, subagent,\ntodo, memory, plan\nSee uc_tool_advanced.puml" <<extref>> as TL02
+User --> TL01 : browse
+User --> TL02 : browse
+' Title:     nasim — UC: Hooks Group
+' Group:     HK (Hooks)
+' Purpose:   Pre/post hooks for tool use and LLM calls
+'            Entry chain: User → ServerRouter → AgentOrchestrator → HooksGroup
+' SQ:        sq_hooks01..sq_hooks06
+  package "Hooks Group (HK)" {
+    usecase "**TOOLSERVICE-01 REGISTER Hook**\n--\nRegister hook with name, event type, handler, priority" <<master>> as HK01
+    usecase "**TOOLSERVICE-02 DISPATCH Pre-Tool Hook**\n--\nExecute hook before tool use" <<master>> as HK02
+    usecase "**TOOLSERVICE-03 DISPATCH Post-Tool Hook**\n--\nExecute hook after tool use" <<master>> as HK03
+    usecase "**TOOLSERVICE-04 DISPATCH Pre-LLM Hook**\n--\nExecute hook before LLM call" <<master>> as HK04
+    usecase "**TOOLSERVICE-05 DISPATCH Post-LLM Hook**\n--\nExecute hook after LLM call" <<master>> as HK05
+    usecase "**TOOLSERVICE-06 VALIDATE Hook Result**\n--\nValidate hook result: allow, deny, modify" <<include>> as HK06
+User --> HK01
+User --> HK02
+User --> HK03
+User --> HK04
+User --> HK05
+' Relationships
+HK02 ..> HK06 : <<include>>
+HK03 ..> HK06 : <<include>>
+HK04 ..> HK06 : <<include>>
+HK05 ..> HK06 : <<include>>
+' Title:     nasim — UC: Plugins Group
+' Group:     PLG (Plugins)
+' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
+'            Entry chain: User → ServerRouter → AgentOrchestrator → PluginsGroup
+' SQ:        sq_plugins01..sq_plugins06
+  package "Plugins Group (PLG)" {
+    usecase "**TOOLSERVICE-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" <<master>> as PLG01
+    usecase "**TOOLSERVICE-02 LOAD Manifest**\n--\nParse plugin manifest metadata" <<include>> as PLG02
+    usecase "**TOOLSERVICE-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" <<include>> as PLG03
+    usecase "**TOOLSERVICE-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" <<include>> as PLG04
+    usecase "**TOOLSERVICE-05 ENABLE Plugin**\n--\nEnable a plugin" <<master>> as PLG05
+    usecase "**TOOLSERVICE-06 DISABLE Plugin**\n--\nDisable a plugin" <<master>> as PLG06
+User --> PLG01
+User --> PLG05
+User --> PLG06
+PLG01 ..> PLG02 : <<include>>
+PLG02 ..> PLG03 : <<include>>
+PLG02 ..> PLG04 : <<include>>
+
+@enduml

@@ -1,0 +1,152 @@
+@startuml uc_api_group
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: API Group (Entry Gate)
+' Group:     API (API Entry Gate)
+' Boundary:  nasim code agent
+' Purpose:   Core business operations exposed via API.
+'            Sole entry point for all interface containers
+'            (CLI, WebApp, DesktopApp, MobileApp, MCP).
+'            ROD-compliant REST endpoints (AIP-136/193).
+'            Entry chain: User → Interface → AgentController → ServerRouter → downstream groups
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
+' Review:    —
+' SQ:        sq_api01..sq_api11
+' ============================================================
+
+
+left to right direction
+
+
+title nasim — API Use Cases (Entry Gate)
+
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+skinparam usecase<<extref>> {
+  BackgroundColor #FFF9C4
+  BorderColor #F9A825
+  FontColor #5D4037
+  BorderStyle dashed
+}
+
+
+' ------------------------------------------------------------
+' Actors
+' ------------------------------------------------------------
+
+
+actor "User" as User
+
+
+' ------------------------------------------------------------
+' Cross-Group External References
+' ------------------------------------------------------------
+
+
+usecase "SESSIONSERVICE-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
+usecase "SESSIONSERVICE-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
+usecase "SESSIONSERVICE-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
+usecase "SESSIONSERVICE-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
+
+usecase "TASKSERVICE-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
+
+usecase "CONFIGREPOSITORY-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
+usecase "CONFIGREPOSITORY-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
+
+usecase "TOOLSERVICE-14\nLIST Registered Tools\n[uc_tool_advanced]" as TL14_ext <<extref>>
+
+
+' ------------------------------------------------------------
+' System Boundary
+' ------------------------------------------------------------
+
+
+rectangle "nasim" {
+  package "API Group (Entry Gate)" {
+    usecase "**HTTPADAPTER-01 LIST Sessions**\n--\nList all sessions with pagination\nGET /v1/sessions" <<master>> as API01
+    usecase "**HTTPADAPTER-02 CREATE Session**\n--\nCreate a new session\nPOST /v1/sessions" <<master>> as API02
+    usecase "**HTTPADAPTER-03 GET Session**\n--\nGet session details by ID\nGET /v1/sessions/{id}" <<master>> as API03
+    usecase "**HTTPADAPTER-04 UPDATE Session**\n--\nUpdate session metadata\nPATCH /v1/sessions/{id}" <<master>> as API04
+    usecase "**HTTPADAPTER-05 DELETE Session**\n--\nDelete a session\nDELETE /v1/sessions/{id}" <<master>> as API05
+    usecase "**HTTPADAPTER-06 DISPATCH Message**\n--\nSend message, receive SSE stream\nPOST /v1/sessions/{id}:dispatch" <<master>> as API06
+    usecase "**HTTPADAPTER-07 LIST Messages**\n--\nList messages in a session\nGET /v1/sessions/{id}/messages" <<master>> as API07
+    usecase "**HTTPADAPTER-08 LIST Tools**\n--\nList registered tools\nGET /v1/tools" <<master>> as API08
+    usecase "**HTTPADAPTER-09 GET Tool**\n--\nGet tool definition\nGET /v1/tools/{name}" <<master>> as API09
+    usecase "**HTTPADAPTER-10 GET Config**\n--\nGet current configuration\nGET /v1/config" <<master>> as API10
+    usecase "**HTTPADAPTER-11 UPDATE Config**\n--\nUpdate configuration at runtime\nPATCH /v1/config" <<master>> as API11
+  }
+}
+
+
+' ------------------------------------------------------------
+' Actor -> Use Case Associations
+' ------------------------------------------------------------
+
+
+User --> API01
+User --> API02
+User --> API03
+User --> API04
+User --> API05
+User --> API06
+User --> API07
+User --> API08
+User --> API09
+User --> API10
+User --> API11
+
+
+
+
+' ------------------------------------------------------------
+' Relationships
+' ------------------------------------------------------------
+
+
+API01 ..> SSN03_ext : <<include>>
+API02 ..> SSN01_ext : <<include>>
+API03 ..> SSN02_ext : <<include>>
+API04 ..> SSN01_ext : <<include>>
+API05 ..> SSN09_ext : <<include>>
+API06 ..> AGT01_ext : <<include>>
+API07 ..> SSN02_ext : <<include>>
+API08 ..> TL14_ext : <<include>>
+API09 ..> TL14_ext : <<include>>
+API10 ..> CFG01_ext : <<include>>
+API11 ..> CFG03_ext : <<include>>
+
+
+
+@enduml

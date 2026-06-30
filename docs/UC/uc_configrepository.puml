@@ -1,0 +1,96 @@
+@startuml uc_config
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Config Group
+' Group:     CFG (Configuration)
+' Boundary:  nasim code agent
+' Purpose:   Config loading, validation, and layered overrides
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ConfigGroup
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
+' Review:    CAR refinement loop 2026-06-27
+' SQ:        sq_config01..sq_config03
+' ============================================================
+
+
+left to right direction
+
+
+title nasim — Config Use Cases
+
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #424242
+  FontColor #000000
+  ArrowColor #424242
+  FontSize 12
+}
+
+
+skinparam actor {
+  BackgroundColor #E8EAF6
+  BorderColor #3949AB
+  FontColor #1A237E
+  FontSize 12
+}
+
+
+skinparam actor<<system>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+
+
+' ------------------------------------------------------------
+' Actors
+' ------------------------------------------------------------
+
+
+actor "User" as User
+
+
+
+' ------------------------------------------------------------
+' System Boundary
+' ------------------------------------------------------------
+
+
+rectangle "nasim" {
+  package "Config Group (CFG)" {
+    usecase "**CONFIGREPOSITORY-01 LOAD Config**\n--\nLoad global YAML, project YAML, env vars, CLI flags" <<master>> as CFG01
+    usecase "**CONFIGREPOSITORY-02 VALIDATE Config**\n--\nValidate config schema at load time" <<include>> as CFG02
+    usecase "**CONFIGREPOSITORY-03 APPLY Layered Config**\n--\nMerge layered config with precedence rules" <<include>> as CFG03
+  }
+}
+
+
+' ------------------------------------------------------------
+' Actor -> Use Case Associations
+' ------------------------------------------------------------
+
+
+User --> CFG01
+
+
+
+' ------------------------------------------------------------
+' Relationships
+' ------------------------------------------------------------
+
+
+CFG01 ..> CFG03 : <<include>>
+CFG03 ..> CFG02 : <<include>>
+
+
+
+@enduml

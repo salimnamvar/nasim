@@ -1,0 +1,58 @@
+@startuml sq_router03_classify_task
+' ============================================================
+' Title:     LLMREPOSITORY-03 — CLASSIFY Task
+' Boundary:  nasim code agent
+' Purpose:   Classify task type and select optimal model
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> ModelRouter
+' SM States: CLASSIFYING (#5C6BC0)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- LLMREPOSITORY-03 CLASSIFY Task
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "LLMRepository" as mgr
+end box
+
+== LLMREPOSITORY-03 CLASSIFY Task ==
+
+user -> iface : LLMREPOSITORY-03 CLASSIFY Task({task_description, context})
+activate iface
+iface -> router : LLMREPOSITORY-03 CLASSIFY Task({task_description, context})
+activate router
+router -> mgr : LLMREPOSITORY-03 CLASSIFY Task(task_description, context)
+activate mgr
+
+alt classification succeeds
+  ref over mgr : LLMREPOSITORY-03 CLASSIFY Task(task_description) <back:#5C6BC0>CLASSIFYING</back>
+  mgr --> router : 200 OK
+  deactivate mgr
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else confidence too low
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "LLMREPOSITORY-03_LOW_CONFIDENCE", message: "Task classification confidence too low", status: 422}}
+  deactivate mgr
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
+  deactivate router
+  deactivate iface
+end
+
+@enduml

@@ -1,0 +1,67 @@
+@startuml sq_tool21_insert_plan
+' ============================================================
+' Title:     TOOLSERVICE-21 — INSERT Plan
+' Boundary:  nasim code agent
+' Purpose:   Add a new plan step via PlanTool
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> PlanTool
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-21 INSERT Plan
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as tool
+end box
+
+== TOOLSERVICE-21 INSERT Plan ==
+
+user -> iface : POST /tools/insert_plan:execute
+activate iface
+iface -> router : POST /tools/insert_plan:execute
+activate router
+
+router -> tool : TOOLSERVICE-21 INSERT Plan(description, dependencies)
+activate tool
+
+alt validation succeeds
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TOOLSERVICE-21 INSERT Plan
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TOOLSERVICE-21 INSERT Plan (SM/README.md)
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else invalid input
+  tool --> router : 422 Unprocessable
+  deactivate tool
+  router --> iface : 422 Unprocessable
+  iface --> user : 422 Unprocessable
+  deactivate router
+  deactivate iface
+else storage error
+  tool --> router : 500 Internal Server Error
+  deactivate tool
+  router --> iface : 500 Internal Server Error
+  iface --> user : 500 Internal Server Error
+  deactivate router
+  deactivate iface
+end
+@enduml

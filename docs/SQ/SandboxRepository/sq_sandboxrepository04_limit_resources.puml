@@ -1,0 +1,58 @@
+@startuml sq_sandbox04_limit_resources
+' ============================================================
+' Title:     SANDBOXREPOSITORY-04 — LIMIT Resources
+' Boundary:  nasim code agent
+' Purpose:   Enforce CPU, memory, and disk quotas per sandbox instance
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> SandboxExecutor
+' SM States: RESOURCE_EXCEEDED (#FF5722)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- SANDBOXREPOSITORY-04 LIMIT Resources
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "SandboxRepository" as mgr
+end box
+
+== SANDBOXREPOSITORY-04 LIMIT Resources ==
+
+user -> iface : PATCH /sandbox/limits
+activate iface
+iface -> router : PATCH /sandbox/limits
+activate router
+router -> mgr : SANDBOXREPOSITORY-04 LIMIT Resources({cgroup_id, quotas})
+activate mgr
+
+alt limits set
+  ref over mgr : SANDBOXREPOSITORY-04 LIMIT Resources({cgroup_id, quotas}) <back:#FF5722>RESOURCE_EXCEEDED</back>
+  mgr --> router : 200 OK
+  deactivate mgr
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else cgroup setup fails
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SANDBOXREPOSITORY-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
+  deactivate mgr
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SANDBOXREPOSITORY-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SANDBOXREPOSITORY-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

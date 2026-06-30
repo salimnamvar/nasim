@@ -1,0 +1,67 @@
+@startuml sq_tool08_search_find
+' ============================================================
+' Title:     TOOLSERVICE-08 — SEARCH Find
+' Boundary:  nasim code agent
+' Purpose:   Find files by name pattern with depth limit
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> FindFileTool
+' SM States: TOOL_EXEC (#B2DFDB)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- TOOLSERVICE-08 SEARCH Find
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ToolService" as tool
+end box
+
+== TOOLSERVICE-08 SEARCH Find ==
+
+user -> iface : POST /tools/search_find:execute
+activate iface
+iface -> router : POST /tools/search_find:execute
+activate router
+
+router -> tool : TOOLSERVICE-08 SEARCH Find(namePattern, path, maxDepth)
+activate tool
+
+alt validation succeeds
+  tool --> router : 200 OK
+  deactivate tool
+  ref over tool : TOOLSERVICE-08 SEARCH Find
+    ' State: <back:#B2DFDB>TOOL_EXEC</back>
+    ' Owned by: TOOLSERVICE-08 SEARCH Find (SM/README.md)
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else path not found
+  tool --> router : 404 Not Found
+  deactivate tool
+  router --> iface : 404 Not Found
+  iface --> user : 404 Not Found
+  deactivate router
+  deactivate iface
+else permission denied
+  tool --> router : 403 Forbidden
+  deactivate tool
+  router --> iface : 403 Forbidden
+  iface --> user : 403 Forbidden
+  deactivate router
+  deactivate iface
+end
+@enduml

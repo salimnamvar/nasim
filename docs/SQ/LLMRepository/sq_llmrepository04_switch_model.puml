@@ -1,0 +1,58 @@
+@startuml sq_router04_switch_model
+' ============================================================
+' Title:     LLMREPOSITORY-04 — SWITCH Model
+' Boundary:  nasim code agent
+' Purpose:   Change the active model at runtime
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> ModelRouter
+' SM States: SWITCHING (#FF8F00)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- LLMREPOSITORY-04 SWITCH Model
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "LLMRepository" as mgr
+end box
+
+== LLMREPOSITORY-04 SWITCH Model ==
+
+user -> iface : LLMREPOSITORY-04 SWITCH Model({target_model})
+activate iface
+iface -> router : LLMREPOSITORY-04 SWITCH Model({target_model})
+activate router
+router -> mgr : LLMREPOSITORY-04 SWITCH Model(target_model)
+activate mgr
+
+alt switch succeeds
+  ref over mgr : LLMREPOSITORY-04 SWITCH Model(model_name) <back:#FF8F00>SWITCHING</back>
+  mgr --> router : 200 OK
+  deactivate mgr
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else model not in catalog
+  mgr --> router : 404 NOT_FOUND\n{error: {code: "LLMREPOSITORY-04_MODEL_NOT_IN_CATALOG", message: "Requested model not in catalog", status: 404}}
+  deactivate mgr
+  router --> iface : 404 NOT_FOUND
+  iface --> user : 404 NOT_FOUND
+  deactivate router
+  deactivate iface
+end
+
+@enduml

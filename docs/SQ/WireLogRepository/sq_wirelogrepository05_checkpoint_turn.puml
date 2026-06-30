@@ -1,0 +1,75 @@
+@startuml sq_wirelog05_checkpoint_turn
+' ============================================================
+' Title:     WIRELOGREPOSITORY-05 — CHECKPOINT Turn
+' Boundary:  nasim code agent
+' Purpose:   Index current turn and persist checkpoint for resumption
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> WireLog -> WireAppender -> FileSystem
+' SM States: (no session state change — wire log checkpoint)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- WIRELOGREPOSITORY-05 CHECKPOINT Turn
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "WireLogRepository" as wl
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "WireLogRepository" as appender
+end box
+
+database "WireLogStore" as storage
+
+== WIRELOGREPOSITORY-05 CHECKPOINT Turn ==
+
+user -> iface : POST /v1/wirelogs:checkpoint
+activate iface
+iface -> router : POST /v1/wirelogs:checkpoint
+activate router
+router -> wl : WIRELOGREPOSITORY-05 CHECKPOINT Turn({turn_data})
+activate wl
+
+alt checkpoint succeeds
+  wl -> appender : WIRELOGREPOSITORY-05 CHECKPOINT Turn({turn_data})
+  activate appender
+  appender -> storage : WIRELOGREPOSITORY-05 WRITE Turn({turn_data})
+  activate storage
+  storage --> appender : 200 OK
+  deactivate storage
+  appender --> wl : 200 OK
+  deactivate appender
+  wl --> router : 200 OK
+  deactivate wl
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else persist failure
+  storage --> appender : 500 INTERNAL\n{error: {code: "WIRELOGREPOSITORY-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  deactivate storage
+  appender --> wl : {error: {code: "WIRELOGREPOSITORY-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  deactivate appender
+  wl --> router : {error: {code: "WIRELOGREPOSITORY-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  deactivate wl
+  router --> iface : {error: {code: "WIRELOGREPOSITORY-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  iface --> user : {error: {code: "WIRELOGREPOSITORY-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  deactivate router
+  deactivate iface
+end
+
+@enduml

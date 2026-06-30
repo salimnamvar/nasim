@@ -1,0 +1,58 @@
+@startuml sq_contextgraph01_process_context
+' ============================================================
+' Title:     CONTEXTSERVICE-01 — PROCESS Context
+' Boundary:  nasim code agent
+' Purpose:   Orchestrate context processing pipeline stages
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> CLIAdapter -> AgentController -> PipelineOrchestrator
+' SM States: (stateless — COMPACTING owned by TASKSERVICE-06)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- CONTEXTSERVICE-01 PROCESS Context
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "ContextService" as orch
+end box
+
+== CONTEXTSERVICE-01 PROCESS Context ==
+
+user -> iface : CONTEXTSERVICE-01 PROCESS Context({graph, token_budget})
+activate iface
+iface -> router : CONTEXTSERVICE-01 PROCESS Context({graph, token_budget})
+activate router
+router -> orch : CONTEXTSERVICE-01 PROCESS Context({graph, token_budget})
+activate orch
+
+alt pipeline_stages complete
+  ref over orch : CONTEXTSERVICE-01 PROCESS Context({graph, token_budget})
+  orch --> router : 200 OK
+  deactivate orch
+  router --> iface : 200 OK
+  iface --> user : 200 OK
+  deactivate router
+  deactivate iface
+else pipeline_error
+  orch --> router : 422 UNPROCESSABLE\n{error: {code: "CONTEXTSERVICE-01_PIPELINE_ERROR", message: "Context processing pipeline failed", status: 422}}
+  deactivate orch
+  router --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
+  deactivate router
+  deactivate iface
+end
+
+@enduml
