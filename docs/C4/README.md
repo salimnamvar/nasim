@@ -57,7 +57,6 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | `c4_nasim_component_agent.puml` | Agent Group | AgentOrchestrator, ConversationHistory, ContextCompactor, PlanSession, SubagentCoordinator, ErrorBoundary, PersonaManager |
 | `c4_nasim_component_context_graph.puml` | Context Graph Group | ContextGraph, PipelineOrchestrator, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor |
 | `c4_nasim_component_edit_strategy.puml` | Edit Strategy Group | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector |
-| `c4_nasim_component_evaluation.puml` | Evaluation Group | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector |
 
 ### Repository Layer (Green)
 
@@ -66,11 +65,10 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | `c4_nasim_component_session.puml` | Session Group | SessionStore, SessionVersioning, SessionSearch, SessionFork |
 | `c4_nasim_component_tools.puml` | Tool Group | Tool (ABC), ToolRegistry, FileTools, SearchTools, ShellTool, DirTool, WebTools, GitTool, LspTool, SubagentTool, TodoTool, MemoryTool, PlanTool, RepoMapTool, SemanticSearchTool, ReviewTool |
 | `c4_nasim_component_config.puml` | Config Group | ConfigLoader, Config (dataclass) |
-| `c4_nasim_component_git.puml` | Git Group | GitIntegration, GitStatus, GitCommit |
 
 ### Infrastructure Layer (Purple)
 
-**Total: 12 C4 diagrams (1 context + 1 container + 1 overview + 9 group components)**
+**Total: 10 C4 diagrams (1 context + 1 container + 1 overview + 7 group components)**
 
 ## CSR Layering & Visual Coding
 
@@ -79,8 +77,8 @@ Each component group is color-coded by its CSR layer:
 | Color | Layer | Groups |
 |-------|-------|--------|
 | Blue | **Controller** | CLI Group (CLIAdapter), API Group (HTTPAdapter, MCPAdapter — in main component diagram) |
-| Orange | **Service** | Agent Group, Safety Group, Context Graph Group, Edit Strategy Group, Evaluation Group |
-| Green | **Repository** | Session Group, Tool Group, Config Group, Git Group, WireLog Group |
+| Orange | **Service** | Agent Group, Safety Group, Context Graph Group, Edit Strategy Group |
+| Green | **Repository** | Session Group, Tool Group, Config Group, WireLog Group |
 | Purple | **Infrastructure** | (none — cross-cutting concerns implemented in code) |
 
 ### CSR Pattern Flow

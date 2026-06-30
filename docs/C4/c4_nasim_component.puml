@@ -7,7 +7,7 @@
 '            adapters, which converge at AgentController (single entry).
 '            Consistent naming: Adapter/Controller, Service, Repository.
 ' Milestone: v1.0
-' Version:   11.2.0
+' Version:   11.3.0
 ' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
 ' Review:    —
 ' Date:      2026-06-29
@@ -19,6 +19,8 @@
 '            replay, session forking, and checkpointing.
 '            v11.2.0 — Added EditStrategyRepository for diff staging,
 '            computation, and safe application of file edits.
+'            v11.3.0 — Added EvaluationService for task evaluation,
+'            success checks, retry coordination, and quality assessment.
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
@@ -54,6 +56,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
         Component(session_svc, "SessionService", "", "Session lifecycle: create, load, save, snapshot, revert")
         Component(safety_svc, "SafetyService", "", "Permission gating, injection scanning, egress inspection")
         Component(context_svc, "ContextService", "", "Context pipeline: graph, truncation, distillation, injection")
+        Component(eval_svc, "EvaluationService", "", "Task evaluation: success checks, LLM review, retry coordination, repetition detection, turn budget management")
     }
 
     ' ── Repository Layer (includes external adapters) ──
@@ -124,6 +127,7 @@ Rel(agent_ctrl, config_repo, "loads configuration")
 Rel(task_svc, tool_svc, "dispatches tool execution")
 Rel(task_svc, safety_svc, "validates actions before dispatch")
 Rel(task_svc, context_svc, "assembles context for LLM call")
+Rel(task_svc, eval_svc, "evaluates task completion, manages retries and quality checks")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Services → Repositories (CSR: Service → Repository) ──
@@ -175,7 +179,7 @@ Rel(web_repo, web, "fetches documentation", "HTTPS")
 
 legend right
     |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
-    |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, SafetyService, ContextService |
+    |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, SafetyService, ContextService, EvaluationService |
     |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, EditStrategyRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository, WireLogRepository |
     |<#FFFDE7>  **Data Store** | SessionStore, MemoryStore, WireLogStore, ConfigStore |
     |<#FAFAFA>  **Container_Ext** | External clients from Container diagram |
