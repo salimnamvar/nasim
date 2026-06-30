@@ -37,6 +37,13 @@ skinparam rectangle<<infrastructure>> {
     FontColor<<infrastructure>> #4A148C
 }
 
+' Data Store (persistence: JSONL, YAML, embeddings)
+skinparam database<<datastore>> {
+    BackgroundColor<<datastore>> #FFFDE7
+    BorderColor<<datastore>> #F9A825
+    FontColor<<datastore>> #F57F17
+}
+
 ' External Container (WebApp, DesktopApp, MobileApp)
 skinparam rectangle<<external_container>> {
     BackgroundColor<<external_container>> #FAFAFA

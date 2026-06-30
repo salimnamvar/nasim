@@ -7,7 +7,7 @@
 '            adapters, which converge at AgentController (single entry).
 '            Consistent naming: Adapter/Controller, Service, Repository.
 ' Milestone: v1.0
-' Version:   11.0.2
+' Version:   11.1.0
 ' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
 ' Review:    —
 ' Date:      2026-06-29
@@ -15,6 +15,8 @@
 '            ErrorBoundary, PersonaManager into TaskService.
 '            v11.0.2 — Absorbed tools.puml gaps: SubagentTool, TodoTool,
 '            PlanTool, ReviewTool into ToolService.
+'            v11.1.0 — Added WireLogRepository for interaction recording,
+'            replay, session forking, and checkpointing.
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
@@ -65,6 +67,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
         Component(mcp_repo, "MCPRepository", "mcp.client", "MCP extension tools: discovery, invocation")
         Component(repo_intel_repo, "RepoIntelligenceRepository", "tree-sitter + API", "AST indexing, symbol graph, semantic search")
         Component(web_repo, "WebRepository", "httpx", "Web fetch: documentation, search results")
+        Component(wire_log_repo, "WireLogRepository", "", "Append-only event store: interaction recording, replay, session forking, checkpointing")
     }
 }
 
@@ -76,6 +79,7 @@ System_Ext(web, "Web", "Documentation and search engines")
 System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
 System_Ext(git, "Git Repository", "Version-controlled project files")
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
+System_Ext(wire_log_store, "Wire Log Storage", "Append-only JSONL files: ~/.nasim/sessions/<id>/wire.jsonl")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── External Clients → Adapters (Container → Component traceability) ──
@@ -126,6 +130,8 @@ Rel(tool_svc, mcp_repo, "invokes extension tools")
 Rel(tool_svc, web_repo, "fetches documentation")
 Rel(context_svc, memory_repo, "injects memory context")
 Rel(context_svc, repo_intel_repo, "queries codebase intelligence")
+Rel(task_svc, wire_log_repo, "records agent-provider-tool interactions")
+Rel(session_svc, wire_log_repo, "forks sessions, checkpoints turns")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Repository → External Systems ──
@@ -138,11 +144,12 @@ Rel(git_repo, git, "version control operations", "git CLI")
 Rel(mcp_repo, mcp_server, "invokes extension tools", "stdio / SSE")
 Rel(repo_intel_repo, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
 Rel(web_repo, web, "fetches documentation", "HTTPS")
+Rel(wire_log_repo, wire_log_store, "reads and writes event logs", "JSONL file I/O")
 
 legend right
     |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
     |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, SafetyService, ContextService |
-    |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository |
+    |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository, WireLogRepository |
     |<#FAFAFA>  **Container_Ext** | External clients from Container diagram |
 end legend
 
