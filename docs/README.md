@@ -19,7 +19,7 @@ memory, and todo store data contracts. CT/API covers the HTTP API server surface
 
 | Directory | Layer | Status | Contents |
 | --------- | ----- | ------ | -------- |
-| [C4/](C4/README.md) | C4 Architecture | In progress | Context, container, 21 component diagrams (24 total) |
+| [C4/](C4/README.md) | C4 Architecture | Revised | Context, container, consolidated component diagram (3 + styles) |
 | [UC/](UC/README.md) | Use Cases | In progress | 148 UCs — 21 groups |
 | [SM/](SM/README.md) | State Machine | In progress | 15 diagrams — agent, session, plan, plugin, and more |
 | [SQ/](SQ/README.md) | Sequence Diagrams | In progress | 149 diagrams across 21 groups (1:1 with UCs) |

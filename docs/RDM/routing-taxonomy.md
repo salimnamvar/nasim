@@ -69,4 +69,4 @@ routing:
 - UC: RTG-03 CLASSIFY Task
 - SQ: `sq_rtg03_classify_task.puml`
 - CL: `ModelRouter.classify_task()`, `RoutingStrategy`, `TaskClassifierStrategy`
-- C4: `c4_nasim_component_provider.puml` → Router group
+- C4: `c4_nasim_component.puml` → Service Layer (Provider group)
