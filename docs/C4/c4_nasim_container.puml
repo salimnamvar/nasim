@@ -8,7 +8,6 @@
 ' Milestone: v1.0
 ' Version:   11.1.0
 ' Source:    docs/C4/c4_nasim_context.puml (v11.0.0)
-' Review:    —
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml

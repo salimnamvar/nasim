@@ -9,18 +9,7 @@
 ' Milestone: v1.0
 ' Version:   11.3.0
 ' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
-' Review:    —
 ' Date:      2026-06-29
-' Note:      v11.0.1 — Absorbed agent.puml gaps: SubagentCoordinator,
-'            ErrorBoundary, PersonaManager into TaskService.
-'            v11.0.2 — Absorbed tools.puml gaps: SubagentTool, TodoTool,
-'            PlanTool, ReviewTool into ToolService.
-'            v11.1.0 — Added WireLogRepository for interaction recording,
-'            replay, session forking, and checkpointing.
-'            v11.2.0 — Added EditStrategyRepository for diff staging,
-'            computation, and safe application of file edits.
-'            v11.3.0 — Added EvaluationService for task evaluation,
-'            success checks, retry coordination, and quality assessment.
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml

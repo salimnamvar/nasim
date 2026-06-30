@@ -6,7 +6,6 @@
 ' Milestone: v1.0
 ' Version:   11.0.0
 ' Source:    docs/C4/README.md
-' Review:    —
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Context.puml
