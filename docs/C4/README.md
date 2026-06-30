@@ -56,7 +56,6 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 |---------|-------|----------------|
 | `c4_nasim_component_agent.puml` | Agent Group | AgentOrchestrator, ConversationHistory, ContextCompactor, PlanSession, SubagentCoordinator, ErrorBoundary, PersonaManager |
 | `c4_nasim_component_context_graph.puml` | Context Graph Group | ContextGraph, PipelineOrchestrator, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor |
-| `c4_nasim_component_edit_strategy.puml` | Edit Strategy Group | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector |
 
 ### Repository Layer (Green)
 
@@ -68,7 +67,7 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 
 ### Infrastructure Layer (Purple)
 
-**Total: 10 C4 diagrams (1 context + 1 container + 1 overview + 7 group components)**
+**Total: 9 C4 diagrams (1 context + 1 container + 1 overview + 6 group components)**
 
 ## CSR Layering & Visual Coding
 
@@ -77,7 +76,7 @@ Each component group is color-coded by its CSR layer:
 | Color | Layer | Groups |
 |-------|-------|--------|
 | Blue | **Controller** | CLI Group (CLIAdapter), API Group (HTTPAdapter, MCPAdapter — in main component diagram) |
-| Orange | **Service** | Agent Group, Safety Group, Context Graph Group, Edit Strategy Group |
+| Orange | **Service** | Agent Group, Safety Group, Context Graph Group |
 | Green | **Repository** | Session Group, Tool Group, Config Group, WireLog Group |
 | Purple | **Infrastructure** | (none — cross-cutting concerns implemented in code) |
 
@@ -324,7 +323,6 @@ All diagrams are traceable to the design chain:
 | `c4_nasim_container.puml` | 22 | Container-level view showing all external system integrations and single convergence point (AgentController). Splitting would break the "system boundary" model. |
 | `c4_nasim_component_tools.puml` | 24 | 16 tool implementations + 8 externals. All tools share the same ABC interface and registry — splitting obscures the polymorphic pattern. |
 | `c4_nasim_component_agent.puml` | 13 | 7 components + 6 externals. Core agent loop components are inseparable — orchestrator, history, compactor form a single processing pipeline. |
-| `c4_nasim_component_edit_strategy.puml` | 13 | 11 strategy implementations + 2 externals. Polymorphic strategy pattern requires all implementations visible together. |
 | `c4_nasim_context.puml` | 11 | All architecturally significant external systems visible. Grouped: Plugin Dir → Host FS, Host Shell → Sandbox Runtime, Tree-sitter/LSP/Embedding/Vector → Repo Intelligence Backend, OTel → Observability Platform. |
 
 ## SIM-03 Compliance (meaningful intent labels)
