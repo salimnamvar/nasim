@@ -49,7 +49,6 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | Diagram | Group | Key Components |
 |---------|-------|----------------|
 | `c4_nasim_component_cli.puml` | CLI Group | ArgParser, REPLSession, Renderer, SlashCommandHandler |
-| `c4_nasim_component_server.puml` | API Group | ServerApp, ServerRouter, SSEHandler, APISchema |
 
 ### Service Layer (Orange)
 
@@ -84,7 +83,7 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | `c4_nasim_component_hooks.puml` | Hooks Group | HookManager |
 | `c4_nasim_component_plugins.puml` | Plugins Group | PluginLoader |
 
-**Total: 23 C4 diagrams (1 context + 1 container + 1 overview + 20 group components)**
+**Total: 22 C4 diagrams (1 context + 1 container + 1 overview + 19 group components)**
 
 ## CSR Layering & Visual Coding
 
@@ -92,9 +91,9 @@ Each component group is color-coded by its CSR layer:
 
 | Color | Layer | Groups |
 |-------|-------|--------|
-| Blue | **Controller** | CLI Group, API Group |
+| Blue | **Controller** | CLI Group (CLIAdapter), API Group (HTTPAdapter, MCPAdapter — in main component diagram) |
 | Orange | **Service** | Agent Group, Router Group, Provider Group, Safety Group, Context Graph Group, Edit Strategy Group, Evaluation Group |
-| Green | **Repository** | Session Group, Tool Group, Memory Group, Config Group, Git Group, Repo Intelligence Group |
+| Green | **Repository** | Session Group, Tool Group, Memory Group, Config Group, Git Group, Repo Intelligence Group, WireLog Group |
 | Purple | **Infrastructure** | MCP Group, Sandbox Group, Observability Group, Hooks Group, Plugins Group |
 
 ### CSR Pattern Flow
@@ -273,15 +272,15 @@ All 148 SQ diagrams use `actor "User"` as the single entry. The API-First delega
 chain is:
 
 ```
-User → [Interface Container] → ServerRouter (API Group) → AgentOrchestrator → Repository
+User → [Interface Container] → HTTPAdapter/CLIAdapter/MCPAdapter → AgentController → Services
 ```
 
-- **CLI flows:** `User → ServerRouter → AgentOrchestrator`. REPLSession and
+- **CLI flows:** `User → CLIAdapter → AgentController`. REPLSession and
   ArgParser are internal CLI Group components (visible in `c4_nasim_component_cli.puml`)
-  but are not modeled as SQ lifelines because the CLI entry point is ServerRouter.
+  but are not modeled as SQ lifelines because the CLI entry point is CLIAdapter.
   The CLI-to-API boundary is enforced by the CSR box structure in SQ diagrams, not
   by separate actor lifelines.
-- **HTTP flows:** `User → ServerRouter → AgentOrchestrator`. WebApp, DesktopApp,
+- **HTTP flows:** `User → HTTPAdapter → AgentController`. WebApp, DesktopApp,
   MobileApp are `Container_Ext` in C4 (separate deployable units) and route through
   ServerRouter.
 - **MCP flows:** `User → MCPClientRuntime → CoreEngine`. MCPClientRuntime is the
@@ -308,7 +307,7 @@ diagrams only.
 - **Container = runtime entry point OR separate deployment:** In C4, a Container does not always mean a separate process. It can also mean a distinct runtime responsibility within a shared process. CLI Process and HTTP API Server use this interpretation.
 - **Container_Ext = separate deployable unit outside the system boundary:** WebApp, DesktopApp, MobileApp, and MCP Client are truly separate applications with their own processes. They are clients of NASIM Application, not part of it.
 - **Single convergence point (AgentController):** All interface containers (CLI Process, HTTP API Server, MCP Client) delegate to AgentController, which routes requests to Core Engine. This makes the convergence visually explicit and enforceable for Sequence Diagrams.
-- **CSR Pattern:** Controller (CLI Group / API Group) → Service (Agent Group, Router Group, etc.) → Repository (Session Group, Tool Group, Memory Group, Config Group). Strict delegation.
+- **CSR Pattern:** Controller (CLIAdapter, HTTPAdapter, MCPAdapter → AgentController) → Service (TaskService, ToolService, SessionService, etc.) → Repository (SessionRepository, MemoryRepository, WireLogRepository, etc.). Strict delegation.
 - **One group, one Boundary:** Each component group is a `Boundary` inside `Container_Boundary(nasim_application, "NASIM Application")`. Groups are logical, not deployable.
 - **System_Ext for cross-group references:** Cross-group references inside NASIM Application use `System_Ext(alias, "ComponentName", "Group Name")` as opaque references, never `Container_Ext`.
 - **System_Ext for real externals only:** Filesystems, web, git repos, LLM backends, MCP servers, LSP servers — genuinely external infrastructure.
