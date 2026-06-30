@@ -65,19 +65,12 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 |---------|-------|----------------|
 | `c4_nasim_component_session.puml` | Session Group | SessionStore, SessionVersioning, SessionSearch, SessionFork |
 | `c4_nasim_component_tools.puml` | Tool Group | Tool (ABC), ToolRegistry, FileTools, SearchTools, ShellTool, DirTool, WebTools, GitTool, LspTool, SubagentTool, TodoTool, MemoryTool, PlanTool, RepoMapTool, SemanticSearchTool, ReviewTool |
-| `c4_nasim_component_memory.puml` | Memory Group | MemoryStore, MemoryIndex, MemoryScope, EpisodicMemoryAdapter, SemanticMemoryAdapter, WorkingMemoryAdapter, MemoryRetriever, MemoryIndexer |
 | `c4_nasim_component_config.puml` | Config Group | ConfigLoader, Config (dataclass) |
 | `c4_nasim_component_git.puml` | Git Group | GitIntegration, GitStatus, GitCommit |
 
 ### Infrastructure Layer (Purple)
 
-| Diagram | Group | Key Components |
-|---------|-------|----------------|
-| `c4_nasim_component_mcp.puml` | MCP Group | MCPClientRuntime, MCPServerRuntime, MCPToolAdapter, MCPDiscovery |
-| `c4_nasim_component_observability.puml` | Observability Group | StructuredLogger, MetricsCollector, TraceCorrelator, ContextPropagator, LogRedactor, DualOutputAdapter, InstrumentationMiddleware, OTelExporter |
-| `c4_nasim_component_hooks.puml` | Hooks Group | HookManager |
-
-**Total: 16 C4 diagrams (1 context + 1 container + 1 overview + 13 group components)**
+**Total: 12 C4 diagrams (1 context + 1 container + 1 overview + 9 group components)**
 
 ## CSR Layering & Visual Coding
 
@@ -87,8 +80,8 @@ Each component group is color-coded by its CSR layer:
 |-------|-------|--------|
 | Blue | **Controller** | CLI Group (CLIAdapter), API Group (HTTPAdapter, MCPAdapter — in main component diagram) |
 | Orange | **Service** | Agent Group, Safety Group, Context Graph Group, Edit Strategy Group, Evaluation Group |
-| Green | **Repository** | Session Group, Tool Group, Memory Group, Config Group, Git Group, WireLog Group |
-| Purple | **Infrastructure** | MCP Group, Observability Group, Hooks Group |
+| Green | **Repository** | Session Group, Tool Group, Config Group, Git Group, WireLog Group |
+| Purple | **Infrastructure** | (none — cross-cutting concerns implemented in code) |
 
 ### CSR Pattern Flow
 
@@ -332,7 +325,6 @@ All diagrams are traceable to the design chain:
 | `c4_nasim_component_overview_infra.puml` | 25 | Infrastructure groups overview. Paired with `_core` for full-system visibility. |
 | `c4_nasim_container.puml` | 22 | Container-level view showing all external system integrations and single convergence point (AgentController). Splitting would break the "system boundary" model. |
 | `c4_nasim_component_tools.puml` | 24 | 16 tool implementations + 8 externals. All tools share the same ABC interface and registry — splitting obscures the polymorphic pattern. |
-| `c4_nasim_component_observability.puml` | 17 | 8 internal components + 9 externals. Observability concerns are tightly coupled (logger ↔ metrics ↔ correlator ↔ propagator). |
 | `c4_nasim_component_agent.puml` | 13 | 7 components + 6 externals. Core agent loop components are inseparable — orchestrator, history, compactor form a single processing pipeline. |
 | `c4_nasim_component_edit_strategy.puml` | 13 | 11 strategy implementations + 2 externals. Polymorphic strategy pattern requires all implementations visible together. |
 | `c4_nasim_context.puml` | 11 | All architecturally significant external systems visible. Grouped: Plugin Dir → Host FS, Host Shell → Sandbox Runtime, Tree-sitter/LSP/Embedding/Vector → Repo Intelligence Backend, OTel → Observability Platform. |
