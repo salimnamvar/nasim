@@ -31,7 +31,7 @@ end box
 '   API_COLOR         — AgentController, controllers
 '   SERVICE_COLOR     — Agent, Router, Safety, Context, Edit Strategy, Evaluation, Provider
 '   REPOSITORY_COLOR  — Session, Tool, Memory, Config, Git, Repo Intelligence
-'   DATASTORE_COLOR   — Session Store, FileSystem, databases
+'   DATASTORE_COLOR   — SessionStore, FileSystem, databases
 '   INFRASTRUCTURE_COLOR — MCP, Sandbox, Observability, Wire Log, Hooks, Plugins
 '
 ' Use ONLY C4-authoritative component names. See ENTITIES.md for the registry.

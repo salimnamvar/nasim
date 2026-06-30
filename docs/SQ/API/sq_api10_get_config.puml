@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigLoader -> ConfigStorage
+' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigLoader -> ConfigStore
 ' SM States: (no state change — read-only)
 ' ============================================================
 
@@ -29,7 +29,7 @@ box "Service" SERVICE_COLOR
   participant "ConfigRepository" as loader
 end box
 
-database "ConfigStorage" as storage
+database "ConfigStore" as storage
 
 == API-10 GET Config ==
 

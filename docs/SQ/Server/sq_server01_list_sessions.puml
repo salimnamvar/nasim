@@ -8,7 +8,7 @@
 ' Version:   1.0.0
 ' Source:    docs/C4/c4_nasim_component_server.puml
 ' Review:    Cross-layer naming alignment
-' CSR Chain: User -> CLIAdapter -> AgentController -> SessionManager -> SessionService -> Session Store
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionManager -> SessionService -> SessionStore
 ' SM States: — (stateless entry point)
 ' ============================================================
 
@@ -35,7 +35,7 @@ box "Repository" REPOSITORY_COLOR
 end box
 
 box "Datastore" DATASTORE_COLOR
-  participant "Session Store" as store
+  participant "SessionStore" as store
 end box
 
 user -> iface : API-01 LIST Sessions()

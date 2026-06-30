@@ -30,7 +30,7 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "WireLogRepository" as appender
 end box
 
-database "WireLogStorage" as storage
+database "WireLogStore" as storage
 
 == WRL-01 APPEND Event ==
 

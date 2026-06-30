@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> AgentOrchestrator -> SessionService -> Session Store
+' CSR Chain: User -> CLIAdapter -> AgentController -> AgentOrchestrator -> SessionService -> SessionStore
 ' SM States: SERVING (#E0F7FA), THINKING (#D7CCC8), RESPONDING (#D1C4E9)
 ' ============================================================
 

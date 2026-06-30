@@ -16,8 +16,8 @@
 '                                            Edit Strategy, Evaluation, Provider)
 '   Repository      #E8F5E9  — green        (Session, Tool, Memory, Config, Git,
 '                                            Repo Intelligence)
-'   Datastore       #F3E5F5  — purple       (Session Store, FileSystem,
-'                                            WireLogStorage, databases)
+'   Datastore       #F3E5F5  — purple       (SessionStore, FileSystem,
+'                                            WireLogStore, databases)
 '   Infrastructure  #ECEFF1  — blue-grey    (MCP, Sandbox, Observability,
 '                                            Wire Log, Hooks, Plugins)
 ' ------------------------------------------------------------

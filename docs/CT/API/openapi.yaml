@@ -109,7 +109,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /v1/sessions/{session}:send:
+  /v1/sessions/{session}:dispatch:
     parameters:
       - $ref: '#/components/parameters/sessionId'
     post:

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> Session Store
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
 ' SM States: ACTIVE (#43A047), CLOSED (#757575)
 ' ============================================================
 
@@ -33,7 +33,7 @@ box "Repository" REPOSITORY_COLOR
   participant "SessionService" as store
 end box
 
-database "Session Store" as storage
+database "SessionStore" as storage
 
 == SSN-09 DELETE Session ==
 

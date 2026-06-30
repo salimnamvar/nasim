@@ -30,7 +30,7 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "WireLogRepository" as reader
 end box
 
-database "WireLogStorage" as storage
+database "WireLogStore" as storage
 
 == WRL-02 READ Log ==
 

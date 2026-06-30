@@ -576,7 +576,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | IDLE | LISTENING | API-06 | DISPATCH Message received | sq_api06_dispatch_message.puml |
 | IDLE | SERVING | API-06 | API request received | sq_api06_dispatch_message.puml |
 | IDLE | PLANNING | AGT-07 | /plan command entered | sq_agent07_queue_plan.puml |
-| IDLE | [*] | AGT-14 | Error handled | — |
+| IDLE | [*] | AGT-01 | Error handled | — |
 | LISTENING | THINKING | API-06 | Input parsed, messages built | sq_api06_dispatch_message.puml |
 | SERVING | THINKING | API-06 | API request processed | sq_api06_dispatch_message.puml |
 | SERVING | IDLE | API-06 | API request complete | sq_api06_dispatch_message.puml |

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> ContextCompactionService -> SessionService -> Session Store
+' CSR Chain: User -> CLIAdapter -> AgentController -> ContextCompactionService -> SessionService -> SessionStore
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -33,7 +33,7 @@ box "Repository" REPOSITORY_COLOR
   participant "SessionService" as store
 end box
 
-database "Session Store" as storage
+database "SessionStore" as storage
 
 == AGT-06 COMPACT Context ==
 

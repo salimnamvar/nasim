@@ -33,7 +33,7 @@ box "Repository" REPOSITORY_COLOR
   participant "WireLogRepository" as appender
 end box
 
-database "WireLogStorage" as storage
+database "WireLogStore" as storage
 
 == WRL-05 CHECKPOINT Turn ==
 
