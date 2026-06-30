@@ -20,11 +20,11 @@ memory, and todo store data contracts. CT/API covers the HTTP API server surface
 | Directory | Layer | Status | Contents |
 | --------- | ----- | ------ | -------- |
 | [C4/](C4/README.md) | C4 Architecture | Revised | Context, container, consolidated component diagram (3 + styles) |
-| [UC/](UC/README.md) | Use Cases | In progress | 148 UCs — 21 groups |
+| [UC/](UC/README.md) | Use Cases | In progress | 148 UCs — 22 groups |
 | [SM/](SM/README.md) | State Machine | In progress | 15 diagrams — agent, session, plan, plugin, and more |
 | [SQ/](SQ/README.md) | Sequence Diagrams | In progress | 149 diagrams across 21 groups (1:1 with UCs) |
 | [ER/](ER/README.md) | ERD | In progress | 5 store schemas |
-| [CL/](CL/README.md) | Class Diagram | In progress | Runtime class model — 90+ classes across 12 groups |
+| [CL/](CL/README.md) | Class Diagram | In progress | Runtime class model — 98+ classes across 15 groups |
 | [CT/DATA/](CT/DATA/README.md) | Data Contracts | In progress | ODCS v3.1.0 — 5 contract diagrams + 2 YAML schemas |
 | [CT/API/](CT/API/README.md) | HTTP API Surface | In progress | OAS 3.1.0 + ROD — 23 endpoints, 8 resources |
 | [RDM/](RDM/README.md) | Implementation Roadmap | Active | 10 milestone docs for coding |
