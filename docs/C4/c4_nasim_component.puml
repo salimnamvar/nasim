@@ -62,7 +62,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
         Component(history_repo, "HistoryRepository", "", "Snapshots, revert index, search index")
         Component(config_repo, "ConfigRepository", "", "YAML, env vars, CLI flags, project overrides")
         Component(memory_repo, "MemoryRepository", "", "Cross-session knowledge persistence")
-        Component(llm_repo, "LLMRepository", "litellm", "LLM API calls: streaming, fallback, capability matching")
+        Component(llm_repo, "LLMRepository", "litellm", "LLM API calls + model routing: streaming, fallback chains, capability-based model selection, task classification")
         Component(fs_repo, "FilesystemRepository", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep")
         Component(sandbox_repo, "SandboxRepository", "subprocess", "Sandboxed command execution: timeout, isolation")
         Component(edit_strategy_repo, "EditStrategyRepository", "", "Diff staging, computation, and safe application: staged edits, sandboxed validation")

@@ -55,9 +55,7 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | Diagram | Group | Key Components |
 |---------|-------|----------------|
 | `c4_nasim_component_agent.puml` | Agent Group | AgentOrchestrator, ConversationHistory, ContextCompactor, PlanSession, SubagentCoordinator, ErrorBoundary, PersonaManager |
-| `c4_nasim_component_router.puml` | Router Group | ModelRouter, FallbackChain, ProviderCapabilities |
 | `c4_nasim_component_provider.puml` | Provider Group | Provider (Protocol), LiteLLMProxy |
-| `c4_nasim_component_safety.puml` | Safety Group | SafetyCoordinator, PermissionGate, InjectionScanner, EgressInspector |
 | `c4_nasim_component_context_graph.puml` | Context Graph Group | ContextGraph, PipelineOrchestrator, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor |
 | `c4_nasim_component_edit_strategy.puml` | Edit Strategy Group | EditStrategyManager, EditStrategy (ABC), SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector |
 | `c4_nasim_component_evaluation.puml` | Evaluation Group | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, RepetitionDetector, TurnBudgetInjector |
@@ -82,7 +80,7 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | `c4_nasim_component_hooks.puml` | Hooks Group | HookManager |
 | `c4_nasim_component_plugins.puml` | Plugins Group | PluginLoader |
 
-**Total: 21 C4 diagrams (1 context + 1 container + 1 overview + 18 group components)**
+**Total: 19 C4 diagrams (1 context + 1 container + 1 overview + 16 group components)**
 
 ## CSR Layering & Visual Coding
 
@@ -91,7 +89,7 @@ Each component group is color-coded by its CSR layer:
 | Color | Layer | Groups |
 |-------|-------|--------|
 | Blue | **Controller** | CLI Group (CLIAdapter), API Group (HTTPAdapter, MCPAdapter — in main component diagram) |
-| Orange | **Service** | Agent Group, Router Group, Provider Group, Safety Group, Context Graph Group, Edit Strategy Group, Evaluation Group |
+| Orange | **Service** | Agent Group, Provider Group, Safety Group, Context Graph Group, Edit Strategy Group, Evaluation Group |
 | Green | **Repository** | Session Group, Tool Group, Memory Group, Config Group, Git Group, Repo Intelligence Group, WireLog Group |
 | Purple | **Infrastructure** | MCP Group, Observability Group, Hooks Group, Plugins Group |
 
