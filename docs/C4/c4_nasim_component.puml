@@ -69,6 +69,14 @@ Container_Boundary(nasim_application, "NASIM Application") {
         Component(web_repo, "WebRepository", "httpx", "Web fetch: documentation, search results")
         Component(wire_log_repo, "WireLogRepository", "", "Append-only event store: interaction recording, replay, session forking, checkpointing")
     }
+
+    ' ── Data Stores (internal persistence) ──
+    Boundary(datastore_layer, "Data Stores") <<datastore>> {
+        ComponentDb(session_store, "Session Store", "JSONL", "Conversation history: ~/.nasim/sessions/")
+        ComponentDb(memory_store, "Memory Store", "JSON + embeddings", "Cross-session knowledge: ~/.nasim/memory/")
+        ComponentDb(wire_log_store, "Wire Log Store", "JSONL", "Append-only interaction log: ~/.nasim/sessions/<id>/wire.jsonl")
+        ComponentDb(config_store, "Config Store", "YAML", "Configuration: project overrides, env vars")
+    }
 }
 
 ' ── External Systems ──
@@ -79,7 +87,6 @@ System_Ext(web, "Web", "Documentation and search engines")
 System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
 System_Ext(git, "Git Repository", "Version-controlled project files")
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
-System_Ext(wire_log_store, "Wire Log Storage", "Append-only JSONL files: ~/.nasim/sessions/<id>/wire.jsonl")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── External Clients → Adapters (Container → Component traceability) ──
@@ -134,6 +141,15 @@ Rel(task_svc, wire_log_repo, "records agent-provider-tool interactions")
 Rel(session_svc, wire_log_repo, "forks sessions, checkpoints turns")
 
 ' ══════════════════════════════════════════════════════════════
+' ── Repository → Data Stores (internal persistence) ──
+' ══════════════════════════════════════════════════════════════
+
+Rel(session_repo, session_store, "reads and writes conversations", "JSONL")
+Rel(memory_repo, memory_store, "reads and writes knowledge", "JSON + vectors")
+Rel(wire_log_repo, wire_log_store, "reads and writes event logs", "JSONL")
+Rel(config_repo, config_store, "reads and writes configuration", "YAML")
+
+' ══════════════════════════════════════════════════════════════
 ' ── Repository → External Systems ──
 ' ══════════════════════════════════════════════════════════════
 
@@ -144,12 +160,12 @@ Rel(git_repo, git, "version control operations", "git CLI")
 Rel(mcp_repo, mcp_server, "invokes extension tools", "stdio / SSE")
 Rel(repo_intel_repo, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
 Rel(web_repo, web, "fetches documentation", "HTTPS")
-Rel(wire_log_repo, wire_log_store, "reads and writes event logs", "JSONL file I/O")
 
 legend right
     |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
     |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, SafetyService, ContextService |
     |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository, WireLogRepository |
+    |<#FFFDE7>  **Data Store** | SessionStore, MemoryStore, WireLogStore, ConfigStore |
     |<#FAFAFA>  **Container_Ext** | External clients from Container diagram |
 end legend
 

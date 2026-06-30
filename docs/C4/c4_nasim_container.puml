@@ -6,7 +6,7 @@
 '            All interfaces (CLI, WebApp, DesktopApp, MobileApp,
 '            MCP Client) are external clients connecting to it.
 ' Milestone: v1.0
-' Version:   11.0.1
+' Version:   11.1.0
 ' Source:    docs/C4/c4_nasim_context.puml (v11.0.0)
 ' Review:    —
 ' ============================================================
@@ -23,6 +23,11 @@ Person(user, "Developer", "Uses NASIM as an AI coding assistant")
 
 System_Boundary(nasim_service, "NASIM Service") {
     Container(nasim_app, "NASIM Application", "Python 3.10+", "AI coding agent: agentic loop, tool orchestration, safety, context management")
+
+    ContainerDb(session_store, "Session Store", "JSONL", "Conversation history: ~/.nasim/sessions/")
+    ContainerDb(memory_store, "Memory Store", "JSON + embeddings", "Cross-session knowledge: ~/.nasim/memory/")
+    ContainerDb(wire_log_store, "Wire Log Store", "JSONL", "Append-only interaction log: ~/.nasim/sessions/<id>/wire.jsonl")
+    ContainerDb(config_store, "Config Store", "YAML", "Configuration: project overrides, env vars")
 }
 
 Container_Ext(cli, "CLI", "Python 3.10+", "Terminal interface: REPL, arg parsing, slash commands")
@@ -60,12 +65,19 @@ Rel(nasim_app, git, "reads state, creates commits", "git CLI")
 Rel(nasim_app, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
 Rel(nasim_app, obs, "emits logs and metrics", "stdout / HTTP")
 
+' ── Data Stores ──
+Rel(nasim_app, session_store, "persists conversations", "JSONL write")
+Rel(nasim_app, memory_store, "stores knowledge", "JSON + vectors")
+Rel(nasim_app, wire_log_store, "records interactions", "JSONL append")
+Rel(nasim_app, config_store, "reads/writes config", "YAML")
+
 legend right
     |= Symbol |= Meaning |
     | Person | Human actor |
     | Container | Internal deployable unit |
     | Container_Ext | External client application |
     | System_Ext | External system |
+    | ContainerDb | Internal data store |
 end legend
 
 @enduml
