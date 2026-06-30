@@ -1,6 +1,6 @@
 @startuml sq_tool03_update_file
 ' ============================================================
-' Title:     TL-03 — UPDATE File
+' Title:     TOOL-03 — UPDATE File
 ' Boundary:  nasim code agent
 ' Purpose:   Replace an exact string in a file
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-03 UPDATE File
+title nasim -- TOOL-03 UPDATE File
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-03 UPDATE File ==
+== TOOL-03 UPDATE File ==
 
 user -> iface : POST /tools/update_file:execute
 activate iface
 iface -> router : POST /tools/update_file:execute
 activate router
 
-router -> tool : TL-03 UPDATE File(path, oldString, newString)
+router -> tool : TOOL-03 UPDATE File(path, oldString, newString)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-03 UPDATE File
+  ref over tool : TOOL-03 UPDATE File
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-03 UPDATE File (SM/README.md)
+    ' Owned by: TOOL-03 UPDATE File (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

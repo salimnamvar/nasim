@@ -1,0 +1,70 @@
+@startuml sq_ac01_process_request
+' ============================================================
+' Title:     AC-01 — PROCESS Request
+' Boundary:  nasim code agent
+' Purpose:   Route incoming request from any interface to Core Engine
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> InterfaceAdapter -> AgentController -> TaskService
+' SM States: LISTENING (#E8EAF6), THINKING (#D7CCC8), IDLE (#ECEFF1)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- AC-01 PROCESS Request
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as engine
+end box
+
+== AC-01 PROCESS Request ==
+
+user -> iface : AC-01 PROCESS Request({payload})
+activate iface
+
+iface -> router : AC-01 PROCESS Request({payload})
+activate router
+
+router -> engine : AC-01 PROCESS Request({payload})
+activate engine
+
+alt request valid
+  ref over router
+    AC-02: VALIDATE Request
+  end ref
+  ref over router
+    AC-03: ADAPT Protocol
+  end ref
+  ref over router
+    AC-04: DISPATCH to Core Engine
+  end ref
+
+  engine --> router : 200 OK — {result}
+  deactivate engine
+  router --> iface : 200 OK — {result}
+  deactivate router
+  iface --> user : 200 OK — {result}
+  deactivate iface
+
+else request invalid
+  engine --> router : 422 INVALID_ARGUMENT\n{error: {code: "AC-01_VALIDATION_ERROR", message: "Invalid request format", status: 422}}
+  deactivate engine
+  router --> iface : 422 INVALID_ARGUMENT
+  deactivate router
+  iface --> user : 422 INVALID_ARGUMENT
+  deactivate iface
+end
+
+@enduml

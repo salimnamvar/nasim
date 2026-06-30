@@ -1,6 +1,6 @@
 @startuml sq_editstrategy10_stage_diff
 ' ============================================================
-' Title:     EDT-10 — STAGE Diff
+' Title:     EDITSTRATEGY-10 — STAGE Diff
 ' Boundary:  nasim code agent
 ' Purpose:   Stage a computed diff for user review and approval
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EDT-10 STAGE Diff
+title nasim -- EDITSTRATEGY-10 STAGE Diff
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EditStrategyRepository" as mgr
 end box
 
-== EDT-10 STAGE Diff ==
+== EDITSTRATEGY-10 STAGE Diff ==
 
-user -> iface : EDT-10 STAGE Diff({file_path, diff_content})
+user -> iface : EDITSTRATEGY-10 STAGE Diff({file_path, diff_content})
 activate iface
-iface -> router : EDT-10 STAGE Diff({file_path, diff_content})
+iface -> router : EDITSTRATEGY-10 STAGE Diff({file_path, diff_content})
 activate router
-router -> mgr : EDT-10 STAGE Diff({file_path, diff_content})
+router -> mgr : EDITSTRATEGY-10 STAGE Diff({file_path, diff_content})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : EDT-10 STAGE Diff <back:#FFE082>STAGING</back>
+  ref over mgr : EDITSTRATEGY-10 STAGE Diff <back:#FFE082>STAGING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,11 +47,11 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  ref over mgr : EDT-10 STAGE Diff <back:#9FA8DA>EMPTY</back>
-  mgr --> router : {error: {code: "EDT-10_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  ref over mgr : EDITSTRATEGY-10 STAGE Diff <back:#9FA8DA>EMPTY</back>
+  mgr --> router : {error: {code: "EDITSTRATEGY-10_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate mgr
-  router --> iface : {error: {code: "EDT-10_VALIDATION_ERROR", message: "Validation failed", status: 422}}
-  iface --> user : {error: {code: "EDT-10_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  router --> iface : {error: {code: "EDITSTRATEGY-10_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  iface --> user : {error: {code: "EDITSTRATEGY-10_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate router
   deactivate iface
 end

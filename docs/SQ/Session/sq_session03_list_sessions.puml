@@ -1,6 +1,6 @@
 @startuml sq_session03_list_sessions
 ' ============================================================
-' Title:     SSN-03 — LIST Sessions
+' Title:     SESSION-03 — LIST Sessions
 ' Boundary:  nasim code agent
 ' Purpose:   List available saved sessions
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SSN-03 LIST Sessions
+title nasim -- SESSION-03 LIST Sessions
 
 actor "User" as user
 
@@ -35,19 +35,19 @@ end box
 
 database "SessionStore" as storage
 
-== SSN-03 LIST Sessions ==
+== SESSION-03 LIST Sessions ==
 
 user -> iface : GET /sessions
 activate iface
 iface -> router : GET /sessions
 activate router
 
-router -> svc : SSN-03 LIST Sessions({page_size}, {page_token})
+router -> svc : SESSION-03 LIST Sessions({page_size}, {page_token})
 activate svc
-svc -> store : SSN-03 LIST Sessions({page_size}, {page_token})
+svc -> store : SESSION-03 LIST Sessions({page_size}, {page_token})
 activate store
 
-store -> storage : SSN-03 LIST Sessions({page_size}, {page_token})
+store -> storage : SESSION-03 LIST Sessions({page_size}, {page_token})
 activate storage
 
 alt directory not found

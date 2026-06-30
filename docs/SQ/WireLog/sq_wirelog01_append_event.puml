@@ -1,6 +1,6 @@
 @startuml sq_wirelog01_append_event
 ' ============================================================
-' Title:     WRL-01 — APPEND Event
+' Title:     WIRELOG-01 — APPEND Event
 ' Boundary:  nasim code agent
 ' Purpose:   Append event to wire log
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- WRL-01 APPEND Event
+title nasim -- WIRELOG-01 APPEND Event
 
 actor "User" as user
 
@@ -32,19 +32,19 @@ end box
 
 database "WireLogStore" as storage
 
-== WRL-01 APPEND Event ==
+== WIRELOG-01 APPEND Event ==
 
 user -> iface : POST /wirelog/events
 activate iface
 iface -> router : POST /wirelog/events
 activate router
-router -> wl : WRL-01 APPEND Event(event_data)
+router -> wl : WIRELOG-01 APPEND Event(event_data)
 activate wl
 
 alt append succeeds
-  wl -> appender : WRL-01 APPEND Event(event_data)
+  wl -> appender : WIRELOG-01 APPEND Event(event_data)
   activate appender
-  appender -> storage : WRL-01 APPEND Event(event_data)
+  appender -> storage : WIRELOG-01 APPEND Event(event_data)
   activate storage
   storage --> appender : 200 OK
   deactivate storage

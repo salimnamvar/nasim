@@ -1,6 +1,6 @@
 @startuml sq_evaluation03_check_success
 ' ============================================================
-' Title:     EVL-03 — CHECK Success
+' Title:     EVALUATION-03 — CHECK Success
 ' Boundary:  nasim code agent
 ' Purpose:   Execute success checks and aggregate results
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVL-03 CHECK Success
+title nasim -- EVALUATION-03 CHECK Success
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EvaluationService" as runner
 end box
 
-== EVL-03 CHECK Success ==
+== EVALUATION-03 CHECK Success ==
 
-user -> iface : EVL-03 CHECK Success({task_id, check_criteria})
+user -> iface : EVALUATION-03 CHECK Success({task_id, check_criteria})
 activate iface
-iface -> router : EVL-03 CHECK Success({task_id, check_criteria})
+iface -> router : EVALUATION-03 CHECK Success({task_id, check_criteria})
 activate router
-router -> runner : EVL-03 CHECK Success({task_id, check_criteria})
+router -> runner : EVALUATION-03 CHECK Success({task_id, check_criteria})
 activate runner
 
 alt all_checks_pass
-  ref over runner : EVL-03 CHECK Success({task_id}) <back:#C5CAE9>CHECKING</back>
+  ref over runner : EVALUATION-03 CHECK Success({task_id}) <back:#C5CAE9>CHECKING</back>
   runner --> router : 200 OK
   deactivate runner
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt all_checks_pass
   deactivate router
   deactivate iface
 else checks_fail
-  runner --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-03_CHECKS_FAILED", message: "Success checks failed", status: 422}}
+  runner --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-03_CHECKS_FAILED", message: "Success checks failed", status: 422}}
   deactivate runner
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

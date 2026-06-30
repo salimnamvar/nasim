@@ -1,6 +1,6 @@
 @startuml sq_provider04_select_provider_backend
 ' ============================================================
-' Title:     PRV-04 — SELECT Provider Backend
+' Title:     PROVIDER-04 — SELECT Provider Backend
 ' Boundary:  nasim code agent
 ' Purpose:   Map config.provider string to provider class
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PRV-04 SELECT Provider Backend
+title nasim -- PROVIDER-04 SELECT Provider Backend
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "LLMRepository" as mgr
 end box
 
-== PRV-04 SELECT Provider Backend ==
+== PROVIDER-04 SELECT Provider Backend ==
 
 user -> iface : POST /providers:select
 activate iface
 iface -> router : POST /providers:select
 activate router
-router -> mgr : PRV-04 SELECT Provider Backend({provider_name})
+router -> mgr : PROVIDER-04 SELECT Provider Backend({provider_name})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PRV-04 SELECT Provider Backend({provider_name}) <back:#FBC02D>SELECTING</back>
+  ref over mgr : PROVIDER-04 SELECT Provider Backend({provider_name}) <back:#FBC02D>SELECTING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

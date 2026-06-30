@@ -1,6 +1,6 @@
 @startuml sq_evaluation07_record_quality_signal
 ' ============================================================
-' Title:     EVL-07 — RECORD Quality Signal
+' Title:     EVALUATION-07 — RECORD Quality Signal
 ' Boundary:  nasim code agent
 ' Purpose:   Record and persist quality signals for scoring
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVL-07 RECORD Quality Signal
+title nasim -- EVALUATION-07 RECORD Quality Signal
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EvaluationService" as signal
 end box
 
-== EVL-07 RECORD Quality Signal ==
+== EVALUATION-07 RECORD Quality Signal ==
 
 user -> iface : POST /evaluation/quality-signal
 activate iface
 iface -> router : POST /evaluation/quality-signal
 activate router
-router -> signal : EVL-07 RECORD Quality Signal({task_id, score, signals})
+router -> signal : EVALUATION-07 RECORD Quality Signal({task_id, score, signals})
 activate signal
 
 alt recording succeeds
-  ref over signal : EVL-07 RECORD Quality Signal({task_id, score, signals}) <back:#FF8A65>SCORING</back>({task_id, score, signals})
+  ref over signal : EVALUATION-07 RECORD Quality Signal({task_id, score, signals}) <back:#FF8A65>SCORING</back>({task_id, score, signals})
   signal --> router : 200 OK
   deactivate signal
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt recording succeeds
   deactivate router
   deactivate iface
 else recording fails
-  signal --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
+  signal --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
   deactivate signal
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "EVL-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "EVL-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-07_RECORD_FAILED", message: "Quality signal recording failed", status: 422}}
   deactivate router
   deactivate iface
 end

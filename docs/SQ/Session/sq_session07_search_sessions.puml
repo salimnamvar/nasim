@@ -1,6 +1,6 @@
 @startuml sq_session07_search_sessions
 ' ============================================================
-' Title:     SSN-07 — SEARCH Sessions
+' Title:     SESSION-07 — SEARCH Sessions
 ' Boundary:  nasim code agent
 ' Purpose:   Full-text search across session history
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SSN-07 SEARCH Sessions
+title nasim -- SESSION-07 SEARCH Sessions
 
 actor "User" as user
 
@@ -35,25 +35,25 @@ end box
 
 database "SessionStore" as storage
 
-== SSN-07 SEARCH Sessions ==
+== SESSION-07 SEARCH Sessions ==
 
 user -> iface : GET /sessions:search?q={query}
 activate iface
 iface -> router : GET /sessions:search?q={query}
 activate router
 
-router -> svc : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
+router -> svc : SESSION-07 SEARCH Sessions({query}, {page_size}, {page_token})
 activate svc
-svc -> search : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
+svc -> search : SESSION-07 SEARCH Sessions({query}, {page_size}, {page_token})
 activate search
 
-search -> storage : SSN-07 SEARCH Sessions({query}, {page_size}, {page_token})
+search -> storage : SESSION-07 SEARCH Sessions({query}, {page_size}, {page_token})
 activate storage
 
 alt index not available
     storage --> search : IndexError
     deactivate storage
-    search -> storage : SSN-07 SEARCH Sessions({query}, fallback)
+    search -> storage : SESSION-07 SEARCH Sessions({query}, fallback)
     activate storage
     storage --> search : 200 OK — [{session_id, snippet, score}]
     deactivate storage

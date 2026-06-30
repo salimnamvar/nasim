@@ -8,6 +8,7 @@
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
 ' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
+' @csr-exempt service
 ' SM States: (no state change — read-only)
 ' ============================================================
 

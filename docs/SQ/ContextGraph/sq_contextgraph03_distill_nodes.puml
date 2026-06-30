@@ -1,6 +1,6 @@
 @startuml sq_contextgraph03_distill_nodes
 ' ============================================================
-' Title:     CTX-03 — DISTILL Nodes
+' Title:     CONTEXTGRAPH-03 — DISTILL Nodes
 ' Boundary:  nasim code agent
 ' Purpose:   Distill chat history nodes into concise summaries
 ' Milestone: v1.0
@@ -8,12 +8,12 @@
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
 ' CSR Chain: User -> CLIAdapter -> AgentController -> DistillationProcessor
-' SM States: (stateless — COMPACTING owned by AGT-06)
+' SM States: (stateless — COMPACTING owned by AGENT-06)
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- CTX-03 DISTILL Nodes
+title nasim -- CONTEXTGRAPH-03 DISTILL Nodes
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "ContextService" as distill
 end box
 
-== CTX-03 DISTILL Nodes ==
+== CONTEXTGRAPH-03 DISTILL Nodes ==
 
-user -> iface : CTX-03 DISTILL Nodes({nodes, max_tokens})
+user -> iface : CONTEXTGRAPH-03 DISTILL Nodes({nodes, max_tokens})
 activate iface
-iface -> router : CTX-03 DISTILL Nodes({nodes, max_tokens})
+iface -> router : CONTEXTGRAPH-03 DISTILL Nodes({nodes, max_tokens})
 activate router
-router -> distill : CTX-03 DISTILL Nodes({nodes, max_tokens})
+router -> distill : CONTEXTGRAPH-03 DISTILL Nodes({nodes, max_tokens})
 activate distill
 
 alt summary_quality acceptable
-  ref over distill : CTX-03 DISTILL Nodes({nodes, max_tokens})
+  ref over distill : CONTEXTGRAPH-03 DISTILL Nodes({nodes, max_tokens})
   distill --> router : 200 OK
   deactivate distill
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt summary_quality acceptable
   deactivate router
   deactivate iface
 else distillation_fails
-  distill --> router : 422 UNPROCESSABLE\n{error: {code: "CTX-03_DISTILL_FAILED", message: "Node distillation failed", status: 422}}
+  distill --> router : 422 UNPROCESSABLE\n{error: {code: "CONTEXTGRAPH-03_DISTILL_FAILED", message: "Node distillation failed", status: 422}}
   deactivate distill
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

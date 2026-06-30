@@ -1,6 +1,6 @@
 @startuml sq_tool10_search_web
 ' ============================================================
-' Title:     TL-10 — SEARCH Web
+' Title:     TOOL-10 — SEARCH Web
 ' Boundary:  nasim code agent
 ' Purpose:   Search the web for information
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-10 SEARCH Web
+title nasim -- TOOL-10 SEARCH Web
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-10 SEARCH Web ==
+== TOOL-10 SEARCH Web ==
 
 user -> iface : POST /tools/search_web:execute
 activate iface
 iface -> router : POST /tools/search_web:execute
 activate router
 
-router -> tool : TL-10 SEARCH Web(query, numResults)
+router -> tool : TOOL-10 SEARCH Web(query, numResults)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-10 SEARCH Web
+  ref over tool : TOOL-10 SEARCH Web
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-10 SEARCH Web (SM/README.md)
+    ' Owned by: TOOL-10 SEARCH Web (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

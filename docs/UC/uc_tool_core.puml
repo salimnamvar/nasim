@@ -68,22 +68,22 @@ actor "User" as User
 
 rectangle "nasim" {
   package "File Operations" as FILE_PKG {
-    usecase "**TL-01 READ File**\n--\nRead file contents with offset/limit" <<master>> as TL01
-    usecase "**TL-02 INSERT File**\n--\nCreate or overwrite files" <<master>> as TL02
-    usecase "**TL-03 UPDATE File**\n--\nReplace exact strings in files" <<master>> as TL03
-    usecase "**TL-04 LIST Directory**\n--\nList directory contents" <<master>> as TL04
+    usecase "**TOOL-01 READ File**\n--\nRead file contents with offset/limit" <<master>> as TL01
+    usecase "**TOOL-02 INSERT File**\n--\nCreate or overwrite files" <<master>> as TL02
+    usecase "**TOOL-03 UPDATE File**\n--\nReplace exact strings in files" <<master>> as TL03
+    usecase "**TOOL-04 LIST Directory**\n--\nList directory contents" <<master>> as TL04
   }
   package "Shell Execution" as SHL_PKG {
-    usecase "**TL-05 DISPATCH Shell Command**\n--\nExecute shell command via sandbox" <<master>> as TL05
+    usecase "**TOOL-05 DISPATCH Shell Command**\n--\nExecute shell command via sandbox" <<master>> as TL05
   }
   package "Search Tools" as SRCH_PKG {
-    usecase "**TL-06 SEARCH Grep**\n--\nSearch file contents by regex" <<master>> as TL06
-    usecase "**TL-07 SEARCH Glob**\n--\nFind files by glob pattern" <<master>> as TL07
-    usecase "**TL-08 SEARCH Find**\n--\nFind files by name pattern" <<master>> as TL08
+    usecase "**TOOL-06 SEARCH Grep**\n--\nSearch file contents by regex" <<master>> as TL06
+    usecase "**TOOL-07 SEARCH Glob**\n--\nFind files by glob pattern" <<master>> as TL07
+    usecase "**TOOL-08 SEARCH Find**\n--\nFind files by name pattern" <<master>> as TL08
   }
   package "Web Tools" as WEB_PKG {
-    usecase "**TL-09 FETCH Web Content**\n--\nFetch URL content as markdown" <<master>> as TL09
-    usecase "**TL-10 SEARCH Web**\n--\nSearch the web for information" <<master>> as TL10
+    usecase "**TOOL-09 FETCH Web Content**\n--\nFetch URL content as markdown" <<master>> as TL09
+    usecase "**TOOL-10 SEARCH Web**\n--\nSearch the web for information" <<master>> as TL10
   }
 }
 

@@ -20,10 +20,10 @@ memory, and todo store data contracts. CT/API covers the HTTP API server surface
 | Directory | Layer | Status | Contents |
 | --------- | ----- | ------ | -------- |
 | [C4/](C4/README.md) | C4 Architecture | Revised | Context, container, consolidated component diagram (3 + styles) |
-| [UC/](UC/README.md) | Use Cases | In progress | 152 UCs — 22 groups |
+| [UC/](UC/README.md) | Use Cases | In progress | 146 UCs — 21 groups |
 | [SM/](SM/README.md) | State Machine | In progress | 15 diagrams — 195 transitions, all SQ-covered |
-| [SQ/](SQ/README.md) | Sequence Diagrams | In progress | 149 diagrams across 22 groups (4 AC pending) |
-| [ER/](ER/README.md) | ERD | In progress | 6 store schemas (4 C4 data stores + 2 informational) |
+| [SQ/](SQ/README.md) | Sequence Diagrams | In progress | 146 diagrams across 22 groups |
+| [ER/](ER/README.md) | ERD | In progress | 5 store schemas (4 C4 data stores + 1 informational) |
 | [CL/](CL/README.md) | Class Diagram | In progress | Runtime class model — 102 classes across 17 layers |
 | [CT/DATA/](CT/DATA/README.md) | Data Contracts | In progress | ODCS v3.1.0 — 5 contract diagrams + 3 schemas |
 | [CT/API/](CT/API/README.md) | HTTP API Surface | In progress | OAS 3.1.0 + ROD — 23 endpoints, 8 resources |

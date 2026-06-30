@@ -42,7 +42,8 @@ System_Ext(web, "Web", "Documentation and search engines")
 System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
 System_Ext(git, "Git Repository", "Version-controlled project files")
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
-System_Ext(obs, "Observability Platform", "Logs, metrics, dashboards")
+
+
 
 ' ── User → External Clients ─────────────────────────────────
 Rel(user, cli, "runs coding tasks", "terminal REPL")
@@ -65,7 +66,6 @@ Rel(nasim_app, web, "fetches documentation", "HTTPS")
 Rel(nasim_app, mcp_server, "invokes extension tools", "stdio / SSE")
 Rel(nasim_app, git, "reads state, creates commits", "git CLI")
 Rel(nasim_app, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
-Rel(nasim_app, obs, "emits logs and metrics", "stdout / HTTP")
 
 ' ── Legend ───────────────────────────────────────────────────
 legend right

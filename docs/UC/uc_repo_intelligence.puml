@@ -67,12 +67,12 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Repo Intelligence Group (RIM)" {
-    usecase "**RIM-01 INDEX Codebase**\n--\nAST indexing via tree-sitter" <<master>> as RIM01
-    usecase "**RIM-02 BUILD Symbol Graph**\n--\nCross-file symbol reference graph" <<include>> as RIM02
-    usecase "**RIM-03 RANK Results**\n--\nPageRank ranking of code symbols" <<include>> as RIM03
-    usecase "**RIM-04 INJECT RepoMap**\n--\nGenerate token-budgeted repo-map" <<master>> as RIM04
-    usecase "**RIM-05 EMBED Code**\n--\nGenerate vector embeddings for code" <<master>> as RIM05
-    usecase "**RIM-06 SEARCH Semantic**\n--\nVector similarity search over embeddings" <<include>> as RIM06
+    usecase "**REPOINTELLIGENCE-01 INDEX Codebase**\n--\nAST indexing via tree-sitter" <<master>> as RIM01
+    usecase "**REPOINTELLIGENCE-02 BUILD Symbol Graph**\n--\nCross-file symbol reference graph" <<include>> as RIM02
+    usecase "**REPOINTELLIGENCE-03 RANK Results**\n--\nPageRank ranking of code symbols" <<include>> as RIM03
+    usecase "**REPOINTELLIGENCE-04 INJECT RepoMap**\n--\nGenerate token-budgeted repo-map" <<master>> as RIM04
+    usecase "**REPOINTELLIGENCE-05 EMBED Code**\n--\nGenerate vector embeddings for code" <<master>> as RIM05
+    usecase "**REPOINTELLIGENCE-06 SEARCH Semantic**\n--\nVector similarity search over embeddings" <<include>> as RIM06
   }
 }
 

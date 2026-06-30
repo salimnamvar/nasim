@@ -1,6 +1,6 @@
 @startuml sq_router01_select_model
 ' ============================================================
-' Title:     RTG-01 — SELECT Model
+' Title:     ROUTER-01 — SELECT Model
 ' Boundary:  nasim code agent
 ' Purpose:   Model selection and fallback routing
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RTG-01 SELECT Model
+title nasim -- ROUTER-01 SELECT Model
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "LLMRepository" as mgr
 end box
 
-== RTG-01 SELECT Model ==
+== ROUTER-01 SELECT Model ==
 
-user -> iface : RTG-01 SELECT Model({task_type})
+user -> iface : ROUTER-01 SELECT Model({task_type})
 activate iface
-iface -> router : RTG-01 SELECT Model({task_type})
+iface -> router : ROUTER-01 SELECT Model({task_type})
 activate router
-router -> mgr : RTG-01 SELECT Model(task_classification)
+router -> mgr : ROUTER-01 SELECT Model(task_classification)
 activate mgr
 
 alt model found
-  ref over mgr : RTG-01 SELECT Model(task_type) <back:#3F51B5>SELECTING</back>
+  ref over mgr : ROUTER-01 SELECT Model(task_type) <back:#3F51B5>SELECTING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt model found
   deactivate router
   deactivate iface
 else no supported model
-  mgr --> router : 404 NOT_FOUND\n{error: {code: "RTG-01_MODEL_NOT_FOUND", message: "No supported model for task", status: 404}}
+  mgr --> router : 404 NOT_FOUND\n{error: {code: "ROUTER-01_MODEL_NOT_FOUND", message: "No supported model for task", status: 404}}
   deactivate mgr
   router --> iface : 404 NOT_FOUND
   iface --> user : 404 NOT_FOUND

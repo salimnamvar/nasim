@@ -1,6 +1,6 @@
 @startuml sq_session09_delete_session
 ' ============================================================
-' Title:     SSN-09 — DELETE Session
+' Title:     SESSION-09 — DELETE Session
 ' Boundary:  nasim code agent
 ' Purpose:   Permanently delete a session and its associated data
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SSN-09 DELETE Session
+title nasim -- SESSION-09 DELETE Session
 
 actor "User" as user
 
@@ -35,16 +35,16 @@ end box
 
 database "SessionStore" as storage
 
-== SSN-09 DELETE Session ==
+== SESSION-09 DELETE Session ==
 
 user -> iface : DELETE /sessions/{session_id}
 activate iface
 iface -> router : DELETE /sessions/{session_id}
 activate router
 
-router -> svc : SSN-09 DELETE Session({session_id})
+router -> svc : SESSION-09 DELETE Session({session_id})
 activate svc
-svc -> store : SSN-09 DELETE Session({session_id})
+svc -> store : SESSION-09 DELETE Session({session_id})
 activate store
 
 alt session_id is empty
@@ -67,7 +67,7 @@ alt session not found
     deactivate iface
 end
 
-store -> storage : SSN-09 DELETE Session({session_id})
+store -> storage : SESSION-09 DELETE Session({session_id})
 activate storage
 
 alt permission denied
@@ -86,11 +86,11 @@ end
 storage --> store : 200 OK — removed
 deactivate storage
 
-ref over store : SSN-09 DELETE Session({session_id}) <back:#757575>CLOSED</back>
+ref over store : SESSION-09 DELETE Session({session_id}) <back:#757575>CLOSED</back>
 
 store --> svc : 200 OK — delete_confirmed({session_id})
 deactivate store
-ref over svc : SSN-09 DELETE Session({session_id}) <back:#757575>CLOSED</back>
+ref over svc : SESSION-09 DELETE Session({session_id}) <back:#757575>CLOSED</back>
 svc --> router : 200 OK — delete_confirmed({session_id})
 deactivate svc
 router --> iface : 200 OK — delete_confirmed({session_id})

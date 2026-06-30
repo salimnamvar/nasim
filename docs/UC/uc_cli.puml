@@ -89,10 +89,10 @@ rectangle "nasim" {
     usecase "**CLI-01 PROCESS User Input**\n--\nREPL loop, input handling.\nDelegates ALL business ops to AgentController." <<master>> as CLI01
     usecase "**CLI-02 DISPATCH Slash Command**\n--\nMap /cmd strings to API calls.\n/sessions → API-01, /model → API-11" <<master>> as CLI02
     usecase "**CLI-03 STREAM Output**\n--\nRender AgentEvents from API SSE stream to terminal" <<include>> as CLI03
-    usecase "**CLI-04 READ CLI Arguments**\n--\nParse startup CLI arguments.\n<<master>> CFG-01" <<master>> as CLI04
-    usecase "**CLI-05 ENABLE Plan Mode**\n--\n/plan command.\n<<master>> AGT-07" <<master>> as CLI05
-    usecase "**CLI-06 REQUEST Approval**\n--\nSafety approval prompt.\n<<master>> SAF-02" <<master>> as CLI06
-    usecase "**CLI-07 SWITCH Model**\n--\n/model command.\n<<master>> RTG-04" <<master>> as CLI07
+    usecase "**CLI-04 READ CLI Arguments**\n--\nParse startup CLI arguments.\n<<master>> CONFIG-01" <<master>> as CLI04
+    usecase "**CLI-05 ENABLE Plan Mode**\n--\n/plan command.\n<<master>> AGENT-07" <<master>> as CLI05
+    usecase "**CLI-06 REQUEST Approval**\n--\nSafety approval prompt.\n<<master>> SAFETY-02" <<master>> as CLI06
+    usecase "**CLI-07 SWITCH Model**\n--\n/model command.\n<<master>> ROUTER-04" <<master>> as CLI07
     usecase "**CLI-08 LIST Sessions**\n--\n/sessions command.\n<<master>> API-01" <<master>> as CLI08
   }
 }

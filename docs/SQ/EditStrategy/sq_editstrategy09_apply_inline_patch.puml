@@ -1,6 +1,6 @@
 @startuml sq_editstrategy09_apply_inline_patch
 ' ============================================================
-' Title:     EDT-09 — APPLY Inline Patch
+' Title:     EDITSTRATEGY-09 — APPLY Inline Patch
 ' Boundary:  nasim code agent
 ' Purpose:   Apply an inline patch edit to a file
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EDT-09 APPLY Inline Patch
+title nasim -- EDITSTRATEGY-09 APPLY Inline Patch
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EditStrategyRepository" as coder
 end box
 
-== EDT-09 APPLY Inline Patch ==
+== EDITSTRATEGY-09 APPLY Inline Patch ==
 
-user -> iface : EDT-09 APPLY Inline Patch({file_path, patch_content})
+user -> iface : EDITSTRATEGY-09 APPLY Inline Patch({file_path, patch_content})
 activate iface
-iface -> router : EDT-09 APPLY Inline Patch({file_path, patch_content})
+iface -> router : EDITSTRATEGY-09 APPLY Inline Patch({file_path, patch_content})
 activate router
-router -> coder : EDT-09 APPLY Inline Patch({file_path, patch_content})
+router -> coder : EDITSTRATEGY-09 APPLY Inline Patch({file_path, patch_content})
 activate coder
 
 alt validation succeeds
-  ref over coder : EDT-09 APPLY Inline Patch <back:#B2DFDB>TOOL_EXEC</back>
+  ref over coder : EDITSTRATEGY-09 APPLY Inline Patch <back:#B2DFDB>TOOL_EXEC</back>
   coder --> router : 200 OK
   deactivate coder
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  coder --> router : {error: {code: "EDT-09_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  coder --> router : {error: {code: "EDITSTRATEGY-09_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate coder
-  router --> iface : {error: {code: "EDT-09_VALIDATION_ERROR", message: "Validation failed", status: 422}}
-  iface --> user : {error: {code: "EDT-09_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  router --> iface : {error: {code: "EDITSTRATEGY-09_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  iface --> user : {error: {code: "EDITSTRATEGY-09_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate router
   deactivate iface
 end

@@ -1,6 +1,6 @@
 @startuml sq_plugins01_discover_plugins
 ' ============================================================
-' Title:     PLG-01 — DISCOVER Plugin
+' Title:     PLUGINS-01 — DISCOVER Plugin
 ' Boundary:  nasim code agent
 ' Purpose:   Discover plugins from plugin directory
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PLG-01 DISCOVER Plugin
+title nasim -- PLUGINS-01 DISCOVER Plugin
 
 actor "User" as user
 
@@ -33,19 +33,19 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "ToolService" as mgr
 end box
 
-== PLG-01 DISCOVER Plugin ==
+== PLUGINS-01 DISCOVER Plugin ==
 
-user -> iface : PLG-01 DISCOVER Plugin({plugin_dir})
+user -> iface : PLUGINS-01 DISCOVER Plugin({plugin_dir})
 activate iface
-iface -> router : PLG-01 DISCOVER Plugin({plugin_dir})
+iface -> router : PLUGINS-01 DISCOVER Plugin({plugin_dir})
 activate router
-router -> svc : PLG-01 DISCOVER Plugin({plugin_dir})
+router -> svc : PLUGINS-01 DISCOVER Plugin({plugin_dir})
 activate svc
-svc -> mgr : PLG-01 DISCOVER Plugin({plugin_dir})
+svc -> mgr : PLUGINS-01 DISCOVER Plugin({plugin_dir})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PLG-01 DISCOVER Plugin({plugin_dir}) <back:#E0E0E0>DISCOVERED</back>
+  ref over mgr : PLUGINS-01 DISCOVER Plugin({plugin_dir}) <back:#E0E0E0>DISCOVERED</back>
   mgr --> svc : 200 OK
   deactivate mgr
   svc --> router : 200 OK
@@ -55,12 +55,12 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLG-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
   deactivate mgr
-  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLG-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
+  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
   deactivate svc
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLG-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLG-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-01_DISCOVERY_FAILED", message: "Plugin discovery failed", status: 422}}
   deactivate router
   deactivate iface
 end

@@ -1,6 +1,6 @@
 @startuml sq_agent06_compact_context
 ' ============================================================
-' Title:     AGT-06 — COMPACT Context
+' Title:     AGENT-06 — COMPACT Context
 ' Boundary:  nasim code agent
 ' Purpose:   Summarize old exchanges when token budget exceeded
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-06 COMPACT Context
+title nasim -- AGENT-06 COMPACT Context
 
 actor "User" as user
 
@@ -35,20 +35,20 @@ end box
 
 database "SessionStore" as storage
 
-== AGT-06 COMPACT Context ==
+== AGENT-06 COMPACT Context ==
 
-user -> iface : AGT-06 COMPACT Context({agent_id, budget})
+user -> iface : AGENT-06 COMPACT Context({agent_id, budget})
 activate iface
-iface -> router : AGT-06 COMPACT Context({agent_id, budget})
+iface -> router : AGENT-06 COMPACT Context({agent_id, budget})
 activate router
-router -> compactor : AGT-06 COMPACT Context({agent_id, budget})
+router -> compactor : AGENT-06 COMPACT Context({agent_id, budget})
 activate compactor
 
 alt summary_quality acceptable
-  ref over compactor : AGT-06 COMPACT Context({agent_id, budget}) <back:#43A047>RUNNING</back>
-  compactor -> store : AGT-06 PERSIST Compacted({session_id, compacted_context})
+  ref over compactor : AGENT-06 COMPACT Context({agent_id, budget}) <back:#43A047>RUNNING</back>
+  compactor -> store : AGENT-06 PERSIST Compacted({session_id, compacted_context})
   activate store
-  store -> storage : AGT-06 PERSIST Compacted({session_id, compacted_context})
+  store -> storage : AGENT-06 PERSIST Compacted({session_id, compacted_context})
   activate storage
   storage --> store : 200 OK
   deactivate storage
@@ -61,10 +61,10 @@ alt summary_quality acceptable
   deactivate router
   deactivate iface
 else compaction fails
-  compactor --> router : 500 INTERNAL\n{error: {code: "AGT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
+  compactor --> router : 500 INTERNAL\n{error: {code: "AGENT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
   deactivate compactor
-  router --> iface : 500 INTERNAL\n{error: {code: "AGT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
-  iface --> user : 500 INTERNAL\n{error: {code: "AGT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
+  router --> iface : 500 INTERNAL\n{error: {code: "AGENT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
+  iface --> user : 500 INTERNAL\n{error: {code: "AGENT-06_COMPACT_FAILED", message: "Context compaction failed", status: 500}}
   deactivate router
   deactivate iface
 end

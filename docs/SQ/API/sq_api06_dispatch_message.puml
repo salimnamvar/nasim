@@ -72,7 +72,7 @@ deactivate store
 ref over orchestrator : API-06 DISPATCH Message <back:#E0F7FA>SERVING</back> → <back:#D7CCC8>THINKING</back> → <back:#D1C4E9>RESPONDING</back>
 
 ref over orchestrator
-  AGT-01: PROCESS User Task
+  AGENT-01: PROCESS User Task
 end ref
 
 orchestrator --> router : 200 OK — {events}

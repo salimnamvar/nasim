@@ -1,6 +1,6 @@
 @startuml sq_evaluation02_check_task_completion
 ' ============================================================
-' Title:     EVL-02 — CHECK Task Completion
+' Title:     EVALUATION-02 — CHECK Task Completion
 ' Boundary:  nasim code agent
 ' Purpose:   Check whether the task's criteria are met
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVL-02 CHECK Task Completion
+title nasim -- EVALUATION-02 CHECK Task Completion
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EvaluationService" as eval
 end box
 
-== EVL-02 CHECK Task Completion ==
+== EVALUATION-02 CHECK Task Completion ==
 
-user -> iface : EVL-02 CHECK Task Completion({task_id})
+user -> iface : EVALUATION-02 CHECK Task Completion({task_id})
 activate iface
-iface -> router : EVL-02 CHECK Task Completion({task_id})
+iface -> router : EVALUATION-02 CHECK Task Completion({task_id})
 activate router
-router -> eval : EVL-02 CHECK Task Completion({task_id})
+router -> eval : EVALUATION-02 CHECK Task Completion({task_id})
 activate eval
 
 alt criteria_met
-  ref over eval : EVL-02 CHECK Task Completion({task_id}) <back:#C5CAE9>CHECKING</back>
+  ref over eval : EVALUATION-02 CHECK Task Completion({task_id}) <back:#C5CAE9>CHECKING</back>
   eval --> router : 200 OK
   deactivate eval
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt criteria_met
   deactivate router
   deactivate iface
 else criteria_unmet
-  eval --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-02_CRITERIA_UNMET", message: "Task completion criteria not met", status: 422}}
+  eval --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-02_CRITERIA_UNMET", message: "Task completion criteria not met", status: 422}}
   deactivate eval
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

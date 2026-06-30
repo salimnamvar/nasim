@@ -67,12 +67,12 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Plugins Group (PLG)" {
-    usecase "**PLG-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" <<master>> as PLG01
-    usecase "**PLG-02 LOAD Manifest**\n--\nParse plugin manifest metadata" <<include>> as PLG02
-    usecase "**PLG-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" <<include>> as PLG03
-    usecase "**PLG-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" <<include>> as PLG04
-    usecase "**PLG-05 ENABLE Plugin**\n--\nEnable a plugin" <<master>> as PLG05
-    usecase "**PLG-06 DISABLE Plugin**\n--\nDisable a plugin" <<master>> as PLG06
+    usecase "**PLUGINS-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" <<master>> as PLG01
+    usecase "**PLUGINS-02 LOAD Manifest**\n--\nParse plugin manifest metadata" <<include>> as PLG02
+    usecase "**PLUGINS-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" <<include>> as PLG03
+    usecase "**PLUGINS-04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" <<include>> as PLG04
+    usecase "**PLUGINS-05 ENABLE Plugin**\n--\nEnable a plugin" <<master>> as PLG05
+    usecase "**PLUGINS-06 DISABLE Plugin**\n--\nDisable a plugin" <<master>> as PLG06
   }
 }
 

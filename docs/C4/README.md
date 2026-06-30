@@ -53,7 +53,7 @@ User → Controller (CLIAdapter, HTTPAdapter, MCPAdapter → AgentController)
 | MCP Server | Extension tools via MCP protocol |
 | Git Repository | Version-controlled project files |
 | Repo Intelligence Backend | Tree-sitter, LSP, embeddings, vector store |
-| Observability Platform | Logs, metrics, dashboards |
+
 
 ### External clients
 

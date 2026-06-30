@@ -1,6 +1,6 @@
 @startuml sq_plugins02_load_manifest
 ' ============================================================
-' Title:     PLG-02 — LOAD Manifest
+' Title:     PLUGINS-02 — LOAD Manifest
 ' Boundary:  nasim code agent
 ' Purpose:   Read and parse a plugin's manifest.yaml file
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PLG-02 LOAD Manifest
+title nasim -- PLUGINS-02 LOAD Manifest
 
 actor "User" as user
 
@@ -33,19 +33,19 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "ToolService" as mgr
 end box
 
-== PLG-02 LOAD Manifest ==
+== PLUGINS-02 LOAD Manifest ==
 
-user -> iface : PLG-02 LOAD Manifest({manifest_path})
+user -> iface : PLUGINS-02 LOAD Manifest({manifest_path})
 activate iface
-iface -> router : PLG-02 LOAD Manifest({manifest_path})
+iface -> router : PLUGINS-02 LOAD Manifest({manifest_path})
 activate router
-router -> svc : PLG-02 LOAD Manifest({manifest_path})
+router -> svc : PLUGINS-02 LOAD Manifest({manifest_path})
 activate svc
-svc -> mgr : PLG-02 LOAD Manifest({manifest_path})
+svc -> mgr : PLUGINS-02 LOAD Manifest({manifest_path})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PLG-02 LOAD Manifest <back:#FFCC80>LOADING</back>
+  ref over mgr : PLUGINS-02 LOAD Manifest <back:#FFCC80>LOADING</back>
   mgr --> svc : 200 OK
   deactivate mgr
   svc --> router : 200 OK
@@ -55,12 +55,12 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else manifest invalid
-  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLG-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
   deactivate mgr
-  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLG-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
+  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
   deactivate svc
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLG-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLG-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-02_MANIFEST_INVALID", message: "Plugin manifest is invalid", status: 422}}
   deactivate router
   deactivate iface
 end

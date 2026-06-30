@@ -74,14 +74,14 @@ actor "User" as User
 ' ------------------------------------------------------------
 
 
-usecase "AGT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
-usecase "SSN-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
-usecase "SSN-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
-usecase "SSN-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
-usecase "SSN-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
-usecase "CFG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
-usecase "CFG-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
-usecase "TL-14\nLIST Registered Tools\n[uc_tool_advanced]" as TL14_ext <<extref>>
+usecase "AGENT-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
+usecase "SESSION-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref>>
+usecase "SESSION-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
+usecase "SESSION-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
+usecase "SESSION-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
+usecase "CONFIG-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
+usecase "CONFIG-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
+usecase "TOOL-14\nLIST Registered Tools\n[uc_tool_advanced]" as TL14_ext <<extref>>
 
 
 ' ------------------------------------------------------------

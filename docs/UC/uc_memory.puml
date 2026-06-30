@@ -67,10 +67,10 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Memory Group (MEM)" {
-    usecase "**MEM-01 PERSIST Knowledge**\n--\nStore knowledge entries with scope, key, content" <<master>> as MEM01
-    usecase "**MEM-02 RECALL Knowledge**\n--\nRetrieve knowledge from memory stores" <<master>> as MEM02
-    usecase "**MEM-03 SEARCH Knowledge**\n--\nFTS5 search across stored knowledge" <<include>> as MEM03
-    usecase "**MEM-04 SCOPE Knowledge**\n--\nIsolate knowledge by global, project, session scope" <<include>> as MEM04
+    usecase "**MEMORY-01 PERSIST Knowledge**\n--\nStore knowledge entries with scope, key, content" <<master>> as MEM01
+    usecase "**MEMORY-02 RECALL Knowledge**\n--\nRetrieve knowledge from memory stores" <<master>> as MEM02
+    usecase "**MEMORY-03 SEARCH Knowledge**\n--\nFTS5 search across stored knowledge" <<include>> as MEM03
+    usecase "**MEMORY-04 SCOPE Knowledge**\n--\nIsolate knowledge by global, project, session scope" <<include>> as MEM04
   }
 }
 

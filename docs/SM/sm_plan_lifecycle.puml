@@ -12,7 +12,7 @@
 
 title nasim — Plan Lifecycle
 
-[*] --> EMPTY : AGT-07
+[*] --> EMPTY : AGENT-07
 
 state "EMPTY" as EMPTY #F5F5F5
 EMPTY : No plan active.
@@ -20,7 +20,7 @@ EMPTY : Default state.
 
 state "BUILDING" as BUILDING #FFE0B2
 BUILDING : Plan being constructed.
-BUILDING : AGT-07 QUEUE Plan.
+BUILDING : AGENT-07 QUEUE Plan.
 
 state "QUEUED" as QUEUED #E3F2FD
 QUEUED : Plan queued for approval.
@@ -28,7 +28,7 @@ QUEUED : Plan construction complete.
 
 state "APPROVED" as APPROVED #388E3C
 APPROVED : Plan approved by user.
-APPROVED : AGT-08 APPROVE Plan.
+APPROVED : AGENT-08 APPROVE Plan.
 
 state "EXECUTING" as EXECUTING #A5D6A7
 EXECUTING : Plan steps being executed.
@@ -42,15 +42,15 @@ state "REJECTED" as REJECTED #B71C1C
 REJECTED : Plan rejected by user.
 REJECTED : Terminal state.
 
-EMPTY --> BUILDING : AGT-07
-BUILDING --> QUEUED : AGT-07
-BUILDING --> EMPTY : AGT-07
-QUEUED --> APPROVED : AGT-08
-QUEUED --> REJECTED : AGT-08
-APPROVED --> EXECUTING : AGT-08
-EXECUTING --> COMPLETED : AGT-01
-EXECUTING --> EMPTY : AGT-14
-COMPLETED --> [*] : AGT-01
-REJECTED --> [*] : AGT-08
+EMPTY --> BUILDING : AGENT-07
+BUILDING --> QUEUED : AGENT-07
+BUILDING --> EMPTY : AGENT-07
+QUEUED --> APPROVED : AGENT-08
+QUEUED --> REJECTED : AGENT-08
+APPROVED --> EXECUTING : AGENT-08
+EXECUTING --> COMPLETED : AGENT-01
+EXECUTING --> EMPTY : AGENT-14
+COMPLETED --> [*] : AGENT-01
+REJECTED --> [*] : AGENT-08
 
 @enduml

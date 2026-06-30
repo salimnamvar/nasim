@@ -1,6 +1,6 @@
 @startuml sq_session08_branch_session
 ' ============================================================
-' Title:     SSN-08 — BRANCH Session
+' Title:     SESSION-08 — BRANCH Session
 ' Boundary:  nasim code agent
 ' Purpose:   Fork session into a new branch for parallel exploration
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SSN-08 BRANCH Session
+title nasim -- SESSION-08 BRANCH Session
 
 actor "User" as user
 
@@ -36,16 +36,16 @@ end box
 
 database "SessionStore" as storage
 
-== SSN-08 BRANCH Session ==
+== SESSION-08 BRANCH Session ==
 
 user -> iface : POST /sessions/{session_id}:branch
 activate iface
 iface -> router : POST /sessions/{session_id}:branch
 activate router
 
-router -> svc : SSN-08 BRANCH Session({session_id}, {from_turn})
+router -> svc : SESSION-08 BRANCH Session({session_id}, {from_turn})
 activate svc
-svc -> fork : SSN-08 BRANCH Session({session_id}, {from_turn})
+svc -> fork : SESSION-08 BRANCH Session({session_id}, {from_turn})
 activate fork
 
 alt session_id is empty
@@ -57,7 +57,7 @@ alt session_id is empty
     deactivate iface
 end
 
-fork -> store : SSN-08 READ Session({session_id})
+fork -> store : SESSION-08 READ Session({session_id})
 activate store
 
 alt session not found
@@ -76,9 +76,9 @@ end
 store --> fork : 200 OK — {session_data}
 deactivate store
 
-ref over fork : SSN-08 BRANCH Session({session_id}, {from_turn}) <back:#7B1FA2>BRANCHED</back>
+ref over fork : SESSION-08 BRANCH Session({session_id}, {from_turn}) <back:#7B1FA2>BRANCHED</back>
 
-fork -> store : SSN-08 INSERT BranchSession({session_id}, {branch_id}, {from_turn})
+fork -> store : SESSION-08 INSERT BranchSession({session_id}, {branch_id}, {from_turn})
 activate store
 
 alt copy failure
@@ -94,7 +94,7 @@ alt copy failure
     deactivate iface
 end
 
-store -> storage : SSN-08 INSERT SessionFile({branch_id}.jsonl)
+store -> storage : SESSION-08 INSERT SessionFile({branch_id}.jsonl)
 activate storage
 
 alt disk write error

@@ -1,6 +1,6 @@
 @startuml sq_sandbox01_isolate_command
 ' ============================================================
-' Title:     SBX-01 — ISOLATE Command
+' Title:     SANDBOX-01 — ISOLATE Command
 ' Boundary:  nasim code agent
 ' Purpose:   Execute command in OS-level sandbox
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SBX-01 ISOLATE Command
+title nasim -- SANDBOX-01 ISOLATE Command
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "SandboxRepository" as mgr
 end box
 
-== SBX-01 ISOLATE Command ==
+== SANDBOX-01 ISOLATE Command ==
 
 user -> iface : POST /sandbox/isolate
 activate iface
 iface -> router : POST /sandbox/isolate
 activate router
-router -> mgr : SBX-01 ISOLATE Command({command, policy})
+router -> mgr : SANDBOX-01 ISOLATE Command({command, policy})
 activate mgr
 
 alt execution succeeds
-  ref over mgr : SBX-01 ISOLATE Command({command, policy}) <back:#2196F3>EXECUTING</back>
+  ref over mgr : SANDBOX-01 ISOLATE Command({command, policy}) <back:#2196F3>EXECUTING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt execution succeeds
   deactivate router
   deactivate iface
 else timeout or violation
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SBX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SBX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SBX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-01_ISOLATION_FAILED", message: "Command isolation failed", status: 422}}
   deactivate router
   deactivate iface
 end

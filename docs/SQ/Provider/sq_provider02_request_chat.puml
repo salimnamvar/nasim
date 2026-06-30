@@ -1,6 +1,6 @@
 @startuml sq_provider02_request_chat
 ' ============================================================
-' Title:     PRV-02 — REQUEST Chat
+' Title:     PROVIDER-02 — REQUEST Chat
 ' Boundary:  nasim code agent
 ' Purpose:   Synchronous LLM chat completion via provider abstraction
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PRV-02 REQUEST Chat
+title nasim -- PROVIDER-02 REQUEST Chat
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "LLMRepository" as mgr
 end box
 
-== PRV-02 REQUEST Chat ==
+== PROVIDER-02 REQUEST Chat ==
 
 user -> iface : POST /providers/{id}:chat
 activate iface
 iface -> router : POST /providers/{id}:chat
 activate router
-router -> mgr : PRV-02 REQUEST Chat({messages, tools})
+router -> mgr : PROVIDER-02 REQUEST Chat({messages, tools})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PRV-02 REQUEST Chat({messages, tools}) <back:#D7CCC8>THINKING</back>
+  ref over mgr : PROVIDER-02 REQUEST Chat({messages, tools}) <back:#D7CCC8>THINKING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

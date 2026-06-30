@@ -1,6 +1,6 @@
 @startuml sq_wirelog05_checkpoint_turn
 ' ============================================================
-' Title:     WRL-05 — CHECKPOINT Turn
+' Title:     WIRELOG-05 — CHECKPOINT Turn
 ' Boundary:  nasim code agent
 ' Purpose:   Index current turn and persist checkpoint for resumption
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- WRL-05 CHECKPOINT Turn
+title nasim -- WIRELOG-05 CHECKPOINT Turn
 
 actor "User" as user
 
@@ -35,19 +35,19 @@ end box
 
 database "WireLogStore" as storage
 
-== WRL-05 CHECKPOINT Turn ==
+== WIRELOG-05 CHECKPOINT Turn ==
 
 user -> iface : POST /v1/wirelogs:checkpoint
 activate iface
 iface -> router : POST /v1/wirelogs:checkpoint
 activate router
-router -> wl : WRL-05 CHECKPOINT Turn({turn_data})
+router -> wl : WIRELOG-05 CHECKPOINT Turn({turn_data})
 activate wl
 
 alt checkpoint succeeds
-  wl -> appender : WRL-05 CHECKPOINT Turn({turn_data})
+  wl -> appender : WIRELOG-05 CHECKPOINT Turn({turn_data})
   activate appender
-  appender -> storage : WRL-05 WRITE Turn({turn_data})
+  appender -> storage : WIRELOG-05 WRITE Turn({turn_data})
   activate storage
   storage --> appender : 200 OK
   deactivate storage
@@ -60,14 +60,14 @@ alt checkpoint succeeds
   deactivate router
   deactivate iface
 else persist failure
-  storage --> appender : 500 INTERNAL\n{error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  storage --> appender : 500 INTERNAL\n{error: {code: "WIRELOG-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
   deactivate storage
-  appender --> wl : {error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  appender --> wl : {error: {code: "WIRELOG-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
   deactivate appender
-  wl --> router : {error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  wl --> router : {error: {code: "WIRELOG-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
   deactivate wl
-  router --> iface : {error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
-  iface --> user : {error: {code: "WRL-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  router --> iface : {error: {code: "WIRELOG-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
+  iface --> user : {error: {code: "WIRELOG-05_STORAGE_FAIL", message: "Checkpoint write failed", status: 500}}
   deactivate router
   deactivate iface
 end

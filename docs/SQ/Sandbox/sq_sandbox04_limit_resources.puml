@@ -1,6 +1,6 @@
 @startuml sq_sandbox04_limit_resources
 ' ============================================================
-' Title:     SBX-04 — LIMIT Resources
+' Title:     SANDBOX-04 — LIMIT Resources
 ' Boundary:  nasim code agent
 ' Purpose:   Enforce CPU, memory, and disk quotas per sandbox instance
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SBX-04 LIMIT Resources
+title nasim -- SANDBOX-04 LIMIT Resources
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "SandboxRepository" as mgr
 end box
 
-== SBX-04 LIMIT Resources ==
+== SANDBOX-04 LIMIT Resources ==
 
 user -> iface : PATCH /sandbox/limits
 activate iface
 iface -> router : PATCH /sandbox/limits
 activate router
-router -> mgr : SBX-04 LIMIT Resources({cgroup_id, quotas})
+router -> mgr : SANDBOX-04 LIMIT Resources({cgroup_id, quotas})
 activate mgr
 
 alt limits set
-  ref over mgr : SBX-04 LIMIT Resources({cgroup_id, quotas}) <back:#FF5722>RESOURCE_EXCEEDED</back>
+  ref over mgr : SANDBOX-04 LIMIT Resources({cgroup_id, quotas}) <back:#FF5722>RESOURCE_EXCEEDED</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt limits set
   deactivate router
   deactivate iface
 else cgroup setup fails
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SBX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SBX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SBX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-04_LIMIT_FAILED", message: "Resource limit failed", status: 422}}
   deactivate router
   deactivate iface
 end

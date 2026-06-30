@@ -1,6 +1,6 @@
 @startuml sq_tool15_spawn_subagent
 ' ============================================================
-' Title:     TL-15 — SPAWN Subagent
+' Title:     TOOL-15 — SPAWN Subagent
 ' Boundary:  nasim code agent
 ' Purpose:   Create a child subagent via SubagentTool
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-15 SPAWN Subagent
+title nasim -- TOOL-15 SPAWN Subagent
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-15 SPAWN Subagent ==
+== TOOL-15 SPAWN Subagent ==
 
 user -> iface : POST /tools/spawn_subagent:execute
 activate iface
 iface -> router : POST /tools/spawn_subagent:execute
 activate router
 
-router -> tool : TL-15 SPAWN Subagent(prompt, subagentType)
+router -> tool : TOOL-15 SPAWN Subagent(prompt, subagentType)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-15 SPAWN Subagent
+  ref over tool : TOOL-15 SPAWN Subagent
     ' State: <back:#FFAB91>SPAWNING</back> → <back:#BCAAA4>RUNNING</back>
-    ' Owned by: TL-15 SPAWN Subagent (SM/README.md)
+    ' Owned by: TOOL-15 SPAWN Subagent (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

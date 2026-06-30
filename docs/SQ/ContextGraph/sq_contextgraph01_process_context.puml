@@ -1,6 +1,6 @@
 @startuml sq_contextgraph01_process_context
 ' ============================================================
-' Title:     CTX-01 — PROCESS Context
+' Title:     CONTEXTGRAPH-01 — PROCESS Context
 ' Boundary:  nasim code agent
 ' Purpose:   Orchestrate context processing pipeline stages
 ' Milestone: v1.0
@@ -8,12 +8,12 @@
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
 ' CSR Chain: User -> CLIAdapter -> AgentController -> PipelineOrchestrator
-' SM States: (stateless — COMPACTING owned by AGT-06)
+' SM States: (stateless — COMPACTING owned by AGENT-06)
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- CTX-01 PROCESS Context
+title nasim -- CONTEXTGRAPH-01 PROCESS Context
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "ContextService" as orch
 end box
 
-== CTX-01 PROCESS Context ==
+== CONTEXTGRAPH-01 PROCESS Context ==
 
-user -> iface : CTX-01 PROCESS Context({graph, token_budget})
+user -> iface : CONTEXTGRAPH-01 PROCESS Context({graph, token_budget})
 activate iface
-iface -> router : CTX-01 PROCESS Context({graph, token_budget})
+iface -> router : CONTEXTGRAPH-01 PROCESS Context({graph, token_budget})
 activate router
-router -> orch : CTX-01 PROCESS Context({graph, token_budget})
+router -> orch : CONTEXTGRAPH-01 PROCESS Context({graph, token_budget})
 activate orch
 
 alt pipeline_stages complete
-  ref over orch : CTX-01 PROCESS Context({graph, token_budget})
+  ref over orch : CONTEXTGRAPH-01 PROCESS Context({graph, token_budget})
   orch --> router : 200 OK
   deactivate orch
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt pipeline_stages complete
   deactivate router
   deactivate iface
 else pipeline_error
-  orch --> router : 422 UNPROCESSABLE\n{error: {code: "CTX-01_PIPELINE_ERROR", message: "Context processing pipeline failed", status: 422}}
+  orch --> router : 422 UNPROCESSABLE\n{error: {code: "CONTEXTGRAPH-01_PIPELINE_ERROR", message: "Context processing pipeline failed", status: 422}}
   deactivate orch
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

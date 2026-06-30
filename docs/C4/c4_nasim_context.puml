@@ -28,7 +28,8 @@ System_Ext(mcp_server, "MCP Server", "Extension tools via MCP protocol")
 System_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP")
 System_Ext(git, "Git Repository", "Version-controlled project files")
 System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embeddings, vector store")
-System_Ext(obs, "Observability Platform", "Logs, metrics, dashboards")
+
+
 
 Rel(user, nasim_service, "submits coding tasks, receives AI-generated changes")
 Rel(nasim_service, llm, "sends context, receives completions")
@@ -39,7 +40,6 @@ Rel(nasim_service, mcp_server, "invokes extension tools")
 Rel(mcp_client, nasim_service, "consumes NASIM tools via MCP")
 Rel(nasim_service, git, "reads state, creates commits")
 Rel(nasim_service, repo_intel, "parses code, queries intelligence")
-Rel(nasim_service, obs, "emits logs and metrics")
 
 legend right
     |= Symbol |= Meaning |

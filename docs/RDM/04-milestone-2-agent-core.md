@@ -21,12 +21,12 @@ Implement the agent orchestrator, conversation history, context compaction, perm
 
 | # | Deliverable | UC Trace | SQ Trace |
 | - | --- | --- | --- |
-| 1 | `TaskService` core loop | AGT-01 | sq_agt01 |
-| 2 | Tool dispatch with permission gate | AGT-02, AGT-05 | sq_agt02, sq_agt05 |
-| 3 | `ConversationHistory` + token tracking | AGT-03, AGT-04, CTX-01 | sq_agt03, sq_agt04, sq_ctx01 |
-| 4 | `ContextService` | AGT-06, CTX-02, CTX-03 | sq_agt06, sq_ctx02, sq_ctx03 |
-| 5 | `SafetyService` | SAF-01, SAF-02, SAF-03 | sq_saf01, sq_saf02, sq_saf03 |
-| 6 | `TaskService` | AGT-07, AGT-08 | sq_agt07, sq_agt08 |
+| 1 | `TaskService` core loop | AGENT-01 | sq_agt01 |
+| 2 | Tool dispatch with permission gate | AGENT-02, AGENT-05 | sq_agt02, sq_agt05 |
+| 3 | `ConversationHistory` + token tracking | AGENT-03, AGENT-04, CONTEXTGRAPH-01 | sq_agt03, sq_agt04, sq_ctx01 |
+| 4 | `ContextService` | AGENT-06, CONTEXTGRAPH-02, CONTEXTGRAPH-03 | sq_agt06, sq_ctx02, sq_ctx03 |
+| 5 | `SafetyService` | SAFETY-01, SAFETY-02, SAFETY-03 | sq_saf01, sq_saf02, sq_saf03 |
+| 6 | `TaskService` | AGENT-07, AGENT-08 | sq_agt07, sq_agt08 |
 | 7 | `AgentEvent` hierarchy | — | — |
 
 ## Acceptance Criteria

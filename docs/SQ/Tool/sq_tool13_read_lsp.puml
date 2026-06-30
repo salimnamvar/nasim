@@ -1,6 +1,6 @@
 @startuml sq_tool13_read_lsp
 ' ============================================================
-' Title:     TL-13 — READ LSP
+' Title:     TOOL-13 — READ LSP
 ' Boundary:  nasim code agent
 ' Purpose:   Query LSP server for hover, definition, or references
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-13 READ LSP
+title nasim -- TOOL-13 READ LSP
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-13 READ LSP ==
+== TOOL-13 READ LSP ==
 
 user -> iface : POST /tools/read_lsp:execute
 activate iface
 iface -> router : POST /tools/read_lsp:execute
 activate router
 
-router -> tool : TL-13 READ LSP(query, params)
+router -> tool : TOOL-13 READ LSP(query, params)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-13 READ LSP
+  ref over tool : TOOL-13 READ LSP
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-13 READ LSP (SM/README.md)
+    ' Owned by: TOOL-13 READ LSP (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

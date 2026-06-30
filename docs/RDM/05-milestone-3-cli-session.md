@@ -24,7 +24,7 @@ Implement the CLI layer: REPL loop, argument parsing, slash commands, and render
 | 2 | `REPLSession` input loop | CLI-01 | sq_cli01 |
 | 3 | `Renderer` streaming + tool display | CLI-03 | sq_cli03 |
 | 4 | `SlashCommandHandler` | CLI-02, CLI-05, CLI-06 | sq_cli02 |
-| 5 | Session integration (continue/session flags) | SSN-01..04 | sq_ssn01..04 |
+| 5 | Session integration (continue/session flags) | SESSION-01..04 | sq_ssn01..04 |
 
 ## Acceptance Criteria
 

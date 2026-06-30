@@ -1,6 +1,6 @@
 @startuml sq_plugins05_enable_plugin
 ' ============================================================
-' Title:     PLG-05 — ENABLE Plugin
+' Title:     PLUGINS-05 — ENABLE Plugin
 ' Boundary:  nasim code agent
 ' Purpose:   Load plugin and activate its tools and hooks
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PLG-05 ENABLE Plugin
+title nasim -- PLUGINS-05 ENABLE Plugin
 
 actor "User" as user
 
@@ -33,19 +33,19 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "ToolService" as mgr
 end box
 
-== PLG-05 ENABLE Plugin ==
+== PLUGINS-05 ENABLE Plugin ==
 
-user -> iface : PLG-05 ENABLE Plugin({plugin_id})
+user -> iface : PLUGINS-05 ENABLE Plugin({plugin_id})
 activate iface
-iface -> router : PLG-05 ENABLE Plugin({plugin_id})
+iface -> router : PLUGINS-05 ENABLE Plugin({plugin_id})
 activate router
-router -> svc : PLG-05 ENABLE Plugin({plugin_id})
+router -> svc : PLUGINS-05 ENABLE Plugin({plugin_id})
 activate svc
-svc -> mgr : PLG-05 ENABLE Plugin({plugin_id})
+svc -> mgr : PLUGINS-05 ENABLE Plugin({plugin_id})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PLG-05 ENABLE Plugin <back:#4CAF50>ENABLED</back>
+  ref over mgr : PLUGINS-05 ENABLE Plugin <back:#4CAF50>ENABLED</back>
   mgr --> svc : 200 OK
   deactivate mgr
   svc --> router : 200 OK
@@ -55,12 +55,12 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else activation fails
-  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLG-05_ACTIVATION_FAILED", message: "Plugin activation failed", status: 422}}
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-05_ACTIVATION_FAILED", message: "Plugin activation failed", status: 422}}
   deactivate mgr
-  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLG-05_ACTIVATION_FAILED", message: "Plugin activation failed", status: 422}}
+  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-05_ACTIVATION_FAILED", message: "Plugin activation failed", status: 422}}
   deactivate svc
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLG-05_ACTIVATION_FAILED", message: "Plugin activation failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLG-05_ACTIVATION_FAILED", message: "Plugin activation failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-05_ACTIVATION_FAILED", message: "Plugin activation failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-05_ACTIVATION_FAILED", message: "Plugin activation failed", status: 422}}
   deactivate router
   deactivate iface
 end

@@ -1,6 +1,6 @@
 @startuml sq_hooks04_dispatch_pre_llm_hook
 ' ============================================================
-' Title:     HK-04 — DISPATCH Pre-LLM Hook
+' Title:     HOOKS-04 — DISPATCH Pre-LLM Hook
 ' Boundary:  nasim code agent
 ' Purpose:   Execute hooks before LLM call
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- HK-04 DISPATCH Pre-LLM Hook
+title nasim -- HOOKS-04 DISPATCH Pre-LLM Hook
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "ToolService" as mgr
 end box
 
-== HK-04 DISPATCH Pre-LLM Hook ==
+== HOOKS-04 DISPATCH Pre-LLM Hook ==
 
 user -> iface : POST /hooks/{id}:dispatch
 activate iface
 iface -> router : POST /hooks/{id}:dispatch
 activate router
-router -> mgr : HK-04 DISPATCH Pre-LLM Hook({messages})
+router -> mgr : HOOKS-04 DISPATCH Pre-LLM Hook({messages})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : HK-04 DISPATCH Pre-LLM Hook({messages}) <back:#FFFDE7>HOOK_RUNNING</back>
+  ref over mgr : HOOKS-04 DISPATCH Pre-LLM Hook({messages}) <back:#FFFDE7>HOOK_RUNNING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "HK-04_PRE_LLM_FAILED", message: "Pre-LLM hook dispatch failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "HOOKS-04_PRE_LLM_FAILED", message: "Pre-LLM hook dispatch failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "HK-04_PRE_LLM_FAILED", message: "Pre-LLM hook dispatch failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "HK-04_PRE_LLM_FAILED", message: "Pre-LLM hook dispatch failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "HOOKS-04_PRE_LLM_FAILED", message: "Pre-LLM hook dispatch failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "HOOKS-04_PRE_LLM_FAILED", message: "Pre-LLM hook dispatch failed", status: 422}}
   deactivate router
   deactivate iface
 end

@@ -1,6 +1,6 @@
 @startuml sq_repointelligence02_build_symbol_graph
 ' ============================================================
-' Title:     RIM-02 — BUILD Symbol Graph
+' Title:     REPOINTELLIGENCE-02 — BUILD Symbol Graph
 ' Boundary:  nasim code agent
 ' Purpose:   Build cross-file symbol reference graph
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RIM-02 BUILD Symbol Graph
+title nasim -- REPOINTELLIGENCE-02 BUILD Symbol Graph
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "RepoIntelligenceRepository" as symbolRepo
 end box
 
-== RIM-02 BUILD Symbol Graph ==
+== REPOINTELLIGENCE-02 BUILD Symbol Graph ==
 
-user -> iface : RIM-02 BUILD Symbol Graph({ast_index})
+user -> iface : REPOINTELLIGENCE-02 BUILD Symbol Graph({ast_index})
 activate iface
-iface -> router : RIM-02 BUILD Symbol Graph({ast_index})
+iface -> router : REPOINTELLIGENCE-02 BUILD Symbol Graph({ast_index})
 activate router
-router -> mgr : RIM-02 BUILD SymbolGraph({ast_index})
+router -> mgr : REPOINTELLIGENCE-02 BUILD SymbolGraph({ast_index})
 activate mgr
 
 alt reference_resolution completes without error
-  ref over mgr : RIM-02 BUILD SymbolGraph({ast_index}) <back:#9C27B0>BUILDING_GRAPH</back>
-  mgr -> symbolRepo : RIM-02 PERSIST SymbolGraph({ast_index, references})
+  ref over mgr : REPOINTELLIGENCE-02 BUILD SymbolGraph({ast_index}) <back:#9C27B0>BUILDING_GRAPH</back>
+  mgr -> symbolRepo : REPOINTELLIGENCE-02 PERSIST SymbolGraph({ast_index, references})
   activate symbolRepo
   symbolRepo --> mgr : 200 OK
   deactivate symbolRepo
@@ -55,10 +55,10 @@ alt reference_resolution completes without error
   deactivate router
   deactivate iface
 else reference resolution fails
-  mgr --> router : 500 INTERNAL\n{error: {code: "RIM-02_GRAPH_ERROR", message: "Symbol graph construction failed", status: 500}}
+  mgr --> router : 500 INTERNAL\n{error: {code: "REPOINTELLIGENCE-02_GRAPH_ERROR", message: "Symbol graph construction failed", status: 500}}
   deactivate mgr
-  router --> iface : 500 INTERNAL\n{error: {code: "RIM-02_GRAPH_ERROR", message: "Symbol graph construction failed", status: 500}}
-  iface --> user : 500 INTERNAL\n{error: {code: "RIM-02_GRAPH_ERROR", message: "Symbol graph construction failed", status: 500}}
+  router --> iface : 500 INTERNAL\n{error: {code: "REPOINTELLIGENCE-02_GRAPH_ERROR", message: "Symbol graph construction failed", status: 500}}
+  iface --> user : 500 INTERNAL\n{error: {code: "REPOINTELLIGENCE-02_GRAPH_ERROR", message: "Symbol graph construction failed", status: 500}}
   deactivate router
   deactivate iface
 end

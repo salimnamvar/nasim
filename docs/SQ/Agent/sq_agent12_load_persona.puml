@@ -1,6 +1,6 @@
 @startuml sq_agent12_load_persona
 ' ============================================================
-' Title:     AGT-12 — LOAD Persona
+' Title:     AGENT-12 — LOAD Persona
 ' Boundary:  nasim code agent
 ' Purpose:   Load persona configuration and apply system prompt
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-12 LOAD Persona
+title nasim -- AGENT-12 LOAD Persona
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "TaskService" as personaRepo
 end box
 
-== AGT-12 LOAD Persona ==
+== AGENT-12 LOAD Persona ==
 
 user -> iface : POST /v1/agents/{agent_id}:load-persona
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:load-persona
 activate router
-router -> persona : AGT-12 LOAD Persona({persona_name})
+router -> persona : AGENT-12 LOAD Persona({persona_name})
 activate persona
 
 alt load succeeds without error
-  ref over persona : AGT-12 LOAD Persona({persona_name}) <back:#43A047>RUNNING</back>
-  persona -> personaRepo : AGT-12 READ Persona({persona_name})
+  ref over persona : AGENT-12 LOAD Persona({persona_name}) <back:#43A047>RUNNING</back>
+  persona -> personaRepo : AGENT-12 READ Persona({persona_name})
   activate personaRepo
   personaRepo --> persona : 200 OK
   deactivate personaRepo
@@ -55,10 +55,10 @@ alt load succeeds without error
   deactivate router
   deactivate iface
 else config invalid
-  persona --> router : 422 INVALID_ARGUMENT\n{error: {code: "AGT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
+  persona --> router : 422 INVALID_ARGUMENT\n{error: {code: "AGENT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
   deactivate persona
-  router --> iface : 422 INVALID_ARGUMENT\n{error: {code: "AGT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
-  iface --> user : 422 INVALID_ARGUMENT\n{error: {code: "AGT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
+  router --> iface : 422 INVALID_ARGUMENT\n{error: {code: "AGENT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
+  iface --> user : 422 INVALID_ARGUMENT\n{error: {code: "AGENT-12_INVALID_CONFIG", message: "Persona configuration invalid", status: 422}}
   deactivate router
   deactivate iface
 end

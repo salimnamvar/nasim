@@ -1,6 +1,6 @@
 @startuml sq_tool09_fetch_web_content
 ' ============================================================
-' Title:     TL-09 — FETCH Web Content
+' Title:     TOOL-09 — FETCH Web Content
 ' Boundary:  nasim code agent
 ' Purpose:   Fetch URL content and convert to markdown
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-09 FETCH Web Content
+title nasim -- TOOL-09 FETCH Web Content
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-09 FETCH Web Content ==
+== TOOL-09 FETCH Web Content ==
 
 user -> iface : POST /tools/fetch_web:execute
 activate iface
 iface -> router : POST /tools/fetch_web:execute
 activate router
 
-router -> tool : TL-09 FETCH Web Content(url, timeout)
+router -> tool : TOOL-09 FETCH Web Content(url, timeout)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-09 FETCH Web Content
+  ref over tool : TOOL-09 FETCH Web Content
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-09 FETCH Web Content (SM/README.md)
+    ' Owned by: TOOL-09 FETCH Web Content (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

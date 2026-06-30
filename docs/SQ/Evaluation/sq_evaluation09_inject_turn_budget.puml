@@ -1,6 +1,6 @@
 @startuml sq_evaluation09_inject_turn_budget
 ' ============================================================
-' Title:     EVL-09 — INJECT Turn Budget
+' Title:     EVALUATION-09 — INJECT Turn Budget
 ' Boundary:  nasim code agent
 ' Purpose:   Inject remaining turn budget into the conversation
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVL-09 INJECT Turn Budget
+title nasim -- EVALUATION-09 INJECT Turn Budget
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EvaluationService" as injector
 end box
 
-== EVL-09 INJECT Turn Budget ==
+== EVALUATION-09 INJECT Turn Budget ==
 
-user -> iface : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
+user -> iface : EVALUATION-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
 activate iface
-iface -> router : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
+iface -> router : EVALUATION-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
 activate router
-router -> injector : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
+router -> injector : EVALUATION-09 INJECT Turn Budget({task_id, remaining_turns, max_turns})
 activate injector
 
 alt injection succeeds
-  ref over injector : EVL-09 INJECT Turn Budget({task_id, remaining_turns, max_turns}) <back:#C5CAE9>CHECKING</back>({task_id, remaining_turns, max_turns})
+  ref over injector : EVALUATION-09 INJECT Turn Budget({task_id, remaining_turns, max_turns}) <back:#C5CAE9>CHECKING</back>({task_id, remaining_turns, max_turns})
   injector --> router : 200 OK
   deactivate injector
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt injection succeeds
   deactivate router
   deactivate iface
 else budget exceeded
-  injector --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
+  injector --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
   deactivate injector
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "EVL-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "EVL-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-09_BUDGET_EXCEEDED", message: "Turn budget exceeded", status: 422}}
   deactivate router
   deactivate iface
 end

@@ -38,8 +38,8 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Tools Group (TL)" {
-    usecase "**TL-01 LIST Core Tools**\n--\nFile operations, shell,\nsearch, web tools\nSee uc_tool_core.puml" <<extref>> as TL01
-    usecase "**TL-02 LIST Advanced Tools**\n--\nGit, MCP, LSP, subagent,\ntodo, memory, plan\nSee uc_tool_advanced.puml" <<extref>> as TL02
+    usecase "**TOOL-01 LIST Core Tools**\n--\nFile operations, shell,\nsearch, web tools\nSee uc_tool_core.puml" <<extref>> as TL01
+    usecase "**TOOL-02 LIST Advanced Tools**\n--\nGit, MCP, LSP, subagent,\ntodo, memory, plan\nSee uc_tool_advanced.puml" <<extref>> as TL02
   }
 }
 

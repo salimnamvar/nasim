@@ -67,12 +67,12 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Context Graph Group (CTX)" {
-    usecase "**CTX-01 PROCESS Context**\n--\nOrchestrate context pipeline stages" <<master>> as CTX01
-    usecase "**CTX-02 TRUNCATE Nodes**\n--\nTruncate context nodes to fit token budget" <<include>> as CTX02
-    usecase "**CTX-03 DISTILL Nodes**\n--\nSummarize long context nodes via LLM" <<include>> as CTX03
-    usecase "**CTX-04 INJECT Context**\n--\nInject memory and repo-map into graph" <<include>> as CTX04
-    usecase "**CTX-05 COMPACT Nodes**\n--\nMerge redundant context nodes" <<include>> as CTX05
-    usecase "**CTX-06 TRACK Token Budget**\n--\nTrack cumulative token usage" <<include>> as CTX06
+    usecase "**CONTEXTGRAPH-01 PROCESS Context**\n--\nOrchestrate context pipeline stages" <<master>> as CTX01
+    usecase "**CONTEXTGRAPH-02 TRUNCATE Nodes**\n--\nTruncate context nodes to fit token budget" <<include>> as CTX02
+    usecase "**CONTEXTGRAPH-03 DISTILL Nodes**\n--\nSummarize long context nodes via LLM" <<include>> as CTX03
+    usecase "**CONTEXTGRAPH-04 INJECT Context**\n--\nInject memory and repo-map into graph" <<include>> as CTX04
+    usecase "**CONTEXTGRAPH-05 COMPACT Nodes**\n--\nMerge redundant context nodes" <<include>> as CTX05
+    usecase "**CONTEXTGRAPH-06 TRACK Token Budget**\n--\nTrack cumulative token usage" <<include>> as CTX06
   }
 }
 

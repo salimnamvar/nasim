@@ -21,10 +21,10 @@ Set up project structure, config loading, and session persistence. Foundation fo
 | # | Deliverable | UC Trace | SQ Trace |
 | - | --- | --- | --- |
 | 1 | `pyproject.toml` with all deps + tool config | — | — |
-| 2 | `Config` dataclass + `ConfigRepository` | CFG-01, CFG-02, CFG-03 | sq_cfg01, sq_cfg02, sq_cfg03 |
-| 3 | `Session` dataclass + `SessionRepository` | SSN-01, SSN-02, SSN-03, SSN-04 | sq_ssn01, sq_ssn02, sq_ssn03, sq_ssn04 |
+| 2 | `Config` dataclass + `ConfigRepository` | CONFIG-01, CONFIG-02, CONFIG-03 | sq_cfg01, sq_cfg02, sq_cfg03 |
+| 3 | `Session` dataclass + `SessionRepository` | SESSION-01, SESSION-02, SESSION-03, SESSION-04 | sq_ssn01, sq_ssn02, sq_ssn03, sq_ssn04 |
 | 4 | `DomainException` base + specific exceptions | — | — |
-| 5 | Test suite: config loading, session CRUD | CFG-01..03, SSN-01..04 | sq_cfg01..03, sq_ssn01..04 |
+| 5 | Test suite: config loading, session CRUD | CONFIG-01..03, SESSION-01..04 | sq_cfg01..03, sq_ssn01..04 |
 
 ## Acceptance Criteria
 

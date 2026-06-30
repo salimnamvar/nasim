@@ -15,7 +15,7 @@
 
 title nasim — Subagent Lifecycle
 
-[*] --> IDLE : AGT-09
+[*] --> IDLE : AGENT-09
 
 state "IDLE" as IDLE #CFD8DC
 IDLE : No child agent active.
@@ -37,15 +37,15 @@ state "FAILED" as FAILED #EF9A9A
 FAILED : Child agent encountered unrecoverable error.
 FAILED : Error reported to parent, child cleaned up.
 
-IDLE --> SPAWNING : AGT-09
-SPAWNING --> RUNNING : AGT-09
-SPAWNING --> FAILED : AGT-09
-RUNNING --> COMPLETED : AGT-10
-RUNNING --> FAILED : AGT-14
-COMPLETED --> IDLE : AGT-10
-FAILED --> IDLE : AGT-14
+IDLE --> SPAWNING : AGENT-09
+SPAWNING --> RUNNING : AGENT-09
+SPAWNING --> FAILED : AGENT-09
+RUNNING --> COMPLETED : AGENT-10
+RUNNING --> FAILED : AGENT-14
+COMPLETED --> IDLE : AGENT-10
+FAILED --> IDLE : AGENT-14
 
-COMPLETED --> [*] : AGT-10
-FAILED --> [*] : AGT-14
+COMPLETED --> [*] : AGENT-10
+FAILED --> [*] : AGENT-14
 
 @enduml

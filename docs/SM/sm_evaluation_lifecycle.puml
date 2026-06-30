@@ -7,7 +7,7 @@
 '            Orchestrates: checks, LLM review, test suites, scoring, retry.
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (EvaluationService), docs/UC/README.md (EVL-01..EVL-09)
+' Source:    C4 component diagram (EvaluationService), docs/UC/README.md (EVALUATION-01..EVALUATION-09)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
@@ -15,7 +15,7 @@
 
 title nasim — Evaluation Lifecycle
 
-[*] --> IDLE : EVL-01
+[*] --> IDLE : EVALUATION-01
 
 state "IDLE" as IDLE #90A4AE
 IDLE : No evaluation in progress.
@@ -23,23 +23,23 @@ IDLE : Default state.
 
 state "CHECKING" as CHECKING #C5CAE9
 CHECKING : Running task completion and success checks.
-CHECKING : EVL-02 CHECK Task Completion, EVL-03 CHECK Success.
+CHECKING : EVALUATION-02 CHECK Task Completion, EVALUATION-03 CHECK Success.
 
 state "REVIEWING" as REVIEWING #AB47BC
 REVIEWING : LLM-based code review and quality assessment.
-REVIEWING : EVL-04 VALIDATE With LLM.
+REVIEWING : EVALUATION-04 VALIDATE With LLM.
 
 state "TESTING" as TESTING #D4E157
 TESTING : Running project test suites.
-TESTING : EVL-05 VALIDATE Test Suite.
+TESTING : EVALUATION-05 VALIDATE Test Suite.
 
 state "SCORING" as SCORING #FF8A65
 SCORING : Recording quality signal and scoring.
-SCORING : EVL-07 RECORD Quality Signal.
+SCORING : EVALUATION-07 RECORD Quality Signal.
 
 state "RETRYING" as RETRYING #C62828
 RETRYING : Coordinating retry with backoff and escalation.
-RETRYING : EVL-06 COORDINATE Retry.
+RETRYING : EVALUATION-06 COORDINATE Retry.
 
 state "PASSED" as PASSED #689F38
 PASSED : Evaluation passed all criteria.
@@ -49,24 +49,24 @@ state "FAILED" as FAILED #AD1457
 FAILED : Evaluation failed, retries exhausted.
 FAILED : Terminal failure state.
 
-IDLE --> CHECKING : EVL-01
-CHECKING --> REVIEWING : EVL-04
-CHECKING --> TESTING : EVL-05
-CHECKING --> SCORING : EVL-07
-CHECKING --> FAILED : EVL-02
-REVIEWING --> SCORING : EVL-07
-REVIEWING --> RETRYING : EVL-06
-TESTING --> SCORING : EVL-07
-TESTING --> RETRYING : EVL-06
-SCORING --> PASSED : EVL-07
-SCORING --> RETRYING : EVL-06
-RETRYING --> CHECKING : EVL-06
-RETRYING --> FAILED : EVL-06
+IDLE --> CHECKING : EVALUATION-01
+CHECKING --> REVIEWING : EVALUATION-04
+CHECKING --> TESTING : EVALUATION-05
+CHECKING --> SCORING : EVALUATION-07
+CHECKING --> FAILED : EVALUATION-02
+REVIEWING --> SCORING : EVALUATION-07
+REVIEWING --> RETRYING : EVALUATION-06
+TESTING --> SCORING : EVALUATION-07
+TESTING --> RETRYING : EVALUATION-06
+SCORING --> PASSED : EVALUATION-07
+SCORING --> RETRYING : EVALUATION-06
+RETRYING --> CHECKING : EVALUATION-06
+RETRYING --> FAILED : EVALUATION-06
 
-PASSED --> IDLE : EVL-01
-FAILED --> IDLE : EVL-01
+PASSED --> IDLE : EVALUATION-01
+FAILED --> IDLE : EVALUATION-01
 
-PASSED --> [*] : EVL-01
-FAILED --> [*] : EVL-01
+PASSED --> [*] : EVALUATION-01
+FAILED --> [*] : EVALUATION-01
 
 @enduml

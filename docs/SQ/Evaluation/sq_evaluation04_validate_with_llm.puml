@@ -1,6 +1,6 @@
 @startuml sq_evaluation04_validate_with_llm
 ' ============================================================
-' Title:     EVL-04 — VALIDATE With LLM
+' Title:     EVALUATION-04 — VALIDATE With LLM
 ' Boundary:  nasim code agent
 ' Purpose:   Validate task results using an LLM reviewer
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVL-04 VALIDATE With LLM
+title nasim -- EVALUATION-04 VALIDATE With LLM
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EvaluationService" as reviewer
 end box
 
-== EVL-04 VALIDATE With LLM ==
+== EVALUATION-04 VALIDATE With LLM ==
 
-user -> iface : EVL-04 VALIDATE With LLM({task_id, artifact})
+user -> iface : EVALUATION-04 VALIDATE With LLM({task_id, artifact})
 activate iface
-iface -> router : EVL-04 VALIDATE With LLM({task_id, artifact})
+iface -> router : EVALUATION-04 VALIDATE With LLM({task_id, artifact})
 activate router
-router -> reviewer : EVL-04 VALIDATE With LLM({task_id, artifact})
+router -> reviewer : EVALUATION-04 VALIDATE With LLM({task_id, artifact})
 activate reviewer
 
 alt llm_approves
-  ref over reviewer : EVL-04 VALIDATE With LLM({task_id, prompt}) <back:#AB47BC>REVIEWING</back>
+  ref over reviewer : EVALUATION-04 VALIDATE With LLM({task_id, prompt}) <back:#AB47BC>REVIEWING</back>
   reviewer --> router : 200 OK
   deactivate reviewer
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt llm_approves
   deactivate router
   deactivate iface
 else llm_rejects
-  reviewer --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-04_LLM_REJECTED", message: "LLM review failed", status: 422}}
+  reviewer --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-04_LLM_REJECTED", message: "LLM review failed", status: 422}}
   deactivate reviewer
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

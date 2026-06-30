@@ -1,6 +1,6 @@
 @startuml sq_plugins04_register_plugin_hooks
 ' ============================================================
-' Title:     PLG-04 — REGISTER Plugin Hooks
+' Title:     PLUGINS-04 — REGISTER Plugin Hooks
 ' Boundary:  nasim code agent
 ' Purpose:   Register all hooks declared in a plugin manifest
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PLG-04 REGISTER Plugin Hooks
+title nasim -- PLUGINS-04 REGISTER Plugin Hooks
 
 actor "User" as user
 
@@ -33,19 +33,19 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "ToolService" as mgr
 end box
 
-== PLG-04 REGISTER Plugin Hooks ==
+== PLUGINS-04 REGISTER Plugin Hooks ==
 
-user -> iface : PLG-04 REGISTER Plugin Hooks({manifest})
+user -> iface : PLUGINS-04 REGISTER Plugin Hooks({manifest})
 activate iface
-iface -> router : PLG-04 REGISTER Plugin Hooks({manifest})
+iface -> router : PLUGINS-04 REGISTER Plugin Hooks({manifest})
 activate router
-router -> svc : PLG-04 REGISTER Plugin Hooks({manifest})
+router -> svc : PLUGINS-04 REGISTER Plugin Hooks({manifest})
 activate svc
-svc -> mgr : PLG-04 REGISTER Plugin Hooks({manifest})
+svc -> mgr : PLUGINS-04 REGISTER Plugin Hooks({manifest})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PLG-04 REGISTER Plugin Hooks <back:#90CAF9>LOADED</back> <back:#90CAF9>LOADED</back>
+  ref over mgr : PLUGINS-04 REGISTER Plugin Hooks <back:#90CAF9>LOADED</back> <back:#90CAF9>LOADED</back>
   mgr --> svc : 200 OK
   deactivate mgr
   svc --> router : 200 OK
@@ -55,12 +55,12 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else registration fails
-  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLG-04_HOOK_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-04_HOOK_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
   deactivate mgr
-  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLG-04_HOOK_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
+  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-04_HOOK_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
   deactivate svc
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLG-04_HOOK_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLG-04_HOOK_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-04_HOOK_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-04_HOOK_REGISTRATION_FAILED", message: "Hook registration failed", status: 422}}
   deactivate router
   deactivate iface
 end

@@ -67,9 +67,9 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Safety Group (SAF)" {
-    usecase "**SAF-01 CHECK Permission**\n--\nCheck permission against safety rules" <<include>> as SAF01
-    usecase "**SAF-02 REQUEST Approval**\n--\nPrompt user for approval" <<master>> as SAF02
-    usecase "**SAF-03 APPLY Safety Mode**\n--\nApply safety mode configuration" <<master>> as SAF03
+    usecase "**SAFETY-01 CHECK Permission**\n--\nCheck permission against safety rules" <<include>> as SAF01
+    usecase "**SAFETY-02 REQUEST Approval**\n--\nPrompt user for approval" <<master>> as SAF02
+    usecase "**SAFETY-03 APPLY Safety Mode**\n--\nApply safety mode configuration" <<master>> as SAF03
   }
 }
 

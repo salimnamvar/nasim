@@ -1,6 +1,6 @@
 @startuml sq_safety03_apply_safety_mode
 ' ============================================================
-' Title:     SAF-03 — APPLY Safety Mode
+' Title:     SAFETY-03 — APPLY Safety Mode
 ' Boundary:  nasim code agent
 ' Purpose:   Configure safety mode from config
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SAF-03 APPLY Safety Mode
+title nasim -- SAFETY-03 APPLY Safety Mode
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "SafetyService" as mgr
 end box
 
-== SAF-03 APPLY Safety Mode ==
+== SAFETY-03 APPLY Safety Mode ==
 
-user -> iface : SAF-03 APPLY Safety Mode({safety_mode})
+user -> iface : SAFETY-03 APPLY Safety Mode({safety_mode})
 activate iface
-iface -> router : SAF-03 APPLY Safety Mode({safety_mode})
+iface -> router : SAFETY-03 APPLY Safety Mode({safety_mode})
 activate router
-router -> mgr : SAF-03 APPLY Safety Mode(safety_mode)
+router -> mgr : SAFETY-03 APPLY Safety Mode(safety_mode)
 activate mgr
 
 alt mode applied
-  ref over mgr : SAF-03 APPLY Safety Mode(safety_mode) <back:#FDD835>ASK</back>
+  ref over mgr : SAFETY-03 APPLY Safety Mode(safety_mode) <back:#FDD835>ASK</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt mode applied
   deactivate router
   deactivate iface
 else invalid mode
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SAF-03_INVALID_MODE", message: "Invalid safety mode", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SAFETY-03_INVALID_MODE", message: "Invalid safety mode", status: 422}}
   deactivate mgr
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

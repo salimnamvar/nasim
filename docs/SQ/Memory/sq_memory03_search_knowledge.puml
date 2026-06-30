@@ -1,6 +1,6 @@
 @startuml sq_memory03_search_knowledge
 ' ============================================================
-' Title:     MEM-03 — SEARCH Knowledge
+' Title:     MEMORY-03 — SEARCH Knowledge
 ' Boundary:  nasim code agent
 ' Purpose:   Full-text search across knowledge store
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- MEM-03 SEARCH Knowledge
+title nasim -- MEMORY-03 SEARCH Knowledge
 
 actor "User" as user
 
@@ -33,15 +33,15 @@ box "Repository" REPOSITORY_COLOR
   participant "MemoryRepository" as store
 end box
 
-== MEM-03 SEARCH Knowledge ==
+== MEMORY-03 SEARCH Knowledge ==
 
 user -> iface : GET /knowledge?q={query}
 activate iface
 iface -> router : GET /knowledge?q={query}
 activate router
-router -> svc : MEM-03 SEARCH Knowledge({query, scope})
+router -> svc : MEMORY-03 SEARCH Knowledge({query, scope})
 activate svc
-svc -> store : MEM-03 SEARCH Knowledge({query, scope})
+svc -> store : MEMORY-03 SEARCH Knowledge({query, scope})
 activate store
 
 alt search fails

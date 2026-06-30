@@ -67,16 +67,16 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Edit Strategy Group (EDT)" {
-    usecase "**EDT-01 SELECT Strategy**\n--\nSelect optimal edit strategy for model" <<master>> as EDT01
-    usecase "**EDT-02 APPLY Search-Replace**\n--\nSearch-and-replace edit with fuzzy matching" <<include>> as EDT02
-    usecase "**EDT-03 APPLY Whole-File**\n--\nWhole file rewrite strategy" <<include>> as EDT03
-    usecase "**EDT-04 APPLY Unified Diff**\n--\nUnified diff format edit" <<include>> as EDT04
-    usecase "**EDT-05 APPLY Fenced Block**\n--\nFenced code block format edit" <<include>> as EDT05
-    usecase "**EDT-06 APPLY Function-Level**\n--\nAST-targeted function replacement" <<include>> as EDT06
-    usecase "**EDT-07 APPLY Diff Sandbox**\n--\nSandboxed diff with validation" <<include>> as EDT07
-    usecase "**EDT-08 APPLY Architect**\n--\nMulti-file architectural edit" <<include>> as EDT08
-    usecase "**EDT-09 APPLY Inline Patch**\n--\napply-patch format edit" <<include>> as EDT09
-    usecase "**EDT-10 STAGE Diff**\n--\nStage edits for review before apply" <<include>> as EDT10
+    usecase "**EDITSTRATEGY-01 SELECT Strategy**\n--\nSelect optimal edit strategy for model" <<master>> as EDT01
+    usecase "**EDITSTRATEGY-02 APPLY Search-Replace**\n--\nSearch-and-replace edit with fuzzy matching" <<include>> as EDT02
+    usecase "**EDITSTRATEGY-03 APPLY Whole-File**\n--\nWhole file rewrite strategy" <<include>> as EDT03
+    usecase "**EDITSTRATEGY-04 APPLY Unified Diff**\n--\nUnified diff format edit" <<include>> as EDT04
+    usecase "**EDITSTRATEGY-05 APPLY Fenced Block**\n--\nFenced code block format edit" <<include>> as EDT05
+    usecase "**EDITSTRATEGY-06 APPLY Function-Level**\n--\nAST-targeted function replacement" <<include>> as EDT06
+    usecase "**EDITSTRATEGY-07 APPLY Diff Sandbox**\n--\nSandboxed diff with validation" <<include>> as EDT07
+    usecase "**EDITSTRATEGY-08 APPLY Architect**\n--\nMulti-file architectural edit" <<include>> as EDT08
+    usecase "**EDITSTRATEGY-09 APPLY Inline Patch**\n--\napply-patch format edit" <<include>> as EDT09
+    usecase "**EDITSTRATEGY-10 STAGE Diff**\n--\nStage edits for review before apply" <<include>> as EDT10
   }
 }
 

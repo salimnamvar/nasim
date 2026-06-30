@@ -30,7 +30,7 @@ skinparam rectangle<<repository>> {
     FontColor<<repository>> #1B5E20
 }
 
-' Infrastructure Layer (MCP, Sandbox, Observability, Wire Log, Hooks, Plugins)
+' Infrastructure Layer (MCP, Sandbox, Wire Log, Hooks, Plugins)
 skinparam rectangle<<infrastructure>> {
     BackgroundColor<<infrastructure>> #F3E5F5
     BorderColor<<infrastructure>> #7B1FA2
@@ -66,7 +66,7 @@ skinparam rectangle<<deployable>> {
 '                                          Edit Strategy, Evaluation, Provider
 '   <<repository>>   — green (#E8F5E9)   — Session, Tool, Memory, Config, Git,
 '                                          Repo Intelligence
-'   <<infrastructure>> — purple (#F3E5F5) — MCP, Sandbox, Observability,
+'   <<infrastructure>> — purple (#F3E5F5) — MCP, Sandbox,
 '                                          Wire Log, Hooks, Plugins
 '
 ' Each diagram should include a standalone 'legend' block explaining

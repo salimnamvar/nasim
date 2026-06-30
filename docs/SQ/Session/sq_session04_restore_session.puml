@@ -1,6 +1,6 @@
 @startuml sq_session04_restore_session
 ' ============================================================
-' Title:     SSN-04 — RESTORE Session
+' Title:     SESSION-04 — RESTORE Session
 ' Boundary:  nasim code agent
 ' Purpose:   Resume a previous session by loading its history
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SSN-04 RESTORE Session
+title nasim -- SESSION-04 RESTORE Session
 
 actor "User" as user
 
@@ -35,16 +35,16 @@ end box
 
 database "SessionStore" as storage
 
-== SSN-04 RESTORE Session ==
+== SESSION-04 RESTORE Session ==
 
 user -> iface : POST /sessions/{session_id}:restore
 activate iface
 iface -> router : POST /sessions/{session_id}:restore
 activate router
 
-router -> svc : SSN-04 RESTORE Session({session_id})
+router -> svc : SESSION-04 RESTORE Session({session_id})
 activate svc
-svc -> store : SSN-04 RESTORE Session({session_id})
+svc -> store : SESSION-04 RESTORE Session({session_id})
 activate store
 
 alt session_id is empty
@@ -67,7 +67,7 @@ alt session not found
     deactivate iface
 end
 
-store -> storage : SSN-04 RESTORE Session({session_id})
+store -> storage : SESSION-04 RESTORE Session({session_id})
 activate storage
 
 alt disk read error
@@ -86,11 +86,11 @@ end
 storage --> store : 200 OK
 deactivate storage
 
-ref over store : SSN-04 RESTORE Session({session_id}) <back:#43A047>ACTIVE</back>
+ref over store : SESSION-04 RESTORE Session({session_id}) <back:#43A047>ACTIVE</back>
 
 store --> svc : 200 OK
 deactivate store
-ref over svc : SSN-04 RESTORE Session({session_id}) <back:#43A047>ACTIVE</back>
+ref over svc : SESSION-04 RESTORE Session({session_id}) <back:#43A047>ACTIVE</back>
 svc --> router : 200 OK
 deactivate svc
 router --> iface : 200 OK

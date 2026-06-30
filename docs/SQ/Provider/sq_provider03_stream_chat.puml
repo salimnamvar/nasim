@@ -1,6 +1,6 @@
 @startuml sq_provider03_stream_chat
 ' ============================================================
-' Title:     PRV-03 — STREAM Chat
+' Title:     PROVIDER-03 — STREAM Chat
 ' Boundary:  nasim code agent
 ' Purpose:   Streaming LLM chat completion via provider abstraction
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PRV-03 STREAM Chat
+title nasim -- PROVIDER-03 STREAM Chat
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "LLMRepository" as mgr
 end box
 
-== PRV-03 STREAM Chat ==
+== PROVIDER-03 STREAM Chat ==
 
 user -> iface : POST /providers/{id}:chat/stream
 activate iface
 iface -> router : POST /providers/{id}:chat/stream
 activate router
-router -> mgr : PRV-03 STREAM Chat({messages, tools})
+router -> mgr : PROVIDER-03 STREAM Chat({messages, tools})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PRV-03 STREAM Chat({messages, tools}) <back:#D1C4E9>RESPONDING</back>
+  ref over mgr : PROVIDER-03 STREAM Chat({messages, tools}) <back:#D1C4E9>RESPONDING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

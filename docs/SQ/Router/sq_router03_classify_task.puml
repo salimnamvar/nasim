@@ -1,6 +1,6 @@
 @startuml sq_router03_classify_task
 ' ============================================================
-' Title:     RTG-03 — CLASSIFY Task
+' Title:     ROUTER-03 — CLASSIFY Task
 ' Boundary:  nasim code agent
 ' Purpose:   Classify task type and select optimal model
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RTG-03 CLASSIFY Task
+title nasim -- ROUTER-03 CLASSIFY Task
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "LLMRepository" as mgr
 end box
 
-== RTG-03 CLASSIFY Task ==
+== ROUTER-03 CLASSIFY Task ==
 
-user -> iface : RTG-03 CLASSIFY Task({task_description, context})
+user -> iface : ROUTER-03 CLASSIFY Task({task_description, context})
 activate iface
-iface -> router : RTG-03 CLASSIFY Task({task_description, context})
+iface -> router : ROUTER-03 CLASSIFY Task({task_description, context})
 activate router
-router -> mgr : RTG-03 CLASSIFY Task(task_description, context)
+router -> mgr : ROUTER-03 CLASSIFY Task(task_description, context)
 activate mgr
 
 alt classification succeeds
-  ref over mgr : RTG-03 CLASSIFY Task(task_description) <back:#5C6BC0>CLASSIFYING</back>
+  ref over mgr : ROUTER-03 CLASSIFY Task(task_description) <back:#5C6BC0>CLASSIFYING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt classification succeeds
   deactivate router
   deactivate iface
 else confidence too low
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "RTG-03_LOW_CONFIDENCE", message: "Task classification confidence too low", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "ROUTER-03_LOW_CONFIDENCE", message: "Task classification confidence too low", status: 422}}
   deactivate mgr
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

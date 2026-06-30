@@ -1,6 +1,6 @@
 @startuml sq_agent13_switch_persona
 ' ============================================================
-' Title:     AGT-13 — SWITCH Persona
+' Title:     AGENT-13 — SWITCH Persona
 ' Boundary:  nasim code agent
 ' Purpose:   Unload current persona and activate a new one
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-13 SWITCH Persona
+title nasim -- AGENT-13 SWITCH Persona
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "TaskService" as personaRepo
 end box
 
-== AGT-13 SWITCH Persona ==
+== AGENT-13 SWITCH Persona ==
 
 user -> iface : POST /v1/agents/{agent_id}:switch-persona
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:switch-persona
 activate router
-router -> persona : AGT-13 SWITCH Persona({new_persona_name})
+router -> persona : AGENT-13 SWITCH Persona({new_persona_name})
 activate persona
 
 alt switch succeeds without error
-  ref over persona : AGT-13 SWITCH Persona({new_persona_name}) <back:#43A047>RUNNING</back>
-  persona -> personaRepo : AGT-13 READ Persona({new_persona_name})
+  ref over persona : AGENT-13 SWITCH Persona({new_persona_name}) <back:#43A047>RUNNING</back>
+  persona -> personaRepo : AGENT-13 READ Persona({new_persona_name})
   activate personaRepo
   personaRepo --> persona : 200 OK
   deactivate personaRepo
@@ -55,10 +55,10 @@ alt switch succeeds without error
   deactivate router
   deactivate iface
 else switch fails
-  persona --> router : 404 NOT_FOUND\n{error: {code: "AGT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
+  persona --> router : 404 NOT_FOUND\n{error: {code: "AGENT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
   deactivate persona
-  router --> iface : 404 NOT_FOUND\n{error: {code: "AGT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
-  iface --> user : 404 NOT_FOUND\n{error: {code: "AGT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
+  router --> iface : 404 NOT_FOUND\n{error: {code: "AGENT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
+  iface --> user : 404 NOT_FOUND\n{error: {code: "AGENT-13_NOT_FOUND", message: "Target persona not found", status: 404}}
   deactivate router
   deactivate iface
 end

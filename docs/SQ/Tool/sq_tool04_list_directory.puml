@@ -1,6 +1,6 @@
 @startuml sq_tool04_list_directory
 ' ============================================================
-' Title:     TL-04 — LIST Directory
+' Title:     TOOL-04 — LIST Directory
 ' Boundary:  nasim code agent
 ' Purpose:   List files and directories at a path with pagination
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-04 LIST Directory
+title nasim -- TOOL-04 LIST Directory
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-04 LIST Directory ==
+== TOOL-04 LIST Directory ==
 
 user -> iface : POST /tools/list_directory:execute
 activate iface
 iface -> router : POST /tools/list_directory:execute
 activate router
 
-router -> tool : TL-04 LIST Directory(path, pageSize, pageToken)
+router -> tool : TOOL-04 LIST Directory(path, pageSize, pageToken)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-04 LIST Directory
+  ref over tool : TOOL-04 LIST Directory
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-04 LIST Directory (SM/README.md)
+    ' Owned by: TOOL-04 LIST Directory (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

@@ -1,6 +1,6 @@
 @startuml sq_wirelog04_fork_session
 ' ============================================================
-' Title:     WRL-04 — FORK Session
+' Title:     WIRELOG-04 — FORK Session
 ' Boundary:  nasim code agent
 ' Purpose:   Fork session at any turn
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- WRL-04 FORK Session
+title nasim -- WIRELOG-04 FORK Session
 
 actor "User" as user
 
@@ -32,26 +32,26 @@ end box
 
 database "WireLogStore" as storage
 
-== WRL-04 FORK Session ==
+== WIRELOG-04 FORK Session ==
 
 user -> iface : POST /wirelog/fork
 activate iface
 iface -> router : POST /wirelog/fork
 activate router
-router -> wl : WRL-04 FORK Session(source_session_id, fork_turn)
+router -> wl : WIRELOG-04 FORK Session(source_session_id, fork_turn)
 activate wl
 
 alt fork succeeds
-  wl -> fork_mgr : WRL-04 FORK Session(source_session_id, fork_turn)
+  wl -> fork_mgr : WIRELOG-04 FORK Session(source_session_id, fork_turn)
   activate fork_mgr
-  fork_mgr -> storage : WRL-04 FORK Session(source_session_id, fork_turn)
+  fork_mgr -> storage : WIRELOG-04 FORK Session(source_session_id, fork_turn)
   activate storage
   storage --> fork_mgr : 200 OK
   deactivate storage
   fork_mgr --> wl : 200 OK
   deactivate fork_mgr
 
-  ref over fork_mgr : WRL-04 FORK Session({source_session_id, fork_turn}) <back:#7B1FA2>BRANCHED</back>
+  ref over fork_mgr : WIRELOG-04 FORK Session({source_session_id, fork_turn}) <back:#7B1FA2>BRANCHED</back>
 
   wl --> router : 200 OK
   deactivate wl

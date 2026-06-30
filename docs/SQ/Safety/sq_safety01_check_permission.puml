@@ -1,6 +1,6 @@
 @startuml sq_safety01_check_permission
 ' ============================================================
-' Title:     SAF-01 — CHECK Permission
+' Title:     SAFETY-01 — CHECK Permission
 ' Boundary:  nasim code agent
 ' Purpose:   Per-tool safety check before execution
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SAF-01 CHECK Permission
+title nasim -- SAFETY-01 CHECK Permission
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "SafetyService" as mgr
 end box
 
-== SAF-01 CHECK Permission ==
+== SAFETY-01 CHECK Permission ==
 
-user -> iface : SAF-01 CHECK Permission({tool_name, safety_mode})
+user -> iface : SAFETY-01 CHECK Permission({tool_name, safety_mode})
 activate iface
-iface -> router : SAF-01 CHECK Permission({tool_name, safety_mode})
+iface -> router : SAFETY-01 CHECK Permission({tool_name, safety_mode})
 activate router
-router -> mgr : SAF-01 CHECK Permission(tool_name, safety_mode)
+router -> mgr : SAFETY-01 CHECK Permission(tool_name, safety_mode)
 activate mgr
 
 alt permission allowed
-  ref over mgr : SAF-01 CHECK Permission(tool_name, safety_mode) <back:#9CCC65>PERMISSIVE</back>
+  ref over mgr : SAFETY-01 CHECK Permission(tool_name, safety_mode) <back:#9CCC65>PERMISSIVE</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt permission allowed
   deactivate router
   deactivate iface
 else permission denied
-  mgr --> router : 403 FORBIDDEN\n{error: {code: "SAF-01_PERMISSION_DENIED", message: "Tool blocked by safety policy", status: 403}}
+  mgr --> router : 403 FORBIDDEN\n{error: {code: "SAFETY-01_PERMISSION_DENIED", message: "Tool blocked by safety policy", status: 403}}
   deactivate mgr
   router --> iface : 403 FORBIDDEN
   iface --> user : 403 FORBIDDEN

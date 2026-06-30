@@ -12,10 +12,9 @@ Back to [docs/](../README.md).
 | `er_memory_store.puml` | Memory Store | Memory Store | JSON Lines | Cross-session knowledge entries with FTS5 index |
 | `er_wire_log.puml` | Wire Log | Wire Log Store | JSON Lines | Append-only per-session event store with turn index |
 | `er_config_store.puml` | Config Store | Config Store | YAML | Layered configuration schema |
-| `er_observability.puml` | Observability | — (emit-only) | In-memory / stdout | Structured logs, metrics, trace context, redaction rules |
 | `er_repo_intelligence.puml` | Repo Intelligence | — (external) | JSON Lines | AST index, symbol graph, embedding store |
 
-**Total: 6 ERD diagrams (4 C4 data stores, 2 informational)**
+**Total: 5 ERD diagrams (4 C4 data stores, 1 informational)**
 
 ## Notation
 

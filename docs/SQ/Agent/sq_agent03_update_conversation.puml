@@ -1,6 +1,6 @@
 @startuml sq_agent03_update_conversation
 ' ============================================================
-' Title:     AGT-03 — UPDATE Conversation
+' Title:     AGENT-03 — UPDATE Conversation
 ' Boundary:  nasim code agent
 ' Purpose:   Append messages and track token count
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-03 UPDATE Conversation
+title nasim -- AGENT-03 UPDATE Conversation
 
 actor "User" as user
 
@@ -35,20 +35,20 @@ end box
 
 database "SessionStore" as storage
 
-== AGT-03 UPDATE Conversation ==
+== AGENT-03 UPDATE Conversation ==
 
-user -> iface : AGT-03 UPDATE Conversation({msg, updateMask})
+user -> iface : AGENT-03 UPDATE Conversation({msg, updateMask})
 activate iface
-iface -> router : AGT-03 UPDATE Conversation({msg, updateMask})
+iface -> router : AGENT-03 UPDATE Conversation({msg, updateMask})
 activate router
-router -> history : AGT-03 UPDATE Conversation({msg, updateMask})
+router -> history : AGENT-03 UPDATE Conversation({msg, updateMask})
 activate history
 
 alt token_count <= budget
-  ref over history : AGT-03 UPDATE Conversation({msg, updateMask}) <back:#43A047>RUNNING</back>
-  history -> store : AGT-03 PERSIST History({session_id, messages})
+  ref over history : AGENT-03 UPDATE Conversation({msg, updateMask}) <back:#43A047>RUNNING</back>
+  history -> store : AGENT-03 PERSIST History({session_id, messages})
   activate store
-  store -> storage : AGT-03 PERSIST History({session_id, messages})
+  store -> storage : AGENT-03 PERSIST History({session_id, messages})
   activate storage
   storage --> store : 200 OK
   deactivate storage
@@ -61,10 +61,10 @@ alt token_count <= budget
   deactivate router
   deactivate iface
 else budget exceeded
-  history --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
+  history --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGENT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
   deactivate history
-  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "AGT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
-  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "AGT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "AGENT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "AGENT-03_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 409}}
   deactivate router
   deactivate iface
 end

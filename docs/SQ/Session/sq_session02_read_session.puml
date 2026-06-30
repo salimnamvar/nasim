@@ -1,6 +1,6 @@
 @startuml sq_session02_read_session
 ' ============================================================
-' Title:     SSN-02 — READ Session
+' Title:     SESSION-02 — READ Session
 ' Boundary:  nasim code agent
 ' Purpose:   Load conversation history from disk
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SSN-02 READ Session
+title nasim -- SESSION-02 READ Session
 
 actor "User" as user
 
@@ -35,16 +35,16 @@ end box
 
 database "SessionStore" as storage
 
-== SSN-02 READ Session ==
+== SESSION-02 READ Session ==
 
 user -> iface : GET /sessions/{session_id}
 activate iface
 iface -> router : GET /sessions/{session_id}
 activate router
 
-router -> svc : SSN-02 READ Session({session_id})
+router -> svc : SESSION-02 READ Session({session_id})
 activate svc
-svc -> store : SSN-02 READ Session({session_id})
+svc -> store : SESSION-02 READ Session({session_id})
 activate store
 
 alt session_id is empty
@@ -67,7 +67,7 @@ alt session not found
     deactivate iface
 end
 
-store -> storage : SSN-02 READ Session({session_id})
+store -> storage : SESSION-02 READ Session({session_id})
 activate storage
 
 alt disk read error
@@ -86,11 +86,11 @@ end
 storage --> store : 200 OK
 deactivate storage
 
-ref over store : SSN-02 READ Session({session_id}) <back:#1E88E5>RESTORED</back>
+ref over store : SESSION-02 READ Session({session_id}) <back:#1E88E5>RESTORED</back>
 
 store --> svc : 200 OK
 deactivate store
-ref over svc : SSN-02 READ Session({session_id}) <back:#1E88E5>RESTORED</back>
+ref over svc : SESSION-02 READ Session({session_id}) <back:#1E88E5>RESTORED</back>
 svc --> router : 200 OK
 deactivate svc
 router --> iface : 200 OK

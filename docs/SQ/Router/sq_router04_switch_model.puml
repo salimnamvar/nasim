@@ -1,6 +1,6 @@
 @startuml sq_router04_switch_model
 ' ============================================================
-' Title:     RTG-04 — SWITCH Model
+' Title:     ROUTER-04 — SWITCH Model
 ' Boundary:  nasim code agent
 ' Purpose:   Change the active model at runtime
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RTG-04 SWITCH Model
+title nasim -- ROUTER-04 SWITCH Model
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "LLMRepository" as mgr
 end box
 
-== RTG-04 SWITCH Model ==
+== ROUTER-04 SWITCH Model ==
 
-user -> iface : RTG-04 SWITCH Model({target_model})
+user -> iface : ROUTER-04 SWITCH Model({target_model})
 activate iface
-iface -> router : RTG-04 SWITCH Model({target_model})
+iface -> router : ROUTER-04 SWITCH Model({target_model})
 activate router
-router -> mgr : RTG-04 SWITCH Model(target_model)
+router -> mgr : ROUTER-04 SWITCH Model(target_model)
 activate mgr
 
 alt switch succeeds
-  ref over mgr : RTG-04 SWITCH Model(model_name) <back:#FF8F00>SWITCHING</back>
+  ref over mgr : ROUTER-04 SWITCH Model(model_name) <back:#FF8F00>SWITCHING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt switch succeeds
   deactivate router
   deactivate iface
 else model not in catalog
-  mgr --> router : 404 NOT_FOUND\n{error: {code: "RTG-04_MODEL_NOT_IN_CATALOG", message: "Requested model not in catalog", status: 404}}
+  mgr --> router : 404 NOT_FOUND\n{error: {code: "ROUTER-04_MODEL_NOT_IN_CATALOG", message: "Requested model not in catalog", status: 404}}
   deactivate mgr
   router --> iface : 404 NOT_FOUND
   iface --> user : 404 NOT_FOUND

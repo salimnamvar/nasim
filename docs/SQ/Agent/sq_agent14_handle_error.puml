@@ -1,6 +1,6 @@
 @startuml sq_agent14_handle_error
 ' ============================================================
-' Title:     AGT-14 — HANDLE Error
+' Title:     AGENT-14 — HANDLE Error
 ' Boundary:  nasim code agent
 ' Purpose:   Classify errors and determine recovery action
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-14 HANDLE Error
+title nasim -- AGENT-14 HANDLE Error
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "TaskService" as boundary
 end box
 
-== AGT-14 HANDLE Error ==
+== AGENT-14 HANDLE Error ==
 
 user -> iface : POST /v1/agents/{agent_id}:handle-error
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:handle-error
 activate router
-router -> errorService : AGT-14 HANDLE Error({error})
+router -> errorService : AGENT-14 HANDLE Error({error})
 activate errorService
 
 alt retryable error
-  ref over errorService : AGT-14 HANDLE Error({error}) <back:#EF5350>FAILED</back>
-  errorService -> boundary : AGT-14 PERSIST Error({error, recovery_action})
+  ref over errorService : AGENT-14 HANDLE Error({error}) <back:#EF5350>FAILED</back>
+  errorService -> boundary : AGENT-14 PERSIST Error({error, recovery_action})
   activate boundary
   boundary --> errorService : 200 OK
   deactivate boundary
@@ -55,10 +55,10 @@ alt retryable error
   deactivate router
   deactivate iface
 else unrecoverable error
-  errorService --> router : 500 INTERNAL\n{error: {code: "AGT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
+  errorService --> router : 500 INTERNAL\n{error: {code: "AGENT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
   deactivate errorService
-  router --> iface : 500 INTERNAL\n{error: {code: "AGT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
-  iface --> user : 500 INTERNAL\n{error: {code: "AGT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
+  router --> iface : 500 INTERNAL\n{error: {code: "AGENT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
+  iface --> user : 500 INTERNAL\n{error: {code: "AGENT-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
   deactivate router
   deactivate iface
 end

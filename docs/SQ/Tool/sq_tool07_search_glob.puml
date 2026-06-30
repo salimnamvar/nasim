@@ -1,6 +1,6 @@
 @startuml sq_tool07_search_glob
 ' ============================================================
-' Title:     TL-07 — SEARCH Glob
+' Title:     TOOL-07 — SEARCH Glob
 ' Boundary:  nasim code agent
 ' Purpose:   Find files by glob pattern
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-07 SEARCH Glob
+title nasim -- TOOL-07 SEARCH Glob
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-07 SEARCH Glob ==
+== TOOL-07 SEARCH Glob ==
 
 user -> iface : POST /tools/search_glob:execute
 activate iface
 iface -> router : POST /tools/search_glob:execute
 activate router
 
-router -> tool : TL-07 SEARCH Glob(pattern, basePath)
+router -> tool : TOOL-07 SEARCH Glob(pattern, basePath)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-07 SEARCH Glob
+  ref over tool : TOOL-07 SEARCH Glob
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-07 SEARCH Glob (SM/README.md)
+    ' Owned by: TOOL-07 SEARCH Glob (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

@@ -1,6 +1,6 @@
 @startuml sq_wirelog02_read_log
 ' ============================================================
-' Title:     WRL-02 — READ Log
+' Title:     WIRELOG-02 — READ Log
 ' Boundary:  nasim code agent
 ' Purpose:   Sequential scan for replay
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- WRL-02 READ Log
+title nasim -- WIRELOG-02 READ Log
 
 actor "User" as user
 
@@ -32,19 +32,19 @@ end box
 
 database "WireLogStore" as storage
 
-== WRL-02 READ Log ==
+== WIRELOG-02 READ Log ==
 
 user -> iface : GET /wirelog/events
 activate iface
 iface -> router : GET /wirelog/events
 activate router
-router -> wl : WRL-02 READ Log(session_id, filter)
+router -> wl : WIRELOG-02 READ Log(session_id, filter)
 activate wl
 
 alt read succeeds
-  wl -> reader : WRL-02 READ Log(session_id, filter)
+  wl -> reader : WIRELOG-02 READ Log(session_id, filter)
   activate reader
-  reader -> storage : WRL-02 READ Log(session_id, filter)
+  reader -> storage : WIRELOG-02 READ Log(session_id, filter)
   activate storage
   storage --> reader : 200 OK
   deactivate storage

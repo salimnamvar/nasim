@@ -1,6 +1,6 @@
 @startuml sq_memory02_recall_knowledge
 ' ============================================================
-' Title:     MEM-02 — RECALL Knowledge
+' Title:     MEMORY-02 — RECALL Knowledge
 ' Boundary:  nasim code agent
 ' Purpose:   Retrieve previously stored knowledge
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- MEM-02 RECALL Knowledge
+title nasim -- MEMORY-02 RECALL Knowledge
 
 actor "User" as user
 
@@ -33,15 +33,15 @@ box "Repository" REPOSITORY_COLOR
   participant "MemoryRepository" as store
 end box
 
-== MEM-02 RECALL Knowledge ==
+== MEMORY-02 RECALL Knowledge ==
 
 user -> iface : GET /knowledge/{key}
 activate iface
 iface -> router : GET /knowledge/{key}
 activate router
-router -> svc : MEM-02 RECALL Knowledge({key})
+router -> svc : MEMORY-02 RECALL Knowledge({key})
 activate svc
-svc -> store : MEM-02 RECALL Knowledge({key})
+svc -> store : MEMORY-02 RECALL Knowledge({key})
 activate store
 
 alt key not found

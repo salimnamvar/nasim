@@ -1,6 +1,6 @@
 @startuml sq_memory04_scope_knowledge
 ' ============================================================
-' Title:     MEM-04 — SCOPE Knowledge
+' Title:     MEMORY-04 — SCOPE Knowledge
 ' Boundary:  nasim code agent
 ' Purpose:   Filter knowledge by scope (global, project, session)
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- MEM-04 SCOPE Knowledge
+title nasim -- MEMORY-04 SCOPE Knowledge
 
 actor "User" as user
 
@@ -33,15 +33,15 @@ box "Repository" REPOSITORY_COLOR
   participant "MemoryRepository" as store
 end box
 
-== MEM-04 SCOPE Knowledge ==
+== MEMORY-04 SCOPE Knowledge ==
 
 user -> iface : GET /knowledge/scope
 activate iface
 iface -> router : GET /knowledge/scope
 activate router
-router -> svc : MEM-04 SCOPE Knowledge({scope})
+router -> svc : MEMORY-04 SCOPE Knowledge({scope})
 activate svc
-svc -> store : MEM-04 SCOPE Knowledge({scope})
+svc -> store : MEMORY-04 SCOPE Knowledge({scope})
 activate store
 
 alt scope not found

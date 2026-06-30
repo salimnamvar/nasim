@@ -1,6 +1,6 @@
 @startuml sq_agent11_delegate_to_persona
 ' ============================================================
-' Title:     AGT-11 — DELEGATE to Persona
+' Title:     AGENT-11 — DELEGATE to Persona
 ' Boundary:  nasim code agent
 ' Purpose:   Assign task execution to a specialized persona role
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-11 DELEGATE to Persona
+title nasim -- AGENT-11 DELEGATE to Persona
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "TaskService" as personaRepo
 end box
 
-== AGT-11 DELEGATE to Persona ==
+== AGENT-11 DELEGATE to Persona ==
 
 user -> iface : POST /v1/agents/{agent_id}:delegate-persona
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:delegate-persona
 activate router
-router -> persona : AGT-11 DELEGATE to Persona({task, persona_hint})
+router -> persona : AGENT-11 DELEGATE to Persona({task, persona_hint})
 activate persona
 
 alt delegation succeeds without error
-  ref over persona : AGT-11 DELEGATE Persona({task, persona_hint}) <back:#43A047>RUNNING</back>
-  persona -> personaRepo : AGT-11 READ Persona({persona_hint})
+  ref over persona : AGENT-11 DELEGATE Persona({task, persona_hint}) <back:#43A047>RUNNING</back>
+  persona -> personaRepo : AGENT-11 READ Persona({persona_hint})
   activate personaRepo
   personaRepo --> persona : 200 OK
   deactivate personaRepo
@@ -55,10 +55,10 @@ alt delegation succeeds without error
   deactivate router
   deactivate iface
 else persona not found
-  persona --> router : 404 NOT_FOUND\n{error: {code: "AGT-11_NOT_FOUND", message: "Persona not found", status: 404}}
+  persona --> router : 404 NOT_FOUND\n{error: {code: "AGENT-11_NOT_FOUND", message: "Persona not found", status: 404}}
   deactivate persona
-  router --> iface : 404 NOT_FOUND\n{error: {code: "AGT-11_NOT_FOUND", message: "Persona not found", status: 404}}
-  iface --> user : 404 NOT_FOUND\n{error: {code: "AGT-11_NOT_FOUND", message: "Persona not found", status: 404}}
+  router --> iface : 404 NOT_FOUND\n{error: {code: "AGENT-11_NOT_FOUND", message: "Persona not found", status: 404}}
+  iface --> user : 404 NOT_FOUND\n{error: {code: "AGENT-11_NOT_FOUND", message: "Persona not found", status: 404}}
   deactivate router
   deactivate iface
 end

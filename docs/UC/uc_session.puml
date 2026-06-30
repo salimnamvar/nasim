@@ -67,15 +67,15 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Session Group (SSN)" {
-    usecase "**SSN-01 PERSIST Session**\n--\nSave session to storage" <<include>> as SSN01
-    usecase "**SSN-02 READ Session**\n--\nLoad session from storage" <<include>> as SSN02
-    usecase "**SSN-03 LIST Sessions**\n--\nList all saved sessions" <<master>> as SSN03
-    usecase "**SSN-04 RESTORE Session**\n--\nResume a previously saved session" <<master>> as SSN04
-    usecase "**SSN-05 SNAPSHOT Session**\n--\nCreate session state snapshot" <<master>> as SSN05
-    usecase "**SSN-06 REVERT Turn**\n--\nUndo last turn in session" <<master>> as SSN06
-    usecase "**SSN-07 SEARCH Sessions**\n--\nCross-session search via FTS5" <<master>> as SSN07
-    usecase "**SSN-08 BRANCH Session**\n--\nFork conversation from any point" <<master>> as SSN08
-    usecase "**SSN-09 DELETE Session**\n--\nDelete session from storage" <<master>> as SSN09
+    usecase "**SESSION-01 PERSIST Session**\n--\nSave session to storage" <<include>> as SSN01
+    usecase "**SESSION-02 READ Session**\n--\nLoad session from storage" <<include>> as SSN02
+    usecase "**SESSION-03 LIST Sessions**\n--\nList all saved sessions" <<master>> as SSN03
+    usecase "**SESSION-04 RESTORE Session**\n--\nResume a previously saved session" <<master>> as SSN04
+    usecase "**SESSION-05 SNAPSHOT Session**\n--\nCreate session state snapshot" <<master>> as SSN05
+    usecase "**SESSION-06 REVERT Turn**\n--\nUndo last turn in session" <<master>> as SSN06
+    usecase "**SESSION-07 SEARCH Sessions**\n--\nCross-session search via FTS5" <<master>> as SSN07
+    usecase "**SESSION-08 BRANCH Session**\n--\nFork conversation from any point" <<master>> as SSN08
+    usecase "**SESSION-09 DELETE Session**\n--\nDelete session from storage" <<master>> as SSN09
   }
 }
 

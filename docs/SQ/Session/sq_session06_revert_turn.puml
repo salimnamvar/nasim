@@ -1,6 +1,6 @@
 @startuml sq_session06_revert_turn
 ' ============================================================
-' Title:     SSN-06 — REVERT Turn
+' Title:     SESSION-06 — REVERT Turn
 ' Boundary:  nasim code agent
 ' Purpose:   Restore session to a previous snapshot or turn
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SSN-06 REVERT Turn
+title nasim -- SESSION-06 REVERT Turn
 
 actor "User" as user
 
@@ -36,16 +36,16 @@ end box
 
 database "SessionStore" as storage
 
-== SSN-06 REVERT Turn ==
+== SESSION-06 REVERT Turn ==
 
 user -> iface : POST /sessions/{session_id}:revert
 activate iface
 iface -> router : POST /sessions/{session_id}:revert
 activate router
 
-router -> svc : SSN-06 REVERT Session({session_id}, {target_turn})
+router -> svc : SESSION-06 REVERT Session({session_id}, {target_turn})
 activate svc
-svc -> versioning : SSN-06 REVERT Session({session_id}, {target_turn})
+svc -> versioning : SESSION-06 REVERT Session({session_id}, {target_turn})
 activate versioning
 
 alt session_id is empty
@@ -57,7 +57,7 @@ alt session_id is empty
     deactivate iface
 end
 
-versioning -> store : SSN-06 READ Snapshot({session_id}, {target_turn})
+versioning -> store : SESSION-06 READ Snapshot({session_id}, {target_turn})
 activate store
 
 alt session not found
@@ -86,7 +86,7 @@ alt snapshot not found
     deactivate iface
 end
 
-store -> storage : SSN-06 READ Snapshot({session_id}, {target_turn})
+store -> storage : SESSION-06 READ Snapshot({session_id}, {target_turn})
 activate storage
 
 alt disk read error
@@ -110,7 +110,7 @@ deactivate storage
 store --> versioning : 200 OK — {snapshot_messages}
 deactivate store
 
-versioning -> store : SSN-06 UPDATE Session({session_id}, {messages})
+versioning -> store : SESSION-06 UPDATE Session({session_id}, {messages})
 activate store
 
 alt update error

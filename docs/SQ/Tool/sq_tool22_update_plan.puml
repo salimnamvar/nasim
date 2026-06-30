@@ -1,6 +1,6 @@
 @startuml sq_tool22_update_plan
 ' ============================================================
-' Title:     TL-22 — UPDATE Plan
+' Title:     TOOL-22 — UPDATE Plan
 ' Boundary:  nasim code agent
 ' Purpose:   Update status or content of an existing plan step
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-22 UPDATE Plan
+title nasim -- TOOL-22 UPDATE Plan
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-22 UPDATE Plan ==
+== TOOL-22 UPDATE Plan ==
 
 user -> iface : POST /tools/update_plan:execute
 activate iface
 iface -> router : POST /tools/update_plan:execute
 activate router
 
-router -> tool : TL-22 UPDATE Plan(stepId, status, description, updateMask)
+router -> tool : TOOL-22 UPDATE Plan(stepId, status, description, updateMask)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-22 UPDATE Plan
+  ref over tool : TOOL-22 UPDATE Plan
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-22 UPDATE Plan (SM/README.md)
+    ' Owned by: TOOL-22 UPDATE Plan (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

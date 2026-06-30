@@ -1,6 +1,6 @@
 @startuml sq_agent02_dispatch_tool_call
 ' ============================================================
-' Title:     AGT-02 — DISPATCH Tool Call
+' Title:     AGENT-02 — DISPATCH Tool Call
 ' Boundary:  nasim code agent
 ' Purpose:   Route tool call to ToolRegistry via safety pipeline
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-02 DISPATCH Tool Call
+title nasim -- AGENT-02 DISPATCH Tool Call
 
 actor "User" as user
 
@@ -30,19 +30,19 @@ box "Service" SERVICE_COLOR
   participant "SafetyService" as safety
 end box
 
-== AGT-02 DISPATCH Tool Call ==
+== AGENT-02 DISPATCH Tool Call ==
 
-user -> iface : AGT-02 DISPATCH Tool Call({tool_name, args})
+user -> iface : AGENT-02 DISPATCH Tool Call({tool_name, args})
 activate iface
-iface -> router : AGT-02 DISPATCH Tool Call({tool_name, args})
+iface -> router : AGENT-02 DISPATCH Tool Call({tool_name, args})
 activate router
-router -> orchestrator : AGT-02 DISPATCH Tool Call({tool_name, args})
+router -> orchestrator : AGENT-02 DISPATCH Tool Call({tool_name, args})
 activate orchestrator
-orchestrator -> safety : AGT-02 DISPATCH Safety Check({tool_name, args})
+orchestrator -> safety : AGENT-02 DISPATCH Safety Check({tool_name, args})
 activate safety
 
 alt safety_approved
-  ref over orchestrator : AGT-02 DISPATCH ToolCall({tool_name, args}) <back:#43A047>RUNNING</back>
+  ref over orchestrator : AGENT-02 DISPATCH ToolCall({tool_name, args}) <back:#43A047>RUNNING</back>
   safety --> orchestrator : 200 OK Approved
   deactivate safety
   orchestrator --> router : 200 OK
@@ -52,13 +52,13 @@ alt safety_approved
   deactivate router
   deactivate iface
 else safety_violation
-  ref over orchestrator : AGT-02 DISPATCH ToolCall({tool_name, args}) <back:#CE93D8>WAITING</back>
-  safety --> orchestrator : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
+  ref over orchestrator : AGENT-02 DISPATCH ToolCall({tool_name, args}) <back:#CE93D8>WAITING</back>
+  safety --> orchestrator : 403 PERMISSION_DENIED\n{error: {code: "AGENT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
   deactivate safety
-  orchestrator --> router : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
+  orchestrator --> router : 403 PERMISSION_DENIED\n{error: {code: "AGENT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
   deactivate orchestrator
-  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
-  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "AGT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
+  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "AGENT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
+  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "AGENT-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
   deactivate router
   deactivate iface
 end

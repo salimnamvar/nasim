@@ -7,7 +7,7 @@
 '            States: UNREGISTERED → REGISTERING → ACTIVE → SELECTING
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (LLMRepository), docs/UC/README.md (PRV-01, PRV-04)
+' Source:    C4 component diagram (LLMRepository), docs/UC/README.md (PROVIDER-01, PROVIDER-04)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
@@ -15,7 +15,7 @@
 
 title nasim — Provider Connection Lifecycle
 
-[*] --> UNREGISTERED : PRV-01
+[*] --> UNREGISTERED : PROVIDER-01
 
 state "UNREGISTERED" as UNREGISTERED #455A64
 UNREGISTERED : No provider registered.
@@ -23,29 +23,29 @@ UNREGISTERED : Default state.
 
 state "REGISTERING" as REGISTERING #29B6F6
 REGISTERING : Provider registration in progress.
-REGISTERING : PRV-01 REGISTER Provider.
+REGISTERING : PROVIDER-01 REGISTER Provider.
 
 state "ACTIVE" as ACTIVE #03A9F4
 ACTIVE : Provider registered and ready for chat.
-ACTIVE : PRV-02 REQUEST Chat, PRV-03 STREAM Chat.
+ACTIVE : PROVIDER-02 REQUEST Chat, PROVIDER-03 STREAM Chat.
 
 state "SELECTING" as SELECTING #FBC02D
 SELECTING : Backend selection in progress.
-SELECTING : PRV-04 SELECT Provider Backend.
+SELECTING : PROVIDER-04 SELECT Provider Backend.
 
 state "ERROR" as ERROR #E64A19
 ERROR : Registration or selection failed.
 ERROR : Provider unavailable or invalid.
 
-UNREGISTERED --> REGISTERING : PRV-01
-REGISTERING --> ACTIVE : PRV-01
-REGISTERING --> ERROR : PRV-01
-ACTIVE --> SELECTING : PRV-04
-SELECTING --> ACTIVE : PRV-04
-SELECTING --> ERROR : PRV-04
-ACTIVE --> UNREGISTERED : PRV-01
-ERROR --> UNREGISTERED : PRV-01
+UNREGISTERED --> REGISTERING : PROVIDER-01
+REGISTERING --> ACTIVE : PROVIDER-01
+REGISTERING --> ERROR : PROVIDER-01
+ACTIVE --> SELECTING : PROVIDER-04
+SELECTING --> ACTIVE : PROVIDER-04
+SELECTING --> ERROR : PROVIDER-04
+ACTIVE --> UNREGISTERED : PROVIDER-01
+ERROR --> UNREGISTERED : PROVIDER-01
 
-UNREGISTERED --> [*] : PRV-01
+UNREGISTERED --> [*] : PROVIDER-01
 
 @enduml

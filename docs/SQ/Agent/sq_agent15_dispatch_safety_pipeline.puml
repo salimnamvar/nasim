@@ -1,6 +1,6 @@
 @startuml sq_agent15_dispatch_safety_pipeline
 ' ============================================================
-' Title:     AGT-15 — DISPATCH Safety Pipeline
+' Title:     AGENT-15 — DISPATCH Safety Pipeline
 ' Boundary:  nasim code agent
 ' Purpose:   Run injection scan, egress inspect, and permission check
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-15 DISPATCH Safety Pipeline
+title nasim -- AGENT-15 DISPATCH Safety Pipeline
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "SafetyService" as safety
 end box
 
-== AGT-15 DISPATCH Safety Pipeline ==
+== AGENT-15 DISPATCH Safety Pipeline ==
 
 user -> iface : POST /v1/agents/{agent_id}:dispatch-safety
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:dispatch-safety
 activate router
-router -> safety : AGT-15 DISPATCH Safety Pipeline({tool_call})
+router -> safety : AGENT-15 DISPATCH Safety Pipeline({tool_call})
 activate safety
 
 alt all checks pass without error
-  ref over safety : AGT-15 DISPATCH SafetyPipeline({tool_call}) <back:#43A047>RUNNING</back>
+  ref over safety : AGENT-15 DISPATCH SafetyPipeline({tool_call}) <back:#43A047>RUNNING</back>
   safety --> router : 200 OK
   deactivate safety
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt all checks pass without error
   deactivate router
   deactivate iface
 else safety violation
-  safety --> router : 403 PERMISSION_DENIED\n{error: {code: "AGT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
+  safety --> router : 403 PERMISSION_DENIED\n{error: {code: "AGENT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
   deactivate safety
-  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "AGT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
-  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "AGT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
+  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "AGENT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
+  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "AGENT-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
   deactivate router
   deactivate iface
 end

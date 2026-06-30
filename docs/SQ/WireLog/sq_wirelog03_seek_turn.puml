@@ -1,6 +1,6 @@
 @startuml sq_wirelog03_seek_turn
 ' ============================================================
-' Title:     WRL-03 — SEEK Turn
+' Title:     WIRELOG-03 — SEEK Turn
 ' Boundary:  nasim code agent
 ' Purpose:   Seek to a specific turn in the wire log
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- WRL-03 SEEK Turn
+title nasim -- WIRELOG-03 SEEK Turn
 
 actor "User" as user
 
@@ -32,19 +32,19 @@ end box
 
 database "WireLogStore" as storage
 
-== WRL-03 SEEK Turn ==
+== WIRELOG-03 SEEK Turn ==
 
 user -> iface : GET /wirelog/turns/{turn}
 activate iface
 iface -> router : GET /wirelog/turns/{turn}
 activate router
-router -> wl : WRL-03 SEEK Turn(target_turn_number)
+router -> wl : WIRELOG-03 SEEK Turn(target_turn_number)
 activate wl
 
 alt turn found
-  wl -> reader : WRL-03 SEEK Turn(target_turn_number)
+  wl -> reader : WIRELOG-03 SEEK Turn(target_turn_number)
   activate reader
-  reader -> storage : WRL-03 SEEK Turn(target_turn_number)
+  reader -> storage : WIRELOG-03 SEEK Turn(target_turn_number)
   activate storage
   storage --> reader : 200 OK
   deactivate storage

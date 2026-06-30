@@ -1,6 +1,6 @@
 @startuml sq_tool17_update_todo
 ' ============================================================
-' Title:     TL-17 — UPDATE Todo
+' Title:     TOOL-17 — UPDATE Todo
 ' Boundary:  nasim code agent
 ' Purpose:   Update status or content of an existing todo item
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-17 UPDATE Todo
+title nasim -- TOOL-17 UPDATE Todo
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-17 UPDATE Todo ==
+== TOOL-17 UPDATE Todo ==
 
 user -> iface : POST /tools/update_todo:execute
 activate iface
 iface -> router : POST /tools/update_todo:execute
 activate router
 
-router -> tool : TL-17 UPDATE Todo(todoId, status, description, updateMask)
+router -> tool : TOOL-17 UPDATE Todo(todoId, status, description, updateMask)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-17 UPDATE Todo
+  ref over tool : TOOL-17 UPDATE Todo
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-17 UPDATE Todo (SM/README.md)
+    ' Owned by: TOOL-17 UPDATE Todo (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

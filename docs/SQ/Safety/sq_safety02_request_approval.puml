@@ -1,6 +1,6 @@
 @startuml sq_safety02_request_approval
 ' ============================================================
-' Title:     SAF-02 — REQUEST Approval
+' Title:     SAFETY-02 — REQUEST Approval
 ' Boundary:  nasim code agent
 ' Purpose:   Display approval prompt for unsafe tool execution
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SAF-02 REQUEST Approval
+title nasim -- SAFETY-02 REQUEST Approval
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "SafetyService" as mgr
 end box
 
-== SAF-02 REQUEST Approval ==
+== SAFETY-02 REQUEST Approval ==
 
-user -> iface : SAF-02 REQUEST Approval({tool_name, args})
+user -> iface : SAFETY-02 REQUEST Approval({tool_name, args})
 activate iface
-iface -> router : SAF-02 REQUEST Approval({tool_name, args})
+iface -> router : SAFETY-02 REQUEST Approval({tool_name, args})
 activate router
-router -> mgr : SAF-02 REQUEST Approval(tool_name, args)
+router -> mgr : SAFETY-02 REQUEST Approval(tool_name, args)
 activate mgr
 
 alt user approves
-  ref over mgr : SAF-02 REQUEST Approval(tool_name, args) <back:#FFF9C4>AWAITING_APPROVAL</back>
+  ref over mgr : SAFETY-02 REQUEST Approval(tool_name, args) <back:#FFF9C4>AWAITING_APPROVAL</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt user approves
   deactivate router
   deactivate iface
 else user rejects
-  mgr --> router : 403 FORBIDDEN\n{error: {code: "SAF-02_USER_REJECTED", message: "User rejected tool execution", status: 403}}
+  mgr --> router : 403 FORBIDDEN\n{error: {code: "SAFETY-02_USER_REJECTED", message: "User rejected tool execution", status: 403}}
   deactivate mgr
   router --> iface : 403 FORBIDDEN
   iface --> user : 403 FORBIDDEN

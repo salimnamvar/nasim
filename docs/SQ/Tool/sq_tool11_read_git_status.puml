@@ -1,6 +1,6 @@
 @startuml sq_tool11_read_git_status
 ' ============================================================
-' Title:     TL-11 — READ Git Status
+' Title:     TOOL-11 — READ Git Status
 ' Boundary:  nasim code agent
 ' Purpose:   Git operations: status, diff, commit
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-11 READ Git Status
+title nasim -- TOOL-11 READ Git Status
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-11 READ Git Status ==
+== TOOL-11 READ Git Status ==
 
 user -> iface : POST /tools/read_git_status:execute
 activate iface
 iface -> router : POST /tools/read_git_status:execute
 activate router
 
-router -> tool : TL-11 READ Git Status(action, args)
+router -> tool : TOOL-11 READ Git Status(action, args)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-11 READ Git Status
+  ref over tool : TOOL-11 READ Git Status
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-11 READ Git Status (SM/README.md)
+    ' Owned by: TOOL-11 READ Git Status (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

@@ -1,6 +1,6 @@
 @startuml sq_contextgraph05_compact_nodes
 ' ============================================================
-' Title:     CTX-05 — COMPACT Nodes
+' Title:     CONTEXTGRAPH-05 — COMPACT Nodes
 ' Boundary:  nasim code agent
 ' Purpose:   Compact low-importance nodes by merging or summarizing
 ' Milestone: v1.0
@@ -8,12 +8,12 @@
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
 ' CSR Chain: User -> CLIAdapter -> AgentController -> CompactionProcessor
-' SM States: (stateless — COMPACTING owned by AGT-06)
+' SM States: (stateless — COMPACTING owned by AGENT-06)
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- CTX-05 COMPACT Nodes
+title nasim -- CONTEXTGRAPH-05 COMPACT Nodes
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "ContextService" as compact
 end box
 
-== CTX-05 COMPACT Nodes ==
+== CONTEXTGRAPH-05 COMPACT Nodes ==
 
-user -> iface : CTX-05 COMPACT Nodes({nodes, strategy})
+user -> iface : CONTEXTGRAPH-05 COMPACT Nodes({nodes, strategy})
 activate iface
-iface -> router : CTX-05 COMPACT Nodes({nodes, strategy})
+iface -> router : CONTEXTGRAPH-05 COMPACT Nodes({nodes, strategy})
 activate router
-router -> compact : CTX-05 COMPACT Nodes({nodes, strategy})
+router -> compact : CONTEXTGRAPH-05 COMPACT Nodes({nodes, strategy})
 activate compact
 
 alt merge_threshold met
-  ref over compact : CTX-05 COMPACT Nodes({nodes, strategy})
+  ref over compact : CONTEXTGRAPH-05 COMPACT Nodes({nodes, strategy})
   compact --> router : 200 OK
   deactivate compact
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt merge_threshold met
   deactivate router
   deactivate iface
 else compaction_fails
-  compact --> router : 422 UNPROCESSABLE\n{error: {code: "CTX-05_COMPACTION_FAILED", message: "Node compaction failed", status: 422}}
+  compact --> router : 422 UNPROCESSABLE\n{error: {code: "CONTEXTGRAPH-05_COMPACTION_FAILED", message: "Node compaction failed", status: 422}}
   deactivate compact
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

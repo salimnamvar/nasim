@@ -1,6 +1,6 @@
 @startuml sq_plugins06_disable_plugin
 ' ============================================================
-' Title:     PLG-06 — DISABLE Plugin
+' Title:     PLUGINS-06 — DISABLE Plugin
 ' Boundary:  nasim code agent
 ' Purpose:   Deactivate plugin tools and hooks, set state DISABLED
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PLG-06 DISABLE Plugin
+title nasim -- PLUGINS-06 DISABLE Plugin
 
 actor "User" as user
 
@@ -33,19 +33,19 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "ToolService" as mgr
 end box
 
-== PLG-06 DISABLE Plugin ==
+== PLUGINS-06 DISABLE Plugin ==
 
-user -> iface : PLG-06 DISABLE Plugin({plugin_id})
+user -> iface : PLUGINS-06 DISABLE Plugin({plugin_id})
 activate iface
-iface -> router : PLG-06 DISABLE Plugin({plugin_id})
+iface -> router : PLUGINS-06 DISABLE Plugin({plugin_id})
 activate router
-router -> svc : PLG-06 DISABLE Plugin({plugin_id})
+router -> svc : PLUGINS-06 DISABLE Plugin({plugin_id})
 activate svc
-svc -> mgr : PLG-06 DISABLE Plugin({plugin_id})
+svc -> mgr : PLUGINS-06 DISABLE Plugin({plugin_id})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PLG-06 DISABLE Plugin <back:#CE93D8>DISABLED</back>
+  ref over mgr : PLUGINS-06 DISABLE Plugin <back:#CE93D8>DISABLED</back>
   mgr --> svc : 200 OK
   deactivate mgr
   svc --> router : 200 OK
@@ -55,12 +55,12 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else deactivation fails
-  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLG-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
+  mgr --> svc : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
   deactivate mgr
-  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLG-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
+  svc --> router : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
   deactivate svc
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLG-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLG-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "PLUGINS-06_DEACTIVATION_FAILED", message: "Plugin deactivation failed", status: 422}}
   deactivate router
   deactivate iface
 end

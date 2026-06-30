@@ -1,6 +1,6 @@
 @startuml sq_contextgraph04_inject_context
 ' ============================================================
-' Title:     CTX-04 — INJECT Context
+' Title:     CONTEXTGRAPH-04 — INJECT Context
 ' Boundary:  nasim code agent
 ' Purpose:   Inject relevant context into the conversation
 ' Milestone: v1.0
@@ -8,12 +8,12 @@
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
 ' CSR Chain: User -> CLIAdapter -> AgentController -> InjectionProcessor
-' SM States: (stateless — COMPACTING owned by AGT-06)
+' SM States: (stateless — COMPACTING owned by AGENT-06)
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- CTX-04 INJECT Context
+title nasim -- CONTEXTGRAPH-04 INJECT Context
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "ContextService" as inject
 end box
 
-== CTX-04 INJECT Context ==
+== CONTEXTGRAPH-04 INJECT Context ==
 
-user -> iface : CTX-04 INJECT Context({query, max_results})
+user -> iface : CONTEXTGRAPH-04 INJECT Context({query, max_results})
 activate iface
-iface -> router : CTX-04 INJECT Context({query, max_results})
+iface -> router : CONTEXTGRAPH-04 INJECT Context({query, max_results})
 activate router
-router -> inject : CTX-04 INJECT Context({query, max_results})
+router -> inject : CONTEXTGRAPH-04 INJECT Context({query, max_results})
 activate inject
 
 alt relevant_context found
-  ref over inject : CTX-04 INJECT Context({query, max_results})
+  ref over inject : CONTEXTGRAPH-04 INJECT Context({query, max_results})
   inject --> router : 200 OK
   deactivate inject
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt relevant_context found
   deactivate router
   deactivate iface
 else no_relevant_context
-  inject --> router : 404 NOT_FOUND\n{error: {code: "CTX-04_NO_RELEVANT_CONTEXT", message: "No relevant context found", status: 404}}
+  inject --> router : 404 NOT_FOUND\n{error: {code: "CONTEXTGRAPH-04_NO_RELEVANT_CONTEXT", message: "No relevant context found", status: 404}}
   deactivate inject
   router --> iface : 404 NOT_FOUND
   iface --> user : 404 NOT_FOUND

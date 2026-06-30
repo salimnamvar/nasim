@@ -18,7 +18,7 @@
 '                                            Repo Intelligence)
 '   Datastore       #F3E5F5  — purple       (SessionStore, FileSystem,
 '                                            WireLogStore, databases)
-'   Infrastructure  #ECEFF1  — blue-grey    (MCP, Sandbox, Observability,
+'   Infrastructure  #ECEFF1  — blue-grey    (MCP, Sandbox,
 '                                            Wire Log, Hooks, Plugins)
 ' ------------------------------------------------------------
 

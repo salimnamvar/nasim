@@ -1,6 +1,6 @@
 @startuml sq_evaluation08_detect_repetition
 ' ============================================================
-' Title:     EVL-08 — DETECT Repetition
+' Title:     EVALUATION-08 — DETECT Repetition
 ' Boundary:  nasim code agent
 ' Purpose:   Detect repetitive tool call or response patterns
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVL-08 DETECT Repetition
+title nasim -- EVALUATION-08 DETECT Repetition
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EvaluationService" as detector
 end box
 
-== EVL-08 DETECT Repetition ==
+== EVALUATION-08 DETECT Repetition ==
 
 user -> iface : GET /evaluation/repetition
 activate iface
 iface -> router : GET /evaluation/repetition
 activate router
-router -> detector : EVL-08 DETECT Repetition({task_id, recent_calls})
+router -> detector : EVALUATION-08 DETECT Repetition({task_id, recent_calls})
 activate detector
 
 alt no repetition
-  ref over detector : EVL-08 DETECT Repetition({task_id, recent_calls}) <back:#C5CAE9>CHECKING</back>({task_id, recent_calls})
+  ref over detector : EVALUATION-08 DETECT Repetition({task_id, recent_calls}) <back:#C5CAE9>CHECKING</back>({task_id, recent_calls})
   detector --> router : 200 OK
   deactivate detector
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt no repetition
   deactivate router
   deactivate iface
 else repetition detected
-  detector --> router : 409 CONFLICT\n{error: {code: "EVL-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
+  detector --> router : 409 CONFLICT\n{error: {code: "EVALUATION-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
   deactivate detector
-  router --> iface : 409 CONFLICT\n{error: {code: "EVL-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
-  iface --> user : 409 CONFLICT\n{error: {code: "EVL-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
+  router --> iface : 409 CONFLICT\n{error: {code: "EVALUATION-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
+  iface --> user : 409 CONFLICT\n{error: {code: "EVALUATION-08_REPETITION_DETECTED", message: "Repetitive pattern detected", status: 409}}
   deactivate router
   deactivate iface
 end

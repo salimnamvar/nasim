@@ -56,29 +56,29 @@ ref over mgr : API-02 CREATE Session
 | Group | Canonical (C4) Name | Boundary | Diagrams |
 | ----- | :-----------------: | -------- | :------: |
 | AC | AgentController | Agent Controller — single convergence point for all interface containers | 4 |
-| AGT | Agent | Agent Core — orchestrator, history, permissions, plans, subagents | 14 |
+| AGENT | Agent | Agent Core — orchestrator, history, permissions, plans, subagents | 14 |
 | CLI | CLI | CLI Interface Container — REPL, parsing, rendering | 8 |
-| CFG | Config | Configuration — config loading and validation | 3 |
-| CTX | ContextGraph | Context Management — token counting and compaction | 6 |
-| EDT | EditStrategy | Edit Strategy — polymorphic edit strategies | 10 |
-| EVL | Evaluation | Evaluation — task evaluation and quality checks | 9 |
-| HK | Hooks | Hooks — pre/post hooks for tool and LLM lifecycle | 6 |
+| CONFIG | Config | Configuration — config loading and validation | 3 |
+| CONTEXTGRAPH | ContextGraph | Context Management — token counting and compaction | 6 |
+| EDITSTRATEGY | EditStrategy | Edit Strategy — polymorphic edit strategies | 10 |
+| EVALUATION | Evaluation | Evaluation — task evaluation and quality checks | 9 |
+| HOOKS | Hooks | Hooks — pre/post hooks for tool and LLM lifecycle | 6 |
 | MCP | MCP | Model Context Protocol — client/server extension tools | 4 |
-| MEM | Memory | Memory — cross-session knowledge persistence | 4 |
-| OBS | Observability | Observability — structured logging, metrics, trace correlation | 6 |
-| PLG | Plugins | Plugins — plugin discovery, loading, registration | 6 |
-| PRV | Provider | Provider Layer — provider abstraction, chat, streaming | 4 |
-| RIM | RepoIntelligence | Repo Intelligence — codebase indexing, symbol graphs, embedding | 6 |
-| RTG | Router | Model Router — model selection, fallback, routing | 4 |
-| SAF | Safety | Safety — permission checks and user approval | 3 |
-| SBX | Sandbox | Sandbox — OS-level process isolation | 4 |
-| SRV | API | API Group (Entry Gate) — REST API, SSE streaming | 11 |
-| SSN | Session | Session — persistence and resumption | 9 |
-| TL | Tool | Tool Layer — all tool implementations | 22 |
-| VCS | Git | Version Control — Git status, diff, commit | 4 |
-| WRL | WireLog | Wire Log — append-only event store, fork, checkpoint | 5 |
+| MEMORY | Memory | Memory — cross-session knowledge persistence | 4 |
 
-**Total: 149 SQ diagrams on disk (152 expected: 148 existing + 4 AC pending; 1 stale Server/ duplicate removed from count)**
+| PLUGINS | Plugins | Plugins — plugin discovery, loading, registration | 6 |
+| PROVIDER | Provider | Provider Layer — provider abstraction, chat, streaming | 4 |
+| REPOINTELLIGENCE | RepoIntelligence | Repo Intelligence — codebase indexing, symbol graphs, embedding | 6 |
+| ROUTER | Router | Model Router — model selection, fallback, routing | 4 |
+| SAFETY | Safety | Safety — permission checks and user approval | 3 |
+| SANDBOX | Sandbox | Sandbox — OS-level process isolation | 4 |
+| API | API | API Group (Entry Gate) — REST API, SSE streaming | 11 |
+| SESSION | Session | Session — persistence and resumption | 9 |
+| TOOL | Tool | Tool Layer — all tool implementations | 22 |
+| GIT | Git | Version Control — Git status, diff, commit | 4 |
+| WIRELOG | WireLog | Wire Log — append-only event store, fork, checkpoint | 5 |
+
+**Total: 146 SQ diagrams on disk (147 with common/) — OBS group removed**
 
 ## Naming Convention
 

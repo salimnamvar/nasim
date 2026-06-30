@@ -1,6 +1,6 @@
 @startuml sq_git03_read_diff
 ' ============================================================
-' Title:     VCS-03 — READ Diff
+' Title:     GIT-03 — READ Diff
 ' Boundary:  nasim code agent
 ' Purpose:   Read diff between commits or working tree
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- VCS-03 READ Diff
+title nasim -- GIT-03 READ Diff
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Repository" REPOSITORY_COLOR
   participant "GitRepository" as mgr
 end box
 
-== VCS-03 READ Diff ==
+== GIT-03 READ Diff ==
 
 user -> iface : GET /git/diff
 activate iface
 iface -> router : GET /git/diff
 activate router
-router -> mgr : VCS-03 READ Diff({repo_path, base, head})
+router -> mgr : GIT-03 READ Diff({repo_path, base, head})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : VCS-03 READ Diff({repo_path, ref_spec}) <back:#B2DFDB>TOOL_EXEC</back>
+  ref over mgr : GIT-03 READ Diff({repo_path, ref_spec}) <back:#B2DFDB>TOOL_EXEC</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "VCS-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "GIT-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "VCS-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "VCS-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "GIT-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "GIT-03_DIFF_FAILED", message: "Git diff failed", status: 422}}
   deactivate router
   deactivate iface
 end

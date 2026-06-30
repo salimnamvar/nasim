@@ -36,7 +36,7 @@ C4 → UC → SM → SQ → ERD → CL → CT/DATA → CT/API → Code
 | UC | In progress | 25 UC files + inventory | 148 UCs across 21 groups |
 | SM | In progress | 15 diagrams + inventory | Agent, session, plan, plugin, and more |
 | SQ | In progress | 149 diagrams | 1:1 with UCs, across 21 groups |
-| ERD | In progress | 5 diagrams + inventory | Session, memory, observability, repo intelligence, wire log |
+| ERD | In progress | 5 diagrams + inventory | Session, memory, wire log, config, repo intelligence |
 | CL | In progress | 1 diagram + inventory | Runtime class model (90+ classes) |
 | CT/DATA | In progress | 5 contract diagrams + 2 YAML | ODCS v3.1.0 data contracts |
 | CT/API | In progress | 6 API diagrams + OpenAPI + ROD | OAS 3.1.0 HTTP API surface |

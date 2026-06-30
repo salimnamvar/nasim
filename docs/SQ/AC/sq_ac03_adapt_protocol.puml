@@ -1,0 +1,72 @@
+@startuml sq_ac03_adapt_protocol
+' ============================================================
+' Title:     AC-03 — ADAPT Protocol
+' Boundary:  nasim code agent
+' Purpose:   Adapt between interface protocols (CLI, HTTP, MCP)
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> InterfaceAdapter -> AgentController
+' SM States: LISTENING (#E8EAF6), IDLE (#ECEFF1)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- AC-03 ADAPT Protocol
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+  participant "HTTPAdapter" as http
+  participant "MCPAdapter" as mcp
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+== AC-03 ADAPT Protocol ==
+
+user -> iface : AC-03 ADAPT Protocol({payload, protocol})
+activate iface
+
+iface -> router : AC-03 ADAPT Protocol({payload, protocol})
+activate router
+
+alt protocol is CLI
+  router -> iface : AC-03 ADAPT Protocol({payload, "cli"})
+  iface --> router : 200 OK — {adapted_payload}
+  deactivate iface
+  router --> user : 200 OK — {adapted_payload}
+  deactivate router
+
+else protocol is HTTP
+  router -> http : AC-03 ADAPT Protocol({payload, "http"})
+  activate http
+  http --> router : 200 OK — {adapted_payload}
+  deactivate http
+  router --> iface : 200 OK — {adapted_payload}
+  deactivate router
+  iface --> user : 200 OK — {adapted_payload}
+  deactivate iface
+
+else protocol is MCP
+  router -> mcp : AC-03 ADAPT Protocol({payload, "mcp"})
+  activate mcp
+  mcp --> router : 200 OK — {adapted_payload}
+  deactivate mcp
+  router --> iface : 200 OK — {adapted_payload}
+  deactivate router
+  iface --> user : 200 OK — {adapted_payload}
+  deactivate iface
+
+else unsupported protocol
+  router --> iface : 501 NOT_IMPLEMENTED\n{error: {code: "AC-03_PROTOCOL_ERROR", message: "Unsupported protocol", status: 501}}
+  deactivate router
+  iface --> user : 501 NOT_IMPLEMENTED
+  deactivate iface
+end
+
+@enduml

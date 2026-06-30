@@ -1,6 +1,6 @@
 @startuml sq_agent04_delete_history
 ' ============================================================
-' Title:     AGT-04 — DELETE History
+' Title:     AGENT-04 — DELETE History
 ' Boundary:  nasim code agent
 ' Purpose:   Reset conversation history to initial state
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-04 DELETE History
+title nasim -- AGENT-04 DELETE History
 
 actor "User" as user
 
@@ -35,20 +35,20 @@ end box
 
 database "SessionStore" as storage
 
-== AGT-04 DELETE History ==
+== AGENT-04 DELETE History ==
 
-user -> iface : AGT-04 DELETE History({agent_id})
+user -> iface : AGENT-04 DELETE History({agent_id})
 activate iface
-iface -> router : AGT-04 DELETE History({agent_id})
+iface -> router : AGENT-04 DELETE History({agent_id})
 activate router
-router -> history : AGT-04 DELETE History({agent_id})
+router -> history : AGENT-04 DELETE History({agent_id})
 activate history
 
 alt history_exists
-  ref over history : AGT-04 DELETE History({agent_id}) <back:#BBDEFB>CREATED</back>
-  history -> store : AGT-04 DELETE History({session_id})
+  ref over history : AGENT-04 DELETE History({agent_id}) <back:#BBDEFB>CREATED</back>
+  history -> store : AGENT-04 DELETE History({session_id})
   activate store
-  store -> storage : AGT-04 DELETE History({session_id})
+  store -> storage : AGENT-04 DELETE History({session_id})
   activate storage
   storage --> store : 200 OK
   deactivate storage
@@ -61,10 +61,10 @@ alt history_exists
   deactivate router
   deactivate iface
 else history not found
-  history --> router : 404 NOT_FOUND\n{error: {code: "AGT-04_NOT_FOUND", message: "History not found", status: 404}}
+  history --> router : 404 NOT_FOUND\n{error: {code: "AGENT-04_NOT_FOUND", message: "History not found", status: 404}}
   deactivate history
-  router --> iface : 404 NOT_FOUND\n{error: {code: "AGT-04_NOT_FOUND", message: "History not found", status: 404}}
-  iface --> user : 404 NOT_FOUND\n{error: {code: "AGT-04_NOT_FOUND", message: "History not found", status: 404}}
+  router --> iface : 404 NOT_FOUND\n{error: {code: "AGENT-04_NOT_FOUND", message: "History not found", status: 404}}
+  iface --> user : 404 NOT_FOUND\n{error: {code: "AGENT-04_NOT_FOUND", message: "History not found", status: 404}}
   deactivate router
   deactivate iface
 end

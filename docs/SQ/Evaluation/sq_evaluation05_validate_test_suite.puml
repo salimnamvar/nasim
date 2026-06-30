@@ -1,6 +1,6 @@
 @startuml sq_evaluation05_validate_test_suite
 ' ============================================================
-' Title:     EVL-05 — VALIDATE Test Suite
+' Title:     EVALUATION-05 — VALIDATE Test Suite
 ' Boundary:  nasim code agent
 ' Purpose:   Run the project test suite for validation
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVL-05 VALIDATE Test Suite
+title nasim -- EVALUATION-05 VALIDATE Test Suite
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EvaluationService" as runner
 end box
 
-== EVL-05 VALIDATE Test Suite ==
+== EVALUATION-05 VALIDATE Test Suite ==
 
-user -> iface : EVL-05 VALIDATE Test Suite({task_id, test_commands})
+user -> iface : EVALUATION-05 VALIDATE Test Suite({task_id, test_commands})
 activate iface
-iface -> router : EVL-05 VALIDATE Test Suite({task_id, test_commands})
+iface -> router : EVALUATION-05 VALIDATE Test Suite({task_id, test_commands})
 activate router
-router -> runner : EVL-05 VALIDATE Test Suite({task_id, test_commands})
+router -> runner : EVALUATION-05 VALIDATE Test Suite({task_id, test_commands})
 activate runner
 
 alt tests_pass
-  ref over runner : EVL-05 VALIDATE Test Suite({task_id, test_commands}) <back:#D4E157>TESTING</back>
+  ref over runner : EVALUATION-05 VALIDATE Test Suite({task_id, test_commands}) <back:#D4E157>TESTING</back>
   runner --> router : 200 OK
   deactivate runner
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt tests_pass
   deactivate router
   deactivate iface
 else tests_fail
-  runner --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-05_TESTS_FAILED", message: "Test suite failed", status: 422}}
+  runner --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-05_TESTS_FAILED", message: "Test suite failed", status: 422}}
   deactivate runner
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

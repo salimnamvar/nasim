@@ -1,6 +1,6 @@
 @startuml sq_repointelligence04_inject_repo_map
 ' ============================================================
-' Title:     RIM-04 — INJECT RepoMap
+' Title:     REPOINTELLIGENCE-04 — INJECT RepoMap
 ' Boundary:  nasim code agent
 ' Purpose:   Token-budgeted repo-map injection into LLM context
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RIM-04 INJECT RepoMap
+title nasim -- REPOINTELLIGENCE-04 INJECT RepoMap
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "RepoIntelligenceRepository" as repoMapRepo
 end box
 
-== RIM-04 INJECT RepoMap ==
+== REPOINTELLIGENCE-04 INJECT RepoMap ==
 
-user -> iface : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
+user -> iface : REPOINTELLIGENCE-04 INJECT RepoMap({budget_tokens, ranked_symbols})
 activate iface
-iface -> router : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
+iface -> router : REPOINTELLIGENCE-04 INJECT RepoMap({budget_tokens, ranked_symbols})
 activate router
-router -> mgr : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols})
+router -> mgr : REPOINTELLIGENCE-04 INJECT RepoMap({budget_tokens, ranked_symbols})
 activate mgr
 
 alt budget_sufficient and injection completes
-  ref over mgr : RIM-04 INJECT RepoMap({budget_tokens, ranked_symbols}) <back:#7CB342>INDEXED</back>
-  mgr -> repoMapRepo : RIM-04 READ RepoMap({ranked_symbols})
+  ref over mgr : REPOINTELLIGENCE-04 INJECT RepoMap({budget_tokens, ranked_symbols}) <back:#7CB342>INDEXED</back>
+  mgr -> repoMapRepo : REPOINTELLIGENCE-04 READ RepoMap({ranked_symbols})
   activate repoMapRepo
   repoMapRepo --> mgr : 200 OK
   deactivate repoMapRepo
@@ -55,10 +55,10 @@ alt budget_sufficient and injection completes
   deactivate router
   deactivate iface
 else budget exhausted
-  mgr --> router : 409 FAILED_PRECONDITION\n{error: {code: "RIM-04_BUDGET_EXCEEDED", message: "Token budget exhausted", status: 409}}
+  mgr --> router : 409 FAILED_PRECONDITION\n{error: {code: "REPOINTELLIGENCE-04_BUDGET_EXCEEDED", message: "Token budget exhausted", status: 409}}
   deactivate mgr
-  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "RIM-04_BUDGET_EXCEEDED", message: "Token budget exhausted", status: 409}}
-  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "RIM-04_BUDGET_EXCEEDED", message: "Token budget exhausted", status: 409}}
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "REPOINTELLIGENCE-04_BUDGET_EXCEEDED", message: "Token budget exhausted", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "REPOINTELLIGENCE-04_BUDGET_EXCEEDED", message: "Token budget exhausted", status: 409}}
   deactivate router
   deactivate iface
 end

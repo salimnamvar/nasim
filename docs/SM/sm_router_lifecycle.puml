@@ -7,7 +7,7 @@
 '            States: IDLE → CLASSIFYING → SELECTING → IDLE | FALLBACK
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (LLMRepository), docs/UC/README.md (RTG-01, RTG-02, RTG-03, RTG-04)
+' Source:    C4 component diagram (LLMRepository), docs/UC/README.md (ROUTER-01, ROUTER-02, ROUTER-03, ROUTER-04)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
@@ -15,7 +15,7 @@
 
 title nasim — Router Lifecycle
 
-[*] --> IDLE : RTG-01
+[*] --> IDLE : ROUTER-01
 
 state "IDLE" as IDLE #EEEEEE
 IDLE : No routing in progress.
@@ -23,36 +23,36 @@ IDLE : Default state.
 
 state "CLASSIFYING" as CLASSIFYING #5C6BC0
 CLASSIFYING : Task classification for model routing.
-CLASSIFYING : RTG-03 CLASSIFY Task.
+CLASSIFYING : ROUTER-03 CLASSIFY Task.
 
 state "SELECTING" as SELECTING #3F51B5
 SELECTING : Model selection in progress.
-SELECTING : RTG-01 SELECT Model.
+SELECTING : ROUTER-01 SELECT Model.
 
 state "SWITCHING" as SWITCHING #FF8F00
 SWITCHING : Runtime model switch in progress.
-SWITCHING : RTG-04 SWITCH Model.
+SWITCHING : ROUTER-04 SWITCH Model.
 
 state "FALLBACK" as FALLBACK #EF6C00
 FALLBACK : Falling back to next available model.
-FALLBACK : RTG-02 APPLY Fallback.
+FALLBACK : ROUTER-02 APPLY Fallback.
 
 state "ERROR" as ERROR #BF360C
 ERROR : Routing or fallback failed.
 ERROR : All models exhausted or classification failed.
 
-IDLE --> CLASSIFYING : RTG-03
-CLASSIFYING --> SELECTING : RTG-01
-CLASSIFYING --> ERROR : RTG-03
-SELECTING --> IDLE : RTG-01
-SELECTING --> FALLBACK : RTG-02
-FALLBACK --> SELECTING : RTG-02
-FALLBACK --> ERROR : RTG-02
-IDLE --> SWITCHING : RTG-04
-SWITCHING --> IDLE : RTG-04
-SWITCHING --> ERROR : RTG-04
-ERROR --> IDLE : RTG-01
+IDLE --> CLASSIFYING : ROUTER-03
+CLASSIFYING --> SELECTING : ROUTER-01
+CLASSIFYING --> ERROR : ROUTER-03
+SELECTING --> IDLE : ROUTER-01
+SELECTING --> FALLBACK : ROUTER-02
+FALLBACK --> SELECTING : ROUTER-02
+FALLBACK --> ERROR : ROUTER-02
+IDLE --> SWITCHING : ROUTER-04
+SWITCHING --> IDLE : ROUTER-04
+SWITCHING --> ERROR : ROUTER-04
+ERROR --> IDLE : ROUTER-01
 
-IDLE --> [*] : RTG-01
+IDLE --> [*] : ROUTER-01
 
 @enduml

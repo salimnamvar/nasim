@@ -1,6 +1,6 @@
 @startuml sq_hooks02_dispatch_pre_tool_hook
 ' ============================================================
-' Title:     HK-02 — DISPATCH Pre-Tool Hook
+' Title:     HOOKS-02 — DISPATCH Pre-Tool Hook
 ' Boundary:  nasim code agent
 ' Purpose:   Execute hooks before tool execution
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- HK-02 DISPATCH Pre-Tool Hook
+title nasim -- HOOKS-02 DISPATCH Pre-Tool Hook
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "ToolService" as mgr
 end box
 
-== HK-02 DISPATCH Pre-Tool Hook ==
+== HOOKS-02 DISPATCH Pre-Tool Hook ==
 
 user -> iface : POST /hooks/{id}:dispatch
 activate iface
 iface -> router : POST /hooks/{id}:dispatch
 activate router
-router -> mgr : HK-02 DISPATCH Pre-Tool Hook({tool_name, args})
+router -> mgr : HOOKS-02 DISPATCH Pre-Tool Hook({tool_name, args})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : HK-02 DISPATCH Pre-Tool Hook({tool_name, args}) <back:#FFFDE7>HOOK_RUNNING</back>
+  ref over mgr : HOOKS-02 DISPATCH Pre-Tool Hook({tool_name, args}) <back:#FFFDE7>HOOK_RUNNING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "HK-02_PRE_TOOL_FAILED", message: "Pre-tool hook dispatch failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "HOOKS-02_PRE_TOOL_FAILED", message: "Pre-tool hook dispatch failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "HK-02_PRE_TOOL_FAILED", message: "Pre-tool hook dispatch failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "HK-02_PRE_TOOL_FAILED", message: "Pre-tool hook dispatch failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "HOOKS-02_PRE_TOOL_FAILED", message: "Pre-tool hook dispatch failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "HOOKS-02_PRE_TOOL_FAILED", message: "Pre-tool hook dispatch failed", status: 422}}
   deactivate router
   deactivate iface
 end

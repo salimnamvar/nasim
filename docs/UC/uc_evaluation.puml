@@ -67,15 +67,15 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Evaluation Group (EVL)" {
-    usecase "**EVL-01 EVALUATE Task**\n--\nOrchestrate task evaluation:\nchecks, scores, retries" <<master>> as EVL01
-    usecase "**EVL-02 CHECK Task Completion**\n--\nEvaluate task completion\nagainst success criteria" <<include>> as EVL02
-    usecase "**EVL-03 CHECK Success**\n--\nRun user-defined success checks" <<include>> as EVL03
-    usecase "**EVL-04 VALIDATE With LLM**\n--\nLLM-based code review\nand quality assessment" <<include>> as EVL04
-    usecase "**EVL-05 VALIDATE Test Suite**\n--\nRun project test suites" <<include>> as EVL05
-    usecase "**EVL-06 COORDINATE Retry**\n--\nCoordinate retry with\nbackoff and escalation" <<include>> as EVL06
-    usecase "**EVL-07 RECORD Quality Signal**\n--\nProduce accept/reject\nwith feedback" <<include>> as EVL07
-    usecase "**EVL-08 DETECT Repetition**\n--\nDetect repeated failures\nor loops" <<include>> as EVL08
-    usecase "**EVL-09 INJECT Turn Budget**\n--\nInject turn budget limits\ninto context" <<include>> as EVL09
+    usecase "**EVALUATION-01 EVALUATE Task**\n--\nOrchestrate task evaluation:\nchecks, scores, retries" <<master>> as EVL01
+    usecase "**EVALUATION-02 CHECK Task Completion**\n--\nEvaluate task completion\nagainst success criteria" <<include>> as EVL02
+    usecase "**EVALUATION-03 CHECK Success**\n--\nRun user-defined success checks" <<include>> as EVL03
+    usecase "**EVALUATION-04 VALIDATE With LLM**\n--\nLLM-based code review\nand quality assessment" <<include>> as EVL04
+    usecase "**EVALUATION-05 VALIDATE Test Suite**\n--\nRun project test suites" <<include>> as EVL05
+    usecase "**EVALUATION-06 COORDINATE Retry**\n--\nCoordinate retry with\nbackoff and escalation" <<include>> as EVL06
+    usecase "**EVALUATION-07 RECORD Quality Signal**\n--\nProduce accept/reject\nwith feedback" <<include>> as EVL07
+    usecase "**EVALUATION-08 DETECT Repetition**\n--\nDetect repeated failures\nor loops" <<include>> as EVL08
+    usecase "**EVALUATION-09 INJECT Turn Budget**\n--\nInject turn budget limits\ninto context" <<include>> as EVL09
   }
 }
 

@@ -1,6 +1,6 @@
 @startuml sq_provider01_register_provider
 ' ============================================================
-' Title:     PRV-01 — REGISTER Provider
+' Title:     PROVIDER-01 — REGISTER Provider
 ' Boundary:  nasim code agent
 ' Purpose:   Provider instantiation from config
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- PRV-01 REGISTER Provider
+title nasim -- PROVIDER-01 REGISTER Provider
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "LLMRepository" as mgr
 end box
 
-== PRV-01 REGISTER Provider ==
+== PROVIDER-01 REGISTER Provider ==
 
 user -> iface : POST /providers:register
 activate iface
 iface -> router : POST /providers:register
 activate router
-router -> mgr : PRV-01 REGISTER Provider({config})
+router -> mgr : PROVIDER-01 REGISTER Provider({config})
 activate mgr
 
 alt validation succeeds
-  ref over mgr : PRV-01 REGISTER Provider({config}) <back:#03A9F4>ACTIVE</back>
+  ref over mgr : PROVIDER-01 REGISTER Provider({config}) <back:#03A9F4>ACTIVE</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK

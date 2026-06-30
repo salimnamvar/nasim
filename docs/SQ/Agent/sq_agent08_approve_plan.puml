@@ -1,6 +1,6 @@
 @startuml sq_agent08_approve_plan
 ' ============================================================
-' Title:     AGT-08 — APPROVE Plan
+' Title:     AGENT-08 — APPROVE Plan
 ' Boundary:  nasim code agent
 ' Purpose:   Execute queued tool calls after user approval
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGT-08 APPROVE Plan
+title nasim -- AGENT-08 APPROVE Plan
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "TaskService" as planStore
 end box
 
-== AGT-08 APPROVE Plan ==
+== AGENT-08 APPROVE Plan ==
 
 user -> iface : POST /v1/agents/{agent_id}:approve-plan
 activate iface
 iface -> router : POST /v1/agents/{agent_id}:approve-plan
 activate router
-router -> plan : AGT-08 APPROVE Plan({agent_id})
+router -> plan : AGENT-08 APPROVE Plan({agent_id})
 activate plan
 
 alt plan approved without error
-  ref over plan : AGT-08 APPROVE Plan({agent_id}) <back:#43A047>RUNNING</back>
-  plan -> planStore : AGT-08 READ Plan({agent_id})
+  ref over plan : AGENT-08 APPROVE Plan({agent_id}) <back:#43A047>RUNNING</back>
+  plan -> planStore : AGENT-08 READ Plan({agent_id})
   activate planStore
   planStore --> plan : 200 OK
   deactivate planStore
@@ -55,10 +55,10 @@ alt plan approved without error
   deactivate router
   deactivate iface
 else plan empty
-  plan --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
+  plan --> router : 409 FAILED_PRECONDITION\n{error: {code: "AGENT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
   deactivate plan
-  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "AGT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
-  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "AGT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "AGENT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "AGENT-08_PLAN_EMPTY", message: "No queued plan to approve", status: 409}}
   deactivate router
   deactivate iface
 end

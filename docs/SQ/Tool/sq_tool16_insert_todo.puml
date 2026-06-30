@@ -1,6 +1,6 @@
 @startuml sq_tool16_insert_todo
 ' ============================================================
-' Title:     TL-16 — INSERT Todo
+' Title:     TOOL-16 — INSERT Todo
 ' Boundary:  nasim code agent
 ' Purpose:   Add a new todo item via TodoTool
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-16 INSERT Todo
+title nasim -- TOOL-16 INSERT Todo
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-16 INSERT Todo ==
+== TOOL-16 INSERT Todo ==
 
 user -> iface : POST /tools/insert_todo:execute
 activate iface
 iface -> router : POST /tools/insert_todo:execute
 activate router
 
-router -> tool : TL-16 INSERT Todo(title, description)
+router -> tool : TOOL-16 INSERT Todo(title, description)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-16 INSERT Todo
+  ref over tool : TOOL-16 INSERT Todo
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-16 INSERT Todo (SM/README.md)
+    ' Owned by: TOOL-16 INSERT Todo (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

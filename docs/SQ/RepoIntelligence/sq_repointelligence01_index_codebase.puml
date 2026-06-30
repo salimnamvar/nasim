@@ -1,6 +1,6 @@
 @startuml sq_repointelligence01_index_codebase
 ' ============================================================
-' Title:     RIM-01 — INDEX Codebase
+' Title:     REPOINTELLIGENCE-01 — INDEX Codebase
 ' Boundary:  nasim code agent
 ' Purpose:   Build AST index and symbol graph from project source
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RIM-01 INDEX Codebase
+title nasim -- REPOINTELLIGENCE-01 INDEX Codebase
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "RepoIntelligenceRepository" as ast
 end box
 
-== RIM-01 INDEX Codebase ==
+== REPOINTELLIGENCE-01 INDEX Codebase ==
 
-user -> iface : RIM-01 INDEX Codebase({project_root})
+user -> iface : REPOINTELLIGENCE-01 INDEX Codebase({project_root})
 activate iface
-iface -> router : RIM-01 INDEX Codebase({project_root})
+iface -> router : REPOINTELLIGENCE-01 INDEX Codebase({project_root})
 activate router
-router -> mgr : RIM-01 INDEX Codebase({project_root})
+router -> mgr : REPOINTELLIGENCE-01 INDEX Codebase({project_root})
 activate mgr
 
 alt ast_extraction completes without error
-  ref over mgr : RIM-01 INDEX Codebase({project_root}) <back:#4FC3F7>INDEXING</back>
-  mgr -> ast : RIM-01 INDEX Codebase({project_root})
+  ref over mgr : REPOINTELLIGENCE-01 INDEX Codebase({project_root}) <back:#4FC3F7>INDEXING</back>
+  mgr -> ast : REPOINTELLIGENCE-01 INDEX Codebase({project_root})
   activate ast
   ast --> mgr : 200 OK
   deactivate ast
@@ -55,10 +55,10 @@ alt ast_extraction completes without error
   deactivate router
   deactivate iface
 else parse validation fails
-  mgr --> router : 400 BAD_REQUEST\n{error: {code: "RIM-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
+  mgr --> router : 400 BAD_REQUEST\n{error: {code: "REPOINTELLIGENCE-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
   deactivate mgr
-  router --> iface : 400 BAD_REQUEST\n{error: {code: "RIM-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
-  iface --> user : 400 BAD_REQUEST\n{error: {code: "RIM-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
+  router --> iface : 400 BAD_REQUEST\n{error: {code: "REPOINTELLIGENCE-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
+  iface --> user : 400 BAD_REQUEST\n{error: {code: "REPOINTELLIGENCE-01_PARSE_ERROR", message: "AST extraction failed", status: 400}}
   deactivate router
   deactivate iface
 end

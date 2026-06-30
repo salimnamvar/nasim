@@ -1,0 +1,64 @@
+@startuml sq_ac04_dispatch_to_core_engine
+' ============================================================
+' Title:     AC-04 — DISPATCH to Core Engine
+' Boundary:  nasim code agent
+' Purpose:   Forward validated request to TaskService
+' Milestone: v1.0
+' Version:   9.1.0
+' Source:    docs/UC/README.md, docs/SM/README.md
+' Review:    —
+' CSR Chain: User -> InterfaceAdapter -> AgentController -> TaskService
+' SM States: LISTENING (#E8EAF6), THINKING (#D7CCC8), IDLE (#ECEFF1)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim -- AC-04 DISPATCH to Core Engine
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "CLIAdapter" as iface
+end box
+
+box "API" API_COLOR
+  participant "AgentController" as router
+end box
+
+box "Service" SERVICE_COLOR
+  participant "TaskService" as engine
+end box
+
+== AC-04 DISPATCH to Core Engine ==
+
+user -> iface : AC-04 DISPATCH to Core Engine({validated_payload})
+activate iface
+
+iface -> router : AC-04 DISPATCH to Core Engine({validated_payload})
+activate router
+
+router -> engine : AC-04 DISPATCH to Core Engine({validated_payload})
+activate engine
+
+alt dispatch successful
+  ref over engine
+    AGENT-01: PROCESS User Task
+  end ref
+
+  engine --> router : 200 OK — {task_result}
+  deactivate engine
+  router --> iface : 200 OK — {task_result}
+  deactivate router
+  iface --> user : 200 OK — {task_result}
+  deactivate iface
+
+else engine unavailable
+  engine --> router : 503 SERVICE_UNAVAILABLE\n{error: {code: "AC-04_DISPATCH_ERROR", message: "Core engine unavailable", status: 503}}
+  deactivate engine
+  router --> iface : 503 SERVICE_UNAVAILABLE
+  deactivate router
+  iface --> user : 503 SERVICE_UNAVAILABLE
+  deactivate iface
+end
+
+@enduml

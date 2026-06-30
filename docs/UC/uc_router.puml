@@ -68,10 +68,10 @@ actor "User" as User
 
 rectangle "nasim" {
   package "Router Group (RTG)" {
-    usecase "**RTG-01 SELECT Model**\n--\nSelect best model for task" <<master>> as RTG01
-    usecase "**RTG-02 APPLY Fallback**\n--\nFallback to next available model" <<include>> as RTG02
-    usecase "**RTG-03 CLASSIFY Task**\n--\nClassify task for model routing" <<include>> as RTG03
-    usecase "**RTG-04 SWITCH Model**\n--\nSwitch model at runtime" <<master>> as RTG04
+    usecase "**ROUTER-01 SELECT Model**\n--\nSelect best model for task" <<master>> as RTG01
+    usecase "**ROUTER-02 APPLY Fallback**\n--\nFallback to next available model" <<include>> as RTG02
+    usecase "**ROUTER-03 CLASSIFY Task**\n--\nClassify task for model routing" <<include>> as RTG03
+    usecase "**ROUTER-04 SWITCH Model**\n--\nSwitch model at runtime" <<master>> as RTG04
   }
 }
 

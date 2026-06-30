@@ -1,6 +1,6 @@
 @startuml sq_evaluation01_evaluate_task
 ' ============================================================
-' Title:     EVL-01 — EVALUATE Task
+' Title:     EVALUATION-01 — EVALUATE Task
 ' Boundary:  nasim code agent
 ' Purpose:   Evaluate task completion via success checks and quality signals
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVL-01 EVALUATE Task
+title nasim -- EVALUATION-01 EVALUATE Task
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EvaluationService" as eng
 end box
 
-== EVL-01 EVALUATE Task ==
+== EVALUATION-01 EVALUATE Task ==
 
-user -> iface : EVL-01 EVALUATE Task({task_id, check_commands})
+user -> iface : EVALUATION-01 EVALUATE Task({task_id, check_commands})
 activate iface
-iface -> router : EVL-01 EVALUATE Task({task_id, check_commands})
+iface -> router : EVALUATION-01 EVALUATE Task({task_id, check_commands})
 activate router
-router -> eng : EVL-01 EVALUATE Task({task_id, check_commands})
+router -> eng : EVALUATION-01 EVALUATE Task({task_id, check_commands})
 activate eng
 
 alt all_checks_pass
-  ref over eng : EVL-01 EVALUATE Task({task_id, check_commands}) <back:#C5CAE9>CHECKING</back>
+  ref over eng : EVALUATION-01 EVALUATE Task({task_id, check_commands}) <back:#C5CAE9>CHECKING</back>
   eng --> router : 200 OK
   deactivate eng
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt all_checks_pass
   deactivate router
   deactivate iface
 else check_fails
-  eng --> router : 422 UNPROCESSABLE\n{error: {code: "EVL-01_CHECK_FAILED", message: "Task evaluation check failed", status: 422}}
+  eng --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATION-01_CHECK_FAILED", message: "Task evaluation check failed", status: 422}}
   deactivate eng
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

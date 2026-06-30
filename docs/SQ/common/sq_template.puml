@@ -32,7 +32,7 @@ end box
 '   SERVICE_COLOR     — Agent, Router, Safety, Context, Edit Strategy, Evaluation, Provider
 '   REPOSITORY_COLOR  — Session, Tool, Memory, Config, Git, Repo Intelligence
 '   DATASTORE_COLOR   — SessionStore, FileSystem, databases
-'   INFRASTRUCTURE_COLOR — MCP, Sandbox, Observability, Wire Log, Hooks, Plugins
+'   INFRASTRUCTURE_COLOR — MCP, Sandbox, Wire Log, Hooks, Plugins
 '
 ' Use ONLY C4-authoritative component names. See ENTITIES.md for the registry.
 ' DO NOT invent managers, orchestrators, or stores that don't exist in C4.

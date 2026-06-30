@@ -1,6 +1,6 @@
 @startuml sq_editstrategy01_select_strategy
 ' ============================================================
-' Title:     EDT-01 — SELECT Strategy
+' Title:     EDITSTRATEGY-01 — SELECT Strategy
 ' Boundary:  nasim code agent
 ' Purpose:   Choose optimal edit format for the target model
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EDT-01 SELECT Strategy
+title nasim -- EDITSTRATEGY-01 SELECT Strategy
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EditStrategyRepository" as sel
 end box
 
-== EDT-01 SELECT Strategy ==
+== EDITSTRATEGY-01 SELECT Strategy ==
 
-user -> iface : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
+user -> iface : EDITSTRATEGY-01 SELECT Strategy({file_path, edit_description, model_id})
 activate iface
-iface -> router : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
+iface -> router : EDITSTRATEGY-01 SELECT Strategy({file_path, edit_description, model_id})
 activate router
-router -> sel : EDT-01 SELECT Strategy({file_path, edit_description, model_id})
+router -> sel : EDITSTRATEGY-01 SELECT Strategy({file_path, edit_description, model_id})
 activate sel
 
 alt strategy found
-  ref over sel : EDT-01 SELECT Strategy <back:#D7CCC8>THINKING</back>
+  ref over sel : EDITSTRATEGY-01 SELECT Strategy <back:#D7CCC8>THINKING</back>
   sel --> router : 200 OK
   deactivate sel
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt strategy found
   deactivate router
   deactivate iface
 else strategy not found
-  sel --> router : {error: {code: "EDT-01_NOT_FOUND", message: "Strategy not found", status: 404}}
+  sel --> router : {error: {code: "EDITSTRATEGY-01_NOT_FOUND", message: "Strategy not found", status: 404}}
   deactivate sel
-  router --> iface : {error: {code: "EDT-01_NOT_FOUND", message: "Strategy not found", status: 404}}
-  iface --> user : {error: {code: "EDT-01_NOT_FOUND", message: "Strategy not found", status: 404}}
+  router --> iface : {error: {code: "EDITSTRATEGY-01_NOT_FOUND", message: "Strategy not found", status: 404}}
+  iface --> user : {error: {code: "EDITSTRATEGY-01_NOT_FOUND", message: "Strategy not found", status: 404}}
   deactivate router
   deactivate iface
 end

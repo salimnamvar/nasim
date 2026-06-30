@@ -1,6 +1,6 @@
 @startuml sq_tool18_read_todos
 ' ============================================================
-' Title:     TL-18 — READ Todos
+' Title:     TOOL-18 — READ Todos
 ' Boundary:  nasim code agent
 ' Purpose:   List all todo items or filter by status
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- TL-18 READ Todos
+title nasim -- TOOL-18 READ Todos
 
 actor "User" as user
 
@@ -29,22 +29,22 @@ box "Repository" REPOSITORY_COLOR
   participant "ToolService" as tool
 end box
 
-== TL-18 READ Todos ==
+== TOOL-18 READ Todos ==
 
 user -> iface : POST /tools/read_todos:execute
 activate iface
 iface -> router : POST /tools/read_todos:execute
 activate router
 
-router -> tool : TL-18 READ Todos(statusFilter)
+router -> tool : TOOL-18 READ Todos(statusFilter)
 activate tool
 
 alt validation succeeds
   tool --> router : 200 OK
   deactivate tool
-  ref over tool : TL-18 READ Todos
+  ref over tool : TOOL-18 READ Todos
     ' State: <back:#B2DFDB>TOOL_EXEC</back>
-    ' Owned by: TL-18 READ Todos (SM/README.md)
+    ' Owned by: TOOL-18 READ Todos (SM/README.md)
   router --> iface : 200 OK
   iface --> user : 200 OK
   deactivate router

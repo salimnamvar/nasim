@@ -1,6 +1,6 @@
 @startuml sq_config03_apply_layered_config
 ' ============================================================
-' Title:     CFG-03 — APPLY Layered Config
+' Title:     CONFIG-03 — APPLY Layered Config
 ' Boundary:  nasim code agent
 ' Purpose:   Apply layered configuration merging global, project, env, and CLI
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- CFG-03 APPLY Layered Config
+title nasim -- CONFIG-03 APPLY Layered Config
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Repository" REPOSITORY_COLOR
   participant "ConfigRepository" as mgr
 end box
 
-== CFG-03 APPLY Layered Config ==
+== CONFIG-03 APPLY Layered Config ==
 
-user -> iface : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+user -> iface : CONFIG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
 activate iface
-iface -> router : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+iface -> router : CONFIG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
 activate router
-router -> mgr : CFG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+router -> mgr : CONFIG-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
 activate mgr
 
 alt merge succeeds
-  ref over mgr : CFG-03 APPLY Layered Config <back:#E0F7FA>SERVING</back>
+  ref over mgr : CONFIG-03 APPLY Layered Config <back:#E0F7FA>SERVING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt merge succeeds
   deactivate router
   deactivate iface
 else merge fails
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "CFG-03_MERGE_ERROR", message: "Layered config merge failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "CONFIG-03_MERGE_ERROR", message: "Layered config merge failed", status: 422}}
   deactivate mgr
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

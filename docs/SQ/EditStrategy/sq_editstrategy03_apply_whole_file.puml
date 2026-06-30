@@ -1,6 +1,6 @@
 @startuml sq_editstrategy03_apply_whole_file
 ' ============================================================
-' Title:     EDT-03 — APPLY Whole-File
+' Title:     EDITSTRATEGY-03 — APPLY Whole-File
 ' Boundary:  nasim code agent
 ' Purpose:   Replace entire file content with new content
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- EDT-03 APPLY Whole-File
+title nasim -- EDITSTRATEGY-03 APPLY Whole-File
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "EditStrategyRepository" as coder
 end box
 
-== EDT-03 APPLY Whole-File ==
+== EDITSTRATEGY-03 APPLY Whole-File ==
 
-user -> iface : EDT-03 APPLY Whole-File({file_path, content})
+user -> iface : EDITSTRATEGY-03 APPLY Whole-File({file_path, content})
 activate iface
-iface -> router : EDT-03 APPLY Whole-File({file_path, content})
+iface -> router : EDITSTRATEGY-03 APPLY Whole-File({file_path, content})
 activate router
-router -> coder : EDT-03 APPLY Whole-File({file_path, content})
+router -> coder : EDITSTRATEGY-03 APPLY Whole-File({file_path, content})
 activate coder
 
 alt validation succeeds
-  ref over coder : EDT-03 APPLY Whole-File <back:#B2DFDB>TOOL_EXEC</back>
+  ref over coder : EDITSTRATEGY-03 APPLY Whole-File <back:#B2DFDB>TOOL_EXEC</back>
   coder --> router : 200 OK
   deactivate coder
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt validation succeeds
   deactivate router
   deactivate iface
 else validation fails
-  coder --> router : {error: {code: "EDT-03_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  coder --> router : {error: {code: "EDITSTRATEGY-03_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate coder
-  router --> iface : {error: {code: "EDT-03_VALIDATION_ERROR", message: "Validation failed", status: 422}}
-  iface --> user : {error: {code: "EDT-03_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  router --> iface : {error: {code: "EDITSTRATEGY-03_VALIDATION_ERROR", message: "Validation failed", status: 422}}
+  iface --> user : {error: {code: "EDITSTRATEGY-03_VALIDATION_ERROR", message: "Validation failed", status: 422}}
   deactivate router
   deactivate iface
 end

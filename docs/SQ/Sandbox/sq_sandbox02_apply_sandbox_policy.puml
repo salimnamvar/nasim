@@ -1,6 +1,6 @@
 @startuml sq_sandbox02_apply_sandbox_policy
 ' ============================================================
-' Title:     SBX-02 — APPLY Sandbox Policy
+' Title:     SANDBOX-02 — APPLY Sandbox Policy
 ' Boundary:  nasim code agent
 ' Purpose:   Load and apply sandbox security policy
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SBX-02 APPLY Sandbox Policy
+title nasim -- SANDBOX-02 APPLY Sandbox Policy
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Infrastructure" INFRASTRUCTURE_COLOR
   participant "SandboxRepository" as mgr
 end box
 
-== SBX-02 APPLY Sandbox Policy ==
+== SANDBOX-02 APPLY Sandbox Policy ==
 
 user -> iface : PATCH /sandbox/policy
 activate iface
 iface -> router : PATCH /sandbox/policy
 activate router
-router -> mgr : SBX-02 APPLY Sandbox Policy({policy_path})
+router -> mgr : SANDBOX-02 APPLY Sandbox Policy({policy_path})
 activate mgr
 
 alt policy applied
-  ref over mgr : SBX-02 APPLY Sandbox Policy({policy_path}) <back:#78909C>IDLE</back>
+  ref over mgr : SANDBOX-02 APPLY Sandbox Policy({policy_path}) <back:#78909C>IDLE</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,10 +47,10 @@ alt policy applied
   deactivate router
   deactivate iface
 else invalid policy
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SBX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
   deactivate mgr
-  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SBX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
-  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SBX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
+  router --> iface : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
+  iface --> user : 422 UNPROCESSABLE\n{error: {code: "SANDBOX-02_POLICY_APPLY_FAILED", message: "Sandbox policy application failed", status: 422}}
   deactivate router
   deactivate iface
 end

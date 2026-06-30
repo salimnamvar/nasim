@@ -30,7 +30,6 @@ actor "User" as User
 
 
 actor "MCP Client" as MCPClient <<system>>
-actor "Observability Platform" as Platform <<system>>
 
 
 ' ------------------------------------------------------------
@@ -63,7 +62,6 @@ rectangle "nasim" {
   usecase "**Memory Group**" <<master>> as MEMORY_GROUP
   usecase "**Repo Intelligence Group**" <<master>> as REPO_INTEL_GROUP
   usecase "**Wire Log Group**" <<master>> as WIRE_LOG_GROUP
-  usecase "**Observability Group**" <<master>> as OBSERVABILITY_GROUP
 }
 
 
@@ -76,7 +74,6 @@ User --> AC_GROUP
 
 MCPClient --> AC_GROUP
 
-Platform --> OBSERVABILITY_GROUP
 
 
 ' ------------------------------------------------------------
@@ -113,7 +110,6 @@ AGENT_GROUP ..> PLUGINS_GROUP : <<extend>>
 AGENT_GROUP ..> MEMORY_GROUP : <<extend>>
 AGENT_GROUP ..> REPO_INTEL_GROUP : <<extend>>
 AGENT_GROUP ..> WIRE_LOG_GROUP : <<extend>>
-AGENT_GROUP ..> OBSERVABILITY_GROUP : <<extend>>
 
 
 @enduml

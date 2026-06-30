@@ -1,6 +1,6 @@
 @startuml sq_repointelligence05_embed_code
 ' ============================================================
-' Title:     RIM-05 — EMBED Code
+' Title:     REPOINTELLIGENCE-05 — EMBED Code
 ' Boundary:  nasim code agent
 ' Purpose:   Generate vector embeddings for code fragments
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RIM-05 EMBED Code
+title nasim -- REPOINTELLIGENCE-05 EMBED Code
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "RepoIntelligenceRepository" as embeddingAdapter
 end box
 
-== RIM-05 EMBED Code ==
+== REPOINTELLIGENCE-05 EMBED Code ==
 
-user -> iface : RIM-05 EMBED Code({code_fragments})
+user -> iface : REPOINTELLIGENCE-05 EMBED Code({code_fragments})
 activate iface
-iface -> router : RIM-05 EMBED Code({code_fragments})
+iface -> router : REPOINTELLIGENCE-05 EMBED Code({code_fragments})
 activate router
-router -> mgr : RIM-05 EMBED Code({code_fragments})
+router -> mgr : REPOINTELLIGENCE-05 EMBED Code({code_fragments})
 activate mgr
 
 alt embedding_model available and embed completes
-  ref over mgr : RIM-05 EMBED Code({code_fragments}) <back:#E6EE9C>EMBEDDING</back>
-  mgr -> embeddingAdapter : RIM-05 PERSIST Embedding({code_fragments})
+  ref over mgr : REPOINTELLIGENCE-05 EMBED Code({code_fragments}) <back:#E6EE9C>EMBEDDING</back>
+  mgr -> embeddingAdapter : REPOINTELLIGENCE-05 PERSIST Embedding({code_fragments})
   activate embeddingAdapter
   embeddingAdapter --> mgr : 200 OK
   deactivate embeddingAdapter
@@ -55,10 +55,10 @@ alt embedding_model available and embed completes
   deactivate router
   deactivate iface
 else provider error
-  mgr --> router : 503 UNAVAILABLE\n{error: {code: "RIM-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
+  mgr --> router : 503 UNAVAILABLE\n{error: {code: "REPOINTELLIGENCE-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
   deactivate mgr
-  router --> iface : 503 UNAVAILABLE\n{error: {code: "RIM-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
-  iface --> user : 503 UNAVAILABLE\n{error: {code: "RIM-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
+  router --> iface : 503 UNAVAILABLE\n{error: {code: "REPOINTELLIGENCE-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
+  iface --> user : 503 UNAVAILABLE\n{error: {code: "REPOINTELLIGENCE-05_PROVIDER_ERROR", message: "Embedding provider unavailable", status: 503}}
   deactivate router
   deactivate iface
 end

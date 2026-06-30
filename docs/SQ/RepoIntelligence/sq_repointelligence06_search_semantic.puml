@@ -1,6 +1,6 @@
 @startuml sq_repointelligence06_search_semantic
 ' ============================================================
-' Title:     RIM-06 — SEARCH Semantic
+' Title:     REPOINTELLIGENCE-06 — SEARCH Semantic
 ' Boundary:  nasim code agent
 ' Purpose:   Embedding-based code similarity search across repository
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RIM-06 SEARCH Semantic
+title nasim -- REPOINTELLIGENCE-06 SEARCH Semantic
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "RepoIntelligenceRepository" as embeddingRepo
 end box
 
-== RIM-06 SEARCH Semantic ==
+== REPOINTELLIGENCE-06 SEARCH Semantic ==
 
-user -> iface : RIM-06 SEARCH Semantic({query, top_k})
+user -> iface : REPOINTELLIGENCE-06 SEARCH Semantic({query, top_k})
 activate iface
-iface -> router : RIM-06 SEARCH Semantic({query, top_k})
+iface -> router : REPOINTELLIGENCE-06 SEARCH Semantic({query, top_k})
 activate router
-router -> mgr : RIM-06 SEARCH Semantic({query, top_k})
+router -> mgr : REPOINTELLIGENCE-06 SEARCH Semantic({query, top_k})
 activate mgr
 
 alt embeddings_indexed and search completes
-  ref over mgr : RIM-06 SEARCH Semantic({query, top_k}) <back:#7CB342>INDEXED</back>
-  mgr -> embeddingRepo : RIM-06 SEARCH Embedding({query, top_k})
+  ref over mgr : REPOINTELLIGENCE-06 SEARCH Semantic({query, top_k}) <back:#7CB342>INDEXED</back>
+  mgr -> embeddingRepo : REPOINTELLIGENCE-06 SEARCH Embedding({query, top_k})
   activate embeddingRepo
   embeddingRepo --> mgr : 200 OK
   deactivate embeddingRepo
@@ -55,10 +55,10 @@ alt embeddings_indexed and search completes
   deactivate router
   deactivate iface
 else no results
-  mgr --> router : 404 NOT_FOUND\n{error: {code: "RIM-06_NO_RESULTS", message: "No matching results found", status: 404}}
+  mgr --> router : 404 NOT_FOUND\n{error: {code: "REPOINTELLIGENCE-06_NO_RESULTS", message: "No matching results found", status: 404}}
   deactivate mgr
-  router --> iface : 404 NOT_FOUND\n{error: {code: "RIM-06_NO_RESULTS", message: "No matching results found", status: 404}}
-  iface --> user : 404 NOT_FOUND\n{error: {code: "RIM-06_NO_RESULTS", message: "No matching results found", status: 404}}
+  router --> iface : 404 NOT_FOUND\n{error: {code: "REPOINTELLIGENCE-06_NO_RESULTS", message: "No matching results found", status: 404}}
+  iface --> user : 404 NOT_FOUND\n{error: {code: "REPOINTELLIGENCE-06_NO_RESULTS", message: "No matching results found", status: 404}}
   deactivate router
   deactivate iface
 end

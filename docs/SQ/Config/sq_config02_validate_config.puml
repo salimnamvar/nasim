@@ -1,6 +1,6 @@
 @startuml sq_config02_validate_config
 ' ============================================================
-' Title:     CFG-02 — VALIDATE Config
+' Title:     CONFIG-02 — VALIDATE Config
 ' Boundary:  nasim code agent
 ' Purpose:   Validate configuration field types and values
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- CFG-02 VALIDATE Config
+title nasim -- CONFIG-02 VALIDATE Config
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Repository" REPOSITORY_COLOR
   participant "ConfigRepository" as mgr
 end box
 
-== CFG-02 VALIDATE Config ==
+== CONFIG-02 VALIDATE Config ==
 
-user -> iface : CFG-02 VALIDATE Config({config_object})
+user -> iface : CONFIG-02 VALIDATE Config({config_object})
 activate iface
-iface -> router : CFG-02 VALIDATE Config({config_object})
+iface -> router : CONFIG-02 VALIDATE Config({config_object})
 activate router
-router -> mgr : CFG-02 VALIDATE Config({config_object})
+router -> mgr : CONFIG-02 VALIDATE Config({config_object})
 activate mgr
 
 alt validation passes
-  ref over mgr : CFG-02 VALIDATE Config <back:#E0F7FA>SERVING</back>
+  ref over mgr : CONFIG-02 VALIDATE Config <back:#E0F7FA>SERVING</back>
   mgr --> router : 200 OK
   deactivate mgr
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt validation passes
   deactivate router
   deactivate iface
 else validation fails
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "CFG-02_VALIDATION_ERROR", message: "Config validation failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "CONFIG-02_VALIDATION_ERROR", message: "Config validation failed", status: 422}}
   deactivate mgr
   router --> iface : 422 UNPROCESSABLE
   iface --> user : 422 UNPROCESSABLE

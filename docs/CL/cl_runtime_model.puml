@@ -1,4 +1,5 @@
 @startuml cl_runtime_model
+' @cl-type runtime
 ' ============================================================
 ' Title:     nasim — Runtime Model
 ' Boundary:  NASIM Application (C4 container)

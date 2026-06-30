@@ -1,6 +1,6 @@
 @startuml sq_session05_snapshot_session
 ' ============================================================
-' Title:     SSN-05 — SNAPSHOT Session
+' Title:     SESSION-05 — SNAPSHOT Session
 ' Boundary:  nasim code agent
 ' Purpose:   Create a point-in-time snapshot of session state
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- SSN-05 SNAPSHOT Session
+title nasim -- SESSION-05 SNAPSHOT Session
 
 actor "User" as user
 
@@ -36,16 +36,16 @@ end box
 
 database "SessionStore" as storage
 
-== SSN-05 SNAPSHOT Session ==
+== SESSION-05 SNAPSHOT Session ==
 
 user -> iface : POST /sessions/{session_id}:snapshot
 activate iface
 iface -> router : POST /sessions/{session_id}:snapshot
 activate router
 
-router -> svc : SSN-05 SNAPSHOT Session({session_id})
+router -> svc : SESSION-05 SNAPSHOT Session({session_id})
 activate svc
-svc -> versioning : SSN-05 SNAPSHOT Session({session_id})
+svc -> versioning : SESSION-05 SNAPSHOT Session({session_id})
 activate versioning
 
 alt session_id is empty
@@ -57,7 +57,7 @@ alt session_id is empty
     deactivate iface
 end
 
-versioning -> store : SSN-05 SNAPSHOT Session({session_id})
+versioning -> store : SESSION-05 SNAPSHOT Session({session_id})
 activate store
 
 alt session not found
@@ -73,7 +73,7 @@ alt session not found
     deactivate iface
 end
 
-store -> storage : SSN-05 SNAPSHOT Session({session_id})
+store -> storage : SESSION-05 SNAPSHOT Session({session_id})
 activate storage
 
 alt disk read error
@@ -97,7 +97,7 @@ deactivate storage
 store --> versioning : 200 OK — {session_data}
 deactivate store
 
-versioning -> storage : SSN-05 SNAPSHOT Session({session_id}, {snapshot_id})
+versioning -> storage : SESSION-05 SNAPSHOT Session({session_id}, {snapshot_id})
 activate storage
 
 alt disk write error

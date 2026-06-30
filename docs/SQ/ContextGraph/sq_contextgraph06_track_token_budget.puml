@@ -1,6 +1,6 @@
 @startuml sq_contextgraph06_track_token_budget
 ' ============================================================
-' Title:     CTX-06 — TRACK Token Budget
+' Title:     CONTEXTGRAPH-06 — TRACK Token Budget
 ' Boundary:  nasim code agent
 ' Purpose:   Track token consumption against allocated budget
 ' Milestone: v1.0
@@ -8,12 +8,12 @@
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
 ' CSR Chain: User -> CLIAdapter -> AgentController -> TokenBudgetTracker
-' SM States: (stateless — COMPACTING owned by AGT-06)
+' SM States: (stateless — COMPACTING owned by AGENT-06)
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- CTX-06 TRACK Token Budget
+title nasim -- CONTEXTGRAPH-06 TRACK Token Budget
 
 actor "User" as user
 
@@ -29,17 +29,17 @@ box "Service" SERVICE_COLOR
   participant "ContextService" as tracker
 end box
 
-== CTX-06 TRACK Token Budget ==
+== CONTEXTGRAPH-06 TRACK Token Budget ==
 
-user -> iface : CTX-06 TRACK Token Budget({used_tokens, total_budget})
+user -> iface : CONTEXTGRAPH-06 TRACK Token Budget({used_tokens, total_budget})
 activate iface
-iface -> router : CTX-06 TRACK Token Budget({used_tokens, total_budget})
+iface -> router : CONTEXTGRAPH-06 TRACK Token Budget({used_tokens, total_budget})
 activate router
-router -> tracker : CTX-06 TRACK Token Budget({used_tokens, total_budget})
+router -> tracker : CONTEXTGRAPH-06 TRACK Token Budget({used_tokens, total_budget})
 activate tracker
 
 alt budget_within_limits
-  ref over tracker : CTX-06 TRACK Token Budget({used_tokens, total_budget})
+  ref over tracker : CONTEXTGRAPH-06 TRACK Token Budget({used_tokens, total_budget})
   tracker --> router : 200 OK
   deactivate tracker
   router --> iface : 200 OK
@@ -47,7 +47,7 @@ alt budget_within_limits
   deactivate router
   deactivate iface
 else budget_exceeded
-  tracker --> router : 429 TOO_MANY_REQUESTS\n{error: {code: "CTX-06_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 429}}
+  tracker --> router : 429 TOO_MANY_REQUESTS\n{error: {code: "CONTEXTGRAPH-06_BUDGET_EXCEEDED", message: "Token budget exceeded", status: 429}}
   deactivate tracker
   router --> iface : 429 TOO_MANY_REQUESTS
   iface --> user : 429 TOO_MANY_REQUESTS

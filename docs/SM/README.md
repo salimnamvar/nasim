@@ -20,7 +20,7 @@
 | REVIEWING | LLM review of results | success checks passed, optional review | #FFF8E1 |
 | RETRYING | Retrying with feedback | success checks failed or review rejected | #FBE9E7 |
 | STAGING | Diff sandbox staging | tool exec in diff_sandbox mode | #F1F8E9 |
-| AWAITING_DIFF_APPROVAL | Presenting diff to user | SAF-02 REQUEST Approval | #FCE4EC |
+| AWAITING_DIFF_APPROVAL | Presenting diff to user | SAFETY-02 REQUEST Approval | #FCE4EC |
 
 > **API-First Entry:** All entry/exit transitions use `API-06` (DISPATCH Message) as the sole entry gate. No interface container may bypass the API.
 
@@ -28,8 +28,8 @@
 
 | From | To | UC ID | Condition |
 |------|----|-------|-----------|
-| STAGING | AWAITING_DIFF_APPROVAL | EDT-10 | Diff computed successfully |
-| STAGING | ERROR | EDT-10 | Diff computation failed (file deleted, conflict, algorithm error) |
+| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGY-10 | Diff computed successfully |
+| STAGING | ERROR | EDITSTRATEGY-10 | Diff computation failed (file deleted, conflict, algorithm error) |
 
 ## Session Lifecycle States (Entity)
 
@@ -39,7 +39,7 @@
 | ACTIVE | Session accepting messages | Session created or restored | #43A047 |
 | SAVED | Session persisted to disk | API-04 UPDATE Session | #1565C0 |
 | RESTORED | Session loaded from disk | API-03 GET Session | #1E88E5 |
-| BRANCHED | Session forked from parent | WRL-04 FORK Session | #7B1FA2 |
+| BRANCHED | Session forked from parent | WIRELOG-04 FORK Session | #7B1FA2 |
 | CLOSED | Session terminated | API-05 DELETE Session | #757575 |
 
 ## Plan Lifecycle States (Entity)
@@ -47,9 +47,9 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | EMPTY | No plan active | Default state | #F5F5F5 |
-| BUILDING | Plan being constructed | AGT-07 QUEUE Plan | #FFE0B2 |
+| BUILDING | Plan being constructed | AGENT-07 QUEUE Plan | #FFE0B2 |
 | QUEUED | Plan queued for approval | Plan construction complete | #E3F2FD |
-| APPROVED | Plan approved by user | AGT-08 APPROVE Plan | #388E3C |
+| APPROVED | Plan approved by user | AGENT-08 APPROVE Plan | #388E3C |
 | EXECUTING | Plan steps being executed | Plan approved, execution started | #A5D6A7 |
 | COMPLETED | All plan steps finished | Implicit: agent loop finishes all steps | #1B5E20 |
 | REJECTED | Plan rejected by user | User rejects plan | #B71C1C |
@@ -58,11 +58,11 @@
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
-| DISCOVERED | Plugin found on filesystem | PLG-01 DISCOVER Plugins | #E0E0E0 |
-| LOADING | Plugin manifest being parsed | PLG-02 LOAD Manifest | #FFCC80 |
-| LOADED | Plugin manifest parsed, tools registered | PLG-03 REGISTER Plugin Tools | #90CAF9 |
-| ENABLED | Plugin active and available | PLG-05 ENABLE Plugin | #4CAF50 |
-| DISABLED | Plugin deactivated | PLG-06 DISABLE Plugin | #CE93D8 |
+| DISCOVERED | Plugin found on filesystem | PLUGINS-01 DISCOVER Plugins | #E0E0E0 |
+| LOADING | Plugin manifest being parsed | PLUGINS-02 LOAD Manifest | #FFCC80 |
+| LOADED | Plugin manifest parsed, tools registered | PLUGINS-03 REGISTER Plugin Tools | #90CAF9 |
+| ENABLED | Plugin active and available | PLUGINS-05 ENABLE Plugin | #4CAF50 |
+| DISABLED | Plugin deactivated | PLUGINS-06 DISABLE Plugin | #CE93D8 |
 | ERROR | Plugin failed to load or crashed | Load error or runtime exception | #EF5350 |
 
 ## Subagent Lifecycle States (Entity)
@@ -70,19 +70,19 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | No child agent active | Default state | #CFD8DC |
-| SPAWNING | Child agent process initializing | AGT-09 SPAWN Subagent | #FFAB91 |
-| RUNNING | Child agent executing task | AGT-09 SPAWN Subagent | #BCAAA4 |
-| COMPLETED | Child agent finished successfully | AGT-10 COLLECT Subagent Result | #80CBC4 |
-| FAILED | Child agent encountered unrecoverable error | AGT-14 HANDLE Error | #EF9A9A |
+| SPAWNING | Child agent process initializing | AGENT-09 SPAWN Subagent | #FFAB91 |
+| RUNNING | Child agent executing task | AGENT-09 SPAWN Subagent | #BCAAA4 |
+| COMPLETED | Child agent finished successfully | AGENT-10 COLLECT Subagent Result | #80CBC4 |
+| FAILED | Child agent encountered unrecoverable error | AGENT-14 HANDLE Error | #EF9A9A |
 
 ## Persona Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | UNLOADED | No persona loaded | Default state | #9E9E9E |
-| LOADING | Persona configuration being loaded | AGT-12 LOAD Persona | #FFC107 |
-| ACTIVE | Persona active and available for delegation | AGT-11 DELEGATE to Persona | #4DB6AC |
-| SWITCHING | Switching to different persona at runtime | AGT-13 SWITCH Persona | #FF9800 |
+| LOADING | Persona configuration being loaded | AGENT-12 LOAD Persona | #FFC107 |
+| ACTIVE | Persona active and available for delegation | AGENT-11 DELEGATE to Persona | #4DB6AC |
+| SWITCHING | Switching to different persona at runtime | AGENT-13 SWITCH Persona | #FF9800 |
 | ERROR | Persona load or switch failed | Load error or switch failure | #F44336 |
 
 ## MCP Client Connection Lifecycle States (Entity)
@@ -110,45 +110,45 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | No process running in sandbox | Default state | #78909C |
-| EXECUTING | Process running in sandbox | SBX-01 ISOLATE Command | #2196F3 |
-| MONITORING | Process being monitored for resource usage | SBX-03 MONITOR Process | #64B5F6 |
-| COMPLETED | Process finished successfully | SBX-01 ISOLATE Command | #8BC34A |
-| TIMEOUT | Process exceeded time limit | SBX-03 MONITOR Process | #FFB74D |
-| FAILED | Process crashed or was killed | SBX-01 ISOLATE Command | #D32F2F |
-| RESOURCE_EXCEEDED | Process exceeded CPU, memory, or disk quota | SBX-04 LIMIT Resources | #FF5722 |
+| EXECUTING | Process running in sandbox | SANDBOX-01 ISOLATE Command | #2196F3 |
+| MONITORING | Process being monitored for resource usage | SANDBOX-03 MONITOR Process | #64B5F6 |
+| COMPLETED | Process finished successfully | SANDBOX-01 ISOLATE Command | #8BC34A |
+| TIMEOUT | Process exceeded time limit | SANDBOX-03 MONITOR Process | #FFB74D |
+| FAILED | Process crashed or was killed | SANDBOX-01 ISOLATE Command | #D32F2F |
+| RESOURCE_EXCEEDED | Process exceeded CPU, memory, or disk quota | SANDBOX-04 LIMIT Resources | #FF5722 |
 
 ## Diff Staging Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | EMPTY | No diff staged | Default state | #9FA8DA |
-| STAGING | Diff being computed | EDT-10 STAGE Diff | #FFE082 |
-| STAGED | Diff ready for review | EDT-10 STAGE Diff | #C5E1A5 |
-| AWAITING_APPROVAL | Diff presented to user for approval | SAF-02 REQUEST Approval | #FFD54F |
-| APPROVED | User approved diff | SAF-02 REQUEST Approval | #AED581 |
-| APPLYING | Approved diff being applied | EDT-10 STAGE Diff | #81C784 |
-| APPLIED | Diff successfully applied | EDT-10 STAGE Diff | #009688 |
-| ERROR | Diff computation or application failed | EDT-10 failure | #E53935 |
+| STAGING | Diff being computed | EDITSTRATEGY-10 STAGE Diff | #FFE082 |
+| STAGED | Diff ready for review | EDITSTRATEGY-10 STAGE Diff | #C5E1A5 |
+| AWAITING_APPROVAL | Diff presented to user for approval | SAFETY-02 REQUEST Approval | #FFD54F |
+| APPROVED | User approved diff | SAFETY-02 REQUEST Approval | #AED581 |
+| APPLYING | Approved diff being applied | EDITSTRATEGY-10 STAGE Diff | #81C784 |
+| APPLIED | Diff successfully applied | EDITSTRATEGY-10 STAGE Diff | #009688 |
+| ERROR | Diff computation or application failed | EDITSTRATEGY-10 failure | #E53935 |
 
 ## Safety Mode Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | UNINITIALIZED | Safety system not initialized | Default state | #BDBDBD |
-| PERMISSIVE | All operations allowed, no approval prompts | SAF-03 APPLY Safety Mode | #9CCC65 |
-| ASK | User approval required for sensitive operations | SAF-03 APPLY Safety Mode | #FDD835 |
-| BLOCK | Dangerous operations blocked entirely | SAF-03 APPLY Safety Mode | #E91E63 |
-| ERROR | Safety system encountered an error | SAF-01 CHECK Permission failure | #F4511E |
+| PERMISSIVE | All operations allowed, no approval prompts | SAFETY-03 APPLY Safety Mode | #9CCC65 |
+| ASK | User approval required for sensitive operations | SAFETY-03 APPLY Safety Mode | #FDD835 |
+| BLOCK | Dangerous operations blocked entirely | SAFETY-03 APPLY Safety Mode | #E91E63 |
+| ERROR | Safety system encountered an error | SAFETY-01 CHECK Permission failure | #F4511E |
 
 ## Router Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | No routing in progress | Default state | #EEEEEE |
-| CLASSIFYING | Task classification for model routing | RTG-03 CLASSIFY Task | #5C6BC0 |
-| SELECTING | Model selection in progress | RTG-01 SELECT Model | #3F51B5 |
-| SWITCHING | Runtime model switch in progress | RTG-04 SWITCH Model | #FF8F00 |
-| FALLBACK | Falling back to next available model | RTG-02 APPLY Fallback | #EF6C00 |
+| CLASSIFYING | Task classification for model routing | ROUTER-03 CLASSIFY Task | #5C6BC0 |
+| SELECTING | Model selection in progress | ROUTER-01 SELECT Model | #3F51B5 |
+| SWITCHING | Runtime model switch in progress | ROUTER-04 SWITCH Model | #FF8F00 |
+| FALLBACK | Falling back to next available model | ROUTER-02 APPLY Fallback | #EF6C00 |
 | ERROR | Routing or fallback failed | All models exhausted | #BF360C |
 
 ## Provider Connection Lifecycle States (Entity)
@@ -156,9 +156,9 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | UNREGISTERED | No provider registered | Default state | #455A64 |
-| REGISTERING | Provider registration in progress | PRV-01 REGISTER Provider | #29B6F6 |
-| ACTIVE | Provider registered and ready for chat | PRV-01 REGISTER Provider | #03A9F4 |
-| SELECTING | Backend selection in progress | PRV-04 SELECT Provider Backend | #FBC02D |
+| REGISTERING | Provider registration in progress | PROVIDER-01 REGISTER Provider | #29B6F6 |
+| ACTIVE | Provider registered and ready for chat | PROVIDER-01 REGISTER Provider | #03A9F4 |
+| SELECTING | Backend selection in progress | PROVIDER-04 SELECT Provider Backend | #FBC02D |
 | ERROR | Registration or selection failed | Provider unavailable | #E64A19 |
 
 ## Evaluation Lifecycle States (Process)
@@ -166,11 +166,11 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | No evaluation in progress | Default state | #90A4AE |
-| CHECKING | Running task completion and success checks | EVL-01 EVALUATE Task | #C5CAE9 |
-| REVIEWING | LLM-based code review and quality assessment | EVL-04 VALIDATE With LLM | #AB47BC |
-| TESTING | Running project test suites | EVL-05 VALIDATE Test Suite | #D4E157 |
-| SCORING | Recording quality signal and scoring | EVL-07 RECORD Quality Signal | #FF8A65 |
-| RETRYING | Coordinating retry with backoff and escalation | EVL-06 COORDINATE Retry | #C62828 |
+| CHECKING | Running task completion and success checks | EVALUATION-01 EVALUATE Task | #C5CAE9 |
+| REVIEWING | LLM-based code review and quality assessment | EVALUATION-04 VALIDATE With LLM | #AB47BC |
+| TESTING | Running project test suites | EVALUATION-05 VALIDATE Test Suite | #D4E157 |
+| SCORING | Recording quality signal and scoring | EVALUATION-07 RECORD Quality Signal | #FF8A65 |
+| RETRYING | Coordinating retry with backoff and escalation | EVALUATION-06 COORDINATE Retry | #C62828 |
 | PASSED | Evaluation passed all criteria | Terminal success state | #689F38 |
 | FAILED | Evaluation failed, retries exhausted | Terminal failure state | #AD1457 |
 
@@ -179,10 +179,10 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | UNINDEXED | No repository index exists | Default state | #424242 |
-| INDEXING | AST indexing via tree-sitter in progress | RIM-01 INDEX Codebase | #4FC3F7 |
-| INDEXED | Repository fully indexed | RIM-01 INDEX Codebase | #7CB342 |
-| BUILDING_GRAPH | Cross-file symbol reference graph in progress | RIM-02 BUILD Symbol Graph | #9C27B0 |
-| EMBEDDING | Generating vector embeddings for code | RIM-05 EMBED Code | #E6EE9C |
+| INDEXING | AST indexing via tree-sitter in progress | REPOINTELLIGENCE-01 INDEX Codebase | #4FC3F7 |
+| INDEXED | Repository fully indexed | REPOINTELLIGENCE-01 INDEX Codebase | #7CB342 |
+| BUILDING_GRAPH | Cross-file symbol reference graph in progress | REPOINTELLIGENCE-02 BUILD Symbol Graph | #9C27B0 |
+| EMBEDDING | Generating vector embeddings for code | REPOINTELLIGENCE-05 EMBED Code | #E6EE9C |
 | STALE | Index outdated, needs re-index | Source files changed | #FFECB3 |
 | ERROR | Indexing, graph building, or embedding failed | Unrecoverable processing error | #DD2C00 |
 
@@ -215,9 +215,9 @@
   SMT ownership rules apply: one lifecycle-write UC per target state.
 - All hex colors are canonical — state-machine diagrams use `state "STATE" as STATE #HEX`
   syntax per PlantUML standard.
-- **Transition labels** use UC-ID-only convention (e.g., `AGT-01`, `PRV-02`, `SAF-02`).
+- **Transition labels** use UC-ID-only convention (e.g., `AGENT-01`, `PROVIDER-02`, `SAFETY-02`).
   No human-readable suffixes. Multiple transitions from one state may share a UC ID
-  when the same action produces different outcomes (e.g., `PRV-02` → RESPONDING, TOOL_EXEC, ERROR).
+  when the same action produces different outcomes (e.g., `PROVIDER-02` → RESPONDING, TOOL_EXEC, ERROR).
 - **API-First:** All entry/exit transitions in Agent SM use `API-06` as the sole entry gate.
   Session lifecycle mutations use API UCs (API-02 through API-05).
 
@@ -227,44 +227,44 @@
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | IDLE | AGT-01 | Process startup |
+| [*] | IDLE | AGENT-01 | Process startup |
 | IDLE | LISTENING | API-06 | DISPATCH Message received |
 | IDLE | SERVING | API-06 | API request received |
-| IDLE | PLANNING | AGT-07 | /plan command entered |
+| IDLE | PLANNING | AGENT-07 | /plan command entered |
 | LISTENING | THINKING | API-06 | Input parsed, messages built |
 | SERVING | THINKING | API-06 | API request processed |
 | SERVING | IDLE | API-06 | API request complete |
-| THINKING | RESPONDING | PRV-02 | LLM returns text only |
-| THINKING | TOOL_EXEC | PRV-02 | LLM returns tool_calls |
-| THINKING | COMPACTING | AGT-06 | token_count > context_budget |
-| THINKING | ROUTING | RTG-01 | ModelRouter resolving model |
-| THINKING | ERROR | PRV-02 | Provider call failed |
-| THINKING | EVALUATING | EVL-01 | task_complete AND evaluation_enabled |
-| ROUTING | THINKING | RTG-01 | Model selected |
-| TOOL_EXEC | THINKING | AGT-02 | Tool call complete |
-| TOOL_EXEC | AWAITING_APPROVAL | SAF-02 | safety_mode=ask AND unsafe tool |
-| TOOL_EXEC | HOOK_RUNNING | HK-02 | Pre/post hook configured |
-| TOOL_EXEC | ERROR | AGT-02 | Tool execution failed |
-| TOOL_EXEC | STAGING | EDT-10 | diff_sandbox mode active |
-| HOOK_RUNNING | TOOL_EXEC | HK-02 | Hook execution complete |
-| HOOK_RUNNING | IDLE | HK-02 | Hook execution complete (no tool) |
-| AWAITING_APPROVAL | TOOL_EXEC | SAF-02 | User approves |
-| AWAITING_APPROVAL | IDLE | SAF-02 | User denies |
-| COMPACTING | THINKING | AGT-06 | Context compacted |
+| THINKING | RESPONDING | PROVIDER-02 | LLM returns text only |
+| THINKING | TOOL_EXEC | PROVIDER-02 | LLM returns tool_calls |
+| THINKING | COMPACTING | AGENT-06 | token_count > context_budget |
+| THINKING | ROUTING | ROUTER-01 | ModelRouter resolving model |
+| THINKING | ERROR | PROVIDER-02 | Provider call failed |
+| THINKING | EVALUATING | EVALUATION-01 | task_complete AND evaluation_enabled |
+| ROUTING | THINKING | ROUTER-01 | Model selected |
+| TOOL_EXEC | THINKING | AGENT-02 | Tool call complete |
+| TOOL_EXEC | AWAITING_APPROVAL | SAFETY-02 | safety_mode=ask AND unsafe tool |
+| TOOL_EXEC | HOOK_RUNNING | HOOKS-02 | Pre/post hook configured |
+| TOOL_EXEC | ERROR | AGENT-02 | Tool execution failed |
+| TOOL_EXEC | STAGING | EDITSTRATEGY-10 | diff_sandbox mode active |
+| HOOK_RUNNING | TOOL_EXEC | HOOKS-02 | Hook execution complete |
+| HOOK_RUNNING | IDLE | HOOKS-02 | Hook execution complete (no tool) |
+| AWAITING_APPROVAL | TOOL_EXEC | SAFETY-02 | User approves |
+| AWAITING_APPROVAL | IDLE | SAFETY-02 | User denies |
+| COMPACTING | THINKING | AGENT-06 | Context compacted |
 | RESPONDING | IDLE | API-06 | Response streamed to user |
-| ERROR | IDLE | AGT-14 | Error handled |
-| PLANNING | IDLE | AGT-07 | Plan mode exited |
-| EVALUATING | REVIEWING | EVL-01 | Evaluation passed |
-| EVALUATING | RETRYING | EVL-01 | Evaluation failed |
-| EVALUATING | THINKING | EVL-01 | Retry with feedback |
-| REVIEWING | THINKING | EVL-04 | LLM review passed |
-| REVIEWING | RETRYING | EVL-04 | LLM review rejected |
-| RETRYING | THINKING | EVL-06 | Retry with feedback |
-| RETRYING | ERROR | EVL-06 | Retry exhausted |
-| STAGING | AWAITING_DIFF_APPROVAL | EDT-10 | Diff computed successfully |
-| STAGING | ERROR | EDT-10 | Diff computation failed |
-| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAF-02 | User approves diff |
-| AWAITING_DIFF_APPROVAL | IDLE | SAF-02 | User rejects diff |
+| ERROR | IDLE | AGENT-14 | Error handled |
+| PLANNING | IDLE | AGENT-07 | Plan mode exited |
+| EVALUATING | REVIEWING | EVALUATION-01 | Evaluation passed |
+| EVALUATING | RETRYING | EVALUATION-01 | Evaluation failed |
+| EVALUATING | THINKING | EVALUATION-01 | Retry with feedback |
+| REVIEWING | THINKING | EVALUATION-04 | LLM review passed |
+| REVIEWING | RETRYING | EVALUATION-04 | LLM review rejected |
+| RETRYING | THINKING | EVALUATION-06 | Retry with feedback |
+| RETRYING | ERROR | EVALUATION-06 | Retry exhausted |
+| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGY-10 | Diff computed successfully |
+| STAGING | ERROR | EDITSTRATEGY-10 | Diff computation failed |
+| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETY-02 | User approves diff |
+| AWAITING_DIFF_APPROVAL | IDLE | SAFETY-02 | User rejects diff |
 
 ### Session Lifecycle Transition Matrix
 
@@ -273,7 +273,7 @@
 | [*] | CREATED | API-02 | Session record initialized |
 | CREATED | ACTIVE | API-02 | Session ready for messages |
 | ACTIVE | SAVED | API-04 | Session persisted to disk |
-| ACTIVE | BRANCHED | WRL-04 | Session forked from parent |
+| ACTIVE | BRANCHED | WIRELOG-04 | Session forked from parent |
 | ACTIVE | CLOSED | API-05 | Session terminated |
 | SAVED | RESTORED | API-03 | Session loaded from disk |
 | SAVED | CLOSED | API-05 | Session terminated |
@@ -288,66 +288,66 @@
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | EMPTY | AGT-07 | No plan active |
-| EMPTY | BUILDING | AGT-07 | /plan command entered |
-| BUILDING | QUEUED | AGT-07 | Plan construction complete |
-| BUILDING | EMPTY | AGT-07 | Plan cancelled |
-| QUEUED | APPROVED | AGT-08 | User approves plan |
-| QUEUED | REJECTED | AGT-08 | User rejects plan |
-| APPROVED | EXECUTING | AGT-08 | Execution started |
-| EXECUTING | COMPLETED | AGT-01 | All plan steps finished |
-| EXECUTING | EMPTY | AGT-14 | Execution failed or cancelled |
-| COMPLETED | [*] | AGT-01 | Terminal state |
-| REJECTED | [*] | AGT-08 | Terminal state |
+| [*] | EMPTY | AGENT-07 | No plan active |
+| EMPTY | BUILDING | AGENT-07 | /plan command entered |
+| BUILDING | QUEUED | AGENT-07 | Plan construction complete |
+| BUILDING | EMPTY | AGENT-07 | Plan cancelled |
+| QUEUED | APPROVED | AGENT-08 | User approves plan |
+| QUEUED | REJECTED | AGENT-08 | User rejects plan |
+| APPROVED | EXECUTING | AGENT-08 | Execution started |
+| EXECUTING | COMPLETED | AGENT-01 | All plan steps finished |
+| EXECUTING | EMPTY | AGENT-14 | Execution failed or cancelled |
+| COMPLETED | [*] | AGENT-01 | Terminal state |
+| REJECTED | [*] | AGENT-08 | Terminal state |
 
 ### Plugin Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | DISCOVERED | PLG-01 | Plugin found on filesystem |
-| DISCOVERED | LOADING | PLG-02 | Manifest parsing starts |
-| DISCOVERED | ERROR | PLG-01 | Plugin discovery failed |
-| LOADING | LOADED | PLG-03 | Manifest parsed, tools registered |
-| LOADING | ERROR | PLG-02 | Manifest parsing failed |
-| LOADED | ENABLED | PLG-05 | Plugin activated |
-| LOADED | DISABLED | PLG-06 | Plugin deactivated |
-| LOADED | ERROR | PLG-03 | Tool registration failed |
-| ENABLED | DISABLED | PLG-06 | Plugin deactivated |
-| ENABLED | ERROR | PLG-01 | Runtime exception |
-| ENABLED | [*] | PLG-06 | Plugin unloaded |
-| DISABLED | ENABLED | PLG-05 | Plugin activated |
-| DISABLED | [*] | PLG-06 | Plugin unloaded |
-| ERROR | DISCOVERED | PLG-01 | Re-discovery (recovery) |
+| [*] | DISCOVERED | PLUGINS-01 | Plugin found on filesystem |
+| DISCOVERED | LOADING | PLUGINS-02 | Manifest parsing starts |
+| DISCOVERED | ERROR | PLUGINS-01 | Plugin discovery failed |
+| LOADING | LOADED | PLUGINS-03 | Manifest parsed, tools registered |
+| LOADING | ERROR | PLUGINS-02 | Manifest parsing failed |
+| LOADED | ENABLED | PLUGINS-05 | Plugin activated |
+| LOADED | DISABLED | PLUGINS-06 | Plugin deactivated |
+| LOADED | ERROR | PLUGINS-03 | Tool registration failed |
+| ENABLED | DISABLED | PLUGINS-06 | Plugin deactivated |
+| ENABLED | ERROR | PLUGINS-01 | Runtime exception |
+| ENABLED | [*] | PLUGINS-06 | Plugin unloaded |
+| DISABLED | ENABLED | PLUGINS-05 | Plugin activated |
+| DISABLED | [*] | PLUGINS-06 | Plugin unloaded |
+| ERROR | DISCOVERED | PLUGINS-01 | Re-discovery (recovery) |
 
 ### Subagent Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | IDLE | AGT-09 | Default state |
-| IDLE | SPAWNING | AGT-09 | Child agent spawn requested |
-| SPAWNING | RUNNING | AGT-09 | Child agent initialized |
-| SPAWNING | FAILED | AGT-09 | Spawn failed |
-| RUNNING | COMPLETED | AGT-10 | Task finished successfully |
-| RUNNING | FAILED | AGT-14 | Unrecoverable error |
-| COMPLETED | IDLE | AGT-10 | Results aggregated to parent |
-| COMPLETED | [*] | AGT-10 | Terminal state |
-| FAILED | IDLE | AGT-14 | Error reported, cleanup done |
-| FAILED | [*] | AGT-14 | Terminal state |
+| [*] | IDLE | AGENT-09 | Default state |
+| IDLE | SPAWNING | AGENT-09 | Child agent spawn requested |
+| SPAWNING | RUNNING | AGENT-09 | Child agent initialized |
+| SPAWNING | FAILED | AGENT-09 | Spawn failed |
+| RUNNING | COMPLETED | AGENT-10 | Task finished successfully |
+| RUNNING | FAILED | AGENT-14 | Unrecoverable error |
+| COMPLETED | IDLE | AGENT-10 | Results aggregated to parent |
+| COMPLETED | [*] | AGENT-10 | Terminal state |
+| FAILED | IDLE | AGENT-14 | Error reported, cleanup done |
+| FAILED | [*] | AGENT-14 | Terminal state |
 
 ### Persona Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | UNLOADED | AGT-12 | Default state |
-| UNLOADED | LOADING | AGT-12 | Load requested |
-| LOADING | ACTIVE | AGT-12 | Load successful |
-| LOADING | ERROR | AGT-12 | Load failed |
-| ACTIVE | SWITCHING | AGT-13 | Switch requested |
-| SWITCHING | ACTIVE | AGT-13 | Switch successful |
-| SWITCHING | ERROR | AGT-13 | Switch failed |
-| ACTIVE | UNLOADED | AGT-11 | Delegation complete |
-| ERROR | UNLOADED | AGT-12 | Recovery: retry load |
-| UNLOADED | [*] | AGT-12 | Terminal state |
+| [*] | UNLOADED | AGENT-12 | Default state |
+| UNLOADED | LOADING | AGENT-12 | Load requested |
+| LOADING | ACTIVE | AGENT-12 | Load successful |
+| LOADING | ERROR | AGENT-12 | Load failed |
+| ACTIVE | SWITCHING | AGENT-13 | Switch requested |
+| SWITCHING | ACTIVE | AGENT-13 | Switch successful |
+| SWITCHING | ERROR | AGENT-13 | Switch failed |
+| ACTIVE | UNLOADED | AGENT-11 | Delegation complete |
+| ERROR | UNLOADED | AGENT-12 | Recovery: retry load |
+| UNLOADED | [*] | AGENT-12 | Terminal state |
 
 ### MCP Client Connection Lifecycle Transition Matrix
 
@@ -382,38 +382,38 @@
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | IDLE | SBX-01 | Default state |
-| IDLE | EXECUTING | SBX-01 | Command started |
-| EXECUTING | MONITORING | SBX-03 | Resource monitoring started |
-| MONITORING | EXECUTING | SBX-03 | Monitoring continues |
-| EXECUTING | COMPLETED | SBX-01 | Process finished |
-| EXECUTING | FAILED | SBX-01 | Process crashed |
-| EXECUTING | TIMEOUT | SBX-03 | Timeout exceeded |
-| EXECUTING | RESOURCE_EXCEEDED | SBX-04 | Resource limit hit |
-| MONITORING | TIMEOUT | SBX-03 | Timeout exceeded |
-| MONITORING | RESOURCE_EXCEEDED | SBX-04 | Resource limit hit |
-| TIMEOUT | IDLE | SBX-01 | Cleanup after timeout |
-| FAILED | IDLE | SBX-01 | Cleanup after failure |
-| RESOURCE_EXCEEDED | IDLE | SBX-04 | Cleanup after resource violation |
-| COMPLETED | [*] | SBX-01 | Terminal state |
+| [*] | IDLE | SANDBOX-01 | Default state |
+| IDLE | EXECUTING | SANDBOX-01 | Command started |
+| EXECUTING | MONITORING | SANDBOX-03 | Resource monitoring started |
+| MONITORING | EXECUTING | SANDBOX-03 | Monitoring continues |
+| EXECUTING | COMPLETED | SANDBOX-01 | Process finished |
+| EXECUTING | FAILED | SANDBOX-01 | Process crashed |
+| EXECUTING | TIMEOUT | SANDBOX-03 | Timeout exceeded |
+| EXECUTING | RESOURCE_EXCEEDED | SANDBOX-04 | Resource limit hit |
+| MONITORING | TIMEOUT | SANDBOX-03 | Timeout exceeded |
+| MONITORING | RESOURCE_EXCEEDED | SANDBOX-04 | Resource limit hit |
+| TIMEOUT | IDLE | SANDBOX-01 | Cleanup after timeout |
+| FAILED | IDLE | SANDBOX-01 | Cleanup after failure |
+| RESOURCE_EXCEEDED | IDLE | SANDBOX-04 | Cleanup after resource violation |
+| COMPLETED | [*] | SANDBOX-01 | Terminal state |
 
 ### Diff Staging Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | EMPTY | EDT-10 | Default state |
-| EMPTY | STAGING | EDT-10 | Diff computation started |
-| STAGING | STAGED | EDT-10 | Diff computed successfully |
-| STAGING | ERROR | EDT-10 | Diff computation failed |
-| STAGED | AWAITING_APPROVAL | EDT-10 | Diff presented for review |
-| AWAITING_APPROVAL | APPROVED | SAF-02 | User approved |
-| AWAITING_APPROVAL | EMPTY | SAF-02 | User rejected, cleanup |
-| APPROVED | APPLYING | EDT-10 | Diff application started |
-| APPLYING | APPLIED | EDT-10 | Diff applied successfully |
-| APPLYING | ERROR | EDT-10 | Diff application failed |
-| APPLIED | EMPTY | EDT-10 | Cleanup after application |
-| ERROR | EMPTY | EDT-10 | Cleanup after error |
-| APPLIED | [*] | EDT-10 | Terminal state |
+| [*] | EMPTY | EDITSTRATEGY-10 | Default state |
+| EMPTY | STAGING | EDITSTRATEGY-10 | Diff computation started |
+| STAGING | STAGED | EDITSTRATEGY-10 | Diff computed successfully |
+| STAGING | ERROR | EDITSTRATEGY-10 | Diff computation failed |
+| STAGED | AWAITING_APPROVAL | EDITSTRATEGY-10 | Diff presented for review |
+| AWAITING_APPROVAL | APPROVED | SAFETY-02 | User approved |
+| AWAITING_APPROVAL | EMPTY | SAFETY-02 | User rejected, cleanup |
+| APPROVED | APPLYING | EDITSTRATEGY-10 | Diff application started |
+| APPLYING | APPLIED | EDITSTRATEGY-10 | Diff applied successfully |
+| APPLYING | ERROR | EDITSTRATEGY-10 | Diff application failed |
+| APPLIED | EMPTY | EDITSTRATEGY-10 | Cleanup after application |
+| ERROR | EMPTY | EDITSTRATEGY-10 | Cleanup after error |
+| APPLIED | [*] | EDITSTRATEGY-10 | Terminal state |
 
 ## Lifecycle-Write UC Mapping (SMT Ownership)
 
@@ -427,48 +427,48 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | ACTIVE | API-02 CREATE Session | Session accepting messages (after init/resume) |
 | SAVED | API-04 UPDATE Session | Session persisted to disk |
 | RESTORED | API-03 GET Session | Session loaded from disk |
-| BRANCHED | WRL-04 FORK Session | Session forked from parent |
+| BRANCHED | WIRELOG-04 FORK Session | Session forked from parent |
 | CLOSED | API-05 DELETE Session | Session terminated (quit or error) |
 
 ### Plan Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| BUILDING | AGT-07 QUEUE Plan | Plan being constructed |
-| QUEUED | AGT-07 QUEUE Plan | Plan construction complete, queued for approval |
-| APPROVED | AGT-08 APPROVE Plan | Plan approved by user |
-| EXECUTING | AGT-08 APPROVE Plan | Plan execution starts |
-| COMPLETED | AGT-01 PROCESS User Task | Agent loop finishes all steps |
-| REJECTED | AGT-08 APPROVE Plan | Plan rejected by user |
+| BUILDING | AGENT-07 QUEUE Plan | Plan being constructed |
+| QUEUED | AGENT-07 QUEUE Plan | Plan construction complete, queued for approval |
+| APPROVED | AGENT-08 APPROVE Plan | Plan approved by user |
+| EXECUTING | AGENT-08 APPROVE Plan | Plan execution starts |
+| COMPLETED | AGENT-01 PROCESS User Task | Agent loop finishes all steps |
+| REJECTED | AGENT-08 APPROVE Plan | Plan rejected by user |
 
 ### Plugin Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| DISCOVERED | PLG-01 DISCOVER Plugins | Plugin found on filesystem |
-| LOADING | PLG-02 LOAD Manifest | Plugin manifest being parsed |
-| LOADED | PLG-03 REGISTER Plugin Tools | Manifest parsed, tools registered |
-| ENABLED | PLG-05 ENABLE Plugin | Plugin active and available |
-| DISABLED | PLG-06 DISABLE Plugin | Plugin deactivated |
-| ERROR | PLG-01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |
+| DISCOVERED | PLUGINS-01 DISCOVER Plugins | Plugin found on filesystem |
+| LOADING | PLUGINS-02 LOAD Manifest | Plugin manifest being parsed |
+| LOADED | PLUGINS-03 REGISTER Plugin Tools | Manifest parsed, tools registered |
+| ENABLED | PLUGINS-05 ENABLE Plugin | Plugin active and available |
+| DISABLED | PLUGINS-06 DISABLE Plugin | Plugin deactivated |
+| ERROR | PLUGINS-01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |
 
 ### Subagent Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| SPAWNING | AGT-09 SPAWN Subagent | Child agent process initializing |
-| RUNNING | AGT-09 SPAWN Subagent | Child agent executing task |
-| COMPLETED | AGT-10 COLLECT Subagent Result | Child agent finished successfully |
-| FAILED | AGT-14 HANDLE Error | Child agent encountered unrecoverable error |
+| SPAWNING | AGENT-09 SPAWN Subagent | Child agent process initializing |
+| RUNNING | AGENT-09 SPAWN Subagent | Child agent executing task |
+| COMPLETED | AGENT-10 COLLECT Subagent Result | Child agent finished successfully |
+| FAILED | AGENT-14 HANDLE Error | Child agent encountered unrecoverable error |
 
 ### Persona Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| LOADING | AGT-12 LOAD Persona | Persona configuration being loaded |
-| ACTIVE | AGT-11 DELEGATE to Persona | Persona active and available |
-| SWITCHING | AGT-13 SWITCH Persona | Switching persona at runtime |
-| ERROR | AGT-12 LOAD Persona | Persona load or switch failed |
+| LOADING | AGENT-12 LOAD Persona | Persona configuration being loaded |
+| ACTIVE | AGENT-11 DELEGATE to Persona | Persona active and available |
+| SWITCHING | AGENT-13 SWITCH Persona | Switching persona at runtime |
+| ERROR | AGENT-12 LOAD Persona | Persona load or switch failed |
 
 ### MCP Client Connection Lifecycle
 
@@ -492,76 +492,76 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| EXECUTING | SBX-01 ISOLATE Command | Process running in sandbox |
-| MONITORING | SBX-03 MONITOR Process | Process being monitored |
-| COMPLETED | SBX-01 ISOLATE Command | Process finished successfully |
-| TIMEOUT | SBX-03 MONITOR Process | Process exceeded time limit |
-| FAILED | SBX-01 ISOLATE Command | Process crashed or was killed |
-| RESOURCE_EXCEEDED | SBX-04 LIMIT Resources | Process exceeded resource quota |
+| EXECUTING | SANDBOX-01 ISOLATE Command | Process running in sandbox |
+| MONITORING | SANDBOX-03 MONITOR Process | Process being monitored |
+| COMPLETED | SANDBOX-01 ISOLATE Command | Process finished successfully |
+| TIMEOUT | SANDBOX-03 MONITOR Process | Process exceeded time limit |
+| FAILED | SANDBOX-01 ISOLATE Command | Process crashed or was killed |
+| RESOURCE_EXCEEDED | SANDBOX-04 LIMIT Resources | Process exceeded resource quota |
 
 ### Diff Staging Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| STAGING | EDT-10 STAGE Diff | Diff being computed |
-| STAGED | EDT-10 STAGE Diff | Diff ready for review |
-| AWAITING_APPROVAL | SAF-02 REQUEST Approval | Diff presented for user approval |
-| APPROVED | SAF-02 REQUEST Approval | User approved diff |
-| APPLYING | EDT-10 STAGE Diff | Approved diff being applied |
-| APPLIED | EDT-10 STAGE Diff | Diff successfully applied |
-| ERROR | EDT-10 STAGE Diff | Diff computation or application failed |
+| STAGING | EDITSTRATEGY-10 STAGE Diff | Diff being computed |
+| STAGED | EDITSTRATEGY-10 STAGE Diff | Diff ready for review |
+| AWAITING_APPROVAL | SAFETY-02 REQUEST Approval | Diff presented for user approval |
+| APPROVED | SAFETY-02 REQUEST Approval | User approved diff |
+| APPLYING | EDITSTRATEGY-10 STAGE Diff | Approved diff being applied |
+| APPLIED | EDITSTRATEGY-10 STAGE Diff | Diff successfully applied |
+| ERROR | EDITSTRATEGY-10 STAGE Diff | Diff computation or application failed |
 
 ### Safety Mode Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| UNINITIALIZED | SAF-03 APPLY Safety Mode | Safety system not initialized |
-| PERMISSIVE | SAF-03 APPLY Safety Mode | Permissive mode applied |
-| ASK | SAF-03 APPLY Safety Mode | Ask mode applied |
-| BLOCK | SAF-03 APPLY Safety Mode | Block mode applied |
-| ERROR | SAF-01 CHECK Permission | Safety system encountered error |
+| UNINITIALIZED | SAFETY-03 APPLY Safety Mode | Safety system not initialized |
+| PERMISSIVE | SAFETY-03 APPLY Safety Mode | Permissive mode applied |
+| ASK | SAFETY-03 APPLY Safety Mode | Ask mode applied |
+| BLOCK | SAFETY-03 APPLY Safety Mode | Block mode applied |
+| ERROR | SAFETY-01 CHECK Permission | Safety system encountered error |
 
 ### Router Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| CLASSIFYING | RTG-03 CLASSIFY Task | Task classification started |
-| SELECTING | RTG-01 SELECT Model | Model selection in progress |
-| SWITCHING | RTG-04 SWITCH Model | Runtime model switch |
-| FALLBACK | RTG-02 APPLY Fallback | Falling back to next model |
-| ERROR | RTG-03 CLASSIFY Task | Classification or routing failure |
+| CLASSIFYING | ROUTER-03 CLASSIFY Task | Task classification started |
+| SELECTING | ROUTER-01 SELECT Model | Model selection in progress |
+| SWITCHING | ROUTER-04 SWITCH Model | Runtime model switch |
+| FALLBACK | ROUTER-02 APPLY Fallback | Falling back to next model |
+| ERROR | ROUTER-03 CLASSIFY Task | Classification or routing failure |
 
 ### Provider Connection Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| REGISTERING | PRV-01 REGISTER Provider | Provider registration started |
-| ACTIVE | PRV-01 REGISTER Provider | Provider registered and ready |
-| SELECTING | PRV-04 SELECT Provider Backend | Backend selection in progress |
-| ERROR | PRV-01 REGISTER Provider | Registration or selection failed |
+| REGISTERING | PROVIDER-01 REGISTER Provider | Provider registration started |
+| ACTIVE | PROVIDER-01 REGISTER Provider | Provider registered and ready |
+| SELECTING | PROVIDER-04 SELECT Provider Backend | Backend selection in progress |
+| ERROR | PROVIDER-01 REGISTER Provider | Registration or selection failed |
 
 ### Evaluation Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| CHECKING | EVL-01 EVALUATE Task | Task completion checks started |
-| REVIEWING | EVL-04 VALIDATE With LLM | LLM review in progress |
-| TESTING | EVL-05 VALIDATE Test Suite | Test validation in progress |
-| SCORING | EVL-07 RECORD Quality Signal | Scoring in progress |
-| RETRYING | EVL-06 COORDINATE Retry | Retry with backoff and escalation |
-| PASSED | EVL-07 RECORD Quality Signal | Evaluation passed |
-| FAILED | EVL-02 CHECK Task Completion | Evaluation failed |
+| CHECKING | EVALUATION-01 EVALUATE Task | Task completion checks started |
+| REVIEWING | EVALUATION-04 VALIDATE With LLM | LLM review in progress |
+| TESTING | EVALUATION-05 VALIDATE Test Suite | Test validation in progress |
+| SCORING | EVALUATION-07 RECORD Quality Signal | Scoring in progress |
+| RETRYING | EVALUATION-06 COORDINATE Retry | Retry with backoff and escalation |
+| PASSED | EVALUATION-07 RECORD Quality Signal | Evaluation passed |
+| FAILED | EVALUATION-02 CHECK Task Completion | Evaluation failed |
 
 ### Repository Index Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| INDEXING | RIM-01 INDEX Codebase | AST indexing in progress |
-| INDEXED | RIM-01 INDEX Codebase | Repository fully indexed |
-| BUILDING_GRAPH | RIM-02 BUILD Symbol Graph | Cross-file symbol reference graph |
-| EMBEDDING | RIM-05 EMBED Code | Vector embedding generation |
-| STALE | RIM-01 INDEX Codebase | Index outdated, needs re-index |
-| ERROR | RIM-01 INDEX Codebase | Indexing operation failed |
+| INDEXING | REPOINTELLIGENCE-01 INDEX Codebase | AST indexing in progress |
+| INDEXED | REPOINTELLIGENCE-01 INDEX Codebase | Repository fully indexed |
+| BUILDING_GRAPH | REPOINTELLIGENCE-02 BUILD Symbol Graph | Cross-file symbol reference graph |
+| EMBEDDING | REPOINTELLIGENCE-05 EMBED Code | Vector embedding generation |
+| STALE | REPOINTELLIGENCE-01 INDEX Codebase | Index outdated, needs re-index |
+| ERROR | REPOINTELLIGENCE-01 INDEX Codebase | Indexing operation failed |
 
 ## SM → SQ Transition Coverage Tables
 
@@ -572,49 +572,49 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | AGT-01 | Process startup | sq_agent01_process_user_task.puml |
+| [*] | IDLE | AGENT-01 | Process startup | sq_agent01_process_user_task.puml |
 | IDLE | LISTENING | API-06 | DISPATCH Message received | sq_api06_dispatch_message.puml |
 | IDLE | SERVING | API-06 | API request received | sq_api06_dispatch_message.puml |
-| IDLE | PLANNING | AGT-07 | /plan command entered | sq_agent07_queue_plan.puml |
-| IDLE | [*] | AGT-01 | Error handled | — |
+| IDLE | PLANNING | AGENT-07 | /plan command entered | sq_agent07_queue_plan.puml |
+| IDLE | [*] | AGENT-01 | Error handled | — |
 | LISTENING | THINKING | API-06 | Input parsed, messages built | sq_api06_dispatch_message.puml |
 | SERVING | THINKING | API-06 | API request processed | sq_api06_dispatch_message.puml |
 | SERVING | IDLE | API-06 | API request complete | sq_api06_dispatch_message.puml |
-| THINKING | RESPONDING | PRV-02 | LLM returns text only | sq_provider02_request_chat.puml |
-| THINKING | TOOL_EXEC | PRV-02 | LLM returns tool_calls | sq_provider02_request_chat.puml |
-| THINKING | COMPACTING | AGT-06 | token_count > context_budget | sq_agent06_compact_context.puml |
-| THINKING | ROUTING | RTG-01 | ModelRouter resolving model | sq_router01_select_model.puml |
-| THINKING | ERROR | PRV-02 | Provider call failed | sq_provider02_request_chat.puml |
+| THINKING | RESPONDING | PROVIDER-02 | LLM returns text only | sq_provider02_request_chat.puml |
+| THINKING | TOOL_EXEC | PROVIDER-02 | LLM returns tool_calls | sq_provider02_request_chat.puml |
+| THINKING | COMPACTING | AGENT-06 | token_count > context_budget | sq_agent06_compact_context.puml |
+| THINKING | ROUTING | ROUTER-01 | ModelRouter resolving model | sq_router01_select_model.puml |
+| THINKING | ERROR | PROVIDER-02 | Provider call failed | sq_provider02_request_chat.puml |
 | THINKING | RESPONDING | API-06 | Response dispatched | sq_api06_dispatch_message.puml |
-| THINKING | EVALUATING | EVL-01 | task_complete AND evaluation_enabled | sq_evaluation01_evaluate_task.puml |
-| ROUTING | THINKING | RTG-01 | Model selected | sq_router01_select_model.puml |
-| TOOL_EXEC | THINKING | AGT-02 | Tool call complete | sq_agent02_dispatch_tool_call.puml |
-| TOOL_EXEC | AWAITING_APPROVAL | SAF-02 | safety_mode=ask AND unsafe tool | sq_safety02_request_approval.puml |
-| TOOL_EXEC | HOOK_RUNNING | HK-02 | Pre/post hook configured | sq_hooks02_dispatch_pre_tool_hook.puml |
-| TOOL_EXEC | ERROR | AGT-02 | Tool execution failed | sq_agent02_dispatch_tool_call.puml |
-| TOOL_EXEC | STAGING | EDT-10 | diff_sandbox mode active | sq_editstrategy10_stage_diff.puml |
-| HOOK_RUNNING | TOOL_EXEC | HK-02 | Hook execution complete | sq_hooks02_dispatch_pre_tool_hook.puml |
-| HOOK_RUNNING | IDLE | HK-02 | Hook execution complete (no tool) | sq_hooks02_dispatch_pre_tool_hook.puml |
-| AWAITING_APPROVAL | TOOL_EXEC | SAF-02 | User approves | sq_safety02_request_approval.puml |
-| AWAITING_APPROVAL | IDLE | SAF-02 | User denies | sq_safety02_request_approval.puml |
-| COMPACTING | THINKING | AGT-06 | Context compacted | sq_agent06_compact_context.puml |
+| THINKING | EVALUATING | EVALUATION-01 | task_complete AND evaluation_enabled | sq_evaluation01_evaluate_task.puml |
+| ROUTING | THINKING | ROUTER-01 | Model selected | sq_router01_select_model.puml |
+| TOOL_EXEC | THINKING | AGENT-02 | Tool call complete | sq_agent02_dispatch_tool_call.puml |
+| TOOL_EXEC | AWAITING_APPROVAL | SAFETY-02 | safety_mode=ask AND unsafe tool | sq_safety02_request_approval.puml |
+| TOOL_EXEC | HOOK_RUNNING | HOOKS-02 | Pre/post hook configured | sq_hooks02_dispatch_pre_tool_hook.puml |
+| TOOL_EXEC | ERROR | AGENT-02 | Tool execution failed | sq_agent02_dispatch_tool_call.puml |
+| TOOL_EXEC | STAGING | EDITSTRATEGY-10 | diff_sandbox mode active | sq_editstrategy10_stage_diff.puml |
+| HOOK_RUNNING | TOOL_EXEC | HOOKS-02 | Hook execution complete | sq_hooks02_dispatch_pre_tool_hook.puml |
+| HOOK_RUNNING | IDLE | HOOKS-02 | Hook execution complete (no tool) | sq_hooks02_dispatch_pre_tool_hook.puml |
+| AWAITING_APPROVAL | TOOL_EXEC | SAFETY-02 | User approves | sq_safety02_request_approval.puml |
+| AWAITING_APPROVAL | IDLE | SAFETY-02 | User denies | sq_safety02_request_approval.puml |
+| COMPACTING | THINKING | AGENT-06 | Context compacted | sq_agent06_compact_context.puml |
 | RESPONDING | IDLE | API-06 | Response streamed to user | sq_api06_dispatch_message.puml |
-| ERROR | IDLE | AGT-14 | Error handled | sq_agent14_handle_error.puml |
-| PLANNING | IDLE | AGT-07 | Plan mode exited | sq_agent07_queue_plan.puml |
-| EVALUATING | REVIEWING | EVL-01 | Evaluation passed | sq_evaluation01_evaluate_task.puml |
-| EVALUATING | RETRYING | EVL-01 | Evaluation failed | sq_evaluation01_evaluate_task.puml |
-| EVALUATING | THINKING | EVL-01 | Retry with feedback | sq_evaluation01_evaluate_task.puml |
-| REVIEWING | THINKING | EVL-04 | LLM review passed | sq_evaluation04_validate_with_llm.puml |
-| REVIEWING | RETRYING | EVL-04 | LLM review rejected | sq_evaluation04_validate_with_llm.puml |
-| RETRYING | THINKING | EVL-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | ERROR | EVL-06 | Retry exhausted | sq_evaluation06_coordinate_retry.puml |
-| STAGING | AWAITING_DIFF_APPROVAL | EDT-10 | Diff computed successfully | sq_editstrategy10_stage_diff.puml |
-| STAGING | ERROR | EDT-10 | Diff computation failed | sq_editstrategy10_stage_diff.puml |
-| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAF-02 | User approves diff | sq_safety02_request_approval.puml |
-| AWAITING_DIFF_APPROVAL | IDLE | SAF-02 | User rejects diff | sq_safety02_request_approval.puml |
+| ERROR | IDLE | AGENT-14 | Error handled | sq_agent14_handle_error.puml |
+| PLANNING | IDLE | AGENT-07 | Plan mode exited | sq_agent07_queue_plan.puml |
+| EVALUATING | REVIEWING | EVALUATION-01 | Evaluation passed | sq_evaluation01_evaluate_task.puml |
+| EVALUATING | RETRYING | EVALUATION-01 | Evaluation failed | sq_evaluation01_evaluate_task.puml |
+| EVALUATING | THINKING | EVALUATION-01 | Retry with feedback | sq_evaluation01_evaluate_task.puml |
+| REVIEWING | THINKING | EVALUATION-04 | LLM review passed | sq_evaluation04_validate_with_llm.puml |
+| REVIEWING | RETRYING | EVALUATION-04 | LLM review rejected | sq_evaluation04_validate_with_llm.puml |
+| RETRYING | THINKING | EVALUATION-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | ERROR | EVALUATION-06 | Retry exhausted | sq_evaluation06_coordinate_retry.puml |
+| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGY-10 | Diff computed successfully | sq_editstrategy10_stage_diff.puml |
+| STAGING | ERROR | EDITSTRATEGY-10 | Diff computation failed | sq_editstrategy10_stage_diff.puml |
+| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETY-02 | User approves diff | sq_safety02_request_approval.puml |
+| AWAITING_DIFF_APPROVAL | IDLE | SAFETY-02 | User rejects diff | sq_safety02_request_approval.puml |
 
 > **Coverage:** 39/39 non-terminal transitions covered. 0 ORPHANs.
-> **Note:** `THINKING→RESPONDING` appears twice with different UC-IDs — `PRV-02` (provider generates content) and `API-06` (API dispatches to network) — reflecting two semantically distinct transitions between the same states.
+> **Note:** `THINKING→RESPONDING` appears twice with different UC-IDs — `PROVIDER-02` (provider generates content) and `API-06` (API dispatches to network) — reflecting two semantically distinct transitions between the same states.
 
 ### sm_session_lifecycle — Transition Coverage Table
 
@@ -623,7 +623,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | [*] | CREATED | API-02 | Session record initialized | sq_api02_create_session.puml |
 | CREATED | ACTIVE | API-02 | Session ready for messages | sq_api02_create_session.puml |
 | ACTIVE | SAVED | API-04 | Session persisted to disk | sq_api04_update_session.puml |
-| ACTIVE | BRANCHED | WRL-04 | Session forked from parent | sq_wirelog04_fork_session.puml |
+| ACTIVE | BRANCHED | WIRELOG-04 | Session forked from parent | sq_wirelog04_fork_session.puml |
 | ACTIVE | CLOSED | API-05 | Session terminated | sq_api05_delete_session.puml |
 | SAVED | RESTORED | API-03 | Session loaded from disk | sq_api03_get_session.puml |
 | SAVED | CLOSED | API-05 | Session terminated | sq_api05_delete_session.puml |
@@ -640,16 +640,16 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | AGT-09 | Default state | sq_agent09_spawn_subagent.puml |
-| IDLE | SPAWNING | AGT-09 | Child agent spawn requested | sq_agent09_spawn_subagent.puml |
-| SPAWNING | RUNNING | AGT-09 | Child agent initialized | sq_agent09_spawn_subagent.puml |
-| SPAWNING | FAILED | AGT-09 | Spawn failed | sq_agent09_spawn_subagent.puml |
-| RUNNING | COMPLETED | AGT-10 | Task finished successfully | sq_agent10_collect_subagent_result.puml |
-| RUNNING | FAILED | AGT-14 | Unrecoverable error | sq_agent14_handle_error.puml |
-| COMPLETED | IDLE | AGT-10 | Results aggregated to parent | sq_agent10_collect_subagent_result.puml |
-| COMPLETED | [*] | AGT-10 | Terminal state | — |
-| FAILED | IDLE | AGT-14 | Error reported, cleanup done | sq_agent14_handle_error.puml |
-| FAILED | [*] | AGT-14 | Terminal state | — |
+| [*] | IDLE | AGENT-09 | Default state | sq_agent09_spawn_subagent.puml |
+| IDLE | SPAWNING | AGENT-09 | Child agent spawn requested | sq_agent09_spawn_subagent.puml |
+| SPAWNING | RUNNING | AGENT-09 | Child agent initialized | sq_agent09_spawn_subagent.puml |
+| SPAWNING | FAILED | AGENT-09 | Spawn failed | sq_agent09_spawn_subagent.puml |
+| RUNNING | COMPLETED | AGENT-10 | Task finished successfully | sq_agent10_collect_subagent_result.puml |
+| RUNNING | FAILED | AGENT-14 | Unrecoverable error | sq_agent14_handle_error.puml |
+| COMPLETED | IDLE | AGENT-10 | Results aggregated to parent | sq_agent10_collect_subagent_result.puml |
+| COMPLETED | [*] | AGENT-10 | Terminal state | — |
+| FAILED | IDLE | AGENT-14 | Error reported, cleanup done | sq_agent14_handle_error.puml |
+| FAILED | [*] | AGENT-14 | Terminal state | — |
 
 > **Coverage:** 8/8 non-terminal transitions covered. 0 ORPHANs.
 
@@ -657,20 +657,20 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | DISCOVERED | PLG-01 | Plugin found on filesystem | sq_plugins01_discover_plugins.puml |
-| DISCOVERED | LOADING | PLG-02 | Manifest parsing starts | sq_plugins02_load_manifest.puml |
-| DISCOVERED | ERROR | PLG-01 | Plugin discovery failed | sq_plugins01_discover_plugins.puml |
-| LOADING | LOADED | PLG-03 | Manifest parsed, tools registered | sq_plugins03_register_plugin_tools.puml |
-| LOADING | ERROR | PLG-02 | Manifest parsing failed | sq_plugins02_load_manifest.puml |
-| LOADED | ENABLED | PLG-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
-| LOADED | DISABLED | PLG-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
-| LOADED | ERROR | PLG-03 | Tool registration failed | sq_plugins03_register_plugin_tools.puml |
-| ENABLED | DISABLED | PLG-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
-| ENABLED | ERROR | PLG-01 | Runtime exception | sq_plugins01_discover_plugins.puml |
-| ENABLED | [*] | PLG-06 | Plugin unloaded | — |
-| DISABLED | ENABLED | PLG-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
-| DISABLED | [*] | PLG-06 | Plugin unloaded | — |
-| ERROR | DISCOVERED | PLG-01 | Re-discovery (recovery) | sq_plugins01_discover_plugins.puml |
+| [*] | DISCOVERED | PLUGINS-01 | Plugin found on filesystem | sq_plugins01_discover_plugins.puml |
+| DISCOVERED | LOADING | PLUGINS-02 | Manifest parsing starts | sq_plugins02_load_manifest.puml |
+| DISCOVERED | ERROR | PLUGINS-01 | Plugin discovery failed | sq_plugins01_discover_plugins.puml |
+| LOADING | LOADED | PLUGINS-03 | Manifest parsed, tools registered | sq_plugins03_register_plugin_tools.puml |
+| LOADING | ERROR | PLUGINS-02 | Manifest parsing failed | sq_plugins02_load_manifest.puml |
+| LOADED | ENABLED | PLUGINS-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
+| LOADED | DISABLED | PLUGINS-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
+| LOADED | ERROR | PLUGINS-03 | Tool registration failed | sq_plugins03_register_plugin_tools.puml |
+| ENABLED | DISABLED | PLUGINS-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
+| ENABLED | ERROR | PLUGINS-01 | Runtime exception | sq_plugins01_discover_plugins.puml |
+| ENABLED | [*] | PLUGINS-06 | Plugin unloaded | — |
+| DISABLED | ENABLED | PLUGINS-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
+| DISABLED | [*] | PLUGINS-06 | Plugin unloaded | — |
+| ERROR | DISCOVERED | PLUGINS-01 | Re-discovery (recovery) | sq_plugins01_discover_plugins.puml |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
@@ -678,17 +678,17 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | EMPTY | AGT-07 | No plan active | sq_agent07_queue_plan.puml |
-| EMPTY | BUILDING | AGT-07 | /plan command entered | sq_agent07_queue_plan.puml |
-| BUILDING | QUEUED | AGT-07 | Plan construction complete | sq_agent07_queue_plan.puml |
-| BUILDING | EMPTY | AGT-07 | Plan cancelled | sq_agent07_queue_plan.puml |
-| QUEUED | APPROVED | AGT-08 | User approves plan | sq_agent08_approve_plan.puml |
-| QUEUED | REJECTED | AGT-08 | User rejects plan | sq_agent08_approve_plan.puml |
-| APPROVED | EXECUTING | AGT-08 | Execution started | sq_agent08_approve_plan.puml |
-| EXECUTING | COMPLETED | AGT-01 | All plan steps finished | sq_agent01_process_user_task.puml |
-| EXECUTING | EMPTY | AGT-14 | Execution failed or cancelled | sq_agent14_handle_error.puml |
-| COMPLETED | [*] | AGT-01 | Terminal state | — |
-| REJECTED | [*] | AGT-08 | Terminal state | — |
+| [*] | EMPTY | AGENT-07 | No plan active | sq_agent07_queue_plan.puml |
+| EMPTY | BUILDING | AGENT-07 | /plan command entered | sq_agent07_queue_plan.puml |
+| BUILDING | QUEUED | AGENT-07 | Plan construction complete | sq_agent07_queue_plan.puml |
+| BUILDING | EMPTY | AGENT-07 | Plan cancelled | sq_agent07_queue_plan.puml |
+| QUEUED | APPROVED | AGENT-08 | User approves plan | sq_agent08_approve_plan.puml |
+| QUEUED | REJECTED | AGENT-08 | User rejects plan | sq_agent08_approve_plan.puml |
+| APPROVED | EXECUTING | AGENT-08 | Execution started | sq_agent08_approve_plan.puml |
+| EXECUTING | COMPLETED | AGENT-01 | All plan steps finished | sq_agent01_process_user_task.puml |
+| EXECUTING | EMPTY | AGENT-14 | Execution failed or cancelled | sq_agent14_handle_error.puml |
+| COMPLETED | [*] | AGENT-01 | Terminal state | — |
+| REJECTED | [*] | AGENT-08 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
@@ -696,16 +696,16 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNLOADED | AGT-12 | Default state | `sq_agent12_load_persona.puml` |
-| UNLOADED | LOADING | AGT-12 | Load requested | `sq_agent12_load_persona.puml` |
-| LOADING | ACTIVE | AGT-12 | Load successful | `sq_agent12_load_persona.puml` |
-| LOADING | ERROR | AGT-12 | Load failed | `sq_agent12_load_persona.puml` |
-| ACTIVE | SWITCHING | AGT-13 | Switch requested | `sq_agent13_switch_persona.puml` |
-| SWITCHING | ACTIVE | AGT-13 | Switch successful | `sq_agent13_switch_persona.puml` |
-| SWITCHING | ERROR | AGT-13 | Switch failed | `sq_agent13_switch_persona.puml` |
-| ACTIVE | UNLOADED | AGT-11 | Delegation complete | `sq_agent11_delegate_to_persona.puml` |
-| ERROR | UNLOADED | AGT-12 | Recovery: retry load | `sq_agent12_load_persona.puml` |
-| UNLOADED | [*] | AGT-12 | Terminal state | — |
+| [*] | UNLOADED | AGENT-12 | Default state | `sq_agent12_load_persona.puml` |
+| UNLOADED | LOADING | AGENT-12 | Load requested | `sq_agent12_load_persona.puml` |
+| LOADING | ACTIVE | AGENT-12 | Load successful | `sq_agent12_load_persona.puml` |
+| LOADING | ERROR | AGENT-12 | Load failed | `sq_agent12_load_persona.puml` |
+| ACTIVE | SWITCHING | AGENT-13 | Switch requested | `sq_agent13_switch_persona.puml` |
+| SWITCHING | ACTIVE | AGENT-13 | Switch successful | `sq_agent13_switch_persona.puml` |
+| SWITCHING | ERROR | AGENT-13 | Switch failed | `sq_agent13_switch_persona.puml` |
+| ACTIVE | UNLOADED | AGENT-11 | Delegation complete | `sq_agent11_delegate_to_persona.puml` |
+| ERROR | UNLOADED | AGENT-12 | Recovery: retry load | `sq_agent12_load_persona.puml` |
+| UNLOADED | [*] | AGENT-12 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
@@ -746,20 +746,20 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | SBX-01 | Default state | `sq_sandbox01_isolate_command.puml` |
-| IDLE | EXECUTING | SBX-01 | Command started | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | MONITORING | SBX-03 | Resource monitoring started | `sq_sandbox03_monitor_process.puml` |
-| MONITORING | EXECUTING | SBX-03 | Monitoring continues | `sq_sandbox03_monitor_process.puml` |
-| EXECUTING | COMPLETED | SBX-01 | Process finished | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | FAILED | SBX-01 | Process crashed | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | TIMEOUT | SBX-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
-| EXECUTING | RESOURCE_EXCEEDED | SBX-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
-| MONITORING | TIMEOUT | SBX-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
-| MONITORING | RESOURCE_EXCEEDED | SBX-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
-| TIMEOUT | IDLE | SBX-01 | Cleanup after timeout | `sq_sandbox01_isolate_command.puml` |
-| FAILED | IDLE | SBX-01 | Cleanup after failure | `sq_sandbox01_isolate_command.puml` |
-| RESOURCE_EXCEEDED | IDLE | SBX-04 | Cleanup after resource violation | `sq_sandbox04_limit_resources.puml` |
-| COMPLETED | [*] | SBX-01 | Terminal state | — |
+| [*] | IDLE | SANDBOX-01 | Default state | `sq_sandbox01_isolate_command.puml` |
+| IDLE | EXECUTING | SANDBOX-01 | Command started | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | MONITORING | SANDBOX-03 | Resource monitoring started | `sq_sandbox03_monitor_process.puml` |
+| MONITORING | EXECUTING | SANDBOX-03 | Monitoring continues | `sq_sandbox03_monitor_process.puml` |
+| EXECUTING | COMPLETED | SANDBOX-01 | Process finished | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | FAILED | SANDBOX-01 | Process crashed | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | TIMEOUT | SANDBOX-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
+| EXECUTING | RESOURCE_EXCEEDED | SANDBOX-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
+| MONITORING | TIMEOUT | SANDBOX-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
+| MONITORING | RESOURCE_EXCEEDED | SANDBOX-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
+| TIMEOUT | IDLE | SANDBOX-01 | Cleanup after timeout | `sq_sandbox01_isolate_command.puml` |
+| FAILED | IDLE | SANDBOX-01 | Cleanup after failure | `sq_sandbox01_isolate_command.puml` |
+| RESOURCE_EXCEEDED | IDLE | SANDBOX-04 | Cleanup after resource violation | `sq_sandbox04_limit_resources.puml` |
+| COMPLETED | [*] | SANDBOX-01 | Terminal state | — |
 
 > **Coverage:** 13/13 non-terminal transitions covered. 0 ORPHANs.
 
@@ -767,19 +767,19 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | EMPTY | EDT-10 | Default state | `sq_editstrategy10_stage_diff.puml` |
-| EMPTY | STAGING | EDT-10 | Diff computation started | `sq_editstrategy10_stage_diff.puml` |
-| STAGING | STAGED | EDT-10 | Diff computed successfully | `sq_editstrategy10_stage_diff.puml` |
-| STAGING | ERROR | EDT-10 | Diff computation failed | `sq_editstrategy10_stage_diff.puml` |
-| STAGED | AWAITING_APPROVAL | EDT-10 | Diff presented for review | `sq_editstrategy10_stage_diff.puml` |
-| AWAITING_APPROVAL | APPROVED | SAF-02 | User approved | `sq_safety02_request_approval.puml` |
-| AWAITING_APPROVAL | EMPTY | SAF-02 | User rejected, cleanup | `sq_safety02_request_approval.puml` |
-| APPROVED | APPLYING | EDT-10 | Diff application started | `sq_editstrategy10_stage_diff.puml` |
-| APPLYING | APPLIED | EDT-10 | Diff applied successfully | `sq_editstrategy10_stage_diff.puml` |
-| APPLYING | ERROR | EDT-10 | Diff application failed | `sq_editstrategy10_stage_diff.puml` |
-| APPLIED | EMPTY | EDT-10 | Cleanup after application | `sq_editstrategy10_stage_diff.puml` |
-| ERROR | EMPTY | EDT-10 | Cleanup after error | `sq_editstrategy10_stage_diff.puml` |
-| APPLIED | [*] | EDT-10 | Terminal state | — |
+| [*] | EMPTY | EDITSTRATEGY-10 | Default state | `sq_editstrategy10_stage_diff.puml` |
+| EMPTY | STAGING | EDITSTRATEGY-10 | Diff computation started | `sq_editstrategy10_stage_diff.puml` |
+| STAGING | STAGED | EDITSTRATEGY-10 | Diff computed successfully | `sq_editstrategy10_stage_diff.puml` |
+| STAGING | ERROR | EDITSTRATEGY-10 | Diff computation failed | `sq_editstrategy10_stage_diff.puml` |
+| STAGED | AWAITING_APPROVAL | EDITSTRATEGY-10 | Diff presented for review | `sq_editstrategy10_stage_diff.puml` |
+| AWAITING_APPROVAL | APPROVED | SAFETY-02 | User approved | `sq_safety02_request_approval.puml` |
+| AWAITING_APPROVAL | EMPTY | SAFETY-02 | User rejected, cleanup | `sq_safety02_request_approval.puml` |
+| APPROVED | APPLYING | EDITSTRATEGY-10 | Diff application started | `sq_editstrategy10_stage_diff.puml` |
+| APPLYING | APPLIED | EDITSTRATEGY-10 | Diff applied successfully | `sq_editstrategy10_stage_diff.puml` |
+| APPLYING | ERROR | EDITSTRATEGY-10 | Diff application failed | `sq_editstrategy10_stage_diff.puml` |
+| APPLIED | EMPTY | EDITSTRATEGY-10 | Cleanup after application | `sq_editstrategy10_stage_diff.puml` |
+| ERROR | EMPTY | EDITSTRATEGY-10 | Cleanup after error | `sq_editstrategy10_stage_diff.puml` |
+| APPLIED | [*] | EDITSTRATEGY-10 | Terminal state | — |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
@@ -787,21 +787,21 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNINITIALIZED | SAF-03 | Default state | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | PERMISSIVE | SAF-03 | Apply permissive mode | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | ASK | SAF-03 | Apply ask mode | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | BLOCK | SAF-03 | Apply block mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | ASK | SAF-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | BLOCK | SAF-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
-| ASK | PERMISSIVE | SAF-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
-| ASK | BLOCK | SAF-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
-| BLOCK | PERMISSIVE | SAF-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
-| BLOCK | ASK | SAF-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | ERROR | SAF-01 | Permission check failed | sq_safety01_check_permission.puml |
-| ASK | ERROR | SAF-01 | Permission check failed | sq_safety01_check_permission.puml |
-| BLOCK | ERROR | SAF-01 | Permission check failed | sq_safety01_check_permission.puml |
-| ERROR | UNINITIALIZED | SAF-03 | Recovery: reinitialize | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | [*] | SAF-03 | Terminal state | — |
+| [*] | UNINITIALIZED | SAFETY-03 | Default state | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | PERMISSIVE | SAFETY-03 | Apply permissive mode | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | ASK | SAFETY-03 | Apply ask mode | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | BLOCK | SAFETY-03 | Apply block mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | ASK | SAFETY-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | BLOCK | SAFETY-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
+| ASK | PERMISSIVE | SAFETY-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
+| ASK | BLOCK | SAFETY-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
+| BLOCK | PERMISSIVE | SAFETY-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
+| BLOCK | ASK | SAFETY-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | ERROR | SAFETY-01 | Permission check failed | sq_safety01_check_permission.puml |
+| ASK | ERROR | SAFETY-01 | Permission check failed | sq_safety01_check_permission.puml |
+| BLOCK | ERROR | SAFETY-01 | Permission check failed | sq_safety01_check_permission.puml |
+| ERROR | UNINITIALIZED | SAFETY-03 | Recovery: reinitialize | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | [*] | SAFETY-03 | Terminal state | — |
 
 > **Coverage:** 14/14 non-terminal transitions covered. 0 ORPHANs.
 
@@ -809,19 +809,19 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | RTG-01 | Default state | sq_router01_select_model.puml |
-| IDLE | CLASSIFYING | RTG-03 | Task classification started | sq_router03_classify_task.puml |
-| CLASSIFYING | SELECTING | RTG-01 | Classification complete | sq_router01_select_model.puml |
-| CLASSIFYING | ERROR | RTG-03 | Classification failed | sq_router03_classify_task.puml |
-| SELECTING | IDLE | RTG-01 | Model selected | sq_router01_select_model.puml |
-| SELECTING | FALLBACK | RTG-02 | Primary model unavailable | sq_router02_apply_fallback.puml |
-| FALLBACK | SELECTING | RTG-02 | Fallback to next model | sq_router02_apply_fallback.puml |
-| FALLBACK | ERROR | RTG-02 | All models exhausted | sq_router02_apply_fallback.puml |
-| IDLE | SWITCHING | RTG-04 | Runtime switch requested | sq_router04_switch_model.puml |
-| SWITCHING | IDLE | RTG-04 | Switch successful | sq_router04_switch_model.puml |
-| SWITCHING | ERROR | RTG-04 | Switch failed | sq_router04_switch_model.puml |
-| ERROR | IDLE | RTG-01 | Recovery: retry | sq_router01_select_model.puml |
-| IDLE | [*] | RTG-01 | Terminal state | — |
+| [*] | IDLE | ROUTER-01 | Default state | sq_router01_select_model.puml |
+| IDLE | CLASSIFYING | ROUTER-03 | Task classification started | sq_router03_classify_task.puml |
+| CLASSIFYING | SELECTING | ROUTER-01 | Classification complete | sq_router01_select_model.puml |
+| CLASSIFYING | ERROR | ROUTER-03 | Classification failed | sq_router03_classify_task.puml |
+| SELECTING | IDLE | ROUTER-01 | Model selected | sq_router01_select_model.puml |
+| SELECTING | FALLBACK | ROUTER-02 | Primary model unavailable | sq_router02_apply_fallback.puml |
+| FALLBACK | SELECTING | ROUTER-02 | Fallback to next model | sq_router02_apply_fallback.puml |
+| FALLBACK | ERROR | ROUTER-02 | All models exhausted | sq_router02_apply_fallback.puml |
+| IDLE | SWITCHING | ROUTER-04 | Runtime switch requested | sq_router04_switch_model.puml |
+| SWITCHING | IDLE | ROUTER-04 | Switch successful | sq_router04_switch_model.puml |
+| SWITCHING | ERROR | ROUTER-04 | Switch failed | sq_router04_switch_model.puml |
+| ERROR | IDLE | ROUTER-01 | Recovery: retry | sq_router01_select_model.puml |
+| IDLE | [*] | ROUTER-01 | Terminal state | — |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
@@ -829,16 +829,16 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNREGISTERED | PRV-01 | Default state | sq_provider01_register_provider.puml |
-| UNREGISTERED | REGISTERING | PRV-01 | Registration started | sq_provider01_register_provider.puml |
-| REGISTERING | ACTIVE | PRV-01 | Registration successful | sq_provider01_register_provider.puml |
-| REGISTERING | ERROR | PRV-01 | Registration failed | sq_provider01_register_provider.puml |
-| ACTIVE | SELECTING | PRV-04 | Backend selection started | sq_provider04_select_provider_backend.puml |
-| SELECTING | ACTIVE | PRV-04 | Backend selected | sq_provider04_select_provider_backend.puml |
-| SELECTING | ERROR | PRV-04 | Selection failed | sq_provider04_select_provider_backend.puml |
-| ACTIVE | UNREGISTERED | PRV-01 | Unregistered | sq_provider01_register_provider.puml |
-| ERROR | UNREGISTERED | PRV-01 | Recovery: re-register | sq_provider01_register_provider.puml |
-| UNREGISTERED | [*] | PRV-01 | Terminal state | — |
+| [*] | UNREGISTERED | PROVIDER-01 | Default state | sq_provider01_register_provider.puml |
+| UNREGISTERED | REGISTERING | PROVIDER-01 | Registration started | sq_provider01_register_provider.puml |
+| REGISTERING | ACTIVE | PROVIDER-01 | Registration successful | sq_provider01_register_provider.puml |
+| REGISTERING | ERROR | PROVIDER-01 | Registration failed | sq_provider01_register_provider.puml |
+| ACTIVE | SELECTING | PROVIDER-04 | Backend selection started | sq_provider04_select_provider_backend.puml |
+| SELECTING | ACTIVE | PROVIDER-04 | Backend selected | sq_provider04_select_provider_backend.puml |
+| SELECTING | ERROR | PROVIDER-04 | Selection failed | sq_provider04_select_provider_backend.puml |
+| ACTIVE | UNREGISTERED | PROVIDER-01 | Unregistered | sq_provider01_register_provider.puml |
+| ERROR | UNREGISTERED | PROVIDER-01 | Recovery: re-register | sq_provider01_register_provider.puml |
+| UNREGISTERED | [*] | PROVIDER-01 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
@@ -846,24 +846,24 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | EVL-01 | Default state | sq_evaluation01_evaluate_task.puml |
-| IDLE | CHECKING | EVL-01 | Evaluation started | sq_evaluation01_evaluate_task.puml |
-| CHECKING | REVIEWING | EVL-04 | LLM review required | sq_evaluation04_validate_with_llm.puml |
-| CHECKING | TESTING | EVL-05 | Test validation required | sq_evaluation05_validate_test_suite.puml |
-| CHECKING | SCORING | EVL-07 | Direct scoring (no review/test) | sq_evaluation07_record_quality_signal.puml |
-| CHECKING | FAILED | EVL-02 | Task completion check failed | sq_evaluation02_check_task_completion.puml |
-| REVIEWING | SCORING | EVL-07 | LLM review passed | sq_evaluation07_record_quality_signal.puml |
-| REVIEWING | RETRYING | EVL-06 | LLM review rejected | sq_evaluation06_coordinate_retry.puml |
-| TESTING | SCORING | EVL-07 | Tests passed | sq_evaluation07_record_quality_signal.puml |
-| TESTING | RETRYING | EVL-06 | Tests failed | sq_evaluation06_coordinate_retry.puml |
-| SCORING | PASSED | EVL-07 | Scoring threshold met | sq_evaluation07_record_quality_signal.puml |
-| SCORING | RETRYING | EVL-06 | Scoring below threshold | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | CHECKING | EVL-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | FAILED | EVL-06 | Retries exhausted | sq_evaluation06_coordinate_retry.puml |
-| PASSED | IDLE | EVL-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
-| FAILED | IDLE | EVL-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
-| PASSED | [*] | EVL-01 | Terminal state | — |
-| FAILED | [*] | EVL-01 | Terminal state | — |
+| [*] | IDLE | EVALUATION-01 | Default state | sq_evaluation01_evaluate_task.puml |
+| IDLE | CHECKING | EVALUATION-01 | Evaluation started | sq_evaluation01_evaluate_task.puml |
+| CHECKING | REVIEWING | EVALUATION-04 | LLM review required | sq_evaluation04_validate_with_llm.puml |
+| CHECKING | TESTING | EVALUATION-05 | Test validation required | sq_evaluation05_validate_test_suite.puml |
+| CHECKING | SCORING | EVALUATION-07 | Direct scoring (no review/test) | sq_evaluation07_record_quality_signal.puml |
+| CHECKING | FAILED | EVALUATION-02 | Task completion check failed | sq_evaluation02_check_task_completion.puml |
+| REVIEWING | SCORING | EVALUATION-07 | LLM review passed | sq_evaluation07_record_quality_signal.puml |
+| REVIEWING | RETRYING | EVALUATION-06 | LLM review rejected | sq_evaluation06_coordinate_retry.puml |
+| TESTING | SCORING | EVALUATION-07 | Tests passed | sq_evaluation07_record_quality_signal.puml |
+| TESTING | RETRYING | EVALUATION-06 | Tests failed | sq_evaluation06_coordinate_retry.puml |
+| SCORING | PASSED | EVALUATION-07 | Scoring threshold met | sq_evaluation07_record_quality_signal.puml |
+| SCORING | RETRYING | EVALUATION-06 | Scoring below threshold | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | CHECKING | EVALUATION-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | FAILED | EVALUATION-06 | Retries exhausted | sq_evaluation06_coordinate_retry.puml |
+| PASSED | IDLE | EVALUATION-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
+| FAILED | IDLE | EVALUATION-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
+| PASSED | [*] | EVALUATION-01 | Terminal state | — |
+| FAILED | [*] | EVALUATION-01 | Terminal state | — |
 
 > **Coverage:** 16/16 non-terminal transitions covered. 0 ORPHANs.
 
@@ -871,21 +871,21 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNINDEXED | RIM-01 | Default state | sq_repointelligence01_index_codebase.puml |
-| UNINDEXED | INDEXING | RIM-01 | Indexing started | sq_repointelligence01_index_codebase.puml |
-| INDEXING | INDEXED | RIM-01 | Indexing complete | sq_repointelligence01_index_codebase.puml |
-| INDEXING | ERROR | RIM-01 | Indexing failed | sq_repointelligence01_index_codebase.puml |
-| INDEXED | BUILDING_GRAPH | RIM-02 | Graph building started | sq_repointelligence02_build_symbol_graph.puml |
-| BUILDING_GRAPH | INDEXED | RIM-02 | Graph built | sq_repointelligence02_build_symbol_graph.puml |
-| BUILDING_GRAPH | ERROR | RIM-02 | Graph building failed | sq_repointelligence02_build_symbol_graph.puml |
-| INDEXED | EMBEDDING | RIM-05 | Embedding started | sq_repointelligence05_embed_code.puml |
-| EMBEDDING | INDEXED | RIM-05 | Embedding complete | sq_repointelligence05_embed_code.puml |
-| EMBEDDING | ERROR | RIM-05 | Embedding failed | sq_repointelligence05_embed_code.puml |
-| INDEXED | STALE | RIM-01 | Source files changed | sq_repointelligence01_index_codebase.puml |
-| STALE | INDEXING | RIM-01 | Re-indexing started | sq_repointelligence01_index_codebase.puml |
-| ERROR | UNINDEXED | RIM-01 | Recovery: start fresh | sq_repointelligence01_index_codebase.puml |
-| INDEXED | [*] | RIM-01 | Terminal state | — |
-| UNINDEXED | [*] | RIM-01 | Terminal state | — |
+| [*] | UNINDEXED | REPOINTELLIGENCE-01 | Default state | sq_repointelligence01_index_codebase.puml |
+| UNINDEXED | INDEXING | REPOINTELLIGENCE-01 | Indexing started | sq_repointelligence01_index_codebase.puml |
+| INDEXING | INDEXED | REPOINTELLIGENCE-01 | Indexing complete | sq_repointelligence01_index_codebase.puml |
+| INDEXING | ERROR | REPOINTELLIGENCE-01 | Indexing failed | sq_repointelligence01_index_codebase.puml |
+| INDEXED | BUILDING_GRAPH | REPOINTELLIGENCE-02 | Graph building started | sq_repointelligence02_build_symbol_graph.puml |
+| BUILDING_GRAPH | INDEXED | REPOINTELLIGENCE-02 | Graph built | sq_repointelligence02_build_symbol_graph.puml |
+| BUILDING_GRAPH | ERROR | REPOINTELLIGENCE-02 | Graph building failed | sq_repointelligence02_build_symbol_graph.puml |
+| INDEXED | EMBEDDING | REPOINTELLIGENCE-05 | Embedding started | sq_repointelligence05_embed_code.puml |
+| EMBEDDING | INDEXED | REPOINTELLIGENCE-05 | Embedding complete | sq_repointelligence05_embed_code.puml |
+| EMBEDDING | ERROR | REPOINTELLIGENCE-05 | Embedding failed | sq_repointelligence05_embed_code.puml |
+| INDEXED | STALE | REPOINTELLIGENCE-01 | Source files changed | sq_repointelligence01_index_codebase.puml |
+| STALE | INDEXING | REPOINTELLIGENCE-01 | Re-indexing started | sq_repointelligence01_index_codebase.puml |
+| ERROR | UNINDEXED | REPOINTELLIGENCE-01 | Recovery: start fresh | sq_repointelligence01_index_codebase.puml |
+| INDEXED | [*] | REPOINTELLIGENCE-01 | Terminal state | — |
+| UNINDEXED | [*] | REPOINTELLIGENCE-01 | Terminal state | — |
 
 > **Coverage:** 13/13 non-terminal transitions covered. 0 ORPHANs.
 
@@ -898,21 +898,21 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 
 | # | SM File | Entity | C4 Component | Type | States | UCs | Status |
 |---|---------|--------|--------------|------|--------|-----|--------|
-| 1 | sm_agent_lifecycle.puml | TaskService | TaskService | Process FSM | 17 | AGT-01..14, API-06, PRV-02, EDT-10, SAF-02, HK-02, EVL-01..06, RTG-01 | ✅ GREEN |
-| 2 | sm_session_lifecycle.puml | SessionRepository | SessionService | Entity | 6 | API-02..05, WRL-04 | ✅ GREEN |
-| 3 | sm_plan_lifecycle.puml | TaskService (Plan) | TaskService | Entity | 7 | AGT-07, AGT-08, AGT-01, AGT-14 | ✅ GREEN |
-| 4 | sm_plugin_lifecycle.puml | ToolService (Plugin) | ToolService | Entity | 6 | PLG-01..06 | ✅ GREEN |
-| 5 | sm_subagent_lifecycle.puml | TaskService (Subagent) | TaskService | Entity | 5 | AGT-09, AGT-10, AGT-14 | ✅ GREEN |
-| 6 | sm_persona_lifecycle.puml | TaskService (Persona) | TaskService | Entity | 5 | AGT-11, AGT-12, AGT-13 | ✅ GREEN |
+| 1 | sm_agent_lifecycle.puml | TaskService | TaskService | Process FSM | 17 | AGENT-01..14, API-06, PROVIDER-02, EDITSTRATEGY-10, SAFETY-02, HOOKS-02, EVALUATION-01..06, ROUTER-01 | ✅ GREEN |
+| 2 | sm_session_lifecycle.puml | SessionRepository | SessionService | Entity | 6 | API-02..05, WIRELOG-04 | ✅ GREEN |
+| 3 | sm_plan_lifecycle.puml | TaskService (Plan) | TaskService | Entity | 7 | AGENT-07, AGENT-08, AGENT-01, AGENT-14 | ✅ GREEN |
+| 4 | sm_plugin_lifecycle.puml | ToolService (Plugin) | ToolService | Entity | 6 | PLUGINS-01..06 | ✅ GREEN |
+| 5 | sm_subagent_lifecycle.puml | TaskService (Subagent) | TaskService | Entity | 5 | AGENT-09, AGENT-10, AGENT-14 | ✅ GREEN |
+| 6 | sm_persona_lifecycle.puml | TaskService (Persona) | TaskService | Entity | 5 | AGENT-11, AGENT-12, AGENT-13 | ✅ GREEN |
 | 7 | sm_mcp_client_lifecycle.puml | MCPRepository | MCPRepository | Entity | 5 | MCP-01, MCP-02 | ✅ GREEN |
 | 8 | sm_mcp_server_lifecycle.puml | MCPRepository (Server) | MCPRepository | Entity | 5 | MCP-04 | ✅ GREEN |
-| 9 | sm_sandbox_execution_lifecycle.puml | SandboxRepository | SandboxRepository | Entity | 7 | SBX-01, SBX-03, SBX-04 | ✅ GREEN |
-| 10 | sm_diff_staging_lifecycle.puml | EditStrategyRepository | EditStrategyRepository | Entity | 8 | EDT-10, SAF-02 | ✅ GREEN |
-| 11 | sm_safety_mode_lifecycle.puml | SafetyService | SafetyService | Entity | 5 | SAF-01, SAF-03 | ✅ GREEN |
-| 12 | sm_router_lifecycle.puml | LLMRepository | LLMRepository | Entity | 6 | RTG-01..04 | ✅ GREEN |
-| 13 | sm_provider_connection_lifecycle.puml | LLMRepository (Provider) | LLMRepository | Entity | 5 | PRV-01, PRV-04 | ✅ GREEN |
-| 14 | sm_evaluation_lifecycle.puml | EvaluationService | EvaluationService | Entity | 8 | EVL-01..07 | ✅ GREEN |
-| 15 | sm_index_lifecycle.puml | RepoIntelligenceRepository | RepoIntelligenceRepository | Entity | 7 | RIM-01, RIM-02, RIM-05 | ✅ GREEN |
+| 9 | sm_sandbox_execution_lifecycle.puml | SandboxRepository | SandboxRepository | Entity | 7 | SANDBOX-01, SANDBOX-03, SANDBOX-04 | ✅ GREEN |
+| 10 | sm_diff_staging_lifecycle.puml | EditStrategyRepository | EditStrategyRepository | Entity | 8 | EDITSTRATEGY-10, SAFETY-02 | ✅ GREEN |
+| 11 | sm_safety_mode_lifecycle.puml | SafetyService | SafetyService | Entity | 5 | SAFETY-01, SAFETY-03 | ✅ GREEN |
+| 12 | sm_router_lifecycle.puml | LLMRepository | LLMRepository | Entity | 6 | ROUTER-01..04 | ✅ GREEN |
+| 13 | sm_provider_connection_lifecycle.puml | LLMRepository (Provider) | LLMRepository | Entity | 5 | PROVIDER-01, PROVIDER-04 | ✅ GREEN |
+| 14 | sm_evaluation_lifecycle.puml | EvaluationService | EvaluationService | Entity | 8 | EVALUATION-01..07 | ✅ GREEN |
+| 15 | sm_index_lifecycle.puml | RepoIntelligenceRepository | RepoIntelligenceRepository | Entity | 7 | REPOINTELLIGENCE-01, REPOINTELLIGENCE-02, REPOINTELLIGENCE-05 | ✅ GREEN |
 
 ### Coverage Summary
 
@@ -968,8 +968,8 @@ These components have lifecycle states that occur as transient sub-states within
 
 | # | Entity | C4 Component | Reason | Rationale |
 |---|--------|--------------|--------|-----------|
-| 1 | WireLog | WireLogRepository | Write-buffer lifecycle | Append-only event store with buffering/flush. Simple 3-state (OPEN→WRITING→FLUSHING). UCs: WRL-01..05. |
-| 2 | GitIntegration | GitRepository | Auto-commit lifecycle | Monitors for changes then commits. 3-state (IDLE→CHANGES_DETECTED→COMMITTING). UC: VCS-04. |
+| 1 | WireLog | WireLogRepository | Write-buffer lifecycle | Append-only event store with buffering/flush. Simple 3-state (OPEN→WRITING→FLUSHING). UCs: WIRELOG-01..05. |
+| 2 | GitIntegration | GitRepository | Auto-commit lifecycle | Monitors for changes then commits. 3-state (IDLE→CHANGES_DETECTED→COMMITTING). UC: GIT-04. |
 | 3 | PipelineOrchestrator | ContextService | Pipeline stage lifecycle | 5 transient pipeline stages completing synchronously in one pass. LOW risk. |
 | 4 | REPLSession | CLIAdapter | REPL loop lifecycle | CLI entry point. Delegates all business logic via API. REPL state is UI state, not domain state. |
 | 5 | ServerApp | HTTPAdapter | ASGI lifespan lifecycle | Standard ASGI startup/shutdown. Few project-specific transitions. |
@@ -978,20 +978,20 @@ These components have lifecycle states that occur as transient sub-states within
 
 Every entity SM state has exactly one owning lifecycle-write UC. Verified per SMT rules:
 
-- **Session**: CREATED (API-02), ACTIVE (API-02), SAVED (API-04), RESTORED (API-03), BRANCHED (WRL-04), CLOSED (API-05) ✅
-- **Plan**: BUILDING (AGT-07), QUEUED (AGT-07), APPROVED (AGT-08), EXECUTING (AGT-08), COMPLETED (AGT-01), REJECTED (AGT-08) ✅
-- **Plugin**: DISCOVERED (PLG-01), LOADING (PLG-02), LOADED (PLG-03), ENABLED (PLG-05), DISABLED (PLG-06), ERROR (PLG-01) ✅
-- **Subagent**: SPAWNING (AGT-09), RUNNING (AGT-09), COMPLETED (AGT-10), FAILED (AGT-14) ✅
-- **Persona**: LOADING (AGT-12), ACTIVE (AGT-11), SWITCHING (AGT-13), ERROR (AGT-12) ✅
+- **Session**: CREATED (API-02), ACTIVE (API-02), SAVED (API-04), RESTORED (API-03), BRANCHED (WIRELOG-04), CLOSED (API-05) ✅
+- **Plan**: BUILDING (AGENT-07), QUEUED (AGENT-07), APPROVED (AGENT-08), EXECUTING (AGENT-08), COMPLETED (AGENT-01), REJECTED (AGENT-08) ✅
+- **Plugin**: DISCOVERED (PLUGINS-01), LOADING (PLUGINS-02), LOADED (PLUGINS-03), ENABLED (PLUGINS-05), DISABLED (PLUGINS-06), ERROR (PLUGINS-01) ✅
+- **Subagent**: SPAWNING (AGENT-09), RUNNING (AGENT-09), COMPLETED (AGENT-10), FAILED (AGENT-14) ✅
+- **Persona**: LOADING (AGENT-12), ACTIVE (AGENT-11), SWITCHING (AGENT-13), ERROR (AGENT-12) ✅
 - **MCP Client**: CONNECTING (MCP-01), CONNECTED (MCP-01), DISCOVERING (MCP-02), ERROR (MCP-01) ✅
 - **MCP Server**: STARTING (MCP-04), RUNNING (MCP-04), STOPPING (MCP-04), ERROR (MCP-04) ✅
-- **Sandbox**: EXECUTING (SBX-01), MONITORING (SBX-03), COMPLETED (SBX-01), TIMEOUT (SBX-03), FAILED (SBX-01), RESOURCE_EXCEEDED (SBX-04) ✅
-- **Diff Staging**: STAGING (EDT-10), STAGED (EDT-10), AWAITING_APPROVAL (SAF-02), APPROVED (SAF-02), APPLYING (EDT-10), APPLIED (EDT-10), ERROR (EDT-10) ✅
-- **Safety**: PERMISSIVE (SAF-03), ASK (SAF-03), BLOCK (SAF-03), ERROR (SAF-01) ✅
-- **Router**: CLASSIFYING (RTG-03), SELECTING (RTG-01), SWITCHING (RTG-04), FALLBACK (RTG-02), ERROR (RTG-03) ✅
-- **Provider**: REGISTERING (PRV-01), ACTIVE (PRV-01), SELECTING (PRV-04), ERROR (PRV-01) ✅
-- **Evaluation**: CHECKING (EVL-01), REVIEWING (EVL-04), TESTING (EVL-05), SCORING (EVL-07), RETRYING (EVL-06), PASSED (EVL-07), FAILED (EVL-02) ✅
-- **Index**: INDEXING (RIM-01), INDEXED (RIM-01), BUILDING_GRAPH (RIM-02), EMBEDDING (RIM-05), STALE (RIM-01), ERROR (RIM-01) ✅
+- **Sandbox**: EXECUTING (SANDBOX-01), MONITORING (SANDBOX-03), COMPLETED (SANDBOX-01), TIMEOUT (SANDBOX-03), FAILED (SANDBOX-01), RESOURCE_EXCEEDED (SANDBOX-04) ✅
+- **Diff Staging**: STAGING (EDITSTRATEGY-10), STAGED (EDITSTRATEGY-10), AWAITING_APPROVAL (SAFETY-02), APPROVED (SAFETY-02), APPLYING (EDITSTRATEGY-10), APPLIED (EDITSTRATEGY-10), ERROR (EDITSTRATEGY-10) ✅
+- **Safety**: PERMISSIVE (SAFETY-03), ASK (SAFETY-03), BLOCK (SAFETY-03), ERROR (SAFETY-01) ✅
+- **Router**: CLASSIFYING (ROUTER-03), SELECTING (ROUTER-01), SWITCHING (ROUTER-04), FALLBACK (ROUTER-02), ERROR (ROUTER-03) ✅
+- **Provider**: REGISTERING (PROVIDER-01), ACTIVE (PROVIDER-01), SELECTING (PROVIDER-04), ERROR (PROVIDER-01) ✅
+- **Evaluation**: CHECKING (EVALUATION-01), REVIEWING (EVALUATION-04), TESTING (EVALUATION-05), SCORING (EVALUATION-07), RETRYING (EVALUATION-06), PASSED (EVALUATION-07), FAILED (EVALUATION-02) ✅
+- **Index**: INDEXING (REPOINTELLIGENCE-01), INDEXED (REPOINTELLIGENCE-01), BUILDING_GRAPH (REPOINTELLIGENCE-02), EMBEDDING (REPOINTELLIGENCE-05), STALE (REPOINTELLIGENCE-01), ERROR (REPOINTELLIGENCE-01) ✅
 
 ### Agent Process FSM — Documented Deviation
 

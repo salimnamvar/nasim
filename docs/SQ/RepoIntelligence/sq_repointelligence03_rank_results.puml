@@ -1,6 +1,6 @@
 @startuml sq_repointelligence03_rank_results
 ' ============================================================
-' Title:     RIM-03 — RANK Results
+' Title:     REPOINTELLIGENCE-03 — RANK Results
 ' Boundary:  nasim code agent
 ' Purpose:   PageRank ranking with chat-personalization for symbol importance
 ' Milestone: v1.0
@@ -13,7 +13,7 @@
 
 !include ../common/sq_styles.puml
 
-title nasim -- RIM-03 RANK Results
+title nasim -- REPOINTELLIGENCE-03 RANK Results
 
 actor "User" as user
 
@@ -33,18 +33,18 @@ box "Repository" REPOSITORY_COLOR
   participant "RepoIntelligenceRepository" as symbolRepo
 end box
 
-== RIM-03 RANK Results ==
+== REPOINTELLIGENCE-03 RANK Results ==
 
-user -> iface : RIM-03 RANK Results({query, chat_context})
+user -> iface : REPOINTELLIGENCE-03 RANK Results({query, chat_context})
 activate iface
-iface -> router : RIM-03 RANK Results({query, chat_context})
+iface -> router : REPOINTELLIGENCE-03 RANK Results({query, chat_context})
 activate router
-router -> mgr : RIM-03 RANK Results({graph, chat_context})
+router -> mgr : REPOINTELLIGENCE-03 RANK Results({graph, chat_context})
 activate mgr
 
 alt graph_not_empty and ranking completes
-  ref over mgr : RIM-03 RANK Results({graph, chat_context}) <back:#7CB342>INDEXED</back>
-  mgr -> symbolRepo : RIM-03 READ SymbolGraph({project_root})
+  ref over mgr : REPOINTELLIGENCE-03 RANK Results({graph, chat_context}) <back:#7CB342>INDEXED</back>
+  mgr -> symbolRepo : REPOINTELLIGENCE-03 READ SymbolGraph({project_root})
   activate symbolRepo
   symbolRepo --> mgr : 200 OK
   deactivate symbolRepo
@@ -55,10 +55,10 @@ alt graph_not_empty and ranking completes
   deactivate router
   deactivate iface
 else empty graph
-  mgr --> router : 409 FAILED_PRECONDITION\n{error: {code: "RIM-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
+  mgr --> router : 409 FAILED_PRECONDITION\n{error: {code: "REPOINTELLIGENCE-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
   deactivate mgr
-  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "RIM-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
-  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "RIM-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
+  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "REPOINTELLIGENCE-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
+  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "REPOINTELLIGENCE-03_EMPTY_GRAPH", message: "Cannot rank empty graph", status: 409}}
   deactivate router
   deactivate iface
 end
