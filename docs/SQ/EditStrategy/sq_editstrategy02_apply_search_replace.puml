@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SearchReplaceCoder
+' CSR Chain: User -> CLIAdapter -> AgentController -> EditStrategyRepository
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- EDT-02 APPLY Search-Replace
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SearchReplaceCoder" as coder
+  participant "EditStrategyRepository" as coder
 end box
 
 == EDT-02 APPLY Search-Replace ==

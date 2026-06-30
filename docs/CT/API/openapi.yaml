@@ -53,7 +53,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /sessions/{session}:
+  /v1/sessions/{session}:
     parameters:
       - $ref: '#/components/parameters/sessionId'
     get:
@@ -228,6 +228,269 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Config'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/sessions/{session}/subagents:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      operationId: listSubagents
+      summary: "[AGT-09] LIST Subagents"
+      description: Returns a list of child agents spawned in the session.
+      tags: [Subagents]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSubagentsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: spawnSubagent
+      summary: "[AGT-09] SPAWN Subagent"
+      description: Spawns a child agent for a subtask.
+      tags: [Subagents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubagentSpawn'
+      responses:
+        '201':
+          description: Subagent spawned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subagent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/sessions/{session}/subagents/{subagent}:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+      - name: subagent
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Subagent UUID
+    get:
+      operationId: getSubagent
+      summary: "[AGT-10] READ Subagent"
+      description: Returns the subagent's result.
+      tags: [Subagents]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubagentResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/memory:
+    get:
+      operationId: recallKnowledge
+      summary: "[MEM-02] LIST Memory"
+      description: Retrieves knowledge entries.
+      tags: [Memory]
+      parameters:
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/pageToken'
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [global, project, session]
+          description: Memory scope filter
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMemoryResponse'
+    post:
+      operationId: persistKnowledge
+      summary: "[MEM-01] INSERT Memory"
+      description: Stores a new knowledge entry.
+      tags: [Memory]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryEntry'
+      responses:
+        '201':
+          description: Memory entry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryEntry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/memory/search:
+    get:
+      operationId: searchKnowledge
+      summary: "[MEM-03] SEARCH Memory"
+      description: Searches knowledge entries using full-text search.
+      tags: [Memory]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [global, project, session]
+          description: Search scope
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchMemoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/sessions/{session}/snapshots:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      operationId: listSnapshots
+      summary: "[SSN-05] LIST Snapshots"
+      description: Lists session snapshots.
+      tags: [Snapshots]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSnapshotsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: createSnapshot
+      summary: "[SSN-05] INSERT Snapshot"
+      description: Creates a session snapshot.
+      tags: [Snapshots]
+      responses:
+        '201':
+          description: Snapshot created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Snapshot'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/sessions/{session}/snapshots/{snapshot}:restore:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+      - name: snapshot
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Snapshot UUID
+    post:
+      operationId: restoreSnapshot
+      summary: "[SSN-06] RESTORE Snapshot"
+      description: Restores a session from a snapshot.
+      tags: [Snapshots]
+      responses:
+        '200':
+          description: Session restored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/sessions/{session}/todos:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+    get:
+      operationId: listTodos
+      summary: "[TL-18] LIST Todos"
+      description: Lists todo items in the session.
+      tags: [Todos]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListTodosResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: createTodo
+      summary: "[TL-16] INSERT Todo"
+      description: Creates a todo item.
+      tags: [Todos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoCreate'
+      responses:
+        '201':
+          description: Todo created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/sessions/{session}/todos/{todo}:
+    parameters:
+      - $ref: '#/components/parameters/sessionId'
+      - name: todo
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Todo UUID
+    patch:
+      operationId: updateTodo
+      summary: "[TL-17] UPDATE Todo"
+      description: Updates a todo item.
+      tags: [Todos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoUpdate'
+      responses:
+        '200':
+          description: Todo updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -491,6 +754,199 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Tool'
+
+    Subagent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Subagent UUID (OUTPUT_ONLY)
+        parent_session_id:
+          type: string
+          format: uuid
+          description: Parent session ID
+        status:
+          type: string
+          enum: [RUNNING, COMPLETED, FAILED]
+          readOnly: true
+          description: Subagent status (OUTPUT_ONLY)
+        task:
+          type: string
+          description: Subagent task description
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation timestamp (OUTPUT_ONLY)
+
+    SubagentSpawn:
+      type: object
+      properties:
+        task:
+          type: string
+          description: Task description for the subagent
+        persona:
+          type: string
+          description: Persona to use for the subagent
+      required:
+        - task
+
+    SubagentResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Subagent UUID (OUTPUT_ONLY)
+        result:
+          type: string
+          description: Subagent final result
+        success:
+          type: boolean
+          description: Whether the subagent succeeded
+        error:
+          type: string
+          description: Error message if failed
+        completed_at:
+          type: string
+          format: date-time
+          description: Completion timestamp
+
+    ListSubagentsResponse:
+      type: object
+      properties:
+        subagents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subagent'
+        next_page_token:
+          type: string
+
+    MemoryEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Memory entry UUID (OUTPUT_ONLY)
+        scope:
+          type: string
+          enum: [global, project, session]
+          description: Memory scope
+        key:
+          type: string
+          description: Memory key
+        content:
+          type: string
+          description: Memory content
+        metadata:
+          type: object
+          description: Optional metadata
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation timestamp (OUTPUT_ONLY)
+
+    ListMemoryResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemoryEntry'
+        next_page_token:
+          type: string
+
+    SearchMemoryResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemoryEntry'
+
+    Snapshot:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Snapshot UUID (OUTPUT_ONLY)
+        session_id:
+          type: string
+          format: uuid
+          description: Session ID
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation timestamp (OUTPUT_ONLY)
+        message_count:
+          type: integer
+          description: Number of messages in snapshot
+
+    ListSnapshotsResponse:
+      type: object
+      properties:
+        snapshots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Snapshot'
+
+    Todo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Todo UUID (OUTPUT_ONLY)
+        content:
+          type: string
+          description: Todo content
+        done:
+          type: boolean
+          description: Whether the todo is completed
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation timestamp (OUTPUT_ONLY)
+
+    TodoCreate:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Todo content
+      required:
+        - content
+
+    TodoUpdate:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Todo content
+        done:
+          type: boolean
+          description: Completion status
+
+    ListTodosResponse:
+      type: object
+      properties:
+        todos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Todo'
+        next_page_token:
+          type: string
 
     Error:
       type: object

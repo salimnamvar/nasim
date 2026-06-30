@@ -41,46 +41,58 @@ Back to [docs/](../README.md).
 
 | Method | Path | operationId | UC ID | Description |
 | ------ | ---- | ----------- | ------- | ----------- |
-| GET | `/v1/sessions` | ssn03ListSessions | SSN-03 | List sessions (paginated) |
-| POST | `/v1/sessions` | srv02CreateSession | SRV-02 | Create new session |
-| GET | `/v1/sessions/{session_id}` | srv08GetSession | — | Get session metadata |
-| PATCH | `/v1/sessions/{session_id}` | srv04UpdateSession | SRV-04 | Update session metadata |
-| DELETE | `/v1/sessions/{session_id}` | srv05DeleteSession | SRV-05 | Delete session |
-| GET | `/v1/sessions/{session_id}/messages` | srv05GetMessageHistory | SRV-05 | Get message history (paginated) |
-| POST | `/v1/sessions/{session_id}/messages` | srv03SendMessage | SRV-03 | Send message (SSE stream) |
-| GET | `/v1/tools` | srv06ListTools | SRV-06 | List registered tools |
-| GET | `/v1/tools/{tool_id}` | srv09GetTool | SRV-09 | Get tool details |
-| GET | `/v1/config` | srv07GetConfig | SRV-07 | Get agent configuration |
-| PATCH | `/v1/config` | srv11UpdateConfig | SRV-11 | Update agent configuration |
-| GET | `/v1/sessions/{session_id}/subagents` | agt09ListSubagents | AGT-09 | List child agents |
-| POST | `/v1/sessions/{session_id}/subagents` | agt09SpawnSubagent | AGT-09 | Spawn child agent |
-| GET | `/v1/sessions/{session_id}/subagents/{subagent_id}` | agt10GetSubagent | AGT-10 | Get subagent result |
-| POST | `/v1/memory` | mem01PersistKnowledge | MEM-01 | Store knowledge entry |
-| GET | `/v1/memory` | mem02RecallKnowledge | MEM-02 | Retrieve knowledge |
-| GET | `/v1/memory/search` | mem03SearchKnowledge | MEM-03 | Search knowledge (FTS) |
-| GET | `/v1/sessions/{session_id}/snapshots` | ssn05ListSnapshots | SSN-05 | List session snapshots |
-| POST | `/v1/sessions/{session_id}/snapshots` | ssn05CreateSnapshot | SSN-05 | Create session snapshot |
-| POST | `/v1/sessions/{session_id}/snapshots/{snapshot_id}:restore` | ssn06RestoreSnapshot | SSN-06 | Restore from snapshot |
-| GET | `/v1/sessions/{session_id}/todos` | tl18ListTodos | TL-18 | List session todos |
-| POST | `/v1/sessions/{session_id}/todos` | tl16CreateTodo | TL-16 | Create todo item |
-| PATCH | `/v1/sessions/{session_id}/todos/{todo_id}` | tl17UpdateTodo | TL-17 | Update todo item |
+| GET | `/v1/sessions` | listSessions | SSN-03 | List sessions (paginated) |
+| POST | `/v1/sessions` | createSession | SSN-01 | Create new session |
+| GET | `/v1/sessions/{session}` | getSession | SSN-02 | Get session metadata |
+| PATCH | `/v1/sessions/{session}` | updateSession | SSN-04 | Update session metadata |
+| DELETE | `/v1/sessions/{session}` | deleteSession | SSN-05 | Delete session |
+| POST | `/v1/sessions/{session}:send` | sendMessage | API-06 | Send message (SSE stream) |
+| GET | `/v1/sessions/{session}/messages` | listMessages | API-07 | Get message history (paginated) |
+| GET | `/v1/tools` | listTools | TL-01 | List registered tools |
+| GET | `/v1/tools/{tool}` | getTool | TL-02 | Get tool details |
+| GET | `/v1/config` | getConfig | CFG-01 | Get agent configuration |
+| PATCH | `/v1/config` | updateConfig | CFG-02 | Update agent configuration |
+| GET | `/v1/sessions/{session}/subagents` | listSubagents | AGT-09 | List child agents |
+| POST | `/v1/sessions/{session}/subagents` | spawnSubagent | AGT-09 | Spawn child agent |
+| GET | `/v1/sessions/{session}/subagents/{subagent}` | getSubagent | AGT-10 | Get subagent result |
+| POST | `/v1/memory` | persistKnowledge | MEM-01 | Store knowledge entry |
+| GET | `/v1/memory` | recallKnowledge | MEM-02 | Retrieve knowledge |
+| GET | `/v1/memory/search` | searchKnowledge | MEM-03 | Search knowledge (FTS) |
+| GET | `/v1/sessions/{session}/snapshots` | listSnapshots | SSN-05 | List session snapshots |
+| POST | `/v1/sessions/{session}/snapshots` | createSnapshot | SSN-05 | Create session snapshot |
+| POST | `/v1/sessions/{session}/snapshots/{snapshot}:restore` | restoreSnapshot | SSN-06 | Restore from snapshot |
+| GET | `/v1/sessions/{session}/todos` | listTodos | TL-18 | List session todos |
+| POST | `/v1/sessions/{session}/todos` | createTodo | TL-16 | Create todo item |
+| PATCH | `/v1/sessions/{session}/todos/{todo}` | updateTodo | TL-17 | Update todo item |
 
 **Total: 23 endpoints across 8 resources**
+
+## Resources
+
+| Resource | Collection Path | Methods | Owner (C4) |
+| -------- | --------------- | ------- | ---------- |
+| Session | `/v1/sessions` | List, Get, Create, Update, Delete | HTTPAdapter → SessionService |
+| Message | `/v1/sessions/{session}/messages` | List, Create (SSE via `:send`) | HTTPAdapter → AgentController |
+| Tool | `/v1/tools` | List, Get | HTTPAdapter → ToolService |
+| Config | `/v1/config` | Get, Update | HTTPAdapter → ConfigRepository |
+| Subagent | `/v1/sessions/{session}/subagents` | List, Create, Get | HTTPAdapter → TaskService |
+| Memory | `/v1/memory` | List, Create, Search | HTTPAdapter → MemoryRepository |
+| Snapshot | `/v1/sessions/{session}/snapshots` | List, Create, Restore | HTTPAdapter → SessionService |
+| Todo | `/v1/sessions/{session}/todos` | List, Create, Update | HTTPAdapter → TaskService |
 
 ## Design Chain Position
 
 ```
-... → CL → CT/DATA → CT/API → Code
+C4 → UC → SM → SQ → CL → ER → CT/DATA → CT/API → RDM
 ```
 
-CT/API receives input from CT/DATA (field names, types), ROD (resource model),
-and UC (operation definitions), and outputs to Code (route handlers, schemas).
+CT/API receives input from UC (operation definitions), CT/DATA (field names, types),
+and SQ (message flow), and outputs to Code (route handlers, schemas).
 
 ## Related Layers
 
-| Layer | Path |
-| ----- | ---- |
-| UC (source) | `docs/UC/uc_api_group.puml` |
-| SQ (source) | `docs/SQ/SRV/` |
-| CL (source) | `docs/CL/cl_runtime_model.puml` |
-| CT/DATA (sibling) | `docs/CT/DATA/nasim_session_store.datacontract.yaml` |
+| Layer | Path | Relationship |
+| ----- | ---- | ------------ |
+| UC (source) | `docs/UC/` | Defines operations that map to HTTP endpoints |
+| SQ (source) | `docs/SQ/` | Validates message flow through HTTPAdapter |
+| CT/DATA (sibling) | `docs/CT/DATA/` | Shares schema definitions for request/response bodies |

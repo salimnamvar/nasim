@@ -51,7 +51,7 @@ skinparam rectangle<<external_container>> {
     FontColor<<external_container>> #212121
 }
 
-' Deployable Container (CLI Process, API Server Process, Core Engine)
+' Deployable Container (CLI, WebApp, NASIM Application)
 skinparam rectangle<<deployable>> {
     BackgroundColor<<deployable>> #E8EAF6
     BorderColor<<deployable>> #283593
@@ -76,9 +76,9 @@ skinparam rectangle<<deployable>> {
 
 ' CSR lint markers (reserved for cross-layer linting — do not remove)
 !define CSR_ACTOR actor "User" as user
-!define CSR_CTRL participant "ServerRouter" as ctrl
-!define CSR_SVC participant "AgentOrchestrator" as svc
-!define CSR_REPO participant "SessionStore" as repo
+!define CSR_CTRL participant "AgentController" as ctrl
+!define CSR_SVC participant "TaskService" as svc
+!define CSR_REPO participant "SessionRepository" as repo
 !define CSR_ACT activate actorUser
 !define CSR_DEACT deactivate actorUser
 

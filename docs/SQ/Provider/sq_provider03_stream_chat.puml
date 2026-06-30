@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> Provider
+' CSR Chain: User -> CLIAdapter -> AgentController -> Provider
 ' SM States: THINKING (#D7CCC8), RESPONDING (#D1C4E9)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- PRV-03 STREAM Chat
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "Provider" as mgr
+  participant "LLMRepository" as mgr
 end box
 
 == PRV-03 STREAM Chat ==

@@ -5,46 +5,33 @@ Each diagram covers one UC's collaboration order, guards, alt paths, and rollbac
 
 Back to [docs/](../README.md).
 
-## API-First Convention
-
-All SQ diagrams follow the API-First delegation chain:
-
-```
-User → [Interface Container] → API (ServerRouter) → Core Component → Repository
-```
-
-- **Single actor:** `User` routes through `ServerRouter` (API Group)
-- **No bypass:** No interface may call core services directly
-- **CSR pattern:** Controller → Service → Repository
-- **ROD AIP-193:** All failure paths use `{error: {code, message, status}}`
-
 ## C4 Component Name Fidelity
 
-**CRITICAL RULE:** All lifeline names in SQ diagrams MUST be C4-authoritative component names from `ENTITIES.md`. No invented managers, orchestrators, stores, or directories.
+**CRITICAL RULE:** All lifeline names in SQ diagrams MUST be C4-authoritative component names from `docs/C4/c4_nasim_component.puml`.
 
 | Group | C4 Components (Authoritative) |
 |-------|-------------------------------|
-| API | ServerApp, ServerRouter, SSEHandler, APISchema |
-| Agent | AgentOrchestrator, ConversationHistory, ContextCompactor, SafetyCoordinator, PlanSession, SubagentCoordinator, ErrorBoundary, PersonaManager |
-| CLI | ArgParser, REPLSession, Renderer, SlashCommandHandler |
-| Session | SessionStore, SessionVersioning, SessionSearch, SessionFork |
-| Tool | Tool (ABC), ToolRegistry, ReadFileTool, WriteFileTool, EditFileTool, GrepTool, GlobTool, FindFileTool, ShellTool, DirTool, WebFetchTool, WebSearchTool, GitTool, LspTool, SubagentTool, TodoTool, MemoryTool, PlanTool, RepoMapTool, SemanticSearchTool, ReviewTool |
-| Provider | Provider, LiteLLMProxy, ModelRouter, FallbackChain, ModelCatalog |
-| Config | ConfigLoader, Config |
-| Memory | MemoryStore, MemoryIndex, MemoryScope, EpisodicMemoryAdapter, SemanticMemoryAdapter, WorkingMemoryAdapter, MemoryRetriever, MemoryIndexer |
-| Git | GitIntegration, GitStatus, GitCommit |
-| RepoIntelligence | RepoIntelligenceManager, ASTIndexAdapter, SymbolGraph, RankingService, EmbeddingAdapter, SemanticSearchService, RepoMapBuilder |
-| ContextGraph | ContextGraph, ContextNode, ContextEdge, ContextProcessor, ContextPrioritizer, TruncationProcessor, DistillationProcessor, InjectionProcessor, CompactionProcessor, PipelineOrchestrator, TokenBudgetTracker |
-| EditStrategy | EditStrategyManager, EditStrategy, SearchReplaceCoder, WholeFileCoder, UnifiedDiffCoder, FencedBlockCoder, FunctionLevelCoder, DiffSandboxCoder, ArchitectCoder, InlinePatchCoder, StrategySelector |
-| Evaluation | EvaluationEngine, TaskEvaluator, SuccessCheckRunner, LLMReviewer, TestRunner, RetryCoordinator, QualitySignal, RepetitionDetector, TurnBudgetInjector |
-| Router | ModelRouter, FallbackChain |
-| Safety | SafetyCoordinator |
-| MCP | MCPClientRuntime, MCPServerRuntime, MCPToolAdapter, MCPDiscovery |
-| Sandbox | SandboxExecutor, SandboxPolicy, SandboxMonitor |
-| Observability | StructuredLogger, MetricsCollector, TraceCorrelator, ContextPropagator, LogRedactor, DualOutputAdapter, OTelExporter |
-| Hooks | HookManager, Hook, HookResult |
-| Plugins | PluginLoader, PluginManifest |
-| WireLog | WireLog, WireAppender, WireReader, TurnIndex, SessionForkManager |
+| API | HTTPAdapter, AgentController, SessionService, ToolService, ConfigRepository |
+| Agent | TaskService, ToolService, SafetyService, ContextService, SessionService, EvaluationService, LLMRepository |
+| CLI | CLIAdapter, AgentController, TaskService |
+| Session | SessionService, SessionRepository, HistoryRepository |
+| Tool | ToolService, FilesystemRepository, SandboxRepository, GitRepository, WebRepository, MCPRepository, RepoIntelligenceRepository, MemoryRepository |
+| Provider | LLMRepository |
+| Config | ConfigRepository |
+| Memory | MemoryRepository |
+| Git | GitRepository |
+| RepoIntelligence | RepoIntelligenceRepository |
+| ContextGraph | ContextService |
+| EditStrategy | EditStrategyRepository |
+| Evaluation | EvaluationService |
+| Router | LLMRepository |
+| Safety | SafetyService |
+| MCP | MCPRepository |
+| Sandbox | SandboxRepository |
+| Observability | WireLogRepository |
+| Hooks | ToolService |
+| Plugins | ToolService |
+| WireLog | WireLogRepository |
 
 ## State Write Convention
 

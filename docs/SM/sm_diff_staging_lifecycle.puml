@@ -3,7 +3,7 @@
 ' ============================================================
 ' Title:     nasim — Diff Staging Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Staging lifecycle for DiffSandboxManager.
+' Purpose:   Staging lifecycle for EditStrategyRepository (Diff).
 '            States: EMPTY → STAGING → STAGED → AWAITING_APPROVAL → APPROVED → APPLYING → APPLIED
 ' Milestone: v1.0
 ' Version:   1.0.0

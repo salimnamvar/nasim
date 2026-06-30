@@ -4,7 +4,7 @@
 ' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Memory Store ERD
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — MemoryRepository owns this store
 ' Purpose:   Enhanced memory schema with RAG support
 ' Milestone: v1.0
 ' Version:   2.0.0

@@ -1,7 +1,7 @@
 @startuml ct_api_wire_log
 ' ============================================================
 ' Title:     nasim — Wire Log API
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — HTTPAdapter API surface
 ' Purpose:   Public interfaces for append-only wire event logging
 ' Milestone: v1.0
 ' Version:   1.0.0

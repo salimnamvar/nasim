@@ -44,6 +44,7 @@ Back to [docs/](../README.md).
 | CostOptimizationStrategy | `nasim/provider/strategy.py` | class | LLMRepository | Route by cost |
 | RoleStrategy | `nasim/provider/strategy.py` | class | LLMRepository | Route by agent role |
 | ModelRoleRegistry | `nasim/provider/registry.py` | class | LLMRepository | Preferred model per role |
+| ProviderFactory | `nasim/provider/factory.py` | class | LLMRepository | Creates Provider instances from config |
 
 ### Agent Layer
 
@@ -109,17 +110,91 @@ Back to [docs/](../README.md).
 
 | Class | Module (planned) | Type | C4 Component | Description |
 |-------|------------------|------|-------------|-------------|
-| Hook | `nasim/hooks/types.py` | class | — | Hook definition: name, event, handler |
-| HookResult | `nasim/hooks/types.py` | dataclass | — | Hook execution result: allow, deny, modify |
-| HookManager | `nasim/hooks/manager.py` | class | — | Registers and executes hooks |
+| Hook | `nasim/hooks/types.py` | class | ToolService | Hook definition: name, event, handler |
+| HookResult | `nasim/hooks/types.py` | dataclass | ToolService | Hook execution result: allow, deny, modify |
+| HookManager | `nasim/hooks/manager.py` | class | ToolService | Registers and executes hooks |
 
 ### Plugin Layer
 
 | Class | Module (planned) | Type | C4 Component | Description |
 |-------|------------------|------|-------------|-------------|
-| PluginLoader | `nasim/plugins/loader.py` | class | — | Discovers and loads plugins |
-| PluginManifest | `nasim/plugins/manifest.py` | dataclass | — | Plugin metadata |
-| Plugin | `nasim/plugins/loader.py` | class | — | Loaded plugin instance |
+| PluginLoader | `nasim/plugins/loader.py` | class | ToolService | Discovers and loads plugins |
+| PluginManifest | `nasim/plugins/manifest.py` | dataclass | ToolService | Plugin metadata |
+| Plugin | `nasim/plugins/loader.py` | class | ToolService | Loaded plugin instance |
+
+### Repo Intelligence Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| SymbolGraph | `nasim/repointel/graph.py` | class | RepoIntelligenceRepository | In-memory symbol graph with pagerank |
+| RankingService | `nasim/repointel/ranking.py` | class | RepoIntelligenceRepository | Rank symbols by relevance |
+| SemanticSearchService | `nasim/repointel/search.py` | class | RepoIntelligenceRepository | Semantic search over embeddings |
+| RepoMapBuilder | `nasim/repointel/map.py` | class | RepoIntelligenceRepository | Build repo-map from ranked symbols |
+
+### Edit Strategy Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| EditStrategyManager | `nasim/editstrategy/manager.py` | ABC | EditStrategyRepository | Abstract base for edit strategies |
+| SearchReplaceCoder | `nasim/editstrategy/search_replace.py` | class | EditStrategyRepository | Exact string replacement edits |
+| WholeFileCoder | `nasim/editstrategy/whole_file.py` | class | EditStrategyRepository | Full file overwrite edits |
+| UnifiedDiffCoder | `nasim/editstrategy/unified_diff.py` | class | EditStrategyRepository | Unified diff format edits |
+| FencedBlockCoder | `nasim/editstrategy/fenced_block.py` | class | EditStrategyRepository | Fenced code block edits |
+| FunctionLevelCoder | `nasim/editstrategy/function_level.py` | class | EditStrategyRepository | Function-level targeted edits |
+| DiffSandboxCoder | `nasim/editstrategy/diff_sandbox.py` | class | EditStrategyRepository | Sandboxed diff staging and review |
+| ArchitectCoder | `nasim/editstrategy/architect.py` | class | EditStrategyRepository | Architecture-first planning edits |
+| InlinePatchCoder | `nasim/editstrategy/inline_patch.py` | class | EditStrategyRepository | Inline patch format edits |
+| StrategySelector | `nasim/editstrategy/selector.py` | class | EditStrategyRepository | Selects strategy based on model capabilities |
+
+### Evaluation Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| EvaluationEngine | `nasim/evaluation/engine.py` | class | EvaluationService | Orchestrates task quality evaluation |
+| SuccessCheckRunner | `nasim/evaluation/success.py` | class | EvaluationService | Runs success criteria checks |
+| LLMReviewer | `nasim/evaluation/review.py` | class | EvaluationService | Reviews task output via LLM |
+| RetryCoordinator | `nasim/evaluation/retry.py` | class | EvaluationService | Coordinates retry with feedback |
+| RepetitionDetector | `nasim/evaluation/repetition.py` | class | EvaluationService | Detects repeated tool call patterns |
+| TurnBudgetInjector | `nasim/evaluation/turn_budget.py` | class | EvaluationService | Injects turn budget instructions |
+
+### Wire Log Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| WireLog | `nasim/wirelog/log.py` | class | WireLogRepository | Append-only event store |
+| WireAppender | `nasim/wirelog/appender.py` | class | WireLogRepository | Writes WireEvents to storage |
+| WireReader | `nasim/wirelog/reader.py` | class | WireLogRepository | Iterates and seeks over WireEvents |
+| TurnIndex | `nasim/wirelog/index.py` | class | WireLogRepository | Maps turn number to byte offset |
+
+### Context Graph Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| ContextGraph | `nasim/context/graph.py` | class | ContextService | Directed graph of context nodes |
+| ContextNode | `nasim/context/graph.py` | class | ContextService | Node: type, content, token_count |
+| ContextEdge | `nasim/context/graph.py` | class | ContextService | Edge: type, source, target |
+| PipelineOrchestrator | `nasim/context/pipeline.py` | class | ContextService | Orchestrates the context processing pipeline |
+| TruncationProcessor | `nasim/context/truncate.py` | class | ContextService | Truncates low-value context nodes |
+| DistillationProcessor | `nasim/context/distill.py` | class | ContextService | Distills context via LLM summarization |
+| InjectionProcessor | `nasim/context/inject.py` | class | ContextService | Injects relevant memory as context |
+| CompactionProcessor | `nasim/context/compact.py` | class | ContextService | Compacts message history |
+| TokenBudgetTracker | `nasim/context/budget.py` | class | ContextService | Tracks and enforces token budgets |
+
+### Memory Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| MemoryRetriever | `nasim/memory/retriever.py` | class | MemoryRepository | Queries cross-session knowledge |
+| MemoryIndexer | `nasim/memory/indexer.py` | class | MemoryRepository | Indexes knowledge entries |
+
+### Sandbox Layer
+
+| Class | Module (planned) | Type | C4 Component | Description |
+|-------|------------------|------|-------------|-------------|
+| EditStagingArea | `nasim/sandbox/staging.py` | class | SandboxRepository | Staged file content for review |
+| DiffComputer | `nasim/sandbox/diff.py` | class | SandboxRepository | Computes diffs between original and staged |
+| DiffPresenter | `nasim/sandbox/diff.py` | class | SandboxRepository | Renders diff for user presentation |
+| StagedApplicator | `nasim/sandbox/apply.py` | class | SandboxRepository | Applies staged changes after approval |
 
 ---
 

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> PluginLoader
+' CSR Chain: User -> CLIAdapter -> AgentController -> PluginLoader
 ' SM States: ENABLED (#4CAF50), ERROR (#EF5350)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- PLG-05 ENABLE Plugin
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "PluginManager" as svc
+  participant "ToolService" as svc
 end box
 
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "PluginLoader" as mgr
+  participant "ToolService" as mgr
 end box
 
 == PLG-05 ENABLE Plugin ==

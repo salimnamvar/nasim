@@ -1,0 +1,108 @@
+@startuml er_config_store
+' Source:  docs/CT/DATA/ (config is YAML files + env vars + CLI flags)
+' Store:   Config Store — ~/.nasim/config.yaml + .nasim/config.yaml (YAML)
+' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
+' ============================================================
+' Title:     nasim — Config Store ERD
+' Boundary:  NASIM Application — ConfigRepository owns this store
+' Purpose:   Logical schema for layered YAML configuration
+' Milestone: v1.0
+' Version:   1.0.0
+' Source:    docs/ER/README.md (gap analysis — C4 component diagram v11.3.0)
+' Review:    —
+' Note:      Layered merge: global YAML → project YAML → env vars → CLI flags.
+'            Each layer overrides the previous. No relational DB.
+' ============================================================
+
+title nasim — Config Store ERD
+
+entity "config_layer" as cl {
+    * layer_name : TEXT {global|project|env|cli}
+    --
+    * priority : INTEGER
+    * source_path : TEXT (path)
+}
+
+entity "config_entry" as ce {
+    * config_id : TEXT <<PK>> {provider|model|server_url|safety_mode|
+                              context_budget|timeout|max_iterations|
+                              server_port|mcp_servers|hooks}
+    --
+    * value : TEXT (JSON)
+    * layer_name : TEXT (FK to config_layer)
+}
+
+entity "provider_config" as pc {
+    * model : TEXT <<PK>>
+    --
+    * provider : TEXT
+    * api_key_env : TEXT
+    * capability_flags : TEXT (JSON)
+    * fallbacks : TEXT (JSON)
+    * default_params : TEXT (JSON)
+}
+
+entity "safety_config" as sc {
+    * config_id : TEXT <<PK>>
+    --
+    * safety_mode : TEXT {off|auto|strict}
+    * injection_scan_enabled : BOOLEAN
+    * egress_inspect_enabled : BOOLEAN
+    * permission_prompt : TEXT
+}
+
+entity "mcp_server_config" as mc {
+    * server_name : TEXT (PK)
+    --
+    * transport : TEXT {stdio|sse}
+    * command : TEXT
+    * args : TEXT (JSON)
+    * env_vars : TEXT (JSON)
+}
+
+entity "hook_config" as hc {
+    * hook_name : TEXT (PK)
+    --
+    * event : TEXT {pre_tool|post_tool|pre_llm|post_llm}
+    * command : TEXT
+    * timeout_ms : INTEGER
+}
+
+ce ||--o{ cl : "resolved from"
+ce ||--o{ pc : "extended by"
+ce ||--o{ sc : "extended by"
+ce ||--o{ mc : "references"
+ce ||--o{ hc : "references"
+
+note bottom of cl
+  Physical storage:
+    global:  ~/.nasim/config.yaml
+    project: .nasim/config.yaml
+    env:     NASIM_* environment variables
+    cli:     --flag arguments
+  Merge order: global ← project ← env ← cli
+end note
+
+note right of pc
+  Per-model provider configuration.
+  Model string selects backend via litellm.
+end note
+
+note right of sc
+  Safety mode determines permission gating:
+    off   — no checks
+    auto  — check if input matches patterns
+    strict — always prompt for approval
+end note
+
+note right of mc
+  MCP server definitions.
+  Transport: stdio (subprocess) or sse (HTTP).
+end note
+
+note right of hc
+  Custom hook scripts triggered
+  at lifecycle events.
+end note
+
+@enduml

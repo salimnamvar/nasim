@@ -8,7 +8,7 @@
 ' Group:     SAF (Safety Layer)
 ' Boundary:  nasim code agent
 ' Purpose:   Permission gates, user approval prompts, safety mode enforcement.
-'            Entry chain: User → ServerRouter → AgentOrchestrator → SafetyCoordinator
+'            Entry chain: User → HTTPAdapter → TaskService → SafetyService
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md

@@ -3,7 +3,7 @@
 ' ============================================================
 ' Title:     nasim — Sandbox Execution Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Process lifecycle for SandboxExecutor sandboxed commands.
+' Purpose:   Process lifecycle for SandboxRepository (sandboxed commands).
 '            States: IDLE → EXECUTING → COMPLETED | TIMEOUT | FAILED
 ' Milestone: v1.0
 ' Version:   1.0.0

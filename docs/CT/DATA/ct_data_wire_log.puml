@@ -1,7 +1,7 @@
 @startuml ct_data_wire_log
 ' ============================================================
 ' Title:     nasim — Wire Log Data Structures
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — WireLogRepository (wire event data structures)
 ' Purpose:   Data models for append-only wire event store
 ' Milestone: v1.0
 ' Version:   1.0.0
@@ -28,6 +28,7 @@ package "Wire Log Data" #E3F2FD {
     }
 
     class TurnIndexEntry <<dataclass>> {
+        + session_id : str
         + turn_number : int
         + byte_offset : int
         + timestamp : str
@@ -38,6 +39,7 @@ package "Wire Log Data" #E3F2FD {
         + total_events : int
         + total_turns : int
         + created_at : str
+        + file_path : str
     }
 }
 

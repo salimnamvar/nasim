@@ -1,7 +1,7 @@
 @startuml ct_data_evaluation
 ' ============================================================
 ' Title:     nasim — Evaluation Data Structures
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — EvaluationService (in-memory data structures)
 ' Purpose:   Data models for success checks, quality signals, and retry
 ' Milestone: v1.0
 ' Version:   1.0.0

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> EvaluationEngine
+' CSR Chain: User -> CLIAdapter -> AgentController -> EvaluationEngine
 ' SM States: CHECKING (#C5CAE9)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- EVL-01 EVALUATE Task
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "EvaluationEngine" as eng
+  participant "EvaluationService" as eng
 end box
 
 == EVL-01 EVALUATE Task ==

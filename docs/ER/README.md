@@ -6,15 +6,16 @@ Back to [docs/](../README.md).
 
 ## Diagrams
 
-| File | Store Boundary | Type | Description |
-| ---- | -------------- | ---- | ----------- |
-| `er_session_store.puml` | Session Store | JSON Lines | Session metadata + messages + file metadata |
-| `er_memory_store.puml` | Memory Store | JSON Lines | Cross-session knowledge entries with FTS5 index |
-| `er_observability.puml` | Observability | In-memory / stdout | Structured logs, metrics, trace context, redaction rules |
-| `er_repo_intelligence.puml` | Repo Intelligence | JSON Lines | AST index, symbol graph, embedding store |
-| `er_wire_log.puml` | Wire Log | JSON Lines | Append-only per-session event store with turn index |
+| File | Store Boundary | C4 Store | Type | Description |
+| ---- | -------------- | -------- | ---- | ----------- |
+| `er_session_store.puml` | Session Store | Session Store | JSON Lines | Session metadata + messages + file metadata |
+| `er_memory_store.puml` | Memory Store | Memory Store | JSON Lines | Cross-session knowledge entries with FTS5 index |
+| `er_wire_log.puml` | Wire Log | Wire Log Store | JSON Lines | Append-only per-session event store with turn index |
+| `er_config_store.puml` | Config Store | Config Store | YAML | Layered configuration schema |
+| `er_observability.puml` | Observability | — (emit-only) | In-memory / stdout | Structured logs, metrics, trace context, redaction rules |
+| `er_repo_intelligence.puml` | Repo Intelligence | — (external) | JSON Lines | AST index, symbol graph, embedding store |
 
-**Total: 5 ERD diagrams**
+**Total: 6 ERD diagrams (4 C4 data stores, 2 informational)**
 
 ## Notation
 
@@ -39,6 +40,7 @@ See the [PlantUML IE reference](https://plantuml.com/ie-diagram) for syntax.
 | ----- | ------------ | ----------- | ----- |
 | SessionStore | `session` → `message` | 1:M | Messages ordered by sequence number |
 | SessionStore | `session` → `session_file` | 1:1 | One JSONL file per session |
+| ConfigStore | `config_layer` → `config_entry` | 1:M | Layered merge: global ← project ← env ← cli |
 
 ## Notes
 
@@ -55,15 +57,15 @@ No SQL database, no SQLite, no migrations needed.
 ## Design Chain Position
 
 ```
-... → SM → SQ → ERD → CL → Code
+C4 → UC → SM → SQ → CL → ER → CT/DATA → CT/API → RDM
 ```
 
-ERD bridges the logical session model and the physical JSON Lines implementation.
+ERD documents the physical schema for each C4 data store. All stores are managed by their owning C4 repository component.
 
 ## Related Layers
 
-| Layer | Path |
-| ----- | ---- |
-| Class diagram (source) | `docs/CL/cl_runtime_model.puml` |
-| Lifecycle states | `docs/SM/sm_agent_lifecycle.puml` |
-| Session UCs | `docs/UC/uc_session.puml` |
+| Layer | Path | Relationship |
+| ----- | ---- | ------------ |
+| C4 Components (source) | `docs/C4/c4_nasim_component.puml` | Defines data stores and owning components |
+| CL Classes | `docs/CL/cl_runtime_model.puml` | Maps runtime classes to data stores |
+| CT/DATA Contracts | `docs/CT/DATA/` | Validate ERD field definitions |

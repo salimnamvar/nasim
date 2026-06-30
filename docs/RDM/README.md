@@ -1,7 +1,7 @@
 # RDM — Implementation Roadmap
 
-Actionable milestone docs for nasim CODE. Design chain (C4→UC→SM→SQ→ERD→CL)
-is in progress.
+Actionable milestone docs for nasim CODE. Full design chain:
+`C4 → UC → SM → SQ → CL → ER → CT/DATA → CT/API → RDM → Code`
 All docs enforce design-chain traceability, layered architecture, and quality gates.
 
 Back to [docs/](../README.md).

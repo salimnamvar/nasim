@@ -1,7 +1,7 @@
 @startuml ct_data_context_graph
 ' ============================================================
 ' Title:     nasim — Context Graph Data Structures
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — ContextService (in-memory data structures)
 ' Purpose:   Data models for context graph nodes, edges, and pipeline
 ' Milestone: v1.0
 ' Version:   1.0.0

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> REPLSession -> ArgParser -> ServerRouter
+' CSR Chain: User -> CLIAdapter -> REPLSession -> ArgParser -> AgentController
 ' SM States: —
 ' ============================================================
 
@@ -18,13 +18,13 @@ title nasim -- CLI-04 READ CLI Arguments
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
-  participant "REPLSession" as repl
-  participant "ArgParser" as argparser
+  participant "CLIAdapter" as iface
+  participant "CLIAdapter" as repl
+  participant "CLIAdapter" as argparser
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 == CLI-04 READ CLI Arguments ==

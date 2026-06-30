@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> GitIntegration
+' CSR Chain: User -> CLIAdapter -> AgentController -> GitIntegration
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- VCS-03 READ Diff
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "GitIntegration" as mgr
+  participant "GitRepository" as mgr
 end box
 
 == VCS-03 READ Diff ==

@@ -15,35 +15,35 @@ Back to [docs/](../README.md).
 
 ### Data Contract Diagrams (PlantUML)
 
-| File | Store Boundary | Entity Count | Description |
-| ---- | -------------- | :----------: | ----------- |
-| `ct_data_wire_log.puml` | Wire Log | 3 | WireEvent, TurnIndexEntry, WireMetadata |
-| `ct_data_observability.puml` | Observability | 6 | LogRecord, MetricPoint, TraceContext, ObservabilityConfig, RedactionRule, LogLevel |
-| `ct_data_repo_intelligence.puml` | Repo Intelligence | — | Repo intelligence data structures |
-| `ct_data_evaluation.puml` | Evaluation | — | Evaluation data structures |
-| `ct_data_context_graph.puml` | Context Graph | — | Context graph data structures |
+| File | Store Boundary | C4 Component | Entity Count | Description |
+| ---- | -------------- | ------------ | :----------: | ----------- |
+| `ct_data_wire_log.puml` | Wire Log | WireLogRepository | 3 | WireEvent, TurnIndexEntry, WireMetadata |
+| `ct_data_observability.puml` | Observability | WireLogRepository | 7 | LogRecord, MetricPoint, TraceContext, ObservabilityConfig, RedactionRule, LogLevel, MetricType |
+| `ct_data_repo_intelligence.puml` | Repo Intelligence | RepoIntelligenceRepository | 8 | ASTTag, SymbolNode, SymbolEdge, RankedSymbol, SearchResult, RepoMap, SymbolType, EdgeType |
+| `ct_data_evaluation.puml` | Evaluation | EvaluationService | 6 | SuccessCheck, QualitySignal, ReviewResult, RetryConfig, TurnBudget, FailureStrategy |
+| `ct_data_context_graph.puml` | Context Graph | ContextService | 5 | ContextNode, ContextEdge, PipelineResult, NodeType, EdgeType |
 
-## Store Summary
+### Missing Contracts (Gap Analysis)
 
-| Store | Type | Path Pattern | Description |
-| ----- | ---- | ------------ | ----------- |
-| Session Store | JSON Lines | `~/.nasim/sessions/{id}/session.jsonl` | Agent conversation history |
-| Memory Store | JSON Lines | `~/.nasim/memory/{scope}/{key}.json` | Cross-session knowledge |
-| Todo Store | JSON Lines | `~/.nasim/sessions/{id}/todos.jsonl` | Task tracking within sessions |
+| C4 Data Store | ERD | CT/DATA Contract | Status |
+| ------------- | --- | ---------------- | ------ |
+| Session Store | `er_session_store.puml` | `nasim_session_store.datacontract.yaml` | ✅ Complete |
+| Wire Log Store | `er_wire_log.puml` | `ct_data_wire_log.puml` | ✅ Complete |
+| Memory Store | `er_memory_store.puml` | — (in-memory + filesystem) | ⚠️ No formal contract needed — JSON files |
+| Config Store | `er_config_store.puml` | — (YAML files) | ⚠️ No formal contract needed — layered YAML |
 
 ## Design Chain Position
 
 ```
-... → SQ → ERD → CL → CT/DATA → CT/API → Code
+C4 → UC → SM → SQ → CL → ER → CT/DATA → CT/API → RDM
 ```
 
-CT/DATA receives input from ERD (logical schema) and SQ (field accesses),
-and outputs to CL (entity names, attributes) and CT/API (request/response schemas).
+CT/DATA receives input from ERD (logical schema) and outputs to CL (entity names, attributes).
 
 ## Related Layers
 
-| Layer | Path |
-| ----- | ---- |
-| ERD (source) | `docs/ER/er_session_store.puml` |
-| CL (target) | `docs/CL/cl_runtime_model.puml` |
-| CT/API (sibling) | `docs/CT/API/openapi.yaml` |
+| Layer | Path | Relationship |
+| ----- | ---- | ------------ |
+| ERD (source) | `docs/ER/` | Defines physical store schema for each data store |
+| CL (target) | `docs/CL/cl_runtime_model.puml` | Maps data structures to runtime classes |
+| CT/API (sibling) | `docs/CT/API/openapi.yaml` | Shares schema definitions for HTTP access |

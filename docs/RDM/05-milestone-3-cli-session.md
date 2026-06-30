@@ -28,7 +28,7 @@ Implement the CLI layer: REPL loop, argument parsing, slash commands, and render
 
 ## Acceptance Criteria
 
-- REPL reads input, dispatches to AgentOrchestrator, renders AgentEvents
+- REPL reads input, dispatches to TaskService, renders AgentEvents
 - Streaming text displays token-by-token with Rich formatting
 - Tool calls show tool name, parameters, and results
 - Slash commands: /help, /quit, /plan, /approve, /continue, /session

@@ -14,7 +14,7 @@
 | AWAITING_APPROVAL | Waiting for user permission | safety_mode=ask AND unsafe tool | #FFF9C4 |
 | PLANNING | Plan mode, tool calls queued | /plan command entered | #FFCCBC |
 | HOOK_RUNNING | Pre/post hook executing | tool or LLM call with hooks | #FFFDE7 |
-| ROUTING | Model selection in progress | ModelRouter resolving model | #EDE7F6 |
+| ROUTING | Model selection in progress | LLMRepository resolving model | #EDE7F6 |
 | SERVING | API processing request from any interface | API-06 DISPATCH Message | #E0F7FA |
 | EVALUATING | Evaluating task completion | task_complete AND evaluation_enabled | #F9FBE7 |
 | REVIEWING | LLM review of results | success checks passed, optional review | #FFF8E1 |
@@ -896,23 +896,23 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 
 ### Full SM Inventory (15 files)
 
-| # | SM File | Entity | C4 Group | Type | States | UCs | Status |
-|---|---------|--------|----------|------|--------|-----|--------|
-| 1 | sm_agent_lifecycle.puml | AgentOrchestrator | Agent | Process FSM | 17 | AGT-01..14, API-06, PRV-02, EDT-10, SAF-02, HK-02, EVL-01..06, RTG-01 | ✅ GREEN |
-| 2 | sm_session_lifecycle.puml | SessionStore | Session | Entity | 6 | API-02..05, WRL-04 | ✅ GREEN |
-| 3 | sm_plan_lifecycle.puml | PlanSession | Agent | Entity | 7 | AGT-07, AGT-08, AGT-01, AGT-14 | ✅ GREEN |
-| 4 | sm_plugin_lifecycle.puml | PluginLoader | Plugins | Entity | 6 | PLG-01..06 | ✅ GREEN |
-| 5 | sm_subagent_lifecycle.puml | SubagentCoordinator | Agent | Entity | 5 | AGT-09, AGT-10, AGT-14 | ✅ GREEN |
-| 6 | sm_persona_lifecycle.puml | PersonaManager | Agent | Entity | 5 | AGT-11, AGT-12, AGT-13 | ✅ GREEN |
-| 7 | sm_mcp_client_lifecycle.puml | MCPClientRuntime | MCP | Entity | 5 | MCP-01, MCP-02 | ✅ GREEN |
-| 8 | sm_mcp_server_lifecycle.puml | MCPServerRuntime | MCP | Entity | 5 | MCP-04 | ✅ GREEN |
-| 9 | sm_sandbox_execution_lifecycle.puml | SandboxExecutor | Sandbox | Entity | 7 | SBX-01, SBX-03, SBX-04 | ✅ GREEN |
-| 10 | sm_diff_staging_lifecycle.puml | DiffSandboxManager | Sandbox | Entity | 8 | EDT-10, SAF-02 | ✅ GREEN |
-| 11 | sm_safety_mode_lifecycle.puml | SafetyCoordinator | Safety | Entity | 5 | SAF-01, SAF-03 | ✅ GREEN |
-| 12 | sm_router_lifecycle.puml | ModelRouter | Router | Entity | 6 | RTG-01..04 | ✅ GREEN |
-| 13 | sm_provider_connection_lifecycle.puml | LiteLLMProxy | Provider | Entity | 5 | PRV-01, PRV-04 | ✅ GREEN |
-| 14 | sm_evaluation_lifecycle.puml | EvaluationEngine | Evaluation | Entity | 8 | EVL-01..07 | ✅ GREEN |
-| 15 | sm_index_lifecycle.puml | RepoIntelligenceManager | Repo Intelligence | Entity | 7 | RIM-01, RIM-02, RIM-05 | ✅ GREEN |
+| # | SM File | Entity | C4 Component | Type | States | UCs | Status |
+|---|---------|--------|--------------|------|--------|-----|--------|
+| 1 | sm_agent_lifecycle.puml | TaskService | TaskService | Process FSM | 17 | AGT-01..14, API-06, PRV-02, EDT-10, SAF-02, HK-02, EVL-01..06, RTG-01 | ✅ GREEN |
+| 2 | sm_session_lifecycle.puml | SessionRepository | SessionService | Entity | 6 | API-02..05, WRL-04 | ✅ GREEN |
+| 3 | sm_plan_lifecycle.puml | TaskService (Plan) | TaskService | Entity | 7 | AGT-07, AGT-08, AGT-01, AGT-14 | ✅ GREEN |
+| 4 | sm_plugin_lifecycle.puml | ToolService (Plugin) | ToolService | Entity | 6 | PLG-01..06 | ✅ GREEN |
+| 5 | sm_subagent_lifecycle.puml | TaskService (Subagent) | TaskService | Entity | 5 | AGT-09, AGT-10, AGT-14 | ✅ GREEN |
+| 6 | sm_persona_lifecycle.puml | TaskService (Persona) | TaskService | Entity | 5 | AGT-11, AGT-12, AGT-13 | ✅ GREEN |
+| 7 | sm_mcp_client_lifecycle.puml | MCPRepository | MCPRepository | Entity | 5 | MCP-01, MCP-02 | ✅ GREEN |
+| 8 | sm_mcp_server_lifecycle.puml | MCPRepository (Server) | MCPRepository | Entity | 5 | MCP-04 | ✅ GREEN |
+| 9 | sm_sandbox_execution_lifecycle.puml | SandboxRepository | SandboxRepository | Entity | 7 | SBX-01, SBX-03, SBX-04 | ✅ GREEN |
+| 10 | sm_diff_staging_lifecycle.puml | EditStrategyRepository | EditStrategyRepository | Entity | 8 | EDT-10, SAF-02 | ✅ GREEN |
+| 11 | sm_safety_mode_lifecycle.puml | SafetyService | SafetyService | Entity | 5 | SAF-01, SAF-03 | ✅ GREEN |
+| 12 | sm_router_lifecycle.puml | LLMRepository | LLMRepository | Entity | 6 | RTG-01..04 | ✅ GREEN |
+| 13 | sm_provider_connection_lifecycle.puml | LLMRepository (Provider) | LLMRepository | Entity | 5 | PRV-01, PRV-04 | ✅ GREEN |
+| 14 | sm_evaluation_lifecycle.puml | EvaluationService | EvaluationService | Entity | 8 | EVL-01..07 | ✅ GREEN |
+| 15 | sm_index_lifecycle.puml | RepoIntelligenceRepository | RepoIntelligenceRepository | Entity | 7 | RIM-01, RIM-02, RIM-05 | ✅ GREEN |
 
 ### Coverage Summary
 
@@ -934,45 +934,45 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 
 | C4 Component | C4 Group | SM File |
 |--------------|----------|---------|
-| AgentOrchestrator | Agent | `sm_agent_lifecycle.puml` (Process FSM) |
-| SessionStore | Session | sm_session_lifecycle.puml |
-| PlanSession | Agent | sm_plan_lifecycle.puml |
-| PluginLoader | Plugins | sm_plugin_lifecycle.puml |
-| SubagentCoordinator | Agent | sm_subagent_lifecycle.puml |
-| PersonaManager | Agent | sm_persona_lifecycle.puml |
-| MCPClientRuntime | MCP | sm_mcp_client_lifecycle.puml |
-| MCPServerRuntime | MCP | sm_mcp_server_lifecycle.puml |
-| SandboxExecutor | Sandbox | sm_sandbox_execution_lifecycle.puml |
-| DiffSandboxManager | Sandbox | sm_diff_staging_lifecycle.puml |
-| SafetyCoordinator | Safety | sm_safety_mode_lifecycle.puml |
-| ModelRouter | Router | sm_router_lifecycle.puml |
-| LiteLLMProxy | Provider | sm_provider_connection_lifecycle.puml |
-| EvaluationEngine | Evaluation | sm_evaluation_lifecycle.puml |
-| RepoIntelligenceManager | Repo Intelligence | sm_index_lifecycle.puml |
+| TaskService | Task | `sm_agent_lifecycle.puml` (Process FSM) |
+| SessionService | Session | sm_session_lifecycle.puml |
+| TaskService | Task | sm_plan_lifecycle.puml |
+| ToolService | Tool | sm_plugin_lifecycle.puml |
+| TaskService | Task | sm_subagent_lifecycle.puml |
+| TaskService | Task | sm_persona_lifecycle.puml |
+| MCPRepository | Repository | sm_mcp_client_lifecycle.puml |
+| MCPRepository | Repository | sm_mcp_server_lifecycle.puml |
+| SandboxRepository | Repository | sm_sandbox_execution_lifecycle.puml |
+| EditStrategyRepository | Repository | sm_diff_staging_lifecycle.puml |
+| SafetyService | Service | sm_safety_mode_lifecycle.puml |
+| LLMRepository | Repository | sm_router_lifecycle.puml |
+| LLMRepository | Repository | sm_provider_connection_lifecycle.puml |
+| EvaluationService | Service | sm_evaluation_lifecycle.puml |
+| RepoIntelligenceRepository | Repository | sm_index_lifecycle.puml |
 
 ### Stateful Entities Covered Inside Agent Process FSM
 
 These components have lifecycle states that occur as transient sub-states within the agent processing loop. Dedicated SMs would add no value:
 
-| Component | Group | Rationale |
-|-----------|-------|-----------|
-| ConversationHistory | Agent | Message store with token tracking. Its only state transition (`normal → compacting`) is a sub-state of Agent FSM's COMPACTING. No independent lifecycle outside the agent loop. |
-| ContextCompactor | Agent | Stateless summarizer invoked by ConversationHistory. No independent lifecycle. |
-| ErrorBoundary | Agent | Error handler. Error states (recoverable vs terminal) are sub-states of Agent FSM's ERROR. |
-| ToolRegistry | Tool | Instance registry. Registration is static at startup (except MCP tools, covered by MCP SMs). |
-| PermissionGate | Safety | Stateless evaluator. Permission decision (allow/deny/ask) maps to Agent FSM transitions. |
-| FallbackChain | Router | Fallback lifecycle captured within Router SM: SELECTING → FALLBACK → ERROR. |
-| Provider (Protocol) | Provider | Chat lifecycle maps to Agent FSM: THINKING → RESPONDING/ERROR. |
+| Component | C4 Component | Rationale |
+|-----------|--------------|-----------|
+| ConversationHistory | TaskService | Message store with token tracking. Its only state transition (`normal → compacting`) is a sub-state of Agent FSM's COMPACTING. No independent lifecycle outside the agent loop. |
+| ContextCompactor | ContextService | Stateless summarizer invoked by ConversationHistory. No independent lifecycle. |
+| ErrorBoundary | TaskService | Error handler. Error states (recoverable vs terminal) are sub-states of Agent FSM's ERROR. |
+| ToolRegistry | ToolService | Instance registry. Registration is static at startup (except MCP tools, covered by MCP SMs). |
+| PermissionGate | SafetyService | Stateless evaluator. Permission decision (allow/deny/ask) maps to Agent FSM transitions. |
+| FallbackChain | LLMRepository | Fallback lifecycle captured within Router SM: SELECTING → FALLBACK → ERROR. |
+| Provider (Protocol) | LLMRepository | Chat lifecycle maps to Agent FSM: THINKING → RESPONDING/ERROR. |
 
 ### Stateful Entities Without Dedicated SM (LOW Priority — Backlog)
 
-| # | Entity | C4 Group | Reason | Rationale |
-|---|--------|----------|--------|-----------|
-| 1 | WireLog | Wire Log | Write-buffer lifecycle | Append-only event store with buffering/flush. Simple 3-state (OPEN→WRITING→FLUSHING). UCs: WRL-01..05. |
-| 2 | GitIntegration | Git | Auto-commit lifecycle | Monitors for changes then commits. 3-state (IDLE→CHANGES_DETECTED→COMMITTING). UC: VCS-04. |
-| 3 | PipelineOrchestrator | Context Graph | Pipeline stage lifecycle | 5 transient pipeline stages completing synchronously in one pass. LOW risk. |
-| 4 | REPLSession | CLI | REPL loop lifecycle | CLI entry point. Delegates all business logic via API. REPL state is UI state, not domain state. |
-| 5 | ServerApp | API | ASGI lifespan lifecycle | Standard ASGI startup/shutdown. Few project-specific transitions. |
+| # | Entity | C4 Component | Reason | Rationale |
+|---|--------|--------------|--------|-----------|
+| 1 | WireLog | WireLogRepository | Write-buffer lifecycle | Append-only event store with buffering/flush. Simple 3-state (OPEN→WRITING→FLUSHING). UCs: WRL-01..05. |
+| 2 | GitIntegration | GitRepository | Auto-commit lifecycle | Monitors for changes then commits. 3-state (IDLE→CHANGES_DETECTED→COMMITTING). UC: VCS-04. |
+| 3 | PipelineOrchestrator | ContextService | Pipeline stage lifecycle | 5 transient pipeline stages completing synchronously in one pass. LOW risk. |
+| 4 | REPLSession | CLIAdapter | REPL loop lifecycle | CLI entry point. Delegates all business logic via API. REPL state is UI state, not domain state. |
+| 5 | ServerApp | HTTPAdapter | ASGI lifespan lifecycle | Standard ASGI startup/shutdown. Few project-specific transitions. |
 
 ### Lifecycle-Write Ownership Verification
 
@@ -998,8 +998,8 @@ Every entity SM state has exactly one owning lifecycle-write UC. Verified per SM
 The Agent SM is intentionally a **Process FSM**, not an Entity Lifecycle. Per sm.md:
 *"SMT rules from sm.md do not apply (documented deviation)."*
 
-Rationale:
-- Models the runtime processing loop of AgentOrchestrator, not a persisted entity.
+ Rationale:
+ - Models the runtime processing loop of TaskService, not a persisted entity.
 - States (THINKING, TOOL_EXEC, RESPONDING) are transient processing states.
 - Transitions driven by UC events on the active processing context, not writes to a stored entity.
 - No persisted `lifecycle_state` — the process state lives in the runtime stack.

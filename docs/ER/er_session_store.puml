@@ -4,7 +4,7 @@
 ' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Session Store ERD
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — SessionRepository owns this store
 ' Purpose:   Physical schema for session JSON Lines store
 ' Milestone: v1.0
 ' Version:   2.0.0

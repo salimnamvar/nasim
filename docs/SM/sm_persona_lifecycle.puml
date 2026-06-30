@@ -3,7 +3,7 @@
 ' ============================================================
 ' Title:     nasim — Persona Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Entity lifecycle for PersonaManager persona roles.
+' Purpose:   Entity lifecycle for TaskService (Persona roles).
 '            States: UNLOADED → LOADING → ACTIVE ↔ SWITCHING
 ' Milestone: v1.0
 ' Version:   1.0.0

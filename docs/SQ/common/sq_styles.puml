@@ -10,13 +10,13 @@
 ' ------------------------------------------------------------
 ' CSR Layer Colours — 7 distinct layers (left-to-right order)
 '   Actor           #BBDEFB  — blue         (external user/actor)
-'   Interface       #E3F2FD  — light blue   (CLI Process, WebApp, DesktopApp)
-'   API/Controller  #C5CAE9  — indigo       (ServerRouter, controllers)
+'   Interface       #E3F2FD  — light blue   (CLIAdapter, WebApp, DesktopApp)
+'   API/Controller  #C5CAE9  — indigo       (AgentController, controllers)
 '   Service         #FFF3E0  — orange       (Agent, Router, Safety, Context,
 '                                            Edit Strategy, Evaluation, Provider)
 '   Repository      #E8F5E9  — green        (Session, Tool, Memory, Config, Git,
 '                                            Repo Intelligence)
-'   Datastore       #F3E5F5  — purple       (SessionStorage, FileSystem,
+'   Datastore       #F3E5F5  — purple       (Session Store, FileSystem,
 '                                            WireLogStorage, databases)
 '   Infrastructure  #ECEFF1  — blue-grey    (MCP, Sandbox, Observability,
 '                                            Wire Log, Hooks, Plugins)

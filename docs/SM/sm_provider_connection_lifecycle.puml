@@ -3,11 +3,11 @@
 ' ============================================================
 ' Title:     nasim — Provider Connection Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Connection lifecycle for LiteLLMProxy.
+' Purpose:   Connection lifecycle for LLMRepository (Provider).
 '            States: UNREGISTERED → REGISTERING → ACTIVE → SELECTING
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/UC/README.md (PRV-01, PRV-04)
+' Source:    C4 component diagram (LLMRepository), docs/UC/README.md (PRV-01, PRV-04)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.

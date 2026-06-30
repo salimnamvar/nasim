@@ -8,7 +8,7 @@
 ' Version:   1.0.0
 ' Source:    docs/C4/c4_nasim_component_server.puml
 ' Review:    Cross-layer naming alignment
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionManager -> SessionStore -> SessionStorage
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionManager -> SessionService -> Session Store
 ' SM States: — (stateless entry point)
 ' ============================================================
 
@@ -19,23 +19,23 @@ title nasim -- SRV-01 LIST Sessions
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as api
+  participant "AgentController" as api
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SessionManager" as svc
+  participant "SessionService" as svc
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "SessionStore" as repo
+  participant "SessionService" as repo
 end box
 
 box "Datastore" DATASTORE_COLOR
-  participant "SessionStorage" as store
+  participant "Session Store" as store
 end box
 
 user -> iface : API-01 LIST Sessions()

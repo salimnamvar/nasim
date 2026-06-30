@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> WireLog -> WireReader -> FileSystem
+' CSR Chain: User -> CLIAdapter -> AgentController -> WireLog -> WireReader -> FileSystem
 ' SM States: (no session state change — read-only operation)
 ' ============================================================
 
@@ -18,16 +18,16 @@ title nasim -- WRL-02 READ Log
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "WireLog" as wl
-  participant "WireReader" as reader
+  participant "WireLogRepository" as wl
+  participant "WireLogRepository" as reader
 end box
 
 database "WireLogStorage" as storage

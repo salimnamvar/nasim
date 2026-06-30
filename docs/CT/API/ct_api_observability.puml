@@ -1,7 +1,7 @@
 @startuml ct_api_observability
 ' ============================================================
 ' Title:     nasim — Observability API
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — HTTPAdapter API surface
 ' Purpose:   Public interfaces for structured logging, metrics, trace, and redaction
 ' Milestone: v1.0
 ' Version:   1.0.0

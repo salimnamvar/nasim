@@ -4,7 +4,7 @@
 ' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Observability ERD
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — WireLogRepository emits observability data
 ' Purpose:   Physical schema for structured logs, metrics, and trace context
 ' Milestone: v1.0
 ' Version:   1.0.0

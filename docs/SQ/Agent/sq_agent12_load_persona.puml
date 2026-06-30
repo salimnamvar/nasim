@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> PersonaService -> PersonaRepository
+' CSR Chain: User -> CLIAdapter -> AgentController -> PersonaService -> PersonaRepository
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- AGT-12 LOAD Persona
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "PersonaService" as persona
+  participant "TaskService" as persona
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "PersonaRepository" as personaRepo
+  participant "TaskService" as personaRepo
 end box
 
 == AGT-12 LOAD Persona ==

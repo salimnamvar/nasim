@@ -2,12 +2,12 @@
 ' ============================================================
 ' Title:     SSN-01 — PERSIST Session
 ' Boundary:  nasim code agent
-' Purpose:   Persist session messages to disk via SessionStore
+' Purpose:   Persist session messages to disk via SessionService
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionStore -> SessionStorage
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> Session Store
 ' SM States: ACTIVE (#43A047), SAVED (#1565C0)
 ' ============================================================
 
@@ -18,11 +18,11 @@ title nasim -- SSN-01 PERSIST Session
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
@@ -30,10 +30,10 @@ box "Service" SERVICE_COLOR
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "SessionStore" as store
+  participant "SessionService" as store
 end box
 
-database "SessionStorage" as storage
+database "Session Store" as storage
 
 == SSN-01 PERSIST Session ==
 

@@ -1,7 +1,7 @@
 @startuml ct_api_edit_strategy
 ' ============================================================
 ' Title:     nasim — Edit Strategy API
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — HTTPAdapter API surface
 ' Purpose:   Public interfaces for edit strategy selection and application
 ' Milestone: v1.0
 ' Version:   1.0.0

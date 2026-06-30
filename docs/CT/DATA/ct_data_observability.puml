@@ -1,7 +1,7 @@
 @startuml ct_data_observability
 ' ============================================================
 ' Title:     nasim — Observability Data Structures
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — WireLogRepository (emit-only observability data)
 ' Purpose:   Data models for structured logging, metrics, and trace correlation
 ' Milestone: v1.0
 ' Version:   1.0.0
@@ -19,6 +19,7 @@ skinparam classAttributeIconSize 0
 package "Observability Data" #E3F2FD {
 
     class LogRecord <<dataclass>> {
+        + record_id : str
         + timestamp : str
         + level : LogLevel
         + logger_name : str
@@ -29,6 +30,7 @@ package "Observability Data" #E3F2FD {
         + session_id : str
         + turn_number : int
         + extra : dict
+        + redacted : bool
     }
 
     class LogLevel <<enumeration>> {
@@ -63,6 +65,8 @@ package "Observability Data" #E3F2FD {
         + turn_number : int
         + operation_name : str
         + start_time : float
+        + end_time : float
+        + status : str
     }
 
     class ObservabilityConfig <<dataclass>> {

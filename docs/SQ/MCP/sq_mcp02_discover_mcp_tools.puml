@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> MCPDiscovery -> MCPClientRuntime
+' CSR Chain: User -> CLIAdapter -> AgentController -> MCPRepository -> MCPRepository
 ' SM States: DISCOVERING (#A1887F), CONNECTED (#00BCD4), ERROR (#E57373)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- MCP-02 DISCOVER MCP Tools
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "MCPDiscovery" as svc
+  participant "MCPRepository" as svc
 end box
 
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "MCPClientRuntime" as mgr
+  participant "MCPRepository" as mgr
 end box
 
 == MCP-02 DISCOVER MCP Tools ==

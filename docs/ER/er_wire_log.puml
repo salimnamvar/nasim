@@ -4,7 +4,7 @@
 ' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Wire Log ERD
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — WireLogRepository owns this store
 ' Purpose:   Physical schema for append-only wire event store
 ' Milestone: v1.0
 ' Version:   2.0.0

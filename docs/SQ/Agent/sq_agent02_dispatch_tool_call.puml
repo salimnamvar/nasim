@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> AgentOrchestrator -> SafetyCoordinator
+' CSR Chain: User -> CLIAdapter -> AgentController -> AgentOrchestrator -> SafetyService
 ' SM States: RUNNING (#43A047), WAITING (#CE93D8)
 ' ============================================================
 
@@ -18,16 +18,16 @@ title nasim -- AGT-02 DISPATCH Tool Call
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "AgentOrchestrator" as orchestrator
-  participant "SafetyCoordinator" as safety
+  participant "TaskService" as orchestrator
+  participant "SafetyService" as safety
 end box
 
 == AGT-02 DISPATCH Tool Call ==

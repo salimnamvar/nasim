@@ -3,7 +3,7 @@
 ' ============================================================
 ' Title:     nasim — MCP Client Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Connection lifecycle for MCPClientRuntime.
+' Purpose:   Connection lifecycle for MCPRepository (MCP Client).
 '            States: DISCONNECTED → CONNECTING → CONNECTED → DISCOVERING
 ' Milestone: v1.0
 ' Version:   1.0.0

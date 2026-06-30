@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> EditStrategyManager
+' CSR Chain: User -> CLIAdapter -> AgentController -> EditStrategyRepository
 ' SM States: EMPTY (#9FA8DA), STAGING (#FFE082), STAGED (#C5E1A5)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- EDT-10 STAGE Diff
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "EditStrategyManager" as mgr
+  participant "EditStrategyRepository" as mgr
 end box
 
 == EDT-10 STAGE Diff ==

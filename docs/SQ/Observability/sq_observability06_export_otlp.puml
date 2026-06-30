@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> OTelExporter
+' CSR Chain: User -> CLIAdapter -> AgentController -> OTelExporter
 ' SM States: —
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- OBS-06 EXPORT OTLP
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "OTelExporter" as mgr
+  participant "WireLogRepository" as mgr
 end box
 
 == OBS-06 EXPORT OTLP ==

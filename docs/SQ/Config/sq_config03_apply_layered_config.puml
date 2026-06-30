@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ConfigLoader
+' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigLoader
 ' SM States: SERVING (#E0F7FA)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- CFG-03 APPLY Layered Config
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "ConfigLoader" as mgr
+  participant "ConfigRepository" as mgr
 end box
 
 == CFG-03 APPLY Layered Config ==

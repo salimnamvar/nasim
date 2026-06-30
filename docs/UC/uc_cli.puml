@@ -9,7 +9,7 @@
 ' Boundary:  nasim code agent
 ' Purpose:   CLI-specific interface UCs: REPL, slash commands, rendering.
 '            ALL business operations delegate through AgentController.
-'            Entry chain: User → CLI Process → AgentController → Core Engine
+'            Entry chain: User → CLIAdapter → AgentController → TaskService
 ' Milestone: v1.0
 ' Version:   10.0.0
 ' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)

@@ -1,7 +1,7 @@
 @startuml ct_api_context_graph
 ' ============================================================
 ' Title:     nasim — Context Graph API
-' Boundary:  nasim code agent CLI
+' Boundary:  NASIM Application — HTTPAdapter API surface
 ' Purpose:   Public interfaces for context graph construction and processing
 ' Milestone: v1.0
 ' Version:   1.0.0

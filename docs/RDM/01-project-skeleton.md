@@ -23,43 +23,43 @@ src/nasim/
 │   └── commands.py             # SlashCommandHandler (C4: CLI)
 ├── agent/                      # AGENT LAYER — core orchestration
 │   ├── __init__.py
-│   ├── orchestrator.py         # AgentOrchestrator (C4: Agent) — drives LLM/tool loop
-│   ├── history.py              # ConversationHistory (C4: Agent) — messages + token tracking
-│   ├── compactor.py            # ContextCompactor (C4: Agent) — summarization
-│   ├── permission.py           # PermissionGate (C4: Agent) — safety checks
-│   ├── plan.py                 # PlanSession (C4: Agent) — plan mode queue
+│   ├── orchestrator.py         # TaskService (C4: TaskService) — drives LLM/tool loop
+│   ├── history.py              # ConversationHistory (C4: TaskService) — messages + token tracking
+│   ├── compactor.py            # ContextService (C4: TaskService) — summarization
+│   ├── permission.py           # SafetyService (C4: TaskService) — safety checks
+│   ├── plan.py                 # TaskService (C4: TaskService) — plan mode queue
 │   └── events.py               # AgentEvent hierarchy — TextChunk, ToolStart, ToolResult, Error, Done
 ├── provider/                   # PROVIDER LAYER — LLM abstraction
 │   ├── __init__.py
-│   ├── base.py                 # Provider (Protocol), ProviderFactory, LLMResponse, ToolCall
+│   ├── base.py                 # Provider (Protocol), LLMRepository, LLMResponse, ToolCall
 │   ├── ollama.py               # OllamaProvider
 │   ├── openai.py               # OpenAIProvider (Phase 2)
 │   └── anthropic.py            # AnthropicProvider (Phase 2)
 ├── tools/                      # TOOL LAYER — all tool implementations
 │   ├── __init__.py
-│   ├── base.py                 # Tool (ABC), ToolRegistry, ToolResult
+│   ├── base.py                 # Tool (ABC), ToolService, ToolResult
 │   ├── file.py                 # ReadFileTool, WriteFileTool, EditFileTool
 │   ├── search.py               # GrepTool, GlobTool, FindFileTool
 │   ├── shell.py                # ShellTool
 │   ├── directory.py            # DirTool
 │   ├── web.py                  # WebFetchTool, WebSearchTool
 │   ├── git.py                  # GitTool
-│   └── mcp.py                  # MCPToolAdapter
+│   └── mcp.py                  # MCPRepository
 ├── config/                     # CONFIG LAYER — cross-cutting
 │   ├── __init__.py
 │   ├── schema.py               # Config (dataclass) — typed configuration
-│   └── loader.py               # ConfigLoader — layered YAML + env + CLI
+│   └── loader.py               # ConfigRepository — layered YAML + env + CLI
 ├── session/                    # SESSION LAYER — cross-cutting
 │   ├── __init__.py
 │   ├── model.py                # Session (dataclass) — session data
-│   └── store.py                # SessionStore — JSON Lines persistence
+│   └── store.py                # SessionRepository — JSON Lines persistence
 └── domain/                     # DOMAIN — shared types
     ├── __init__.py
     └── exceptions.py           # Domain exceptions (raised in agent/tools, caught in CLI)
 
 tests/
 ├── unit/
-│   ├── agent/                  # AgentOrchestrator, ConversationHistory, etc.
+│   ├── agent/                  # TaskService, ConversationHistory, etc.
 │   ├── provider/               # Provider mock tests
 │   ├── tools/                  # Individual tool tests
 │   ├── config/                 # Config loading tests
@@ -76,7 +76,7 @@ tests/
 
 | Layer | Do | Don't |
 | --- | --- | --- |
-| `CLI/` | Parse input → delegate to AgentOrchestrator → render AgentEvents | Business logic, direct tool calls, provider calls |
+| `CLI/` | Parse input → delegate to TaskService → render AgentEvents | Business logic, direct tool calls, provider calls |
 | `agent/` | Orchestrate LLM/tool loop, emit AgentEvents, manage permissions | Import CLI/rendering, print(), sys.exit(), direct file I/O |
 | `provider/` | Implement Provider Protocol, handle HTTP/JSON, return LLMResponse | Import agent or CLI, manage state beyond single call |
 | `tools/` | Implement Tool ABC, return ToolResult, declare safe/unsafe | Import agent or CLI, manage cross-tool state |

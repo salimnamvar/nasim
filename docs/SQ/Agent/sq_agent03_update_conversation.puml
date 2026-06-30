@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> ConversationService -> SessionStore -> SessionStorage
+' CSR Chain: User -> CLIAdapter -> AgentController -> ConversationService -> SessionService -> Session Store
 ' SM States: RUNNING (#43A047)
 ' ============================================================
 
@@ -18,22 +18,22 @@ title nasim -- AGT-03 UPDATE Conversation
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "ConversationService" as history
+  participant "TaskService" as history
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "SessionStore" as store
+  participant "SessionService" as store
 end box
 
-database "SessionStorage" as storage
+database "Session Store" as storage
 
 == AGT-03 UPDATE Conversation ==
 

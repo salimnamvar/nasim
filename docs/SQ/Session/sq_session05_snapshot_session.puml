@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SessionVersioning -> SessionStore -> SessionStorage
+' CSR Chain: User -> CLIAdapter -> AgentController -> SessionVersioning -> SessionService -> Session Store
 ' SM States: (no state change — snapshot is versioning operation)
 ' ============================================================
 
@@ -18,11 +18,11 @@ title nasim -- SSN-05 SNAPSHOT Session
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
@@ -30,11 +30,11 @@ box "Service" SERVICE_COLOR
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "SessionVersioning" as versioning
-  participant "SessionStore" as store
+  participant "SessionService" as versioning
+  participant "SessionService" as store
 end box
 
-database "SessionStorage" as storage
+database "Session Store" as storage
 
 == SSN-05 SNAPSHOT Session ==
 

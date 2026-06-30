@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> WireLog -> WireAppender -> FileSystem
+' CSR Chain: User -> CLIAdapter -> AgentController -> WireLog -> WireAppender -> FileSystem
 ' SM States: (no session state change — wire log checkpoint)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- WRL-05 CHECKPOINT Turn
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "WireLog" as wl
+  participant "WireLogRepository" as wl
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "WireAppender" as appender
+  participant "WireLogRepository" as appender
 end box
 
 database "WireLogStorage" as storage

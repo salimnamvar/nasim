@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> WireLog -> SessionForkManager -> FileSystem
+' CSR Chain: User -> CLIAdapter -> AgentController -> WireLog -> SessionServiceManager -> FileSystem
 ' SM States: BRANCHED (#7B1FA2)
 ' ============================================================
 
@@ -18,16 +18,16 @@ title nasim -- WRL-04 FORK Session
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "WireLog" as wl
-  participant "SessionForkManager" as fork_mgr
+  participant "WireLogRepository" as wl
+  participant "WireLogRepository" as fork_mgr
 end box
 
 database "WireLogStorage" as storage

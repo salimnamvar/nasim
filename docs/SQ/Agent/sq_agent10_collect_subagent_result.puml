@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> ServerRouter -> SubagentService -> SubagentRegistry
+' CSR Chain: User -> CLIAdapter -> AgentController -> SubagentService -> SubagentRegistry
 ' SM States: COMPLETED (#2E7D32)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- AGT-10 COLLECT Subagent Result
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
+  participant "CLIAdapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SubagentService" as subagent
+  participant "TaskService" as subagent
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "SubagentRegistry" as subagentRegistry
+  participant "TaskService" as subagentRegistry
 end box
 
 == AGT-10 COLLECT Subagent Result ==

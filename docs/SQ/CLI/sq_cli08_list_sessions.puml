@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLI Process -> SlashCommandHandler -> ServerRouter
+' CSR Chain: User -> CLIAdapter -> SlashCommandHandler -> AgentController
 ' SM States: —
 ' ============================================================
 
@@ -18,12 +18,12 @@ title nasim -- CLI-08 LIST Sessions
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Process" as iface
-  participant "SlashCommandHandler" as sch
+  participant "CLIAdapter" as iface
+  participant "CLIAdapter" as sch
 end box
 
 box "API" API_COLOR
-  participant "ServerRouter" as router
+  participant "AgentController" as router
 end box
 
 == CLI-08 LIST Sessions ==

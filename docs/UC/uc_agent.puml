@@ -67,8 +67,8 @@ skinparam usecase<<extref>> {
 
 
 actor "User" as User
-actor "Router" as Router <<system>>
-actor "Agent" as Agent <<system>>
+actor "LLMRepository" as Router <<system>>
+actor "TaskService" as Agent <<system>>
 
 
 ' ============================================================

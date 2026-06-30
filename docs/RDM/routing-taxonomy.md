@@ -27,7 +27,7 @@
 
 ## Classification Algorithm
 
-`ModelRouter.classify_task(input, context)`:
+`LLMRepository.classify_task(input, context)`:
 
 1. Extract signals from input:
    - Input length (token count)
@@ -68,5 +68,5 @@ routing:
 
 - UC: RTG-03 CLASSIFY Task
 - SQ: `sq_rtg03_classify_task.puml`
-- CL: `ModelRouter.classify_task()`, `RoutingStrategy`, `TaskClassifierStrategy`
+- CL: `LLMRepository.classify_task()`, `RoutingStrategy`, `TaskClassifierStrategy`
 - C4: `c4_nasim_component.puml` → Service Layer (Provider group)
