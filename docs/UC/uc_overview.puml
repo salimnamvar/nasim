@@ -7,7 +7,7 @@
 ' Title:     nasim — UC Overview (Architecture Navigation Map)
 ' Group:     ALL (All Groups)
 ' Boundary:  nasim code agent
-' Purpose:   High-level group overview showing all 22 UC groups
+' Purpose:   High-level group overview showing all 18 UC groups
 '            and their actor interactions. AgentController
 '            (Convergence Point) is the central entry gate.
 '            This is a NAVIGATION MAP — no individual UC IDs shown.

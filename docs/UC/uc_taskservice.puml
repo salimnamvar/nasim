@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Agent Group
-' Group:     AGT (Agent Core)
+' Title:     nasim — UC: TaskService Group
+' Group:     TASKSERVICE (TaskService)
 ' Boundary:  nasim code agent
 ' Purpose:   Core agentic loop: provider call, tool dispatch,
 '            conversation history, context compaction, plans,
@@ -15,7 +15,7 @@
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_agent01..sq_agent15
+' SQ:        sq_taskservice01..sq_taskservice15
 ' ============================================================
 
 

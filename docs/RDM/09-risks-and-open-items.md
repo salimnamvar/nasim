@@ -20,8 +20,8 @@ Back to [docs/rdm/](./README.md).
 
 | # | Item | Status | Target |
 | - | --- | --- | --- |
-| O1 | OpenAI provider implementation | Deferred | Phase 2 |
-| O2 | Anthropic provider implementation | Deferred | Phase 2 |
-| O3 | Web server mode (async) | Deferred | Phase 2 |
-| O4 | Session search/compaction UI | Deferred | Phase 2 |
-| O5 | Tool usage analytics | Deferred | Phase 2 |
+| O1 | OpenAI provider implementation | Deferred | 
+| O2 | Anthropic provider implementation | Deferred | 
+| O3 | Web server mode (async) | Deferred | 
+| O4 | Session search/compaction UI | Deferred | 
+| O5 | Tool usage analytics | Deferred | 

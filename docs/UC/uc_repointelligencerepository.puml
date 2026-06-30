@@ -4,16 +4,16 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Repo Intelligence Group
-' Group:     RIM (Repo Intelligence)
+' Title:     nasim — UC: RepoIntelligenceRepository Group
+' Group:     REPOINTELLIGENCEREPOSITORY (RepoIntelligenceRepository)
 ' Boundary:  nasim code agent
 ' Purpose:   Codebase intelligence: AST indexing, symbol graph, semantic search, repo mapping
-'            Entry chain: User → ServerRouter → AgentOrchestrator → RepoIntelligence
+'            Entry chain: User → ServerRouter → AgentOrchestrator → RepoIntelligenceRepository
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_repointelligence01..sq_repointelligence06
+' SQ:        sq_repointelligencerepository01..sq_repointelligencerepository06
 ' ============================================================
 
 

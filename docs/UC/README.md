@@ -169,7 +169,7 @@ CONTEXTSERVICE-02..06 are sub-use-cases of CONTEXTSERVICE-01. They use `<<includ
 | MCPREPOSITORY-03 | ADAPT MCP Tool | MCPRepository | `sq_mcprepository03_adapt_mcp_tool.puml` | |
 | MCPREPOSITORY-04 | EXPOSE nasim Tools | MCPRepository | `sq_mcprepository04_expose_nasim_tools.puml` | |
 
-> MCPREPOSITORY-05 (REGISTER A2A Task) and MCPREPOSITORY-06 (RECEIVE A2A Result) are planned for Phase 2 (A2A agent-to-agent delegation). They are excluded from the current count pending SQ authoring per the design-chain discipline. When implemented, they will use new IDs (MCPREPOSITORY-05 and MCPREPOSITORY-06 remain reserved per UC-02 permanence rule).
+> MCPREPOSITORY-05 (REGISTER A2A Task) and MCPREPOSITORY-06 (RECEIVE A2A Result) are planned (A2A agent-to-agent delegation). They are excluded from the current count pending SQ authoring per the design-chain discipline. When implemented, they will use new IDs (MCPREPOSITORY-05 and MCPREPOSITORY-06 remain reserved per UC-02 permanence rule).
 
 ---
 
@@ -317,8 +317,8 @@ EVALUATIONSERVICE-02..09 are sub-use-cases of EVALUATIONSERVICE-01. They use `<<
 
 | Data Structure | Owner Group | Role |
 |----------------|-------------|------|
-| CompactionPolicy | AGT (Agent) | Compaction rules: token threshold, message age, importance scoring |
-| StrategyHeuristics | EDT (Edit Strategy) | Rules: edit_size, risk_level, file_type, complexity |
+| CompactionPolicy | TASKSERVICE (Agent/TaskService) | Compaction rules: token threshold, message age, importance scoring |
+| StrategyHeuristics | EDITSTRATEGYREPOSITORY (Edit Strategy) | Rules: edit_size, risk_level, file_type, complexity |
 
 ---
 
@@ -345,13 +345,13 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 | HTTPAdapter | API | HTTPADAPTER-01..11 | Core business operations (HTTP API) |
 | CLIAdapter | CLI | CLI-01..08 | CLI-specific interface UCs |
 | TaskService | AGT | TASKSERVICE-01..15 | Core agentic loop |
-| LLMRepository | PRV, RTG | LLMREPOSITORY-01..04, LLMREPOSITORY-01..04 | LLM provider abstraction and model routing |
+| LLMRepository | LLM | LLMREPOSITORY-01..04, LLMREPOSITORY-01..04 | LLM provider abstraction and model routing |
 | ConfigRepository | CFG | CONFIGREPOSITORY-01..03 | Config loading and validation |
 | SessionService | SSN | SESSIONSERVICE-01..09 | Session persistence |
 | SafetyService | SAF | SAFETYSERVICE-01..03 | Permission gates |
 | ContextService | CTX | CONTEXTSERVICE-01..06 | Context pipeline |
 | MCPRepository | MCP | MCPREPOSITORY-01..04 | MCP protocol handling |
-| ToolService | TL, HK, PLG | TOOLSERVICE-01..22, TOOLSERVICE-01..06, TOOLSERVICE-01..06 | Tool registry, hooks, plugins |
+| ToolService | TL | TOOLSERVICE-01..22, TOOLSERVICE-01..06, TOOLSERVICE-01..06 | Tool registry, hooks, plugins |
 | WireLogRepository | WRL | WIRELOGREPOSITORY-01..05 | Append-only event store |
 | MemoryRepository | MEM | MEMORYREPOSITORY-01..04 | Cross-session knowledge |
 | GitRepository | VCS | GITREPOSITORY-01..04 | Version control |
@@ -362,4 +362,4 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 
 ---
 
-**Total: 152 UCs** (148 existing + 4 new AgentController UCs) matching 148 existing SQ diagrams + 4 new AgentController SQ diagrams (excluding TASKSERVICE-05 which is a vacant ID per permanence rule).
+**Total: 146 UCs** across 18 groups matching 146 SQ diagrams (1:1 mapping, excluding TASKSERVICE-05 which is a vacant ID per permanence rule).

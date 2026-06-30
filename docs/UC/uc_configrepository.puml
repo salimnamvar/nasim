@@ -4,16 +4,16 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Config Group
-' Group:     CFG (Configuration)
+' Title:     nasim — UC: ConfigRepository Group
+' Group:     CONFIGREPOSITORY (ConfigRepository)
 ' Boundary:  nasim code agent
 ' Purpose:   Config loading, validation, and layered overrides
-'            Entry chain: User → ServerRouter → AgentOrchestrator → ConfigGroup
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ConfigRepository
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_config01..sq_config03
+' SQ:        sq_configrepository01..sq_configrepository03
 ' ============================================================
 
 

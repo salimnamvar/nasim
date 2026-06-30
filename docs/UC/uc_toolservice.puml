@@ -7,36 +7,36 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Tool Group — Core Tools
-' Group:     TL (Tool Layer)
+' Title:     nasim — UC: ToolService Group — Core Tools
+' Group:     TOOLSERVICE (ToolService)
 ' Boundary:  nasim code agent
 ' Purpose:   Core tool implementations: file operations, shell execution,
 '            search tools, web tools. Entry chain: User →
-'            ServerRouter → AgentOrchestrator → ToolRegistry
+'            ServerRouter → AgentOrchestrator → ToolService
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_tool01..sq_tool10
+' SQ:        sq_toolservice01..sq_toolservice10
 ' ============================================================
 
 
 
 !include common/uc_styles.puml
 ' ============================================================
-' Title:     nasim — UC: Tool Group — Core Tools
-' Group:     TL (Tool Layer)
+' Title:     nasim — UC: ToolService Group — Core Tools
+' Group:     TOOLSERVICE (ToolService)
 ' Boundary:  nasim code agent
 ' Purpose:   Core tool implementations: file operations, shell execution,
 '            search tools, web tools. Entry chain: User →
-'            ServerRouter → AgentOrchestrator → ToolRegistry
+'            ServerRouter → AgentOrchestrator → ToolService
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_tool01..sq_tool10
+' SQ:        sq_toolservice01..sq_toolservice10
 left to right direction
-title nasim — Tool Use Cases — Core Tools
+title nasim — ToolService Use Cases — Core Tools
 skinparam actorStyle awesome
   BackgroundColor #FFFFFF
   BorderColor #424242
@@ -79,12 +79,12 @@ User --> TL07
 User --> TL08
 User --> TL09
 User --> TL10
-' Title:     nasim — UC: Tool Group — Advanced & Integration Tools
+' Title:     nasim — UC: ToolService Group — Advanced & Integration Tools
 ' Purpose:   Advanced tool implementations: git, MCP dispatch, LSP,
 '            registry, subagent, todo, memory, plan.
 '            Entry chain: User → ServerRouter → AgentOrchestrator →
-'            ToolRegistry → Tool implementation
-' SQ:        sq_tool11..sq_tool22
+'            ToolService → Tool implementation
+' SQ:        sq_toolservice11..sq_toolservice22
   package "Integration Tools" as INT_PKG {
     usecase "**TOOLSERVICE-11 READ Git Status**\n--\nGit status, diff, commit operations" <<master>> as TL11
     usecase "**TOOLSERVICE-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" <<master>> as TL12
@@ -124,17 +124,17 @@ User --> TL22
 '            docs/UC/uc_tool_core.puml,
 '            docs/UC/uc_tool_advanced.puml
 ' ------------------------------------------------------------
-  package "Tools Group (TL)" {
+  package "ToolService Group (TL)" {
     usecase "**TOOLSERVICE-01 LIST Core Tools**\n--\nFile operations, shell,\nsearch, web tools\nSee uc_tool_core.puml" <<extref>> as TL01
     usecase "**TOOLSERVICE-02 LIST Advanced Tools**\n--\nGit, MCP, LSP, subagent,\ntodo, memory, plan\nSee uc_tool_advanced.puml" <<extref>> as TL02
 User --> TL01 : browse
 User --> TL02 : browse
-' Title:     nasim — UC: Hooks Group
-' Group:     HK (Hooks)
+' Title:     nasim — UC: ToolService Group — Hooks
+' Group:     TOOLSERVICE (ToolService)
 ' Purpose:   Pre/post hooks for tool use and LLM calls
-'            Entry chain: User → ServerRouter → AgentOrchestrator → HooksGroup
-' SQ:        sq_hooks01..sq_hooks06
-  package "Hooks Group (HK)" {
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ToolService
+' SQ:        sq_toolserviceservice01..sq_toolserviceservice06
+  package "ToolService Group — Hooks" {
     usecase "**TOOLSERVICE-01 REGISTER Hook**\n--\nRegister hook with name, event type, handler, priority" <<master>> as HK01
     usecase "**TOOLSERVICE-02 DISPATCH Pre-Tool Hook**\n--\nExecute hook before tool use" <<master>> as HK02
     usecase "**TOOLSERVICE-03 DISPATCH Post-Tool Hook**\n--\nExecute hook after tool use" <<master>> as HK03
@@ -151,12 +151,12 @@ HK02 ..> HK06 : <<include>>
 HK03 ..> HK06 : <<include>>
 HK04 ..> HK06 : <<include>>
 HK05 ..> HK06 : <<include>>
-' Title:     nasim — UC: Plugins Group
-' Group:     PLG (Plugins)
+' Title:     nasim — UC: ToolService Group — Plugins
+' Group:     TOOLSERVICE (ToolService)
 ' Purpose:   Plugin discovery, loading, dynamic tool/hook registration
-'            Entry chain: User → ServerRouter → AgentOrchestrator → PluginsGroup
-' SQ:        sq_plugins01..sq_plugins06
-  package "Plugins Group (PLG)" {
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ToolService
+' SQ:        sq_toolserviceservice01..sq_toolserviceservice06
+  package "ToolService Group — Plugins" {
     usecase "**TOOLSERVICE-01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" <<master>> as PLG01
     usecase "**TOOLSERVICE-02 LOAD Manifest**\n--\nParse plugin manifest metadata" <<include>> as PLG02
     usecase "**TOOLSERVICE-03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" <<include>> as PLG03

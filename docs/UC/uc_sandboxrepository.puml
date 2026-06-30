@@ -4,16 +4,16 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Sandbox Group
-' Group:     SBX (Sandbox)
+' Title:     nasim — UC: SandboxRepository Group
+' Group:     SANDBOXREPOSITORY (SandboxRepository)
 ' Boundary:  nasim code agent
 ' Purpose:   OS-level process isolation for shell and edit operations
-'            Entry chain: User → ServerRouter → AgentOrchestrator → SandboxGroup
+'            Entry chain: User → ServerRouter → AgentOrchestrator → SandboxRepository
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_sandbox01..sq_sandbox04
+' SQ:        sq_sandboxrepository01..sq_sandboxrepository04
 ' ============================================================
 
 

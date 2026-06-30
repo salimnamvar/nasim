@@ -4,16 +4,16 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Git Group
-' Group:     VCS (Git Integration)
+' Title:     nasim — UC: GitRepository Group
+' Group:     GITREPOSITORY (GitRepository)
 ' Boundary:  nasim code agent
 ' Purpose:   Version control awareness: status, diff, commit, auto-commit
-'            Entry chain: User → ServerRouter → AgentOrchestrator → GitGroup
+'            Entry chain: User → ServerRouter → AgentOrchestrator → GitRepository
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_git01..sq_git04
+' SQ:        sq_gitrepository01..sq_gitrepository04
 ' ============================================================
 
 

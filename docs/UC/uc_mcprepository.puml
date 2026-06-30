@@ -4,16 +4,16 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: MCP Group
-' Group:     MCP (Model Context Protocol)
+' Title:     nasim — UC: MCPRepository Group
+' Group:     MCPREPOSITORY (MCPRepository)
 ' Boundary:  nasim code agent
 ' Purpose:   MCP as first-class subsystem: client/server runtime, tool adapter, discovery
-'            Entry chain: MCP Client → AgentController → Core Engine → MCP Group
+'            Entry chain: MCP Client → AgentController → Core Engine → MCPRepository
 ' Milestone: v1.0
 ' Version:   10.0.0
 ' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
 ' Review:    —
-' SQ:        sq_mcp01..sq_mcp04
+' SQ:        sq_mcprepository01..sq_mcprepository04
 ' ============================================================
 
 

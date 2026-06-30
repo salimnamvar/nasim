@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Safety Group
-' Group:     SAF (Safety Layer)
+' Title:     nasim — UC: SafetyService Group
+' Group:     SAFETYSERVICE (SafetyService)
 ' Boundary:  nasim code agent
 ' Purpose:   Permission gates, user approval prompts, safety mode enforcement.
 '            Entry chain: User → HTTPAdapter → TaskService → SafetyService
@@ -13,7 +13,7 @@
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_safety01..sq_safety03
+' SQ:        sq_safetyservice01..sq_safetyservice03
 ' ============================================================
 
 

@@ -33,8 +33,8 @@ src/nasim/
 │   ├── __init__.py
 │   ├── base.py                 # Provider (Protocol), LLMRepository, LLMResponse, ToolCall
 │   ├── ollama.py               # OllamaProvider
-│   ├── openai.py               # OpenAIProvider (Phase 2)
-│   └── anthropic.py            # AnthropicProvider (Phase 2)
+│   ├── openai.py               # OpenAIProvider 
+│   └── anthropic.py            # AnthropicProvider
 ├── tools/                      # TOOL LAYER — all tool implementations
 │   ├── __init__.py
 │   ├── base.py                 # Tool (ABC), ToolService, ToolResult

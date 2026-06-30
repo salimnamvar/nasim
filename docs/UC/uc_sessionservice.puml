@@ -4,16 +4,16 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Session Group
-' Group:     SSN (Session)
+' Title:     nasim — UC: SessionService Group
+' Group:     SESSIONSERVICE (SessionService)
 ' Boundary:  nasim code agent
 ' Purpose:   Session persistence, versioning, search, fork
-'            Entry chain: User → ServerRouter → AgentOrchestrator → SessionGroup
+'            Entry chain: User → ServerRouter → AgentOrchestrator → SessionService
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_session01..sq_session09
+' SQ:        sq_sessionservice01..sq_sessionservice09
 ' ============================================================
 
 

@@ -4,16 +4,16 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Edit Strategy Group
-' Group:     EDT (Edit Strategy)
+' Title:     nasim — UC: EditStrategyRepository Group
+' Group:     EDITSTRATEGYREPOSITORY (EditStrategyRepository)
 ' Boundary:  nasim code agent
 ' Purpose:   Polymorphic edit strategies with sandboxed diff staging
-'            Entry chain: User → ServerRouter → AgentOrchestrator → EditStrategyGroup
+'            Entry chain: User → ServerRouter → AgentOrchestrator → EditStrategyRepository
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_editstrategy01..sq_editstrategy10
+' SQ:        sq_editstrategyrepository01..sq_editstrategyrepository10
 ' ============================================================
 
 

@@ -5,7 +5,7 @@
 
 ' ============================================================
 ' Title:     nasim — UC: AgentController (Convergence Point)
-' Group:     AC (AgentController)
+' Group:     AGENTCONTROLLER (AgentController)
 ' Boundary:  nasim code agent
 ' Purpose:   Single convergence point for all interface
 '            containers (CLI, HTTP, MCP). Routes validated
@@ -15,7 +15,7 @@
 ' Version:   10.0.0
 ' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
 ' Review:    —
-' SQ:        sq_ac01..sq_ac04
+' SQ:        sq_agentcontroller01..sq_agentcontroller04
 ' ============================================================
 
 

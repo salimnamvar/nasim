@@ -4,16 +4,16 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: Context Graph Group
-' Group:     CTX (Context Management)
+' Title:     nasim — UC: ContextService Group
+' Group:     CONTEXTSERVICE (ContextService)
 ' Boundary:  nasim code agent
 ' Purpose:   Context pipeline: graph construction, truncation, distillation, injection, compaction
-'            Entry chain: User → ServerRouter → AgentOrchestrator → ContextGraphGroup
+'            Entry chain: User → ServerRouter → AgentOrchestrator → ContextService
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
 ' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_contextgraph01..sq_contextgraph06
+' SQ:        sq_contextservice01..sq_contextservice06
 ' ============================================================
 
 

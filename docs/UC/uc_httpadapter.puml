@@ -4,8 +4,8 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: API Group (Entry Gate)
-' Group:     API (API Entry Gate)
+' Title:     nasim — UC: HTTPAdapter Group (Entry Gate)
+' Group:     HTTPADAPTER (HTTPAdapter)
 ' Boundary:  nasim code agent
 ' Purpose:   Core business operations exposed via API.
 '            Sole entry point for all interface containers
@@ -16,7 +16,7 @@
 ' Version:   10.0.0
 ' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
 ' Review:    —
-' SQ:        sq_api01..sq_api11
+' SQ:        sq_httpadapter01..sq_httpadapter11
 ' ============================================================
 
 
