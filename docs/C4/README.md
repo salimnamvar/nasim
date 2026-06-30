@@ -69,7 +69,6 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | `c4_nasim_component_memory.puml` | Memory Group | MemoryStore, MemoryIndex, MemoryScope, EpisodicMemoryAdapter, SemanticMemoryAdapter, WorkingMemoryAdapter, MemoryRetriever, MemoryIndexer |
 | `c4_nasim_component_config.puml` | Config Group | ConfigLoader, Config (dataclass) |
 | `c4_nasim_component_git.puml` | Git Group | GitIntegration, GitStatus, GitCommit |
-| `c4_nasim_component_repo_intelligence.puml` | Repo Intelligence Group | RepoIntelligenceManager, ASTIndexAdapter, SymbolGraph, EmbeddingAdapter, SemanticSearchService, RepoMapBuilder |
 
 ### Infrastructure Layer (Purple)
 
@@ -80,7 +79,7 @@ Each per-group diagram shows internal components within `Container_Boundary(nasi
 | `c4_nasim_component_hooks.puml` | Hooks Group | HookManager |
 | `c4_nasim_component_plugins.puml` | Plugins Group | PluginLoader |
 
-**Total: 19 C4 diagrams (1 context + 1 container + 1 overview + 16 group components)**
+**Total: 18 C4 diagrams (1 context + 1 container + 1 overview + 15 group components)**
 
 ## CSR Layering & Visual Coding
 
@@ -90,7 +89,7 @@ Each component group is color-coded by its CSR layer:
 |-------|-------|--------|
 | Blue | **Controller** | CLI Group (CLIAdapter), API Group (HTTPAdapter, MCPAdapter — in main component diagram) |
 | Orange | **Service** | Agent Group, Provider Group, Safety Group, Context Graph Group, Edit Strategy Group, Evaluation Group |
-| Green | **Repository** | Session Group, Tool Group, Memory Group, Config Group, Git Group, Repo Intelligence Group, WireLog Group |
+| Green | **Repository** | Session Group, Tool Group, Memory Group, Config Group, Git Group, WireLog Group |
 | Purple | **Infrastructure** | MCP Group, Observability Group, Hooks Group, Plugins Group |
 
 ### CSR Pattern Flow
@@ -204,7 +203,7 @@ The System Context diagram (`c4_nasim_context.puml`) groups several external sys
 | Repo Intelligence Backend | Tree-sitter + LSP Server + Embedding Model + Vector Store | All consumed by the Repo Intelligence subsystem (RIM) for code understanding |
 | Observability Platform | Log agent + Prometheus + Grafana + OTel Collector | OTel is part of the platform's collection pipeline |
 
-These groupings are **Context-level simplifications only**. The distinct responsibilities of each external system are visible in the corresponding Component diagrams (e.g., `c4_nasim_component_repo_intelligence.puml` shows Tree-sitter, Embedding Model, and Vector Store as separate `System_Ext` elements).
+These groupings are **Context-level simplifications only**. The distinct responsibilities of each external system are visible in the corresponding Component diagrams (e.g., `RepoIntelligenceRepository` in the main component diagram shows Tree-sitter, Embedding Model, and Vector Store as separate `System_Ext` elements).
 
 ## Interface Containers (external, separate deployable units)
 

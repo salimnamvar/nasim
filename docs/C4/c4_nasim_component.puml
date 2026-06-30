@@ -68,7 +68,7 @@ Container_Boundary(nasim_application, "NASIM Application") {
         Component(edit_strategy_repo, "EditStrategyRepository", "", "Diff staging, computation, and safe application: staged edits, sandboxed validation")
         Component(git_repo, "GitRepository", "gitpython", "Git operations: status, diff, commit, branch")
         Component(mcp_repo, "MCPRepository", "mcp.client", "MCP extension tools: discovery, invocation")
-        Component(repo_intel_repo, "RepoIntelligenceRepository", "tree-sitter + API", "AST indexing, symbol graph, semantic search")
+        Component(repo_intel_repo, "RepoIntelligenceRepository", "tree-sitter + API", "Codebase intelligence: AST indexing, symbol graph, embedding generation, semantic search, repo map building")
         Component(web_repo, "WebRepository", "httpx", "Web fetch: documentation, search results")
         Component(wire_log_repo, "WireLogRepository", "", "Append-only event store: interaction recording, replay, session forking, checkpointing")
     }
