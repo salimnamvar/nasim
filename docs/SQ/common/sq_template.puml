@@ -106,6 +106,12 @@ end box
 ' 8. break for early exits, alt for branching (P06, P17)
 ' 9. User always connects to Interface before API (AD-05, P09)
 ' 10. SQ title must match UC description 1:1 (AD-07, P10)
+' 11. Sub-UCs MUST use ref blocks, NOT self-calls (DRY principle)
+'     Example: ref over component\n  sq_ref_sub_uc_name\nend ref
+'     NEVER: component -> component : SUB_UC_ID verb({params})
+' 12. File naming: sq_{canonical_group}{nn}_{description}.puml
+'     Hooks: sq_toolservice_hk{nn}_{description}.puml
+'     Plugins: sq_toolservice_plg{nn}_{description}.puml
 ' ============================================================
 
 @enduml

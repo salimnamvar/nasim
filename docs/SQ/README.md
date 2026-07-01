@@ -172,6 +172,18 @@ Run `python docs/SQ/common/sq_enforce.py` to check all diagrams against:
 - E-SQ-07: No Notes (CRITICAL)
 - E-SQ-08: ROD Format (HIGH)
 
+### Naming Verification (Infinite Loop Cycle)
+
+Each infinite loop cycle MUST verify:
+1. All SQ file names match UC README references
+2. All SM transition coverage tables use canonical SQ file names
+3. No naming inconsistencies between layers
+
+Verification command:
+```bash
+cd docs/SQ && grep -oP 'sq_[^`]+\.puml' ../UC/README.md | sort -u > /tmp/uc_refs.txt && find . -name "sq_*.puml" -not -path "*/common/*" -exec basename {} \; | sort -u > /tmp/disk_files.txt && comm -23 /tmp/uc_refs.txt /tmp/disk_files.txt
+```
+
 ### Template
 
 New SQ diagrams MUST be created from `common/sq_template.puml`.

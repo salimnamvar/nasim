@@ -23,7 +23,6 @@ actor "MCP Client" as MCPClient <<system>>
 
 
 usecase "AGENTCTRL-01\nPROCESS Request\n[uc_agent_ctrl]" as AC01_ext <<extref>>
-usecase "AGENTCTRL-04\nDISPATCH to Services\n[uc_agent_ctrl]" as AC04_ext <<extref>>
 
 
 rectangle "nasim" {
@@ -44,7 +43,6 @@ MCP01 ..> AC01_ext : <<include>>
 MCP01 ..> MCP04 : <<include>>
 MCP02 ..> AC01_ext : <<include>>
 MCP03 ..> AC01_ext : <<include>>
-MCP03 ..> AC04_ext : <<include>>
 
 
 @enduml

@@ -5,6 +5,11 @@
 > **Key UC alignments (v13.0.0):** Agent compaction → `CONTEXTSVC-05`; plugin lifecycle → `TOOLSVC-PLG01..06`; LLM router → `LLMREPOSITORY-05..08`; LLM provider → `LLMREPOSITORY-01..04`; pre-tool hooks → `TOOLSVC-HK02`.
 >
 > **Update 2026-07-01 (Cycle 5):** Fixed SQ reference naming in transition coverage tables — updated from short prefixes (e.g., `sq_agent01`) to canonical names (e.g., `sq_taskservice01`) to match actual files on disk.
+>
+> **SM → SQ Verification (Infinite Loop Cycle):** Each infinite loop cycle MUST verify that all SM transition coverage table SQ references match actual files on disk. Verification command:
+> ```bash
+> cd docs/SM && grep -oE "sq_[a-z0-9_]+\.puml" README.md | sort -u > /tmp/sm_refs.txt && find ../SQ -name "sq_*.puml" -not -path "*/common/*" -exec basename {} \; | sort -u > /tmp/disk_files.txt && comm -23 /tmp/sm_refs.txt /tmp/disk_files.txt
+> ```
 
 ## Agent Lifecycle States (Process FSM)
 
@@ -57,11 +62,11 @@
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
-| DISCOVERED | Plugin found on filesystem | TOOLSVC-01 DISCOVER Plugins | #E0E0E0 |
-| LOADING | Plugin manifest being parsed | TOOLSVC-02 LOAD Manifest | #FFCC80 |
-| LOADED | Plugin manifest parsed, tools registered | TOOLSVC-03 REGISTER Plugin Tools | #90CAF9 |
-| ENABLED | Plugin active and available | TOOLSVC-05 ENABLE Plugin | #4CAF50 |
-| DISABLED | Plugin deactivated | TOOLSVC-06 DISABLE Plugin | #CE93D8 |
+| DISCOVERED | Plugin found on filesystem | TOOLSVC-PLG01 DISCOVER Plugins | #E0E0E0 |
+| LOADING | Plugin manifest being parsed | TOOLSVC-PLG02 LOAD Manifest | #FFCC80 |
+| LOADED | Plugin manifest parsed, tools registered | TOOLSVC-PLG03 REGISTER Plugin Tools | #90CAF9 |
+| ENABLED | Plugin active and available | TOOLSVC-PLG05 ENABLE Plugin | #4CAF50 |
+| DISABLED | Plugin deactivated | TOOLSVC-PLG06 DISABLE Plugin | #CE93D8 |
 | ERROR | Plugin failed to load or crashed | Load error or runtime exception | #EF5350 |
 
 ## Subagent Lifecycle States (Entity)
@@ -301,20 +306,20 @@
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | DISCOVERED | TOOLSVC-01 | Plugin found on filesystem |
-| DISCOVERED | LOADING | TOOLSVC-02 | Manifest parsing starts |
-| DISCOVERED | ERROR | TOOLSVC-01 | Plugin discovery failed |
-| LOADING | LOADED | TOOLSVC-03 | Manifest parsed, tools registered |
-| LOADING | ERROR | TOOLSVC-02 | Manifest parsing failed |
-| LOADED | ENABLED | TOOLSVC-05 | Plugin activated |
-| LOADED | DISABLED | TOOLSVC-06 | Plugin deactivated |
-| LOADED | ERROR | TOOLSVC-03 | Tool registration failed |
-| ENABLED | DISABLED | TOOLSVC-06 | Plugin deactivated |
-| ENABLED | ERROR | TOOLSVC-01 | Runtime exception |
-| ENABLED | [*] | TOOLSVC-06 | Plugin unloaded |
-| DISABLED | ENABLED | TOOLSVC-05 | Plugin activated |
-| DISABLED | [*] | TOOLSVC-06 | Plugin unloaded |
-| ERROR | DISCOVERED | TOOLSVC-01 | Re-discovery (recovery) |
+| [*] | DISCOVERED | TOOLSVC-PLG01 | Plugin found on filesystem |
+| DISCOVERED | LOADING | TOOLSVC-PLG02 | Manifest parsing starts |
+| DISCOVERED | ERROR | TOOLSVC-PLG01 | Plugin discovery failed |
+| LOADING | LOADED | TOOLSVC-PLG03 | Manifest parsed, tools registered |
+| LOADING | ERROR | TOOLSVC-PLG02 | Manifest parsing failed |
+| LOADED | ENABLED | TOOLSVC-PLG05 | Plugin activated |
+| LOADED | DISABLED | TOOLSVC-PLG06 | Plugin deactivated |
+| LOADED | ERROR | TOOLSVC-PLG03 | Tool registration failed |
+| ENABLED | DISABLED | TOOLSVC-PLG06 | Plugin deactivated |
+| ENABLED | ERROR | TOOLSVC-PLG01 | Runtime exception |
+| ENABLED | [*] | TOOLSVC-PLG06 | Plugin unloaded |
+| DISABLED | ENABLED | TOOLSVC-PLG05 | Plugin activated |
+| DISABLED | [*] | TOOLSVC-PLG06 | Plugin unloaded |
+| ERROR | DISCOVERED | TOOLSVC-PLG01 | Re-discovery (recovery) |
 
 ### Subagent Lifecycle Transition Matrix
 
@@ -442,12 +447,12 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| DISCOVERED | TOOLSVC-01 DISCOVER Plugins | Plugin found on filesystem |
-| LOADING | TOOLSVC-02 LOAD Manifest | Plugin manifest being parsed |
-| LOADED | TOOLSVC-03 REGISTER Plugin Tools | Manifest parsed, tools registered |
-| ENABLED | TOOLSVC-05 ENABLE Plugin | Plugin active and available |
-| DISABLED | TOOLSVC-06 DISABLE Plugin | Plugin deactivated |
-| ERROR | TOOLSVC-01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |
+| DISCOVERED | TOOLSVC-PLG01 DISCOVER Plugins | Plugin found on filesystem |
+| LOADING | TOOLSVC-PLG02 LOAD Manifest | Plugin manifest being parsed |
+| LOADED | TOOLSVC-PLG03 REGISTER Plugin Tools | Manifest parsed, tools registered |
+| ENABLED | TOOLSVC-PLG05 ENABLE Plugin | Plugin active and available |
+| DISABLED | TOOLSVC-PLG06 DISABLE Plugin | Plugin deactivated |
+| ERROR | TOOLSVC-PLG01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |
 
 ### Subagent Lifecycle
 
@@ -634,15 +639,15 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | TASKSVC-09 | Default state | sq_agent09_spawn_subagent.puml |
-| IDLE | SPAWNING | TASKSVC-09 | Child agent spawn requested | sq_agent09_spawn_subagent.puml |
-| SPAWNING | RUNNING | TASKSVC-09 | Child agent initialized | sq_agent09_spawn_subagent.puml |
-| SPAWNING | FAILED | TASKSVC-09 | Spawn failed | sq_agent09_spawn_subagent.puml |
-| RUNNING | COMPLETED | TASKSVC-10 | Task finished successfully | sq_agent10_collect_subagent_result.puml |
-| RUNNING | FAILED | TASKSVC-14 | Unrecoverable error | sq_agent14_handle_error.puml |
-| COMPLETED | IDLE | TASKSVC-10 | Results aggregated to parent | sq_agent10_collect_subagent_result.puml |
+| [*] | IDLE | TASKSVC-09 | Default state | sq_taskservice09_spawn_subagent.puml |
+| IDLE | SPAWNING | TASKSVC-09 | Child agent spawn requested | sq_taskservice09_spawn_subagent.puml |
+| SPAWNING | RUNNING | TASKSVC-09 | Child agent initialized | sq_taskservice09_spawn_subagent.puml |
+| SPAWNING | FAILED | TASKSVC-09 | Spawn failed | sq_taskservice09_spawn_subagent.puml |
+| RUNNING | COMPLETED | TASKSVC-10 | Task finished successfully | sq_taskservice10_collect_subagent_result.puml |
+| RUNNING | FAILED | TASKSVC-14 | Unrecoverable error | sq_taskservice14_handle_error.puml |
+| COMPLETED | IDLE | TASKSVC-10 | Results aggregated to parent | sq_taskservice10_collect_subagent_result.puml |
 | COMPLETED | [*] | TASKSVC-10 | Terminal state | — |
-| FAILED | IDLE | TASKSVC-14 | Error reported, cleanup done | sq_agent14_handle_error.puml |
+| FAILED | IDLE | TASKSVC-14 | Error reported, cleanup done | sq_taskservice14_handle_error.puml |
 | FAILED | [*] | TASKSVC-14 | Terminal state | — |
 
 > **Coverage:** 8/8 non-terminal transitions covered. 0 ORPHANs.
@@ -651,20 +656,20 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | DISCOVERED | TOOLSVC-01 | Plugin found on filesystem | sq_plugins01_discover_plugins.puml |
-| DISCOVERED | LOADING | TOOLSVC-02 | Manifest parsing starts | sq_plugins02_load_manifest.puml |
-| DISCOVERED | ERROR | TOOLSVC-01 | Plugin discovery failed | sq_plugins01_discover_plugins.puml |
-| LOADING | LOADED | TOOLSVC-03 | Manifest parsed, tools registered | sq_plugins03_register_plugin_tools.puml |
-| LOADING | ERROR | TOOLSVC-02 | Manifest parsing failed | sq_plugins02_load_manifest.puml |
-| LOADED | ENABLED | TOOLSVC-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
-| LOADED | DISABLED | TOOLSVC-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
-| LOADED | ERROR | TOOLSVC-03 | Tool registration failed | sq_plugins03_register_plugin_tools.puml |
-| ENABLED | DISABLED | TOOLSVC-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
-| ENABLED | ERROR | TOOLSVC-01 | Runtime exception | sq_plugins01_discover_plugins.puml |
-| ENABLED | [*] | TOOLSVC-06 | Plugin unloaded | — |
-| DISABLED | ENABLED | TOOLSVC-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
-| DISABLED | [*] | TOOLSVC-06 | Plugin unloaded | — |
-| ERROR | DISCOVERED | TOOLSVC-01 | Re-discovery (recovery) | sq_plugins01_discover_plugins.puml |
+| [*] | DISCOVERED | TOOLSVC-PLG01 | Plugin found on filesystem | sq_toolservice_plg01_discover_plugins.puml |
+| DISCOVERED | LOADING | TOOLSVC-PLG02 | Manifest parsing starts | sq_toolservice_plg02_load_manifest.puml |
+| DISCOVERED | ERROR | TOOLSVC-PLG01 | Plugin discovery failed | sq_toolservice_plg01_discover_plugins.puml |
+| LOADING | LOADED | TOOLSVC-PLG03 | Manifest parsed, tools registered | sq_toolservice_plg03_register_plugin_tools.puml |
+| LOADING | ERROR | TOOLSVC-PLG02 | Manifest parsing failed | sq_toolservice_plg02_load_manifest.puml |
+| LOADED | ENABLED | TOOLSVC-PLG05 | Plugin activated | sq_toolservice_plg05_enable_plugin.puml |
+| LOADED | DISABLED | TOOLSVC-PLG06 | Plugin deactivated | sq_toolservice_plg06_disable_plugin.puml |
+| LOADED | ERROR | TOOLSVC-PLG03 | Tool registration failed | sq_toolservice_plg03_register_plugin_tools.puml |
+| ENABLED | DISABLED | TOOLSVC-PLG06 | Plugin deactivated | sq_toolservice_plg06_disable_plugin.puml |
+| ENABLED | ERROR | TOOLSVC-PLG01 | Runtime exception | sq_toolservice_plg01_discover_plugins.puml |
+| ENABLED | [*] | TOOLSVC-PLG06 | Plugin unloaded | — |
+| DISABLED | ENABLED | TOOLSVC-PLG05 | Plugin activated | sq_toolservice_plg05_enable_plugin.puml |
+| DISABLED | [*] | TOOLSVC-PLG06 | Plugin unloaded | — |
+| ERROR | DISCOVERED | TOOLSVC-PLG01 | Re-discovery (recovery) | sq_toolservice_plg01_discover_plugins.puml |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
@@ -672,15 +677,15 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | EMPTY | TASKSVC-07 | No plan active | sq_agent07_queue_plan.puml |
-| EMPTY | BUILDING | TASKSVC-07 | /plan command entered | sq_agent07_queue_plan.puml |
-| BUILDING | QUEUED | TASKSVC-07 | Plan construction complete | sq_agent07_queue_plan.puml |
-| BUILDING | EMPTY | TASKSVC-07 | Plan cancelled | sq_agent07_queue_plan.puml |
-| QUEUED | APPROVED | TASKSVC-08 | User approves plan | sq_agent08_approve_plan.puml |
-| QUEUED | REJECTED | TASKSVC-08 | User rejects plan | sq_agent08_approve_plan.puml |
-| APPROVED | EXECUTING | TASKSVC-08 | Execution started | sq_agent08_approve_plan.puml |
-| EXECUTING | COMPLETED | TASKSVC-01 | All plan steps finished | sq_agent01_process_user_task.puml |
-| EXECUTING | EMPTY | TASKSVC-14 | Execution failed or cancelled | sq_agent14_handle_error.puml |
+| [*] | EMPTY | TASKSVC-07 | No plan active | sq_taskservice07_queue_plan.puml |
+| EMPTY | BUILDING | TASKSVC-07 | /plan command entered | sq_taskservice07_queue_plan.puml |
+| BUILDING | QUEUED | TASKSVC-07 | Plan construction complete | sq_taskservice07_queue_plan.puml |
+| BUILDING | EMPTY | TASKSVC-07 | Plan cancelled | sq_taskservice07_queue_plan.puml |
+| QUEUED | APPROVED | TASKSVC-08 | User approves plan | sq_taskservice08_approve_plan.puml |
+| QUEUED | REJECTED | TASKSVC-08 | User rejects plan | sq_taskservice08_approve_plan.puml |
+| APPROVED | EXECUTING | TASKSVC-08 | Execution started | sq_taskservice08_approve_plan.puml |
+| EXECUTING | COMPLETED | TASKSVC-01 | All plan steps finished | sq_taskservice01_process_user_task.puml |
+| EXECUTING | EMPTY | TASKSVC-14 | Execution failed or cancelled | sq_taskservice14_handle_error.puml |
 | COMPLETED | [*] | TASKSVC-01 | Terminal state | — |
 | REJECTED | [*] | TASKSVC-08 | Terminal state | — |
 
@@ -690,15 +695,15 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNLOADED | TASKSVC-12 | Default state | `sq_agent12_load_persona.puml` |
-| UNLOADED | LOADING | TASKSVC-12 | Load requested | `sq_agent12_load_persona.puml` |
-| LOADING | ACTIVE | TASKSVC-12 | Load successful | `sq_agent12_load_persona.puml` |
-| LOADING | ERROR | TASKSVC-12 | Load failed | `sq_agent12_load_persona.puml` |
-| ACTIVE | SWITCHING | TASKSVC-13 | Switch requested | `sq_agent13_switch_persona.puml` |
-| SWITCHING | ACTIVE | TASKSVC-13 | Switch successful | `sq_agent13_switch_persona.puml` |
-| SWITCHING | ERROR | TASKSVC-13 | Switch failed | `sq_agent13_switch_persona.puml` |
-| ACTIVE | UNLOADED | TASKSVC-11 | Delegation complete | `sq_agent11_delegate_to_persona.puml` |
-| ERROR | UNLOADED | TASKSVC-12 | Recovery: retry load | `sq_agent12_load_persona.puml` |
+| [*] | UNLOADED | TASKSVC-12 | Default state | `sq_taskservice12_load_persona.puml` |
+| UNLOADED | LOADING | TASKSVC-12 | Load requested | `sq_taskservice12_load_persona.puml` |
+| LOADING | ACTIVE | TASKSVC-12 | Load successful | `sq_taskservice12_load_persona.puml` |
+| LOADING | ERROR | TASKSVC-12 | Load failed | `sq_taskservice12_load_persona.puml` |
+| ACTIVE | SWITCHING | TASKSVC-13 | Switch requested | `sq_taskservice13_switch_persona.puml` |
+| SWITCHING | ACTIVE | TASKSVC-13 | Switch successful | `sq_taskservice13_switch_persona.puml` |
+| SWITCHING | ERROR | TASKSVC-13 | Switch failed | `sq_taskservice13_switch_persona.puml` |
+| ACTIVE | UNLOADED | TASKSVC-11 | Delegation complete | `sq_taskservice11_delegate_to_persona.puml` |
+| ERROR | UNLOADED | TASKSVC-12 | Recovery: retry load | `sq_taskservice12_load_persona.puml` |
 | UNLOADED | [*] | TASKSVC-12 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
@@ -707,15 +712,15 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | DISCONNECTED | MCPREPO-01 | Default state | `sq_mcp01_connect_mcp_server.puml` |
-| DISCONNECTED | CONNECTING | MCPREPO-01 | Connect requested | `sq_mcp01_connect_mcp_server.puml` |
-| CONNECTING | CONNECTED | MCPREPO-01 | Connection established | `sq_mcp01_connect_mcp_server.puml` |
-| CONNECTING | ERROR | MCPREPO-01 | Connection failed | `sq_mcp01_connect_mcp_server.puml` |
-| CONNECTED | DISCOVERING | MCPREPO-02 | Tool discovery started | `sq_mcp02_discover_mcp_tools.puml` |
-| DISCOVERING | CONNECTED | MCPREPO-02 | Discovery complete | `sq_mcp02_discover_mcp_tools.puml` |
-| DISCOVERING | ERROR | MCPREPO-02 | Discovery failed | `sq_mcp02_discover_mcp_tools.puml` |
-| CONNECTED | DISCONNECTED | MCPREPO-01 | Disconnected | `sq_mcp01_connect_mcp_server.puml` |
-| ERROR | DISCONNECTED | MCPREPO-01 | Recovery: reconnect | `sq_mcp01_connect_mcp_server.puml` |
+| [*] | DISCONNECTED | MCPREPO-01 | Default state | `sq_mcprepository01_connect_mcp_server.puml` |
+| DISCONNECTED | CONNECTING | MCPREPO-01 | Connect requested | `sq_mcprepository01_connect_mcp_server.puml` |
+| CONNECTING | CONNECTED | MCPREPO-01 | Connection established | `sq_mcprepository01_connect_mcp_server.puml` |
+| CONNECTING | ERROR | MCPREPO-01 | Connection failed | `sq_mcprepository01_connect_mcp_server.puml` |
+| CONNECTED | DISCOVERING | MCPREPO-02 | Tool discovery started | `sq_mcprepository02_discover_mcp_tools.puml` |
+| DISCOVERING | CONNECTED | MCPREPO-02 | Discovery complete | `sq_mcprepository02_discover_mcp_tools.puml` |
+| DISCOVERING | ERROR | MCPREPO-02 | Discovery failed | `sq_mcprepository02_discover_mcp_tools.puml` |
+| CONNECTED | DISCONNECTED | MCPREPO-01 | Disconnected | `sq_mcprepository01_connect_mcp_server.puml` |
+| ERROR | DISCONNECTED | MCPREPO-01 | Recovery: reconnect | `sq_mcprepository01_connect_mcp_server.puml` |
 | DISCONNECTED | [*] | MCPREPO-01 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
@@ -724,14 +729,14 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | STOPPED | MCPREPO-04 | Default state | `sq_mcp04_expose_nasim_tools.puml` |
-| STOPPED | STARTING | MCPREPO-04 | Start requested | `sq_mcp04_expose_nasim_tools.puml` |
-| STARTING | RUNNING | MCPREPO-04 | Startup complete | `sq_mcp04_expose_nasim_tools.puml` |
-| STARTING | ERROR | MCPREPO-04 | Startup failed | `sq_mcp04_expose_nasim_tools.puml` |
-| RUNNING | STOPPING | MCPREPO-04 | Stop requested | `sq_mcp04_expose_nasim_tools.puml` |
-| STOPPING | STOPPED | MCPREPO-04 | Shutdown complete | `sq_mcp04_expose_nasim_tools.puml` |
-| RUNNING | ERROR | MCPREPO-04 | Runtime failure | `sq_mcp04_expose_nasim_tools.puml` |
-| ERROR | STOPPED | MCPREPO-04 | Recovery: shutdown | `sq_mcp04_expose_nasim_tools.puml` |
+| [*] | STOPPED | MCPREPO-04 | Default state | `sq_mcprepository04_expose_nasim_tools.puml` |
+| STOPPED | STARTING | MCPREPO-04 | Start requested | `sq_mcprepository04_expose_nasim_tools.puml` |
+| STARTING | RUNNING | MCPREPO-04 | Startup complete | `sq_mcprepository04_expose_nasim_tools.puml` |
+| STARTING | ERROR | MCPREPO-04 | Startup failed | `sq_mcprepository04_expose_nasim_tools.puml` |
+| RUNNING | STOPPING | MCPREPO-04 | Stop requested | `sq_mcprepository04_expose_nasim_tools.puml` |
+| STOPPING | STOPPED | MCPREPO-04 | Shutdown complete | `sq_mcprepository04_expose_nasim_tools.puml` |
+| RUNNING | ERROR | MCPREPO-04 | Runtime failure | `sq_mcprepository04_expose_nasim_tools.puml` |
+| ERROR | STOPPED | MCPREPO-04 | Recovery: shutdown | `sq_mcprepository04_expose_nasim_tools.puml` |
 | STOPPED | [*] | MCPREPO-04 | Terminal state | — |
 
 > **Coverage:** 8/8 non-terminal transitions covered. 0 ORPHANs.
@@ -740,19 +745,19 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | SANDBOXREPO-01 | Default state | `sq_sandbox01_isolate_command.puml` |
-| IDLE | EXECUTING | SANDBOXREPO-01 | Command started | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | MONITORING | SANDBOXREPO-03 | Resource monitoring started | `sq_sandbox03_monitor_process.puml` |
-| MONITORING | EXECUTING | SANDBOXREPO-03 | Monitoring continues | `sq_sandbox03_monitor_process.puml` |
-| EXECUTING | COMPLETED | SANDBOXREPO-01 | Process finished | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | FAILED | SANDBOXREPO-01 | Process crashed | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | TIMEOUT | SANDBOXREPO-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
-| EXECUTING | RESOURCE_EXCEEDED | SANDBOXREPO-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
-| MONITORING | TIMEOUT | SANDBOXREPO-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
-| MONITORING | RESOURCE_EXCEEDED | SANDBOXREPO-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
-| TIMEOUT | IDLE | SANDBOXREPO-01 | Cleanup after timeout | `sq_sandbox01_isolate_command.puml` |
-| FAILED | IDLE | SANDBOXREPO-01 | Cleanup after failure | `sq_sandbox01_isolate_command.puml` |
-| RESOURCE_EXCEEDED | IDLE | SANDBOXREPO-04 | Cleanup after resource violation | `sq_sandbox04_limit_resources.puml` |
+| [*] | IDLE | SANDBOXREPO-01 | Default state | `sq_sandboxrepository01_isolate_command.puml` |
+| IDLE | EXECUTING | SANDBOXREPO-01 | Command started | `sq_sandboxrepository01_isolate_command.puml` |
+| EXECUTING | MONITORING | SANDBOXREPO-03 | Resource monitoring started | `sq_sandboxrepository03_monitor_process.puml` |
+| MONITORING | EXECUTING | SANDBOXREPO-03 | Monitoring continues | `sq_sandboxrepository03_monitor_process.puml` |
+| EXECUTING | COMPLETED | SANDBOXREPO-01 | Process finished | `sq_sandboxrepository01_isolate_command.puml` |
+| EXECUTING | FAILED | SANDBOXREPO-01 | Process crashed | `sq_sandboxrepository01_isolate_command.puml` |
+| EXECUTING | TIMEOUT | SANDBOXREPO-03 | Timeout exceeded | `sq_sandboxrepository03_monitor_process.puml` |
+| EXECUTING | RESOURCE_EXCEEDED | SANDBOXREPO-04 | Resource limit hit | `sq_sandboxrepository04_limit_resources.puml` |
+| MONITORING | TIMEOUT | SANDBOXREPO-03 | Timeout exceeded | `sq_sandboxrepository03_monitor_process.puml` |
+| MONITORING | RESOURCE_EXCEEDED | SANDBOXREPO-04 | Resource limit hit | `sq_sandboxrepository04_limit_resources.puml` |
+| TIMEOUT | IDLE | SANDBOXREPO-01 | Cleanup after timeout | `sq_sandboxrepository01_isolate_command.puml` |
+| FAILED | IDLE | SANDBOXREPO-01 | Cleanup after failure | `sq_sandboxrepository01_isolate_command.puml` |
+| RESOURCE_EXCEEDED | IDLE | SANDBOXREPO-04 | Cleanup after resource violation | `sq_sandboxrepository04_limit_resources.puml` |
 | COMPLETED | [*] | SANDBOXREPO-01 | Terminal state | — |
 
 > **Coverage:** 13/13 non-terminal transitions covered. 0 ORPHANs.
@@ -761,18 +766,18 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | EMPTY | EDITSTRATEGYREPO-10 | Default state | `sq_editstrategy10_stage_diff.puml` |
-| EMPTY | STAGING | EDITSTRATEGYREPO-10 | Diff computation started | `sq_editstrategy10_stage_diff.puml` |
-| STAGING | STAGED | EDITSTRATEGYREPO-10 | Diff computed successfully | `sq_editstrategy10_stage_diff.puml` |
-| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed | `sq_editstrategy10_stage_diff.puml` |
-| STAGED | AWAITING_APPROVAL | EDITSTRATEGYREPO-10 | Diff presented for review | `sq_editstrategy10_stage_diff.puml` |
-| AWAITING_APPROVAL | APPROVED | SAFETYSVC-02 | User approved | `sq_safety02_request_approval.puml` |
-| AWAITING_APPROVAL | EMPTY | SAFETYSVC-02 | User rejected, cleanup | `sq_safety02_request_approval.puml` |
-| APPROVED | APPLYING | EDITSTRATEGYREPO-10 | Diff application started | `sq_editstrategy10_stage_diff.puml` |
-| APPLYING | APPLIED | EDITSTRATEGYREPO-10 | Diff applied successfully | `sq_editstrategy10_stage_diff.puml` |
-| APPLYING | ERROR | EDITSTRATEGYREPO-10 | Diff application failed | `sq_editstrategy10_stage_diff.puml` |
-| APPLIED | EMPTY | EDITSTRATEGYREPO-10 | Cleanup after application | `sq_editstrategy10_stage_diff.puml` |
-| ERROR | EMPTY | EDITSTRATEGYREPO-10 | Cleanup after error | `sq_editstrategy10_stage_diff.puml` |
+| [*] | EMPTY | EDITSTRATEGYREPO-10 | Default state | `sq_editstrategyrepository10_stage_diff.puml` |
+| EMPTY | STAGING | EDITSTRATEGYREPO-10 | Diff computation started | `sq_editstrategyrepository10_stage_diff.puml` |
+| STAGING | STAGED | EDITSTRATEGYREPO-10 | Diff computed successfully | `sq_editstrategyrepository10_stage_diff.puml` |
+| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed | `sq_editstrategyrepository10_stage_diff.puml` |
+| STAGED | AWAITING_APPROVAL | EDITSTRATEGYREPO-10 | Diff presented for review | `sq_editstrategyrepository10_stage_diff.puml` |
+| AWAITING_APPROVAL | APPROVED | SAFETYSVC-02 | User approved | `sq_safetyservice02_request_approval.puml` |
+| AWAITING_APPROVAL | EMPTY | SAFETYSVC-02 | User rejected, cleanup | `sq_safetyservice02_request_approval.puml` |
+| APPROVED | APPLYING | EDITSTRATEGYREPO-10 | Diff application started | `sq_editstrategyrepository10_stage_diff.puml` |
+| APPLYING | APPLIED | EDITSTRATEGYREPO-10 | Diff applied successfully | `sq_editstrategyrepository10_stage_diff.puml` |
+| APPLYING | ERROR | EDITSTRATEGYREPO-10 | Diff application failed | `sq_editstrategyrepository10_stage_diff.puml` |
+| APPLIED | EMPTY | EDITSTRATEGYREPO-10 | Cleanup after application | `sq_editstrategyrepository10_stage_diff.puml` |
+| ERROR | EMPTY | EDITSTRATEGYREPO-10 | Cleanup after error | `sq_editstrategyrepository10_stage_diff.puml` |
 | APPLIED | [*] | EDITSTRATEGYREPO-10 | Terminal state | — |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
@@ -781,20 +786,20 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNINITIALIZED | SAFETYSVC-03 | Default state | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | PERMISSIVE | SAFETYSVC-03 | Apply permissive mode | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | ASK | SAFETYSVC-03 | Apply ask mode | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | BLOCK | SAFETYSVC-03 | Apply block mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | ASK | SAFETYSVC-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | BLOCK | SAFETYSVC-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
-| ASK | PERMISSIVE | SAFETYSVC-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
-| ASK | BLOCK | SAFETYSVC-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
-| BLOCK | PERMISSIVE | SAFETYSVC-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
-| BLOCK | ASK | SAFETYSVC-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | ERROR | SAFETYSVC-01 | Permission check failed | sq_safety01_check_permission.puml |
-| ASK | ERROR | SAFETYSVC-01 | Permission check failed | sq_safety01_check_permission.puml |
-| BLOCK | ERROR | SAFETYSVC-01 | Permission check failed | sq_safety01_check_permission.puml |
-| ERROR | UNINITIALIZED | SAFETYSVC-03 | Recovery: reinitialize | sq_safety03_apply_safety_mode.puml |
+| [*] | UNINITIALIZED | SAFETYSVC-03 | Default state | sq_safetyservice03_apply_safety_mode.puml |
+| UNINITIALIZED | PERMISSIVE | SAFETYSVC-03 | Apply permissive mode | sq_safetyservice03_apply_safety_mode.puml |
+| UNINITIALIZED | ASK | SAFETYSVC-03 | Apply ask mode | sq_safetyservice03_apply_safety_mode.puml |
+| UNINITIALIZED | BLOCK | SAFETYSVC-03 | Apply block mode | sq_safetyservice03_apply_safety_mode.puml |
+| PERMISSIVE | ASK | SAFETYSVC-03 | Switch to ask mode | sq_safetyservice03_apply_safety_mode.puml |
+| PERMISSIVE | BLOCK | SAFETYSVC-03 | Switch to block mode | sq_safetyservice03_apply_safety_mode.puml |
+| ASK | PERMISSIVE | SAFETYSVC-03 | Switch to permissive mode | sq_safetyservice03_apply_safety_mode.puml |
+| ASK | BLOCK | SAFETYSVC-03 | Switch to block mode | sq_safetyservice03_apply_safety_mode.puml |
+| BLOCK | PERMISSIVE | SAFETYSVC-03 | Switch to permissive mode | sq_safetyservice03_apply_safety_mode.puml |
+| BLOCK | ASK | SAFETYSVC-03 | Switch to ask mode | sq_safetyservice03_apply_safety_mode.puml |
+| PERMISSIVE | ERROR | SAFETYSVC-01 | Permission check failed | sq_safetyservice01_check_permission.puml |
+| ASK | ERROR | SAFETYSVC-01 | Permission check failed | sq_safetyservice01_check_permission.puml |
+| BLOCK | ERROR | SAFETYSVC-01 | Permission check failed | sq_safetyservice01_check_permission.puml |
+| ERROR | UNINITIALIZED | SAFETYSVC-03 | Recovery: reinitialize | sq_safetyservice03_apply_safety_mode.puml |
 | UNINITIALIZED | [*] | SAFETYSVC-03 | Terminal state | — |
 
 > **Coverage:** 14/14 non-terminal transitions covered. 0 ORPHANs.
@@ -803,18 +808,18 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | LLMREPO-01 | Default state | sq_router01_select_model.puml |
-| IDLE | CLASSIFYING | LLMREPO-03 | Task classification started | sq_router03_classify_task.puml |
-| CLASSIFYING | SELECTING | LLMREPO-01 | Classification complete | sq_router01_select_model.puml |
-| CLASSIFYING | ERROR | LLMREPO-03 | Classification failed | sq_router03_classify_task.puml |
-| SELECTING | IDLE | LLMREPO-01 | Model selected | sq_router01_select_model.puml |
-| SELECTING | FALLBACK | LLMREPO-02 | Primary model unavailable | sq_router02_apply_fallback.puml |
-| FALLBACK | SELECTING | LLMREPO-02 | Fallback to next model | sq_router02_apply_fallback.puml |
-| FALLBACK | ERROR | LLMREPO-02 | All models exhausted | sq_router02_apply_fallback.puml |
-| IDLE | SWITCHING | LLMREPO-04 | Runtime switch requested | sq_router04_switch_model.puml |
-| SWITCHING | IDLE | LLMREPO-04 | Switch successful | sq_router04_switch_model.puml |
-| SWITCHING | ERROR | LLMREPO-04 | Switch failed | sq_router04_switch_model.puml |
-| ERROR | IDLE | LLMREPO-01 | Recovery: retry | sq_router01_select_model.puml |
+| [*] | IDLE | LLMREPO-01 | Default state | sq_llmrepository05_select_model.puml |
+| IDLE | CLASSIFYING | LLMREPO-03 | Task classification started | sq_llmrepository07_classify_task.puml |
+| CLASSIFYING | SELECTING | LLMREPO-01 | Classification complete | sq_llmrepository05_select_model.puml |
+| CLASSIFYING | ERROR | LLMREPO-03 | Classification failed | sq_llmrepository07_classify_task.puml |
+| SELECTING | IDLE | LLMREPO-01 | Model selected | sq_llmrepository05_select_model.puml |
+| SELECTING | FALLBACK | LLMREPO-02 | Primary model unavailable | sq_llmrepository06_apply_fallback.puml |
+| FALLBACK | SELECTING | LLMREPO-02 | Fallback to next model | sq_llmrepository06_apply_fallback.puml |
+| FALLBACK | ERROR | LLMREPO-02 | All models exhausted | sq_llmrepository06_apply_fallback.puml |
+| IDLE | SWITCHING | LLMREPO-04 | Runtime switch requested | sq_llmrepository08_switch_model.puml |
+| SWITCHING | IDLE | LLMREPO-04 | Switch successful | sq_llmrepository08_switch_model.puml |
+| SWITCHING | ERROR | LLMREPO-04 | Switch failed | sq_llmrepository08_switch_model.puml |
+| ERROR | IDLE | LLMREPO-01 | Recovery: retry | sq_llmrepository05_select_model.puml |
 | IDLE | [*] | LLMREPO-01 | Terminal state | — |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
@@ -823,15 +828,15 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNREGISTERED | LLMREPO-01 | Default state | sq_provider01_register_provider.puml |
-| UNREGISTERED | REGISTERING | LLMREPO-01 | Registration started | sq_provider01_register_provider.puml |
-| REGISTERING | ACTIVE | LLMREPO-01 | Registration successful | sq_provider01_register_provider.puml |
-| REGISTERING | ERROR | LLMREPO-01 | Registration failed | sq_provider01_register_provider.puml |
-| ACTIVE | SELECTING | LLMREPO-04 | Backend selection started | sq_provider04_select_provider_backend.puml |
-| SELECTING | ACTIVE | LLMREPO-04 | Backend selected | sq_provider04_select_provider_backend.puml |
-| SELECTING | ERROR | LLMREPO-04 | Selection failed | sq_provider04_select_provider_backend.puml |
-| ACTIVE | UNREGISTERED | LLMREPO-01 | Unregistered | sq_provider01_register_provider.puml |
-| ERROR | UNREGISTERED | LLMREPO-01 | Recovery: re-register | sq_provider01_register_provider.puml |
+| [*] | UNREGISTERED | LLMREPO-01 | Default state | sq_llmrepository01_register_provider.puml |
+| UNREGISTERED | REGISTERING | LLMREPO-01 | Registration started | sq_llmrepository01_register_provider.puml |
+| REGISTERING | ACTIVE | LLMREPO-01 | Registration successful | sq_llmrepository01_register_provider.puml |
+| REGISTERING | ERROR | LLMREPO-01 | Registration failed | sq_llmrepository01_register_provider.puml |
+| ACTIVE | SELECTING | LLMREPO-04 | Backend selection started | sq_llmrepository04_select_provider_backend.puml |
+| SELECTING | ACTIVE | LLMREPO-04 | Backend selected | sq_llmrepository04_select_provider_backend.puml |
+| SELECTING | ERROR | LLMREPO-04 | Selection failed | sq_llmrepository04_select_provider_backend.puml |
+| ACTIVE | UNREGISTERED | LLMREPO-01 | Unregistered | sq_llmrepository01_register_provider.puml |
+| ERROR | UNREGISTERED | LLMREPO-01 | Recovery: re-register | sq_llmrepository01_register_provider.puml |
 | UNREGISTERED | [*] | LLMREPO-01 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
@@ -840,20 +845,20 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | EVALSVC-01 | Default state | sq_evaluation01_evaluate_task.puml |
-| IDLE | CHECKING | EVALSVC-01 | Evaluation started | sq_evaluation01_evaluate_task.puml |
-| CHECKING | REVIEWING | EVALSVC-04 | LLM review required | sq_evaluation04_validate_with_llm.puml |
-| CHECKING | TESTING | EVALSVC-05 | Test validation required | sq_evaluation05_validate_test_suite.puml |
-| CHECKING | SCORING | EVALSVC-07 | Direct scoring (no review/test) | sq_evaluation07_record_quality_signal.puml |
-| CHECKING | FAILED | EVALSVC-02 | Task completion check failed | sq_evaluation02_check_task_completion.puml |
-| REVIEWING | SCORING | EVALSVC-07 | LLM review passed | sq_evaluation07_record_quality_signal.puml |
-| REVIEWING | RETRYING | EVALSVC-06 | LLM review rejected | sq_evaluation06_coordinate_retry.puml |
-| TESTING | SCORING | EVALSVC-07 | Tests passed | sq_evaluation07_record_quality_signal.puml |
-| TESTING | RETRYING | EVALSVC-06 | Tests failed | sq_evaluation06_coordinate_retry.puml |
-| SCORING | PASSED | EVALSVC-07 | Scoring threshold met | sq_evaluation07_record_quality_signal.puml |
-| SCORING | RETRYING | EVALSVC-06 | Scoring below threshold | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | CHECKING | EVALSVC-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | FAILED | EVALSVC-06 | Retries exhausted | sq_evaluation06_coordinate_retry.puml |
+| [*] | IDLE | EVALSVC-01 | Default state | sq_evaluationservice01_evaluate_task.puml |
+| IDLE | CHECKING | EVALSVC-01 | Evaluation started | sq_evaluationservice01_evaluate_task.puml |
+| CHECKING | REVIEWING | EVALSVC-04 | LLM review required | sq_evaluationservice04_validate_with_llm.puml |
+| CHECKING | TESTING | EVALSVC-05 | Test validation required | sq_evaluationservice05_validate_test_suite.puml |
+| CHECKING | SCORING | EVALSVC-07 | Direct scoring (no review/test) | sq_evaluationservice07_record_quality_signal.puml |
+| CHECKING | FAILED | EVALSVC-02 | Task completion check failed | sq_evaluationservice02_check_task_completion.puml |
+| REVIEWING | SCORING | EVALSVC-07 | LLM review passed | sq_evaluationservice07_record_quality_signal.puml |
+| REVIEWING | RETRYING | EVALSVC-06 | LLM review rejected | sq_evaluationservice06_coordinate_retry.puml |
+| TESTING | SCORING | EVALSVC-07 | Tests passed | sq_evaluationservice07_record_quality_signal.puml |
+| TESTING | RETRYING | EVALSVC-06 | Tests failed | sq_evaluationservice06_coordinate_retry.puml |
+| SCORING | PASSED | EVALSVC-07 | Scoring threshold met | sq_evaluationservice07_record_quality_signal.puml |
+| SCORING | RETRYING | EVALSVC-06 | Scoring below threshold | sq_evaluationservice06_coordinate_retry.puml |
+| RETRYING | CHECKING | EVALSVC-06 | Retry with feedback | sq_evaluationservice06_coordinate_retry.puml |
+| RETRYING | FAILED | EVALSVC-06 | Retries exhausted | sq_evaluationservice06_coordinate_retry.puml |
 | PASSED | [*] | EVALSVC-07 | Terminal state | — |
 | FAILED | [*] | EVALSVC-06 | Terminal state | — |
 
@@ -864,19 +869,19 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNINDEXED | REPOINTELREPO-01 | Default state | sq_repointelligence01_index_codebase.puml |
-| UNINDEXED | INDEXING | REPOINTELREPO-01 | Indexing started | sq_repointelligence01_index_codebase.puml |
-| INDEXING | INDEXED | REPOINTELREPO-01 | Indexing complete | sq_repointelligence01_index_codebase.puml |
-| INDEXING | ERROR | REPOINTELREPO-01 | Indexing failed | sq_repointelligence01_index_codebase.puml |
-| INDEXED | BUILDING_GRAPH | REPOINTELREPO-02 | Graph building started | sq_repointelligence02_build_symbol_graph.puml |
-| BUILDING_GRAPH | INDEXED | REPOINTELREPO-02 | Graph built | sq_repointelligence02_build_symbol_graph.puml |
-| BUILDING_GRAPH | ERROR | REPOINTELREPO-02 | Graph building failed | sq_repointelligence02_build_symbol_graph.puml |
-| INDEXED | EMBEDDING | REPOINTELREPO-05 | Embedding started | sq_repointelligence05_embed_code.puml |
-| EMBEDDING | INDEXED | REPOINTELREPO-05 | Embedding complete | sq_repointelligence05_embed_code.puml |
-| EMBEDDING | ERROR | REPOINTELREPO-05 | Embedding failed | sq_repointelligence05_embed_code.puml |
-| INDEXED | STALE | REPOINTELREPO-01 | Source files changed | sq_repointelligence01_index_codebase.puml |
-| STALE | INDEXING | REPOINTELREPO-01 | Re-indexing started | sq_repointelligence01_index_codebase.puml |
-| ERROR | UNINDEXED | REPOINTELREPO-01 | Recovery: start fresh | sq_repointelligence01_index_codebase.puml |
+| [*] | UNINDEXED | REPOINTELREPO-01 | Default state | sq_repointelligencerepository01_index_codebase.puml |
+| UNINDEXED | INDEXING | REPOINTELREPO-01 | Indexing started | sq_repointelligencerepository01_index_codebase.puml |
+| INDEXING | INDEXED | REPOINTELREPO-01 | Indexing complete | sq_repointelligencerepository01_index_codebase.puml |
+| INDEXING | ERROR | REPOINTELREPO-01 | Indexing failed | sq_repointelligencerepository01_index_codebase.puml |
+| INDEXED | BUILDING_GRAPH | REPOINTELREPO-02 | Graph building started | sq_repointelligencerepository02_build_symbol_graph.puml |
+| BUILDING_GRAPH | INDEXED | REPOINTELREPO-02 | Graph built | sq_repointelligencerepository02_build_symbol_graph.puml |
+| BUILDING_GRAPH | ERROR | REPOINTELREPO-02 | Graph building failed | sq_repointelligencerepository02_build_symbol_graph.puml |
+| INDEXED | EMBEDDING | REPOINTELREPO-05 | Embedding started | sq_repointelligencerepository05_embed_code.puml |
+| EMBEDDING | INDEXED | REPOINTELREPO-05 | Embedding complete | sq_repointelligencerepository05_embed_code.puml |
+| EMBEDDING | ERROR | REPOINTELREPO-05 | Embedding failed | sq_repointelligencerepository05_embed_code.puml |
+| INDEXED | STALE | REPOINTELREPO-01 | Source files changed | sq_repointelligencerepository01_index_codebase.puml |
+| STALE | INDEXING | REPOINTELREPO-01 | Re-indexing started | sq_repointelligencerepository01_index_codebase.puml |
+| ERROR | UNINDEXED | REPOINTELREPO-01 | Recovery: start fresh | sq_repointelligencerepository01_index_codebase.puml |
 | INDEXED | [*] | REPOINTELREPO-01 | Terminal state | — |
 | UNINDEXED | [*] | REPOINTELREPO-01 | Terminal state | — |
 
@@ -894,7 +899,7 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 | 1 | sm_task_svc_agent.puml | Task Service | Task Service | Process FSM | 16 | TASKSVC-01..14, HTTPADP-06, LLMREPO-02, EDITSTRATEGYREPO-10, SAFETYSVC-02, TOOLSVC-HK02, EVALSVC-01..06, LLMREPO-05 | ✅ GREEN |
 | 2 | sm_session_svc_session.puml | Session | Session Service | Entity | 6 | SESSIONSVC-01..04, SESSIONSVC-08, SESSIONSVC-09 | ✅ GREEN |
 | 3 | sm_task_svc_plan.puml | Task Service (Plan) | Task Service | Entity | 7 | TASKSVC-07, TASKSVC-08, TASKSVC-01, TASKSVC-14 | ✅ GREEN |
-| 4 | sm_tool_svc_plugin.puml | Tool Service (Plugin) | Tool Service | Entity | 6 | TOOLSVC-01..06 | ✅ GREEN |
+| 4 | sm_tool_svc_plugin.puml | Tool Service (Plugin) | Tool Service | Entity | 6 | TOOLSVC-PLG01..06 | ✅ GREEN |
 | 5 | sm_task_svc_subagent.puml | Task Service (Subagent) | Task Service | Entity | 5 | TASKSVC-09, TASKSVC-10, TASKSVC-14 | ✅ GREEN |
 | 6 | sm_task_svc_persona.puml | Task Service (Persona) | Task Service | Entity | 5 | TASKSVC-11, TASKSVC-12, TASKSVC-13 | ✅ GREEN |
 | 7 | sm_mcp_repo_client.puml | MCP Repository | MCP Repository | Entity | 5 | MCPREPO-01, MCPREPO-02 | ✅ GREEN |
@@ -973,7 +978,7 @@ Every entity SM state has exactly one owning lifecycle-write UC. Verified per SM
 
 - **Session**: CREATED (SESSIONSVC-01), ACTIVE (SESSIONSVC-01), SAVED (SESSIONSVC-01), RESTORED (SESSIONSVC-04), BRANCHED (SESSIONSVC-08), CLOSED (SESSIONSVC-09) ✅
 - **Plan**: BUILDING (TASKSVC-07), QUEUED (TASKSVC-07), APPROVED (TASKSVC-08), EXECUTING (TASKSVC-08), COMPLETED (TASKSVC-01), REJECTED (TASKSVC-08) ✅
-- **Plugin**: DISCOVERED (TOOLSVC-01), LOADING (TOOLSVC-02), LOADED (TOOLSVC-03), ENABLED (TOOLSVC-05), DISABLED (TOOLSVC-06), ERROR (TOOLSVC-01) ✅
+- **Plugin**: DISCOVERED (TOOLSVC-PLG01), LOADING (TOOLSVC-PLG02), LOADED (TOOLSVC-PLG03), ENABLED (TOOLSVC-PLG05), DISABLED (TOOLSVC-PLG06), ERROR (TOOLSVC-PLG01) ✅
 - **Subagent**: SPAWNING (TASKSVC-09), RUNNING (TASKSVC-09), COMPLETED (TASKSVC-10), FAILED (TASKSVC-14) ✅
 - **Persona**: LOADING (TASKSVC-12), ACTIVE (TASKSVC-11), SWITCHING (TASKSVC-13), ERROR (TASKSVC-12) ✅
 - **MCP Client**: CONNECTING (MCPREPO-01), CONNECTED (MCPREPO-01), DISCOVERING (MCPREPO-02), ERROR (MCPREPO-01) ✅

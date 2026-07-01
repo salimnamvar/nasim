@@ -26,16 +26,16 @@
 | `session_repo` | Session Repository | `uc_session_repo.puml` | `SESSIONREPO-` | 3 | JSONL message persistence, turn management. |
 | `history_repo` | History Repository | `uc_history_repo.puml` | `HISTORYREPO-` | 3 | Snapshots, revert index, FTS5 search index. |
 | `config_repo` | Config Repository | `uc_config_repo.puml` | `CONFIGREPO-` | 3 | YAML, env vars, CLI flags, project overrides. |
-| `memory_repo` | Memory Repository | `uc_memory_repo.puml` | `MEMORYREPO-` | 4 | Cross-session knowledge persistence. |
-| `llm_repo` | LLM Repository | `uc_llm_repo.puml` | `LLMREPO-` | 8 | LLM API calls + model routing via litellm. |
+| `memory_repo` | Memory Repository | `uc_memory_repo.puml` | `MEMORYREPOSITORY-` | 4 | Cross-session knowledge persistence. |
+| `llm_repo` | LLM Repository | `uc_llm_repo.puml` | `LLMREPOSITORY-` | 8 | LLM API calls + model routing via litellm. |
 | `fs_repo` | Filesystem Repository | `uc_fs_repo.puml` | `FSREPO-` | 4 | Host filesystem I/O: read, write, glob, grep. |
-| `sandbox_repo` | Sandbox Repository | `uc_sandbox_repo.puml` | `SANDBOXREPO-` | 4 | Sandboxed command execution: timeout, isolation. |
-| `edit_strategy_repo` | Edit Strategy Repository | `uc_edit_strategy_repo.puml` | `EDITSTRATEGYREPO-` | 10 | Diff staging, computation, safe application. |
-| `git_repo` | Git Repository | `uc_git_repo.puml` | `GITREPO-` | 4 | Git operations: status, diff, commit, branch. |
-| `mcp_repo` | MCP Repository | `uc_mcp_repo.puml` | `MCPREPO-` | 4 | MCP extension tools: discovery, invocation. |
-| `repo_intel_repo` | Repo Intelligence Repository | `uc_repo_intel_repo.puml` | `REPOINTELREPO-` | 6 | AST indexing, symbol graph, embeddings, semantic search. |
+| `sandbox_repo` | Sandbox Repository | `uc_sandbox_repo.puml` | `SANDBOXREPOSITORY-` | 4 | Sandboxed command execution: timeout, isolation. |
+| `edit_strategy_repo` | Edit Strategy Repository | `uc_edit_strategy_repo.puml` | `EDITSTRATEGYREPOSITORY-` | 10 | Diff staging, computation, safe application. |
+| `git_repo` | Git Repository | `uc_git_repo.puml` | `GITREPOSITORY-` | 4 | Git operations: status, diff, commit, branch. |
+| `mcp_repo` | MCP Repository | `uc_mcp_repo.puml` | `MCPREPOSITORY-` | 4 | MCP extension tools: discovery, invocation. |
+| `repo_intel_repo` | Repo Intelligence Repository | `uc_repo_intel_repo.puml` | `REPOINTELLIGENCEREPOSITORY-` | 6 | AST indexing, symbol graph, embeddings, semantic search. |
 | `web_repo` | Web Repository | `uc_web_repo.puml` | `WEBREPO-` | 2 | Web fetch: documentation, search results. |
-| `wire_log_repo` | Wire Log Repository | `uc_wire_log_repo.puml` | `WIRELOGREPO-` | 5 | Append-only event store, fork, checkpoint. |
+| `wire_log_repo` | Wire Log Repository | `uc_wire_log_repo.puml` | `WIRELOGREPOSITORY-` | 5 | Append-only event store, fork, checkpoint. |
 | **Total** | **24 components** | **24 diagrams** + `uc_overview.puml` | — | **165** | 1:1 C4 component ↔ UC diagram |
 
 ---
@@ -60,16 +60,16 @@ Every C4 component maps 1:1 to a UC diagram file. This table satisfies C4-UC-12 
 | SESSIONREPO-01..03 | Append, read, write session files | Session Repository (`session_repo`) | Repository Layer |
 | HISTORYREPO-01..03 | Snapshot, index search, revert | History Repository (`history_repo`) | Repository Layer |
 | CONFIGREPO-01..03 | Read YAML/env, write config | Config Repository (`config_repo`) | Repository Layer |
-| MEMORYREPO-01..04 | Persist, recall, search, scope knowledge | Memory Repository (`memory_repo`) | Repository Layer |
-| LLMREPO-01..08 | Register provider, request/stream chat, select/fallback/switch | LLM Repository (`llm_repo`) | Repository Layer |
+| MEMORYREPOSITORY-01..04 | Persist, recall, search, scope knowledge | Memory Repository (`memory_repo`) | Repository Layer |
+| LLMREPOSITORY-01..08 | Register provider, request/stream chat, select/fallback/switch | LLM Repository (`llm_repo`) | Repository Layer |
 | FSREPO-01..04 | Read, write, list, search files | Filesystem Repository (`fs_repo`) | Repository Layer |
-| SANDBOXREPO-01..04 | Isolate, apply policy, monitor, limit resources | Sandbox Repository (`sandbox_repo`) | Repository Layer |
-| EDITSTRATEGYREPO-01..10 | Select strategy, apply diff types, stage | Edit Strategy Repository (`edit_strategy_repo`) | Repository Layer |
-| GITREPO-01..04 | Read status, commit, diff, auto-commit | Git Repository (`git_repo`) | Repository Layer |
-| MCPREPO-01..04 | Connect, discover, adapt MCP tools, expose nasim tools | MCP Repository (`mcp_repo`) | Repository Layer |
-| REPOINTELREPO-01..06 | Index, build symbol graph, rank, inject repomap, embed, search | Repo Intelligence Repository (`repo_intel_repo`) | Repository Layer |
+| SANDBOXREPOSITORY-01..04 | Isolate, apply policy, monitor, limit resources | Sandbox Repository (`sandbox_repo`) | Repository Layer |
+| EDITSTRATEGYREPOSITORY-01..10 | Select strategy, apply diff types, stage | Edit Strategy Repository (`edit_strategy_repo`) | Repository Layer |
+| GITREPOSITORY-01..04 | Read status, commit, diff, auto-commit | Git Repository (`git_repo`) | Repository Layer |
+| MCPREPOSITORY-01..04 | Connect, discover, adapt MCP tools, expose nasim tools | MCP Repository (`mcp_repo`) | Repository Layer |
+| REPOINTELLIGENCEREPOSITORY-01..06 | Index, build symbol graph, rank, inject repomap, embed, search | Repo Intelligence Repository (`repo_intel_repo`) | Repository Layer |
 | WEBREPO-01..02 | Fetch URL, search web | Web Repository (`web_repo`) | Repository Layer |
-| WIRELOGREPO-01..05 | Append, read, seek, fork, checkpoint | Wire Log Repository (`wire_log_repo`) | Repository Layer |
+| WIRELOGREPOSITORY-01..05 | Append, read, seek, fork, checkpoint | Wire Log Repository (`wire_log_repo`) | Repository Layer |
 
 ---
 
@@ -464,16 +464,16 @@ Extref stubs use the short prefix for readability; the owning diagram always use
 | `session_repo` | `uc_session_repo.puml` | `SESSIONREPO-` | Session Repository Group |
 | `history_repo` | `uc_history_repo.puml` | `HISTORYREPO-` | History Repository Group |
 | `config_repo` | `uc_config_repo.puml` | `CONFIGREPO-` | Config Repository Group |
-| `memory_repo` | `uc_memory_repo.puml` | `MEMORYREPO-` | Memory Repository Group |
-| `llm_repo` | `uc_llm_repo.puml` | `LLMREPO-` | LLM Repository Group |
+| `memory_repo` | `uc_memory_repo.puml` | `MEMORYREPOSITORY-` | Memory Repository Group |
+| `llm_repo` | `uc_llm_repo.puml` | `LLMREPOSITORY-` | LLM Repository Group |
 | `fs_repo` | `uc_fs_repo.puml` | `FSREPO-` | Filesystem Repository Group |
-| `sandbox_repo` | `uc_sandbox_repo.puml` | `SANDBOXREPO-` | Sandbox Repository Group |
-| `edit_strategy_repo` | `uc_edit_strategy_repo.puml` | `EDITSTRATEGYREPO-` | Edit Strategy Repository Group |
-| `git_repo` | `uc_git_repo.puml` | `GITREPO-` | Git Repository Group |
-| `mcp_repo` | `uc_mcp_repo.puml` | `MCPREPO-` | MCP Repository Group |
-| `repo_intel_repo` | `uc_repo_intel_repo.puml` | `REPOINTELREPO-` | Repo Intelligence Repository Group |
+| `sandbox_repo` | `uc_sandbox_repo.puml` | `SANDBOXREPOSITORY-` | Sandbox Repository Group |
+| `edit_strategy_repo` | `uc_edit_strategy_repo.puml` | `EDITSTRATEGYREPOSITORY-` | Edit Strategy Repository Group |
+| `git_repo` | `uc_git_repo.puml` | `GITREPOSITORY-` | Git Repository Group |
+| `mcp_repo` | `uc_mcp_repo.puml` | `MCPREPOSITORY-` | MCP Repository Group |
+| `repo_intel_repo` | `uc_repo_intel_repo.puml` | `REPOINTELLIGENCEREPOSITORY-` | Repo Intelligence Repository Group |
 | `web_repo` | `uc_web_repo.puml` | `WEBREPO-` | Web Repository Group |
-| `wire_log_repo` | `uc_wire_log_repo.puml` | `WIRELOGREPO-` | Wire Log Repository Group |
+| `wire_log_repo` | `uc_wire_log_repo.puml` | `WIRELOGREPOSITORY-` | Wire Log Repository Group |
 
 ### Controller Layer Detail
 
@@ -498,15 +498,20 @@ Extref stubs use the short prefix for readability; the owning diagram always use
 
 ### Repository Layer
 
-| C4 Component | C4 ID | UC Group | UC IDs | Description |
-|--------------|-------|----------|--------|-------------|
-| LLM Repository | `llm_repo` | LLM | LLMREPOSITORY-01..08 | LLM API calls and model routing |
-| Memory Repository | `memory_repo` | MEM | MEMORYREPOSITORY-01..04 | Cross-session knowledge |
-| Sandbox Repository | `sandbox_repo` | SBX | SANDBOXREPOSITORY-01..04 | Sandboxed execution |
-| Edit Strategy Repository | `edit_strategy_repo` | EDT | EDITSTRATEGYREPOSITORY-01..10 | Edit strategies |
-| Git Repository | `git_repo` | VCS | GITREPOSITORY-01..04 | Version control |
-| MCP Repository | `mcp_repo` | MCP | MCPREPOSITORY-01..04 | MCP extension tools |
-| Repo Intelligence Repository | `repo_intel_repo` | RIM | REPOINTELLIGENCEREPOSITORY-01..06 | Codebase intelligence |
+| C4 Component | C4 ID | UC Group | UC IDs | SQ Diagrams | Description |
+|--------------|-------|----------|--------|-------------|-------------|
+| LLM Repository | `llm_repo` | LLM | LLMREPOSITORY-01..08 | `sq_llmrepository01_register_provider.puml` .. `sq_llmrepository08_switch_model.puml` | LLM API calls and model routing |
+| Memory Repository | `memory_repo` | MEM | MEMORYREPOSITORY-01..04 | `sq_memoryrepository01_persist_knowledge.puml` .. `sq_memoryrepository04_scope_knowledge.puml` | Cross-session knowledge |
+| Sandbox Repository | `sandbox_repo` | SBX | SANDBOXREPOSITORY-01..04 | `sq_sandboxrepository01_isolate_command.puml` .. `sq_sandboxrepository04_limit_resources.puml` | Sandboxed execution |
+| Edit Strategy Repository | `edit_strategy_repo` | EDT | EDITSTRATEGYREPOSITORY-01..10 | `sq_editstrategyrepository01_select_strategy.puml` .. `sq_editstrategyrepository10_stage_diff.puml` | Edit strategies |
+| Git Repository | `git_repo` | VCS | GITREPOSITORY-01..04 | `sq_gitrepository01_read_git_status.puml` .. `sq_gitrepository04_auto_commit.puml` | Version control |
+| MCP Repository | `mcp_repo` | MCP | MCPREPOSITORY-01..04 | `sq_mcprepository01_connect_mcp_server.puml` .. `sq_mcprepository04_expose_nasim_tools.puml` | MCP extension tools |
+| Repo Intelligence Repository | `repo_intel_repo` | RIM | REPOINTELLIGENCEREPOSITORY-01..06 | `sq_repointelligencerepository01_index_codebase.puml` .. `sq_repointelligencerepository06_search_semantic.puml` | Codebase intelligence |
+| Session Repository | `session_repo` | SSN | SESSIONREPO-01..03 | `sq_sessionrepository01_append_message.puml` .. `sq_sessionrepository03_manage_turns.puml` | JSONL message persistence, turn management |
+| History Repository | `history_repo` | HIS | HISTORYREPO-01..03 | `sq_historyrepository01_create_snapshot.puml` .. `sq_historyrepository03_search_history.puml` | Snapshots, revert index, FTS5 search |
+| Config Repository | `config_repo` | CFG | CONFIGREPO-01..03 | `sq_configrepository01_load_config.puml` .. `sq_configrepository03_apply_layered_config.puml` | YAML, env vars, CLI flags, project overrides |
+| Filesystem Repository | `fs_repo` | FS | FSREPO-01..04 | `sq_filesystemrepository01_read_file.puml` .. `sq_filesystemrepository04_grep_search.puml` | Host filesystem I/O: read, write, glob, grep |
+| Web Repository | `web_repo` | WEB | WEBREPO-01..02 | `sq_webrepository01_fetch_content.puml` .. `sq_webrepository02_search_web.puml` | Web fetch: documentation, search results |
 | Wire Log Repository | `wire_log_repo` | WRL | WIRELOGREPOSITORY-01..05 | Append-only event store |
 | Session Repository | `session_repo` | `uc_session_repo.puml` | SESSIONREPO-01..03 | Data-access: turn persistence, loaded by Session Service |
 | History Repository | `history_repo` | `uc_history_repo.puml` | HISTORYREPO-01..03 | Data-access: snapshots, revert index, search |

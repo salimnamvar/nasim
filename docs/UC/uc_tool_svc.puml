@@ -39,76 +39,126 @@ rectangle "nasim" {
   package "Tool Service Group" {
 
     package "File Operations" {
-      usecase "**TOOLSVC-01 READ File**\n--\nRead file with offset/limit" <<master>> as TL01
-      usecase "**TOOLSVC-02 INSERT File**\n--\nCreate or overwrite files" <<master>> as TL02
-      usecase "**TOOLSVC-03 UPDATE File**\n--\nReplace exact strings in files" <<master>> as TL03
-      usecase "**TOOLSVC-04 LIST Directory**\n--\nList directory contents" <<master>> as TL04
+      usecase "**TOOLSVC-01 READ File**" <<master>> as TL01
+      usecase "**TOOLSVC-02 INSERT File**" <<master>> as TL02
+      usecase "**TOOLSVC-03 UPDATE File**" <<master>> as TL03
+      usecase "**TOOLSVC-04 LIST Directory**" <<master>> as TL04
     }
 
     package "Shell Execution" {
-      usecase "**TOOLSVC-05 DISPATCH Shell Command**\n--\nExecute command via sandbox" <<master>> as TL05
+      usecase "**TOOLSVC-05 DISPATCH Shell Command**" <<master>> as TL05
     }
 
     package "Search Tools" {
-      usecase "**TOOLSVC-06 SEARCH Grep**\n--\nSearch file contents by regex" <<master>> as TL06
-      usecase "**TOOLSVC-07 SEARCH Glob**\n--\nFind files by glob pattern" <<master>> as TL07
-      usecase "**TOOLSVC-08 SEARCH Find**\n--\nFind files by name pattern" <<master>> as TL08
+      usecase "**TOOLSVC-06 SEARCH Grep**" <<master>> as TL06
+      usecase "**TOOLSVC-07 SEARCH Glob**" <<master>> as TL07
+      usecase "**TOOLSVC-08 SEARCH Find**" <<master>> as TL08
     }
 
     package "Web Tools" {
-      usecase "**TOOLSVC-09 FETCH Web Content**\n--\nFetch URL as markdown" <<master>> as TL09
-      usecase "**TOOLSVC-10 SEARCH Web**\n--\nSearch the web" <<master>> as TL10
+      usecase "**TOOLSVC-09 FETCH Web Content**" <<master>> as TL09
+      usecase "**TOOLSVC-10 SEARCH Web**" <<master>> as TL10
     }
 
     package "Integration Tools" {
-      usecase "**TOOLSVC-11 READ Git Status**\n--\nGit status, diff, commit" <<master>> as TL11
-      usecase "**TOOLSVC-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" <<master>> as TL12
-      usecase "**TOOLSVC-13 READ LSP**\n--\nLSP hover, definition, references" <<master>> as TL13
-      usecase "**TOOLSVC-14 LIST Registered Tools**\n--\nList all registered tools" <<master>> as TL14
+      usecase "**TOOLSVC-11 READ Git Status**" <<master>> as TL11
+      usecase "**TOOLSVC-12 DISPATCH MCP Extension**" <<master>> as TL12
+      usecase "**TOOLSVC-13 READ LSP**" <<master>> as TL13
+      usecase "**TOOLSVC-14 LIST Registered Tools**" <<master>> as TL14
     }
 
     package "Agent Tools" {
-      usecase "**TOOLSVC-15 SPAWN Subagent**\n--\nSpawn child agent" <<master>> as TL15
+      usecase "**TOOLSVC-15 SPAWN Subagent**" <<master>> as TL15
     }
 
     package "Task Tracking" {
-      usecase "**TOOLSVC-16 INSERT Todo**\n--\nCreate task entry" <<master>> as TL16
-      usecase "**TOOLSVC-17 UPDATE Todo**\n--\nUpdate task entry" <<master>> as TL17
-      usecase "**TOOLSVC-18 READ Todos**\n--\nList task entries" <<master>> as TL18
+      usecase "**TOOLSVC-16 INSERT Todo**" <<master>> as TL16
+      usecase "**TOOLSVC-17 UPDATE Todo**" <<master>> as TL17
+      usecase "**TOOLSVC-18 READ Todos**" <<master>> as TL18
     }
 
     package "Memory" {
-      usecase "**TOOLSVC-19 PERSIST Memory**\n--\nStore cross-session knowledge" <<master>> as TL19
-      usecase "**TOOLSVC-20 RECALL Memory**\n--\nRetrieve cross-session knowledge" <<master>> as TL20
+      usecase "**TOOLSVC-19 PERSIST Memory**" <<master>> as TL19
+      usecase "**TOOLSVC-20 RECALL Memory**" <<master>> as TL20
     }
 
     package "Planning" {
-      usecase "**TOOLSVC-21 INSERT Plan**\n--\nCreate plan entry" <<master>> as TL21
-      usecase "**TOOLSVC-22 UPDATE Plan**\n--\nUpdate plan entry" <<master>> as TL22
+      usecase "**TOOLSVC-21 INSERT Plan**" <<master>> as TL21
+      usecase "**TOOLSVC-22 UPDATE Plan**" <<master>> as TL22
     }
 
     package "Hooks" {
-      usecase "**TOOLSVC-HK01 REGISTER Hook**\n--\nRegister lifecycle hook" <<master>> as HK01
-      usecase "**TOOLSVC-HK02 DISPATCH Pre-Tool Hook**\n--\nExecute pre-tool hook" <<master>> as HK02
-      usecase "**TOOLSVC-HK03 DISPATCH Post-Tool Hook**\n--\nExecute post-tool hook" <<master>> as HK03
-      usecase "**TOOLSVC-HK04 DISPATCH Pre-LLM Hook**\n--\nExecute pre-LLM hook" <<master>> as HK04
-      usecase "**TOOLSVC-HK05 DISPATCH Post-LLM Hook**\n--\nExecute post-LLM hook" <<master>> as HK05
-      usecase "**TOOLSVC-HK06 VALIDATE Hook Result**\n--\nValidate hook result" <<include>> as HK06
+      usecase "**TOOLSVC-HK01 REGISTER Hook**" <<master>> as HK01
+      usecase "**TOOLSVC-HK02 DISPATCH Pre-Tool Hook**" <<master>> as HK02
+      usecase "**TOOLSVC-HK03 DISPATCH Post-Tool Hook**" <<master>> as HK03
+      usecase "**TOOLSVC-HK04 DISPATCH Pre-LLM Hook**" <<master>> as HK04
+      usecase "**TOOLSVC-HK05 DISPATCH Post-LLM Hook**" <<master>> as HK05
+      usecase "**TOOLSVC-HK06 VALIDATE Hook Result**" <<include>> as HK06
     }
 
     package "Plugins" {
-      usecase "**TOOLSVC-PLG01 DISCOVER Plugins**\n--\nDiscover local plugins" <<master>> as PLG01
-      usecase "**TOOLSVC-PLG02 LOAD Manifest**\n--\nParse plugin manifest" <<include>> as PLG02
-      usecase "**TOOLSVC-PLG03 REGISTER Plugin Tools**\n--\nRegister plugin tools" <<include>> as PLG03
-      usecase "**TOOLSVC-PLG04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks" <<include>> as PLG04
-      usecase "**TOOLSVC-PLG05 ENABLE Plugin**\n--\nEnable a plugin" <<master>> as PLG05
-      usecase "**TOOLSVC-PLG06 DISABLE Plugin**\n--\nDisable a plugin" <<master>> as PLG06
+      usecase "**TOOLSVC-PLG01 DISCOVER Plugins**" <<master>> as PLG01
+      usecase "**TOOLSVC-PLG02 LOAD Manifest**" <<include>> as PLG02
+      usecase "**TOOLSVC-PLG03 REGISTER Plugin Tools**" <<include>> as PLG03
+      usecase "**TOOLSVC-PLG04 REGISTER Plugin Hooks**" <<include>> as PLG04
+      usecase "**TOOLSVC-PLG05 ENABLE Plugin**" <<master>> as PLG05
+      usecase "**TOOLSVC-PLG06 DISABLE Plugin**" <<master>> as PLG06
     }
   }
 }
 
 
+' File Operations
+TaskSvc --> TL01
+TaskSvc --> TL02
+TaskSvc --> TL03
+TaskSvc --> TL04
+
+' Shell
+TaskSvc --> TL05
+
+' Search
+TaskSvc --> TL06
+TaskSvc --> TL07
+TaskSvc --> TL08
+
+' Web
+TaskSvc --> TL09
+TaskSvc --> TL10
+
+' Integration
+TaskSvc --> TL11
+TaskSvc --> TL12
+TaskSvc --> TL13
 TaskSvc --> TL14
+
+' Agent
+TaskSvc --> TL15
+
+' Task Tracking
+TaskSvc --> TL16
+TaskSvc --> TL17
+TaskSvc --> TL18
+
+' Memory
+TaskSvc --> TL19
+TaskSvc --> TL20
+
+' Planning
+TaskSvc --> TL21
+TaskSvc --> TL22
+
+' Hooks
+TaskSvc --> HK01
+TaskSvc --> HK02
+TaskSvc --> HK03
+TaskSvc --> HK04
+TaskSvc --> HK05
+
+' Plugins
+TaskSvc --> PLG01
+TaskSvc --> PLG05
+TaskSvc --> PLG06
 
 TL01 ..> FR01_ext : <<include>>
 TL02 ..> FR02_ext : <<include>>
@@ -128,7 +178,7 @@ HK04 ..> HK06 : <<include>>
 HK05 ..> HK06 : <<include>>
 PLG01 ..> PLG02 : <<include>>
 PLG02 ..> PLG03 : <<include>>
-PLG02 ..> PLG04 : <<include>>
+PLG02 ..> PLG04 : <<include>
 
 
 @enduml
