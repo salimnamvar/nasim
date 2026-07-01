@@ -673,7 +673,7 @@ Full transition matrices and hex color registry: `docs/SM/README.md`.
 | PLANNING (agent) | plan_mode_active | `sq_taskservice07` |
 | EVALUATING → THINKING | retry with feedback | `sq_evaluationservice01` |
 
-Full SQ inventory: `docs/SQ/README.md` (146+ diagrams).
+Full SQ inventory: `docs/SQ/README.md` (165+ diagrams + 19 common ref blocks).
 
 ---
 

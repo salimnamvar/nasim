@@ -3,8 +3,12 @@
 > **SQ Architect pass:** 2026-07-01 — Critical task_svc flows rewritten to v10.0.0 with strict CSR layering, SM state guards, RoD method names, and DRY `ref` fragments in `common/sq_ref_*.puml`. Traceability: `docs/UC/README.md` § Sequence Diagram Layer.
 >
 > **Update 2026-07-01:** Added 19 missing SQ diagrams for ConfigService, MCPAdapter, SessionRepository, HistoryRepository, FilesystemRepository, WebRepository groups. Total now 171 diagrams (165 group + 6 common) across 25 groups.
+>
+> **Update 2026-07-01 (Cycle 1):** Added 13 new ref blocks for Context Service (CONTEXTSVC-02..06) and Evaluation Service (EVALSVC-02..09) sub-UCs. Updated `sq_contextservice01_process_context.puml`, `sq_evaluationservice01_evaluate_task.puml`, and `sq_ref_assemble_context.puml` to use ref blocks instead of self-calls. Total now 184 common ref blocks (19 on disk).
+>
+> **Update 2026-07-01 (Cycle 2):** Fixed naming inconsistency for hook and plugin SQ files — renamed from `sq_toolserviceservice{nn}` to `sq_toolservice_hk{nn}` / `sq_toolservice_plg{nn}` to match UC README convention.
 
-Sequence diagrams organised by UC group. 165 diagrams across 25 groups (171 total with common/).
+Sequence diagrams organised by UC group. 165 diagrams across 25 groups (184 total with common/).
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
 Back to [docs/](../README.md).
@@ -87,7 +91,7 @@ ref over mgr : HTTPADAPTER-02 CREATE Session
 | GIT | Git | Version Control — Git status, diff, commit | 4 |
 | WIRELOG | WireLog | Wire Log — append-only event store, fork, checkpoint | 5 |
 
-**Total: 165 SQ diagrams on disk (179 with common/) — OBS group removed**
+**Total: 165 SQ diagrams on disk (184 with common/) — OBS group removed**
 
 ## Naming Convention
 
@@ -104,6 +108,21 @@ Examples:
 - `docs/SQ/ConfigService/sq_configservice01_load_config.puml`
 - `docs/SQ/MCPAdapter/sq_mcpadapter01_process_mcp_request.puml`
 - `docs/SQ/SessionRepository/sq_sessionrepository01_append_message.puml`
+
+### Hook and Plugin Naming (TOOLSVC-HK/PLG)
+
+Hooks and plugins use a special naming convention with `_hk` and `_plg` suffixes:
+
+```
+docs/SQ/ToolService/sq_toolservice_hk{nn}_{description}.puml   # Hooks
+docs/SQ/ToolService/sq_toolservice_plg{nn}_{description}.puml  # Plugins
+```
+
+Examples:
+- `docs/SQ/ToolService/sq_toolservice_hk01_register_hook.puml`
+- `docs/SQ/ToolService/sq_toolservice_hk02_dispatch_pre_tool_hook.puml`
+- `docs/SQ/ToolService/sq_toolservice_plg01_discover_plugins.puml`
+- `docs/SQ/ToolService/sq_toolservice_plg03_register_plugin_tools.puml`
 
 ## SQ Diagram Convention
 
@@ -139,7 +158,7 @@ Each SQ diagram follows this structure:
 ### Common Styles
 
 All diagrams include `common/sq_styles.puml` for consistent CSR layer colours,
-skinparam settings, and visual output across all 171 diagrams.
+skinparam settings, and visual output across all 184 diagrams.
 
 ### Enforcement
 

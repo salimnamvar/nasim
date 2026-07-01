@@ -5,9 +5,10 @@
 
 ' ============================================================
 ' Title:     nasim — UC Group Overview
-' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Boundary:  NASIM Application — All Layers
 ' Purpose:   Navigation map — CSR delegation chain only.
 '            No individual UC IDs shown.
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
 ' ============================================================
 
 

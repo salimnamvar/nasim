@@ -22,7 +22,7 @@ memory, and todo store data contracts. CT/API covers the HTTP API server surface
 | [C4/](C4/README.md) | C4 Architecture | Revised | Context, container, consolidated component diagram (3 + styles) |
 | [UC/](UC/README.md) | Use Cases | In progress | 146 UCs — 21 groups |
 | [SM/](SM/README.md) | State Machine | In progress | 15 diagrams — 195 transitions, all SQ-covered |
-| [SQ/](SQ/README.md) | Sequence Diagrams | In progress | 146 diagrams across 22 groups |
+| [SQ/](SQ/README.md) | Sequence Diagrams | In progress | 165 diagrams across 25 groups + 19 common ref blocks |
 | [ER/](ER/README.md) | ERD | In progress | 5 store schemas (4 C4 data stores + 1 informational) |
 | [CL/](CL/README.md) | Class Diagram | In progress | Runtime class model — 102 classes across 17 layers |
 | [CT/DATA/](CT/DATA/README.md) | Data Contracts | In progress | ODCS v3.1.0 — 5 contract diagrams + 3 schemas |
