@@ -5,22 +5,20 @@ that translates natural language into file changes via agentic tool orchestratio
 
 ## Diagram set
 
-Three diagrams following the C4 hierarchy, plus a shared style file:
-
 | File | C4 Level | Version | Description |
 | ---- | -------- | ------- | ----------- |
-| [c4_nasim_context.puml](c4_nasim_context.puml) | Context | v11.1.0 | NASIM Service as a single system with Developer actor and 9 external systems |
-| [c4_nasim_container.puml](c4_nasim_container.puml) | Container | v12.2.0 | Single NASIM Application container + 5 external clients + 4 data stores + 8 external systems |
-| [c4_nasim_component.puml](c4_nasim_component.puml) | Component | v11.5.0 | Full CSR 3-layer view: Controller, Service, Repository — all component groups consolidated |
-| [common/c4_styles.puml](common/c4_styles.puml) | — | v9.0.0 | Shared color palette, skinparam, and CSR lint markers |
+| [c4_nasim_context.puml](c4_nasim_context.puml) | Context | v13.0.0 | NASIM Service as a single system with Developer actor and 8 external systems |
+| [c4_nasim_container.puml](c4_nasim_container.puml) | Container | v13.0.0 | Single NASIM Application container + 5 external clients + 8 external systems |
+| [c4_nasim_component.puml](c4_nasim_component.puml) | Component | v13.0.0 | Full CSR 3-layer view: Controller, Service, Repository, Data Store |
+| [common/c4_styles.puml](common/c4_styles.puml) | — | v10.0.0 | Shared CSR AddElementTag palette and skinparam stereotypes |
 
 ## How to read
 
 1. **Context** — what NASIM Service is and what it talks to.
-2. **Container** — the single deployable application, its data stores,
-   external clients, and system dependencies.
+2. **Container** — the single deployable application, its external clients,
+   and system dependencies.
 3. **Component** — internal architecture: adapters → AgentController →
-   services → repositories → external systems.
+   services → repositories → data stores → external systems.
 
 ## Architecture summary
 
@@ -32,8 +30,8 @@ same NASIM Application container via HTTP/JSON + SSE or stdio.
 
 ```
 User → Controller (CLIAdapter, HTTPAdapter, MCPAdapter → AgentController)
-     → Service (TaskService, ToolService, SessionService, SafetyService,
-                ContextService, EvaluationService)
+     → Service (TaskService, ToolService, SessionService, ConfigService,
+                SafetyService, ContextService, EvaluationService)
      → Repository (SessionRepository, LLMRepository, FilesystemRepository,
                     SandboxRepository, EditStrategyRepository, GitRepository,
                     MCPRepository, RepoIntelligenceRepository, WebRepository,
@@ -53,7 +51,6 @@ User → Controller (CLIAdapter, HTTPAdapter, MCPAdapter → AgentController)
 | MCP Server | Extension tools via MCP protocol |
 | Git Repository | Version-controlled project files |
 | Repo Intelligence Backend | Tree-sitter, LSP, embeddings, vector store |
-
 
 ### External clients
 
@@ -76,11 +73,15 @@ plantuml c4_nasim_container.puml
 plantuml c4_nasim_component.puml
 ```
 
+## Versioning
+
+Context, Container, and Component diagrams share version **v13.0.0**.
+Source traceability: `README.md` → Context → Container → Component.
+
 ## Design chain
 
 C4 feeds into UC → SM → SQ → ERD → CL → CT. All lifelines in SQ diagrams
-trace back to components defined here. Cross-layer consistency is verified by
-`docs/C4/common/` linters.
+trace back to components defined here.
 
 ## See also
 

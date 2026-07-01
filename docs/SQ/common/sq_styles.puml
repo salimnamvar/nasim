@@ -105,6 +105,18 @@ skinparam SequenceReferenceBorderThickness 1
 ' (This file is purely a styles definition; inclusion is
 '  handled by the importing diagram.)
 ' ------------------------------------------------------------
+' ------------------------------------------------------------
+' CSR lint markers (moved from docs/C4/common/c4_styles.puml)
+' Reserved for cross-layer SQ linting — do not remove.
+' ------------------------------------------------------------
+
+!define CSR_ACTOR actor "User" as user
+!define CSR_CTRL participant "AgentController" as ctrl
+!define CSR_SVC participant "TaskService" as svc
+!define CSR_REPO participant "SessionRepository" as repo
+!define CSR_ACT activate actorUser
+!define CSR_DEACT deactivate actorUser
+
 alt styles apply
     note right: CSRs, skinparms, colours are defined above
 else fallback to defaults

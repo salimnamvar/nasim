@@ -2,84 +2,77 @@
 title Apply C4 Shared Styles
 ' ============================================================
 ' Title:     NASIM C4 — Apply Shared Styles
-' Purpose:   Common color palette, skinparam, and macros
-'            for all nasim C4 diagrams.
-' Version:   9.0.0
+' Purpose:   CSR layer colour palette, AddElementTag definitions,
+'            and skinparam stereotypes for all NASIM C4 diagrams.
+' Version:   10.0.0
 ' Source:    docs/C4/common/c4_styles.puml
 ' ============================================================
+'
+' INCLUDE ORDER (required for AddElementTag to resolve):
+'   1. !include C4_Context.puml  OR  C4_Container.puml  OR  C4_Component.puml
+'   2. !include common/c4_styles.puml
+'
+' LAYERED COMPONENT DIAGRAM USAGE:
+'   - Apply $tags on every Component/ComponentDb inside a Boundary.
+'   - Boundary(...) <<stereotype>> labels the group; $tags colours each element.
+'   - Valid tags: controller | service | repository | datastore
+'   - Example:
+'       Boundary(ctrl_layer, "Controller Layer") {
+'           Component(agent_ctrl, "AgentController", "asyncio", "...", $tags="controller")
+'       }
+'   - Do NOT put Sequence Diagram defines here — use docs/SQ/common/sq_styles.puml.
+'   - Do NOT use LAYOUT_WITH_LEGEND() — use a manual 'legend right' block instead.
 
-' --- Color Palette (CSR Layers) ---
-' Controller Layer (CLI, API)
+' --- AddElementTag (primary — colours individual components) ---
+AddElementTag("controller", $bgColor="#E3F2FD", $borderColor="#1565C0", $fontColor="#0D47A1", $legendText="Controller")
+AddElementTag("service", $bgColor="#FFF3E0", $borderColor="#E65100", $fontColor="#BF360C", $legendText="Service")
+AddElementTag("repository", $bgColor="#E8F5E9", $borderColor="#2E7D32", $fontColor="#1B5E20", $legendText="Repository")
+AddElementTag("datastore", $bgColor="#FFFDE7", $borderColor="#F9A825", $fontColor="#F57F17", $legendText="Data Store")
+AddElementTag("infrastructure", $bgColor="#F3E5F5", $borderColor="#7B1FA2", $fontColor="#4A148C", $legendText="Infrastructure")
+AddElementTag("external_container", $bgColor="#FAFAFA", $borderColor="#616161", $fontColor="#212121", $legendText="External Client")
+AddElementTag("deployable", $bgColor="#E8EAF6", $borderColor="#283593", $fontColor="#1A237E", $legendText="Deployable")
+
+' --- Skinparam stereotypes (fallback for Boundary wrappers) ---
 skinparam rectangle<<controller>> {
     BackgroundColor<<controller>> #E3F2FD
     BorderColor<<controller>> #1565C0
     FontColor<<controller>> #0D47A1
 }
 
-' Service Layer (Agent, Router, Safety, Context Graph, Edit Strategy, Evaluation)
 skinparam rectangle<<service>> {
     BackgroundColor<<service>> #FFF3E0
     BorderColor<<service>> #E65100
     FontColor<<service>> #BF360C
 }
 
-' Repository Layer (Session, Tool, Memory, Config, Git, Repo Intelligence)
 skinparam rectangle<<repository>> {
     BackgroundColor<<repository>> #E8F5E9
     BorderColor<<repository>> #2E7D32
     FontColor<<repository>> #1B5E20
 }
 
-' Infrastructure Layer (MCP, Sandbox, Wire Log, Hooks, Plugins)
 skinparam rectangle<<infrastructure>> {
     BackgroundColor<<infrastructure>> #F3E5F5
     BorderColor<<infrastructure>> #7B1FA2
     FontColor<<infrastructure>> #4A148C
 }
 
-' Data Store (persistence: JSONL, YAML, embeddings)
 skinparam database<<datastore>> {
     BackgroundColor<<datastore>> #FFFDE7
     BorderColor<<datastore>> #F9A825
     FontColor<<datastore>> #F57F17
 }
 
-' External Container (WebApp, DesktopApp, MobileApp)
 skinparam rectangle<<external_container>> {
     BackgroundColor<<external_container>> #FAFAFA
     BorderColor<<external_container>> #616161
     FontColor<<external_container>> #212121
 }
 
-' Deployable Container (CLI, WebApp, NASIM Application)
 skinparam rectangle<<deployable>> {
     BackgroundColor<<deployable>> #E8EAF6
     BorderColor<<deployable>> #283593
     FontColor<<deployable>> #1A237E
 }
-
-' --- Usage ---
-' !include common/c4_styles.puml
-' Provides CSR layer color palette via stereotypes:
-'   <<controller>>   — blue (#E3F2FD)   — CLI Group, API Group
-'   <<service>>      — orange (#FFF3E0)  — Agent, Router, Safety, Context Graph,
-'                                          Edit Strategy, Evaluation, Provider
-'   <<repository>>   — green (#E8F5E9)   — Session, Tool, Memory, Config, Git,
-'                                          Repo Intelligence
-'   <<infrastructure>> — purple (#F3E5F5) — MCP, Sandbox,
-'                                          Wire Log, Hooks, Plugins
-'
-' Each diagram should include a standalone 'legend' block explaining
-' these colors. Do NOT use LAYOUT_WITH_LEGEND() with this file — it
-' produces an empty auto-generated legend when no AddElementTag calls
-' are present. Use a manual 'legend right' block instead.
-
-' CSR lint markers (reserved for cross-layer linting — do not remove)
-!define CSR_ACTOR actor "User" as user
-!define CSR_CTRL participant "AgentController" as ctrl
-!define CSR_SVC participant "TaskService" as svc
-!define CSR_REPO participant "SessionRepository" as repo
-!define CSR_ACT activate actorUser
-!define CSR_DEACT deactivate actorUser
 
 @enduml
