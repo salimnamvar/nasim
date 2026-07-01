@@ -6,7 +6,8 @@
 ' ============================================================
 ' Title:     nasim — UC: MCP Repository Group
 ' Group:     MCPREPOSITORY (MCP Repository)
-' Boundary:  NASIM Service
+' C4 ID:     mcp_repo
+' Boundary:  NASIM Application — Repository Layer
 ' Purpose:   MCP extension tools: discovery, invocation
 '            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service → MCP Repository
 ' Milestone: v1.0

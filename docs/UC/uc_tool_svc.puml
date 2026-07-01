@@ -16,6 +16,8 @@
 ' Entry:     Adapter → agent_ctrl → task_svc → tool_svc
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
 ' SQ:        sq_toolservice01..sq_toolservice22, hk01..06, plg01..06
+' SIM-01:    Exceeds 15-UC visual limit (34 total). Organized into
+'            11 sub-packages, each ≤15 UCs. Exception noted.
 ' ============================================================
 
 

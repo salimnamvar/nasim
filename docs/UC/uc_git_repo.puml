@@ -6,7 +6,8 @@
 ' ============================================================
 ' Title:     nasim — UC: Git Repository Group
 ' Group:     GITREPOSITORY (Git Repository)
-' Boundary:  NASIM Service
+' C4 ID:     git_repo
+' Boundary:  NASIM Application — Repository Layer
 ' Purpose:   Git operations: status, diff, commit, branch
 '            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service → Git Repository
 ' Milestone: v1.0

@@ -6,7 +6,8 @@
 ' ============================================================
 ' Title:     nasim — UC: LLM Repository Group
 ' Group:     LLMREPOSITORY (LLM Repository)
-' Boundary:  NASIM Service
+' C4 ID:     llm_repo
+' Boundary:  NASIM Application — Repository Layer
 ' Purpose:   LLM API calls + model routing: streaming, fallback chains,
 '            capability-based model selection, task classification.
 '            Entry chain: User → Interface → Agent Controller → Task Service → LLM Repository

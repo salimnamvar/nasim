@@ -6,7 +6,8 @@
 ' ============================================================
 ' Title:     nasim — UC: Wire Log Repository Group
 ' Group:     WIRELOGREPOSITORY (Wire Log Repository)
-' Boundary:  NASIM Service
+' C4 ID:     wire_log_repo
+' Boundary:  NASIM Application — Repository Layer
 ' Purpose:   Append-only event store: interaction recording, replay,
 '            session forking, checkpointing.
 '            Entry chain: User → Interface → Agent Controller → Task Service → Wire Log Repository

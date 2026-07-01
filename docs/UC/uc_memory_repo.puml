@@ -6,7 +6,8 @@
 ' ============================================================
 ' Title:     nasim — UC: Memory Repository Group
 ' Group:     MEMORYREPOSITORY (Memory Repository)
-' Boundary:  NASIM Service
+' C4 ID:     memory_repo
+' Boundary:  NASIM Application — Repository Layer
 ' Purpose:   Cross-session knowledge persistence
 '            Entry chain: User → Interface → Agent Controller → Task Service → Context Service → Memory Repository
 ' Milestone: v1.0

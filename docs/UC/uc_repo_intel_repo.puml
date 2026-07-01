@@ -6,7 +6,8 @@
 ' ============================================================
 ' Title:     nasim — UC: Repo Intelligence Repository Group
 ' Group:     REPOINTELLIGENCEREPOSITORY (Repo Intelligence Repository)
-' Boundary:  NASIM Service
+' C4 ID:     repo_intel_repo
+' Boundary:  NASIM Application — Repository Layer
 ' Purpose:   Codebase intelligence: AST indexing, symbol graph, embedding
 '            generation, semantic search, repo map building.
 '            Entry chain: User → Interface → Agent Controller → Task Service → Context Service → Repo Intelligence Repository

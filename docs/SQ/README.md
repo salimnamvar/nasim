@@ -6,7 +6,7 @@
 >
 > **Update 2026-07-01 (Cycle 1):** Added 13 new ref blocks for Context Service (CONTEXTSVC-02..06) and Evaluation Service (EVALSVC-02..09) sub-UCs. Updated `sq_contextservice01_process_context.puml`, `sq_evaluationservice01_evaluate_task.puml`, and `sq_ref_assemble_context.puml` to use ref blocks instead of self-calls. Total now 184 common ref blocks (19 on disk).
 >
-> **Update 2026-07-01 (Cycle 2):** Fixed naming inconsistency for hook and plugin SQ files — renamed from `sq_toolserviceservice{nn}` to `sq_toolservice_hk{nn}` / `sq_toolservice_plg{nn}` to match UC README convention.
+> **Update 2026-07-01 (Cycle 2):** Fixed naming inconsistency for hook and plugin SQ files — renamed from `sq_toolserviceservice{nn}` to `sq_toolservice_hk{nn}` / `sq_toolservice_plg{nn}` to match UC README convention. Also fixed AgentController-04 (`sq_agentcontroller04_dispatch_to_core_engine.puml` → `sq_agentcontroller04_dispatch_to_services.puml`), LLM Repository files (01-04 → 05-08), and MCP Adapter files (`sq_mcpadapter` → `sq_mcp_adapter`).
 
 Sequence diagrams organised by UC group. 165 diagrams across 25 groups (184 total with common/).
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.

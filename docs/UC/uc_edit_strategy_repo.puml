@@ -6,7 +6,8 @@
 ' ============================================================
 ' Title:     nasim — UC: Edit Strategy Repository Group
 ' Group:     EDITSTRATEGYREPOSITORY (Edit Strategy Repository)
-' Boundary:  NASIM Service
+' C4 ID:     edit_strategy_repo
+' Boundary:  NASIM Application — Repository Layer
 ' Purpose:   Diff staging, computation, and safe application:
 '            staged edits, sandboxed validation.
 '            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service → Edit Strategy Repository
