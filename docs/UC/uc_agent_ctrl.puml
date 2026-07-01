@@ -43,9 +43,10 @@ usecase "CONFIGSVC-03\nAPPLY Layered Config\n[uc_config_svc]" as CFG03_ext <<ext
 
 rectangle "nasim" {
   package "Agent Controller Group" {
-    usecase "**AGENTCTRL-01 PROCESS Request**\n--\nRoute incoming request from\ncli_adp, http_adp, or mcp_adp" <<master>> as AC01
+    usecase "**AGENTCTRL-01 PROCESS Request**\n--\nCentral entry point.\nReceives from ALL adapters\n(cli_adp, http_adp, mcp_adp)" <<master>> as AC01
     usecase "**AGENTCTRL-02 VALIDATE Request**\n--\nValidate format, permissions,\nand protocol" <<include>> as AC02
     usecase "**AGENTCTRL-03 ADAPT Protocol**\n--\nAdapt between CLI, HTTP,\nand MCP protocols" <<include>> as AC03
+    usecase "**AGENTCTRL-05 ROUTE Request**\n--\nClassify request type:\ndispatch, session, config" <<include>> as AC05
     usecase "**AGENTCTRL-04 DISPATCH to Services**\n--\nForward to task_svc,\nsession_svc, or config_svc" <<include>> as AC04
   }
 }
@@ -55,6 +56,7 @@ Adapter --> AC01
 
 AC01 ..> AC02 : <<include>>
 AC01 ..> AC03 : <<include>>
+AC01 ..> AC05 : <<include>>
 AC01 ..> AC04 : <<include>>
 
 AC04 ..> TASK01_ext : <<include>>

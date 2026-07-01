@@ -42,7 +42,7 @@ MCPClient --> MCP03
 
 MCP01 ..> AC01_ext : <<include>>
 MCP01 ..> MCP04 : <<include>>
-MCP02 ..> AC04_ext : <<include>>
+MCP02 ..> AC01_ext : <<include>>
 MCP03 ..> AC01_ext : <<include>>
 MCP03 ..> AC04_ext : <<include>>
 

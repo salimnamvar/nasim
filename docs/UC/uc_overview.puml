@@ -25,7 +25,7 @@ rectangle "nasim" {
   usecase "**CLI Adapter**\n[cli_adp]" <<master>> as CLI_ADP
   usecase "**HTTP Adapter**\n[http_adp]" <<master>> as HTTP_ADP
   usecase "**MCP Adapter**\n[mcp_adp]" <<master>> as MCP_ADP
-  usecase "**Agent Controller**\n[agent_ctrl]" <<master>> as AGENT_CTRL
+  usecase "**Agent Controller**\n[agent_ctrl]\nEntry: all adapters →\nAC01 (Validate, Adapt, Route) →\nAC04 (Dispatch)" <<master>> as AGENT_CTRL
 
   ' Service Layer
   usecase "**Task Service**\n[task_svc]" <<master>> as TASK_SVC

@@ -3,6 +3,8 @@
 > **Extraction date:** 2026-07-01 — State machines re-derived from `docs/C4/c4_nasim_component.puml` (v13.0.0) and UC diagrams only. Traceability matrix lives in `docs/UC/README.md` § State Machine Layer.
 >
 > **Key UC alignments (v13.0.0):** Agent compaction → `CONTEXTSVC-05`; plugin lifecycle → `TOOLSVC-PLG01..06`; LLM router → `LLMREPOSITORY-05..08`; LLM provider → `LLMREPOSITORY-01..04`; pre-tool hooks → `TOOLSVC-HK02`.
+>
+> **Update 2026-07-01 (Cycle 5):** Fixed SQ reference naming in transition coverage tables — updated from short prefixes (e.g., `sq_agent01`) to canonical names (e.g., `sq_taskservice01`) to match actual files on disk.
 
 ## Agent Lifecycle States (Process FSM)
 
@@ -567,43 +569,43 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | TASKSVC-01 | Process startup | sq_agent01_process_user_task.puml |
-| IDLE | RECEIVING | HTTPADP-06 | Request received (any adapter) | sq_api06_dispatch_message.puml |
-| IDLE | PLANNING | TASKSVC-07 | /plan command entered | sq_agent07_queue_plan.puml |
+| [*] | IDLE | TASKSVC-01 | Process startup | sq_taskservice01_process_user_task.puml |
+| IDLE | RECEIVING | HTTPADP-06 | Request received (any adapter) | sq_httpadapter06_dispatch_message.puml |
+| IDLE | PLANNING | TASKSVC-07 | /plan command entered | sq_taskservice07_queue_plan.puml |
 | IDLE | [*] | TASKSVC-01 | Error handled | — |
-| RECEIVING | THINKING | HTTPADP-06 | [needs_thinking] Input parsed | sq_api06_dispatch_message.puml |
-| RECEIVING | IDLE | HTTPADP-06 | [!needs_thinking] API request complete | sq_api06_dispatch_message.puml |
-| THINKING | RESPONDING | LLMREPO-02 | LLM returns text only | sq_provider02_request_chat.puml |
-| THINKING | TOOL_EXEC | LLMREPO-02 | LLM returns tool_calls | sq_provider02_request_chat.puml |
-| THINKING | COMPACTING | TASKSVC-06 | token_count > context_budget | sq_agent06_compact_context.puml |
-| THINKING | ROUTING | LLMREPO-05 | ModelRouter resolving model | sq_router01_select_model.puml |
-| THINKING | ERROR | LLMREPO-02 | Provider call failed | sq_provider02_request_chat.puml |
-| THINKING | EVALUATING | EVALSVC-01 | task_complete AND evaluation_enabled | sq_evaluation01_evaluate_task.puml |
-| ROUTING | THINKING | LLMREPO-05 | Model selected | sq_router01_select_model.puml |
-| TOOL_EXEC | THINKING | TASKSVC-02 | Tool call complete | sq_agent02_dispatch_tool_call.puml |
-| TOOL_EXEC | AWAITING_APPROVAL | SAFETYSVC-02 | safety_mode=ask AND unsafe tool | sq_safety02_request_approval.puml |
-| TOOL_EXEC | HOOK_RUNNING | TOOLSVC-HK02 | Pre/post hook configured | sq_hooks02_dispatch_pre_tool_hook.puml |
-| TOOL_EXEC | ERROR | TASKSVC-02 | Tool execution failed | sq_agent02_dispatch_tool_call.puml |
-| TOOL_EXEC | STAGING | EDITSTRATEGYREPO-10 | diff_sandbox mode active | sq_editstrategy10_stage_diff.puml |
-| HOOK_RUNNING | TOOL_EXEC | TOOLSVC-HK02 | Hook execution complete | sq_hooks02_dispatch_pre_tool_hook.puml |
-| HOOK_RUNNING | IDLE | TOOLSVC-HK02 | Hook execution complete (no tool) | sq_hooks02_dispatch_pre_tool_hook.puml |
-| AWAITING_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves | sq_safety02_request_approval.puml |
-| AWAITING_APPROVAL | IDLE | SAFETYSVC-02 | User denies | sq_safety02_request_approval.puml |
-| COMPACTING | THINKING | TASKSVC-06 | Context compacted | sq_agent06_compact_context.puml |
-| RESPONDING | IDLE | HTTPADP-06 | Response streamed to user | sq_api06_dispatch_message.puml |
-| ERROR | IDLE | TASKSVC-14 | Error handled | sq_agent14_handle_error.puml |
-| PLANNING | IDLE | TASKSVC-07 | Plan mode exited | sq_agent07_queue_plan.puml |
-| EVALUATING | REVIEWING | EVALSVC-01 | Evaluation passed | sq_evaluation01_evaluate_task.puml |
-| EVALUATING | RETRYING | EVALSVC-01 | Evaluation failed | sq_evaluation01_evaluate_task.puml |
-| EVALUATING | THINKING | EVALSVC-01 | Retry with feedback | sq_evaluation01_evaluate_task.puml |
-| REVIEWING | THINKING | EVALSVC-04 | LLM review passed | sq_evaluation04_validate_with_llm.puml |
-| REVIEWING | RETRYING | EVALSVC-04 | LLM review rejected | sq_evaluation04_validate_with_llm.puml |
-| RETRYING | THINKING | EVALSVC-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | ERROR | EVALSVC-06 | Retry exhausted | sq_evaluation06_coordinate_retry.puml |
-| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPO-10 | Diff computed successfully | sq_editstrategy10_stage_diff.puml |
-| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed | sq_editstrategy10_stage_diff.puml |
-| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves diff | sq_safety02_request_approval.puml |
-| AWAITING_DIFF_APPROVAL | IDLE | SAFETYSVC-02 | User rejects diff | sq_safety02_request_approval.puml |
+| RECEIVING | THINKING | HTTPADP-06 | [needs_thinking] Input parsed | sq_httpadapter06_dispatch_message.puml |
+| RECEIVING | IDLE | HTTPADP-06 | [!needs_thinking] API request complete | sq_httpadapter06_dispatch_message.puml |
+| THINKING | RESPONDING | LLMREPO-02 | LLM returns text only | sq_llmrepository02_request_chat.puml |
+| THINKING | TOOL_EXEC | LLMREPO-02 | LLM returns tool_calls | sq_llmrepository02_request_chat.puml |
+| THINKING | COMPACTING | TASKSVC-06 | token_count > context_budget | sq_taskservice06_compact_context.puml |
+| THINKING | ROUTING | LLMREPO-05 | ModelRouter resolving model | sq_llmrepository05_select_model.puml |
+| THINKING | ERROR | LLMREPO-02 | Provider call failed | sq_llmrepository02_request_chat.puml |
+| THINKING | EVALUATING | EVALSVC-01 | task_complete AND evaluation_enabled | sq_evaluationservice01_evaluate_task.puml |
+| ROUTING | THINKING | LLMREPO-05 | Model selected | sq_llmrepository05_select_model.puml |
+| TOOL_EXEC | THINKING | TASKSVC-02 | Tool call complete | sq_taskservice02_dispatch_tool_call.puml |
+| TOOL_EXEC | AWAITING_APPROVAL | SAFETYSVC-02 | safety_mode=ask AND unsafe tool | sq_safetyservice02_request_approval.puml |
+| TOOL_EXEC | HOOK_RUNNING | TOOLSVC-HK02 | Pre/post hook configured | sq_toolservice_hk02_dispatch_pre_tool_hook.puml |
+| TOOL_EXEC | ERROR | TASKSVC-02 | Tool execution failed | sq_taskservice02_dispatch_tool_call.puml |
+| TOOL_EXEC | STAGING | EDITSTRATEGYREPO-10 | diff_sandbox mode active | sq_editstrategyrepository10_stage_diff.puml |
+| HOOK_RUNNING | TOOL_EXEC | TOOLSVC-HK02 | Hook execution complete | sq_toolservice_hk02_dispatch_pre_tool_hook.puml |
+| HOOK_RUNNING | IDLE | TOOLSVC-HK02 | Hook execution complete (no tool) | sq_toolservice_hk02_dispatch_pre_tool_hook.puml |
+| AWAITING_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves | sq_safetyservice02_request_approval.puml |
+| AWAITING_APPROVAL | IDLE | SAFETYSVC-02 | User denies | sq_safetyservice02_request_approval.puml |
+| COMPACTING | THINKING | TASKSVC-06 | Context compacted | sq_taskservice06_compact_context.puml |
+| RESPONDING | IDLE | HTTPADP-06 | Response streamed to user | sq_httpadapter06_dispatch_message.puml |
+| ERROR | IDLE | TASKSVC-14 | Error handled | sq_taskservice14_handle_error.puml |
+| PLANNING | IDLE | TASKSVC-07 | Plan mode exited | sq_taskservice07_queue_plan.puml |
+| EVALUATING | REVIEWING | EVALSVC-01 | Evaluation passed | sq_evaluationservice01_evaluate_task.puml |
+| EVALUATING | RETRYING | EVALSVC-01 | Evaluation failed | sq_evaluationservice01_evaluate_task.puml |
+| EVALUATING | THINKING | EVALSVC-01 | Retry with feedback | sq_evaluationservice01_evaluate_task.puml |
+| REVIEWING | THINKING | EVALSVC-04 | LLM review passed | sq_evaluationservice04_validate_with_llm.puml |
+| REVIEWING | RETRYING | EVALSVC-04 | LLM review rejected | sq_evaluationservice04_validate_with_llm.puml |
+| RETRYING | THINKING | EVALSVC-06 | Retry with feedback | sq_evaluationservice06_coordinate_retry.puml |
+| RETRYING | ERROR | EVALSVC-06 | Retry exhausted | sq_evaluationservice06_coordinate_retry.puml |
+| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPO-10 | Diff computed successfully | sq_editstrategyrepository10_stage_diff.puml |
+| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed | sq_editstrategyrepository10_stage_diff.puml |
+| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves diff | sq_safetyservice02_request_approval.puml |
+| AWAITING_DIFF_APPROVAL | IDLE | SAFETYSVC-02 | User rejects diff | sq_safetyservice02_request_approval.puml |
 
 > **Coverage:** 37/37 non-terminal transitions covered. 0 ORPHANs.
 > **Note:** Merged LISTENING+SERVING→RECEIVING. Removed THINKING→RESPONDING duplicate (was LLMREPO-02 and HTTPADP-06; consolidated to LLMREPO-02 only).
