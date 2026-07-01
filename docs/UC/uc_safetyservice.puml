@@ -6,13 +6,13 @@
 ' ============================================================
 ' Title:     nasim — UC: SafetyService Group
 ' Group:     SAFETYSERVICE (SafetyService)
-' Boundary:  nasim code agent
-' Purpose:   Permission gates, user approval prompts, safety mode enforcement.
-'            Entry chain: User → HTTPAdapter → TaskService → SafetyService
+' Boundary:  NASIM Service
+' Purpose:   Permission gating, injection scanning, egress inspection.
+'            Entry chain: User → Interface → AgentController → TaskService → SafetyService
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
-' Review:    CAR refinement loop 2026-06-27
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
 ' SQ:        sq_safetyservice01..sq_safetyservice03
 ' ============================================================
 

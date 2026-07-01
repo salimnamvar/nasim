@@ -6,15 +6,14 @@
 ' ============================================================
 ' Title:     nasim — UC: TaskService Group
 ' Group:     TASKSERVICE (TaskService)
-' Boundary:  nasim code agent
-' Purpose:   Core agentic loop: provider call, tool dispatch,
-'            conversation history, context compaction, plans,
-'            subagents, personas, error handling, safety pipeline.
-'            Entry chain: User → ServerRouter → AgentOrchestrator
+' Boundary:  NASIM Service
+' Purpose:   Agentic loop: LLM call, tool dispatch, context assembly,
+'            subagent orchestration, error recovery, persona management.
+'            Entry chain: User → Interface → AgentController → TaskService
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
-' Review:    CAR refinement loop 2026-06-27
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
 ' SQ:        sq_taskservice01..sq_taskservice15
 ' ============================================================
 

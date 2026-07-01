@@ -6,13 +6,14 @@
 ' ============================================================
 ' Title:     nasim — UC: WireLogRepository Group
 ' Group:     WIRELOGREPOSITORY (WireLogRepository)
-' Boundary:  nasim code agent
-' Purpose:   Append-only event log, replay, session fork from wire
-'            Entry chain: User → ServerRouter → AgentOrchestrator → WireLogRepository
+' Boundary:  NASIM Service
+' Purpose:   Append-only event store: interaction recording, replay,
+'            session forking, checkpointing.
+'            Entry chain: User → Interface → AgentController → TaskService → WireLogRepository
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
-' Review:    CAR refinement loop 2026-06-27
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
 ' SQ:        sq_wirelogrepository01..sq_wirelogrepository05
 ' ============================================================
 

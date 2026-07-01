@@ -5,14 +5,14 @@
 
 ' ============================================================
 ' Title:     nasim — UC: CLI Group (Interface Container)
-' Group:     CLI (CLI Interface)
-' Boundary:  nasim code agent
+' Group:     CLI (CLIAdapter)
+' Boundary:  NASIM Service
 ' Purpose:   CLI-specific interface UCs: REPL, slash commands, rendering.
 '            ALL business operations delegate through AgentController.
-'            Entry chain: User → CLIAdapter → AgentController → TaskService
+'            Entry chain: User → CLIAdapter → AgentController → Services
 ' Milestone: v1.0
-' Version:   10.0.0
-' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
 ' Review:    —
 ' SQ:        sq_cli01..sq_cli08
 ' ============================================================

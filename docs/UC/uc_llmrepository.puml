@@ -3,82 +3,109 @@
 !include common/uc_styles.puml
 
 
-!include common/uc_styles.puml
-
-
 ' ============================================================
-' Title:     nasim — UC: LLMRepository Group — Provider
+' Title:     nasim — UC: LLMRepository Group
 ' Group:     LLMREPOSITORY (LLMRepository)
-' Boundary:  nasim code agent
-' Purpose:   LLM provider abstraction via LiteLLM proxy: registration,
-'            chat request/stream, backend selection.
-'            Entry chain: User → ServerRouter → AgentOrchestrator → LLMRepository
+' Boundary:  NASIM Service
+' Purpose:   LLM API calls + model routing: streaming, fallback chains,
+'            capability-based model selection, task classification.
+'            Entry chain: User → Interface → AgentController → TaskService → LLMRepository
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
-' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_llmrepository01..sq_llmrepository04
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
+' SQ:        sq_llmrepository01..sq_llmrepository08
 ' ============================================================
 
 
-
-!include common/uc_styles.puml
-' ============================================================
-' Title:     nasim — UC: LLMRepository Group — Provider
-' Group:     LLMREPOSITORY (LLMRepository)
-' Boundary:  nasim code agent
-' Purpose:   LLM provider abstraction via LiteLLM proxy: registration,
-'            chat request/stream, backend selection.
-'            Entry chain: User → ServerRouter → AgentOrchestrator → LLMRepository
-' Milestone: v1.0
-' Version:   9.1.0
-' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
-' Review:    CAR refinement loop 2026-06-27
-' SQ:        sq_llmrepository01..sq_llmrepository04
 left to right direction
+
+
 title nasim — LLMRepository Use Cases
+
+
 skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+
+skinparam usecase {
   BackgroundColor #FFFFFF
   BorderColor #424242
   FontColor #000000
   ArrowColor #424242
   FontSize 12
 }
+
+
+skinparam actor {
   BackgroundColor #E8EAF6
   BorderColor #3949AB
   FontColor #1A237E
+  FontSize 12
+}
+
+
+skinparam actor<<system>> {
   BackgroundColor #E3F2FD
   BorderColor #1565C0
   FontColor #0D47A1
+}
+
+
+' ------------------------------------------------------------
 ' Actors
+' ------------------------------------------------------------
+
+
 actor "User" as User
+
+
+
+' ------------------------------------------------------------
 ' System Boundary
+' ------------------------------------------------------------
+
+
 rectangle "nasim" {
-  package "Provider Group (PRV)" {
-    usecase "**LLMREPOSITORY-01 REGISTER Provider**\n--\nRegister provider with LiteLLM proxy" <<include>> as PRV01
-    usecase "**LLMREPOSITORY-02 REQUEST Chat**\n--\nSingle-turn LLM chat request" <<master>> as PRV02
-    usecase "**LLMREPOSITORY-03 STREAM Chat**\n--\nStream LLM chat response" <<master>> as PRV03
-    usecase "**LLMREPOSITORY-04 SELECT Provider Backend**\n--\nSelect best provider backend" <<master>> as PRV04
+  package "LLMRepository Group (LLM)" {
+
+    package "Provider" as PRV_PKG {
+      usecase "**LLMREPOSITORY-01 REGISTER Provider**\n--\nRegister provider with LiteLLM proxy" <<include>> as PRV01
+      usecase "**LLMREPOSITORY-02 REQUEST Chat**\n--\nSingle-turn LLM chat request" <<master>> as PRV02
+      usecase "**LLMREPOSITORY-03 STREAM Chat**\n--\nStream LLM chat response" <<master>> as PRV03
+      usecase "**LLMREPOSITORY-04 SELECT Provider Backend**\n--\nSelect best provider backend" <<master>> as PRV04
+    }
+
+    package "Router" as RTG_PKG {
+      usecase "**LLMREPOSITORY-05 SELECT Model**\n--\nSelect best model for task" <<master>> as RTG01
+      usecase "**LLMREPOSITORY-06 APPLY Fallback**\n--\nFallback to next available model" <<include>> as RTG02
+      usecase "**LLMREPOSITORY-07 CLASSIFY Task**\n--\nClassify task for model routing" <<include>> as RTG03
+      usecase "**LLMREPOSITORY-08 SWITCH Model**\n--\nSwitch model at runtime" <<master>> as RTG04
+    }
+  }
+}
+
+
+' ------------------------------------------------------------
 ' Actor -> Use Case Associations
+' ------------------------------------------------------------
+
+
 User --> PRV02
 User --> PRV03
 User --> PRV04
-' Relationships
-PRV04 ..> PRV01 : <<include>>
-' Title:     nasim — UC: LLMRepository Group — Router
-' Group:     LLMREPOSITORY (LLMRepository)
-' Purpose:   Model selection, fallback chains, task classification,
-'            runtime model switching.
-'            Entry chain: User → ServerRouter → AgentOrchestrator → LLMRepository
-' SQ:        sq_llmrepository01..sq_llmrepository04
-  package "LLMRepository Group — Router" {
-    usecase "**LLMREPOSITORY-01 SELECT Model**\n--\nSelect best model for task" <<master>> as RTG01
-    usecase "**LLMREPOSITORY-02 APPLY Fallback**\n--\nFallback to next available model" <<include>> as RTG02
-    usecase "**LLMREPOSITORY-03 CLASSIFY Task**\n--\nClassify task for model routing" <<include>> as RTG03
-    usecase "**LLMREPOSITORY-04 SWITCH Model**\n--\nSwitch model at runtime" <<master>> as RTG04
 User --> RTG01
 User --> RTG04
+
+
+' ------------------------------------------------------------
+' Relationships
+' ------------------------------------------------------------
+
+
+PRV04 ..> PRV01 : <<include>>
 RTG01 ..> RTG03 : <<include>>
 RTG01 ..> RTG02 : <<include>>
+
 
 @enduml

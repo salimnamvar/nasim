@@ -6,14 +6,14 @@
 ' ============================================================
 ' Title:     nasim — UC Overview (Architecture Navigation Map)
 ' Group:     ALL (All Groups)
-' Boundary:  nasim code agent
-' Purpose:   High-level group overview showing all 18 UC groups
+' Boundary:  NASIM Service
+' Purpose:   High-level group overview showing all UC groups
 '            and their actor interactions. AgentController
 '            (Convergence Point) is the central entry gate.
 '            This is a NAVIGATION MAP — no individual UC IDs shown.
-' Source:    docs/UC/README.md, docs/UC/*.puml
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
 ' Milestone: v1.0
-' Version:   10.0.0
+' Version:   13.0.0
 ' Review:    —
 ' ============================================================
 
@@ -32,41 +32,41 @@ actor "User" as User
 actor "MCP Client" as MCPClient <<system>>
 
 
+
 ' ------------------------------------------------------------
-' System Boundary — 22 Group Use Cases
+' System Boundary — UC Groups
 ' ------------------------------------------------------------
 
 
 rectangle "nasim" {
 
   usecase "**AgentController (Convergence Point)**" <<master>> as AC_GROUP
-  usecase "**API Group (Entry Gate)**" <<master>> as API_GROUP
+  usecase "**HTTPAdapter Group (Entry Gate)**" <<master>> as API_GROUP
   usecase "**CLI Group (Interface Container)**" <<master>> as CLI_GROUP
 
-  usecase "**Agent Group**" <<master>> as AGENT_GROUP
-  usecase "**Session Group**" <<master>> as SESSION_GROUP
-  usecase "**Config Group**" <<master>> as CONFIG_GROUP
-  usecase "**Tool Group**" <<master>> as TOOL_GROUP
+  usecase "**TaskService Group**" <<master>> as TASK_GROUP
+  usecase "**SessionService Group**" <<master>> as SESSION_GROUP
+  usecase "**ConfigService Group**" <<master>> as CONFIG_GROUP
+  usecase "**ToolService Group**" <<master>> as TOOL_GROUP
 
-  usecase "**Provider Group**" <<master>> as PROVIDER_GROUP
-  usecase "**Router Group**" <<master>> as ROUTER_GROUP
-  usecase "**Context Graph Group**" <<master>> as CTX_GROUP
-  usecase "**Safety Group**" <<master>> as SAFETY_GROUP
-  usecase "**Sandbox Group**" <<master>> as SANDBOX_GROUP
-  usecase "**Edit Strategy Group**" <<master>> as EDIT_GROUP
-  usecase "**Evaluation Group**" <<master>> as EVAL_GROUP
-  usecase "**Git Group**" <<master>> as GIT_GROUP
-  usecase "**MCP Group**" <<master>> as MCP_GROUP
-  usecase "**Hooks Group**" <<master>> as HOOKS_GROUP
-  usecase "**Plugins Group**" <<master>> as PLUGINS_GROUP
-  usecase "**Memory Group**" <<master>> as MEMORY_GROUP
-  usecase "**Repo Intelligence Group**" <<master>> as REPO_INTEL_GROUP
-  usecase "**Wire Log Group**" <<master>> as WIRE_LOG_GROUP
+  usecase "**LLMRepository Group**" <<master>> as LLM_GROUP
+  usecase "**ContextService Group**" <<master>> as CTX_GROUP
+  usecase "**SafetyService Group**" <<master>> as SAFETY_GROUP
+  usecase "**SandboxRepository Group**" <<master>> as SANDBOX_GROUP
+  usecase "**EditStrategyRepository Group**" <<master>> as EDIT_GROUP
+  usecase "**EvaluationService Group**" <<master>> as EVAL_GROUP
+  usecase "**GitRepository Group**" <<master>> as GIT_GROUP
+  usecase "**MCPRepository Group**" <<master>> as MCP_GROUP
+  usecase "**ToolService Hooks**" <<master>> as HOOKS_GROUP
+  usecase "**ToolService Plugins**" <<master>> as PLUGINS_GROUP
+  usecase "**MemoryRepository Group**" <<master>> as MEMORY_GROUP
+  usecase "**RepoIntelligenceRepository Group**" <<master>> as REPO_INTEL_GROUP
+  usecase "**WireLogRepository Group**" <<master>> as WIRE_LOG_GROUP
 }
 
 
 ' ------------------------------------------------------------
-' Actor → Group Associations
+' Actor -> Group Associations
 ' ------------------------------------------------------------
 
 
@@ -85,31 +85,30 @@ CLI_GROUP ..> AC_GROUP : <<include>>
 API_GROUP ..> AC_GROUP : <<include>>
 MCP_GROUP ..> AC_GROUP : <<include>>
 
-' AgentController → API Group (business operations)
+' AgentController -> API Group (business operations)
 AC_GROUP ..> API_GROUP : <<include>>
 
-' API Group → downstream core groups (mandatory)
-API_GROUP ..> AGENT_GROUP : <<include>>
+' API Group -> downstream core groups (mandatory)
+API_GROUP ..> TASK_GROUP : <<include>>
 API_GROUP ..> SESSION_GROUP : <<include>>
 API_GROUP ..> CONFIG_GROUP : <<include>>
 API_GROUP ..> TOOL_GROUP : <<include>>
 
-' Agent Group → execution groups (mandatory includes)
-AGENT_GROUP ..> PROVIDER_GROUP : <<include>>
-AGENT_GROUP ..> ROUTER_GROUP : <<include>>
-AGENT_GROUP ..> CTX_GROUP : <<include>>
-AGENT_GROUP ..> SAFETY_GROUP : <<include>>
-AGENT_GROUP ..> SANDBOX_GROUP : <<include>>
+' TaskService -> execution groups (mandatory includes)
+TASK_GROUP ..> LLM_GROUP : <<include>>
+TASK_GROUP ..> CTX_GROUP : <<include>>
+TASK_GROUP ..> SAFETY_GROUP : <<include>>
+TASK_GROUP ..> SANDBOX_GROUP : <<include>>
 
-' Agent Group → specialized/cross-cutting groups (optional extends)
-AGENT_GROUP ..> EDIT_GROUP : <<extend>>
-AGENT_GROUP ..> EVAL_GROUP : <<extend>>
-AGENT_GROUP ..> GIT_GROUP : <<extend>>
-AGENT_GROUP ..> HOOKS_GROUP : <<extend>>
-AGENT_GROUP ..> PLUGINS_GROUP : <<extend>>
-AGENT_GROUP ..> MEMORY_GROUP : <<extend>>
-AGENT_GROUP ..> REPO_INTEL_GROUP : <<extend>>
-AGENT_GROUP ..> WIRE_LOG_GROUP : <<extend>>
+' TaskService -> specialized/cross-cutting groups (optional extends)
+TASK_GROUP ..> EDIT_GROUP : <<extend>>
+TASK_GROUP ..> EVAL_GROUP : <<extend>>
+TASK_GROUP ..> GIT_GROUP : <<extend>>
+TASK_GROUP ..> HOOKS_GROUP : <<extend>>
+TASK_GROUP ..> PLUGINS_GROUP : <<extend>>
+TASK_GROUP ..> MEMORY_GROUP : <<extend>>
+TASK_GROUP ..> REPO_INTEL_GROUP : <<extend>>
+TASK_GROUP ..> WIRE_LOG_GROUP : <<extend>>
 
 
 @enduml

@@ -6,12 +6,12 @@
 ' ============================================================
 ' Title:     nasim — UC: MCPRepository Group
 ' Group:     MCPREPOSITORY (MCPRepository)
-' Boundary:  nasim code agent
-' Purpose:   MCP as first-class subsystem: client/server runtime, tool adapter, discovery
-'            Entry chain: MCP Client → AgentController → Core Engine → MCPRepository
+' Boundary:  NASIM Service
+' Purpose:   MCP extension tools: discovery, invocation
+'            Entry chain: User → Interface → AgentController → TaskService → ToolService → MCPRepository
 ' Milestone: v1.0
-' Version:   10.0.0
-' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
 ' Review:    —
 ' SQ:        sq_mcprepository01..sq_mcprepository04
 ' ============================================================

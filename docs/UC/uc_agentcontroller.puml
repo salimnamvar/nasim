@@ -6,14 +6,14 @@
 ' ============================================================
 ' Title:     nasim — UC: AgentController (Convergence Point)
 ' Group:     AGENTCONTROLLER (AgentController)
-' Boundary:  nasim code agent
+' Boundary:  NASIM Service
 ' Purpose:   Single convergence point for all interface
 '            containers (CLI, HTTP, MCP). Routes validated
-'            requests to Core Engine. Protocol-agnostic.
-'            Entry chain: User → Interface → AgentController → Core Engine
+'            requests to services. Protocol-agnostic.
+'            Entry chain: User → Interface → AgentController → Services
 ' Milestone: v1.0
-' Version:   10.0.0
-' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
 ' Review:    —
 ' SQ:        sq_agentcontroller01..sq_agentcontroller04
 ' ============================================================
@@ -91,10 +91,10 @@ usecase "TOOLSERVICE-14\nLIST Registered Tools\n[uc_tool_advanced]" as TL14_ext 
 
 rectangle "nasim" {
   package "AgentController (Convergence Point)" {
-    usecase "**AGENTCONTROLLER-01 PROCESS Request**\n--\nRoute incoming request\nfrom any interface to Core Engine" <<master>> as AC01
+    usecase "**AGENTCONTROLLER-01 PROCESS Request**\n--\nRoute incoming request\nfrom any interface to services" <<master>> as AC01
     usecase "**AGENTCONTROLLER-02 VALIDATE Request**\n--\nValidate request format,\npermissions, and protocol" <<include>> as AC02
     usecase "**AGENTCONTROLLER-03 ADAPT Protocol**\n--\nAdapt between interface\nprotocols (CLI, HTTP, MCP)" <<include>> as AC03
-    usecase "**AGENTCONTROLLER-04 DISPATCH to Core Engine**\n--\nForward validated request\nto AgentOrchestrator" <<include>> as AC04
+    usecase "**AGENTCONTROLLER-04 DISPATCH to Services**\n--\nForward validated request\nto TaskService, SessionService, ConfigService" <<include>> as AC04
   }
 }
 

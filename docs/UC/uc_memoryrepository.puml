@@ -6,13 +6,13 @@
 ' ============================================================
 ' Title:     nasim — UC: MemoryRepository Group
 ' Group:     MEMORYREPOSITORY (MemoryRepository)
-' Boundary:  nasim code agent
-' Purpose:   Cross-session knowledge persistence, retrieval, search, scoping
-'            Entry chain: User → ServerRouter → AgentOrchestrator → MemoryRepository
+' Boundary:  NASIM Service
+' Purpose:   Cross-session knowledge persistence
+'            Entry chain: User → Interface → AgentController → TaskService → ContextService → MemoryRepository
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
-' Review:    CAR refinement loop 2026-06-27
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
 ' SQ:        sq_memoryrepository01..sq_memoryrepository04
 ' ============================================================
 

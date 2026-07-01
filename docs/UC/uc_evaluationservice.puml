@@ -6,13 +6,14 @@
 ' ============================================================
 ' Title:     nasim — UC: EvaluationService Group
 ' Group:     EVALUATIONSERVICE (EvaluationService)
-' Boundary:  nasim code agent
-' Purpose:   Task evaluation: success checks, LLM review, retry coordination
-'            Entry chain: User → ServerRouter → AgentOrchestrator → EvaluationService
+' Boundary:  NASIM Service
+' Purpose:   Task evaluation: success checks, LLM review, retry coordination,
+'            repetition detection, turn budget management.
+'            Entry chain: User → Interface → AgentController → TaskService → EvaluationService
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    .nasim/rules/ENTITIES.md, docs/UC/README.md
-' Review:    CAR refinement loop 2026-06-27
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
 ' SQ:        sq_evaluationservice01..sq_evaluationservice09
 ' ============================================================
 

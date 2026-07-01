@@ -6,15 +6,15 @@
 ' ============================================================
 ' Title:     nasim — UC: HTTPAdapter Group (Entry Gate)
 ' Group:     HTTPADAPTER (HTTPAdapter)
-' Boundary:  nasim code agent
+' Boundary:  NASIM Service
 ' Purpose:   Core business operations exposed via API.
-'            Sole entry point for all interface containers
-'            (CLI, WebApp, DesktopApp, MobileApp, MCP).
+'            Sole entry point for all HTTP-based interface containers
+'            (WebApp, DesktopApp, MobileApp).
 '            ROD-compliant REST endpoints (AIP-136/193).
-'            Entry chain: User → Interface → AgentController → ServerRouter → downstream groups
+'            Entry chain: User → Interface → HTTPAdapter → AgentController → Services
 ' Milestone: v1.0
-' Version:   10.0.0
-' Source:    docs/C4/c4_nasim_container.puml (v10.0.1)
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
 ' Review:    —
 ' SQ:        sq_httpadapter01..sq_httpadapter11
 ' ============================================================

@@ -4,22 +4,22 @@
 
 | Group | C4 Component Owner | SQ Diagrams | Description |
 |-------|--------------------|:-----------:|-------------|
-| AC | AgentController | 4 | Single convergence point for all interface containers. Routes validated requests to Core Engine. |
+| AC | AgentController | 4 | Single convergence point for all interface containers. Routes validated requests to services. |
 | API | HTTPAdapter | 11 | Core business operations exposed via API (ROD-compliant). Delegates through AgentController. |
 | CLI | CLIAdapter | 8 | CLI-specific interface UCs: REPL, slash commands, rendering. All business operations delegate through AgentController. |
 | AGENT | TaskService | 14 | Core agentic loop, permissions, context, plans, subagents |
-| LLM | LLMRepository | 8 | LLM provider abstraction + model routing via litellm proxy |
-| CONFIG | ConfigRepository | 3 | Config loading and validation |
+| LLM | LLMRepository | 8 | LLM API calls + model routing via litellm |
+| CONFIG | ConfigService | 3 | Config loading, validation, layered overrides |
 | SESSION | SessionService | 9 | Session persistence, versioning, search, fork |
-| SAFETY | SafetyService | 3 | Permission gates, user approval, safety modes |
-| CONTEXTGRAPH | ContextService | 6 | Token counting, compaction, context pipeline |
-| MCP | MCPRepository | 4 | Model Context Protocol client/server |
+| SAFETY | SafetyService | 3 | Permission gates, injection scanning, egress inspection |
+| CONTEXT | ContextService | 6 | Context pipeline: graph construction, truncation, distillation, injection, compaction |
+| MCP | MCPRepository | 4 | MCP extension tools: discovery, invocation |
 | TOOL | ToolService | 34 | All tool implementations, hooks, and plugins |
 | MEMORY | MemoryRepository | 4 | Cross-session knowledge persistence |
 | GIT | GitRepository | 4 | Version control integration |
-| SANDBOX | SandboxRepository | 4 | OS-level process isolation |
-| REPOINTELLIGENCE | RepoIntelligenceRepository | 6 | Codebase indexing, symbol graphs, embedding |
-| EDITSTRATEGY | EditStrategyRepository | 10 | Polymorphic edit strategies |
+| SANDBOX | SandboxRepository | 4 | Sandboxed command execution: timeout, isolation |
+| REPOINTELLIGENCE | RepoIntelligenceRepository | 6 | Codebase intelligence: AST indexing, symbol graph, embedding |
+| EDITSTRATEGY | EditStrategyRepository | 10 | Diff staging, computation, and safe application |
 | EVALUATION | EvaluationService | 9 | Task evaluation and quality checks |
 | WIRELOG | WireLogRepository | 5 | Append-only event store, fork, checkpoint |
 | **Total** | **18 groups** | **146** | **1:1 UC↔SQ mapping (100%)** |
@@ -30,10 +30,10 @@
 
 | UC ID | Operation | Component Owner | SQ Diagram | Notes |
 |-------|-----------|-----------------|------------|-------|
-| AGENTCONTROLLER-01 | PROCESS Request | AgentController | `sq_agentcontroller01_process_request.puml` | Route incoming request from any interface to Core Engine |
+| AGENTCONTROLLER-01 | PROCESS Request | AgentController | `sq_agentcontroller01_process_request.puml` | Route incoming request from any interface to services |
 | AGENTCONTROLLER-02 | VALIDATE Request | AgentController | `sq_agentcontroller02_validate_request.puml` | Validate request format, permissions, and protocol |
 | AGENTCONTROLLER-03 | ADAPT Protocol | AgentController | `sq_agentcontroller03_adapt_protocol.puml` | Adapt between interface protocols (CLI, HTTP, MCP) |
-| AGENTCONTROLLER-04 | DISPATCH to Core Engine | AgentController | `sq_agentcontroller04_dispatch_to_core_engine.puml` | Forward validated request to AgentOrchestrator |
+| AGENTCONTROLLER-04 | DISPATCH to Services | AgentController | `sq_agentcontroller04_dispatch_to_services.puml` | Forward validated request to TaskService, SessionService, ConfigService |
 
 ---
 
@@ -50,8 +50,8 @@
 | HTTPADAPTER-07 | LIST Messages | GET | /v1/sessions/{id}/messages | HTTPAdapter → SessionService | `sq_httpadapter07_list_messages.puml` |
 | HTTPADAPTER-08 | LIST Tools | GET | /v1/tools | HTTPAdapter → ToolService | `sq_httpadapter08_list_tools.puml` |
 | HTTPADAPTER-09 | GET Tool | GET | /v1/tools/{name} | HTTPAdapter → ToolService | `sq_httpadapter09_get_tool.puml` |
-| HTTPADAPTER-10 | GET Config | GET | /v1/config | HTTPAdapter → ConfigRepository | `sq_httpadapter10_get_config.puml` |
-| HTTPADAPTER-11 | UPDATE Config | PATCH | /v1/config | HTTPAdapter → ConfigRepository | `sq_httpadapter11_update_config.puml` |
+| HTTPADAPTER-10 | GET Config | GET | /v1/config | HTTPAdapter → ConfigService | `sq_httpadapter10_get_config.puml` |
+| HTTPADAPTER-11 | UPDATE Config | PATCH | /v1/config | HTTPAdapter → ConfigService | `sq_httpadapter11_update_config.puml` |
 
 ---
 
@@ -64,10 +64,10 @@ All business operations MUST delegate through AgentController. No direct calls t
 | CLI-01 | PROCESS User Input | CLIAdapter | `sq_cli01_process_user_input.puml` | REPL loop, input handling, slash command dispatch |
 | CLI-02 | DISPATCH Slash Command | CLIAdapter | `sq_cli02_dispatch_slash_command.puml` | Maps `/cmd` strings to API calls. `<<include>>` HTTPADAPTER-01, HTTPADAPTER-11 |
 | CLI-03 | STREAM Output | CLIAdapter | `sq_cli03_stream_output.puml` | Renders AgentEvents from API SSE stream to terminal |
-| CLI-04 | READ CLI Arguments | CLIAdapter | `sq_cli04_read_cli_arguments.puml` | Startup argument parsing. `<<include>>` CONFIGREPOSITORY-01 |
+| CLI-04 | READ CLI Arguments | CLIAdapter | `sq_cli04_read_cli_arguments.puml` | Startup argument parsing. `<<include>>` CONFIGSERVICE-01 |
 | CLI-05 | ENABLE Plan Mode | CLIAdapter | `sq_cli05_enable_plan_mode.puml` | `/plan` command. `<<include>>` TASKSERVICE-07 |
 | CLI-06 | REQUEST Approval | CLIAdapter | `sq_cli06_request_approval.puml` | Safety prompt. `<<include>>` SAFETYSERVICE-02 |
-| CLI-07 | SWITCH Model | CLIAdapter | `sq_cli07_switch_model.puml` | `/model` command. `<<include>>` LLMREPOSITORY-04 |
+| CLI-07 | SWITCH Model | CLIAdapter | `sq_cli07_switch_model.puml` | `/model` command. `<<include>>` LLMREPOSITORY-08 |
 | CLI-08 | LIST Sessions | CLIAdapter | `sq_cli08_list_sessions.puml` | `/sessions` command. `<<include>>` HTTPADAPTER-01 |
 
 ---
@@ -102,20 +102,20 @@ All business operations MUST delegate through AgentController. No direct calls t
 | LLMREPOSITORY-02 | REQUEST Chat | LLMRepository | `sq_llmrepository02_request_chat.puml` |
 | LLMREPOSITORY-03 | STREAM Chat | LLMRepository | `sq_llmrepository03_stream_chat.puml` |
 | LLMREPOSITORY-04 | SELECT Provider Backend | LLMRepository | `sq_llmrepository04_select_provider_backend.puml` |
-| LLMREPOSITORY-01 | SELECT Model | LLMRepository | `sq_llmrepository01_select_model.puml` |
-| LLMREPOSITORY-02 | APPLY Fallback | LLMRepository | `sq_llmrepository02_apply_fallback.puml` |
-| LLMREPOSITORY-03 | CLASSIFY Task | LLMRepository | `sq_llmrepository03_classify_task.puml` |
-| LLMREPOSITORY-04 | SWITCH Model | LLMRepository | `sq_llmrepository04_switch_model.puml` |
+| LLMREPOSITORY-05 | SELECT Model | LLMRepository | `sq_llmrepository05_select_model.puml` |
+| LLMREPOSITORY-06 | APPLY Fallback | LLMRepository | `sq_llmrepository06_apply_fallback.puml` |
+| LLMREPOSITORY-07 | CLASSIFY Task | LLMRepository | `sq_llmrepository07_classify_task.puml` |
+| LLMREPOSITORY-08 | SWITCH Model | LLMRepository | `sq_llmrepository08_switch_model.puml` |
 
 ---
 
-## ConfigRepository Group (CFG)
+## ConfigService Group (CFG)
 
 | UC ID | Operation | Component Owner | SQ Diagram |
 |-------|-----------|-----------------|------------|
-| CONFIGREPOSITORY-01 | LOAD Config | ConfigRepository | `sq_configrepository01_load_config.puml` |
-| CONFIGREPOSITORY-02 | VALIDATE Config | ConfigRepository | `sq_configrepository02_validate_config.puml` |
-| CONFIGREPOSITORY-03 | APPLY Layered Config | ConfigRepository | `sq_configrepository03_apply_layered_config.puml` |
+| CONFIGSERVICE-01 | LOAD Config | ConfigService | `sq_configservice01_load_config.puml` |
+| CONFIGSERVICE-02 | VALIDATE Config | ConfigService | `sq_configservice02_validate_config.puml` |
+| CONFIGSERVICE-03 | APPLY Layered Config | ConfigService | `sq_configservice03_apply_layered_config.puml` |
 
 ---
 
@@ -201,20 +201,18 @@ TOOLSERVICE-01..22 are the current tool set. TOOLSERVICE-23 (QUERY Repo Map), TO
 | TOOLSERVICE-20 | RECALL Memory | ToolService | `sq_toolservice20_recall_memory.puml` | Memory |
 | TOOLSERVICE-21 | INSERT Plan | ToolService | `sq_toolservice21_insert_plan.puml` | Planning |
 | TOOLSERVICE-22 | UPDATE Plan | ToolService | `sq_toolservice22_update_plan.puml` | Planning |
-| TOOLSERVICE-01 | REGISTER Hook | ToolService | `sq_toolserviceservice01_register_hook.puml` | Hooks |
-| TOOLSERVICE-02 | DISPATCH Pre-Tool Hook | ToolService | `sq_toolserviceservice02_dispatch_pre_tool_hook.puml` | Hooks |
-| TOOLSERVICE-03 | DISPATCH Post-Tool Hook | ToolService | `sq_toolserviceservice03_dispatch_post_tool_hook.puml` | Hooks |
-| TOOLSERVICE-04 | DISPATCH Pre-LLM Hook | ToolService | `sq_toolserviceservice04_dispatch_pre_llm_hook.puml` | Hooks |
-| TOOLSERVICE-05 | DISPATCH Post-LLM Hook | ToolService | `sq_toolserviceservice05_dispatch_post_llm_hook.puml` | Hooks |
-| TOOLSERVICE-06 | VALIDATE Hook Result | ToolService | `sq_toolserviceservice06_validate_hook_result.puml` | Hooks |
-| TOOLSERVICE-01 | DISCOVER Plugins | ToolService | `sq_toolserviceservice01_discover_plugins.puml` | Plugins |
-| TOOLSERVICE-02 | LOAD Manifest | ToolService | `sq_toolserviceservice02_load_manifest.puml` | Plugins |
-| TOOLSERVICE-03 | REGISTER Plugin Tools | ToolService | `sq_toolserviceservice03_register_plugin_tools.puml` | Plugins |
-| TOOLSERVICE-04 | REGISTER Plugin Hooks | ToolService | `sq_toolserviceservice04_register_plugin_hooks.puml` | Plugins |
-| TOOLSERVICE-05 | ENABLE Plugin | ToolService | `sq_toolserviceservice05_enable_plugin.puml` | Plugins |
-| TOOLSERVICE-06 | DISABLE Plugin | ToolService | `sq_toolserviceservice06_disable_plugin.puml` | Plugins |
-
----
+| TOOLSERVICE-HK01 | REGISTER Hook | ToolService | `sq_toolservice_hk01_register_hook.puml` | Hooks |
+| TOOLSERVICE-HK02 | DISPATCH Pre-Tool Hook | ToolService | `sq_toolservice_hk02_dispatch_pre_tool_hook.puml` | Hooks |
+| TOOLSERVICE-HK03 | DISPATCH Post-Tool Hook | ToolService | `sq_toolservice_hk03_dispatch_post_tool_hook.puml` | Hooks |
+| TOOLSERVICE-HK04 | DISPATCH Pre-LLM Hook | ToolService | `sq_toolservice_hk04_dispatch_pre_llm_hook.puml` | Hooks |
+| TOOLSERVICE-HK05 | DISPATCH Post-LLM Hook | ToolService | `sq_toolservice_hk05_dispatch_post_llm_hook.puml` | Hooks |
+| TOOLSERVICE-HK06 | VALIDATE Hook Result | ToolService | `sq_toolservice_hk06_validate_hook_result.puml` | Hooks |
+| TOOLSERVICE-PLG01 | DISCOVER Plugins | ToolService | `sq_toolservice_plg01_discover_plugins.puml` | Plugins |
+| TOOLSERVICE-PLG02 | LOAD Manifest | ToolService | `sq_toolservice_plg02_load_manifest.puml` | Plugins |
+| TOOLSERVICE-PLG03 | REGISTER Plugin Tools | ToolService | `sq_toolservice_plg03_register_plugin_tools.puml` | Plugins |
+| TOOLSERVICE-PLG04 | REGISTER Plugin Hooks | ToolService | `sq_toolservice_plg04_register_plugin_hooks.puml` | Plugins |
+| TOOLSERVICE-PLG05 | ENABLE Plugin | ToolService | `sq_toolservice_plg05_enable_plugin.puml` | Plugins |
+| TOOLSERVICE-PLG06 | DISABLE Plugin | ToolService | `sq_toolservice_plg06_disable_plugin.puml` | Plugins |
 
 ---
 
@@ -317,8 +315,8 @@ EVALUATIONSERVICE-02..09 are sub-use-cases of EVALUATIONSERVICE-01. They use `<<
 
 | Data Structure | Owner Group | Role |
 |----------------|-------------|------|
-| CompactionPolicy | TASKSERVICE (Agent/TaskService) | Compaction rules: token threshold, message age, importance scoring |
-| StrategyHeuristics | EDITSTRATEGYREPOSITORY (Edit Strategy) | Rules: edit_size, risk_level, file_type, complexity |
+| CompactionPolicy | TASKSERVICE (TaskService) | Compaction rules: token threshold, message age, importance scoring |
+| StrategyHeuristics | EDITSTRATEGYREPOSITORY (EditStrategyRepository) | Rules: edit_size, risk_level, file_type, complexity |
 
 ---
 
@@ -345,17 +343,17 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 | HTTPAdapter | API | HTTPADAPTER-01..11 | Core business operations (HTTP API) |
 | CLIAdapter | CLI | CLI-01..08 | CLI-specific interface UCs |
 | TaskService | AGT | TASKSERVICE-01..15 | Core agentic loop |
-| LLMRepository | LLM | LLMREPOSITORY-01..04, LLMREPOSITORY-01..04 | LLM provider abstraction and model routing |
-| ConfigRepository | CFG | CONFIGREPOSITORY-01..03 | Config loading and validation |
-| SessionService | SSN | SESSIONSERVICE-01..09 | Session persistence |
-| SafetyService | SAF | SAFETYSERVICE-01..03 | Permission gates |
+| LLMRepository | LLM | LLMREPOSITORY-01..08 | LLM API calls and model routing |
+| ConfigService | CFG | CONFIGSERVICE-01..03 | Config loading and validation |
+| SessionService | SSN | SESSIONSERVICE-01..09 | Session lifecycle |
+| SafetyService | SAF | SAFETYSERVICE-01..03 | Permission gating, injection scanning |
 | ContextService | CTX | CONTEXTSERVICE-01..06 | Context pipeline |
-| MCPRepository | MCP | MCPREPOSITORY-01..04 | MCP protocol handling |
-| ToolService | TL | TOOLSERVICE-01..22, TOOLSERVICE-01..06, TOOLSERVICE-01..06 | Tool registry, hooks, plugins |
+| MCPRepository | MCP | MCPREPOSITORY-01..04 | MCP extension tools |
+| ToolService | TL | TOOLSERVICE-01..22, TOOLSERVICE-HK01..06, TOOLSERVICE-PLG01..06 | Tool registry, hooks, plugins |
 | WireLogRepository | WRL | WIRELOGREPOSITORY-01..05 | Append-only event store |
 | MemoryRepository | MEM | MEMORYREPOSITORY-01..04 | Cross-session knowledge |
 | GitRepository | VCS | GITREPOSITORY-01..04 | Version control |
-| SandboxRepository | SBX | SANDBOXREPOSITORY-01..04 | OS isolation |
+| SandboxRepository | SBX | SANDBOXREPOSITORY-01..04 | Sandboxed execution |
 | RepoIntelligenceRepository | RIM | REPOINTELLIGENCEREPOSITORY-01..06 | Codebase intelligence |
 | EditStrategyRepository | EDT | EDITSTRATEGYREPOSITORY-01..10 | Edit strategies |
 | EvaluationService | EVL | EVALUATIONSERVICE-01..09 | Task evaluation |
