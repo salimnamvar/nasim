@@ -6,8 +6,8 @@
 '            All interfaces (CLI, WebApp, DesktopApp, MobileApp,
 '            MCP Client) are external clients connecting to it.
 ' Milestone: v1.0
-' Version:   12.1.0
-' Source:    docs/C4/c4_nasim_context.puml (v11.0.0)
+' Version:   12.2.0
+' Source:    docs/C4/c4_nasim_context.puml (v11.1.0)
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
@@ -69,13 +69,13 @@ Rel(nasim_app, repo_intel, "parses code, queries intelligence", "in-process / HT
 
 ' ── Legend ───────────────────────────────────────────────────
 legend right
-    |= Color |= CSR Layer |
-    | <#E3F2FD> | Controller (CLI, API) |
-    | <#FFF3E0> | Service (Agent, Router, Safety) |
-    | <#E8F5E9> | Repository (Session, Tool, Memory) |
-    | <#F3E5F5> | Infrastructure (MCP, Sandbox, Obs) |
-    | <#FFFDE7> | Data Store (JSONL, YAML, embeddings) |
-    | <#FAFAFA> | External Container (WebApp, Desktop) |
+    |= Symbol |= Meaning |
+    | Person | Human actor |
+    | System | System of interest |
+    | System_Ext | External system |
+    | Container_Ext | External client |
+    | Container | Internal deployable |
+    | System_Boundary | Service boundary |
 endlegend
 
 @enduml

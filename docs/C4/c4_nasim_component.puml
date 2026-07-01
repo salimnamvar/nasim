@@ -7,9 +7,13 @@
 '            adapters, which converge at AgentController (single entry).
 '            Consistent naming: Adapter/Controller, Service, Repository.
 ' Milestone: v1.0
-' Version:   11.3.0
-' Source:    docs/C4/c4_nasim_container.puml (v11.0.1)
+' Version:   11.4.0
+' Source:    docs/C4/c4_nasim_container.puml (v12.2.0)
 ' ============================================================
+' SIM-01 EXCEPTION: 40 elements — single container overview showing all
+' CSR layers (Controller, Service, Repository, DataStore) with full
+' external client and system traceability. Splitting would lose the
+' cross-boundary CSR enforcement visibility.
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
 !theme plain
@@ -28,7 +32,7 @@ Container_Ext(mobile, "MobileApp", "React Native / Flutter", "Mobile application
 Container_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP")
 
 ' ── NASIM Application Boundary ──
-Container_Boundary(nasim_application, "NASIM Application") {
+Container_Boundary(nasim_app, "NASIM Application") {
 
     ' ── Controller Layer (single convergence point) ──
     Boundary(controller_layer, "Controller Layer") <<controller>> {
@@ -40,11 +44,11 @@ Container_Boundary(nasim_application, "NASIM Application") {
 
     ' ── Service Layer ──
     Boundary(service_layer, "Service Layer") <<service>> {
-        Component(task_svc, "TaskService", "", "Agentic loop: LLM call, tool dispatch, context assembly, subagent orchestration, error recovery, persona management")
-        Component(tool_svc, "ToolService", "", "Tool registry, parameter validation, execution dispatch; includes subagent, todo, plan, review tools, dynamic plugin-loaded tools, and lifecycle hook dispatch (PreToolUse, PostToolUse, PreLLMCall, PostLLMCall)")
-        Component(session_svc, "SessionService", "", "Session lifecycle: create, load, save, snapshot, revert")
+        Component(task_svc, "TaskService", "asyncio", "Agentic loop: LLM call, tool dispatch, context assembly, subagent orchestration, error recovery, persona management")
+        Component(tool_svc, "ToolService", "registry", "Tool registry, parameter validation, execution dispatch; includes subagent, todo, plan, review tools, dynamic plugin-loaded tools, and lifecycle hook dispatch (PreToolUse, PostToolUse, PreLLMCall, PostLLMCall)")
+        Component(session_svc, "SessionService", "asyncio", "Session lifecycle: create, load, save, snapshot, revert")
         Component(safety_svc, "SafetyService", "", "Permission gating, injection scanning, egress inspection")
-        Component(context_svc, "ContextService", "", "Context pipeline: graph construction, truncation, distillation, injection, and compaction")
+        Component(context_svc, "ContextService", "graph", "Context pipeline: graph construction, truncation, distillation, injection, and compaction")
         Component(eval_svc, "EvaluationService", "", "Task evaluation: success checks, LLM review, retry coordination, repetition detection, turn budget management")
     }
 
@@ -157,11 +161,11 @@ Rel(config_repo, config_store, "reads and writes configuration", "YAML")
 ' ── Repository → External Systems ──
 ' ══════════════════════════════════════════════════════════════
 
-Rel(llm_repo, llm, "routes LLM API calls", "HTTP/JSON streaming")
-Rel(fs_repo, host_fs, "reads and writes files", "path I/O")
-Rel(edit_strategy_repo, host_fs, "reads originals, writes staged edits", "path I/O")
-Rel(sandbox_repo, sandbox, "executes commands", "subprocess")
-Rel(git_repo, git, "version control operations", "git CLI")
+Rel(llm_repo, llm, "sends context, receives completions", "HTTP/JSON streaming")
+Rel(fs_repo, host_fs, "reads and writes project files", "path I/O")
+Rel(edit_strategy_repo, host_fs, "reads and writes project files", "path I/O")
+Rel(sandbox_repo, sandbox, "runs commands in isolation", "subprocess")
+Rel(git_repo, git, "reads state, creates commits", "git CLI")
 Rel(mcp_repo, mcp_server, "invokes extension tools", "stdio / SSE")
 Rel(repo_intel_repo, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
 Rel(web_repo, web, "fetches documentation", "HTTPS")
