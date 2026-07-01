@@ -1,7 +1,7 @@
-@startuml sm_plan_lifecycle
+@startuml sm_task_svc_plan
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — Plan Lifecycle State Machine
+' Title:     nasim — Task Service: Plan Lifecycle State Machine
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Plan (owned by Task Service)
 ' Milestone: v1.0
@@ -10,9 +10,9 @@
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' ============================================================
 
-title nasim — Plan Lifecycle
+title nasim — Task Service: Plan Lifecycle
 
-[*] --> EMPTY : TASKSERVICE-07
+[*] --> EMPTY : TASKSVC-07
 
 state "EMPTY" as EMPTY #F5F5F5
 EMPTY : No plan active.
@@ -20,7 +20,7 @@ EMPTY : Default state.
 
 state "BUILDING" as BUILDING #FFE0B2
 BUILDING : Plan being constructed.
-BUILDING : TASKSERVICE-07 QUEUE Plan.
+BUILDING : TASKSVC-07 QUEUE Plan.
 
 state "QUEUED" as QUEUED #E3F2FD
 QUEUED : Plan queued for approval.
@@ -28,7 +28,7 @@ QUEUED : Plan construction complete.
 
 state "APPROVED" as APPROVED #388E3C
 APPROVED : Plan approved by user.
-APPROVED : TASKSERVICE-08 APPROVE Plan.
+APPROVED : TASKSVC-08 APPROVE Plan.
 
 state "EXECUTING" as EXECUTING #A5D6A7
 EXECUTING : Plan steps being executed.
@@ -42,15 +42,15 @@ state "REJECTED" as REJECTED #B71C1C
 REJECTED : Plan rejected by user.
 REJECTED : Terminal state.
 
-EMPTY --> BUILDING : TASKSERVICE-07
-BUILDING --> QUEUED : TASKSERVICE-07
-BUILDING --> EMPTY : TASKSERVICE-07
-QUEUED --> APPROVED : TASKSERVICE-08
-QUEUED --> REJECTED : TASKSERVICE-08
-APPROVED --> EXECUTING : TASKSERVICE-08
-EXECUTING --> COMPLETED : TASKSERVICE-01
-EXECUTING --> EMPTY : TASKSERVICE-14
-COMPLETED --> [*] : TASKSERVICE-01
-REJECTED --> [*] : TASKSERVICE-08
+EMPTY --> BUILDING : TASKSVC-07
+BUILDING --> QUEUED : TASKSVC-07
+BUILDING --> EMPTY : TASKSVC-07
+QUEUED --> APPROVED : TASKSVC-08
+QUEUED --> REJECTED : TASKSVC-08
+APPROVED --> EXECUTING : TASKSVC-08
+EXECUTING --> COMPLETED : TASKSVC-01
+EXECUTING --> EMPTY : TASKSVC-14
+COMPLETED --> [*] : TASKSVC-01
+REJECTED --> [*] : TASKSVC-08
 
 @enduml

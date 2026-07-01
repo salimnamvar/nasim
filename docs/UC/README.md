@@ -32,23 +32,26 @@
 | `repo_intel_repo` | Repo Intelligence Repository | `uc_repo_intel_repo.puml` | `REPOINTELREPO-` | 6 | AST indexing, symbol graph, embeddings, semantic search. |
 | `web_repo` | Web Repository | `uc_web_repo.puml` | `WEBREPO-` | 2 | Web fetch: documentation, search results. |
 | `wire_log_repo` | Wire Log Repository | `uc_wire_log_repo.puml` | `WIRELOGREPO-` | 5 | Append-only event store, fork, checkpoint. |
-| **Total** | **24 components** | **24 diagrams** + `uc_overview.puml` | — | **~175** | 1:1 C4 component ↔ UC diagram |
+| **Total** | **24 components** | **24 diagrams** + `uc_overview.puml` | — | **164** | 1:1 C4 component ↔ UC diagram |
 
 ---
 
 ## Agent Controller Group (`agent_ctrl`) — Convergence Point
+
+Actor: `Interface Adapter` (cli_adp / http_adp / mcp_adp). End-users never associate directly with this group.
 
 | UC ID | Operation | Component Owner | SQ Diagram | Notes |
 |-------|-----------|-----------------|------------|-------|
 | AGENTCTRL-01 | PROCESS Request | Agent Controller | `sq_agentcontroller01_process_request.puml` | Route incoming request from any interface adapter to services |
 | AGENTCTRL-02 | VALIDATE Request | Agent Controller | `sq_agentcontroller02_validate_request.puml` | Validate request format, permissions, and protocol |
 | AGENTCTRL-03 | ADAPT Protocol | Agent Controller | `sq_agentcontroller03_adapt_protocol.puml` | Adapt between interface protocols (CLI, HTTP, MCP) |
-| AGENTCTRL-04 | DISPATCH to Services | Agent Controller | `sq_agentcontroller04_dispatch_to_services.puml` | Forward validated request to Task Service, Session Service, Config Service |
+| AGENTCTRL-04 | DISPATCH to Services | Agent Controller | `sq_agentcontroller04_dispatch_to_services.puml` | Dispatches to TASKSVC-01/07, SESSIONSVC-01..09, CONFIGSVC-01..03, TOOLSVC-14 |
 
 ---
 
-## HTTP Adapter Group (`http_adp`) — Core Business UCs
+## HTTP Adapter Group (`http_adp`) — Protocol Adaptation
 
+HTTP endpoints adapt REST/SSE requests to `agent_ctrl`. No business logic lives in this group.
 All HTTP operations delegate through Agent Controller (`agent_ctrl`) before reaching services.
 
 | UC ID | Operation | HTTP Method | Path | Component Owner | SQ Diagram |
@@ -73,14 +76,14 @@ All business operations MUST delegate through Agent Controller (`agent_ctrl`). N
 
 | UC ID | Operation | Component Owner | SQ Diagram | Notes |
 |-------|-----------|-----------------|------------|-------|
-| CLIADP-01 | PROCESS User Input | CLI Adapter | `sq_cli01_process_user_input.puml` | REPL loop, input handling, slash command dispatch. `<<include>>` AGENTCTRL-01 |
-| CLIADP-02 | DISPATCH Slash Command | CLI Adapter | `sq_cli02_dispatch_slash_command.puml` | Maps `/cmd` strings to API calls. `<<include>>` AGENTCTRL-01, HTTPADP-01, HTTPADP-11 |
-| CLIADP-03 | STREAM Output | CLI Adapter | `sq_cli03_stream_output.puml` | Renders AgentEvents from API SSE stream to terminal |
-| CLIADP-04 | READ CLI Arguments | CLI Adapter | `sq_cli04_read_cli_arguments.puml` | Startup argument parsing. `<<include>>` CONFIGSVC-01 |
-| CLIADP-05 | ENABLE Plan Mode | CLI Adapter | `sq_cli05_enable_plan_mode.puml` | `/plan` command. `<<include>>` TASKSVC-07 |
-| CLIADP-06 | REQUEST Approval | CLI Adapter | `sq_cli06_request_approval.puml` | Safety prompt. `<<include>>` SAFETYSVC-02 |
-| CLIADP-07 | SWITCH Model | CLI Adapter | `sq_cli07_switch_model.puml` | `/model` command. `<<include>>` LLMREPO-08 |
-| CLIADP-08 | LIST Sessions | CLI Adapter | `sq_cli08_list_sessions.puml` | `/sessions` command. `<<include>>` HTTPADP-01 |
+| CLIADP-01 | PROCESS User Input | CLI Adapter | `sq_cli01_process_user_input.puml` | REPL loop, input handling. `<<include>>` AGENTCTRL-01, CLIADP-03. `<<extend>>` CLIADP-06 |
+| CLIADP-02 | DISPATCH Slash Command | CLI Adapter | `sq_cli02_dispatch_slash_command.puml` | Maps `/cmd` strings to `agent_ctrl`. `<<include>>` AGENTCTRL-01. `<<extend>>` CLIADP-05, 07, 08 |
+| CLIADP-03 | STREAM Output | CLI Adapter | `sq_cli03_stream_output.puml` | Renders AgentEvents from SSE stream to terminal |
+| CLIADP-04 | READ CLI Arguments | CLI Adapter | `sq_cli04_read_cli_arguments.puml` | Startup argument parsing. `<<include>>` AGENTCTRL-01 |
+| CLIADP-05 | ENABLE Plan Mode | CLI Adapter | `sq_cli05_enable_plan_mode.puml` | `/plan` slash command. `<<extend>>` CLIADP-02. `<<include>>` AGENTCTRL-01 → TASKSVC-07 |
+| CLIADP-06 | REQUEST Approval | CLI Adapter | `sq_cli06_request_approval.puml` | Safety prompt during task. `<<extend>>` CLIADP-01. `<<include>>` AGENTCTRL-01 → SAFETYSVC-02 |
+| CLIADP-07 | SWITCH Model | CLI Adapter | `sq_cli07_switch_model.puml` | `/model` slash command. `<<extend>>` CLIADP-02. `<<include>>` AGENTCTRL-01 → LLMREPOSITORY-08 |
+| CLIADP-08 | LIST Sessions | CLI Adapter | `sq_cli08_list_sessions.puml` | `/sessions` slash command. `<<extend>>` CLIADP-02. `<<include>>` AGENTCTRL-01 → SESSIONSVC-03 |
 
 ---
 
@@ -106,7 +109,7 @@ Entry: Adapter → `agent_ctrl` → `task_svc`. C4 orchestration: `task_svc` →
 | UC ID | Operation | Component Owner | SQ Diagram | Notes |
 |-------|-----------|-----------------|------------|-------|
 | TASKSVC-01 | PROCESS User Task | Task Service | `sq_taskservice01_process_user_task.puml` | Primary orchestrator. `<<include>>` TASKSVC-02, TASKSVC-03, TASKSVC-15, CONTEXTSVC-01 |
-| TASKSVC-02 | DISPATCH Tool Call | Task Service | `sq_taskservice02_dispatch_tool_call.puml` | Routes to `tool_svc`. `<<include>>` SAFETYSVC-01, LLMREPO-02/03 |
+| TASKSVC-02 | DISPATCH Tool Call | Task Service | `sq_taskservice02_dispatch_tool_call.puml` | Routes to `tool_svc`. `<<include>>` TOOLSVC-HK02, SAFETYSVC-01, LLMREPOSITORY-02/03 |
 | TASKSVC-03 | UPDATE Conversation | Task Service | `sq_taskservice03_update_conversation.puml` | Appends messages. `<<include>>` SESSIONREPO-01, WIRELOGREPO-01 |
 | TASKSVC-04 | DELETE History | Task Service | `sq_taskservice04_delete_history.puml` | Resets conversation history |
 | TASKSVC-05 | *(vacant — ID retired per permanence rule)* | — | — | Numbering gap preserved |
@@ -204,9 +207,11 @@ CONTEXTSVC-02..06 are sub-use-cases of CONTEXTSVC-01.
 | MCPREPOSITORY-01 | CONNECT MCP Server | MCP Repository | `sq_mcprepository01_connect_mcp_server.puml` | |
 | MCPREPOSITORY-02 | DISCOVER MCP Tools | MCP Repository | `sq_mcprepository02_discover_mcp_tools.puml` | |
 | MCPREPOSITORY-03 | ADAPT MCP Tool | MCP Repository | `sq_mcprepository03_adapt_mcp_tool.puml` | |
-| MCPREPOSITORY-04 | EXPOSE nasim Tools | MCP Repository | `sq_mcprepository04_expose_nasim_tools.puml` | |
+| MCPREPOSITORY-04 | EXPOSE nasim Tools | MCP Repository | `sq_mcprepository04_expose_nasim_tools.puml` | Internal tool-format bridge only. External MCP exposure is **MCPADP-02** (`mcp_adp`), not this UC. |
 
 > MCPREPOSITORY-05 (REGISTER A2A Task) and MCPREPOSITORY-06 (RECEIVE A2A Result) are planned (A2A agent-to-agent delegation). They are excluded from the current count pending SQ authoring per the design-chain discipline. When implemented, they will use new IDs (MCPREPOSITORY-05 and MCPREPOSITORY-06 remain reserved per UC-02 permanence rule).
+
+> **MCP boundary:** `mcp_adp` (MCPADP-*) handles protocol adaptation for external MCP clients. `mcp_repo` (MCPREPOSITORY-*) handles outbound extension-tool integration invoked by `tool_svc`.
 
 ---
 
@@ -359,6 +364,21 @@ EVALSVC-02..09 are sub-use-cases of EVALSVC-01.
 
 ---
 
+## Actor Association Rules
+
+Per the CSR (Controller → Service → Repository) discipline, actor associations follow strict layering:
+
+| Layer | Actor | Rationale |
+|-------|-------|-----------|
+| **Controller Layer** (adapters) | `User`, `MCP Client` | External clients interact only with adapters |
+| **Agent Controller** | `Interface Adapter` | Convergence point — adapters delegate here |
+| **Service Layer** (task_svc, session_svc, config_svc) | `Agent Controller` | Services receive requests from AC, never directly from users |
+| **Service Layer** (tool_svc, safety_svc, context_svc, eval_svc) | `Task Service` | These are orchestrated by task_svc, not directly by AC |
+
+**Rule:** Only Master UCs at the Controller boundary have direct User/MCP Client associations. All other layers use their upstream component as the actor.
+
+---
+
 ## Sub-UC Modeling
 
 Sub-use-cases inherit the Component Owner of their parent UC and are modeled with `<<include>>` relationships in the parent UC diagram:
@@ -367,7 +387,7 @@ Sub-use-cases inherit the Component Owner of their parent UC and are modeled wit
 |-----------|---------|---------|
 | AGENTCTRL-01 (PROCESS Request) | AGENTCTRL-02..04 | `AGENTCTRL-01 ..> AGENTCTRL-02 : <<include>>` etc. |
 | CONTEXTSVC-01 (PROCESS Context) | CONTEXTSVC-02..06 | `CONTEXTSVC-01 ..> CONTEXTSVC-02 : <<include>>` etc. |
-| EDITSTRATEGYREPO-01 (SELECT Strategy) | EDITSTRATEGYREPO-02..10 | `EDITSTRATEGYREPO-01 ..> EDITSTRATEGYREPO-02 : <<include>>` etc. |
+| EDITSTRATEGYREPOSITORY-01 (SELECT Strategy) | EDITSTRATEGYREPOSITORY-02..10 | `EDITSTRATEGYREPOSITORY-01 ..> EDITSTRATEGYREPOSITORY-02 : <<include>>` etc. |
 | EVALSVC-01 (EVALUATE Task) | EVALSVC-02..09 | `EVALSVC-01 ..> EVALSVC-02 : <<include>>` etc. |
 
 No sub-UC has its own sub-UCs (no nesting beyond one level).
@@ -376,7 +396,17 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 
 ## Traceability Matrix (C4 Component → UC)
 
-Every C4 component maps 1:1 to a UC diagram file. UC ID prefixes are derived from the C4 component ID (remove underscores, uppercase).
+Every C4 component maps 1:1 to a UC diagram file.
+
+### UC ID Naming Convention
+
+| Scope | Rule | Example |
+|-------|------|---------|
+| **Canonical ID** (in UC diagram labels) | Full component name, uppercase, no underscores | `LLMREPOSITORY-02`, `SESSIONREPO-01` |
+| **Cross-group extref** (in `<<extref>>` stubs) | Short C4 ID prefix from traceability table | `LLMREPO-02`, `WIRELOGREPO-01` |
+| **C4 component ID** | snake_case in diagrams and README tables | `llm_repo`, `agent_ctrl` |
+
+Extref stubs use the short prefix for readability; the owning diagram always uses the canonical ID.
 
 ### Primary Traceability Table
 
@@ -414,19 +444,19 @@ Every C4 component maps 1:1 to a UC diagram file. UC ID prefixes are derived fro
 | CLI Adapter | `cli_adp` | `uc_cli_adp.puml` | CLIADP-01..08 | CLI-specific interface: REPL, slash commands, rendering. Accessed via `agent_ctrl`. |
 | HTTP Adapter | `http_adp` | `uc_http_adp.puml` | HTTPADP-01..11 | Core business operations (HTTP API). Accessed via `agent_ctrl`. |
 | MCP Adapter | `mcp_adp` | `uc_mcp_adp.puml` | MCPADP-01..04 | MCP protocol interface: tool exposure, stdio/SSE transport. Accessed via `agent_ctrl`. |
-| Agent Controller | `agent_ctrl` | `uc_agent_ctrl.puml` | AGENTCTRL-01..04 | Single convergence point: routes requests to services |
+| Agent Controller | `agent_ctrl` | `uc_agent_ctrl.puml` | AGENTCTRL-01..04 | Single convergence point: routes requests to services. Actor: `Interface Adapter` (not end-user). |
 
 ### Service Layer
 
-| C4 Component | C4 ID | UC Diagram | UC IDs | C4 Entry Chain |
-|--------------|-------|------------|--------|----------------|
-| Task Service | `task_svc` | `uc_task_svc.puml` | TASKSVC-01..15 | `agent_ctrl` → `task_svc` |
-| Tool Service | `tool_svc` | `uc_tool_svc.puml` | TOOLSVC-01..22, HK, PLG | `agent_ctrl` → `task_svc` → `tool_svc` |
-| Session Service | `session_svc` | `uc_session_svc.puml` | SESSIONSVC-01..09 | `agent_ctrl` → `session_svc` |
-| Config Service | `config_svc` | `uc_config_svc.puml` | CONFIGSVC-01..03 | `agent_ctrl` → `config_svc` |
-| Safety Service | `safety_svc` | `uc_safety_svc.puml` | SAFETYSVC-01..03 | `agent_ctrl` → `task_svc` → `safety_svc` |
-| Context Service | `context_svc` | `uc_context_svc.puml` | CONTEXTSVC-01..06 | `agent_ctrl` → `task_svc` → `context_svc` |
-| Evaluation Service | `eval_svc` | `uc_eval_svc.puml` | EVALSVC-01..09 | `agent_ctrl` → `task_svc` → `eval_svc` |
+| C4 Component | C4 ID | UC Diagram | UC IDs | C4 Entry Chain | UC Actor |
+|--------------|-------|------------|--------|----------------|----------|
+| Task Service | `task_svc` | `uc_task_svc.puml` | TASKSVC-01..15 | `agent_ctrl` → `task_svc` | Agent Controller |
+| Tool Service | `tool_svc` | `uc_tool_svc.puml` | TOOLSVC-01..22, HK, PLG | `agent_ctrl` → `task_svc` → `tool_svc` | Task Service |
+| Session Service | `session_svc` | `uc_session_svc.puml` | SESSIONSVC-01..09 | `agent_ctrl` → `session_svc` | Agent Controller |
+| Config Service | `config_svc` | `uc_config_svc.puml` | CONFIGSVC-01..03 | `agent_ctrl` → `config_svc` | Agent Controller |
+| Safety Service | `safety_svc` | `uc_safety_svc.puml` | SAFETYSVC-01..03 | `agent_ctrl` → `task_svc` → `safety_svc` | Task Service |
+| Context Service | `context_svc` | `uc_context_svc.puml` | CONTEXTSVC-01..06 | `agent_ctrl` → `task_svc` → `context_svc` | Task Service |
+| Evaluation Service | `eval_svc` | `uc_eval_svc.puml` | EVALSVC-01..09 | `agent_ctrl` → `task_svc` → `eval_svc` | Task Service |
 
 ### Repository Layer
 
@@ -457,4 +487,16 @@ Every C4 component maps 1:1 to a UC diagram file. UC ID prefixes are derived fro
 
 ---
 
-**Total: 150 UCs** across 19 groups (18 original + MCP Adapter) matching 150 SQ diagrams (1:1 mapping, excluding TASKSERVICE-05 which is a vacant ID per permanence rule).
+**Total: 164 UCs** across 24 C4 component groups (+ `uc_overview.puml` navigation map). Excludes overview group nodes and the vacant TASKSVC-05 ID (permanence rule). Repository-layer UCs use canonical `*REPOSITORY-*` IDs; extref stubs use short prefixes per the naming convention above.
+
+### Adapter → Agent Controller → Service Routing
+
+| Adapter UC | HTTP path / trigger | Agent Controller dispatch | Target service UC |
+|------------|---------------------|---------------------------|-------------------|
+| HTTPADP-01..05, 07 | `/v1/sessions*` | AGENTCTRL-04 | SESSIONSVC-01..09 |
+| HTTPADP-06 | `POST ...:dispatch` | AGENTCTRL-04 | TASKSVC-01 |
+| HTTPADP-08..09 | `/v1/tools*` | AGENTCTRL-04 | TOOLSVC-14 |
+| HTTPADP-10..11 | `/v1/config` | AGENTCTRL-04 | CONFIGSVC-01..03 |
+| CLIADP-01 | REPL input | AGENTCTRL-01 | TASKSVC-01 |
+| CLIADP-02, 05, 07, 08 | Slash commands | AGENTCTRL-01 | Per-command service UC |
+| MCPADP-01..03 | MCP request | AGENTCTRL-01 | TASKSVC-01 / TOOLSVC-14 |

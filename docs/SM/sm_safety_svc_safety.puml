@@ -1,22 +1,22 @@
-@startuml sm_safety_mode_lifecycle
+@startuml sm_safety_svc_safety
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — Safety Mode Lifecycle State Machine
+' Title:     nasim — Safety Service: Mode Lifecycle State Machine
 ' Boundary:  nasim code agent
 ' Purpose:   Mode lifecycle for Safety Service.
 '            Modes: PERMISSIVE, ASK, BLOCK.
-'            All mode transitions via SAFETYSERVICE-03 APPLY Safety Mode.
+'            All mode transitions via SAFETYSVC-03 APPLY Safety Mode.
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (Safety Service), docs/UC/README.md (SAFETYSERVICE-01, SAFETYSERVICE-03)
+' Source:    C4 component diagram (Safety Service), docs/UC/README.md (SAFETYSVC-01, SAFETYSVC-03)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
 ' ============================================================
 
-title nasim — Safety Mode Lifecycle
+title nasim — Safety Service: Mode Lifecycle
 
-[*] --> UNINITIALIZED : SAFETYSERVICE-03
+[*] --> UNINITIALIZED : SAFETYSVC-03
 
 state "UNINITIALIZED" as UNINITIALIZED #BDBDBD
 UNINITIALIZED : Safety system not initialized.
@@ -24,34 +24,34 @@ UNINITIALIZED : Default state before first mode apply.
 
 state "PERMISSIVE" as PERMISSIVE #9CCC65
 PERMISSIVE : All operations allowed, no approval prompts.
-PERMISSIVE : SAFETYSERVICE-03 APPLY Safety Mode.
+PERMISSIVE : SAFETYSVC-03 APPLY Safety Mode.
 
 state "ASK" as ASK #FDD835
 ASK : User approval required for sensitive operations.
-ASK : SAFETYSERVICE-03 APPLY Safety Mode.
+ASK : SAFETYSVC-03 APPLY Safety Mode.
 
 state "BLOCK" as BLOCK #E91E63
 BLOCK : Dangerous operations blocked entirely.
-BLOCK : SAFETYSERVICE-03 APPLY Safety Mode.
+BLOCK : SAFETYSVC-03 APPLY Safety Mode.
 
 state "ERROR" as ERROR #F4511E
 ERROR : Safety system encountered an error.
-ERROR : SAFETYSERVICE-01 CHECK Permission failure.
+ERROR : SAFETYSVC-01 CHECK Permission failure.
 
-UNINITIALIZED --> PERMISSIVE : SAFETYSERVICE-03
-UNINITIALIZED --> ASK : SAFETYSERVICE-03
-UNINITIALIZED --> BLOCK : SAFETYSERVICE-03
-PERMISSIVE --> ASK : SAFETYSERVICE-03
-PERMISSIVE --> BLOCK : SAFETYSERVICE-03
-ASK --> PERMISSIVE : SAFETYSERVICE-03
-ASK --> BLOCK : SAFETYSERVICE-03
-BLOCK --> PERMISSIVE : SAFETYSERVICE-03
-BLOCK --> ASK : SAFETYSERVICE-03
-PERMISSIVE --> ERROR : SAFETYSERVICE-01
-ASK --> ERROR : SAFETYSERVICE-01
-BLOCK --> ERROR : SAFETYSERVICE-01
-ERROR --> UNINITIALIZED : SAFETYSERVICE-03
+UNINITIALIZED --> PERMISSIVE : SAFETYSVC-03
+UNINITIALIZED --> ASK : SAFETYSVC-03
+UNINITIALIZED --> BLOCK : SAFETYSVC-03
+PERMISSIVE --> ASK : SAFETYSVC-03
+PERMISSIVE --> BLOCK : SAFETYSVC-03
+ASK --> PERMISSIVE : SAFETYSVC-03
+ASK --> BLOCK : SAFETYSVC-03
+BLOCK --> PERMISSIVE : SAFETYSVC-03
+BLOCK --> ASK : SAFETYSVC-03
+PERMISSIVE --> ERROR : SAFETYSVC-01
+ASK --> ERROR : SAFETYSVC-01
+BLOCK --> ERROR : SAFETYSVC-01
+ERROR --> UNINITIALIZED : SAFETYSVC-03
 
-UNINITIALIZED --> [*] : SAFETYSERVICE-03
+UNINITIALIZED --> [*] : SAFETYSVC-03
 
 @enduml

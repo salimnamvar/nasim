@@ -20,16 +20,24 @@
 title nasim — UC: Agent Controller Group
 
 
-actor "User" as User
+actor "Interface Adapter" as Adapter <<system>>
 
 
 ' Downstream service entry points (CSR: Controller → Service)
 usecase "TASKSVC-01\nPROCESS User Task\n[uc_task_svc]" as TASK01_ext <<extref>>
+usecase "TASKSVC-07\nQUEUE Plan\n[uc_task_svc]" as TASK07_ext <<extref>>
 usecase "SESSIONSVC-01\nPERSIST Session\n[uc_session_svc]" as SSN01_ext <<extref>>
 usecase "SESSIONSVC-02\nREAD Session\n[uc_session_svc]" as SSN02_ext <<extref>>
 usecase "SESSIONSVC-03\nLIST Sessions\n[uc_session_svc]" as SSN03_ext <<extref>>
+usecase "SESSIONSVC-04\nRESTORE Session\n[uc_session_svc]" as SSN04_ext <<extref>>
+usecase "SESSIONSVC-05\nSNAPSHOT Session\n[uc_session_svc]" as SSN05_ext <<extref>>
+usecase "SESSIONSVC-06\nREVERT Turn\n[uc_session_svc]" as SSN06_ext <<extref>>
+usecase "SESSIONSVC-07\nSEARCH Sessions\n[uc_session_svc]" as SSN07_ext <<extref>>
+usecase "SESSIONSVC-08\nBRANCH Session\n[uc_session_svc]" as SSN08_ext <<extref>>
 usecase "SESSIONSVC-09\nDELETE Session\n[uc_session_svc]" as SSN09_ext <<extref>>
+usecase "TOOLSVC-14\nLIST Registered Tools\n[uc_tool_svc]" as TL14_ext <<extref>>
 usecase "CONFIGSVC-01\nLOAD Config\n[uc_config_svc]" as CFG01_ext <<extref>>
+usecase "CONFIGSVC-02\nVALIDATE Config\n[uc_config_svc]" as CFG02_ext <<extref>>
 usecase "CONFIGSVC-03\nAPPLY Layered Config\n[uc_config_svc]" as CFG03_ext <<extref>>
 
 
@@ -43,18 +51,26 @@ rectangle "nasim" {
 }
 
 
-User --> AC01
+Adapter --> AC01
 
 AC01 ..> AC02 : <<include>>
 AC01 ..> AC03 : <<include>>
 AC01 ..> AC04 : <<include>>
 
 AC04 ..> TASK01_ext : <<include>>
+AC04 ..> TASK07_ext : <<include>>
 AC04 ..> SSN01_ext : <<include>>
 AC04 ..> SSN02_ext : <<include>>
 AC04 ..> SSN03_ext : <<include>>
+AC04 ..> SSN04_ext : <<include>>
+AC04 ..> SSN05_ext : <<include>>
+AC04 ..> SSN06_ext : <<include>>
+AC04 ..> SSN07_ext : <<include>>
+AC04 ..> SSN08_ext : <<include>>
 AC04 ..> SSN09_ext : <<include>>
+AC04 ..> TL14_ext : <<include>>
 AC04 ..> CFG01_ext : <<include>>
+AC04 ..> CFG02_ext : <<include>>
 AC04 ..> CFG03_ext : <<include>>
 
 

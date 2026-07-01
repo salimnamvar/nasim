@@ -20,7 +20,7 @@
 title nasim — UC: Evaluation Service Group
 
 
-actor "User" as User
+actor "Task Service" as TaskSvc <<system>>
 
 
 rectangle "nasim" {
@@ -38,7 +38,7 @@ rectangle "nasim" {
 }
 
 
-User --> EV01
+TaskSvc --> EV01
 
 EV01 ..> EV02 : <<include>>
 EV01 ..> EV03 : <<include>>

@@ -20,7 +20,7 @@
 | REVIEWING | LLM review of results | success checks passed, optional review | #FFF8E1 |
 | RETRYING | Retrying with feedback | success checks failed or review rejected | #FBE9E7 |
 | STAGING | Diff sandbox staging | tool exec in diff_sandbox mode | #F1F8E9 |
-| AWAITING_DIFF_APPROVAL | Presenting diff to user | SAFETYSERVICE-02 REQUEST Approval | #FCE4EC |
+| AWAITING_DIFF_APPROVAL | Presenting diff to user | SAFETYSVC-02 REQUEST Approval | #FCE4EC |
 
 > **API-First Entry:** All entry/exit transitions use `HTTPADP-06` (DISPATCH Message) as the sole entry gate. No interface container may bypass the API.
 
@@ -28,28 +28,28 @@
 
 | From | To | UC ID | Condition |
 |------|----|-------|-----------|
-| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPOSITORY-10 | Diff computed successfully |
-| STAGING | ERROR | EDITSTRATEGYREPOSITORY-10 | Diff computation failed (file deleted, conflict, algorithm error) |
+| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPO-10 | Diff computed successfully |
+| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed (file deleted, conflict, algorithm error) |
 
 ## Session Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
-| CREATED | Session record initialized | SESSIONSERVICE-01 PERSIST Session | #BBDEFB |
-| ACTIVE | Session accepting messages | SESSIONSERVICE-01 PERSIST Session | #43A047 |
-| SAVED | Session persisted to disk | SESSIONSERVICE-01 PERSIST Session | #1565C0 |
-| RESTORED | Session loaded from disk | SESSIONSERVICE-04 RESTORE Session | #1E88E5 |
-| BRANCHED | Session forked from parent | SESSIONSERVICE-08 BRANCH Session | #7B1FA2 |
-| CLOSED | Session terminated | SESSIONSERVICE-09 DELETE Session | #757575 |
+| CREATED | Session record initialized | SESSIONSVC-01 PERSIST Session | #BBDEFB |
+| ACTIVE | Session accepting messages | SESSIONSVC-01 PERSIST Session | #43A047 |
+| SAVED | Session persisted to disk | SESSIONSVC-01 PERSIST Session | #1565C0 |
+| RESTORED | Session loaded from disk | SESSIONSVC-04 RESTORE Session | #1E88E5 |
+| BRANCHED | Session forked from parent | SESSIONSVC-08 BRANCH Session | #7B1FA2 |
+| CLOSED | Session terminated | SESSIONSVC-09 DELETE Session | #757575 |
 
 ## Plan Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | EMPTY | No plan active | Default state | #F5F5F5 |
-| BUILDING | Plan being constructed | TASKSERVICE-07 QUEUE Plan | #FFE0B2 |
+| BUILDING | Plan being constructed | TASKSVC-07 QUEUE Plan | #FFE0B2 |
 | QUEUED | Plan queued for approval | Plan construction complete | #E3F2FD |
-| APPROVED | Plan approved by user | TASKSERVICE-08 APPROVE Plan | #388E3C |
+| APPROVED | Plan approved by user | TASKSVC-08 APPROVE Plan | #388E3C |
 | EXECUTING | Plan steps being executed | Plan approved, execution started | #A5D6A7 |
 | COMPLETED | All plan steps finished | Implicit: agent loop finishes all steps | #1B5E20 |
 | REJECTED | Plan rejected by user | User rejects plan | #B71C1C |
@@ -58,11 +58,11 @@
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
-| DISCOVERED | Plugin found on filesystem | TOOLSERVICE-01 DISCOVER Plugins | #E0E0E0 |
-| LOADING | Plugin manifest being parsed | TOOLSERVICE-02 LOAD Manifest | #FFCC80 |
-| LOADED | Plugin manifest parsed, tools registered | TOOLSERVICE-03 REGISTER Plugin Tools | #90CAF9 |
-| ENABLED | Plugin active and available | TOOLSERVICE-05 ENABLE Plugin | #4CAF50 |
-| DISABLED | Plugin deactivated | TOOLSERVICE-06 DISABLE Plugin | #CE93D8 |
+| DISCOVERED | Plugin found on filesystem | TOOLSVC-01 DISCOVER Plugins | #E0E0E0 |
+| LOADING | Plugin manifest being parsed | TOOLSVC-02 LOAD Manifest | #FFCC80 |
+| LOADED | Plugin manifest parsed, tools registered | TOOLSVC-03 REGISTER Plugin Tools | #90CAF9 |
+| ENABLED | Plugin active and available | TOOLSVC-05 ENABLE Plugin | #4CAF50 |
+| DISABLED | Plugin deactivated | TOOLSVC-06 DISABLE Plugin | #CE93D8 |
 | ERROR | Plugin failed to load or crashed | Load error or runtime exception | #EF5350 |
 
 ## Subagent Lifecycle States (Entity)
@@ -70,19 +70,19 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | No child agent active | Default state | #CFD8DC |
-| SPAWNING | Child agent process initializing | TASKSERVICE-09 SPAWN Subagent | #FFAB91 |
-| RUNNING | Child agent executing task | TASKSERVICE-09 SPAWN Subagent | #BCAAA4 |
-| COMPLETED | Child agent finished successfully | TASKSERVICE-10 COLLECT Subagent Result | #80CBC4 |
-| FAILED | Child agent encountered unrecoverable error | TASKSERVICE-14 HANDLE Error | #EF9A9A |
+| SPAWNING | Child agent process initializing | TASKSVC-09 SPAWN Subagent | #FFAB91 |
+| RUNNING | Child agent executing task | TASKSVC-09 SPAWN Subagent | #BCAAA4 |
+| COMPLETED | Child agent finished successfully | TASKSVC-10 COLLECT Subagent Result | #80CBC4 |
+| FAILED | Child agent encountered unrecoverable error | TASKSVC-14 HANDLE Error | #EF9A9A |
 
 ## Persona Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | UNLOADED | No persona loaded | Default state | #9E9E9E |
-| LOADING | Persona configuration being loaded | TASKSERVICE-12 LOAD Persona | #FFC107 |
-| ACTIVE | Persona active and available for delegation | TASKSERVICE-11 DELEGATE to Persona | #4DB6AC |
-| SWITCHING | Switching to different persona at runtime | TASKSERVICE-13 SWITCH Persona | #FF9800 |
+| LOADING | Persona configuration being loaded | TASKSVC-12 LOAD Persona | #FFC107 |
+| ACTIVE | Persona active and available for delegation | TASKSVC-11 DELEGATE to Persona | #4DB6AC |
+| SWITCHING | Switching to different persona at runtime | TASKSVC-13 SWITCH Persona | #FF9800 |
 | ERROR | Persona load or switch failed | Load error or switch failure | #F44336 |
 
 ## MCP Client Connection Lifecycle States (Entity)
@@ -90,65 +90,65 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | DISCONNECTED | No connection to MCP server | Default state | #B0BEC5 |
-| CONNECTING | Connection to MCP server in progress | MCPREPOSITORY-01 CONNECT MCP Server | #FFCA28 |
-| CONNECTED | Connected to MCP server | MCPREPOSITORY-01 CONNECT MCP Server | #00BCD4 |
-| DISCOVERING | Discovering tools from connected server | MCPREPOSITORY-02 DISCOVER MCP Tools | #A1887F |
-| ERROR | Connection or discovery failed | MCPREPOSITORY-01 or MCPREPOSITORY-02 failure | #E57373 |
+| CONNECTING | Connection to MCP server in progress | MCPREPO-01 CONNECT MCP Server | #FFCA28 |
+| CONNECTED | Connected to MCP server | MCPREPO-01 CONNECT MCP Server | #00BCD4 |
+| DISCOVERING | Discovering tools from connected server | MCPREPO-02 DISCOVER MCP Tools | #A1887F |
+| ERROR | Connection or discovery failed | MCPREPO-01 or MCPREPO-02 failure | #E57373 |
 
 ## MCP Server Serving Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | STOPPED | MCP server not running | Default state | #616161 |
-| STARTING | Server starting up | MCPREPOSITORY-04 EXPOSE nasim Tools | #FFA726 |
-| RUNNING | Server running, serving tools to MCP clients | MCPREPOSITORY-04 EXPOSE nasim Tools | #66BB6A |
-| STOPPING | Server shutting down | MCPREPOSITORY-04 EXPOSE nasim Tools | #FF7043 |
-| ERROR | Server startup or runtime failure | MCPREPOSITORY-04 failure | #FFCDD2 |
+| STARTING | Server starting up | MCPREPO-04 EXPOSE nasim Tools | #FFA726 |
+| RUNNING | Server running, serving tools to MCP clients | MCPREPO-04 EXPOSE nasim Tools | #66BB6A |
+| STOPPING | Server shutting down | MCPREPO-04 EXPOSE nasim Tools | #FF7043 |
+| ERROR | Server startup or runtime failure | MCPREPO-04 failure | #FFCDD2 |
 
 ## Sandbox Execution Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | No process running in sandbox | Default state | #78909C |
-| EXECUTING | Process running in sandbox | SANDBOXREPOSITORY-01 ISOLATE Command | #2196F3 |
-| MONITORING | Process being monitored for resource usage | SANDBOXREPOSITORY-03 MONITOR Process | #64B5F6 |
-| COMPLETED | Process finished successfully | SANDBOXREPOSITORY-01 ISOLATE Command | #8BC34A |
-| TIMEOUT | Process exceeded time limit | SANDBOXREPOSITORY-03 MONITOR Process | #FFB74D |
-| FAILED | Process crashed or was killed | SANDBOXREPOSITORY-01 ISOLATE Command | #D32F2F |
-| RESOURCE_EXCEEDED | Process exceeded CPU, memory, or disk quota | SANDBOXREPOSITORY-04 LIMIT Resources | #FF5722 |
+| EXECUTING | Process running in sandbox | SANDBOXREPO-01 ISOLATE Command | #2196F3 |
+| MONITORING | Process being monitored for resource usage | SANDBOXREPO-03 MONITOR Process | #64B5F6 |
+| COMPLETED | Process finished successfully | SANDBOXREPO-01 ISOLATE Command | #8BC34A |
+| TIMEOUT | Process exceeded time limit | SANDBOXREPO-03 MONITOR Process | #FFB74D |
+| FAILED | Process crashed or was killed | SANDBOXREPO-01 ISOLATE Command | #D32F2F |
+| RESOURCE_EXCEEDED | Process exceeded CPU, memory, or disk quota | SANDBOXREPO-04 LIMIT Resources | #FF5722 |
 
 ## Diff Staging Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | EMPTY | No diff staged | Default state | #9FA8DA |
-| STAGING | Diff being computed | EDITSTRATEGYREPOSITORY-10 STAGE Diff | #FFE082 |
-| STAGED | Diff ready for review | EDITSTRATEGYREPOSITORY-10 STAGE Diff | #C5E1A5 |
-| AWAITING_APPROVAL | Diff presented to user for approval | SAFETYSERVICE-02 REQUEST Approval | #FFD54F |
-| APPROVED | User approved diff | SAFETYSERVICE-02 REQUEST Approval | #AED581 |
-| APPLYING | Approved diff being applied | EDITSTRATEGYREPOSITORY-10 STAGE Diff | #81C784 |
-| APPLIED | Diff successfully applied | EDITSTRATEGYREPOSITORY-10 STAGE Diff | #009688 |
-| ERROR | Diff computation or application failed | EDITSTRATEGYREPOSITORY-10 failure | #E53935 |
+| STAGING | Diff being computed | EDITSTRATEGYREPO-10 STAGE Diff | #FFE082 |
+| STAGED | Diff ready for review | EDITSTRATEGYREPO-10 STAGE Diff | #C5E1A5 |
+| AWAITING_APPROVAL | Diff presented to user for approval | SAFETYSVC-02 REQUEST Approval | #FFD54F |
+| APPROVED | User approved diff | SAFETYSVC-02 REQUEST Approval | #AED581 |
+| APPLYING | Approved diff being applied | EDITSTRATEGYREPO-10 STAGE Diff | #81C784 |
+| APPLIED | Diff successfully applied | EDITSTRATEGYREPO-10 STAGE Diff | #009688 |
+| ERROR | Diff computation or application failed | EDITSTRATEGYREPO-10 failure | #E53935 |
 
 ## Safety Mode Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | UNINITIALIZED | Safety system not initialized | Default state | #BDBDBD |
-| PERMISSIVE | All operations allowed, no approval prompts | SAFETYSERVICE-03 APPLY Safety Mode | #9CCC65 |
-| ASK | User approval required for sensitive operations | SAFETYSERVICE-03 APPLY Safety Mode | #FDD835 |
-| BLOCK | Dangerous operations blocked entirely | SAFETYSERVICE-03 APPLY Safety Mode | #E91E63 |
-| ERROR | Safety system encountered an error | SAFETYSERVICE-01 CHECK Permission failure | #F4511E |
+| PERMISSIVE | All operations allowed, no approval prompts | SAFETYSVC-03 APPLY Safety Mode | #9CCC65 |
+| ASK | User approval required for sensitive operations | SAFETYSVC-03 APPLY Safety Mode | #FDD835 |
+| BLOCK | Dangerous operations blocked entirely | SAFETYSVC-03 APPLY Safety Mode | #E91E63 |
+| ERROR | Safety system encountered an error | SAFETYSVC-01 CHECK Permission failure | #F4511E |
 
 ## Router Lifecycle States (Entity)
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | No routing in progress | Default state | #EEEEEE |
-| CLASSIFYING | Task classification for model routing | LLMREPOSITORY-03 CLASSIFY Task | #5C6BC0 |
-| SELECTING | Model selection in progress | LLMREPOSITORY-01 SELECT Model | #3F51B5 |
-| SWITCHING | Runtime model switch in progress | LLMREPOSITORY-04 SWITCH Model | #FF8F00 |
-| FALLBACK | Falling back to next available model | LLMREPOSITORY-02 APPLY Fallback | #EF6C00 |
+| CLASSIFYING | Task classification for model routing | LLMREPO-03 CLASSIFY Task | #5C6BC0 |
+| SELECTING | Model selection in progress | LLMREPO-01 SELECT Model | #3F51B5 |
+| SWITCHING | Runtime model switch in progress | LLMREPO-04 SWITCH Model | #FF8F00 |
+| FALLBACK | Falling back to next available model | LLMREPO-02 APPLY Fallback | #EF6C00 |
 | ERROR | Routing or fallback failed | All models exhausted | #BF360C |
 
 ## Provider Connection Lifecycle States (Entity)
@@ -156,9 +156,9 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | UNREGISTERED | No provider registered | Default state | #455A64 |
-| REGISTERING | Provider registration in progress | LLMREPOSITORY-01 REGISTER Provider | #29B6F6 |
-| ACTIVE | Provider registered and ready for chat | LLMREPOSITORY-01 REGISTER Provider | #03A9F4 |
-| SELECTING | Backend selection in progress | LLMREPOSITORY-04 SELECT Provider Backend | #FBC02D |
+| REGISTERING | Provider registration in progress | LLMREPO-01 REGISTER Provider | #29B6F6 |
+| ACTIVE | Provider registered and ready for chat | LLMREPO-01 REGISTER Provider | #03A9F4 |
+| SELECTING | Backend selection in progress | LLMREPO-04 SELECT Provider Backend | #FBC02D |
 | ERROR | Registration or selection failed | Provider unavailable | #E64A19 |
 
 ## Evaluation Lifecycle States (Process)
@@ -166,11 +166,11 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | No evaluation in progress | Default state | #90A4AE |
-| CHECKING | Running task completion and success checks | EVALUATIONSERVICE-01 EVALUATE Task | #C5CAE9 |
-| REVIEWING | LLM-based code review and quality assessment | EVALUATIONSERVICE-04 VALIDATE With LLM | #AB47BC |
-| TESTING | Running project test suites | EVALUATIONSERVICE-05 VALIDATE Test Suite | #D4E157 |
-| SCORING | Recording quality signal and scoring | EVALUATIONSERVICE-07 RECORD Quality Signal | #FF8A65 |
-| RETRYING | Coordinating retry with backoff and escalation | EVALUATIONSERVICE-06 COORDINATE Retry | #C62828 |
+| CHECKING | Running task completion and success checks | EVALSVC-01 EVALUATE Task | #C5CAE9 |
+| REVIEWING | LLM-based code review and quality assessment | EVALSVC-04 VALIDATE With LLM | #AB47BC |
+| TESTING | Running project test suites | EVALSVC-05 VALIDATE Test Suite | #D4E157 |
+| SCORING | Recording quality signal and scoring | EVALSVC-07 RECORD Quality Signal | #FF8A65 |
+| RETRYING | Coordinating retry with backoff and escalation | EVALSVC-06 COORDINATE Retry | #C62828 |
 | PASSED | Evaluation passed all criteria | Terminal success state | #689F38 |
 | FAILED | Evaluation failed, retries exhausted | Terminal failure state | #AD1457 |
 
@@ -179,10 +179,10 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | UNINDEXED | No repository index exists | Default state | #424242 |
-| INDEXING | AST indexing via tree-sitter in progress | REPOINTELLIGENCEREPOSITORY-01 INDEX Codebase | #4FC3F7 |
-| INDEXED | Repository fully indexed | REPOINTELLIGENCEREPOSITORY-01 INDEX Codebase | #7CB342 |
-| BUILDING_GRAPH | Cross-file symbol reference graph in progress | REPOINTELLIGENCEREPOSITORY-02 BUILD Symbol Graph | #9C27B0 |
-| EMBEDDING | Generating vector embeddings for code | REPOINTELLIGENCEREPOSITORY-05 EMBED Code | #E6EE9C |
+| INDEXING | AST indexing via tree-sitter in progress | REPOINTELREPO-01 INDEX Codebase | #4FC3F7 |
+| INDEXED | Repository fully indexed | REPOINTELREPO-01 INDEX Codebase | #7CB342 |
+| BUILDING_GRAPH | Cross-file symbol reference graph in progress | REPOINTELREPO-02 BUILD Symbol Graph | #9C27B0 |
+| EMBEDDING | Generating vector embeddings for code | REPOINTELREPO-05 EMBED Code | #E6EE9C |
 | STALE | Index outdated, needs re-index | Source files changed | #FFECB3 |
 | ERROR | Indexing, graph building, or embedding failed | Unrecoverable processing error | #DD2C00 |
 
@@ -190,21 +190,21 @@
 
 | File | Scope |
 |------|-------|
-| `sm_agent_lifecycle.puml` | Agent process FSM — 17 states (API-First) |
-| `sm_session_lifecycle.puml` | Session entity lifecycle — 6 states (API-First) |
-| `sm_plan_lifecycle.puml` | Plan entity lifecycle — 7 states |
-| `sm_plugin_lifecycle.puml` | Plugin entity lifecycle — 6 states (+ 2 terminal exits) |
-| `sm_subagent_lifecycle.puml` | Subagent entity lifecycle — 5 states (IDLE→SPAWNING→RUNNING→COMPLETED/FAILED) + 2 terminal exits |
-| `sm_persona_lifecycle.puml` | Persona entity lifecycle — 5 states (UNLOADED→LOADING→ACTIVE↔SWITCHING) |
-| `sm_mcp_client_lifecycle.puml` | MCP Client connection lifecycle — 5 states (DISCONNECTED→CONNECTING→CONNECTED→DISCOVERING) |
-| `sm_mcp_server_lifecycle.puml` | MCP Server serving lifecycle — 5 states (STOPPED→STARTING→RUNNING→STOPPING) |
-| `sm_sandbox_execution_lifecycle.puml` | Sandbox execution lifecycle — 7 states (IDLE→EXECUTING→COMPLETED/TIMEOUT/FAILED/RESOURCE_EXCEEDED) |
-| `sm_diff_staging_lifecycle.puml` | Diff staging lifecycle — 8 states (EMPTY→STAGING→STAGED→AWAITING_APPROVAL→APPROVED→APPLYING→APPLIED) |
-| `sm_safety_mode_lifecycle.puml` | Safety mode lifecycle — 5 states (UNINITIALIZED→PERMISSIVE|ASK|BLOCK) |
-| `sm_router_lifecycle.puml` | Router selection lifecycle — 6 states (IDLE→CLASSIFYING→SELECTING→FALLBACK|SWITCHING) |
-| `sm_provider_connection_lifecycle.puml` | Provider connection lifecycle — 5 states (UNREGISTERED→REGISTERING→ACTIVE→SELECTING) |
-| `sm_evaluation_lifecycle.puml` | Evaluation process lifecycle — 9 states (IDLE→CHECKING→REVIEWING|TESTING→SCORING→PASSED|FAILED) |
-| `sm_index_lifecycle.puml` | Repository index lifecycle — 7 states (UNINDEXED→INDEXING→INDEXED→BUILDING_GRAPH|EMBEDDING) |
+| `sm_task_svc_agent.puml` | Agent process FSM — 17 states (API-First) |
+| `sm_session_svc_session.puml` | Session entity lifecycle — 6 states (API-First) |
+| `sm_task_svc_plan.puml` | Plan entity lifecycle — 7 states |
+| `sm_tool_svc_plugin.puml` | Plugin entity lifecycle — 6 states (+ 2 terminal exits) |
+| `sm_task_svc_subagent.puml` | Subagent entity lifecycle — 5 states (IDLE→SPAWNING→RUNNING→COMPLETED/FAILED) + 2 terminal exits |
+| `sm_task_svc_persona.puml` | Persona entity lifecycle — 5 states (UNLOADED→LOADING→ACTIVE↔SWITCHING) |
+| `sm_mcp_repo_client.puml` | MCP Client connection lifecycle — 5 states (DISCONNECTED→CONNECTING→CONNECTED→DISCOVERING) |
+| `sm_mcp_repo_server.puml` | MCP Server serving lifecycle — 5 states (STOPPED→STARTING→RUNNING→STOPPING) |
+| `sm_sandbox_repo_sandbox.puml` | Sandbox execution lifecycle — 7 states (IDLE→EXECUTING→COMPLETED/TIMEOUT/FAILED/RESOURCE_EXCEEDED) |
+| `sm_edit_strategy_repo_diff.puml` | Diff staging lifecycle — 8 states (EMPTY→STAGING→STAGED→AWAITING_APPROVAL→APPROVED→APPLYING→APPLIED) |
+| `sm_safety_svc_safety.puml` | Safety mode lifecycle — 5 states (UNINITIALIZED→PERMISSIVE|ASK|BLOCK) |
+| `sm_llm_repo_router.puml` | Router selection lifecycle — 6 states (IDLE→CLASSIFYING→SELECTING→FALLBACK|SWITCHING) |
+| `sm_llm_repo_provider.puml` | Provider connection lifecycle — 5 states (UNREGISTERED→REGISTERING→ACTIVE→SELECTING) |
+| `sm_eval_svc_evaluation.puml` | Evaluation process lifecycle — 9 states (IDLE→CHECKING→REVIEWING|TESTING→SCORING→PASSED|FAILED) |
+| `sm_repo_intel_repo_index.puml` | Repository index lifecycle — 7 states (UNINDEXED→INDEXING→INDEXED→BUILDING_GRAPH|EMBEDDING) |
 
 ## Notes
 
@@ -215,11 +215,11 @@
   SMT ownership rules apply: one lifecycle-write UC per target state.
 - All hex colors are canonical — state-machine diagrams use `state "STATE" as STATE #HEX`
   syntax per PlantUML standard.
-- **Transition labels** use UC-ID-only convention (e.g., `TASKSERVICE-01`, `LLMREPOSITORY-02`, `SAFETYSERVICE-02`).
+- **Transition labels** use UC-ID-only convention (e.g., `TASKSVC-01`, `LLMREPO-02`, `SAFETYSVC-02`).
   No human-readable suffixes. Multiple transitions from one state may share a UC ID
-  when the same action produces different outcomes (e.g., `LLMREPOSITORY-02` → RESPONDING, TOOL_EXEC, ERROR).
+  when the same action produces different outcomes (e.g., `LLMREPO-02` → RESPONDING, TOOL_EXEC, ERROR).
 - **API-First:** All entry/exit transitions in Agent SM use `HTTPADP-06` as the sole entry gate.
-  Session lifecycle mutations use `SESSIONSERVICE-XX` UC IDs (Session Service Group).
+  Session lifecycle mutations use `SESSIONSVC-XX` UC IDs (Session Service Group).
 
 ## Transition Matrices
 
@@ -227,193 +227,193 @@
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | IDLE | TASKSERVICE-01 | Process startup |
+| [*] | IDLE | TASKSVC-01 | Process startup |
 | IDLE | LISTENING | HTTPADP-06 | DISPATCH Message received |
 | IDLE | SERVING | HTTPADP-06 | API request received |
-| IDLE | PLANNING | TASKSERVICE-07 | /plan command entered |
+| IDLE | PLANNING | TASKSVC-07 | /plan command entered |
 | LISTENING | THINKING | HTTPADP-06 | Input parsed, messages built |
 | SERVING | THINKING | HTTPADP-06 | API request processed |
 | SERVING | IDLE | HTTPADP-06 | API request complete |
-| THINKING | RESPONDING | LLMREPOSITORY-02 | LLM returns text only |
-| THINKING | TOOL_EXEC | LLMREPOSITORY-02 | LLM returns tool_calls |
-| THINKING | COMPACTING | TASKSERVICE-06 | token_count > context_budget |
-| THINKING | ROUTING | LLMREPOSITORY-01 | ModelRouter resolving model |
-| THINKING | ERROR | LLMREPOSITORY-02 | Provider call failed |
-| THINKING | EVALUATING | EVALUATIONSERVICE-01 | task_complete AND evaluation_enabled |
-| ROUTING | THINKING | LLMREPOSITORY-01 | Model selected |
-| TOOL_EXEC | THINKING | TASKSERVICE-02 | Tool call complete |
-| TOOL_EXEC | AWAITING_APPROVAL | SAFETYSERVICE-02 | safety_mode=ask AND unsafe tool |
-| TOOL_EXEC | HOOK_RUNNING | TOOLSERVICE-02 | Pre/post hook configured |
-| TOOL_EXEC | ERROR | TASKSERVICE-02 | Tool execution failed |
-| TOOL_EXEC | STAGING | EDITSTRATEGYREPOSITORY-10 | diff_sandbox mode active |
-| HOOK_RUNNING | TOOL_EXEC | TOOLSERVICE-02 | Hook execution complete |
-| HOOK_RUNNING | IDLE | TOOLSERVICE-02 | Hook execution complete (no tool) |
-| AWAITING_APPROVAL | TOOL_EXEC | SAFETYSERVICE-02 | User approves |
-| AWAITING_APPROVAL | IDLE | SAFETYSERVICE-02 | User denies |
-| COMPACTING | THINKING | TASKSERVICE-06 | Context compacted |
+| THINKING | RESPONDING | LLMREPO-02 | LLM returns text only |
+| THINKING | TOOL_EXEC | LLMREPO-02 | LLM returns tool_calls |
+| THINKING | COMPACTING | TASKSVC-06 | token_count > context_budget |
+| THINKING | ROUTING | LLMREPO-01 | ModelRouter resolving model |
+| THINKING | ERROR | LLMREPO-02 | Provider call failed |
+| THINKING | EVALUATING | EVALSVC-01 | task_complete AND evaluation_enabled |
+| ROUTING | THINKING | LLMREPO-01 | Model selected |
+| TOOL_EXEC | THINKING | TASKSVC-02 | Tool call complete |
+| TOOL_EXEC | AWAITING_APPROVAL | SAFETYSVC-02 | safety_mode=ask AND unsafe tool |
+| TOOL_EXEC | HOOK_RUNNING | TOOLSVC-02 | Pre/post hook configured |
+| TOOL_EXEC | ERROR | TASKSVC-02 | Tool execution failed |
+| TOOL_EXEC | STAGING | EDITSTRATEGYREPO-10 | diff_sandbox mode active |
+| HOOK_RUNNING | TOOL_EXEC | TOOLSVC-02 | Hook execution complete |
+| HOOK_RUNNING | IDLE | TOOLSVC-02 | Hook execution complete (no tool) |
+| AWAITING_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves |
+| AWAITING_APPROVAL | IDLE | SAFETYSVC-02 | User denies |
+| COMPACTING | THINKING | TASKSVC-06 | Context compacted |
 | RESPONDING | IDLE | HTTPADP-06 | Response streamed to user |
-| ERROR | IDLE | TASKSERVICE-14 | Error handled |
-| PLANNING | IDLE | TASKSERVICE-07 | Plan mode exited |
-| EVALUATING | REVIEWING | EVALUATIONSERVICE-01 | Evaluation passed |
-| EVALUATING | RETRYING | EVALUATIONSERVICE-01 | Evaluation failed |
-| EVALUATING | THINKING | EVALUATIONSERVICE-01 | Retry with feedback |
-| REVIEWING | THINKING | EVALUATIONSERVICE-04 | LLM review passed |
-| REVIEWING | RETRYING | EVALUATIONSERVICE-04 | LLM review rejected |
-| RETRYING | THINKING | EVALUATIONSERVICE-06 | Retry with feedback |
-| RETRYING | ERROR | EVALUATIONSERVICE-06 | Retry exhausted |
-| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPOSITORY-10 | Diff computed successfully |
-| STAGING | ERROR | EDITSTRATEGYREPOSITORY-10 | Diff computation failed |
-| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETYSERVICE-02 | User approves diff |
-| AWAITING_DIFF_APPROVAL | IDLE | SAFETYSERVICE-02 | User rejects diff |
+| ERROR | IDLE | TASKSVC-14 | Error handled |
+| PLANNING | IDLE | TASKSVC-07 | Plan mode exited |
+| EVALUATING | REVIEWING | EVALSVC-01 | Evaluation passed |
+| EVALUATING | RETRYING | EVALSVC-01 | Evaluation failed |
+| EVALUATING | THINKING | EVALSVC-01 | Retry with feedback |
+| REVIEWING | THINKING | EVALSVC-04 | LLM review passed |
+| REVIEWING | RETRYING | EVALSVC-04 | LLM review rejected |
+| RETRYING | THINKING | EVALSVC-06 | Retry with feedback |
+| RETRYING | ERROR | EVALSVC-06 | Retry exhausted |
+| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPO-10 | Diff computed successfully |
+| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed |
+| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves diff |
+| AWAITING_DIFF_APPROVAL | IDLE | SAFETYSVC-02 | User rejects diff |
 
 ### Session Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | CREATED | SESSIONSERVICE-01 | Session record initialized |
-| CREATED | ACTIVE | SESSIONSERVICE-01 | Session ready for messages |
-| ACTIVE | SAVED | SESSIONSERVICE-01 | Session persisted to disk |
-| ACTIVE | BRANCHED | SESSIONSERVICE-08 | Session forked from parent |
-| ACTIVE | CLOSED | SESSIONSERVICE-09 | Session terminated |
-| SAVED | RESTORED | SESSIONSERVICE-04 | Session loaded from disk |
-| SAVED | CLOSED | SESSIONSERVICE-09 | Session terminated |
-| RESTORED | ACTIVE | SESSIONSERVICE-02 | Session ready for messages |
-| RESTORED | SAVED | SESSIONSERVICE-01 | Session persisted to disk |
-| RESTORED | CLOSED | SESSIONSERVICE-09 | Session terminated |
-| BRANCHED | ACTIVE | SESSIONSERVICE-02 | Session ready for messages |
-| BRANCHED | CLOSED | SESSIONSERVICE-09 | Session terminated |
+| [*] | CREATED | SESSIONSVC-01 | Session record initialized |
+| CREATED | ACTIVE | SESSIONSVC-01 | Session ready for messages |
+| ACTIVE | SAVED | SESSIONSVC-01 | Session persisted to disk |
+| ACTIVE | BRANCHED | SESSIONSVC-08 | Session forked from parent |
+| ACTIVE | CLOSED | SESSIONSVC-09 | Session terminated |
+| SAVED | RESTORED | SESSIONSVC-04 | Session loaded from disk |
+| SAVED | CLOSED | SESSIONSVC-09 | Session terminated |
+| RESTORED | ACTIVE | SESSIONSVC-02 | Session ready for messages |
+| RESTORED | SAVED | SESSIONSVC-01 | Session persisted to disk |
+| RESTORED | CLOSED | SESSIONSVC-09 | Session terminated |
+| BRANCHED | ACTIVE | SESSIONSVC-02 | Session ready for messages |
+| BRANCHED | CLOSED | SESSIONSVC-09 | Session terminated |
 | CLOSED | [*] | — | Terminal state |
 
 ### Plan Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | EMPTY | TASKSERVICE-07 | No plan active |
-| EMPTY | BUILDING | TASKSERVICE-07 | /plan command entered |
-| BUILDING | QUEUED | TASKSERVICE-07 | Plan construction complete |
-| BUILDING | EMPTY | TASKSERVICE-07 | Plan cancelled |
-| QUEUED | APPROVED | TASKSERVICE-08 | User approves plan |
-| QUEUED | REJECTED | TASKSERVICE-08 | User rejects plan |
-| APPROVED | EXECUTING | TASKSERVICE-08 | Execution started |
-| EXECUTING | COMPLETED | TASKSERVICE-01 | All plan steps finished |
-| EXECUTING | EMPTY | TASKSERVICE-14 | Execution failed or cancelled |
-| COMPLETED | [*] | TASKSERVICE-01 | Terminal state |
-| REJECTED | [*] | TASKSERVICE-08 | Terminal state |
+| [*] | EMPTY | TASKSVC-07 | No plan active |
+| EMPTY | BUILDING | TASKSVC-07 | /plan command entered |
+| BUILDING | QUEUED | TASKSVC-07 | Plan construction complete |
+| BUILDING | EMPTY | TASKSVC-07 | Plan cancelled |
+| QUEUED | APPROVED | TASKSVC-08 | User approves plan |
+| QUEUED | REJECTED | TASKSVC-08 | User rejects plan |
+| APPROVED | EXECUTING | TASKSVC-08 | Execution started |
+| EXECUTING | COMPLETED | TASKSVC-01 | All plan steps finished |
+| EXECUTING | EMPTY | TASKSVC-14 | Execution failed or cancelled |
+| COMPLETED | [*] | TASKSVC-01 | Terminal state |
+| REJECTED | [*] | TASKSVC-08 | Terminal state |
 
 ### Plugin Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | DISCOVERED | TOOLSERVICE-01 | Plugin found on filesystem |
-| DISCOVERED | LOADING | TOOLSERVICE-02 | Manifest parsing starts |
-| DISCOVERED | ERROR | TOOLSERVICE-01 | Plugin discovery failed |
-| LOADING | LOADED | TOOLSERVICE-03 | Manifest parsed, tools registered |
-| LOADING | ERROR | TOOLSERVICE-02 | Manifest parsing failed |
-| LOADED | ENABLED | TOOLSERVICE-05 | Plugin activated |
-| LOADED | DISABLED | TOOLSERVICE-06 | Plugin deactivated |
-| LOADED | ERROR | TOOLSERVICE-03 | Tool registration failed |
-| ENABLED | DISABLED | TOOLSERVICE-06 | Plugin deactivated |
-| ENABLED | ERROR | TOOLSERVICE-01 | Runtime exception |
-| ENABLED | [*] | TOOLSERVICE-06 | Plugin unloaded |
-| DISABLED | ENABLED | TOOLSERVICE-05 | Plugin activated |
-| DISABLED | [*] | TOOLSERVICE-06 | Plugin unloaded |
-| ERROR | DISCOVERED | TOOLSERVICE-01 | Re-discovery (recovery) |
+| [*] | DISCOVERED | TOOLSVC-01 | Plugin found on filesystem |
+| DISCOVERED | LOADING | TOOLSVC-02 | Manifest parsing starts |
+| DISCOVERED | ERROR | TOOLSVC-01 | Plugin discovery failed |
+| LOADING | LOADED | TOOLSVC-03 | Manifest parsed, tools registered |
+| LOADING | ERROR | TOOLSVC-02 | Manifest parsing failed |
+| LOADED | ENABLED | TOOLSVC-05 | Plugin activated |
+| LOADED | DISABLED | TOOLSVC-06 | Plugin deactivated |
+| LOADED | ERROR | TOOLSVC-03 | Tool registration failed |
+| ENABLED | DISABLED | TOOLSVC-06 | Plugin deactivated |
+| ENABLED | ERROR | TOOLSVC-01 | Runtime exception |
+| ENABLED | [*] | TOOLSVC-06 | Plugin unloaded |
+| DISABLED | ENABLED | TOOLSVC-05 | Plugin activated |
+| DISABLED | [*] | TOOLSVC-06 | Plugin unloaded |
+| ERROR | DISCOVERED | TOOLSVC-01 | Re-discovery (recovery) |
 
 ### Subagent Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | IDLE | TASKSERVICE-09 | Default state |
-| IDLE | SPAWNING | TASKSERVICE-09 | Child agent spawn requested |
-| SPAWNING | RUNNING | TASKSERVICE-09 | Child agent initialized |
-| SPAWNING | FAILED | TASKSERVICE-09 | Spawn failed |
-| RUNNING | COMPLETED | TASKSERVICE-10 | Task finished successfully |
-| RUNNING | FAILED | TASKSERVICE-14 | Unrecoverable error |
-| COMPLETED | IDLE | TASKSERVICE-10 | Results aggregated to parent |
-| COMPLETED | [*] | TASKSERVICE-10 | Terminal state |
-| FAILED | IDLE | TASKSERVICE-14 | Error reported, cleanup done |
-| FAILED | [*] | TASKSERVICE-14 | Terminal state |
+| [*] | IDLE | TASKSVC-09 | Default state |
+| IDLE | SPAWNING | TASKSVC-09 | Child agent spawn requested |
+| SPAWNING | RUNNING | TASKSVC-09 | Child agent initialized |
+| SPAWNING | FAILED | TASKSVC-09 | Spawn failed |
+| RUNNING | COMPLETED | TASKSVC-10 | Task finished successfully |
+| RUNNING | FAILED | TASKSVC-14 | Unrecoverable error |
+| COMPLETED | IDLE | TASKSVC-10 | Results aggregated to parent |
+| COMPLETED | [*] | TASKSVC-10 | Terminal state |
+| FAILED | IDLE | TASKSVC-14 | Error reported, cleanup done |
+| FAILED | [*] | TASKSVC-14 | Terminal state |
 
 ### Persona Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | UNLOADED | TASKSERVICE-12 | Default state |
-| UNLOADED | LOADING | TASKSERVICE-12 | Load requested |
-| LOADING | ACTIVE | TASKSERVICE-12 | Load successful |
-| LOADING | ERROR | TASKSERVICE-12 | Load failed |
-| ACTIVE | SWITCHING | TASKSERVICE-13 | Switch requested |
-| SWITCHING | ACTIVE | TASKSERVICE-13 | Switch successful |
-| SWITCHING | ERROR | TASKSERVICE-13 | Switch failed |
-| ACTIVE | UNLOADED | TASKSERVICE-11 | Delegation complete |
-| ERROR | UNLOADED | TASKSERVICE-12 | Recovery: retry load |
-| UNLOADED | [*] | TASKSERVICE-12 | Terminal state |
+| [*] | UNLOADED | TASKSVC-12 | Default state |
+| UNLOADED | LOADING | TASKSVC-12 | Load requested |
+| LOADING | ACTIVE | TASKSVC-12 | Load successful |
+| LOADING | ERROR | TASKSVC-12 | Load failed |
+| ACTIVE | SWITCHING | TASKSVC-13 | Switch requested |
+| SWITCHING | ACTIVE | TASKSVC-13 | Switch successful |
+| SWITCHING | ERROR | TASKSVC-13 | Switch failed |
+| ACTIVE | UNLOADED | TASKSVC-11 | Delegation complete |
+| ERROR | UNLOADED | TASKSVC-12 | Recovery: retry load |
+| UNLOADED | [*] | TASKSVC-12 | Terminal state |
 
 ### MCP Client Connection Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | DISCONNECTED | MCPREPOSITORY-01 | Default state |
-| DISCONNECTED | CONNECTING | MCPREPOSITORY-01 | Connect requested |
-| CONNECTING | CONNECTED | MCPREPOSITORY-01 | Connection established |
-| CONNECTING | ERROR | MCPREPOSITORY-01 | Connection failed |
-| CONNECTED | DISCOVERING | MCPREPOSITORY-02 | Tool discovery started |
-| DISCOVERING | CONNECTED | MCPREPOSITORY-02 | Discovery complete |
-| DISCOVERING | ERROR | MCPREPOSITORY-02 | Discovery failed |
-| CONNECTED | DISCONNECTED | MCPREPOSITORY-01 | Disconnected |
-| ERROR | DISCONNECTED | MCPREPOSITORY-01 | Recovery: reconnect |
-| DISCONNECTED | [*] | MCPREPOSITORY-01 | Terminal state |
+| [*] | DISCONNECTED | MCPREPO-01 | Default state |
+| DISCONNECTED | CONNECTING | MCPREPO-01 | Connect requested |
+| CONNECTING | CONNECTED | MCPREPO-01 | Connection established |
+| CONNECTING | ERROR | MCPREPO-01 | Connection failed |
+| CONNECTED | DISCOVERING | MCPREPO-02 | Tool discovery started |
+| DISCOVERING | CONNECTED | MCPREPO-02 | Discovery complete |
+| DISCOVERING | ERROR | MCPREPO-02 | Discovery failed |
+| CONNECTED | DISCONNECTED | MCPREPO-01 | Disconnected |
+| ERROR | DISCONNECTED | MCPREPO-01 | Recovery: reconnect |
+| DISCONNECTED | [*] | MCPREPO-01 | Terminal state |
 
 ### MCP Server Serving Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | STOPPED | MCPREPOSITORY-04 | Default state |
-| STOPPED | STARTING | MCPREPOSITORY-04 | Start requested |
-| STARTING | RUNNING | MCPREPOSITORY-04 | Startup complete |
-| STARTING | ERROR | MCPREPOSITORY-04 | Startup failed |
-| RUNNING | STOPPING | MCPREPOSITORY-04 | Stop requested |
-| STOPPING | STOPPED | MCPREPOSITORY-04 | Shutdown complete |
-| RUNNING | ERROR | MCPREPOSITORY-04 | Runtime failure |
-| ERROR | STOPPED | MCPREPOSITORY-04 | Recovery: shutdown |
-| STOPPED | [*] | MCPREPOSITORY-04 | Terminal state |
+| [*] | STOPPED | MCPREPO-04 | Default state |
+| STOPPED | STARTING | MCPREPO-04 | Start requested |
+| STARTING | RUNNING | MCPREPO-04 | Startup complete |
+| STARTING | ERROR | MCPREPO-04 | Startup failed |
+| RUNNING | STOPPING | MCPREPO-04 | Stop requested |
+| STOPPING | STOPPED | MCPREPO-04 | Shutdown complete |
+| RUNNING | ERROR | MCPREPO-04 | Runtime failure |
+| ERROR | STOPPED | MCPREPO-04 | Recovery: shutdown |
+| STOPPED | [*] | MCPREPO-04 | Terminal state |
 
 ### Sandbox Execution Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | IDLE | SANDBOXREPOSITORY-01 | Default state |
-| IDLE | EXECUTING | SANDBOXREPOSITORY-01 | Command started |
-| EXECUTING | MONITORING | SANDBOXREPOSITORY-03 | Resource monitoring started |
-| MONITORING | EXECUTING | SANDBOXREPOSITORY-03 | Monitoring continues |
-| EXECUTING | COMPLETED | SANDBOXREPOSITORY-01 | Process finished |
-| EXECUTING | FAILED | SANDBOXREPOSITORY-01 | Process crashed |
-| EXECUTING | TIMEOUT | SANDBOXREPOSITORY-03 | Timeout exceeded |
-| EXECUTING | RESOURCE_EXCEEDED | SANDBOXREPOSITORY-04 | Resource limit hit |
-| MONITORING | TIMEOUT | SANDBOXREPOSITORY-03 | Timeout exceeded |
-| MONITORING | RESOURCE_EXCEEDED | SANDBOXREPOSITORY-04 | Resource limit hit |
-| TIMEOUT | IDLE | SANDBOXREPOSITORY-01 | Cleanup after timeout |
-| FAILED | IDLE | SANDBOXREPOSITORY-01 | Cleanup after failure |
-| RESOURCE_EXCEEDED | IDLE | SANDBOXREPOSITORY-04 | Cleanup after resource violation |
-| COMPLETED | [*] | SANDBOXREPOSITORY-01 | Terminal state |
+| [*] | IDLE | SANDBOXREPO-01 | Default state |
+| IDLE | EXECUTING | SANDBOXREPO-01 | Command started |
+| EXECUTING | MONITORING | SANDBOXREPO-03 | Resource monitoring started |
+| MONITORING | EXECUTING | SANDBOXREPO-03 | Monitoring continues |
+| EXECUTING | COMPLETED | SANDBOXREPO-01 | Process finished |
+| EXECUTING | FAILED | SANDBOXREPO-01 | Process crashed |
+| EXECUTING | TIMEOUT | SANDBOXREPO-03 | Timeout exceeded |
+| EXECUTING | RESOURCE_EXCEEDED | SANDBOXREPO-04 | Resource limit hit |
+| MONITORING | TIMEOUT | SANDBOXREPO-03 | Timeout exceeded |
+| MONITORING | RESOURCE_EXCEEDED | SANDBOXREPO-04 | Resource limit hit |
+| TIMEOUT | IDLE | SANDBOXREPO-01 | Cleanup after timeout |
+| FAILED | IDLE | SANDBOXREPO-01 | Cleanup after failure |
+| RESOURCE_EXCEEDED | IDLE | SANDBOXREPO-04 | Cleanup after resource violation |
+| COMPLETED | [*] | SANDBOXREPO-01 | Terminal state |
 
 ### Diff Staging Lifecycle Transition Matrix
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | EMPTY | EDITSTRATEGYREPOSITORY-10 | Default state |
-| EMPTY | STAGING | EDITSTRATEGYREPOSITORY-10 | Diff computation started |
-| STAGING | STAGED | EDITSTRATEGYREPOSITORY-10 | Diff computed successfully |
-| STAGING | ERROR | EDITSTRATEGYREPOSITORY-10 | Diff computation failed |
-| STAGED | AWAITING_APPROVAL | EDITSTRATEGYREPOSITORY-10 | Diff presented for review |
-| AWAITING_APPROVAL | APPROVED | SAFETYSERVICE-02 | User approved |
-| AWAITING_APPROVAL | EMPTY | SAFETYSERVICE-02 | User rejected, cleanup |
-| APPROVED | APPLYING | EDITSTRATEGYREPOSITORY-10 | Diff application started |
-| APPLYING | APPLIED | EDITSTRATEGYREPOSITORY-10 | Diff applied successfully |
-| APPLYING | ERROR | EDITSTRATEGYREPOSITORY-10 | Diff application failed |
-| APPLIED | EMPTY | EDITSTRATEGYREPOSITORY-10 | Cleanup after application |
-| ERROR | EMPTY | EDITSTRATEGYREPOSITORY-10 | Cleanup after error |
-| APPLIED | [*] | EDITSTRATEGYREPOSITORY-10 | Terminal state |
+| [*] | EMPTY | EDITSTRATEGYREPO-10 | Default state |
+| EMPTY | STAGING | EDITSTRATEGYREPO-10 | Diff computation started |
+| STAGING | STAGED | EDITSTRATEGYREPO-10 | Diff computed successfully |
+| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed |
+| STAGED | AWAITING_APPROVAL | EDITSTRATEGYREPO-10 | Diff presented for review |
+| AWAITING_APPROVAL | APPROVED | SAFETYSVC-02 | User approved |
+| AWAITING_APPROVAL | EMPTY | SAFETYSVC-02 | User rejected, cleanup |
+| APPROVED | APPLYING | EDITSTRATEGYREPO-10 | Diff application started |
+| APPLYING | APPLIED | EDITSTRATEGYREPO-10 | Diff applied successfully |
+| APPLYING | ERROR | EDITSTRATEGYREPO-10 | Diff application failed |
+| APPLIED | EMPTY | EDITSTRATEGYREPO-10 | Cleanup after application |
+| ERROR | EMPTY | EDITSTRATEGYREPO-10 | Cleanup after error |
+| APPLIED | [*] | EDITSTRATEGYREPO-10 | Terminal state |
 
 ## Lifecycle-Write UC Mapping (SMT Ownership)
 
@@ -423,469 +423,469 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| CREATED | SESSIONSERVICE-01 PERSIST Session | Session record initialized |
-| ACTIVE | SESSIONSERVICE-01 PERSIST Session | Session accepting messages (after init/resume) |
-| SAVED | SESSIONSERVICE-01 PERSIST Session | Session persisted to disk |
-| RESTORED | SESSIONSERVICE-04 RESTORE Session | Session loaded from disk |
-| BRANCHED | SESSIONSERVICE-08 BRANCH Session | Session forked from parent |
-| CLOSED | SESSIONSERVICE-09 DELETE Session | Session terminated (quit or error) |
+| CREATED | SESSIONSVC-01 PERSIST Session | Session record initialized |
+| ACTIVE | SESSIONSVC-01 PERSIST Session | Session accepting messages (after init/resume) |
+| SAVED | SESSIONSVC-01 PERSIST Session | Session persisted to disk |
+| RESTORED | SESSIONSVC-04 RESTORE Session | Session loaded from disk |
+| BRANCHED | SESSIONSVC-08 BRANCH Session | Session forked from parent |
+| CLOSED | SESSIONSVC-09 DELETE Session | Session terminated (quit or error) |
 
 ### Plan Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| BUILDING | TASKSERVICE-07 QUEUE Plan | Plan being constructed |
-| QUEUED | TASKSERVICE-07 QUEUE Plan | Plan construction complete, queued for approval |
-| APPROVED | TASKSERVICE-08 APPROVE Plan | Plan approved by user |
-| EXECUTING | TASKSERVICE-08 APPROVE Plan | Plan execution starts |
-| COMPLETED | TASKSERVICE-01 PROCESS User Task | Agent loop finishes all steps |
-| REJECTED | TASKSERVICE-08 APPROVE Plan | Plan rejected by user |
+| BUILDING | TASKSVC-07 QUEUE Plan | Plan being constructed |
+| QUEUED | TASKSVC-07 QUEUE Plan | Plan construction complete, queued for approval |
+| APPROVED | TASKSVC-08 APPROVE Plan | Plan approved by user |
+| EXECUTING | TASKSVC-08 APPROVE Plan | Plan execution starts |
+| COMPLETED | TASKSVC-01 PROCESS User Task | Agent loop finishes all steps |
+| REJECTED | TASKSVC-08 APPROVE Plan | Plan rejected by user |
 
 ### Plugin Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| DISCOVERED | TOOLSERVICE-01 DISCOVER Plugins | Plugin found on filesystem |
-| LOADING | TOOLSERVICE-02 LOAD Manifest | Plugin manifest being parsed |
-| LOADED | TOOLSERVICE-03 REGISTER Plugin Tools | Manifest parsed, tools registered |
-| ENABLED | TOOLSERVICE-05 ENABLE Plugin | Plugin active and available |
-| DISABLED | TOOLSERVICE-06 DISABLE Plugin | Plugin deactivated |
-| ERROR | TOOLSERVICE-01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |
+| DISCOVERED | TOOLSVC-01 DISCOVER Plugins | Plugin found on filesystem |
+| LOADING | TOOLSVC-02 LOAD Manifest | Plugin manifest being parsed |
+| LOADED | TOOLSVC-03 REGISTER Plugin Tools | Manifest parsed, tools registered |
+| ENABLED | TOOLSVC-05 ENABLE Plugin | Plugin active and available |
+| DISABLED | TOOLSVC-06 DISABLE Plugin | Plugin deactivated |
+| ERROR | TOOLSVC-01 DISCOVER Plugins | Load error or runtime exception (re-discover recovers) |
 
 ### Subagent Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| SPAWNING | TASKSERVICE-09 SPAWN Subagent | Child agent process initializing |
-| RUNNING | TASKSERVICE-09 SPAWN Subagent | Child agent executing task |
-| COMPLETED | TASKSERVICE-10 COLLECT Subagent Result | Child agent finished successfully |
-| FAILED | TASKSERVICE-14 HANDLE Error | Child agent encountered unrecoverable error |
+| SPAWNING | TASKSVC-09 SPAWN Subagent | Child agent process initializing |
+| RUNNING | TASKSVC-09 SPAWN Subagent | Child agent executing task |
+| COMPLETED | TASKSVC-10 COLLECT Subagent Result | Child agent finished successfully |
+| FAILED | TASKSVC-14 HANDLE Error | Child agent encountered unrecoverable error |
 
 ### Persona Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| LOADING | TASKSERVICE-12 LOAD Persona | Persona configuration being loaded |
-| ACTIVE | TASKSERVICE-11 DELEGATE to Persona | Persona active and available |
-| SWITCHING | TASKSERVICE-13 SWITCH Persona | Switching persona at runtime |
-| ERROR | TASKSERVICE-12 LOAD Persona | Persona load or switch failed |
+| LOADING | TASKSVC-12 LOAD Persona | Persona configuration being loaded |
+| ACTIVE | TASKSVC-11 DELEGATE to Persona | Persona active and available |
+| SWITCHING | TASKSVC-13 SWITCH Persona | Switching persona at runtime |
+| ERROR | TASKSVC-12 LOAD Persona | Persona load or switch failed |
 
 ### MCP Client Connection Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| CONNECTING | MCPREPOSITORY-01 CONNECT MCP Server | Connection in progress |
-| CONNECTED | MCPREPOSITORY-01 CONNECT MCP Server | Connected to MCP server |
-| DISCOVERING | MCPREPOSITORY-02 DISCOVER MCP Tools | Discovering tools from server |
-| ERROR | MCPREPOSITORY-01 CONNECT MCP Server | Connection or discovery failed |
+| CONNECTING | MCPREPO-01 CONNECT MCP Server | Connection in progress |
+| CONNECTED | MCPREPO-01 CONNECT MCP Server | Connected to MCP server |
+| DISCOVERING | MCPREPO-02 DISCOVER MCP Tools | Discovering tools from server |
+| ERROR | MCPREPO-01 CONNECT MCP Server | Connection or discovery failed |
 
 ### MCP Server Serving Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| STARTING | MCPREPOSITORY-04 EXPOSE nasim Tools | Server starting up |
-| RUNNING | MCPREPOSITORY-04 EXPOSE nasim Tools | Server running |
-| STOPPING | MCPREPOSITORY-04 EXPOSE nasim Tools | Server shutting down |
-| ERROR | MCPREPOSITORY-04 EXPOSE nasim Tools | Server startup or runtime failure |
+| STARTING | MCPREPO-04 EXPOSE nasim Tools | Server starting up |
+| RUNNING | MCPREPO-04 EXPOSE nasim Tools | Server running |
+| STOPPING | MCPREPO-04 EXPOSE nasim Tools | Server shutting down |
+| ERROR | MCPREPO-04 EXPOSE nasim Tools | Server startup or runtime failure |
 
 ### Sandbox Execution Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| EXECUTING | SANDBOXREPOSITORY-01 ISOLATE Command | Process running in sandbox |
-| MONITORING | SANDBOXREPOSITORY-03 MONITOR Process | Process being monitored |
-| COMPLETED | SANDBOXREPOSITORY-01 ISOLATE Command | Process finished successfully |
-| TIMEOUT | SANDBOXREPOSITORY-03 MONITOR Process | Process exceeded time limit |
-| FAILED | SANDBOXREPOSITORY-01 ISOLATE Command | Process crashed or was killed |
-| RESOURCE_EXCEEDED | SANDBOXREPOSITORY-04 LIMIT Resources | Process exceeded resource quota |
+| EXECUTING | SANDBOXREPO-01 ISOLATE Command | Process running in sandbox |
+| MONITORING | SANDBOXREPO-03 MONITOR Process | Process being monitored |
+| COMPLETED | SANDBOXREPO-01 ISOLATE Command | Process finished successfully |
+| TIMEOUT | SANDBOXREPO-03 MONITOR Process | Process exceeded time limit |
+| FAILED | SANDBOXREPO-01 ISOLATE Command | Process crashed or was killed |
+| RESOURCE_EXCEEDED | SANDBOXREPO-04 LIMIT Resources | Process exceeded resource quota |
 
 ### Diff Staging Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| STAGING | EDITSTRATEGYREPOSITORY-10 STAGE Diff | Diff being computed |
-| STAGED | EDITSTRATEGYREPOSITORY-10 STAGE Diff | Diff ready for review |
-| AWAITING_APPROVAL | SAFETYSERVICE-02 REQUEST Approval | Diff presented for user approval |
-| APPROVED | SAFETYSERVICE-02 REQUEST Approval | User approved diff |
-| APPLYING | EDITSTRATEGYREPOSITORY-10 STAGE Diff | Approved diff being applied |
-| APPLIED | EDITSTRATEGYREPOSITORY-10 STAGE Diff | Diff successfully applied |
-| ERROR | EDITSTRATEGYREPOSITORY-10 STAGE Diff | Diff computation or application failed |
+| STAGING | EDITSTRATEGYREPO-10 STAGE Diff | Diff being computed |
+| STAGED | EDITSTRATEGYREPO-10 STAGE Diff | Diff ready for review |
+| AWAITING_APPROVAL | SAFETYSVC-02 REQUEST Approval | Diff presented for user approval |
+| APPROVED | SAFETYSVC-02 REQUEST Approval | User approved diff |
+| APPLYING | EDITSTRATEGYREPO-10 STAGE Diff | Approved diff being applied |
+| APPLIED | EDITSTRATEGYREPO-10 STAGE Diff | Diff successfully applied |
+| ERROR | EDITSTRATEGYREPO-10 STAGE Diff | Diff computation or application failed |
 
 ### Safety Mode Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| UNINITIALIZED | SAFETYSERVICE-03 APPLY Safety Mode | Safety system not initialized |
-| PERMISSIVE | SAFETYSERVICE-03 APPLY Safety Mode | Permissive mode applied |
-| ASK | SAFETYSERVICE-03 APPLY Safety Mode | Ask mode applied |
-| BLOCK | SAFETYSERVICE-03 APPLY Safety Mode | Block mode applied |
-| ERROR | SAFETYSERVICE-01 CHECK Permission | Safety system encountered error |
+| UNINITIALIZED | SAFETYSVC-03 APPLY Safety Mode | Safety system not initialized |
+| PERMISSIVE | SAFETYSVC-03 APPLY Safety Mode | Permissive mode applied |
+| ASK | SAFETYSVC-03 APPLY Safety Mode | Ask mode applied |
+| BLOCK | SAFETYSVC-03 APPLY Safety Mode | Block mode applied |
+| ERROR | SAFETYSVC-01 CHECK Permission | Safety system encountered error |
 
 ### Router Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| CLASSIFYING | LLMREPOSITORY-03 CLASSIFY Task | Task classification started |
-| SELECTING | LLMREPOSITORY-01 SELECT Model | Model selection in progress |
-| SWITCHING | LLMREPOSITORY-04 SWITCH Model | Runtime model switch |
-| FALLBACK | LLMREPOSITORY-02 APPLY Fallback | Falling back to next model |
-| ERROR | LLMREPOSITORY-03 CLASSIFY Task | Classification or routing failure |
+| CLASSIFYING | LLMREPO-03 CLASSIFY Task | Task classification started |
+| SELECTING | LLMREPO-01 SELECT Model | Model selection in progress |
+| SWITCHING | LLMREPO-04 SWITCH Model | Runtime model switch |
+| FALLBACK | LLMREPO-02 APPLY Fallback | Falling back to next model |
+| ERROR | LLMREPO-03 CLASSIFY Task | Classification or routing failure |
 
 ### Provider Connection Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| REGISTERING | LLMREPOSITORY-01 REGISTER Provider | Provider registration started |
-| ACTIVE | LLMREPOSITORY-01 REGISTER Provider | Provider registered and ready |
-| SELECTING | LLMREPOSITORY-04 SELECT Provider Backend | Backend selection in progress |
-| ERROR | LLMREPOSITORY-01 REGISTER Provider | Registration or selection failed |
+| REGISTERING | LLMREPO-01 REGISTER Provider | Provider registration started |
+| ACTIVE | LLMREPO-01 REGISTER Provider | Provider registered and ready |
+| SELECTING | LLMREPO-04 SELECT Provider Backend | Backend selection in progress |
+| ERROR | LLMREPO-01 REGISTER Provider | Registration or selection failed |
 
 ### Evaluation Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| CHECKING | EVALUATIONSERVICE-01 EVALUATE Task | Task completion checks started |
-| REVIEWING | EVALUATIONSERVICE-04 VALIDATE With LLM | LLM review in progress |
-| TESTING | EVALUATIONSERVICE-05 VALIDATE Test Suite | Test validation in progress |
-| SCORING | EVALUATIONSERVICE-07 RECORD Quality Signal | Scoring in progress |
-| RETRYING | EVALUATIONSERVICE-06 COORDINATE Retry | Retry with backoff and escalation |
-| PASSED | EVALUATIONSERVICE-07 RECORD Quality Signal | Evaluation passed |
-| FAILED | EVALUATIONSERVICE-02 CHECK Task Completion | Evaluation failed |
+| CHECKING | EVALSVC-01 EVALUATE Task | Task completion checks started |
+| REVIEWING | EVALSVC-04 VALIDATE With LLM | LLM review in progress |
+| TESTING | EVALSVC-05 VALIDATE Test Suite | Test validation in progress |
+| SCORING | EVALSVC-07 RECORD Quality Signal | Scoring in progress |
+| RETRYING | EVALSVC-06 COORDINATE Retry | Retry with backoff and escalation |
+| PASSED | EVALSVC-07 RECORD Quality Signal | Evaluation passed |
+| FAILED | EVALSVC-02 CHECK Task Completion | Evaluation failed |
 
 ### Repository Index Lifecycle
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| INDEXING | REPOINTELLIGENCEREPOSITORY-01 INDEX Codebase | AST indexing in progress |
-| INDEXED | REPOINTELLIGENCEREPOSITORY-01 INDEX Codebase | Repository fully indexed |
-| BUILDING_GRAPH | REPOINTELLIGENCEREPOSITORY-02 BUILD Symbol Graph | Cross-file symbol reference graph |
-| EMBEDDING | REPOINTELLIGENCEREPOSITORY-05 EMBED Code | Vector embedding generation |
-| STALE | REPOINTELLIGENCEREPOSITORY-01 INDEX Codebase | Index outdated, needs re-index |
-| ERROR | REPOINTELLIGENCEREPOSITORY-01 INDEX Codebase | Indexing operation failed |
+| INDEXING | REPOINTELREPO-01 INDEX Codebase | AST indexing in progress |
+| INDEXED | REPOINTELREPO-01 INDEX Codebase | Repository fully indexed |
+| BUILDING_GRAPH | REPOINTELREPO-02 BUILD Symbol Graph | Cross-file symbol reference graph |
+| EMBEDDING | REPOINTELREPO-05 EMBED Code | Vector embedding generation |
+| STALE | REPOINTELREPO-01 INDEX Codebase | Index outdated, needs re-index |
+| ERROR | REPOINTELREPO-01 INDEX Codebase | Indexing operation failed |
 
 ## SM → SQ Transition Coverage Tables
 
 > **TRC-SM-05 compliance:** Every SM transition mapped to its implementing SQ diagram.
 > Terminal (`[*]`) transitions are state diagram syntax, not implementable transitions — marked `—`.
 
-### sm_agent_lifecycle — Transition Coverage Table
+### sm_task_svc_agent — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | TASKSERVICE-01 | Process startup | sq_agent01_process_user_task.puml |
+| [*] | IDLE | TASKSVC-01 | Process startup | sq_agent01_process_user_task.puml |
 | IDLE | LISTENING | HTTPADP-06 | DISPATCH Message received | sq_api06_dispatch_message.puml |
 | IDLE | SERVING | HTTPADP-06 | API request received | sq_api06_dispatch_message.puml |
-| IDLE | PLANNING | TASKSERVICE-07 | /plan command entered | sq_agent07_queue_plan.puml |
-| IDLE | [*] | TASKSERVICE-01 | Error handled | — |
+| IDLE | PLANNING | TASKSVC-07 | /plan command entered | sq_agent07_queue_plan.puml |
+| IDLE | [*] | TASKSVC-01 | Error handled | — |
 | LISTENING | THINKING | HTTPADP-06 | Input parsed, messages built | sq_api06_dispatch_message.puml |
 | SERVING | THINKING | HTTPADP-06 | API request processed | sq_api06_dispatch_message.puml |
 | SERVING | IDLE | HTTPADP-06 | API request complete | sq_api06_dispatch_message.puml |
-| THINKING | RESPONDING | LLMREPOSITORY-02 | LLM returns text only | sq_provider02_request_chat.puml |
-| THINKING | TOOL_EXEC | LLMREPOSITORY-02 | LLM returns tool_calls | sq_provider02_request_chat.puml |
-| THINKING | COMPACTING | TASKSERVICE-06 | token_count > context_budget | sq_agent06_compact_context.puml |
-| THINKING | ROUTING | LLMREPOSITORY-01 | ModelRouter resolving model | sq_router01_select_model.puml |
-| THINKING | ERROR | LLMREPOSITORY-02 | Provider call failed | sq_provider02_request_chat.puml |
+| THINKING | RESPONDING | LLMREPO-02 | LLM returns text only | sq_provider02_request_chat.puml |
+| THINKING | TOOL_EXEC | LLMREPO-02 | LLM returns tool_calls | sq_provider02_request_chat.puml |
+| THINKING | COMPACTING | TASKSVC-06 | token_count > context_budget | sq_agent06_compact_context.puml |
+| THINKING | ROUTING | LLMREPO-01 | ModelRouter resolving model | sq_router01_select_model.puml |
+| THINKING | ERROR | LLMREPO-02 | Provider call failed | sq_provider02_request_chat.puml |
 | THINKING | RESPONDING | HTTPADP-06 | Response dispatched | sq_api06_dispatch_message.puml |
-| THINKING | EVALUATING | EVALUATIONSERVICE-01 | task_complete AND evaluation_enabled | sq_evaluation01_evaluate_task.puml |
-| ROUTING | THINKING | LLMREPOSITORY-01 | Model selected | sq_router01_select_model.puml |
-| TOOL_EXEC | THINKING | TASKSERVICE-02 | Tool call complete | sq_agent02_dispatch_tool_call.puml |
-| TOOL_EXEC | AWAITING_APPROVAL | SAFETYSERVICE-02 | safety_mode=ask AND unsafe tool | sq_safety02_request_approval.puml |
-| TOOL_EXEC | HOOK_RUNNING | TOOLSERVICE-02 | Pre/post hook configured | sq_hooks02_dispatch_pre_tool_hook.puml |
-| TOOL_EXEC | ERROR | TASKSERVICE-02 | Tool execution failed | sq_agent02_dispatch_tool_call.puml |
-| TOOL_EXEC | STAGING | EDITSTRATEGYREPOSITORY-10 | diff_sandbox mode active | sq_editstrategy10_stage_diff.puml |
-| HOOK_RUNNING | TOOL_EXEC | TOOLSERVICE-02 | Hook execution complete | sq_hooks02_dispatch_pre_tool_hook.puml |
-| HOOK_RUNNING | IDLE | TOOLSERVICE-02 | Hook execution complete (no tool) | sq_hooks02_dispatch_pre_tool_hook.puml |
-| AWAITING_APPROVAL | TOOL_EXEC | SAFETYSERVICE-02 | User approves | sq_safety02_request_approval.puml |
-| AWAITING_APPROVAL | IDLE | SAFETYSERVICE-02 | User denies | sq_safety02_request_approval.puml |
-| COMPACTING | THINKING | TASKSERVICE-06 | Context compacted | sq_agent06_compact_context.puml |
+| THINKING | EVALUATING | EVALSVC-01 | task_complete AND evaluation_enabled | sq_evaluation01_evaluate_task.puml |
+| ROUTING | THINKING | LLMREPO-01 | Model selected | sq_router01_select_model.puml |
+| TOOL_EXEC | THINKING | TASKSVC-02 | Tool call complete | sq_agent02_dispatch_tool_call.puml |
+| TOOL_EXEC | AWAITING_APPROVAL | SAFETYSVC-02 | safety_mode=ask AND unsafe tool | sq_safety02_request_approval.puml |
+| TOOL_EXEC | HOOK_RUNNING | TOOLSVC-02 | Pre/post hook configured | sq_hooks02_dispatch_pre_tool_hook.puml |
+| TOOL_EXEC | ERROR | TASKSVC-02 | Tool execution failed | sq_agent02_dispatch_tool_call.puml |
+| TOOL_EXEC | STAGING | EDITSTRATEGYREPO-10 | diff_sandbox mode active | sq_editstrategy10_stage_diff.puml |
+| HOOK_RUNNING | TOOL_EXEC | TOOLSVC-02 | Hook execution complete | sq_hooks02_dispatch_pre_tool_hook.puml |
+| HOOK_RUNNING | IDLE | TOOLSVC-02 | Hook execution complete (no tool) | sq_hooks02_dispatch_pre_tool_hook.puml |
+| AWAITING_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves | sq_safety02_request_approval.puml |
+| AWAITING_APPROVAL | IDLE | SAFETYSVC-02 | User denies | sq_safety02_request_approval.puml |
+| COMPACTING | THINKING | TASKSVC-06 | Context compacted | sq_agent06_compact_context.puml |
 | RESPONDING | IDLE | HTTPADP-06 | Response streamed to user | sq_api06_dispatch_message.puml |
-| ERROR | IDLE | TASKSERVICE-14 | Error handled | sq_agent14_handle_error.puml |
-| PLANNING | IDLE | TASKSERVICE-07 | Plan mode exited | sq_agent07_queue_plan.puml |
-| EVALUATING | REVIEWING | EVALUATIONSERVICE-01 | Evaluation passed | sq_evaluation01_evaluate_task.puml |
-| EVALUATING | RETRYING | EVALUATIONSERVICE-01 | Evaluation failed | sq_evaluation01_evaluate_task.puml |
-| EVALUATING | THINKING | EVALUATIONSERVICE-01 | Retry with feedback | sq_evaluation01_evaluate_task.puml |
-| REVIEWING | THINKING | EVALUATIONSERVICE-04 | LLM review passed | sq_evaluation04_validate_with_llm.puml |
-| REVIEWING | RETRYING | EVALUATIONSERVICE-04 | LLM review rejected | sq_evaluation04_validate_with_llm.puml |
-| RETRYING | THINKING | EVALUATIONSERVICE-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | ERROR | EVALUATIONSERVICE-06 | Retry exhausted | sq_evaluation06_coordinate_retry.puml |
-| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPOSITORY-10 | Diff computed successfully | sq_editstrategy10_stage_diff.puml |
-| STAGING | ERROR | EDITSTRATEGYREPOSITORY-10 | Diff computation failed | sq_editstrategy10_stage_diff.puml |
-| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETYSERVICE-02 | User approves diff | sq_safety02_request_approval.puml |
-| AWAITING_DIFF_APPROVAL | IDLE | SAFETYSERVICE-02 | User rejects diff | sq_safety02_request_approval.puml |
+| ERROR | IDLE | TASKSVC-14 | Error handled | sq_agent14_handle_error.puml |
+| PLANNING | IDLE | TASKSVC-07 | Plan mode exited | sq_agent07_queue_plan.puml |
+| EVALUATING | REVIEWING | EVALSVC-01 | Evaluation passed | sq_evaluation01_evaluate_task.puml |
+| EVALUATING | RETRYING | EVALSVC-01 | Evaluation failed | sq_evaluation01_evaluate_task.puml |
+| EVALUATING | THINKING | EVALSVC-01 | Retry with feedback | sq_evaluation01_evaluate_task.puml |
+| REVIEWING | THINKING | EVALSVC-04 | LLM review passed | sq_evaluation04_validate_with_llm.puml |
+| REVIEWING | RETRYING | EVALSVC-04 | LLM review rejected | sq_evaluation04_validate_with_llm.puml |
+| RETRYING | THINKING | EVALSVC-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | ERROR | EVALSVC-06 | Retry exhausted | sq_evaluation06_coordinate_retry.puml |
+| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPO-10 | Diff computed successfully | sq_editstrategy10_stage_diff.puml |
+| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed | sq_editstrategy10_stage_diff.puml |
+| AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves diff | sq_safety02_request_approval.puml |
+| AWAITING_DIFF_APPROVAL | IDLE | SAFETYSVC-02 | User rejects diff | sq_safety02_request_approval.puml |
 
 > **Coverage:** 39/39 non-terminal transitions covered. 0 ORPHANs.
-> **Note:** `THINKING→RESPONDING` appears twice with different UC-IDs — `LLMREPOSITORY-02` (provider generates content) and `HTTPADP-06` (API dispatches to network) — reflecting two semantically distinct transitions between the same states.
+> **Note:** `THINKING→RESPONDING` appears twice with different UC-IDs — `LLMREPO-02` (provider generates content) and `HTTPADP-06` (API dispatches to network) — reflecting two semantically distinct transitions between the same states.
 
-### sm_session_lifecycle — Transition Coverage Table
+### sm_session_svc_session — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | CREATED | SESSIONSERVICE-01 | Session record initialized | sq_sessionservice01_persist_session.puml |
-| CREATED | ACTIVE | SESSIONSERVICE-01 | Session ready for messages | sq_sessionservice01_persist_session.puml |
-| ACTIVE | SAVED | SESSIONSERVICE-01 | Session persisted to disk | sq_sessionservice01_persist_session.puml |
-| ACTIVE | BRANCHED | SESSIONSERVICE-08 | Session forked from parent | sq_sessionservice08_branch_session.puml |
-| ACTIVE | CLOSED | SESSIONSERVICE-09 | Session terminated | sq_sessionservice09_delete_session.puml |
-| SAVED | RESTORED | SESSIONSERVICE-04 | Session loaded from disk | sq_sessionservice04_restore_session.puml |
-| SAVED | CLOSED | SESSIONSERVICE-09 | Session terminated | sq_sessionservice09_delete_session.puml |
-| RESTORED | ACTIVE | SESSIONSERVICE-02 | Session ready for messages | sq_sessionservice02_read_session.puml |
-| RESTORED | SAVED | SESSIONSERVICE-01 | Session persisted to disk | sq_sessionservice01_persist_session.puml |
-| RESTORED | CLOSED | SESSIONSERVICE-09 | Session terminated | sq_sessionservice09_delete_session.puml |
-| BRANCHED | ACTIVE | SESSIONSERVICE-02 | Session ready for messages | sq_sessionservice02_read_session.puml |
-| BRANCHED | CLOSED | SESSIONSERVICE-09 | Session terminated | sq_sessionservice09_delete_session.puml |
+| [*] | CREATED | SESSIONSVC-01 | Session record initialized | sq_sessionservice01_persist_session.puml |
+| CREATED | ACTIVE | SESSIONSVC-01 | Session ready for messages | sq_sessionservice01_persist_session.puml |
+| ACTIVE | SAVED | SESSIONSVC-01 | Session persisted to disk | sq_sessionservice01_persist_session.puml |
+| ACTIVE | BRANCHED | SESSIONSVC-08 | Session forked from parent | sq_sessionservice08_branch_session.puml |
+| ACTIVE | CLOSED | SESSIONSVC-09 | Session terminated | sq_sessionservice09_delete_session.puml |
+| SAVED | RESTORED | SESSIONSVC-04 | Session loaded from disk | sq_sessionservice04_restore_session.puml |
+| SAVED | CLOSED | SESSIONSVC-09 | Session terminated | sq_sessionservice09_delete_session.puml |
+| RESTORED | ACTIVE | SESSIONSVC-02 | Session ready for messages | sq_sessionservice02_read_session.puml |
+| RESTORED | SAVED | SESSIONSVC-01 | Session persisted to disk | sq_sessionservice01_persist_session.puml |
+| RESTORED | CLOSED | SESSIONSVC-09 | Session terminated | sq_sessionservice09_delete_session.puml |
+| BRANCHED | ACTIVE | SESSIONSVC-02 | Session ready for messages | sq_sessionservice02_read_session.puml |
+| BRANCHED | CLOSED | SESSIONSVC-09 | Session terminated | sq_sessionservice09_delete_session.puml |
 | CLOSED | [*] | — | Terminal state | — |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_subagent_lifecycle — Transition Coverage Table
+### sm_task_svc_subagent — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | TASKSERVICE-09 | Default state | sq_agent09_spawn_subagent.puml |
-| IDLE | SPAWNING | TASKSERVICE-09 | Child agent spawn requested | sq_agent09_spawn_subagent.puml |
-| SPAWNING | RUNNING | TASKSERVICE-09 | Child agent initialized | sq_agent09_spawn_subagent.puml |
-| SPAWNING | FAILED | TASKSERVICE-09 | Spawn failed | sq_agent09_spawn_subagent.puml |
-| RUNNING | COMPLETED | TASKSERVICE-10 | Task finished successfully | sq_agent10_collect_subagent_result.puml |
-| RUNNING | FAILED | TASKSERVICE-14 | Unrecoverable error | sq_agent14_handle_error.puml |
-| COMPLETED | IDLE | TASKSERVICE-10 | Results aggregated to parent | sq_agent10_collect_subagent_result.puml |
-| COMPLETED | [*] | TASKSERVICE-10 | Terminal state | — |
-| FAILED | IDLE | TASKSERVICE-14 | Error reported, cleanup done | sq_agent14_handle_error.puml |
-| FAILED | [*] | TASKSERVICE-14 | Terminal state | — |
+| [*] | IDLE | TASKSVC-09 | Default state | sq_agent09_spawn_subagent.puml |
+| IDLE | SPAWNING | TASKSVC-09 | Child agent spawn requested | sq_agent09_spawn_subagent.puml |
+| SPAWNING | RUNNING | TASKSVC-09 | Child agent initialized | sq_agent09_spawn_subagent.puml |
+| SPAWNING | FAILED | TASKSVC-09 | Spawn failed | sq_agent09_spawn_subagent.puml |
+| RUNNING | COMPLETED | TASKSVC-10 | Task finished successfully | sq_agent10_collect_subagent_result.puml |
+| RUNNING | FAILED | TASKSVC-14 | Unrecoverable error | sq_agent14_handle_error.puml |
+| COMPLETED | IDLE | TASKSVC-10 | Results aggregated to parent | sq_agent10_collect_subagent_result.puml |
+| COMPLETED | [*] | TASKSVC-10 | Terminal state | — |
+| FAILED | IDLE | TASKSVC-14 | Error reported, cleanup done | sq_agent14_handle_error.puml |
+| FAILED | [*] | TASKSVC-14 | Terminal state | — |
 
 > **Coverage:** 8/8 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_plugin_lifecycle — Transition Coverage Table
+### sm_tool_svc_plugin — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | DISCOVERED | TOOLSERVICE-01 | Plugin found on filesystem | sq_plugins01_discover_plugins.puml |
-| DISCOVERED | LOADING | TOOLSERVICE-02 | Manifest parsing starts | sq_plugins02_load_manifest.puml |
-| DISCOVERED | ERROR | TOOLSERVICE-01 | Plugin discovery failed | sq_plugins01_discover_plugins.puml |
-| LOADING | LOADED | TOOLSERVICE-03 | Manifest parsed, tools registered | sq_plugins03_register_plugin_tools.puml |
-| LOADING | ERROR | TOOLSERVICE-02 | Manifest parsing failed | sq_plugins02_load_manifest.puml |
-| LOADED | ENABLED | TOOLSERVICE-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
-| LOADED | DISABLED | TOOLSERVICE-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
-| LOADED | ERROR | TOOLSERVICE-03 | Tool registration failed | sq_plugins03_register_plugin_tools.puml |
-| ENABLED | DISABLED | TOOLSERVICE-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
-| ENABLED | ERROR | TOOLSERVICE-01 | Runtime exception | sq_plugins01_discover_plugins.puml |
-| ENABLED | [*] | TOOLSERVICE-06 | Plugin unloaded | — |
-| DISABLED | ENABLED | TOOLSERVICE-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
-| DISABLED | [*] | TOOLSERVICE-06 | Plugin unloaded | — |
-| ERROR | DISCOVERED | TOOLSERVICE-01 | Re-discovery (recovery) | sq_plugins01_discover_plugins.puml |
+| [*] | DISCOVERED | TOOLSVC-01 | Plugin found on filesystem | sq_plugins01_discover_plugins.puml |
+| DISCOVERED | LOADING | TOOLSVC-02 | Manifest parsing starts | sq_plugins02_load_manifest.puml |
+| DISCOVERED | ERROR | TOOLSVC-01 | Plugin discovery failed | sq_plugins01_discover_plugins.puml |
+| LOADING | LOADED | TOOLSVC-03 | Manifest parsed, tools registered | sq_plugins03_register_plugin_tools.puml |
+| LOADING | ERROR | TOOLSVC-02 | Manifest parsing failed | sq_plugins02_load_manifest.puml |
+| LOADED | ENABLED | TOOLSVC-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
+| LOADED | DISABLED | TOOLSVC-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
+| LOADED | ERROR | TOOLSVC-03 | Tool registration failed | sq_plugins03_register_plugin_tools.puml |
+| ENABLED | DISABLED | TOOLSVC-06 | Plugin deactivated | sq_plugins06_disable_plugin.puml |
+| ENABLED | ERROR | TOOLSVC-01 | Runtime exception | sq_plugins01_discover_plugins.puml |
+| ENABLED | [*] | TOOLSVC-06 | Plugin unloaded | — |
+| DISABLED | ENABLED | TOOLSVC-05 | Plugin activated | sq_plugins05_enable_plugin.puml |
+| DISABLED | [*] | TOOLSVC-06 | Plugin unloaded | — |
+| ERROR | DISCOVERED | TOOLSVC-01 | Re-discovery (recovery) | sq_plugins01_discover_plugins.puml |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_plan_lifecycle — Transition Coverage Table
+### sm_task_svc_plan — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | EMPTY | TASKSERVICE-07 | No plan active | sq_agent07_queue_plan.puml |
-| EMPTY | BUILDING | TASKSERVICE-07 | /plan command entered | sq_agent07_queue_plan.puml |
-| BUILDING | QUEUED | TASKSERVICE-07 | Plan construction complete | sq_agent07_queue_plan.puml |
-| BUILDING | EMPTY | TASKSERVICE-07 | Plan cancelled | sq_agent07_queue_plan.puml |
-| QUEUED | APPROVED | TASKSERVICE-08 | User approves plan | sq_agent08_approve_plan.puml |
-| QUEUED | REJECTED | TASKSERVICE-08 | User rejects plan | sq_agent08_approve_plan.puml |
-| APPROVED | EXECUTING | TASKSERVICE-08 | Execution started | sq_agent08_approve_plan.puml |
-| EXECUTING | COMPLETED | TASKSERVICE-01 | All plan steps finished | sq_agent01_process_user_task.puml |
-| EXECUTING | EMPTY | TASKSERVICE-14 | Execution failed or cancelled | sq_agent14_handle_error.puml |
-| COMPLETED | [*] | TASKSERVICE-01 | Terminal state | — |
-| REJECTED | [*] | TASKSERVICE-08 | Terminal state | — |
+| [*] | EMPTY | TASKSVC-07 | No plan active | sq_agent07_queue_plan.puml |
+| EMPTY | BUILDING | TASKSVC-07 | /plan command entered | sq_agent07_queue_plan.puml |
+| BUILDING | QUEUED | TASKSVC-07 | Plan construction complete | sq_agent07_queue_plan.puml |
+| BUILDING | EMPTY | TASKSVC-07 | Plan cancelled | sq_agent07_queue_plan.puml |
+| QUEUED | APPROVED | TASKSVC-08 | User approves plan | sq_agent08_approve_plan.puml |
+| QUEUED | REJECTED | TASKSVC-08 | User rejects plan | sq_agent08_approve_plan.puml |
+| APPROVED | EXECUTING | TASKSVC-08 | Execution started | sq_agent08_approve_plan.puml |
+| EXECUTING | COMPLETED | TASKSVC-01 | All plan steps finished | sq_agent01_process_user_task.puml |
+| EXECUTING | EMPTY | TASKSVC-14 | Execution failed or cancelled | sq_agent14_handle_error.puml |
+| COMPLETED | [*] | TASKSVC-01 | Terminal state | — |
+| REJECTED | [*] | TASKSVC-08 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_persona_lifecycle — Transition Coverage Table
+### sm_task_svc_persona — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNLOADED | TASKSERVICE-12 | Default state | `sq_agent12_load_persona.puml` |
-| UNLOADED | LOADING | TASKSERVICE-12 | Load requested | `sq_agent12_load_persona.puml` |
-| LOADING | ACTIVE | TASKSERVICE-12 | Load successful | `sq_agent12_load_persona.puml` |
-| LOADING | ERROR | TASKSERVICE-12 | Load failed | `sq_agent12_load_persona.puml` |
-| ACTIVE | SWITCHING | TASKSERVICE-13 | Switch requested | `sq_agent13_switch_persona.puml` |
-| SWITCHING | ACTIVE | TASKSERVICE-13 | Switch successful | `sq_agent13_switch_persona.puml` |
-| SWITCHING | ERROR | TASKSERVICE-13 | Switch failed | `sq_agent13_switch_persona.puml` |
-| ACTIVE | UNLOADED | TASKSERVICE-11 | Delegation complete | `sq_agent11_delegate_to_persona.puml` |
-| ERROR | UNLOADED | TASKSERVICE-12 | Recovery: retry load | `sq_agent12_load_persona.puml` |
-| UNLOADED | [*] | TASKSERVICE-12 | Terminal state | — |
+| [*] | UNLOADED | TASKSVC-12 | Default state | `sq_agent12_load_persona.puml` |
+| UNLOADED | LOADING | TASKSVC-12 | Load requested | `sq_agent12_load_persona.puml` |
+| LOADING | ACTIVE | TASKSVC-12 | Load successful | `sq_agent12_load_persona.puml` |
+| LOADING | ERROR | TASKSVC-12 | Load failed | `sq_agent12_load_persona.puml` |
+| ACTIVE | SWITCHING | TASKSVC-13 | Switch requested | `sq_agent13_switch_persona.puml` |
+| SWITCHING | ACTIVE | TASKSVC-13 | Switch successful | `sq_agent13_switch_persona.puml` |
+| SWITCHING | ERROR | TASKSVC-13 | Switch failed | `sq_agent13_switch_persona.puml` |
+| ACTIVE | UNLOADED | TASKSVC-11 | Delegation complete | `sq_agent11_delegate_to_persona.puml` |
+| ERROR | UNLOADED | TASKSVC-12 | Recovery: retry load | `sq_agent12_load_persona.puml` |
+| UNLOADED | [*] | TASKSVC-12 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_mcp_client_lifecycle — Transition Coverage Table
+### sm_mcp_repo_client — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | DISCONNECTED | MCPREPOSITORY-01 | Default state | `sq_mcp01_connect_mcp_server.puml` |
-| DISCONNECTED | CONNECTING | MCPREPOSITORY-01 | Connect requested | `sq_mcp01_connect_mcp_server.puml` |
-| CONNECTING | CONNECTED | MCPREPOSITORY-01 | Connection established | `sq_mcp01_connect_mcp_server.puml` |
-| CONNECTING | ERROR | MCPREPOSITORY-01 | Connection failed | `sq_mcp01_connect_mcp_server.puml` |
-| CONNECTED | DISCOVERING | MCPREPOSITORY-02 | Tool discovery started | `sq_mcp02_discover_mcp_tools.puml` |
-| DISCOVERING | CONNECTED | MCPREPOSITORY-02 | Discovery complete | `sq_mcp02_discover_mcp_tools.puml` |
-| DISCOVERING | ERROR | MCPREPOSITORY-02 | Discovery failed | `sq_mcp02_discover_mcp_tools.puml` |
-| CONNECTED | DISCONNECTED | MCPREPOSITORY-01 | Disconnected | `sq_mcp01_connect_mcp_server.puml` |
-| ERROR | DISCONNECTED | MCPREPOSITORY-01 | Recovery: reconnect | `sq_mcp01_connect_mcp_server.puml` |
-| DISCONNECTED | [*] | MCPREPOSITORY-01 | Terminal state | — |
+| [*] | DISCONNECTED | MCPREPO-01 | Default state | `sq_mcp01_connect_mcp_server.puml` |
+| DISCONNECTED | CONNECTING | MCPREPO-01 | Connect requested | `sq_mcp01_connect_mcp_server.puml` |
+| CONNECTING | CONNECTED | MCPREPO-01 | Connection established | `sq_mcp01_connect_mcp_server.puml` |
+| CONNECTING | ERROR | MCPREPO-01 | Connection failed | `sq_mcp01_connect_mcp_server.puml` |
+| CONNECTED | DISCOVERING | MCPREPO-02 | Tool discovery started | `sq_mcp02_discover_mcp_tools.puml` |
+| DISCOVERING | CONNECTED | MCPREPO-02 | Discovery complete | `sq_mcp02_discover_mcp_tools.puml` |
+| DISCOVERING | ERROR | MCPREPO-02 | Discovery failed | `sq_mcp02_discover_mcp_tools.puml` |
+| CONNECTED | DISCONNECTED | MCPREPO-01 | Disconnected | `sq_mcp01_connect_mcp_server.puml` |
+| ERROR | DISCONNECTED | MCPREPO-01 | Recovery: reconnect | `sq_mcp01_connect_mcp_server.puml` |
+| DISCONNECTED | [*] | MCPREPO-01 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_mcp_server_lifecycle — Transition Coverage Table
+### sm_mcp_repo_server — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | STOPPED | MCPREPOSITORY-04 | Default state | `sq_mcp04_expose_nasim_tools.puml` |
-| STOPPED | STARTING | MCPREPOSITORY-04 | Start requested | `sq_mcp04_expose_nasim_tools.puml` |
-| STARTING | RUNNING | MCPREPOSITORY-04 | Startup complete | `sq_mcp04_expose_nasim_tools.puml` |
-| STARTING | ERROR | MCPREPOSITORY-04 | Startup failed | `sq_mcp04_expose_nasim_tools.puml` |
-| RUNNING | STOPPING | MCPREPOSITORY-04 | Stop requested | `sq_mcp04_expose_nasim_tools.puml` |
-| STOPPING | STOPPED | MCPREPOSITORY-04 | Shutdown complete | `sq_mcp04_expose_nasim_tools.puml` |
-| RUNNING | ERROR | MCPREPOSITORY-04 | Runtime failure | `sq_mcp04_expose_nasim_tools.puml` |
-| ERROR | STOPPED | MCPREPOSITORY-04 | Recovery: shutdown | `sq_mcp04_expose_nasim_tools.puml` |
-| STOPPED | [*] | MCPREPOSITORY-04 | Terminal state | — |
+| [*] | STOPPED | MCPREPO-04 | Default state | `sq_mcp04_expose_nasim_tools.puml` |
+| STOPPED | STARTING | MCPREPO-04 | Start requested | `sq_mcp04_expose_nasim_tools.puml` |
+| STARTING | RUNNING | MCPREPO-04 | Startup complete | `sq_mcp04_expose_nasim_tools.puml` |
+| STARTING | ERROR | MCPREPO-04 | Startup failed | `sq_mcp04_expose_nasim_tools.puml` |
+| RUNNING | STOPPING | MCPREPO-04 | Stop requested | `sq_mcp04_expose_nasim_tools.puml` |
+| STOPPING | STOPPED | MCPREPO-04 | Shutdown complete | `sq_mcp04_expose_nasim_tools.puml` |
+| RUNNING | ERROR | MCPREPO-04 | Runtime failure | `sq_mcp04_expose_nasim_tools.puml` |
+| ERROR | STOPPED | MCPREPO-04 | Recovery: shutdown | `sq_mcp04_expose_nasim_tools.puml` |
+| STOPPED | [*] | MCPREPO-04 | Terminal state | — |
 
 > **Coverage:** 8/8 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_sandbox_execution_lifecycle — Transition Coverage Table
+### sm_sandbox_repo_sandbox — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | SANDBOXREPOSITORY-01 | Default state | `sq_sandbox01_isolate_command.puml` |
-| IDLE | EXECUTING | SANDBOXREPOSITORY-01 | Command started | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | MONITORING | SANDBOXREPOSITORY-03 | Resource monitoring started | `sq_sandbox03_monitor_process.puml` |
-| MONITORING | EXECUTING | SANDBOXREPOSITORY-03 | Monitoring continues | `sq_sandbox03_monitor_process.puml` |
-| EXECUTING | COMPLETED | SANDBOXREPOSITORY-01 | Process finished | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | FAILED | SANDBOXREPOSITORY-01 | Process crashed | `sq_sandbox01_isolate_command.puml` |
-| EXECUTING | TIMEOUT | SANDBOXREPOSITORY-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
-| EXECUTING | RESOURCE_EXCEEDED | SANDBOXREPOSITORY-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
-| MONITORING | TIMEOUT | SANDBOXREPOSITORY-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
-| MONITORING | RESOURCE_EXCEEDED | SANDBOXREPOSITORY-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
-| TIMEOUT | IDLE | SANDBOXREPOSITORY-01 | Cleanup after timeout | `sq_sandbox01_isolate_command.puml` |
-| FAILED | IDLE | SANDBOXREPOSITORY-01 | Cleanup after failure | `sq_sandbox01_isolate_command.puml` |
-| RESOURCE_EXCEEDED | IDLE | SANDBOXREPOSITORY-04 | Cleanup after resource violation | `sq_sandbox04_limit_resources.puml` |
-| COMPLETED | [*] | SANDBOXREPOSITORY-01 | Terminal state | — |
+| [*] | IDLE | SANDBOXREPO-01 | Default state | `sq_sandbox01_isolate_command.puml` |
+| IDLE | EXECUTING | SANDBOXREPO-01 | Command started | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | MONITORING | SANDBOXREPO-03 | Resource monitoring started | `sq_sandbox03_monitor_process.puml` |
+| MONITORING | EXECUTING | SANDBOXREPO-03 | Monitoring continues | `sq_sandbox03_monitor_process.puml` |
+| EXECUTING | COMPLETED | SANDBOXREPO-01 | Process finished | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | FAILED | SANDBOXREPO-01 | Process crashed | `sq_sandbox01_isolate_command.puml` |
+| EXECUTING | TIMEOUT | SANDBOXREPO-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
+| EXECUTING | RESOURCE_EXCEEDED | SANDBOXREPO-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
+| MONITORING | TIMEOUT | SANDBOXREPO-03 | Timeout exceeded | `sq_sandbox03_monitor_process.puml` |
+| MONITORING | RESOURCE_EXCEEDED | SANDBOXREPO-04 | Resource limit hit | `sq_sandbox04_limit_resources.puml` |
+| TIMEOUT | IDLE | SANDBOXREPO-01 | Cleanup after timeout | `sq_sandbox01_isolate_command.puml` |
+| FAILED | IDLE | SANDBOXREPO-01 | Cleanup after failure | `sq_sandbox01_isolate_command.puml` |
+| RESOURCE_EXCEEDED | IDLE | SANDBOXREPO-04 | Cleanup after resource violation | `sq_sandbox04_limit_resources.puml` |
+| COMPLETED | [*] | SANDBOXREPO-01 | Terminal state | — |
 
 > **Coverage:** 13/13 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_diff_staging_lifecycle — Transition Coverage Table
+### sm_edit_strategy_repo_diff — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | EMPTY | EDITSTRATEGYREPOSITORY-10 | Default state | `sq_editstrategy10_stage_diff.puml` |
-| EMPTY | STAGING | EDITSTRATEGYREPOSITORY-10 | Diff computation started | `sq_editstrategy10_stage_diff.puml` |
-| STAGING | STAGED | EDITSTRATEGYREPOSITORY-10 | Diff computed successfully | `sq_editstrategy10_stage_diff.puml` |
-| STAGING | ERROR | EDITSTRATEGYREPOSITORY-10 | Diff computation failed | `sq_editstrategy10_stage_diff.puml` |
-| STAGED | AWAITING_APPROVAL | EDITSTRATEGYREPOSITORY-10 | Diff presented for review | `sq_editstrategy10_stage_diff.puml` |
-| AWAITING_APPROVAL | APPROVED | SAFETYSERVICE-02 | User approved | `sq_safety02_request_approval.puml` |
-| AWAITING_APPROVAL | EMPTY | SAFETYSERVICE-02 | User rejected, cleanup | `sq_safety02_request_approval.puml` |
-| APPROVED | APPLYING | EDITSTRATEGYREPOSITORY-10 | Diff application started | `sq_editstrategy10_stage_diff.puml` |
-| APPLYING | APPLIED | EDITSTRATEGYREPOSITORY-10 | Diff applied successfully | `sq_editstrategy10_stage_diff.puml` |
-| APPLYING | ERROR | EDITSTRATEGYREPOSITORY-10 | Diff application failed | `sq_editstrategy10_stage_diff.puml` |
-| APPLIED | EMPTY | EDITSTRATEGYREPOSITORY-10 | Cleanup after application | `sq_editstrategy10_stage_diff.puml` |
-| ERROR | EMPTY | EDITSTRATEGYREPOSITORY-10 | Cleanup after error | `sq_editstrategy10_stage_diff.puml` |
-| APPLIED | [*] | EDITSTRATEGYREPOSITORY-10 | Terminal state | — |
+| [*] | EMPTY | EDITSTRATEGYREPO-10 | Default state | `sq_editstrategy10_stage_diff.puml` |
+| EMPTY | STAGING | EDITSTRATEGYREPO-10 | Diff computation started | `sq_editstrategy10_stage_diff.puml` |
+| STAGING | STAGED | EDITSTRATEGYREPO-10 | Diff computed successfully | `sq_editstrategy10_stage_diff.puml` |
+| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed | `sq_editstrategy10_stage_diff.puml` |
+| STAGED | AWAITING_APPROVAL | EDITSTRATEGYREPO-10 | Diff presented for review | `sq_editstrategy10_stage_diff.puml` |
+| AWAITING_APPROVAL | APPROVED | SAFETYSVC-02 | User approved | `sq_safety02_request_approval.puml` |
+| AWAITING_APPROVAL | EMPTY | SAFETYSVC-02 | User rejected, cleanup | `sq_safety02_request_approval.puml` |
+| APPROVED | APPLYING | EDITSTRATEGYREPO-10 | Diff application started | `sq_editstrategy10_stage_diff.puml` |
+| APPLYING | APPLIED | EDITSTRATEGYREPO-10 | Diff applied successfully | `sq_editstrategy10_stage_diff.puml` |
+| APPLYING | ERROR | EDITSTRATEGYREPO-10 | Diff application failed | `sq_editstrategy10_stage_diff.puml` |
+| APPLIED | EMPTY | EDITSTRATEGYREPO-10 | Cleanup after application | `sq_editstrategy10_stage_diff.puml` |
+| ERROR | EMPTY | EDITSTRATEGYREPO-10 | Cleanup after error | `sq_editstrategy10_stage_diff.puml` |
+| APPLIED | [*] | EDITSTRATEGYREPO-10 | Terminal state | — |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_safety_mode_lifecycle — Transition Coverage Table
+### sm_safety_svc_safety — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNINITIALIZED | SAFETYSERVICE-03 | Default state | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | PERMISSIVE | SAFETYSERVICE-03 | Apply permissive mode | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | ASK | SAFETYSERVICE-03 | Apply ask mode | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | BLOCK | SAFETYSERVICE-03 | Apply block mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | ASK | SAFETYSERVICE-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | BLOCK | SAFETYSERVICE-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
-| ASK | PERMISSIVE | SAFETYSERVICE-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
-| ASK | BLOCK | SAFETYSERVICE-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
-| BLOCK | PERMISSIVE | SAFETYSERVICE-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
-| BLOCK | ASK | SAFETYSERVICE-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
-| PERMISSIVE | ERROR | SAFETYSERVICE-01 | Permission check failed | sq_safety01_check_permission.puml |
-| ASK | ERROR | SAFETYSERVICE-01 | Permission check failed | sq_safety01_check_permission.puml |
-| BLOCK | ERROR | SAFETYSERVICE-01 | Permission check failed | sq_safety01_check_permission.puml |
-| ERROR | UNINITIALIZED | SAFETYSERVICE-03 | Recovery: reinitialize | sq_safety03_apply_safety_mode.puml |
-| UNINITIALIZED | [*] | SAFETYSERVICE-03 | Terminal state | — |
+| [*] | UNINITIALIZED | SAFETYSVC-03 | Default state | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | PERMISSIVE | SAFETYSVC-03 | Apply permissive mode | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | ASK | SAFETYSVC-03 | Apply ask mode | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | BLOCK | SAFETYSVC-03 | Apply block mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | ASK | SAFETYSVC-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | BLOCK | SAFETYSVC-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
+| ASK | PERMISSIVE | SAFETYSVC-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
+| ASK | BLOCK | SAFETYSVC-03 | Switch to block mode | sq_safety03_apply_safety_mode.puml |
+| BLOCK | PERMISSIVE | SAFETYSVC-03 | Switch to permissive mode | sq_safety03_apply_safety_mode.puml |
+| BLOCK | ASK | SAFETYSVC-03 | Switch to ask mode | sq_safety03_apply_safety_mode.puml |
+| PERMISSIVE | ERROR | SAFETYSVC-01 | Permission check failed | sq_safety01_check_permission.puml |
+| ASK | ERROR | SAFETYSVC-01 | Permission check failed | sq_safety01_check_permission.puml |
+| BLOCK | ERROR | SAFETYSVC-01 | Permission check failed | sq_safety01_check_permission.puml |
+| ERROR | UNINITIALIZED | SAFETYSVC-03 | Recovery: reinitialize | sq_safety03_apply_safety_mode.puml |
+| UNINITIALIZED | [*] | SAFETYSVC-03 | Terminal state | — |
 
 > **Coverage:** 14/14 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_router_lifecycle — Transition Coverage Table
+### sm_llm_repo_router — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | LLMREPOSITORY-01 | Default state | sq_router01_select_model.puml |
-| IDLE | CLASSIFYING | LLMREPOSITORY-03 | Task classification started | sq_router03_classify_task.puml |
-| CLASSIFYING | SELECTING | LLMREPOSITORY-01 | Classification complete | sq_router01_select_model.puml |
-| CLASSIFYING | ERROR | LLMREPOSITORY-03 | Classification failed | sq_router03_classify_task.puml |
-| SELECTING | IDLE | LLMREPOSITORY-01 | Model selected | sq_router01_select_model.puml |
-| SELECTING | FALLBACK | LLMREPOSITORY-02 | Primary model unavailable | sq_router02_apply_fallback.puml |
-| FALLBACK | SELECTING | LLMREPOSITORY-02 | Fallback to next model | sq_router02_apply_fallback.puml |
-| FALLBACK | ERROR | LLMREPOSITORY-02 | All models exhausted | sq_router02_apply_fallback.puml |
-| IDLE | SWITCHING | LLMREPOSITORY-04 | Runtime switch requested | sq_router04_switch_model.puml |
-| SWITCHING | IDLE | LLMREPOSITORY-04 | Switch successful | sq_router04_switch_model.puml |
-| SWITCHING | ERROR | LLMREPOSITORY-04 | Switch failed | sq_router04_switch_model.puml |
-| ERROR | IDLE | LLMREPOSITORY-01 | Recovery: retry | sq_router01_select_model.puml |
-| IDLE | [*] | LLMREPOSITORY-01 | Terminal state | — |
+| [*] | IDLE | LLMREPO-01 | Default state | sq_router01_select_model.puml |
+| IDLE | CLASSIFYING | LLMREPO-03 | Task classification started | sq_router03_classify_task.puml |
+| CLASSIFYING | SELECTING | LLMREPO-01 | Classification complete | sq_router01_select_model.puml |
+| CLASSIFYING | ERROR | LLMREPO-03 | Classification failed | sq_router03_classify_task.puml |
+| SELECTING | IDLE | LLMREPO-01 | Model selected | sq_router01_select_model.puml |
+| SELECTING | FALLBACK | LLMREPO-02 | Primary model unavailable | sq_router02_apply_fallback.puml |
+| FALLBACK | SELECTING | LLMREPO-02 | Fallback to next model | sq_router02_apply_fallback.puml |
+| FALLBACK | ERROR | LLMREPO-02 | All models exhausted | sq_router02_apply_fallback.puml |
+| IDLE | SWITCHING | LLMREPO-04 | Runtime switch requested | sq_router04_switch_model.puml |
+| SWITCHING | IDLE | LLMREPO-04 | Switch successful | sq_router04_switch_model.puml |
+| SWITCHING | ERROR | LLMREPO-04 | Switch failed | sq_router04_switch_model.puml |
+| ERROR | IDLE | LLMREPO-01 | Recovery: retry | sq_router01_select_model.puml |
+| IDLE | [*] | LLMREPO-01 | Terminal state | — |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_provider_connection_lifecycle — Transition Coverage Table
+### sm_llm_repo_provider — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNREGISTERED | LLMREPOSITORY-01 | Default state | sq_provider01_register_provider.puml |
-| UNREGISTERED | REGISTERING | LLMREPOSITORY-01 | Registration started | sq_provider01_register_provider.puml |
-| REGISTERING | ACTIVE | LLMREPOSITORY-01 | Registration successful | sq_provider01_register_provider.puml |
-| REGISTERING | ERROR | LLMREPOSITORY-01 | Registration failed | sq_provider01_register_provider.puml |
-| ACTIVE | SELECTING | LLMREPOSITORY-04 | Backend selection started | sq_provider04_select_provider_backend.puml |
-| SELECTING | ACTIVE | LLMREPOSITORY-04 | Backend selected | sq_provider04_select_provider_backend.puml |
-| SELECTING | ERROR | LLMREPOSITORY-04 | Selection failed | sq_provider04_select_provider_backend.puml |
-| ACTIVE | UNREGISTERED | LLMREPOSITORY-01 | Unregistered | sq_provider01_register_provider.puml |
-| ERROR | UNREGISTERED | LLMREPOSITORY-01 | Recovery: re-register | sq_provider01_register_provider.puml |
-| UNREGISTERED | [*] | LLMREPOSITORY-01 | Terminal state | — |
+| [*] | UNREGISTERED | LLMREPO-01 | Default state | sq_provider01_register_provider.puml |
+| UNREGISTERED | REGISTERING | LLMREPO-01 | Registration started | sq_provider01_register_provider.puml |
+| REGISTERING | ACTIVE | LLMREPO-01 | Registration successful | sq_provider01_register_provider.puml |
+| REGISTERING | ERROR | LLMREPO-01 | Registration failed | sq_provider01_register_provider.puml |
+| ACTIVE | SELECTING | LLMREPO-04 | Backend selection started | sq_provider04_select_provider_backend.puml |
+| SELECTING | ACTIVE | LLMREPO-04 | Backend selected | sq_provider04_select_provider_backend.puml |
+| SELECTING | ERROR | LLMREPO-04 | Selection failed | sq_provider04_select_provider_backend.puml |
+| ACTIVE | UNREGISTERED | LLMREPO-01 | Unregistered | sq_provider01_register_provider.puml |
+| ERROR | UNREGISTERED | LLMREPO-01 | Recovery: re-register | sq_provider01_register_provider.puml |
+| UNREGISTERED | [*] | LLMREPO-01 | Terminal state | — |
 
 > **Coverage:** 9/9 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_evaluation_lifecycle — Transition Coverage Table
+### sm_eval_svc_evaluation — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | IDLE | EVALUATIONSERVICE-01 | Default state | sq_evaluation01_evaluate_task.puml |
-| IDLE | CHECKING | EVALUATIONSERVICE-01 | Evaluation started | sq_evaluation01_evaluate_task.puml |
-| CHECKING | REVIEWING | EVALUATIONSERVICE-04 | LLM review required | sq_evaluation04_validate_with_llm.puml |
-| CHECKING | TESTING | EVALUATIONSERVICE-05 | Test validation required | sq_evaluation05_validate_test_suite.puml |
-| CHECKING | SCORING | EVALUATIONSERVICE-07 | Direct scoring (no review/test) | sq_evaluation07_record_quality_signal.puml |
-| CHECKING | FAILED | EVALUATIONSERVICE-02 | Task completion check failed | sq_evaluation02_check_task_completion.puml |
-| REVIEWING | SCORING | EVALUATIONSERVICE-07 | LLM review passed | sq_evaluation07_record_quality_signal.puml |
-| REVIEWING | RETRYING | EVALUATIONSERVICE-06 | LLM review rejected | sq_evaluation06_coordinate_retry.puml |
-| TESTING | SCORING | EVALUATIONSERVICE-07 | Tests passed | sq_evaluation07_record_quality_signal.puml |
-| TESTING | RETRYING | EVALUATIONSERVICE-06 | Tests failed | sq_evaluation06_coordinate_retry.puml |
-| SCORING | PASSED | EVALUATIONSERVICE-07 | Scoring threshold met | sq_evaluation07_record_quality_signal.puml |
-| SCORING | RETRYING | EVALUATIONSERVICE-06 | Scoring below threshold | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | CHECKING | EVALUATIONSERVICE-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
-| RETRYING | FAILED | EVALUATIONSERVICE-06 | Retries exhausted | sq_evaluation06_coordinate_retry.puml |
-| PASSED | IDLE | EVALUATIONSERVICE-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
-| FAILED | IDLE | EVALUATIONSERVICE-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
-| PASSED | [*] | EVALUATIONSERVICE-01 | Terminal state | — |
-| FAILED | [*] | EVALUATIONSERVICE-01 | Terminal state | — |
+| [*] | IDLE | EVALSVC-01 | Default state | sq_evaluation01_evaluate_task.puml |
+| IDLE | CHECKING | EVALSVC-01 | Evaluation started | sq_evaluation01_evaluate_task.puml |
+| CHECKING | REVIEWING | EVALSVC-04 | LLM review required | sq_evaluation04_validate_with_llm.puml |
+| CHECKING | TESTING | EVALSVC-05 | Test validation required | sq_evaluation05_validate_test_suite.puml |
+| CHECKING | SCORING | EVALSVC-07 | Direct scoring (no review/test) | sq_evaluation07_record_quality_signal.puml |
+| CHECKING | FAILED | EVALSVC-02 | Task completion check failed | sq_evaluation02_check_task_completion.puml |
+| REVIEWING | SCORING | EVALSVC-07 | LLM review passed | sq_evaluation07_record_quality_signal.puml |
+| REVIEWING | RETRYING | EVALSVC-06 | LLM review rejected | sq_evaluation06_coordinate_retry.puml |
+| TESTING | SCORING | EVALSVC-07 | Tests passed | sq_evaluation07_record_quality_signal.puml |
+| TESTING | RETRYING | EVALSVC-06 | Tests failed | sq_evaluation06_coordinate_retry.puml |
+| SCORING | PASSED | EVALSVC-07 | Scoring threshold met | sq_evaluation07_record_quality_signal.puml |
+| SCORING | RETRYING | EVALSVC-06 | Scoring below threshold | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | CHECKING | EVALSVC-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
+| RETRYING | FAILED | EVALSVC-06 | Retries exhausted | sq_evaluation06_coordinate_retry.puml |
+| PASSED | IDLE | EVALSVC-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
+| FAILED | IDLE | EVALSVC-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
+| PASSED | [*] | EVALSVC-01 | Terminal state | — |
+| FAILED | [*] | EVALSVC-01 | Terminal state | — |
 
 > **Coverage:** 16/16 non-terminal transitions covered. 0 ORPHANs.
 
-### sm_index_lifecycle — Transition Coverage Table
+### sm_repo_intel_repo_index — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | UNINDEXED | REPOINTELLIGENCEREPOSITORY-01 | Default state | sq_repointelligence01_index_codebase.puml |
-| UNINDEXED | INDEXING | REPOINTELLIGENCEREPOSITORY-01 | Indexing started | sq_repointelligence01_index_codebase.puml |
-| INDEXING | INDEXED | REPOINTELLIGENCEREPOSITORY-01 | Indexing complete | sq_repointelligence01_index_codebase.puml |
-| INDEXING | ERROR | REPOINTELLIGENCEREPOSITORY-01 | Indexing failed | sq_repointelligence01_index_codebase.puml |
-| INDEXED | BUILDING_GRAPH | REPOINTELLIGENCEREPOSITORY-02 | Graph building started | sq_repointelligence02_build_symbol_graph.puml |
-| BUILDING_GRAPH | INDEXED | REPOINTELLIGENCEREPOSITORY-02 | Graph built | sq_repointelligence02_build_symbol_graph.puml |
-| BUILDING_GRAPH | ERROR | REPOINTELLIGENCEREPOSITORY-02 | Graph building failed | sq_repointelligence02_build_symbol_graph.puml |
-| INDEXED | EMBEDDING | REPOINTELLIGENCEREPOSITORY-05 | Embedding started | sq_repointelligence05_embed_code.puml |
-| EMBEDDING | INDEXED | REPOINTELLIGENCEREPOSITORY-05 | Embedding complete | sq_repointelligence05_embed_code.puml |
-| EMBEDDING | ERROR | REPOINTELLIGENCEREPOSITORY-05 | Embedding failed | sq_repointelligence05_embed_code.puml |
-| INDEXED | STALE | REPOINTELLIGENCEREPOSITORY-01 | Source files changed | sq_repointelligence01_index_codebase.puml |
-| STALE | INDEXING | REPOINTELLIGENCEREPOSITORY-01 | Re-indexing started | sq_repointelligence01_index_codebase.puml |
-| ERROR | UNINDEXED | REPOINTELLIGENCEREPOSITORY-01 | Recovery: start fresh | sq_repointelligence01_index_codebase.puml |
-| INDEXED | [*] | REPOINTELLIGENCEREPOSITORY-01 | Terminal state | — |
-| UNINDEXED | [*] | REPOINTELLIGENCEREPOSITORY-01 | Terminal state | — |
+| [*] | UNINDEXED | REPOINTELREPO-01 | Default state | sq_repointelligence01_index_codebase.puml |
+| UNINDEXED | INDEXING | REPOINTELREPO-01 | Indexing started | sq_repointelligence01_index_codebase.puml |
+| INDEXING | INDEXED | REPOINTELREPO-01 | Indexing complete | sq_repointelligence01_index_codebase.puml |
+| INDEXING | ERROR | REPOINTELREPO-01 | Indexing failed | sq_repointelligence01_index_codebase.puml |
+| INDEXED | BUILDING_GRAPH | REPOINTELREPO-02 | Graph building started | sq_repointelligence02_build_symbol_graph.puml |
+| BUILDING_GRAPH | INDEXED | REPOINTELREPO-02 | Graph built | sq_repointelligence02_build_symbol_graph.puml |
+| BUILDING_GRAPH | ERROR | REPOINTELREPO-02 | Graph building failed | sq_repointelligence02_build_symbol_graph.puml |
+| INDEXED | EMBEDDING | REPOINTELREPO-05 | Embedding started | sq_repointelligence05_embed_code.puml |
+| EMBEDDING | INDEXED | REPOINTELREPO-05 | Embedding complete | sq_repointelligence05_embed_code.puml |
+| EMBEDDING | ERROR | REPOINTELREPO-05 | Embedding failed | sq_repointelligence05_embed_code.puml |
+| INDEXED | STALE | REPOINTELREPO-01 | Source files changed | sq_repointelligence01_index_codebase.puml |
+| STALE | INDEXING | REPOINTELREPO-01 | Re-indexing started | sq_repointelligence01_index_codebase.puml |
+| ERROR | UNINDEXED | REPOINTELREPO-01 | Recovery: start fresh | sq_repointelligence01_index_codebase.puml |
+| INDEXED | [*] | REPOINTELREPO-01 | Terminal state | — |
+| UNINDEXED | [*] | REPOINTELREPO-01 | Terminal state | — |
 
 > **Coverage:** 13/13 non-terminal transitions covered. 0 ORPHANs.
 
@@ -898,21 +898,21 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 
 | # | SM File | Entity | C4 Component | Type | States | UCs | Status |
 |---|---------|--------|--------------|------|--------|-----|--------|
-| 1 | sm_agent_lifecycle.puml | Task Service | Task Service | Process FSM | 17 | TASKSERVICE-01..14, HTTPADP-06, LLMREPOSITORY-02, EDITSTRATEGYREPOSITORY-10, SAFETYSERVICE-02, TOOLSERVICE-02, EVALUATIONSERVICE-01..06, LLMREPOSITORY-01 | ✅ GREEN |
-| 2 | sm_session_lifecycle.puml | Session | Session Service | Entity | 6 | SESSIONSERVICE-01..04, SESSIONSERVICE-08, SESSIONSERVICE-09 | ✅ GREEN |
-| 3 | sm_plan_lifecycle.puml | Task Service (Plan) | Task Service | Entity | 7 | TASKSERVICE-07, TASKSERVICE-08, TASKSERVICE-01, TASKSERVICE-14 | ✅ GREEN |
-| 4 | sm_plugin_lifecycle.puml | Tool Service (Plugin) | Tool Service | Entity | 6 | TOOLSERVICE-01..06 | ✅ GREEN |
-| 5 | sm_subagent_lifecycle.puml | Task Service (Subagent) | Task Service | Entity | 5 | TASKSERVICE-09, TASKSERVICE-10, TASKSERVICE-14 | ✅ GREEN |
-| 6 | sm_persona_lifecycle.puml | Task Service (Persona) | Task Service | Entity | 5 | TASKSERVICE-11, TASKSERVICE-12, TASKSERVICE-13 | ✅ GREEN |
-| 7 | sm_mcp_client_lifecycle.puml | MCP Repository | MCP Repository | Entity | 5 | MCPREPOSITORY-01, MCPREPOSITORY-02 | ✅ GREEN |
-| 8 | sm_mcp_server_lifecycle.puml | MCP Repository (Server) | MCP Repository | Entity | 5 | MCPREPOSITORY-04 | ✅ GREEN |
-| 9 | sm_sandbox_execution_lifecycle.puml | Sandbox Repository | Sandbox Repository | Entity | 7 | SANDBOXREPOSITORY-01, SANDBOXREPOSITORY-03, SANDBOXREPOSITORY-04 | ✅ GREEN |
-| 10 | sm_diff_staging_lifecycle.puml | Edit Strategy Repository | Edit Strategy Repository | Entity | 8 | EDITSTRATEGYREPOSITORY-10, SAFETYSERVICE-02 | ✅ GREEN |
-| 11 | sm_safety_mode_lifecycle.puml | Safety Service | Safety Service | Entity | 5 | SAFETYSERVICE-01, SAFETYSERVICE-03 | ✅ GREEN |
-| 12 | sm_router_lifecycle.puml | LLM Repository | LLM Repository | Entity | 6 | LLMREPOSITORY-01..04 | ✅ GREEN |
-| 13 | sm_provider_connection_lifecycle.puml | LLM Repository (Provider) | LLM Repository | Entity | 5 | LLMREPOSITORY-01, LLMREPOSITORY-04 | ✅ GREEN |
-| 14 | sm_evaluation_lifecycle.puml | Evaluation Service | Evaluation Service | Entity | 8 | EVALUATIONSERVICE-01..07 | ✅ GREEN |
-| 15 | sm_index_lifecycle.puml | Repo Intelligence Repository | Repo Intelligence Repository | Entity | 7 | REPOINTELLIGENCEREPOSITORY-01, REPOINTELLIGENCEREPOSITORY-02, REPOINTELLIGENCEREPOSITORY-05 | ✅ GREEN |
+| 1 | sm_task_svc_agent.puml | Task Service | Task Service | Process FSM | 17 | TASKSVC-01..14, HTTPADP-06, LLMREPO-02, EDITSTRATEGYREPO-10, SAFETYSVC-02, TOOLSVC-02, EVALSVC-01..06, LLMREPO-01 | ✅ GREEN |
+| 2 | sm_session_svc_session.puml | Session | Session Service | Entity | 6 | SESSIONSVC-01..04, SESSIONSVC-08, SESSIONSVC-09 | ✅ GREEN |
+| 3 | sm_task_svc_plan.puml | Task Service (Plan) | Task Service | Entity | 7 | TASKSVC-07, TASKSVC-08, TASKSVC-01, TASKSVC-14 | ✅ GREEN |
+| 4 | sm_tool_svc_plugin.puml | Tool Service (Plugin) | Tool Service | Entity | 6 | TOOLSVC-01..06 | ✅ GREEN |
+| 5 | sm_task_svc_subagent.puml | Task Service (Subagent) | Task Service | Entity | 5 | TASKSVC-09, TASKSVC-10, TASKSVC-14 | ✅ GREEN |
+| 6 | sm_task_svc_persona.puml | Task Service (Persona) | Task Service | Entity | 5 | TASKSVC-11, TASKSVC-12, TASKSVC-13 | ✅ GREEN |
+| 7 | sm_mcp_repo_client.puml | MCP Repository | MCP Repository | Entity | 5 | MCPREPO-01, MCPREPO-02 | ✅ GREEN |
+| 8 | sm_mcp_repo_server.puml | MCP Repository (Server) | MCP Repository | Entity | 5 | MCPREPO-04 | ✅ GREEN |
+| 9 | sm_sandbox_repo_sandbox.puml | Sandbox Repository | Sandbox Repository | Entity | 7 | SANDBOXREPO-01, SANDBOXREPO-03, SANDBOXREPO-04 | ✅ GREEN |
+| 10 | sm_edit_strategy_repo_diff.puml | Edit Strategy Repository | Edit Strategy Repository | Entity | 8 | EDITSTRATEGYREPO-10, SAFETYSVC-02 | ✅ GREEN |
+| 11 | sm_safety_svc_safety.puml | Safety Service | Safety Service | Entity | 5 | SAFETYSVC-01, SAFETYSVC-03 | ✅ GREEN |
+| 12 | sm_llm_repo_router.puml | LLM Repository | LLM Repository | Entity | 6 | LLMREPO-01..04 | ✅ GREEN |
+| 13 | sm_llm_repo_provider.puml | LLM Repository (Provider) | LLM Repository | Entity | 5 | LLMREPO-01, LLMREPO-04 | ✅ GREEN |
+| 14 | sm_eval_svc_evaluation.puml | Evaluation Service | Evaluation Service | Entity | 8 | EVALSVC-01..07 | ✅ GREEN |
+| 15 | sm_repo_intel_repo_index.puml | Repo Intelligence Repository | Repo Intelligence Repository | Entity | 7 | REPOINTELREPO-01, REPOINTELREPO-02, REPOINTELREPO-05 | ✅ GREEN |
 
 ### Coverage Summary
 
@@ -934,21 +934,21 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 
 | C4 Component | C4 Group | SM File |
 |--------------|----------|---------|
-| Task Service | Task | `sm_agent_lifecycle.puml` (Process FSM) |
-| Session Service | Session | sm_session_lifecycle.puml |
-| Task Service | Task | sm_plan_lifecycle.puml |
-| Tool Service | Tool | sm_plugin_lifecycle.puml |
-| Task Service | Task | sm_subagent_lifecycle.puml |
-| Task Service | Task | sm_persona_lifecycle.puml |
-| MCP Repository | Repository | sm_mcp_client_lifecycle.puml |
-| MCP Repository | Repository | sm_mcp_server_lifecycle.puml |
-| Sandbox Repository | Repository | sm_sandbox_execution_lifecycle.puml |
-| Edit Strategy Repository | Repository | sm_diff_staging_lifecycle.puml |
-| Safety Service | Service | sm_safety_mode_lifecycle.puml |
-| LLM Repository | Repository | sm_router_lifecycle.puml |
-| LLM Repository | Repository | sm_provider_connection_lifecycle.puml |
-| Evaluation Service | Service | sm_evaluation_lifecycle.puml |
-| Repo Intelligence Repository | Repository | sm_index_lifecycle.puml |
+| Task Service | Task | `sm_task_svc_agent.puml` (Process FSM) |
+| Session Service | Session | `sm_session_svc_session.puml` |
+| Task Service | Task | `sm_task_svc_plan.puml` |
+| Tool Service | Tool | `sm_tool_svc_plugin.puml` |
+| Task Service | Task | `sm_task_svc_subagent.puml` |
+| Task Service | Task | `sm_task_svc_persona.puml` |
+| MCP Repository | Repository | `sm_mcp_repo_client.puml` |
+| MCP Repository | Repository | `sm_mcp_repo_server.puml` |
+| Sandbox Repository | Repository | `sm_sandbox_repo_sandbox.puml` |
+| Edit Strategy Repository | Repository | `sm_edit_strategy_repo_diff.puml` |
+| Safety Service | Service | `sm_safety_svc_safety.puml` |
+| LLM Repository | Repository | `sm_llm_repo_router.puml` |
+| LLM Repository | Repository | `sm_llm_repo_provider.puml` |
+| Evaluation Service | Service | `sm_eval_svc_evaluation.puml` |
+| Repo Intelligence Repository | Repository | `sm_repo_intel_repo_index.puml` |
 
 ### Stateful Entities Covered Inside Agent Process FSM
 
@@ -978,20 +978,20 @@ These components have lifecycle states that occur as transient sub-states within
 
 Every entity SM state has exactly one owning lifecycle-write UC. Verified per SMT rules:
 
-- **Session**: CREATED (SESSIONSERVICE-01), ACTIVE (SESSIONSERVICE-01), SAVED (SESSIONSERVICE-01), RESTORED (SESSIONSERVICE-04), BRANCHED (SESSIONSERVICE-08), CLOSED (SESSIONSERVICE-09) ✅
-- **Plan**: BUILDING (TASKSERVICE-07), QUEUED (TASKSERVICE-07), APPROVED (TASKSERVICE-08), EXECUTING (TASKSERVICE-08), COMPLETED (TASKSERVICE-01), REJECTED (TASKSERVICE-08) ✅
-- **Plugin**: DISCOVERED (TOOLSERVICE-01), LOADING (TOOLSERVICE-02), LOADED (TOOLSERVICE-03), ENABLED (TOOLSERVICE-05), DISABLED (TOOLSERVICE-06), ERROR (TOOLSERVICE-01) ✅
-- **Subagent**: SPAWNING (TASKSERVICE-09), RUNNING (TASKSERVICE-09), COMPLETED (TASKSERVICE-10), FAILED (TASKSERVICE-14) ✅
-- **Persona**: LOADING (TASKSERVICE-12), ACTIVE (TASKSERVICE-11), SWITCHING (TASKSERVICE-13), ERROR (TASKSERVICE-12) ✅
-- **MCP Client**: CONNECTING (MCPREPOSITORY-01), CONNECTED (MCPREPOSITORY-01), DISCOVERING (MCPREPOSITORY-02), ERROR (MCPREPOSITORY-01) ✅
-- **MCP Server**: STARTING (MCPREPOSITORY-04), RUNNING (MCPREPOSITORY-04), STOPPING (MCPREPOSITORY-04), ERROR (MCPREPOSITORY-04) ✅
-- **Sandbox**: EXECUTING (SANDBOXREPOSITORY-01), MONITORING (SANDBOXREPOSITORY-03), COMPLETED (SANDBOXREPOSITORY-01), TIMEOUT (SANDBOXREPOSITORY-03), FAILED (SANDBOXREPOSITORY-01), RESOURCE_EXCEEDED (SANDBOXREPOSITORY-04) ✅
-- **Diff Staging**: STAGING (EDITSTRATEGYREPOSITORY-10), STAGED (EDITSTRATEGYREPOSITORY-10), AWAITING_APPROVAL (SAFETYSERVICE-02), APPROVED (SAFETYSERVICE-02), APPLYING (EDITSTRATEGYREPOSITORY-10), APPLIED (EDITSTRATEGYREPOSITORY-10), ERROR (EDITSTRATEGYREPOSITORY-10) ✅
-- **Safety**: PERMISSIVE (SAFETYSERVICE-03), ASK (SAFETYSERVICE-03), BLOCK (SAFETYSERVICE-03), ERROR (SAFETYSERVICE-01) ✅
-- **Router**: CLASSIFYING (LLMREPOSITORY-03), SELECTING (LLMREPOSITORY-01), SWITCHING (LLMREPOSITORY-04), FALLBACK (LLMREPOSITORY-02), ERROR (LLMREPOSITORY-03) ✅
-- **Provider**: REGISTERING (LLMREPOSITORY-01), ACTIVE (LLMREPOSITORY-01), SELECTING (LLMREPOSITORY-04), ERROR (LLMREPOSITORY-01) ✅
-- **Evaluation**: CHECKING (EVALUATIONSERVICE-01), REVIEWING (EVALUATIONSERVICE-04), TESTING (EVALUATIONSERVICE-05), SCORING (EVALUATIONSERVICE-07), RETRYING (EVALUATIONSERVICE-06), PASSED (EVALUATIONSERVICE-07), FAILED (EVALUATIONSERVICE-02) ✅
-- **Index**: INDEXING (REPOINTELLIGENCEREPOSITORY-01), INDEXED (REPOINTELLIGENCEREPOSITORY-01), BUILDING_GRAPH (REPOINTELLIGENCEREPOSITORY-02), EMBEDDING (REPOINTELLIGENCEREPOSITORY-05), STALE (REPOINTELLIGENCEREPOSITORY-01), ERROR (REPOINTELLIGENCEREPOSITORY-01) ✅
+- **Session**: CREATED (SESSIONSVC-01), ACTIVE (SESSIONSVC-01), SAVED (SESSIONSVC-01), RESTORED (SESSIONSVC-04), BRANCHED (SESSIONSVC-08), CLOSED (SESSIONSVC-09) ✅
+- **Plan**: BUILDING (TASKSVC-07), QUEUED (TASKSVC-07), APPROVED (TASKSVC-08), EXECUTING (TASKSVC-08), COMPLETED (TASKSVC-01), REJECTED (TASKSVC-08) ✅
+- **Plugin**: DISCOVERED (TOOLSVC-01), LOADING (TOOLSVC-02), LOADED (TOOLSVC-03), ENABLED (TOOLSVC-05), DISABLED (TOOLSVC-06), ERROR (TOOLSVC-01) ✅
+- **Subagent**: SPAWNING (TASKSVC-09), RUNNING (TASKSVC-09), COMPLETED (TASKSVC-10), FAILED (TASKSVC-14) ✅
+- **Persona**: LOADING (TASKSVC-12), ACTIVE (TASKSVC-11), SWITCHING (TASKSVC-13), ERROR (TASKSVC-12) ✅
+- **MCP Client**: CONNECTING (MCPREPO-01), CONNECTED (MCPREPO-01), DISCOVERING (MCPREPO-02), ERROR (MCPREPO-01) ✅
+- **MCP Server**: STARTING (MCPREPO-04), RUNNING (MCPREPO-04), STOPPING (MCPREPO-04), ERROR (MCPREPO-04) ✅
+- **Sandbox**: EXECUTING (SANDBOXREPO-01), MONITORING (SANDBOXREPO-03), COMPLETED (SANDBOXREPO-01), TIMEOUT (SANDBOXREPO-03), FAILED (SANDBOXREPO-01), RESOURCE_EXCEEDED (SANDBOXREPO-04) ✅
+- **Diff Staging**: STAGING (EDITSTRATEGYREPO-10), STAGED (EDITSTRATEGYREPO-10), AWAITING_APPROVAL (SAFETYSVC-02), APPROVED (SAFETYSVC-02), APPLYING (EDITSTRATEGYREPO-10), APPLIED (EDITSTRATEGYREPO-10), ERROR (EDITSTRATEGYREPO-10) ✅
+- **Safety**: PERMISSIVE (SAFETYSVC-03), ASK (SAFETYSVC-03), BLOCK (SAFETYSVC-03), ERROR (SAFETYSVC-01) ✅
+- **Router**: CLASSIFYING (LLMREPO-03), SELECTING (LLMREPO-01), SWITCHING (LLMREPO-04), FALLBACK (LLMREPO-02), ERROR (LLMREPO-03) ✅
+- **Provider**: REGISTERING (LLMREPO-01), ACTIVE (LLMREPO-01), SELECTING (LLMREPO-04), ERROR (LLMREPO-01) ✅
+- **Evaluation**: CHECKING (EVALSVC-01), REVIEWING (EVALSVC-04), TESTING (EVALSVC-05), SCORING (EVALSVC-07), RETRYING (EVALSVC-06), PASSED (EVALSVC-07), FAILED (EVALSVC-02) ✅
+- **Index**: INDEXING (REPOINTELREPO-01), INDEXED (REPOINTELREPO-01), BUILDING_GRAPH (REPOINTELREPO-02), EMBEDDING (REPOINTELREPO-05), STALE (REPOINTELREPO-01), ERROR (REPOINTELREPO-01) ✅
 
 ### Agent Process FSM — Documented Deviation
 

@@ -1,21 +1,21 @@
-@startuml sm_evaluation_lifecycle
+@startuml sm_eval_svc_evaluation
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — Evaluation Lifecycle State Machine
+' Title:     nasim — Evaluation Service: Evaluation Lifecycle State Machine
 ' Boundary:  nasim code agent
 ' Purpose:   Process lifecycle for Evaluation Service.
 '            Orchestrates: checks, LLM review, test suites, scoring, retry.
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (Evaluation Service), docs/UC/README.md (EVALUATIONSERVICE-01..EVALUATIONSERVICE-09)
+' Source:    C4 component diagram (Evaluation Service), docs/UC/README.md (EVALSVC-01..EVALSVC-09)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
 ' ============================================================
 
-title nasim — Evaluation Lifecycle
+title nasim — Evaluation Service: Evaluation Lifecycle
 
-[*] --> IDLE : EVALUATIONSERVICE-01
+[*] --> IDLE : EVALSVC-01
 
 state "IDLE" as IDLE #90A4AE
 IDLE : No evaluation in progress.
@@ -23,23 +23,23 @@ IDLE : Default state.
 
 state "CHECKING" as CHECKING #C5CAE9
 CHECKING : Running task completion and success checks.
-CHECKING : EVALUATIONSERVICE-02 CHECK Task Completion, EVALUATIONSERVICE-03 CHECK Success.
+CHECKING : EVALSVC-02 CHECK Task Completion, EVALSVC-03 CHECK Success.
 
 state "REVIEWING" as REVIEWING #AB47BC
 REVIEWING : LLM-based code review and quality assessment.
-REVIEWING : EVALUATIONSERVICE-04 VALIDATE With LLM.
+REVIEWING : EVALSVC-04 VALIDATE With LLM.
 
 state "TESTING" as TESTING #D4E157
 TESTING : Running project test suites.
-TESTING : EVALUATIONSERVICE-05 VALIDATE Test Suite.
+TESTING : EVALSVC-05 VALIDATE Test Suite.
 
 state "SCORING" as SCORING #FF8A65
 SCORING : Recording quality signal and scoring.
-SCORING : EVALUATIONSERVICE-07 RECORD Quality Signal.
+SCORING : EVALSVC-07 RECORD Quality Signal.
 
 state "RETRYING" as RETRYING #C62828
 RETRYING : Coordinating retry with backoff and escalation.
-RETRYING : EVALUATIONSERVICE-06 COORDINATE Retry.
+RETRYING : EVALSVC-06 COORDINATE Retry.
 
 state "PASSED" as PASSED #689F38
 PASSED : Evaluation passed all criteria.
@@ -49,24 +49,24 @@ state "FAILED" as FAILED #AD1457
 FAILED : Evaluation failed, retries exhausted.
 FAILED : Terminal failure state.
 
-IDLE --> CHECKING : EVALUATIONSERVICE-01
-CHECKING --> REVIEWING : EVALUATIONSERVICE-04
-CHECKING --> TESTING : EVALUATIONSERVICE-05
-CHECKING --> SCORING : EVALUATIONSERVICE-07
-CHECKING --> FAILED : EVALUATIONSERVICE-02
-REVIEWING --> SCORING : EVALUATIONSERVICE-07
-REVIEWING --> RETRYING : EVALUATIONSERVICE-06
-TESTING --> SCORING : EVALUATIONSERVICE-07
-TESTING --> RETRYING : EVALUATIONSERVICE-06
-SCORING --> PASSED : EVALUATIONSERVICE-07
-SCORING --> RETRYING : EVALUATIONSERVICE-06
-RETRYING --> CHECKING : EVALUATIONSERVICE-06
-RETRYING --> FAILED : EVALUATIONSERVICE-06
+IDLE --> CHECKING : EVALSVC-01
+CHECKING --> REVIEWING : EVALSVC-04
+CHECKING --> TESTING : EVALSVC-05
+CHECKING --> SCORING : EVALSVC-07
+CHECKING --> FAILED : EVALSVC-02
+REVIEWING --> SCORING : EVALSVC-07
+REVIEWING --> RETRYING : EVALSVC-06
+TESTING --> SCORING : EVALSVC-07
+TESTING --> RETRYING : EVALSVC-06
+SCORING --> PASSED : EVALSVC-07
+SCORING --> RETRYING : EVALSVC-06
+RETRYING --> CHECKING : EVALSVC-06
+RETRYING --> FAILED : EVALSVC-06
 
-PASSED --> IDLE : EVALUATIONSERVICE-01
-FAILED --> IDLE : EVALUATIONSERVICE-01
+PASSED --> IDLE : EVALSVC-01
+FAILED --> IDLE : EVALSVC-01
 
-PASSED --> [*] : EVALUATIONSERVICE-01
-FAILED --> [*] : EVALUATIONSERVICE-01
+PASSED --> [*] : EVALSVC-01
+FAILED --> [*] : EVALSVC-01
 
 @enduml

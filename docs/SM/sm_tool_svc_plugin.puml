@@ -1,57 +1,57 @@
-@startuml sm_plugin_lifecycle
+@startuml sm_tool_svc_plugin
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — Plugin Lifecycle State Machine
+' Title:     nasim — Tool Service: Plugin Lifecycle State Machine
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Plugin (persisted in config)
 ' Milestone: v1.0
 ' Version:   6.0.0
-' Source:    docs/UC/README.md
+' Source:    C4 component diagram (Tool Service), docs/UC/README.md
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' ============================================================
 
-title nasim — Plugin Lifecycle
+title nasim — Tool Service: Plugin Lifecycle
 
-[*] --> DISCOVERED : TOOLSERVICE-01
+[*] --> DISCOVERED : TOOLSVC-01
 
 state "DISCOVERED" as DISCOVERED #E0E0E0
 DISCOVERED : Plugin found on filesystem.
-DISCOVERED : TOOLSERVICE-01 DISCOVER Plugins.
+DISCOVERED : TOOLSVC-01 DISCOVER Plugins.
 
 state "LOADING" as LOADING #FFCC80
 LOADING : Plugin manifest being parsed.
-LOADING : TOOLSERVICE-02 LOAD Manifest.
+LOADING : TOOLSVC-02 LOAD Manifest.
 
 state "LOADED" as LOADED #90CAF9
 LOADED : Plugin manifest parsed, tools registered.
-LOADED : TOOLSERVICE-03 REGISTER Plugin Tools.
+LOADED : TOOLSVC-03 REGISTER Plugin Tools.
 
 state "ENABLED" as ENABLED #4CAF50
 ENABLED : Plugin active and available.
-ENABLED : TOOLSERVICE-05 ENABLE Plugin.
+ENABLED : TOOLSVC-05 ENABLE Plugin.
 
 state "DISABLED" as DISABLED #CE93D8
 DISABLED : Plugin deactivated.
-DISABLED : TOOLSERVICE-06 DISABLE Plugin.
+DISABLED : TOOLSVC-06 DISABLE Plugin.
 
 state "ERROR" as ERROR #EF5350
 ERROR : Plugin failed to load or crashed.
 ERROR : Load error or runtime exception.
 
-DISCOVERED --> LOADING : TOOLSERVICE-02
-DISCOVERED --> ERROR : TOOLSERVICE-01
-LOADING --> LOADED : TOOLSERVICE-03
-LOADING --> ERROR : TOOLSERVICE-02
-LOADED --> ENABLED : TOOLSERVICE-05
-LOADED --> DISABLED : TOOLSERVICE-06
-ENABLED --> DISABLED : TOOLSERVICE-06
-DISABLED --> ENABLED : TOOLSERVICE-05
-ENABLED --> ERROR : TOOLSERVICE-01
-LOADED --> ERROR : TOOLSERVICE-03
+DISCOVERED --> LOADING : TOOLSVC-02
+DISCOVERED --> ERROR : TOOLSVC-01
+LOADING --> LOADED : TOOLSVC-03
+LOADING --> ERROR : TOOLSVC-02
+LOADED --> ENABLED : TOOLSVC-05
+LOADED --> DISABLED : TOOLSVC-06
+ENABLED --> DISABLED : TOOLSVC-06
+DISABLED --> ENABLED : TOOLSVC-05
+ENABLED --> ERROR : TOOLSVC-01
+LOADED --> ERROR : TOOLSVC-03
 
-ERROR --> DISCOVERED : TOOLSERVICE-01
+ERROR --> DISCOVERED : TOOLSVC-01
 
-ENABLED --> [*] : TOOLSERVICE-06
-DISABLED --> [*] : TOOLSERVICE-06
+ENABLED --> [*] : TOOLSVC-06
+DISABLED --> [*] : TOOLSVC-06
 
 @enduml

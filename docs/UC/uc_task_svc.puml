@@ -22,9 +22,10 @@
 title nasim — UC: Task Service Group
 
 
-actor "User" as User
+actor "Agent Controller" as AgentCtrl <<system>>
 
 
+usecase "TOOLSVC-HK02\nDISPATCH Pre-Tool Hook\n[uc_tool_svc]" as TLHK02_ext <<extref>>
 usecase "SAFETYSVC-01\nCHECK Permission\n[uc_safety_svc]" as SAF01_ext <<extref>>
 usecase "SAFETYSVC-03\nAPPLY Safety Mode\n[uc_safety_svc]" as SAF03_ext <<extref>>
 usecase "CONTEXTSVC-01\nPROCESS Context\n[uc_context_svc]" as CTX01_ext <<extref>>
@@ -54,8 +55,7 @@ rectangle "nasim" {
 }
 
 
-User --> TS01
-User --> TS09
+AgentCtrl --> TS01
 
 TS01 ..> TS02 : <<include>>
 TS01 ..> TS03 : <<include>>
@@ -69,6 +69,7 @@ TS01 ..> TS13 : <<extend>>
 TS01 ..> TS14 : <<extend>>
 TS01 ..> TS15 : <<include>>
 
+TS02 ..> TLHK02_ext : <<include>>
 TS02 ..> SAF01_ext : <<include>>
 TS02 ..> LLM02_ext : <<include>>
 TS02 ..> LLM03_ext : <<extend>>

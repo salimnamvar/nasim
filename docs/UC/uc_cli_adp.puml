@@ -31,10 +31,10 @@ rectangle "nasim" {
     usecase "**CLIADP-02 DISPATCH Slash Command**\n--\nMap /cmd to agent_ctrl dispatch.\n/sessions, /plan, /model, etc." <<master>> as CLI02
     usecase "**CLIADP-03 STREAM Output**\n--\nRender AgentEvents from SSE\nto terminal" <<include>> as CLI03
     usecase "**CLIADP-04 READ CLI Arguments**\n--\nParse startup CLI arguments" <<master>> as CLI04
-    usecase "**CLIADP-05 ENABLE Plan Mode**\n--\n/plan command via agent_ctrl" <<master>> as CLI05
-    usecase "**CLIADP-06 REQUEST Approval**\n--\nSafety approval prompt\nvia agent_ctrl" <<master>> as CLI06
-    usecase "**CLIADP-07 SWITCH Model**\n--\n/model command via agent_ctrl" <<master>> as CLI07
-    usecase "**CLIADP-08 LIST Sessions**\n--\n/sessions command via agent_ctrl" <<master>> as CLI08
+    usecase "**CLIADP-05 ENABLE Plan Mode**\n--\n/plan command via agent_ctrl" <<extend>> as CLI05
+    usecase "**CLIADP-06 REQUEST Approval**\n--\nSafety approval prompt\nvia agent_ctrl" <<extend>> as CLI06
+    usecase "**CLIADP-07 SWITCH Model**\n--\n/model command via agent_ctrl" <<extend>> as CLI07
+    usecase "**CLIADP-08 LIST Sessions**\n--\n/sessions command via agent_ctrl" <<extend>> as CLI08
   }
 }
 
@@ -42,14 +42,15 @@ rectangle "nasim" {
 User --> CLI01
 User --> CLI02
 User --> CLI04
-User --> CLI05
 User --> CLI06
-User --> CLI07
-User --> CLI08
 
 CLI01 ..> CLI03 : <<include>>
 CLI01 ..> AC01_ext : <<include>>
+CLI01 ..> CLI06 : <<extend>>
 CLI02 ..> AC01_ext : <<include>>
+CLI02 ..> CLI05 : <<extend>>
+CLI02 ..> CLI07 : <<extend>>
+CLI02 ..> CLI08 : <<extend>>
 CLI04 ..> AC01_ext : <<include>>
 CLI05 ..> AC01_ext : <<include>>
 CLI06 ..> AC01_ext : <<include>>

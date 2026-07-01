@@ -20,7 +20,7 @@
 title nasim — UC: Session Service Group
 
 
-actor "User" as User
+actor "Agent Controller" as AgentCtrl <<system>>
 
 
 usecase "SESSIONREPO-01\nAPPEND Message\n[uc_session_repo]" as SR01_ext <<extref>>
@@ -46,13 +46,13 @@ rectangle "nasim" {
 }
 
 
-User --> SS03
-User --> SS04
-User --> SS05
-User --> SS06
-User --> SS07
-User --> SS08
-User --> SS09
+AgentCtrl --> SS03
+AgentCtrl --> SS04
+AgentCtrl --> SS05
+AgentCtrl --> SS06
+AgentCtrl --> SS07
+AgentCtrl --> SS08
+AgentCtrl --> SS09
 
 SS01 ..> SR01_ext : <<include>>
 SS02 ..> SR02_ext : <<include>>

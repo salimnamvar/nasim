@@ -1,21 +1,21 @@
-@startuml sm_mcp_server_lifecycle
+@startuml sm_mcp_repo_server
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — MCP Server Lifecycle State Machine
+' Title:     nasim — MCP Repository: Server Serving Lifecycle State Machine
 ' Boundary:  nasim code agent
 ' Purpose:   Serving lifecycle for MCP Repository (MCP Server).
 '            States: STOPPED → STARTING → RUNNING → STOPPING
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/UC/README.md (MCPREPOSITORY-04)
+' Source:    C4 component diagram (MCP Repository), docs/UC/README.md (MCPREPO-04)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
 ' ============================================================
 
-title nasim — MCP Server Lifecycle
+title nasim — MCP Repository: Server Serving Lifecycle
 
-[*] --> STOPPED : MCPREPOSITORY-04
+[*] --> STOPPED : MCPREPO-04
 
 state "STOPPED" as STOPPED #616161
 STOPPED : MCP server not running.
@@ -23,28 +23,28 @@ STOPPED : Default state.
 
 state "STARTING" as STARTING #FFA726
 STARTING : Server starting up.
-STARTING : MCPREPOSITORY-04 EXPOSE nasim Tools.
+STARTING : MCPREPO-04 EXPOSE nasim Tools.
 
 state "RUNNING" as RUNNING #66BB6A
 RUNNING : Server running, serving tools to MCP clients.
-RUNNING : MCPREPOSITORY-04 EXPOSE nasim Tools.
+RUNNING : MCPREPO-04 EXPOSE nasim Tools.
 
 state "STOPPING" as STOPPING #FF7043
 STOPPING : Server shutting down.
-STOPPING : MCPREPOSITORY-04 EXPOSE nasim Tools.
+STOPPING : MCPREPO-04 EXPOSE nasim Tools.
 
 state "ERROR" as ERROR #FFCDD2
 ERROR : Server startup or runtime failure.
-ERROR : MCPREPOSITORY-04 EXPOSE nasim Tools.
+ERROR : MCPREPO-04 EXPOSE nasim Tools.
 
-STOPPED --> STARTING : MCPREPOSITORY-04
-STARTING --> RUNNING : MCPREPOSITORY-04
-STARTING --> ERROR : MCPREPOSITORY-04
-RUNNING --> STOPPING : MCPREPOSITORY-04
-STOPPING --> STOPPED : MCPREPOSITORY-04
-RUNNING --> ERROR : MCPREPOSITORY-04
-ERROR --> STOPPED : MCPREPOSITORY-04
+STOPPED --> STARTING : MCPREPO-04
+STARTING --> RUNNING : MCPREPO-04
+STARTING --> ERROR : MCPREPO-04
+RUNNING --> STOPPING : MCPREPO-04
+STOPPING --> STOPPED : MCPREPO-04
+RUNNING --> ERROR : MCPREPO-04
+ERROR --> STOPPED : MCPREPO-04
 
-STOPPED --> [*] : MCPREPOSITORY-04
+STOPPED --> [*] : MCPREPO-04
 
 @enduml

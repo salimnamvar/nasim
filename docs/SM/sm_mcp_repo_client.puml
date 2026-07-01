@@ -1,21 +1,21 @@
-@startuml sm_mcp_client_lifecycle
+@startuml sm_mcp_repo_client
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — MCP Client Lifecycle State Machine
+' Title:     nasim — MCP Repository: Client Connection Lifecycle State Machine
 ' Boundary:  nasim code agent
 ' Purpose:   Connection lifecycle for MCP Repository (MCP Client).
 '            States: DISCONNECTED → CONNECTING → CONNECTED → DISCOVERING
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    docs/UC/README.md (MCPREPOSITORY-01, MCPREPOSITORY-02)
+' Source:    C4 component diagram (MCP Repository), docs/UC/README.md (MCPREPO-01, MCPREPO-02)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
 ' ============================================================
 
-title nasim — MCP Client Lifecycle
+title nasim — MCP Repository: Client Connection Lifecycle
 
-[*] --> DISCONNECTED : MCPREPOSITORY-01
+[*] --> DISCONNECTED : MCPREPO-01
 
 state "DISCONNECTED" as DISCONNECTED #B0BEC5
 DISCONNECTED : No connection to MCP server.
@@ -23,29 +23,29 @@ DISCONNECTED : Default state.
 
 state "CONNECTING" as CONNECTING #FFCA28
 CONNECTING : Connection to MCP server in progress.
-CONNECTING : MCPREPOSITORY-01 CONNECT MCP Server.
+CONNECTING : MCPREPO-01 CONNECT MCP Server.
 
 state "CONNECTED" as CONNECTED #00BCD4
 CONNECTED : Connected to MCP server.
-CONNECTED : MCPREPOSITORY-01 CONNECT MCP Server.
+CONNECTED : MCPREPO-01 CONNECT MCP Server.
 
 state "DISCOVERING" as DISCOVERING #A1887F
 DISCOVERING : Discovering tools from connected server.
-DISCOVERING : MCPREPOSITORY-02 DISCOVER MCP Tools.
+DISCOVERING : MCPREPO-02 DISCOVER MCP Tools.
 
 state "ERROR" as ERROR #E57373
 ERROR : Connection or discovery failed.
-ERROR : MCPREPOSITORY-01 CONNECT MCP Server or MCPREPOSITORY-02 DISCOVER MCP Tools.
+ERROR : MCPREPO-01 CONNECT MCP Server or MCPREPO-02 DISCOVER MCP Tools.
 
-DISCONNECTED --> CONNECTING : MCPREPOSITORY-01
-CONNECTING --> CONNECTED : MCPREPOSITORY-01
-CONNECTING --> ERROR : MCPREPOSITORY-01
-CONNECTED --> DISCOVERING : MCPREPOSITORY-02
-DISCOVERING --> CONNECTED : MCPREPOSITORY-02
-DISCOVERING --> ERROR : MCPREPOSITORY-02
-CONNECTED --> DISCONNECTED : MCPREPOSITORY-01
-ERROR --> DISCONNECTED : MCPREPOSITORY-01
+DISCONNECTED --> CONNECTING : MCPREPO-01
+CONNECTING --> CONNECTED : MCPREPO-01
+CONNECTING --> ERROR : MCPREPO-01
+CONNECTED --> DISCOVERING : MCPREPO-02
+DISCOVERING --> CONNECTED : MCPREPO-02
+DISCOVERING --> ERROR : MCPREPO-02
+CONNECTED --> DISCONNECTED : MCPREPO-01
+ERROR --> DISCONNECTED : MCPREPO-01
 
-DISCONNECTED --> [*] : MCPREPOSITORY-01
+DISCONNECTED --> [*] : MCPREPO-01
 
 @enduml

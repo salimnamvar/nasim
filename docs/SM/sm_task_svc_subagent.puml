@@ -1,21 +1,21 @@
-@startuml sm_subagent_lifecycle
+@startuml sm_task_svc_subagent
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — Subagent Lifecycle State Machine
+' Title:     nasim — Task Service: Subagent Lifecycle State Machine
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Task Service (Subagent child processes).
 '            States: IDLE → SPAWNING → RUNNING → COMPLETED | FAILED
 ' Milestone: v1.0
 ' Version:   9.1.0
-' Source:    docs/SM/README.md
+' Source:    C4 component diagram (Task Service), docs/UC/README.md
 ' Review:    CAR audit 2026-06-26
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
 ' ============================================================
 
-title nasim — Subagent Lifecycle
+title nasim — Task Service: Subagent Lifecycle
 
-[*] --> IDLE : TASKSERVICE-09
+[*] --> IDLE : TASKSVC-09
 
 state "IDLE" as IDLE #CFD8DC
 IDLE : No child agent active.
@@ -37,15 +37,15 @@ state "FAILED" as FAILED #EF9A9A
 FAILED : Child agent encountered unrecoverable error.
 FAILED : Error reported to parent, child cleaned up.
 
-IDLE --> SPAWNING : TASKSERVICE-09
-SPAWNING --> RUNNING : TASKSERVICE-09
-SPAWNING --> FAILED : TASKSERVICE-09
-RUNNING --> COMPLETED : TASKSERVICE-10
-RUNNING --> FAILED : TASKSERVICE-14
-COMPLETED --> IDLE : TASKSERVICE-10
-FAILED --> IDLE : TASKSERVICE-14
+IDLE --> SPAWNING : TASKSVC-09
+SPAWNING --> RUNNING : TASKSVC-09
+SPAWNING --> FAILED : TASKSVC-09
+RUNNING --> COMPLETED : TASKSVC-10
+RUNNING --> FAILED : TASKSVC-14
+COMPLETED --> IDLE : TASKSVC-10
+FAILED --> IDLE : TASKSVC-14
 
-COMPLETED --> [*] : TASKSERVICE-10
-FAILED --> [*] : TASKSERVICE-14
+COMPLETED --> [*] : TASKSVC-10
+FAILED --> [*] : TASKSVC-14
 
 @enduml

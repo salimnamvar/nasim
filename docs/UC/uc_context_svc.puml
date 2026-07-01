@@ -21,7 +21,7 @@
 title nasim — UC: Context Service Group
 
 
-actor "User" as User
+actor "Task Service" as TaskSvc <<system>>
 
 
 usecase "MEMORYREPO-02\nRECALL Knowledge\n[uc_memory_repo]" as MR02_ext <<extref>>
@@ -40,7 +40,7 @@ rectangle "nasim" {
 }
 
 
-User --> CX01
+TaskSvc --> CX01
 
 CX01 ..> CX02 : <<include>>
 CX01 ..> CX03 : <<include>>

@@ -19,7 +19,7 @@
 title nasim — UC: Safety Service Group
 
 
-actor "User" as User
+actor "Task Service" as TaskSvc <<system>>
 
 
 rectangle "nasim" {
@@ -31,7 +31,7 @@ rectangle "nasim" {
 }
 
 
-User --> SF02
+TaskSvc --> SF02
 
 SF02 ..> SF01 : <<include>>
 SF03 ..> SF01 : <<include>>

@@ -20,7 +20,7 @@
 title nasim — UC: Config Service Group
 
 
-actor "User" as User
+actor "Agent Controller" as AgentCtrl <<system>>
 
 
 usecase "CONFIGREPO-01\nREAD YAML\n[uc_config_repo]" as CR01_ext <<extref>>
@@ -37,7 +37,7 @@ rectangle "nasim" {
 }
 
 
-User --> CS01
+AgentCtrl --> CS01
 
 CS01 ..> CR01_ext : <<include>>
 CS01 ..> CR02_ext : <<include>>

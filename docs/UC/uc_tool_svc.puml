@@ -22,7 +22,7 @@
 title nasim — UC: Tool Service Group
 
 
-actor "User" as User
+actor "Task Service" as TaskSvc <<system>>
 
 
 usecase "FSREPO-01\nREAD File\n[uc_fs_repo]" as FR01_ext <<extref>>
@@ -33,9 +33,6 @@ usecase "GITREPO-01\nREAD Git Status\n[uc_git_repo]" as GR01_ext <<extref>>
 usecase "MCPREPO-03\nADAPT MCP Tool\n[uc_mcp_repo]" as MP03_ext <<extref>>
 usecase "WEBREPO-01\nFETCH URL\n[uc_web_repo]" as WR01_ext <<extref>>
 usecase "WEBREPO-02\nSEARCH Web\n[uc_web_repo]" as WR02_ext <<extref>>
-usecase "SAFETYSVC-01\nCHECK Permission\n[uc_safety_svc]" as SAF01_ext <<extref>>
-
-
 rectangle "nasim" {
   package "Tool Service Group" {
 
@@ -109,7 +106,7 @@ rectangle "nasim" {
 }
 
 
-User --> TL14
+TaskSvc --> TL14
 
 TL01 ..> FR01_ext : <<include>>
 TL02 ..> FR02_ext : <<include>>
@@ -117,7 +114,6 @@ TL03 ..> ES01_ext : <<include>>
 TL03 ..> FR02_ext : <<include>>
 TL04 ..> FR01_ext : <<include>>
 TL05 ..> SB01_ext : <<include>>
-TL05 ..> SAF01_ext : <<include>>
 TL06 ..> FR01_ext : <<include>>
 TL09 ..> WR01_ext : <<include>>
 TL10 ..> WR02_ext : <<include>>

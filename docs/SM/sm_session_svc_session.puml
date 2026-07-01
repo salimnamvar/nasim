@@ -1,59 +1,59 @@
-@startuml sm_session_lifecycle
+@startuml sm_session_svc_session
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — Session Lifecycle State Machine (API-First)
+' Title:     nasim — Session Service: Session Lifecycle State Machine (API-First)
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Session (persisted to disk).
-'            Lifecycle-write UCs: SESSIONSERVICE-01..09 (Session Service Group).
+'            Lifecycle-write UCs: SESSIONSVC-01..09 (Session Service Group).
 '            External API entry: HTTPADP-02..05 (HTTP Adapter Group).
 ' Milestone: v1.0
 ' Version:   9.0.0
-' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/README.md
+' Source:    C4 component diagram (Session Service), docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/README.md
 ' Review:    SM Architect review 2026-07-01
-' Convention: All transitions use SESSIONSERVICE-XX UC IDs (lifecycle-write owners).
-'             HTTPADP-XX are external API wrappers; SESSIONSERVICE-XX are domain mutators.
+' Convention: All transitions use SESSIONSVC-XX UC IDs (lifecycle-write owners).
+'             HTTPADP-XX are external API wrappers; SESSIONSVC-XX are domain mutators.
 ' ============================================================
 
-title nasim — Session Lifecycle (API-First)
+title nasim — Session Service: Session Lifecycle (API-First)
 
-[*] --> CREATED : SESSIONSERVICE-01
+[*] --> CREATED : SESSIONSVC-01
 
 state "CREATED" as CREATED #BBDEFB
 CREATED : Session record initialized.
-CREATED : SESSIONSERVICE-01 PERSIST Session.
+CREATED : SESSIONSVC-01 PERSIST Session.
 
 state "ACTIVE" as ACTIVE #43A047
 ACTIVE : Session accepting messages.
-ACTIVE : SESSIONSERVICE-02 READ Session.
+ACTIVE : SESSIONSVC-02 READ Session.
 
 state "SAVED" as SAVED #1565C0
 SAVED : Session persisted to disk.
-SAVED : SESSIONSERVICE-01 PERSIST Session.
+SAVED : SESSIONSVC-01 PERSIST Session.
 
 state "RESTORED" as RESTORED #1E88E5
 RESTORED : Session loaded from disk.
-RESTORED : SESSIONSERVICE-04 RESTORE Session.
+RESTORED : SESSIONSVC-04 RESTORE Session.
 
 state "BRANCHED" as BRANCHED #7B1FA2
 BRANCHED : Session forked from parent.
-BRANCHED : SESSIONSERVICE-08 BRANCH Session.
+BRANCHED : SESSIONSVC-08 BRANCH Session.
 
 state "CLOSED" as CLOSED #757575
 CLOSED : Session terminated.
 CLOSED : Terminal state.
 
-CREATED --> ACTIVE : SESSIONSERVICE-01
-ACTIVE --> SAVED : SESSIONSERVICE-01
-ACTIVE --> BRANCHED : SESSIONSERVICE-08
-ACTIVE --> CLOSED : SESSIONSERVICE-09
-SAVED --> RESTORED : SESSIONSERVICE-04
-RESTORED --> ACTIVE : SESSIONSERVICE-02
-RESTORED --> SAVED : SESSIONSERVICE-01
-RESTORED --> CLOSED : SESSIONSERVICE-09
-BRANCHED --> ACTIVE : SESSIONSERVICE-02
-BRANCHED --> CLOSED : SESSIONSERVICE-09
-SAVED --> CLOSED : SESSIONSERVICE-09
+CREATED --> ACTIVE : SESSIONSVC-01
+ACTIVE --> SAVED : SESSIONSVC-01
+ACTIVE --> BRANCHED : SESSIONSVC-08
+ACTIVE --> CLOSED : SESSIONSVC-09
+SAVED --> RESTORED : SESSIONSVC-04
+RESTORED --> ACTIVE : SESSIONSVC-02
+RESTORED --> SAVED : SESSIONSVC-01
+RESTORED --> CLOSED : SESSIONSVC-09
+BRANCHED --> ACTIVE : SESSIONSVC-02
+BRANCHED --> CLOSED : SESSIONSVC-09
+SAVED --> CLOSED : SESSIONSVC-09
 
-CLOSED --> [*] : SESSIONSERVICE-09
+CLOSED --> [*] : SESSIONSVC-09
 
 @enduml

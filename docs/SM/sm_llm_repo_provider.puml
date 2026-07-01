@@ -1,21 +1,21 @@
-@startuml sm_provider_connection_lifecycle
+@startuml sm_llm_repo_provider
 !include common/sm_common_lifecycle.puml
 ' ============================================================
-' Title:     nasim — Provider Connection Lifecycle State Machine
+' Title:     nasim — LLM Repository: Provider Connection Lifecycle State Machine
 ' Boundary:  nasim code agent
 ' Purpose:   Connection lifecycle for LLM Repository (Provider).
 '            States: UNREGISTERED → REGISTERING → ACTIVE → SELECTING
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (LLM Repository), docs/UC/README.md (LLMREPOSITORY-01, LLMREPOSITORY-04)
+' Source:    C4 component diagram (LLM Repository), docs/UC/README.md (LLMREPO-01, LLMREPO-04)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
 ' ============================================================
 
-title nasim — Provider Connection Lifecycle
+title nasim — LLM Repository: Provider Connection Lifecycle
 
-[*] --> UNREGISTERED : LLMREPOSITORY-01
+[*] --> UNREGISTERED : LLMREPO-01
 
 state "UNREGISTERED" as UNREGISTERED #455A64
 UNREGISTERED : No provider registered.
@@ -23,29 +23,29 @@ UNREGISTERED : Default state.
 
 state "REGISTERING" as REGISTERING #29B6F6
 REGISTERING : Provider registration in progress.
-REGISTERING : LLMREPOSITORY-01 REGISTER Provider.
+REGISTERING : LLMREPO-01 REGISTER Provider.
 
 state "ACTIVE" as ACTIVE #03A9F4
 ACTIVE : Provider registered and ready for chat.
-ACTIVE : LLMREPOSITORY-02 REQUEST Chat, LLMREPOSITORY-03 STREAM Chat.
+ACTIVE : LLMREPO-02 REQUEST Chat, LLMREPO-03 STREAM Chat.
 
 state "SELECTING" as SELECTING #FBC02D
 SELECTING : Backend selection in progress.
-SELECTING : LLMREPOSITORY-04 SELECT Provider Backend.
+SELECTING : LLMREPO-04 SELECT Provider Backend.
 
 state "ERROR" as ERROR #E64A19
 ERROR : Registration or selection failed.
 ERROR : Provider unavailable or invalid.
 
-UNREGISTERED --> REGISTERING : LLMREPOSITORY-01
-REGISTERING --> ACTIVE : LLMREPOSITORY-01
-REGISTERING --> ERROR : LLMREPOSITORY-01
-ACTIVE --> SELECTING : LLMREPOSITORY-04
-SELECTING --> ACTIVE : LLMREPOSITORY-04
-SELECTING --> ERROR : LLMREPOSITORY-04
-ACTIVE --> UNREGISTERED : LLMREPOSITORY-01
-ERROR --> UNREGISTERED : LLMREPOSITORY-01
+UNREGISTERED --> REGISTERING : LLMREPO-01
+REGISTERING --> ACTIVE : LLMREPO-01
+REGISTERING --> ERROR : LLMREPO-01
+ACTIVE --> SELECTING : LLMREPO-04
+SELECTING --> ACTIVE : LLMREPO-04
+SELECTING --> ERROR : LLMREPO-04
+ACTIVE --> UNREGISTERED : LLMREPO-01
+ERROR --> UNREGISTERED : LLMREPO-01
 
-UNREGISTERED --> [*] : LLMREPOSITORY-01
+UNREGISTERED --> [*] : LLMREPO-01
 
 @enduml
