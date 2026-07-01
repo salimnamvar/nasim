@@ -4,7 +4,7 @@
 ' Title:     nasim — Agent Lifecycle State Machine (API-First)
 ' Boundary:  nasim code agent
 ' Purpose:   Process FSM showing all agent states and transitions.
-'            All entry points route through the API (HTTPADAPTER-06).
+'            All entry points route through the API (HTTPADP-06).
 ' Milestone: v1.0
 ' Version:   8.0.0
 ' Source:    C4 component diagram (Task Service), docs/UC/README.md
@@ -13,7 +13,7 @@
 '            do not apply (documented deviation).
 ' Convention: All transitions are triggered by the corresponding UC ID
 '            (e.g., EVALUATIONSERVICE-01, EDITSTRATEGYREPOSITORY-10, TASKSERVICE-07) as listed in docs/UC/README.md.
-'            Entry/exit transitions use HTTPADAPTER-06 (DISPATCH Message) as the
+'            Entry/exit transitions use HTTPADP-06 (DISPATCH Message) as the
 '            sole entry gate for all interface containers.
 ' ============================================================
 
@@ -27,7 +27,7 @@ IDLE : No active provider call.
 
 state "LISTENING" as LISTENING #E8EAF6
 LISTENING : Receiving and parsing user input.
-LISTENING : HTTPADAPTER-06 DISPATCH Message (via any interface).
+LISTENING : HTTPADP-06 DISPATCH Message (via any interface).
 
 state "THINKING" as THINKING #D7CCC8
 THINKING : LLM processing messages.
@@ -39,7 +39,7 @@ TOOL_EXEC : TASKSERVICE-02 DISPATCH Tool Call.
 
 state "RESPONDING" as RESPONDING #D1C4E9
 RESPONDING : Streaming final text to user via API SSE.
-RESPONDING : HTTPADAPTER-06 DISPATCH Message (SSE response).
+RESPONDING : HTTPADP-06 DISPATCH Message (SSE response).
 
 state "ERROR" as ERROR #FFEBEE
 ERROR : Error occurred.
@@ -67,7 +67,7 @@ ROUTING : LLMREPOSITORY-01 SELECT Model.
 
 state "SERVING" as SERVING #E0F7FA
 SERVING : API processing request from any interface.
-SERVING : HTTPADAPTER-06 DISPATCH Message.
+SERVING : HTTPADP-06 DISPATCH Message.
 
 state "EVALUATING" as EVALUATING #F9FBE7
 EVALUATING : Evaluating task completion.
@@ -90,20 +90,20 @@ AWAITING_DIFF_APPROVAL : Presenting diff to user.
 AWAITING_DIFF_APPROVAL : SAFETYSERVICE-02 REQUEST Approval.
 
 ' ============================================================
-' Entry transitions: ALL go through HTTPADAPTER-06 (sole entry gate)
+' Entry transitions: ALL go through HTTPADP-06 (sole entry gate)
 ' ============================================================
 
-IDLE --> LISTENING : HTTPADAPTER-06
-IDLE --> SERVING : HTTPADAPTER-06
+IDLE --> LISTENING : HTTPADP-06
+IDLE --> SERVING : HTTPADP-06
 
-LISTENING --> THINKING : HTTPADAPTER-06
+LISTENING --> THINKING : HTTPADP-06
 
 THINKING --> RESPONDING : LLMREPOSITORY-02
 THINKING --> TOOL_EXEC : LLMREPOSITORY-02
 THINKING --> COMPACTING : TASKSERVICE-06
 THINKING --> ROUTING : LLMREPOSITORY-01
 THINKING --> ERROR : LLMREPOSITORY-02
-THINKING --> RESPONDING : HTTPADAPTER-06
+THINKING --> RESPONDING : HTTPADP-06
 THINKING --> EVALUATING : EVALUATIONSERVICE-01
 
 ROUTING --> THINKING : LLMREPOSITORY-01
@@ -123,15 +123,15 @@ AWAITING_APPROVAL --> IDLE : SAFETYSERVICE-02
 COMPACTING --> THINKING : TASKSERVICE-06
 
 ' ============================================================
-' Exit transitions: response flows back through HTTPADAPTER-06
+' Exit transitions: response flows back through HTTPADP-06
 ' ============================================================
 
-RESPONDING --> IDLE : HTTPADAPTER-06
+RESPONDING --> IDLE : HTTPADP-06
 
 ERROR --> IDLE : TASKSERVICE-14
 
-SERVING --> THINKING : HTTPADAPTER-06
-SERVING --> IDLE : HTTPADAPTER-06
+SERVING --> THINKING : HTTPADP-06
+SERVING --> IDLE : HTTPADP-06
 
 IDLE --> PLANNING : TASKSERVICE-07
 PLANNING --> IDLE : TASKSERVICE-07

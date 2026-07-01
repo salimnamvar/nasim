@@ -5,7 +5,7 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | Agent waiting for user input | Startup or response complete | #ECEFF1 |
-| LISTENING | Receiving and parsing user input | HTTPADAPTER-06 DISPATCH Message received | #E8EAF6 |
+| LISTENING | Receiving and parsing user input | HTTPADP-06 DISPATCH Message received | #E8EAF6 |
 | THINKING | LLM processing messages | Input parsed, messages built | #D7CCC8 |
 | TOOL_EXEC | Executing a tool call | LLM returns tool_calls | #B2DFDB |
 | RESPONDING | Streaming final text to user via API SSE | LLM returns text only | #D1C4E9 |
@@ -15,14 +15,14 @@
 | PLANNING | Plan mode, tool calls queued | /plan command entered | #FFCCBC |
 | HOOK_RUNNING | Pre/post hook executing | tool or LLM call with hooks | #FFFDE7 |
 | ROUTING | Model selection in progress | LLM Repository resolving model | #EDE7F6 |
-| SERVING | API processing request from any interface | HTTPADAPTER-06 DISPATCH Message | #E0F7FA |
+| SERVING | API processing request from any interface | HTTPADP-06 DISPATCH Message | #E0F7FA |
 | EVALUATING | Evaluating task completion | task_complete AND evaluation_enabled | #F9FBE7 |
 | REVIEWING | LLM review of results | success checks passed, optional review | #FFF8E1 |
 | RETRYING | Retrying with feedback | success checks failed or review rejected | #FBE9E7 |
 | STAGING | Diff sandbox staging | tool exec in diff_sandbox mode | #F1F8E9 |
 | AWAITING_DIFF_APPROVAL | Presenting diff to user | SAFETYSERVICE-02 REQUEST Approval | #FCE4EC |
 
-> **API-First Entry:** All entry/exit transitions use `HTTPADAPTER-06` (DISPATCH Message) as the sole entry gate. No interface container may bypass the API.
+> **API-First Entry:** All entry/exit transitions use `HTTPADP-06` (DISPATCH Message) as the sole entry gate. No interface container may bypass the API.
 
 ### Transitions from STAGING
 
@@ -35,12 +35,12 @@
 
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
-| CREATED | Session record initialized | HTTPADAPTER-02 CREATE Session | #BBDEFB |
-| ACTIVE | Session accepting messages | Session created or restored | #43A047 |
-| SAVED | Session persisted to disk | HTTPADAPTER-04 UPDATE Session | #1565C0 |
-| RESTORED | Session loaded from disk | HTTPADAPTER-03 GET Session | #1E88E5 |
-| BRANCHED | Session forked from parent | WIRELOGREPOSITORY-04 FORK Session | #7B1FA2 |
-| CLOSED | Session terminated | HTTPADAPTER-05 DELETE Session | #757575 |
+| CREATED | Session record initialized | SESSIONSERVICE-01 PERSIST Session | #BBDEFB |
+| ACTIVE | Session accepting messages | SESSIONSERVICE-01 PERSIST Session | #43A047 |
+| SAVED | Session persisted to disk | SESSIONSERVICE-01 PERSIST Session | #1565C0 |
+| RESTORED | Session loaded from disk | SESSIONSERVICE-04 RESTORE Session | #1E88E5 |
+| BRANCHED | Session forked from parent | SESSIONSERVICE-08 BRANCH Session | #7B1FA2 |
+| CLOSED | Session terminated | SESSIONSERVICE-09 DELETE Session | #757575 |
 
 ## Plan Lifecycle States (Entity)
 
@@ -218,8 +218,8 @@
 - **Transition labels** use UC-ID-only convention (e.g., `TASKSERVICE-01`, `LLMREPOSITORY-02`, `SAFETYSERVICE-02`).
   No human-readable suffixes. Multiple transitions from one state may share a UC ID
   when the same action produces different outcomes (e.g., `LLMREPOSITORY-02` → RESPONDING, TOOL_EXEC, ERROR).
-- **API-First:** All entry/exit transitions in Agent SM use `HTTPADAPTER-06` as the sole entry gate.
-  Session lifecycle mutations use API UCs (HTTPADAPTER-02 through HTTPADAPTER-05).
+- **API-First:** All entry/exit transitions in Agent SM use `HTTPADP-06` as the sole entry gate.
+  Session lifecycle mutations use `SESSIONSERVICE-XX` UC IDs (Session Service Group).
 
 ## Transition Matrices
 
@@ -228,12 +228,12 @@
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
 | [*] | IDLE | TASKSERVICE-01 | Process startup |
-| IDLE | LISTENING | HTTPADAPTER-06 | DISPATCH Message received |
-| IDLE | SERVING | HTTPADAPTER-06 | API request received |
+| IDLE | LISTENING | HTTPADP-06 | DISPATCH Message received |
+| IDLE | SERVING | HTTPADP-06 | API request received |
 | IDLE | PLANNING | TASKSERVICE-07 | /plan command entered |
-| LISTENING | THINKING | HTTPADAPTER-06 | Input parsed, messages built |
-| SERVING | THINKING | HTTPADAPTER-06 | API request processed |
-| SERVING | IDLE | HTTPADAPTER-06 | API request complete |
+| LISTENING | THINKING | HTTPADP-06 | Input parsed, messages built |
+| SERVING | THINKING | HTTPADP-06 | API request processed |
+| SERVING | IDLE | HTTPADP-06 | API request complete |
 | THINKING | RESPONDING | LLMREPOSITORY-02 | LLM returns text only |
 | THINKING | TOOL_EXEC | LLMREPOSITORY-02 | LLM returns tool_calls |
 | THINKING | COMPACTING | TASKSERVICE-06 | token_count > context_budget |
@@ -251,7 +251,7 @@
 | AWAITING_APPROVAL | TOOL_EXEC | SAFETYSERVICE-02 | User approves |
 | AWAITING_APPROVAL | IDLE | SAFETYSERVICE-02 | User denies |
 | COMPACTING | THINKING | TASKSERVICE-06 | Context compacted |
-| RESPONDING | IDLE | HTTPADAPTER-06 | Response streamed to user |
+| RESPONDING | IDLE | HTTPADP-06 | Response streamed to user |
 | ERROR | IDLE | TASKSERVICE-14 | Error handled |
 | PLANNING | IDLE | TASKSERVICE-07 | Plan mode exited |
 | EVALUATING | REVIEWING | EVALUATIONSERVICE-01 | Evaluation passed |
@@ -270,18 +270,18 @@
 
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
-| [*] | CREATED | HTTPADAPTER-02 | Session record initialized |
-| CREATED | ACTIVE | HTTPADAPTER-02 | Session ready for messages |
-| ACTIVE | SAVED | HTTPADAPTER-04 | Session persisted to disk |
-| ACTIVE | BRANCHED | WIRELOGREPOSITORY-04 | Session forked from parent |
-| ACTIVE | CLOSED | HTTPADAPTER-05 | Session terminated |
-| SAVED | RESTORED | HTTPADAPTER-03 | Session loaded from disk |
-| SAVED | CLOSED | HTTPADAPTER-05 | Session terminated |
-| RESTORED | ACTIVE | HTTPADAPTER-02 | Session ready for messages |
-| RESTORED | SAVED | HTTPADAPTER-04 | Session persisted to disk |
-| RESTORED | CLOSED | HTTPADAPTER-05 | Session terminated |
-| BRANCHED | ACTIVE | HTTPADAPTER-02 | Session ready for messages |
-| BRANCHED | CLOSED | HTTPADAPTER-05 | Session terminated |
+| [*] | CREATED | SESSIONSERVICE-01 | Session record initialized |
+| CREATED | ACTIVE | SESSIONSERVICE-01 | Session ready for messages |
+| ACTIVE | SAVED | SESSIONSERVICE-01 | Session persisted to disk |
+| ACTIVE | BRANCHED | SESSIONSERVICE-08 | Session forked from parent |
+| ACTIVE | CLOSED | SESSIONSERVICE-09 | Session terminated |
+| SAVED | RESTORED | SESSIONSERVICE-04 | Session loaded from disk |
+| SAVED | CLOSED | SESSIONSERVICE-09 | Session terminated |
+| RESTORED | ACTIVE | SESSIONSERVICE-02 | Session ready for messages |
+| RESTORED | SAVED | SESSIONSERVICE-01 | Session persisted to disk |
+| RESTORED | CLOSED | SESSIONSERVICE-09 | Session terminated |
+| BRANCHED | ACTIVE | SESSIONSERVICE-02 | Session ready for messages |
+| BRANCHED | CLOSED | SESSIONSERVICE-09 | Session terminated |
 | CLOSED | [*] | — | Terminal state |
 
 ### Plan Lifecycle Transition Matrix
@@ -423,12 +423,12 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
-| CREATED | HTTPADAPTER-02 CREATE Session | Session record initialized |
-| ACTIVE | HTTPADAPTER-02 CREATE Session | Session accepting messages (after init/resume) |
-| SAVED | HTTPADAPTER-04 UPDATE Session | Session persisted to disk |
-| RESTORED | HTTPADAPTER-03 GET Session | Session loaded from disk |
-| BRANCHED | WIRELOGREPOSITORY-04 FORK Session | Session forked from parent |
-| CLOSED | HTTPADAPTER-05 DELETE Session | Session terminated (quit or error) |
+| CREATED | SESSIONSERVICE-01 PERSIST Session | Session record initialized |
+| ACTIVE | SESSIONSERVICE-01 PERSIST Session | Session accepting messages (after init/resume) |
+| SAVED | SESSIONSERVICE-01 PERSIST Session | Session persisted to disk |
+| RESTORED | SESSIONSERVICE-04 RESTORE Session | Session loaded from disk |
+| BRANCHED | SESSIONSERVICE-08 BRANCH Session | Session forked from parent |
+| CLOSED | SESSIONSERVICE-09 DELETE Session | Session terminated (quit or error) |
 
 ### Plan Lifecycle
 
@@ -573,19 +573,19 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
 | [*] | IDLE | TASKSERVICE-01 | Process startup | sq_agent01_process_user_task.puml |
-| IDLE | LISTENING | HTTPADAPTER-06 | DISPATCH Message received | sq_api06_dispatch_message.puml |
-| IDLE | SERVING | HTTPADAPTER-06 | API request received | sq_api06_dispatch_message.puml |
+| IDLE | LISTENING | HTTPADP-06 | DISPATCH Message received | sq_api06_dispatch_message.puml |
+| IDLE | SERVING | HTTPADP-06 | API request received | sq_api06_dispatch_message.puml |
 | IDLE | PLANNING | TASKSERVICE-07 | /plan command entered | sq_agent07_queue_plan.puml |
 | IDLE | [*] | TASKSERVICE-01 | Error handled | — |
-| LISTENING | THINKING | HTTPADAPTER-06 | Input parsed, messages built | sq_api06_dispatch_message.puml |
-| SERVING | THINKING | HTTPADAPTER-06 | API request processed | sq_api06_dispatch_message.puml |
-| SERVING | IDLE | HTTPADAPTER-06 | API request complete | sq_api06_dispatch_message.puml |
+| LISTENING | THINKING | HTTPADP-06 | Input parsed, messages built | sq_api06_dispatch_message.puml |
+| SERVING | THINKING | HTTPADP-06 | API request processed | sq_api06_dispatch_message.puml |
+| SERVING | IDLE | HTTPADP-06 | API request complete | sq_api06_dispatch_message.puml |
 | THINKING | RESPONDING | LLMREPOSITORY-02 | LLM returns text only | sq_provider02_request_chat.puml |
 | THINKING | TOOL_EXEC | LLMREPOSITORY-02 | LLM returns tool_calls | sq_provider02_request_chat.puml |
 | THINKING | COMPACTING | TASKSERVICE-06 | token_count > context_budget | sq_agent06_compact_context.puml |
 | THINKING | ROUTING | LLMREPOSITORY-01 | ModelRouter resolving model | sq_router01_select_model.puml |
 | THINKING | ERROR | LLMREPOSITORY-02 | Provider call failed | sq_provider02_request_chat.puml |
-| THINKING | RESPONDING | HTTPADAPTER-06 | Response dispatched | sq_api06_dispatch_message.puml |
+| THINKING | RESPONDING | HTTPADP-06 | Response dispatched | sq_api06_dispatch_message.puml |
 | THINKING | EVALUATING | EVALUATIONSERVICE-01 | task_complete AND evaluation_enabled | sq_evaluation01_evaluate_task.puml |
 | ROUTING | THINKING | LLMREPOSITORY-01 | Model selected | sq_router01_select_model.puml |
 | TOOL_EXEC | THINKING | TASKSERVICE-02 | Tool call complete | sq_agent02_dispatch_tool_call.puml |
@@ -598,7 +598,7 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | AWAITING_APPROVAL | TOOL_EXEC | SAFETYSERVICE-02 | User approves | sq_safety02_request_approval.puml |
 | AWAITING_APPROVAL | IDLE | SAFETYSERVICE-02 | User denies | sq_safety02_request_approval.puml |
 | COMPACTING | THINKING | TASKSERVICE-06 | Context compacted | sq_agent06_compact_context.puml |
-| RESPONDING | IDLE | HTTPADAPTER-06 | Response streamed to user | sq_api06_dispatch_message.puml |
+| RESPONDING | IDLE | HTTPADP-06 | Response streamed to user | sq_api06_dispatch_message.puml |
 | ERROR | IDLE | TASKSERVICE-14 | Error handled | sq_agent14_handle_error.puml |
 | PLANNING | IDLE | TASKSERVICE-07 | Plan mode exited | sq_agent07_queue_plan.puml |
 | EVALUATING | REVIEWING | EVALUATIONSERVICE-01 | Evaluation passed | sq_evaluation01_evaluate_task.puml |
@@ -614,24 +614,24 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | AWAITING_DIFF_APPROVAL | IDLE | SAFETYSERVICE-02 | User rejects diff | sq_safety02_request_approval.puml |
 
 > **Coverage:** 39/39 non-terminal transitions covered. 0 ORPHANs.
-> **Note:** `THINKING→RESPONDING` appears twice with different UC-IDs — `LLMREPOSITORY-02` (provider generates content) and `HTTPADAPTER-06` (API dispatches to network) — reflecting two semantically distinct transitions between the same states.
+> **Note:** `THINKING→RESPONDING` appears twice with different UC-IDs — `LLMREPOSITORY-02` (provider generates content) and `HTTPADP-06` (API dispatches to network) — reflecting two semantically distinct transitions between the same states.
 
 ### sm_session_lifecycle — Transition Coverage Table
 
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
-| [*] | CREATED | HTTPADAPTER-02 | Session record initialized | sq_api02_create_session.puml |
-| CREATED | ACTIVE | HTTPADAPTER-02 | Session ready for messages | sq_api02_create_session.puml |
-| ACTIVE | SAVED | HTTPADAPTER-04 | Session persisted to disk | sq_api04_update_session.puml |
-| ACTIVE | BRANCHED | WIRELOGREPOSITORY-04 | Session forked from parent | sq_wirelog04_fork_session.puml |
-| ACTIVE | CLOSED | HTTPADAPTER-05 | Session terminated | sq_api05_delete_session.puml |
-| SAVED | RESTORED | HTTPADAPTER-03 | Session loaded from disk | sq_api03_get_session.puml |
-| SAVED | CLOSED | HTTPADAPTER-05 | Session terminated | sq_api05_delete_session.puml |
-| RESTORED | ACTIVE | HTTPADAPTER-02 | Session ready for messages | sq_api02_create_session.puml |
-| RESTORED | SAVED | HTTPADAPTER-04 | Session persisted to disk | sq_api04_update_session.puml |
-| RESTORED | CLOSED | HTTPADAPTER-05 | Session terminated | sq_api05_delete_session.puml |
-| BRANCHED | ACTIVE | HTTPADAPTER-02 | Session ready for messages | sq_api02_create_session.puml |
-| BRANCHED | CLOSED | HTTPADAPTER-05 | Session terminated | sq_api05_delete_session.puml |
+| [*] | CREATED | SESSIONSERVICE-01 | Session record initialized | sq_sessionservice01_persist_session.puml |
+| CREATED | ACTIVE | SESSIONSERVICE-01 | Session ready for messages | sq_sessionservice01_persist_session.puml |
+| ACTIVE | SAVED | SESSIONSERVICE-01 | Session persisted to disk | sq_sessionservice01_persist_session.puml |
+| ACTIVE | BRANCHED | SESSIONSERVICE-08 | Session forked from parent | sq_sessionservice08_branch_session.puml |
+| ACTIVE | CLOSED | SESSIONSERVICE-09 | Session terminated | sq_sessionservice09_delete_session.puml |
+| SAVED | RESTORED | SESSIONSERVICE-04 | Session loaded from disk | sq_sessionservice04_restore_session.puml |
+| SAVED | CLOSED | SESSIONSERVICE-09 | Session terminated | sq_sessionservice09_delete_session.puml |
+| RESTORED | ACTIVE | SESSIONSERVICE-02 | Session ready for messages | sq_sessionservice02_read_session.puml |
+| RESTORED | SAVED | SESSIONSERVICE-01 | Session persisted to disk | sq_sessionservice01_persist_session.puml |
+| RESTORED | CLOSED | SESSIONSERVICE-09 | Session terminated | sq_sessionservice09_delete_session.puml |
+| BRANCHED | ACTIVE | SESSIONSERVICE-02 | Session ready for messages | sq_sessionservice02_read_session.puml |
+| BRANCHED | CLOSED | SESSIONSERVICE-09 | Session terminated | sq_sessionservice09_delete_session.puml |
 | CLOSED | [*] | — | Terminal state | — |
 
 > **Coverage:** 12/12 non-terminal transitions covered. 0 ORPHANs.
@@ -898,8 +898,8 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 
 | # | SM File | Entity | C4 Component | Type | States | UCs | Status |
 |---|---------|--------|--------------|------|--------|-----|--------|
-| 1 | sm_agent_lifecycle.puml | Task Service | Task Service | Process FSM | 17 | TASKSERVICE-01..14, HTTPADAPTER-06, LLMREPOSITORY-02, EDITSTRATEGYREPOSITORY-10, SAFETYSERVICE-02, TOOLSERVICE-02, EVALUATIONSERVICE-01..06, LLMREPOSITORY-01 | ✅ GREEN |
-| 2 | sm_session_lifecycle.puml | Session Repository | Session Service | Entity | 6 | HTTPADAPTER-02..05, WIRELOGREPOSITORY-04 | ✅ GREEN |
+| 1 | sm_agent_lifecycle.puml | Task Service | Task Service | Process FSM | 17 | TASKSERVICE-01..14, HTTPADP-06, LLMREPOSITORY-02, EDITSTRATEGYREPOSITORY-10, SAFETYSERVICE-02, TOOLSERVICE-02, EVALUATIONSERVICE-01..06, LLMREPOSITORY-01 | ✅ GREEN |
+| 2 | sm_session_lifecycle.puml | Session | Session Service | Entity | 6 | SESSIONSERVICE-01..04, SESSIONSERVICE-08, SESSIONSERVICE-09 | ✅ GREEN |
 | 3 | sm_plan_lifecycle.puml | Task Service (Plan) | Task Service | Entity | 7 | TASKSERVICE-07, TASKSERVICE-08, TASKSERVICE-01, TASKSERVICE-14 | ✅ GREEN |
 | 4 | sm_plugin_lifecycle.puml | Tool Service (Plugin) | Tool Service | Entity | 6 | TOOLSERVICE-01..06 | ✅ GREEN |
 | 5 | sm_subagent_lifecycle.puml | Task Service (Subagent) | Task Service | Entity | 5 | TASKSERVICE-09, TASKSERVICE-10, TASKSERVICE-14 | ✅ GREEN |
@@ -978,7 +978,7 @@ These components have lifecycle states that occur as transient sub-states within
 
 Every entity SM state has exactly one owning lifecycle-write UC. Verified per SMT rules:
 
-- **Session**: CREATED (HTTPADAPTER-02), ACTIVE (HTTPADAPTER-02), SAVED (HTTPADAPTER-04), RESTORED (HTTPADAPTER-03), BRANCHED (WIRELOGREPOSITORY-04), CLOSED (HTTPADAPTER-05) ✅
+- **Session**: CREATED (SESSIONSERVICE-01), ACTIVE (SESSIONSERVICE-01), SAVED (SESSIONSERVICE-01), RESTORED (SESSIONSERVICE-04), BRANCHED (SESSIONSERVICE-08), CLOSED (SESSIONSERVICE-09) ✅
 - **Plan**: BUILDING (TASKSERVICE-07), QUEUED (TASKSERVICE-07), APPROVED (TASKSERVICE-08), EXECUTING (TASKSERVICE-08), COMPLETED (TASKSERVICE-01), REJECTED (TASKSERVICE-08) ✅
 - **Plugin**: DISCOVERED (TOOLSERVICE-01), LOADING (TOOLSERVICE-02), LOADED (TOOLSERVICE-03), ENABLED (TOOLSERVICE-05), DISABLED (TOOLSERVICE-06), ERROR (TOOLSERVICE-01) ✅
 - **Subagent**: SPAWNING (TASKSERVICE-09), RUNNING (TASKSERVICE-09), COMPLETED (TASKSERVICE-10), FAILED (TASKSERVICE-14) ✅

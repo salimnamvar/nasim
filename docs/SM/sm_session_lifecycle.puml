@@ -4,53 +4,56 @@
 ' Title:     nasim — Session Lifecycle State Machine (API-First)
 ' Boundary:  nasim code agent
 ' Purpose:   Entity lifecycle for Session (persisted to disk).
-'            All mutations routed through API Group (Entry Gate).
+'            Lifecycle-write UCs: SESSIONSERVICE-01..09 (Session Service Group).
+'            External API entry: HTTPADP-02..05 (HTTP Adapter Group).
 ' Milestone: v1.0
-' Version:   8.0.0
-' Source:    CAR refinement loop — API-First transformation
-' Review:    —
+' Version:   9.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/README.md
+' Review:    SM Architect review 2026-07-01
+' Convention: All transitions use SESSIONSERVICE-XX UC IDs (lifecycle-write owners).
+'             HTTPADP-XX are external API wrappers; SESSIONSERVICE-XX are domain mutators.
 ' ============================================================
 
 title nasim — Session Lifecycle (API-First)
 
-[*] --> CREATED : HTTPADAPTER-02
+[*] --> CREATED : SESSIONSERVICE-01
 
 state "CREATED" as CREATED #BBDEFB
 CREATED : Session record initialized.
-CREATED : HTTPADAPTER-02 CREATE Session.
+CREATED : SESSIONSERVICE-01 PERSIST Session.
 
 state "ACTIVE" as ACTIVE #43A047
 ACTIVE : Session accepting messages.
-ACTIVE : HTTPADAPTER-03 GET Session, HTTPADAPTER-06 DISPATCH Message.
+ACTIVE : SESSIONSERVICE-02 READ Session.
 
 state "SAVED" as SAVED #1565C0
 SAVED : Session persisted to disk.
-SAVED : HTTPADAPTER-01 LIST Sessions, HTTPADAPTER-04 UPDATE Session.
+SAVED : SESSIONSERVICE-01 PERSIST Session.
 
 state "RESTORED" as RESTORED #1E88E5
 RESTORED : Session loaded from disk.
-RESTORED : HTTPADAPTER-03 GET Session.
+RESTORED : SESSIONSERVICE-04 RESTORE Session.
 
 state "BRANCHED" as BRANCHED #7B1FA2
 BRANCHED : Session forked from parent.
-BRANCHED : WIRELOGREPOSITORY-04 FORK Session.
+BRANCHED : SESSIONSERVICE-08 BRANCH Session.
 
 state "CLOSED" as CLOSED #757575
 CLOSED : Session terminated.
 CLOSED : Terminal state.
 
-CREATED --> ACTIVE : HTTPADAPTER-02
-ACTIVE --> SAVED : HTTPADAPTER-04
-ACTIVE --> BRANCHED : WIRELOGREPOSITORY-04
-ACTIVE --> CLOSED : HTTPADAPTER-05
-SAVED --> RESTORED : HTTPADAPTER-03
-RESTORED --> ACTIVE : HTTPADAPTER-02
-RESTORED --> SAVED : HTTPADAPTER-04
-RESTORED --> CLOSED : HTTPADAPTER-05
-BRANCHED --> ACTIVE : HTTPADAPTER-02
-BRANCHED --> CLOSED : HTTPADAPTER-05
-SAVED --> CLOSED : HTTPADAPTER-05
+CREATED --> ACTIVE : SESSIONSERVICE-01
+ACTIVE --> SAVED : SESSIONSERVICE-01
+ACTIVE --> BRANCHED : SESSIONSERVICE-08
+ACTIVE --> CLOSED : SESSIONSERVICE-09
+SAVED --> RESTORED : SESSIONSERVICE-04
+RESTORED --> ACTIVE : SESSIONSERVICE-02
+RESTORED --> SAVED : SESSIONSERVICE-01
+RESTORED --> CLOSED : SESSIONSERVICE-09
+BRANCHED --> ACTIVE : SESSIONSERVICE-02
+BRANCHED --> CLOSED : SESSIONSERVICE-09
+SAVED --> CLOSED : SESSIONSERVICE-09
 
-CLOSED --> [*] : HTTPADAPTER-05
+CLOSED --> [*] : SESSIONSERVICE-09
 
 @enduml
