@@ -1,0 +1,52 @@
+@startuml sq_mcpadapter04_stream_events
+' ============================================================
+' Title:     MCPADP-04 — streamEvents
+' Boundary:  NASIM Application — Interface Layer
+' Purpose:   Stream agent events to MCP clients via MCP notification
+'             channel during task execution.
+' Intro:     Long-lived connection that receives AgentEvents as they
+'             occur during task processing. Adapter formats events
+'             for MCP notification protocol.
+' Summary:   Events include tool calls, status updates, and final
+'             results. Connection closes when task completes.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_mcp_adp.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: MCP Client ↔ MCP Adapter (bidirectional stream)
+' SM States: sm_task_svc_agent.puml — RECEIVING → THINKING → TOOL_EXEC → RESPONDING
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — MCPADP-04 streamEvents
+
+actor "MCP Client" as mcpClient
+
+box "Interface" INTERFACE_COLOR
+  participant "MCP Adapter" as mcpAdp
+end box
+
+== MCPADP-04 streamEvents — entry ==
+
+mcpClient -> mcpAdp : MCPADP-04 streamEvents({sessionId})
+activate mcpAdp
+
+mcpAdp -> mcpAdp : openNotificationChannel({sessionId})
+
+loop event_stream [until task_complete]
+  mcpAdp -> mcpAdp : receiveAgentEvent()
+  mcpAdp -> mcpAdp : formatMcpNotification({event})
+  mcpAdp --> mcpClient : notification — {mcpEvent}
+end
+
+mcpAdp -> mcpAdp : closeNotificationChannel()
+mcpAdp --> mcpClient : stream_complete
+deactivate mcpAdp
+
+== Summary ==
+' MCPADP-04 provides real-time event streaming to MCP clients.
+' Events are formatted from internal AgentEvent format to MCP
+' notification protocol. Connection lifecycle matches task duration.
+
+@enduml

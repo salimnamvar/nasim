@@ -1,0 +1,49 @@
+@startuml sq_sessionrepository01_append_message
+' ============================================================
+' Title:     SESSIONREPO-01 — appendMessage
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Append a message turn to the session's JSONL message store.
+' Intro:     Data-access layer for session persistence. Called by
+'             Session Service during message persistence.
+' Summary:   Messages are appended to JSONL file with turn metadata.
+'             Supports atomic writes for concurrent access.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_session_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Session Service → Session Repository → SessionStore
+' SM States: sm_session_svc_session.puml — ACTIVE → SAVED
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — SESSIONREPO-01 appendMessage
+
+box "Service" SERVICE_COLOR
+  participant "Session Service" as sessionSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Session Repository" as sessionRepo
+end box
+
+database "SessionStore" as sessionStore
+
+== SESSIONREPO-01 appendMessage — entry ==
+
+sessionSvc -> sessionRepo : SESSIONREPO-01 appendMessage({sessionId, turn})
+activate sessionRepo
+
+sessionRepo -> sessionStore : SESSIONREPO-01 appendMessage({sessionId, turn})
+activate sessionStore
+sessionStore --> sessionRepo : 200 OK
+deactivate sessionStore
+
+sessionRepo --> sessionSvc : 200 OK — {messageId, turnIndex}
+deactivate sessionRepo
+
+== Summary ==
+' SESSIONREPO-01 is the write path for session messages. JSONL format
+' enables efficient append-only writes and streaming reads.
+
+@enduml

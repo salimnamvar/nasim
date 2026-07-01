@@ -1,0 +1,61 @@
+@startuml sq_filesystemrepository04_grep_search
+' ============================================================
+' Title:     FSREPO-04 — grepSearch
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Search file contents using regex patterns (grep).
+' Intro:     Data-access layer for content search. Called by Tool Service
+'             for grep-based content discovery.
+' Summary:   Supports regex patterns with file type filtering,
+'             context lines, and result ranking.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_fs_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Tool Service → Filesystem Repository → Host Filesystem
+' SM States: N/A (stateless I/O)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — FSREPO-04 grepSearch
+
+box "Service" SERVICE_COLOR
+  participant "Tool Service" as toolSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Filesystem Repository" as fsRepo
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "Host Filesystem" as hostFs
+end box
+
+== FSREPO-04 grepSearch — entry ==
+
+toolSvc -> fsRepo : FSREPO-04 grepSearch({pattern, path, options})
+activate fsRepo
+
+fsRepo -> fsRepo : validateRegex({pattern})
+fsRepo -> fsRepo : resolveSearchPath({path})
+
+break invalid_regex
+  fsRepo --> toolSvc : 400 BAD_REQUEST\n{error: {code: "FSREPO-04_INVALID_REGEX"}}
+  deactivate fsRepo
+end
+
+fsRepo -> hostFs : FSREPO-04 grepSearch({pattern, path, contextLines})
+activate hostFs
+hostFs --> fsRepo : 200 OK — {matches}
+deactivate hostFs
+
+fsRepo -> fsRepo : rankResults({matches})
+
+fsRepo --> toolSvc : 200 OK — {matches, totalCount}
+deactivate fsRepo
+
+== Summary ==
+' FSREPO-04 provides regex-based content search across files.
+' Supports context lines and result ranking for efficient code search.
+
+@enduml

@@ -1,0 +1,63 @@
+@startuml sq_webrepository01_fetch_content
+' ============================================================
+' Title:     WEBREPO-01 — fetchContent
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Fetch web content from URLs with timeout, retry,
+'             and content type detection.
+' Intro:     Data-access layer for web I/O. Called by Tool Service
+'             for web fetch operations.
+' Summary:   Supports fetching HTML, JSON, and other content types
+'             with configurable timeout and retry policies.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_web_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Tool Service → Web Repository → Web
+' SM States: N/A (stateless I/O)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — WEBREPO-01 fetchContent
+
+box "Service" SERVICE_COLOR
+  participant "Tool Service" as toolSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Web Repository" as webRepo
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "Web" as web
+end box
+
+== WEBREPO-01 fetchContent — entry ==
+
+toolSvc -> webRepo : WEBREPO-01 fetchContent({url, options})
+activate webRepo
+
+webRepo -> webRepo : validateUrl({url})
+webRepo -> webRepo : applyTimeout({options})
+
+break invalid_url
+  webRepo --> toolSvc : 400 BAD_REQUEST\n{error: {code: "WEBREPO-01_INVALID_URL"}}
+  deactivate webRepo
+end
+
+webRepo -> web : WEBREPO-01 fetchContent({url, headers, timeout})
+activate web
+web --> webRepo : 200 OK — {content, contentType, statusCode}
+deactivate web
+
+webRepo -> webRepo : detectContentType({response})
+webRepo -> webRepo : extractContent({response, contentType})
+
+webRepo --> toolSvc : 200 OK — {content, metadata}
+deactivate webRepo
+
+== Summary ==
+' WEBREPO-01 provides web content fetching with timeout and retry.
+' Content type detection enables appropriate parsing for HTML, JSON, etc.
+
+@enduml

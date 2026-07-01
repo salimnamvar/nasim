@@ -1,0 +1,46 @@
+@startuml sq_historyrepository02_revert_to_snapshot
+' ============================================================
+' Title:     HISTORYREPO-02 — revertToSnapshot
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Revert session state to a previously created snapshot.
+' Intro:     Data-access layer for session revert. Called by Session
+'             Service during revert operations.
+' Summary:   Revert restores messages, metadata, and turn boundaries
+'             from the snapshot. Creates a new snapshot before revert.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_history_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Session Service → History Repository
+' SM States: sm_session_svc_session.puml — RESTORED
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — HISTORYREPO-02 revertToSnapshot
+
+box "Service" SERVICE_COLOR
+  participant "Session Service" as sessionSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "History Repository" as historyRepo
+end box
+
+== HISTORYREPO-02 revertToSnapshot — entry ==
+
+sessionSvc -> historyRepo : HISTORYREPO-02 revertToSnapshot({sessionId, snapshotId})
+activate historyRepo
+
+historyRepo -> historyRepo : readSnapshot({snapshotId})
+historyRepo -> historyRepo : createPreRevertSnapshot({sessionId})
+historyRepo -> historyRepo : restoreSessionState({sessionId, snapshot})
+
+historyRepo --> sessionSvc : 200 OK — {revertedTo, newSnapshotId}
+deactivate historyRepo
+
+== Summary ==
+' HISTORYREPO-02 reverts session to a snapshot. A pre-revert snapshot
+' is created to enable undoing the revert itself.
+
+@enduml

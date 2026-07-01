@@ -1,0 +1,46 @@
+@startuml sq_historyrepository03_search_history
+' ============================================================
+' Title:     HISTORYREPO-03 — searchHistory
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Full-text search across session history using FTS5 index.
+' Intro:     Data-access layer for history search. Called by Session
+'             Service for search operations.
+' Summary:   Supports full-text search across all session messages
+'             with relevance ranking and pagination.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_history_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Session Service → History Repository
+' SM States: N/A (read-only search)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — HISTORYREPO-03 searchHistory
+
+box "Service" SERVICE_COLOR
+  participant "Session Service" as sessionSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "History Repository" as historyRepo
+end box
+
+== HISTORYREPO-03 searchHistory — entry ==
+
+sessionSvc -> historyRepo : HISTORYREPO-03 searchHistory({query, sessionId, limit})
+activate historyRepo
+
+historyRepo -> historyRepo : executeFts5Query({query, sessionId})
+historyRepo -> historyRepo : rankResults({matches})
+historyRepo -> historyRepo : paginateResults({ranked, limit})
+
+historyRepo --> sessionSvc : 200 OK — {results, totalCount}
+deactivate historyRepo
+
+== Summary ==
+' HISTORYREPO-03 provides full-text search across session history.
+' FTS5 index enables fast search with relevance ranking.
+
+@enduml

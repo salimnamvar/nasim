@@ -1,0 +1,62 @@
+@startuml sq_filesystemrepository02_write_file
+' ============================================================
+' Title:     FSREPO-02 — writeFile
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Write file contents to the host filesystem with
+'             atomic writes and backup creation.
+' Intro:     Data-access layer for file writes. Called by Tool Service
+'             for file write/update operations.
+' Summary:   Supports atomic writes with backup creation and
+'             write verification.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_fs_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Tool Service → Filesystem Repository → Host Filesystem
+' SM States: N/A (stateless I/O)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — FSREPO-02 writeFile
+
+box "Service" SERVICE_COLOR
+  participant "Tool Service" as toolSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Filesystem Repository" as fsRepo
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "Host Filesystem" as hostFs
+end box
+
+== FSREPO-02 writeFile — entry ==
+
+toolSvc -> fsRepo : FSREPO-02 writeFile({path, content, options})
+activate fsRepo
+
+fsRepo -> fsRepo : validatePath({path})
+fsRepo -> fsRepo : createBackup({path})
+
+break path_invalid
+  fsRepo --> toolSvc : 400 BAD_REQUEST\n{error: {code: "FSREPO-02_INVALID_PATH"}}
+  deactivate fsRepo
+end
+
+fsRepo -> hostFs : FSREPO-02 writeFile({path, content, encoding})
+activate hostFs
+hostFs --> fsRepo : 200 OK — {bytesWritten}
+deactivate hostFs
+
+fsRepo -> fsRepo : verifyWrite({path, content})
+
+fsRepo --> toolSvc : 200 OK — {bytesWritten, backupPath}
+deactivate fsRepo
+
+== Summary ==
+' FSREPO-02 provides atomic file writes with backup creation.
+' Write verification ensures data integrity.
+
+@enduml

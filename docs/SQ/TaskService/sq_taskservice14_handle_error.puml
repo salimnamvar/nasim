@@ -1,66 +1,63 @@
-@startuml sq_agent14_handle_error
+@startuml sq_taskservice14_handle_error
 ' ============================================================
-' Title:     TASKSERVICE-14 — HANDLE Error
-' Boundary:  nasim code agent
-' Purpose:   Classify errors and determine recovery action
+' Title:     TASKSVC-14 — handleError
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Classify errors and determine recovery action for the
+'             agentic loop (retry, fallback, or terminal failure).
+' Intro:     Invoked by TASKSVC-01 when LLM call or tool execution
+'             fails. Entry: task_svc self-invocation during error handling.
+' Summary:   Recoverable errors retry with feedback; unrecoverable errors
+'             transition to ERROR state and return to caller.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> CLI Adapter -> Agent Controller -> ErrorService -> ErrorBoundary
-' SM States: FAILED (#EF5350)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_task_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Task Service (internal orchestration)
+' SM States: sm_task_svc_agent.puml — ERROR, IDLE
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- TASKSERVICE-14 HANDLE Error
-
-actor "User" as user
-
-box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
-end box
-
-box "API" API_COLOR
-  participant "Agent Controller" as router
-end box
+title nasim — TASKSVC-14 handleError
 
 box "Service" SERVICE_COLOR
-  participant "Task Service" as errorService
+  participant "Task Service" as taskSvc
 end box
 
-box "Repository" REPOSITORY_COLOR
-  participant "Task Service" as boundary
-end box
+== TASKSVC-14 handleError — entry ==
 
-== TASKSERVICE-14 HANDLE Error ==
+taskSvc -> taskSvc : TASKSVC-14 handleError({error, context})
+activate taskSvc
 
-user -> iface : POST /v1/agents/{agent_id}:handle-error
-activate iface
-iface -> router : POST /v1/agents/{agent_id}:handle-error
-activate router
-router -> errorService : TASKSERVICE-14 HANDLE Error({error})
-activate errorService
+ref over taskSvc : TASKSVC-14 handleError\nState: <back:#FFEBEE>ERROR</back>
 
-alt retryable error
-  ref over errorService : TASKSERVICE-14 HANDLE Error({error}) <back:#EF5350>FAILED</back>
-  errorService -> boundary : TASKSERVICE-14 PERSIST Error({error, recovery_action})
-  activate boundary
-  boundary --> errorService : 200 OK
-  deactivate boundary
-  errorService --> router : 200 OK
-  deactivate errorService
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else unrecoverable error
-  errorService --> router : 500 INTERNAL\n{error: {code: "TASKSERVICE-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
-  deactivate errorService
-  router --> iface : 500 INTERNAL\n{error: {code: "TASKSERVICE-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
-  iface --> user : 500 INTERNAL\n{error: {code: "TASKSERVICE-14_UNRECOVERABLE", message: "Unrecoverable error", status: 500}}
-  deactivate router
-  deactivate iface
+alt recoverable_error
+  taskSvc -> taskSvc : classifyError({error}) → RETRYABLE
+  ref over taskSvc : TASKSVC-14 handleError\nState: <back:#FFEBEE>ERROR</back> → <back:#ECEFF1>IDLE</back>
+  taskSvc --> taskSvc : 200 OK — {recovered: true, retryHint}
+
+else provider_unavailable
+  taskSvc -> taskSvc : classifyError({error}) → PROVIDER_DOWN
+  ref over taskSvc : TASKSVC-14 handleError\nState: <back:#FFEBEE>ERROR</back> → <back:#ECEFF1>IDLE</back>
+  taskSvc --> taskSvc : 200 OK — {recovered: true, fallbackModel}
+
+else tool_execution_failed
+  taskSvc -> taskSvc : classifyError({error}) → TOOL_ERROR
+  ref over taskSvc : TASKSVC-14 handleError\nState: <back:#FFEBEE>ERROR</back> → <back:#ECEFF1>IDLE</back>
+  taskSvc --> taskSvc : 200 OK — {recovered: true, retryHint}
+
+else unrecoverable_error
+  taskSvc -> taskSvc : classifyError({error}) → FATAL
+  ref over taskSvc : TASKSVC-14 handleError\nState: <back:#FFEBEE>ERROR</back> (terminal)
+  taskSvc --> taskSvc : 500 INTERNAL\n{error: {code: "TASKSVC-14_UNRECOVERABLE"}}
+
 end
+
+deactivate taskSvc
+
+== Summary ==
+' TASKSVC-14 is the error recovery hub for the agentic loop. Error
+' classification determines whether to retry, fallback, or terminate.
+' State transitions follow sm_task_svc_agent ERROR → IDLE pattern.
 
 @enduml

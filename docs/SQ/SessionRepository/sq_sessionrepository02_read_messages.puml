@@ -1,0 +1,50 @@
+@startuml sq_sessionrepository02_read_messages
+' ============================================================
+' Title:     SESSIONREPO-02 — readMessages
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Read messages from session's JSONL message store with
+'             optional pagination and filtering.
+' Intro:     Data-access layer for session reads. Called by Session
+'             Service for message retrieval and context assembly.
+' Summary:   Supports reading full conversation, last N turns, or
+'             messages by role. Enables context assembly pipeline.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_session_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Session Service → Session Repository → SessionStore
+' SM States: sm_session_svc_session.puml — ACTIVE, SAVED, RESTORED
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — SESSIONREPO-02 readMessages
+
+box "Service" SERVICE_COLOR
+  participant "Session Service" as sessionSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Session Repository" as sessionRepo
+end box
+
+database "SessionStore" as sessionStore
+
+== SESSIONREPO-02 readMessages — entry ==
+
+sessionSvc -> sessionRepo : SESSIONREPO-02 readMessages({sessionId, filter})
+activate sessionRepo
+
+sessionRepo -> sessionStore : SESSIONREPO-02 readMessages({sessionId, filter})
+activate sessionStore
+sessionStore --> sessionRepo : 200 OK — {messages}
+deactivate sessionStore
+
+sessionRepo --> sessionSvc : 200 OK — {messages, totalCount}
+deactivate sessionRepo
+
+== Summary ==
+' SESSIONREPO-02 provides read access to session messages. JSONL format
+' enables efficient streaming and pagination for large conversations.
+
+@enduml

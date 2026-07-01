@@ -1,0 +1,78 @@
+@startuml sq_mcpadapter03_invoke_nasim_tool
+' ============================================================
+' Title:     MCPADP-03 — invokeNasimTool
+' Boundary:  NASIM Application — Interface Layer
+' Purpose:   Execute a nasim tool via MCP tools/call endpoint,
+'             routing through agent_ctrl and task_svc.
+' Intro:     Invoked by MCP clients to execute tools. Follows
+'             standard CSR layering: adapter → agent_ctrl → task_svc.
+' Summary:   Tool invocation triggers the full agentic loop
+'             (TASKSVC-01) including safety checks and evaluation.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_mcp_adp.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: MCP Client → MCP Adapter → Agent Controller → Task Service
+' SM States: sm_task_svc_agent.puml — IDLE → RECEIVING
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — MCPADP-03 invokeNasimTool
+
+actor "MCP Client" as mcpClient
+
+box "Interface" INTERFACE_COLOR
+  participant "MCP Adapter" as mcpAdp
+end box
+
+box "API" API_COLOR
+  participant "Agent Controller" as agentCtrl
+end box
+
+box "Service" SERVICE_COLOR
+  participant "Task Service" as taskSvc
+end box
+
+== MCPADP-03 invokeNasimTool — entry ==
+
+mcpClient -> mcpAdp : MCPADP-03 invokeNasimTool({tool, arguments})
+activate mcpAdp
+
+mcpAdp -> mcpAdp : parseMcpToolCall({tool, arguments})
+
+break invalid_tool_call
+  mcpAdp --> mcpClient : 400 BAD_REQUEST\n{error: {code: "MCPADP-03_INVALID_TOOL_CALL"}}
+  deactivate mcpAdp
+end
+
+mcpAdp -> agentCtrl : AGENTCTRL-01 processRequest({tool, arguments})
+activate agentCtrl
+
+ref over agentCtrl
+  AGENTCTRL-02 validateRequest
+  AGENTCTRL-03 adaptProtocol
+  AGENTCTRL-04 dispatchToServices
+end ref
+
+agentCtrl -> taskSvc : TASKSVC-01 processUserTask({tool, arguments})
+activate taskSvc
+
+ref over taskSvc : HTTPADP-06 dispatchMessage\nState: <back:#ECEFF1>IDLE</back> → <back:#E8EAF6>RECEIVING</back>
+
+taskSvc --> agentCtrl : 200 OK — {result}
+deactivate taskSvc
+
+agentCtrl --> mcpAdp : 200 OK — {result}
+deactivate agentCtrl
+
+mcpAdp -> mcpAdp : formatMcpToolResult({result})
+mcpAdp --> mcpClient : 200 OK — {mcpResult}
+deactivate mcpAdp
+
+== Summary ==
+' MCPADP-03 triggers the full agentic loop via TASKSVC-01. Tool
+' invocation is not a direct call — it's a task that may involve
+' context assembly, LLM calls, and multiple tool executions.
+
+@enduml

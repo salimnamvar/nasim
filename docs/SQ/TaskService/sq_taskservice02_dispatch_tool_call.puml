@@ -33,7 +33,7 @@ end box
 actor "User" as user
 participant "CLI Adapter" as iface
 
-== TASKSVC-02 dispatchToolCall ==
+== TASKSVC-02 dispatchToolCall — entry ==
 
 taskSvc -> taskSvc : TASKSVC-02 dispatchToolCall({toolName, args})
 activate taskSvc

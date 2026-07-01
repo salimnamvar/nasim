@@ -1,0 +1,65 @@
+@startuml sq_sessionrepository03_manage_turns
+' ============================================================
+' Title:     SESSIONREPO-03 — manageTurns
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Manage turn metadata including turn count, timestamps,
+'             and turn boundaries in the session message store.
+' Intro:     Data-access layer for turn management. Called by Session
+'             Service for turn tracking and revert operations.
+' Summary:   Supports querying turn boundaries, counting turns, and
+'             marking turn boundaries for revert operations.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_session_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Session Service → Session Repository → SessionStore
+' SM States: sm_session_svc_session.puml — ACTIVE, SAVED
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — SESSIONREPO-03 manageTurns
+
+box "Service" SERVICE_COLOR
+  participant "Session Service" as sessionSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Session Repository" as sessionRepo
+end box
+
+database "SessionStore" as sessionStore
+
+== SESSIONREPO-03 manageTurns — entry ==
+
+sessionSvc -> sessionRepo : SESSIONREPO-03 manageTurns({sessionId, operation})
+activate sessionRepo
+
+alt count_turns
+  sessionRepo -> sessionStore : SESSIONREPO-03 countTurns({sessionId})
+  activate sessionStore
+  sessionStore --> sessionRepo : 200 OK — {turnCount}
+  deactivate sessionStore
+
+else get_turn_boundary
+  sessionRepo -> sessionStore : SESSIONREPO-03 getTurnBoundary({sessionId, turnIndex})
+  activate sessionStore
+  sessionStore --> sessionRepo : 200 OK — {boundary}
+  deactivate sessionStore
+
+else mark_turn_boundary
+  sessionRepo -> sessionStore : SESSIONREPO-03 markTurnBoundary({sessionId, turnIndex})
+  activate sessionStore
+  sessionStore --> sessionRepo : 200 OK
+  deactivate sessionStore
+
+end
+
+sessionRepo --> sessionSvc : 200 OK — {result}
+deactivate sessionRepo
+
+== Summary ==
+' SESSIONREPO-03 manages turn-level metadata for session conversations.
+' Turn boundaries enable revert operations and snapshot management.
+
+@enduml

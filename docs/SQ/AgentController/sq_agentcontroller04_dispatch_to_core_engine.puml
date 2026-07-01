@@ -1,64 +1,86 @@
-@startuml sq_ac04_dispatch_to_core_engine
+@startuml sq_agentcontroller04_dispatch_to_core_engine
 ' ============================================================
-' Title:     AGENTCONTROLLER-04 — DISPATCH to Core Engine
-' Boundary:  nasim code agent
-' Purpose:   Forward validated request to Task Service
+' Title:     AGENTCTRL-04 — dispatchToServices
+' Boundary:  NASIM Application — Controller Layer
+' Purpose:   Forward validated request from Agent Controller to the
+'             appropriate service (task, session, config).
+' Intro:     Entry via AGENTCTRL-01 processRequest. Routes based on
+'             request type: task orchestration → task_svc, session →
+'             session_svc, config → config_svc.
+' Summary:   All service communication flows through agent_ctrl as the
+'             single convergence point. No direct adapter-to-service calls.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> InterfaceAdapter -> Agent Controller -> Task Service
-' SM States: LISTENING (#E8EAF6), THINKING (#D7CCC8), IDLE (#ECEFF1)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_agent_ctrl.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Adapter → Agent Controller → {Task, Session, Config} Service
+' SM States: RECEIVING (sm_task_svc_agent.puml)
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGENTCONTROLLER-04 DISPATCH to Core Engine
+title nasim — AGENTCTRL-04 dispatchToServices
 
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
+  participant "CLI Adapter" as cliAdp
+  participant "HTTP Adapter" as httpAdp
+  participant "MCP Adapter" as mcpAdp
 end box
 
 box "API" API_COLOR
-  participant "Agent Controller" as router
+  participant "Agent Controller" as agentCtrl
 end box
 
 box "Service" SERVICE_COLOR
-  participant "Task Service" as engine
+  participant "Task Service" as taskSvc
+  participant "Session Service" as sessionSvc
+  participant "Config Service" as configSvc
 end box
 
-== AGENTCONTROLLER-04 DISPATCH to Core Engine ==
+== AGENTCTRL-04 dispatchToServices — entry ==
 
-user -> iface : AGENTCONTROLLER-04 DISPATCH to Core Engine({validated_payload})
-activate iface
+ref over agentCtrl
+  AGENTCTRL-02 validateRequest
+  AGENTCTRL-03 adaptProtocol
+end ref
 
-iface -> router : AGENTCONTROLLER-04 DISPATCH to Core Engine({validated_payload})
-activate router
+alt task_orchestration_request
+  agentCtrl -> taskSvc : AGENTCTRL-04 dispatchToServices → TASKSVC-01 processUserTask({payload})
+  activate taskSvc
+  ref over agentCtrl, taskSvc : TASKSVC-01 processUserTask\nState: <back:#E8EAF6>RECEIVING</back>
+  taskSvc --> agentCtrl : 200 OK — {result}
+  deactivate taskSvc
 
-router -> engine : AGENTCONTROLLER-04 DISPATCH to Core Engine({validated_payload})
-activate engine
+else session_lifecycle_request
+  agentCtrl -> sessionSvc : AGENTCTRL-04 dispatchToServices → SESSIONSVC-0x ({payload})
+  activate sessionSvc
+  sessionSvc --> agentCtrl : 200 OK — {result}
+  deactivate sessionSvc
 
-alt dispatch successful
-  ref over engine
-    TASKSERVICE-01: PROCESS User Task
-  end ref
+else config_request
+  agentCtrl -> configSvc : AGENTCTRL-04 dispatchToServices → CONFIGSVC-0x ({payload})
+  activate configSvc
+  configSvc --> agentCtrl : 200 OK — {result}
+  deactivate configSvc
 
-  engine --> router : 200 OK — {task_result}
-  deactivate engine
-  router --> iface : 200 OK — {task_result}
-  deactivate router
-  iface --> user : 200 OK — {task_result}
-  deactivate iface
+else tool_listing_request
+  agentCtrl -> taskSvc : AGENTCTRL-04 dispatchToServices → TOOLSVC-14 listRegisteredTools()
+  activate taskSvc
+  taskSvc --> agentCtrl : 200 OK — {tools}
+  deactivate taskSvc
 
-else engine unavailable
-  engine --> router : 503 SERVICE_UNAVAILABLE\n{error: {code: "AGENTCONTROLLER-04_DISPATCH_ERROR", message: "Core engine unavailable", status: 503}}
-  deactivate engine
-  router --> iface : 503 SERVICE_UNAVAILABLE
-  deactivate router
-  iface --> user : 503 SERVICE_UNAVAILABLE
-  deactivate iface
 end
+
+break service_unavailable
+  agentCtrl --> cliAdp : 503 SERVICE_UNAVAILABLE
+  agentCtrl --> httpAdp : 503 SERVICE_UNAVAILABLE
+  agentCtrl --> mcpAdp : 503 SERVICE_UNAVAILABLE
+end
+
+== Summary ==
+' agent_ctrl is the single convergence point. All adapter-to-service
+' communication routes through AGENTCTRL-04. No bypasses allowed.
 
 @enduml

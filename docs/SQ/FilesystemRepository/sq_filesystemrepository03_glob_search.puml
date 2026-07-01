@@ -1,0 +1,60 @@
+@startuml sq_filesystemrepository03_glob_search
+' ============================================================
+' Title:     FSREPO-03 — globSearch
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Search filesystem using glob patterns for file discovery.
+' Intro:     Data-access layer for file search. Called by Tool Service
+'             for glob-based file discovery.
+' Summary:   Supports recursive glob patterns with file type filtering
+'             and result ranking.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_fs_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Tool Service → Filesystem Repository → Host Filesystem
+' SM States: N/A (stateless I/O)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — FSREPO-03 globSearch
+
+box "Service" SERVICE_COLOR
+  participant "Tool Service" as toolSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Filesystem Repository" as fsRepo
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "Host Filesystem" as hostFs
+end box
+
+== FSREPO-03 globSearch — entry ==
+
+toolSvc -> fsRepo : FSREPO-03 globSearch({pattern, options})
+activate fsRepo
+
+fsRepo -> fsRepo : validatePattern({pattern})
+
+break invalid_pattern
+  fsRepo --> toolSvc : 400 BAD_REQUEST\n{error: {code: "FSREPO-03_INVALID_PATTERN"}}
+  deactivate fsRepo
+end
+
+fsRepo -> hostFs : FSREPO-03 globSearch({pattern, recursive, maxDepth})
+activate hostFs
+hostFs --> fsRepo : 200 OK — {matches}
+deactivate hostFs
+
+fsRepo -> fsRepo : rankResults({matches})
+
+fsRepo --> toolSvc : 200 OK — {files, totalCount}
+deactivate fsRepo
+
+== Summary ==
+' FSREPO-03 provides glob-based file search with pattern validation
+' and result ranking for efficient file discovery.
+
+@enduml

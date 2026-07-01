@@ -1,0 +1,65 @@
+@startuml sq_mcpadapter01_process_mcp_request
+' ============================================================
+' Title:     MCPADP-01 — processMcpRequest
+' Boundary:  NASIM Application — Interface Layer
+' Purpose:   Accept and parse incoming MCP protocol requests from
+'             external MCP clients via stdio or SSE transport.
+' Intro:     Entry point for MCP protocol. Adapts MCP requests to
+'             agent_ctrl format. No business logic in adapter.
+' Summary:   MCP requests are parsed, validated, and forwarded to
+'             agent_ctrl for routing to appropriate services.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_mcp_adp.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: MCP Client → MCP Adapter → Agent Controller
+' SM States: N/A (request-scoped, no domain lifecycle)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — MCPADP-01 processMcpRequest
+
+actor "MCP Client" as mcpClient
+
+box "Interface" INTERFACE_COLOR
+  participant "MCP Adapter" as mcpAdp
+end box
+
+box "API" API_COLOR
+  participant "Agent Controller" as agentCtrl
+end box
+
+== MCPADP-01 processMcpRequest — entry ==
+
+mcpClient -> mcpAdp : MCPADP-01 processMcpRequest({method, params})
+activate mcpAdp
+
+mcpAdp -> mcpAdp : parseMcpPayload({raw})
+mcpAdp -> mcpAdp : validateMcpSchema({parsed})
+
+break invalid_mcp_request
+  mcpAdp --> mcpClient : 400 BAD_REQUEST\n{error: {code: "MCPADP-01_INVALID_SCHEMA"}}
+  deactivate mcpAdp
+end
+
+mcpAdp -> agentCtrl : AGENTCTRL-01 processRequest({payload})
+activate agentCtrl
+
+ref over agentCtrl
+  AGENTCTRL-02 validateRequest
+  AGENTCTRL-03 adaptProtocol
+end ref
+
+agentCtrl --> mcpAdp : 200 OK — {result}
+deactivate agentCtrl
+
+mcpAdp --> mcpClient : 200 OK — {mcpResponse}
+deactivate mcpAdp
+
+== Summary ==
+' MCPADP-01 is the MCP protocol entry point. All MCP requests flow
+' through agent_ctrl before reaching any service. Adapter handles
+' only protocol translation, not business logic.
+
+@enduml

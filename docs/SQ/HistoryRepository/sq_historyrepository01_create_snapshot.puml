@@ -1,0 +1,47 @@
+@startuml sq_historyrepository01_create_snapshot
+' ============================================================
+' Title:     HISTORYREPO-01 — createSnapshot
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Create a point-in-time snapshot of the session for
+'             revert operations.
+' Intro:     Data-access layer for session snapshots. Called by
+'             Session Service during snapshot operations.
+' Summary:   Snapshots capture full session state including messages,
+'             metadata, and turn boundaries.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_history_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Session Service → History Repository
+' SM States: sm_session_svc_session.puml — ACTIVE → SAVED (snapshot)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — HISTORYREPO-01 createSnapshot
+
+box "Service" SERVICE_COLOR
+  participant "Session Service" as sessionSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "History Repository" as historyRepo
+end box
+
+== HISTORYREPO-01 createSnapshot — entry ==
+
+sessionSvc -> historyRepo : HISTORYREPO-01 createSnapshot({sessionId, turnIndex})
+activate historyRepo
+
+historyRepo -> historyRepo : serializeSessionState({sessionId})
+historyRepo -> historyRepo : writeSnapshot({snapshot})
+
+historyRepo --> sessionSvc : 200 OK — {snapshotId, createdAt}
+deactivate historyRepo
+
+== Summary ==
+' HISTORYREPO-01 creates immutable snapshots for session revert.
+' Snapshots are stored separately from the live session to avoid
+' interference with ongoing operations.
+
+@enduml

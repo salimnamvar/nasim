@@ -1,0 +1,90 @@
+@startuml sq_configservice01_load_config
+' ============================================================
+' Title:     CONFIGSVC-01 — loadConfig
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Load configuration from YAML, env vars, CLI flags, and
+'             project overrides, merging them into a unified config.
+' Intro:     Entry via agent_ctrl → config_svc. Loads from Config Repository
+'             which reads from ConfigStore (YAML files).
+' Summary:   Configuration is loaded in priority order: defaults → YAML →
+'             env vars → CLI flags → project overrides.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_config_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Agent Controller → Config Service → Config Repository → ConfigStore
+' SM States: N/A (idempotent read, no multi-state lifecycle)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — CONFIGSVC-01 loadConfig
+
+actor "User" as user
+
+box "Interface" INTERFACE_COLOR
+  participant "HTTP Adapter" as httpAdp
+end box
+
+box "API" API_COLOR
+  participant "Agent Controller" as agentCtrl
+end box
+
+box "Service" SERVICE_COLOR
+  participant "Config Service" as configSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Config Repository" as configRepo
+end box
+
+database "ConfigStore" as configStore
+
+== CONFIGSVC-01 loadConfig — entry ==
+
+user -> httpAdp : HTTPADP-10 getConfig()
+activate httpAdp
+httpAdp -> agentCtrl : AGENTCTRL-01 processRequest({type: "config"})
+activate agentCtrl
+
+ref over agentCtrl
+  AGENTCTRL-02 validateRequest
+  AGENTCTRL-03 adaptProtocol
+end ref
+
+agentCtrl -> configSvc : CONFIGSVC-01 loadConfig({scope})
+activate configSvc
+
+configSvc -> configRepo : CONFIGREPO-01 loadConfig({scope})
+activate configRepo
+configRepo -> configStore : CONFIGREPO-01 loadConfig({scope})
+activate configStore
+configStore --> configRepo : 200 OK — {rawConfig}
+deactivate configStore
+configRepo --> configSvc : 200 OK — {rawConfig}
+deactivate configRepo
+
+configSvc -> configSvc : mergeLayers({defaults, yaml, env, cli, project})
+
+break config_invalid
+  configSvc --> agentCtrl : 422 UNPROCESSABLE\n{error: {code: "CONFIGSVC-01_INVALID_CONFIG"}}
+  agentCtrl --> httpAdp : 422 UNPROCESSABLE
+  httpAdp --> user : 422 UNPROCESSABLE
+  deactivate configSvc
+  deactivate agentCtrl
+  deactivate httpAdp
+end
+
+configSvc --> agentCtrl : 200 OK — {config}
+deactivate configSvc
+agentCtrl --> httpAdp : 200 OK — {config}
+deactivate agentCtrl
+httpAdp --> user : 200 OK — {config}
+deactivate httpAdp
+
+== Summary ==
+' CONFIGSVC-01 loads and merges configuration from multiple sources.
+' Config Repository handles raw file I/O; Config Service applies
+' merge logic and validation.
+
+@enduml

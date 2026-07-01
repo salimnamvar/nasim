@@ -1,0 +1,65 @@
+@startuml sq_webrepository02_search_web
+' ============================================================
+' Title:     WEBREPO-02 — searchWeb
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Search the web using search engines and return
+'             ranked results.
+' Intro:     Data-access layer for web search. Called by Tool Service
+'             for web search operations.
+' Summary:   Supports search engine queries with result ranking,
+'             snippet extraction, and deduplication.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_web_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Tool Service → Web Repository → Web
+' SM States: N/A (stateless I/O)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — WEBREPO-02 searchWeb
+
+box "Service" SERVICE_COLOR
+  participant "Tool Service" as toolSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Web Repository" as webRepo
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "Web" as web
+end box
+
+== WEBREPO-02 searchWeb — entry ==
+
+toolSvc -> webRepo : WEBREPO-02 searchWeb({query, options})
+activate webRepo
+
+webRepo -> webRepo : validateQuery({query})
+webRepo -> webRepo : buildSearchUrl({query, options})
+
+break invalid_query
+  webRepo --> toolSvc : 400 BAD_REQUEST\n{error: {code: "WEBREPO-02_INVALID_QUERY"}}
+  deactivate webRepo
+end
+
+webRepo -> web : WEBREPO-02 searchWeb({query, numResults})
+activate web
+web --> webRepo : 200 OK — {rawResults}
+deactivate web
+
+webRepo -> webRepo : parseResults({rawResults})
+webRepo -> webRepo : extractSnippets({results})
+webRepo -> webRepo : deduplicateResults({results})
+webRepo -> webRepo : rankResults({results})
+
+webRepo --> toolSvc : 200 OK — {results, totalCount}
+deactivate webRepo
+
+== Summary ==
+' WEBREPO-02 provides web search with result ranking and deduplication.
+' Snippet extraction enables efficient result presentation.
+
+@enduml

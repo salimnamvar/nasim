@@ -1,0 +1,56 @@
+@startuml sq_configservice03_apply_layered_config
+' ============================================================
+' Title:     CONFIGSVC-03 — applyLayeredConfig
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Apply configuration overrides from layered sources (env, CLI,
+'             project) on top of base YAML configuration.
+' Intro:     Invoked after CONFIGSVC-01/02. Merges override layers with
+'             priority: CLI flags > env vars > project > YAML > defaults.
+' Summary:   Each layer can override specific keys; final config is the
+'             deep-merged result of all layers.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_config_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Config Service → Config Repository
+' SM States: N/A (idempotent write)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — CONFIGSVC-03 applyLayeredConfig
+
+box "Service" SERVICE_COLOR
+  participant "Config Service" as configSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Config Repository" as configRepo
+end box
+
+database "ConfigStore" as configStore
+
+== CONFIGSVC-03 applyLayeredConfig — entry ==
+
+configSvc -> configSvc : CONFIGSVC-03 applyLayeredConfig({overrides, baseConfig})
+activate configSvc
+
+configSvc -> configSvc : deepMerge({baseConfig, overrides})
+
+configSvc -> configRepo : CONFIGREPO-03 writeConfig({mergedConfig})
+activate configRepo
+configRepo -> configStore : CONFIGREPO-03 writeConfig({mergedConfig})
+activate configStore
+configStore --> configRepo : 200 OK
+deactivate configStore
+configRepo --> configSvc : 200 OK
+deactivate configRepo
+
+configSvc --> configSvc : 200 OK — {config: mergedConfig}
+deactivate configSvc
+
+== Summary ==
+' CONFIGSVC-03 persists the merged configuration. Layer priority ensures
+' CLI flags always win over env vars, which win over project overrides.
+
+@enduml

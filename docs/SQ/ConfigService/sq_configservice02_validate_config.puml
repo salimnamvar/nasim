@@ -1,0 +1,48 @@
+@startuml sq_configservice02_validate_config
+' ============================================================
+' Title:     CONFIGSVC-02 — validateConfig
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Validate loaded configuration against schema and business rules.
+' Intro:     Invoked after CONFIGSVC-01 loadConfig. Ensures all required
+'             fields are present and values are within acceptable ranges.
+' Summary:   Validation checks schema compliance, required fields, value
+'             ranges, and cross-field dependencies.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_config_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Config Service (internal validation)
+' SM States: N/A (idempotent validation)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — CONFIGSVC-02 validateConfig
+
+box "Service" SERVICE_COLOR
+  participant "Config Service" as configSvc
+end box
+
+== CONFIGSVC-02 validateConfig — entry ==
+
+configSvc -> configSvc : CONFIGSVC-02 validateConfig({config})
+activate configSvc
+
+configSvc -> configSvc : checkSchema({config})
+configSvc -> configSvc : checkRequiredFields({config})
+configSvc -> configSvc : checkValueRanges({config})
+configSvc -> configSvc : checkCrossFieldDeps({config})
+
+alt validation_passed
+  configSvc --> configSvc : 200 OK — {valid: true}
+else validation_failed
+  configSvc --> configSvc : 422 UNPROCESSABLE\n{errors: [{field, message, code}]}
+end
+
+deactivate configSvc
+
+== Summary ==
+' CONFIGSVC-02 is a pure validation step with no side effects.
+' Called by CONFIGSVC-01 after loading and CONFIGSVC-03 after applying.
+
+@enduml

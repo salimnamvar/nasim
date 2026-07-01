@@ -1,0 +1,60 @@
+@startuml sq_filesystemrepository01_read_file
+' ============================================================
+' Title:     FSREPO-01 — readFile
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Read file contents from the host filesystem with
+'             path validation and encoding detection.
+' Intro:     Data-access layer for file I/O. Called by Tool Service
+'             for file read operations.
+' Summary:   Supports reading files with line ranges, encoding
+'             detection, and binary file handling.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_fs_repo.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Tool Service → Filesystem Repository → Host Filesystem
+' SM States: N/A (stateless I/O)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — FSREPO-01 readFile
+
+box "Service" SERVICE_COLOR
+  participant "Tool Service" as toolSvc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "Filesystem Repository" as fsRepo
+end box
+
+box "Infrastructure" INFRASTRUCTURE_COLOR
+  participant "Host Filesystem" as hostFs
+end box
+
+== FSREPO-01 readFile — entry ==
+
+toolSvc -> fsRepo : FSREPO-01 readFile({path, lineRange})
+activate fsRepo
+
+fsRepo -> fsRepo : validatePath({path})
+fsRepo -> fsRepo : resolveEncoding({path})
+
+break path_invalid
+  fsRepo --> toolSvc : 400 BAD_REQUEST\n{error: {code: "FSREPO-01_INVALID_PATH"}}
+  deactivate fsRepo
+end
+
+fsRepo -> hostFs : FSREPO-01 readFile({path, encoding, lineRange})
+activate hostFs
+hostFs --> fsRepo : 200 OK — {content, metadata}
+deactivate hostFs
+
+fsRepo --> toolSvc : 200 OK — {content, metadata}
+deactivate fsRepo
+
+== Summary ==
+' FSREPO-01 provides file read access with path validation and
+' encoding detection. Supports line range queries for large files.
+
+@enduml

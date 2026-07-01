@@ -1,0 +1,67 @@
+@startuml sq_mcpadapter02_list_nasim_tools
+' ============================================================
+' Title:     MCPADP-02 — listNasimTools
+' Boundary:  NASIM Application — Interface Layer
+' Purpose:   Expose available nasim tools to external MCP clients
+'             via MCP tools/list endpoint.
+' Intro:     Invoked by MCP clients to discover what tools nasim
+'             provides. Delegates to agent_ctrl → tool_svc.
+' Summary:   Returns tool definitions in MCP-compatible format,
+'             including name, description, and input schema.
+' Milestone: v1.0
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_mcp_adp.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: MCP Client → MCP Adapter → Agent Controller → Tool Service
+' SM States: N/A (request-scoped)
+' ============================================================
+
+!include ../common/sq_styles.puml
+
+title nasim — MCPADP-02 listNasimTools
+
+actor "MCP Client" as mcpClient
+
+box "Interface" INTERFACE_COLOR
+  participant "MCP Adapter" as mcpAdp
+end box
+
+box "API" API_COLOR
+  participant "Agent Controller" as agentCtrl
+end box
+
+box "Service" SERVICE_COLOR
+  participant "Tool Service" as toolSvc
+end box
+
+== MCPADP-02 listNasimTools — entry ==
+
+mcpClient -> mcpAdp : MCPADP-02 listNasimTools()
+activate mcpAdp
+
+mcpAdp -> agentCtrl : AGENTCTRL-01 processRequest({type: "tools/list"})
+activate agentCtrl
+
+ref over agentCtrl
+  AGENTCTRL-02 validateRequest
+  AGENTCTRL-04 dispatchToServices
+end ref
+
+agentCtrl -> toolSvc : TOOLSVC-14 listRegisteredTools()
+activate toolSvc
+toolSvc --> agentCtrl : 200 OK — {tools}
+deactivate toolSvc
+
+agentCtrl --> mcpAdp : 200 OK — {tools}
+deactivate agentCtrl
+
+mcpAdp -> mcpAdp : formatMcpToolsList({tools})
+mcpAdp --> mcpClient : 200 OK — {mcpToolsList}
+deactivate mcpAdp
+
+== Summary ==
+' MCPADP-02 translates nasim tool registry to MCP tools/list format.
+' Tool Service provides the canonical tool definitions; adapter
+' handles MCP-specific formatting.
+
+@enduml
