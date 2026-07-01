@@ -25,15 +25,15 @@ actor "Task Service" as TaskSvc <<system>>
 
 rectangle "nasim" {
   package "Evaluation Service Group" {
-    usecase "**EVALSVC-01 EVALUATE Task**\n--\nOrchestrate task evaluation:\nchecks, scores, retries" <<master>> as EV01
-    usecase "**EVALSVC-02 CHECK Task Completion**\n--\nEvaluate against success criteria" <<include>> as EV02
-    usecase "**EVALSVC-03 CHECK Success**\n--\nRun user-defined success checks" <<include>> as EV03
-    usecase "**EVALSVC-04 VALIDATE With LLM**\n--\nLLM-based code review" <<include>> as EV04
-    usecase "**EVALSVC-05 VALIDATE Test Suite**\n--\nRun project test suites" <<include>> as EV05
-    usecase "**EVALSVC-06 COORDINATE Retry**\n--\nRetry with backoff and escalation" <<include>> as EV06
-    usecase "**EVALSVC-07 RECORD Quality Signal**\n--\nProduce accept/reject with feedback" <<include>> as EV07
-    usecase "**EVALSVC-08 DETECT Repetition**\n--\nDetect repeated failures or loops" <<include>> as EV08
-    usecase "**EVALSVC-09 INJECT Turn Budget**\n--\nInject turn budget limits" <<include>> as EV09
+    usecase "**EVALSVC-01 EVALUATE Task**" <<master>> as EV01
+    usecase "**EVALSVC-02 CHECK Task Completion**" <<include>> as EV02
+    usecase "**EVALSVC-03 CHECK Success**" <<include>> as EV03
+    usecase "**EVALSVC-04 VALIDATE With LLM**" <<include>> as EV04
+    usecase "**EVALSVC-05 VALIDATE Test Suite**" <<include>> as EV05
+    usecase "**EVALSVC-06 COORDINATE Retry**" <<include>> as EV06
+    usecase "**EVALSVC-07 RECORD Quality Signal**" <<include>> as EV07
+    usecase "**EVALSVC-08 DETECT Repetition**" <<include>> as EV08
+    usecase "**EVALSVC-09 INJECT Turn Budget**" <<include>> as EV09
   }
 }
 

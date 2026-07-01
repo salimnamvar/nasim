@@ -23,9 +23,9 @@ deactivate sessionStore
 sessionRepo --> taskSvc : 200 OK
 deactivate sessionRepo
 
-taskSvc -> wireRepo : WIRELOGREPO-01 appendEvent({sessionId, event})
+taskSvc -> wireRepo : WIRELOGREPOSITORY-01 appendEvent({sessionId, event})
 activate wireRepo
-wireRepo -> wireStore : WIRELOGREPO-01 appendEvent({sessionId, event})
+wireRepo -> wireStore : WIRELOGREPOSITORY-01 appendEvent({sessionId, event})
 activate wireStore
 wireStore --> wireRepo : 200 OK
 deactivate wireStore

@@ -60,7 +60,7 @@ taskSvc -> toolSvc : TOOLSVC-01 readFile / TOOLSVC-05 dispatchShellCommand / ...
 activate toolSvc
 
 alt shell_command
-  toolSvc -> sandboxRepo : SANDBOXREPO-01 isolateCommand({cmd})
+  toolSvc -> sandboxRepo : SANDBOXREPOSITORY-01 isolateCommand({cmd})
   activate sandboxRepo
   sandboxRepo --> toolSvc : 200 OK — {stdout, stderr, exitCode}
   deactivate sandboxRepo

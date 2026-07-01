@@ -33,15 +33,15 @@ usecase "WIRELOGREPO-05\nCHECKPOINT Turn\n[uc_wire_log_repo]" as WL05_ext <<extr
 
 rectangle "nasim" {
   package "Session Service Group" {
-    usecase "**SESSIONSVC-01 PERSIST Session**\n--\nSave session to storage" <<include>> as SS01
-    usecase "**SESSIONSVC-02 READ Session**\n--\nLoad session from storage" <<include>> as SS02
-    usecase "**SESSIONSVC-03 LIST Sessions**\n--\nList all saved sessions" <<master>> as SS03
-    usecase "**SESSIONSVC-04 RESTORE Session**\n--\nResume a previously saved session" <<master>> as SS04
-    usecase "**SESSIONSVC-05 SNAPSHOT Session**\n--\nCreate session state snapshot" <<master>> as SS05
-    usecase "**SESSIONSVC-06 REVERT Turn**\n--\nUndo last turn in session" <<master>> as SS06
-    usecase "**SESSIONSVC-07 SEARCH Sessions**\n--\nCross-session search via FTS5" <<master>> as SS07
-    usecase "**SESSIONSVC-08 BRANCH Session**\n--\nFork conversation from any point" <<master>> as SS08
-    usecase "**SESSIONSVC-09 DELETE Session**\n--\nDelete session from storage" <<master>> as SS09
+    usecase "**SESSIONSVC-01 PERSIST Session**" <<include>> as SS01
+    usecase "**SESSIONSVC-02 READ Session**" <<include>> as SS02
+    usecase "**SESSIONSVC-03 LIST Sessions**" <<master>> as SS03
+    usecase "**SESSIONSVC-04 RESTORE Session**" <<master>> as SS04
+    usecase "**SESSIONSVC-05 SNAPSHOT Session**" <<master>> as SS05
+    usecase "**SESSIONSVC-06 REVERT Turn**" <<master>> as SS06
+    usecase "**SESSIONSVC-07 SEARCH Sessions**" <<master>> as SS07
+    usecase "**SESSIONSVC-08 BRANCH Session**" <<master>> as SS08
+    usecase "**SESSIONSVC-09 DELETE Session**" <<master>> as SS09
   }
 }
 

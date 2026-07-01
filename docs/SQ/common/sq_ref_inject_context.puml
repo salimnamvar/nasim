@@ -12,12 +12,12 @@ participant "Context Service" as ctxSvc
 participant "Memory Repository" as memRepo
 participant "Repo Intelligence Repository" as rimRepo
 
-ctxSvc -> memRepo : MEMORYREPO-02 recallKnowledge({scope})
+ctxSvc -> memRepo : MEMORYREPOSITORY-02 recallKnowledge({scope})
 activate memRepo
 memRepo --> ctxSvc : 200 OK — {knowledge}
 deactivate memRepo
 
-ctxSvc -> rimRepo : REPOINTELREPO-04 injectRepoMap({budget})
+ctxSvc -> rimRepo : REPOINTELLIGENCEREPOSITORY-04 injectRepoMap({budget})
 activate rimRepo
 rimRepo --> ctxSvc : 200 OK — {repoMap}
 deactivate rimRepo

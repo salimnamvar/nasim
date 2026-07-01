@@ -24,9 +24,9 @@ actor "Task Service" as TaskSvc <<system>>
 
 rectangle "nasim" {
   package "Safety Service Group" {
-    usecase "**SAFETYSVC-01 CHECK Permission**\n--\nCheck permission against\nsafety rules" <<include>> as SF01
-    usecase "**SAFETYSVC-02 REQUEST Approval**\n--\nPrompt user for approval" <<master>> as SF02
-    usecase "**SAFETYSVC-03 APPLY Safety Mode**\n--\nApply safety mode configuration" <<include>> as SF03
+    usecase "**SAFETYSVC-01 CHECK Permission**" <<include>> as SF01
+    usecase "**SAFETYSVC-02 REQUEST Approval**" <<master>> as SF02
+    usecase "**SAFETYSVC-03 APPLY Safety Mode**" <<include>> as SF03
   }
 }
 

@@ -30,9 +30,9 @@ usecase "CONFIGREPO-03\nWRITE Config\n[uc_config_repo]" as CR03_ext <<extref>>
 
 rectangle "nasim" {
   package "Config Service Group" {
-    usecase "**CONFIGSVC-01 LOAD Config**\n--\nLoad YAML, env vars, CLI flags" <<master>> as CS01
-    usecase "**CONFIGSVC-02 VALIDATE Config**\n--\nValidate config schema at load time" <<include>> as CS02
-    usecase "**CONFIGSVC-03 APPLY Layered Config**\n--\nMerge layered config with\nprecedence rules" <<include>> as CS03
+    usecase "**CONFIGSVC-01 LOAD Config**" <<master>> as CS01
+    usecase "**CONFIGSVC-02 VALIDATE Config**" <<include>> as CS02
+    usecase "**CONFIGSVC-03 APPLY Layered Config**" <<include>> as CS03
   }
 }
 
