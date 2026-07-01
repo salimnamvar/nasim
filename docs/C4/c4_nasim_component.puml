@@ -7,10 +7,10 @@
 '            adapters, which converge at AgentController (single entry).
 '            Consistent naming: Adapter/Controller, Service, Repository.
 ' Milestone: v1.0
-' Version:   11.4.0
+' Version:   11.5.0
 ' Source:    docs/C4/c4_nasim_container.puml (v12.2.0)
 ' ============================================================
-' SIM-01 EXCEPTION: 40 elements — single container overview showing all
+' SIM-01 EXCEPTION: 41 elements — single container overview showing all
 ' CSR layers (Controller, Service, Repository, DataStore) with full
 ' external client and system traceability. Splitting would lose the
 ' cross-boundary CSR enforcement visibility.
@@ -47,6 +47,7 @@ Container_Boundary(nasim_app, "NASIM Application") {
         Component(task_svc, "TaskService", "asyncio", "Agentic loop: LLM call, tool dispatch, context assembly, subagent orchestration, error recovery, persona management")
         Component(tool_svc, "ToolService", "registry", "Tool registry, parameter validation, execution dispatch; includes subagent, todo, plan, review tools, dynamic plugin-loaded tools, and lifecycle hook dispatch (PreToolUse, PostToolUse, PreLLMCall, PostLLMCall)")
         Component(session_svc, "SessionService", "asyncio", "Session lifecycle: create, load, save, snapshot, revert")
+        Component(config_svc, "ConfigService", "", "Config loading, validation, layered overrides (project YAML, env vars, CLI flags, defaults); single source for all configuration access")
         Component(safety_svc, "SafetyService", "", "Permission gating, injection scanning, egress inspection")
         Component(context_svc, "ContextService", "graph", "Context pipeline: graph construction, truncation, distillation, injection, and compaction")
         Component(eval_svc, "EvaluationService", "", "Task evaluation: success checks, LLM review, retry coordination, repetition detection, turn budget management")
@@ -111,7 +112,7 @@ Rel(mcp_adapter, agent_ctrl, "delegates validated request")
 
 Rel(agent_ctrl, task_svc, "dispatches task orchestration")
 Rel(agent_ctrl, session_svc, "manages session lifecycle")
-Rel(agent_ctrl, config_repo, "loads configuration")
+Rel(agent_ctrl, config_svc, "loads and validates configuration")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Services → Services (orchestration) ──
@@ -130,6 +131,7 @@ Rel(task_svc, session_repo, "persists conversation turns")
 Rel(task_svc, llm_repo, "invokes LLM inference")
 Rel(session_svc, session_repo, "loads and saves sessions")
 Rel(session_svc, history_repo, "manages snapshots and revert index")
+Rel(config_svc, config_repo, "reads and validates configuration; applies layered overrides")
 Rel(tool_svc, fs_repo, "reads and writes project files")
 Rel(tool_svc, sandbox_repo, "executes commands in sandbox")
 Rel(tool_svc, edit_strategy_repo, "stages and applies file diffs safely")
@@ -172,7 +174,7 @@ Rel(web_repo, web, "fetches documentation", "HTTPS")
 
 legend right
     |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
-    |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, SafetyService, ContextService, EvaluationService |
+    |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, ConfigService, SafetyService, ContextService, EvaluationService |
     |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, EditStrategyRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository, WireLogRepository |
     |<#FFFDE7>  **Data Store** | SessionStore, MemoryStore, WireLogStore, ConfigStore |
     |<#FAFAFA>  **Container_Ext** | External clients from Container diagram |

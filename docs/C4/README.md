@@ -11,7 +11,7 @@ Three diagrams following the C4 hierarchy, plus a shared style file:
 | ---- | -------- | ------- | ----------- |
 | [c4_nasim_context.puml](c4_nasim_context.puml) | Context | v11.1.0 | NASIM Service as a single system with Developer actor and 9 external systems |
 | [c4_nasim_container.puml](c4_nasim_container.puml) | Container | v12.2.0 | Single NASIM Application container + 5 external clients + 4 data stores + 8 external systems |
-| [c4_nasim_component.puml](c4_nasim_component.puml) | Component | v11.4.0 | Full CSR 3-layer view: Controller, Service, Repository — all component groups consolidated |
+| [c4_nasim_component.puml](c4_nasim_component.puml) | Component | v11.5.0 | Full CSR 3-layer view: Controller, Service, Repository — all component groups consolidated |
 | [common/c4_styles.puml](common/c4_styles.puml) | — | v9.0.0 | Shared color palette, skinparam, and CSR lint markers |
 
 ## How to read

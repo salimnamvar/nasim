@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigLoader -> ConfigStore
+' CSR Chain: User -> HTTPAdapter -> AgentController -> ConfigService -> ConfigRepository
 ' SM States: (no state change — read-only)
 ' ============================================================
 
@@ -18,7 +18,7 @@ title nasim -- HTTPADAPTER-10 GET Config
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "HTTPAdapter" as iface
 end box
 
 box "API" API_COLOR
@@ -26,7 +26,11 @@ box "API" API_COLOR
 end box
 
 box "Service" SERVICE_COLOR
-  participant "ConfigRepository" as loader
+  participant "ConfigService" as cfg_svc
+end box
+
+box "Repository" REPOSITORY_COLOR
+  participant "ConfigRepository" as repo
 end box
 
 database "ConfigStore" as storage
@@ -38,28 +42,37 @@ activate iface
 iface -> router : HTTPADAPTER-10 GET Config({})
 activate router
 
-router -> loader : HTTPADAPTER-10 GET Config({})
-activate loader
+router -> cfg_svc : HTTPADAPTER-10 GET Config({})
+activate cfg_svc
 
-loader -> storage : HTTPADAPTER-10 GET Config({})
+cfg_svc -> repo : HTTPADAPTER-10 GET Config({})
+activate repo
+
+repo -> storage : HTTPADAPTER-10 GET Config({})
 activate storage
 
 alt config not found
-    storage --> loader : 404 NOT_FOUND\n{error: {code: "HTTPADAPTER-10_CONFIG_NOT_FOUND", message: "Configuration not found", status: 404}}
+    storage --> repo : 404 NOT_FOUND\n{error: {code: "HTTPADAPTER-10_CONFIG_NOT_FOUND", message: "Configuration not found", status: 404}}
     deactivate storage
-    loader --> router : 404 NOT_FOUND
+    repo --> cfg_svc : 404 NOT_FOUND
+    deactivate repo
+    cfg_svc --> router : 404 NOT_FOUND
+    deactivate cfg_svc
     router --> iface : 404 NOT_FOUND
-    iface --> user : 404 NOT_FOUND
-    deactivate loader
     deactivate router
+    iface --> user : 404 NOT_FOUND
     deactivate iface
 end
 
-storage --> loader : 200 OK — {config}
+storage --> repo : 200 OK — {config}
 deactivate storage
 
-loader --> router : 200 OK — {config}
-deactivate loader
+repo --> cfg_svc : 200 OK — {config}
+deactivate repo
+
+cfg_svc --> router : 200 OK — {config}
+deactivate cfg_svc
+
 router --> iface : 200 OK — {config}
 iface --> user : 200 OK — {config}
 deactivate router

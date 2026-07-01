@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigLoader
+' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigService -> ConfigRepository
 ' SM States: SERVING (#E0F7FA)
 ' ============================================================
 
@@ -25,6 +25,10 @@ box "API" API_COLOR
   participant "AgentController" as router
 end box
 
+box "Service" SERVICE_COLOR
+  participant "ConfigService" as cfg_svc
+end box
+
 box "Repository" REPOSITORY_COLOR
   participant "ConfigRepository" as mgr
 end box
@@ -35,23 +39,29 @@ user -> iface : CONFIGREPOSITORY-03 APPLY Layered Config({global_defaults, proje
 activate iface
 iface -> router : CONFIGREPOSITORY-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
 activate router
-router -> mgr : CONFIGREPOSITORY-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+router -> cfg_svc : CONFIGREPOSITORY-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
+activate cfg_svc
+cfg_svc -> mgr : CONFIGREPOSITORY-03 APPLY Layered Config({global_defaults, project_overrides, env_overrides, cli_args})
 activate mgr
 
 alt merge succeeds
   ref over mgr : CONFIGREPOSITORY-03 APPLY Layered Config <back:#E0F7FA>SERVING</back>
-  mgr --> router : 200 OK
+  mgr --> cfg_svc : 200 OK
   deactivate mgr
+  cfg_svc --> router : 200 OK
+  deactivate cfg_svc
   router --> iface : 200 OK
-  iface --> user : 200 OK
   deactivate router
+  iface --> user : 200 OK
   deactivate iface
 else merge fails
-  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "CONFIGREPOSITORY-03_MERGE_ERROR", message: "Layered config merge failed", status: 422}}
+  mgr --> cfg_svc : 422 UNPROCESSABLE\n{error: {code: "CONFIGREPOSITORY-03_MERGE_ERROR", message: "Layered config merge failed", status: 422}}
   deactivate mgr
+  cfg_svc --> router : 422 UNPROCESSABLE
+  deactivate cfg_svc
   router --> iface : 422 UNPROCESSABLE
-  iface --> user : 422 UNPROCESSABLE
   deactivate router
+  iface --> user : 422 UNPROCESSABLE
   deactivate iface
 end
 
