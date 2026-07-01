@@ -1,4 +1,4 @@
-@startuml uc_agent
+@startuml uc_task_svc
 
 !include common/uc_styles.puml
 
@@ -75,9 +75,9 @@ actor "Task Service" as Agent <<system>>
 ' ============================================================
 
 
-usecase "SAFETYSERVICE-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>>
-usecase "LLMREPOSITORY-02\nREQUEST Chat\n[uc_provider]" as PRV02_ext <<extref>>
-usecase "LLMREPOSITORY-03\nSTREAM Chat\n[uc_provider]" as PRV03_ext <<extref>>
+usecase "SAFETYSERVICE-01\nCHECK Permission\n[uc_safety_svc]" as SAF01_ext <<extref>>
+usecase "LLMREPOSITORY-02\nREQUEST Chat\n[uc_llm_repo]" as PRV02_ext <<extref>>
+usecase "LLMREPOSITORY-03\nSTREAM Chat\n[uc_llm_repo]" as PRV03_ext <<extref>>
 
 
 ' ============================================================

@@ -1,0 +1,82 @@
+@startuml uc_mcp_adp
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: MCP Adapter Group
+' Group:     MCPADP (MCP Adapter)
+' C4 ID:     mcp_adp
+' Boundary:  NASIM Application
+' Purpose:   MCP protocol: tool exposure, stdio/SSE transport.
+'            External MCP clients connect here to discover and
+'            invoke nasim tools via the Model Context Protocol.
+'            ALL business operations delegate through Agent Controller.
+'            Entry chain: MCP Client → MCP Adapter → Agent Controller → Services
+' Milestone: v1.0
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
+' SQ:        sq_mcp_adapter01..sq_mcp_adapter04
+' ============================================================
+
+
+title nasim — UC: MCP Adapter Group
+
+
+' ------------------------------------------------------------
+' Actors
+' ------------------------------------------------------------
+
+
+actor "MCP Client" as MCPClient <<system>>
+
+
+' ------------------------------------------------------------
+' Cross-Group External References
+' ------------------------------------------------------------
+
+
+usecase "AGENTCTRL-01\nPROCESS Request\n[uc_agent_ctrl]" as AC01_ext <<extref>>
+usecase "AGENTCTRL-04\nDISPATCH to Services\n[uc_agent_ctrl]" as AC04_ext <<extref>>
+
+
+' ------------------------------------------------------------
+' System Boundary
+' ------------------------------------------------------------
+
+
+rectangle "nasim" {
+  package "MCP Adapter Group" {
+    usecase "**MCPADP-01 PROCESS MCP Request**\n--\nAccept and parse incoming\nMCP protocol request.\nDelegates to Agent Controller." <<master>> as MCP01
+    usecase "**MCPADP-02 LIST nasim Tools**\n--\nExpose available nasim tools\nvia MCP tools/list.\n<<include>> AGENTCTRL-04" <<master>> as MCP02
+    usecase "**MCPADP-03 INVOKE nasim Tool**\n--\nExecute tool via MCP tools/call\nand return result.\n<<include>> AGENTCTRL-01" <<master>> as MCP03
+    usecase "**MCPADP-04 STREAM Events**\n--\nStream agent events via\nMCP notification protocol\n(SSE/stdio)." <<include>> as MCP04
+  }
+}
+
+
+' ------------------------------------------------------------
+' Actor -> Use Case Associations
+' ------------------------------------------------------------
+
+
+MCPClient --> MCP01
+MCPClient --> MCP02
+MCPClient --> MCP03
+MCPClient --> MCP04
+
+
+' ------------------------------------------------------------
+' Relationships (downward <<include>> only)
+' ------------------------------------------------------------
+
+
+MCP01 ..> AC01_ext : <<include>>
+MCP02 ..> AC04_ext : <<include>>
+MCP03 ..> AC01_ext : <<include>>
+MCP03 ..> AC04_ext : <<include>>
+MCP01 ..> MCP04 : <<include>>
+
+
+@enduml

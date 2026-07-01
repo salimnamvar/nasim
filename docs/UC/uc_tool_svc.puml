@@ -1,4 +1,4 @@
-@startuml uc_toolservice
+@startuml uc_tool_svc
 
 !include common/uc_styles.puml
 
@@ -76,7 +76,7 @@ actor "User" as User
 ' ------------------------------------------------------------
 
 
-usecase "SAFETYSERVICE-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>>
+usecase "SAFETYSERVICE-01\nCHECK Permission\n[uc_safety_svc]" as SAF01_ext <<extref>>
 
 
 ' ------------------------------------------------------------

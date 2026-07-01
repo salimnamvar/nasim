@@ -1,4 +1,4 @@
-@startuml uc_context_graph
+@startuml uc_context_svc
 
 !include common/uc_styles.puml
 

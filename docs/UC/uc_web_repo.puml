@@ -1,0 +1,39 @@
+@startuml uc_web_repo
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Web Repository Group
+' Group:     WEBREPO (Web Repository)
+' C4 ID:     web_repo
+' Boundary:  NASIM Application
+' Purpose:   Web fetch: documentation, search results.
+'            Accessed via Tool Service through Agent Controller (agent_ctrl).
+' Milestone: v1.0
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
+' SQ:        —
+' ============================================================
+
+
+title nasim — UC: Web Repository Group
+
+
+actor "User" as User
+
+
+rectangle "nasim" {
+  package "Web Repository Group" {
+    usecase "**WEBREPO-01 FETCH URL**\n--\nFetch web content as markdown" <<master>> as WR01
+    usecase "**WEBREPO-02 SEARCH Web**\n--\nSearch documentation and web results" <<master>> as WR02
+  }
+}
+
+
+User --> WR01
+User --> WR02
+
+
+@enduml

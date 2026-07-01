@@ -1,0 +1,43 @@
+@startuml uc_session_repo
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Session Repository Group
+' Group:     SESSIONREPO (Session Repository)
+' C4 ID:     session_repo
+' Boundary:  NASIM Application
+' Purpose:   Message persistence: JSON Lines, turn management.
+'            Accessed via Session Service and Task Service
+'            through Agent Controller (agent_ctrl).
+' Milestone: v1.0
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
+' SQ:        —
+' ============================================================
+
+
+title nasim — UC: Session Repository Group
+
+
+actor "User" as User
+
+
+rectangle "nasim" {
+  package "Session Repository Group" {
+    usecase "**SESSIONREPO-01 APPEND Message**\n--\nAppend message to JSONL session file" <<master>> as SR01
+    usecase "**SESSIONREPO-02 READ Messages**\n--\nRead conversation turns from JSONL" <<master>> as SR02
+    usecase "**SESSIONREPO-03 WRITE Session File**\n--\nPersist session file to session store" <<include>> as SR03
+  }
+}
+
+
+User --> SR01
+User --> SR02
+
+SR01 ..> SR03 : <<include>>
+
+
+@enduml

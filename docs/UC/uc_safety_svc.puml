@@ -1,4 +1,4 @@
-@startuml uc_safety
+@startuml uc_safety_svc
 
 !include common/uc_styles.puml
 

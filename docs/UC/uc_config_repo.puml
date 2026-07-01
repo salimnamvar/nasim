@@ -1,0 +1,42 @@
+@startuml uc_config_repo
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Config Repository Group
+' Group:     CONFIGREPO (Config Repository)
+' C4 ID:     config_repo
+' Boundary:  NASIM Application
+' Purpose:   YAML, env vars, CLI flags, project overrides.
+'            Accessed via Config Service through Agent Controller (agent_ctrl).
+' Milestone: v1.0
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
+' SQ:        —
+' ============================================================
+
+
+title nasim — UC: Config Repository Group
+
+
+actor "User" as User
+
+
+rectangle "nasim" {
+  package "Config Repository Group" {
+    usecase "**CONFIGREPO-01 READ YAML**\n--\nRead project and global YAML config" <<master>> as CR01
+    usecase "**CONFIGREPO-02 READ Environment**\n--\nRead environment variable overrides" <<include>> as CR02
+    usecase "**CONFIGREPO-03 WRITE Config**\n--\nPersist configuration to config store" <<master>> as CR03
+  }
+}
+
+
+User --> CR01
+User --> CR03
+
+CR01 ..> CR02 : <<include>>
+
+
+@enduml

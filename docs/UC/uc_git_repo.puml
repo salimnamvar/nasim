@@ -1,4 +1,4 @@
-@startuml uc_git
+@startuml uc_git_repo
 
 !include common/uc_styles.puml
 

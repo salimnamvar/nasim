@@ -1,0 +1,42 @@
+@startuml uc_history_repo
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: History Repository Group
+' Group:     HISTORYREPO (History Repository)
+' C4 ID:     history_repo
+' Boundary:  NASIM Application
+' Purpose:   Snapshots, revert index, search index.
+'            Accessed via Session Service through Agent Controller (agent_ctrl).
+' Milestone: v1.0
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
+' SQ:        —
+' ============================================================
+
+
+title nasim — UC: History Repository Group
+
+
+actor "User" as User
+
+
+rectangle "nasim" {
+  package "History Repository Group" {
+    usecase "**HISTORYREPO-01 SNAPSHOT State**\n--\nCreate session state snapshot" <<master>> as HR01
+    usecase "**HISTORYREPO-02 INDEX Search**\n--\nMaintain FTS5 search index" <<include>> as HR02
+    usecase "**HISTORYREPO-03 REVERT Turn**\n--\nRestore session from revert index" <<master>> as HR03
+  }
+}
+
+
+User --> HR01
+User --> HR03
+
+HR01 ..> HR02 : <<include>>
+
+
+@enduml

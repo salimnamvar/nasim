@@ -1,4 +1,4 @@
-@startuml uc_wire_log
+@startuml uc_wire_log_repo
 
 !include common/uc_styles.puml
 

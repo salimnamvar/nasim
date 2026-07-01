@@ -1,0 +1,44 @@
+@startuml uc_fs_repo
+
+!include common/uc_styles.puml
+
+
+' ============================================================
+' Title:     nasim — UC: Filesystem Repository Group
+' Group:     FSREPO (Filesystem Repository)
+' C4 ID:     fs_repo
+' Boundary:  NASIM Application
+' Purpose:   Host filesystem I/O: read, write, edit, glob, grep.
+'            Accessed via Tool Service and Edit Strategy Repository
+'            through Agent Controller (agent_ctrl).
+' Milestone: v1.0
+' Version:   13.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
+' Review:    —
+' SQ:        —
+' ============================================================
+
+
+title nasim — UC: Filesystem Repository Group
+
+
+actor "User" as User
+
+
+rectangle "nasim" {
+  package "Filesystem Repository Group" {
+    usecase "**FSREPO-01 READ File**\n--\nRead file contents from host filesystem" <<master>> as FR01
+    usecase "**FSREPO-02 WRITE File**\n--\nWrite or overwrite file on host filesystem" <<master>> as FR02
+    usecase "**FSREPO-03 LIST Path**\n--\nList directory entries" <<master>> as FR03
+    usecase "**FSREPO-04 SEARCH Path**\n--\nGlob and grep search over filesystem" <<master>> as FR04
+  }
+}
+
+
+User --> FR01
+User --> FR02
+User --> FR03
+User --> FR04
+
+
+@enduml

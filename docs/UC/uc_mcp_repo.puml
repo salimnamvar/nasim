@@ -1,4 +1,4 @@
-@startuml uc_mcp
+@startuml uc_mcp_repo
 
 !include common/uc_styles.puml
 
