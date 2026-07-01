@@ -1,0 +1,31 @@
+@startuml sq_ref_inject_context
+' ============================================================
+' Title:     REF — Inject Context (CONTEXTSVC-04)
+' Purpose:   Reusable sub-flow: inject memory and repo intelligence.
+' Source:    docs/UC/uc_context_svc.puml
+' SM:        THINKING (context pipeline stage)
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Context Service" as ctxSvc
+participant "Memory Repository" as memRepo
+participant "Repo Intelligence Repository" as rimRepo
+
+ctxSvc -> memRepo : MEMORYREPO-02 recallKnowledge({scope})
+activate memRepo
+memRepo --> ctxSvc : 200 OK — {knowledge}
+deactivate memRepo
+
+ctxSvc -> rimRepo : REPOINTELREPO-04 injectRepoMap({budget})
+activate rimRepo
+rimRepo --> ctxSvc : 200 OK — {repoMap}
+deactivate rimRepo
+
+ctxSvc -> ctxSvc : CONTEXTSVC-04 injectContext({graph, injections})
+
+ref over ctxSvc : CONTEXTSVC-04 injectContext\nState: <back:#D7CCC8>THINKING</back> (injection)
+
+ctxSvc --> ctxSvc : 200 OK — {enrichedGraph}
+
+@enduml

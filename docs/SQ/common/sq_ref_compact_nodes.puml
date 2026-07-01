@@ -1,0 +1,20 @@
+@startuml sq_ref_compact_nodes
+' ============================================================
+' Title:     REF — Compact Nodes (CONTEXTSVC-05)
+' Purpose:   Reusable sub-flow: compact context when token budget exceeded.
+' Source:    docs/UC/uc_context_svc.puml, docs/SM/sm_task_svc_agent.puml
+' SM:        THINKING → COMPACTING → THINKING
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Task Service" as taskSvc
+participant "Context Service" as ctxSvc
+
+ctxSvc -> ctxSvc : CONTEXTSVC-05 compactNodes({graph})
+
+ref over taskSvc, ctxSvc : CONTEXTSVC-05 compactNodes\nState: <back:#D7CCC8>THINKING</back> → <back:#E0F2F1>COMPACTING</back> → <back:#D7CCC8>THINKING</back>
+
+ctxSvc --> taskSvc : 200 OK — {compactedGraph}
+
+@enduml

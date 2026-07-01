@@ -1,0 +1,19 @@
+@startuml sq_ref_inject_turn_budget
+' ============================================================
+' Title:     REF — Inject Turn Budget (EVALSVC-09)
+' Purpose:   Reusable sub-flow: inject turn budget constraints.
+' Source:    docs/UC/uc_eval_svc.puml
+' SM:        CHECKING
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Evaluation Service" as evalSvc
+
+evalSvc -> evalSvc : EVALSVC-09 injectTurnBudget({budget})
+
+ref over evalSvc : EVALSVC-09 injectTurnBudget\nState: <back:#C5CAE9>CHECKING</back>
+
+evalSvc --> evalSvc : 200 OK — {turnCount, budget}
+
+@enduml

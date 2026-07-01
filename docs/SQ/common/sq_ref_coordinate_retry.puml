@@ -1,0 +1,24 @@
+@startuml sq_ref_coordinate_retry
+' ============================================================
+' Title:     REF — Coordinate Retry (EVALSVC-06)
+' Purpose:   Reusable sub-flow: coordinate retry with backoff.
+' Source:    docs/UC/uc_eval_svc.puml
+' SM:        RETRYING → THINKING | FAILED
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Evaluation Service" as evalSvc
+
+evalSvc -> evalSvc : EVALSVC-06 coordinateRetry({feedback})
+
+ref over evalSvc : EVALSVC-06 coordinateRetry\nState: → <back:#C62828>RETRYING</back>
+
+alt retry_available
+  evalSvc --> evalSvc : 200 OK — {retry: true, feedback}
+else retries_exhausted
+  ref over evalSvc : EVALSVC-06 coordinateRetry\nState: <back:#C62828>RETRYING</back> → <back:#AD1457>FAILED</back>
+  evalSvc --> evalSvc : 422 UNPROCESSABLE\n{error: {code: "EVALSVC-06_EXHAUSTED"}}
+end
+
+@enduml

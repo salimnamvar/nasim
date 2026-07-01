@@ -1,0 +1,19 @@
+@startuml sq_ref_record_quality_signal
+' ============================================================
+' Title:     REF — Record Quality Signal (EVALSVC-07)
+' Purpose:   Reusable sub-flow: record quality signal and score.
+' Source:    docs/UC/uc_eval_svc.puml
+' SM:        CHECKING → SCORING → PASSED | FAILED
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Evaluation Service" as evalSvc
+
+evalSvc -> evalSvc : EVALSVC-07 recordQualitySignal({signals})
+
+ref over evalSvc : EVALSVC-07 recordQualitySignal\nState: <back:#C5CAE9>CHECKING</back> → <back:#FF8A65>SCORING</back>
+
+evalSvc --> evalSvc : 200 OK — {score, verdict}
+
+@enduml

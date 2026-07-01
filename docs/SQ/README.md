@@ -87,7 +87,7 @@ ref over mgr : HTTPADAPTER-02 CREATE Session
 | GIT | Git | Version Control — Git status, diff, commit | 4 |
 | WIRELOG | WireLog | Wire Log — append-only event store, fork, checkpoint | 5 |
 
-**Total: 165 SQ diagrams on disk (171 with common/) — OBS group removed**
+**Total: 165 SQ diagrams on disk (179 with common/) — OBS group removed**
 
 ## Naming Convention
 
@@ -122,6 +122,19 @@ Each SQ diagram follows this structure:
 | `common/sq_ref_dispatch_safety_pipeline.puml` | TASKSVC-15 + SAFETYSVC approval alt | TASKSVC-02 |
 | `common/sq_ref_persist_conversation.puml` | TASKSVC-03 + repo persistence | TASKSVC-01, TASKSVC-02 |
 | `common/sq_ref_handle_error.puml` | TASKSVC-14 ERROR → IDLE | TASKSVC-01 |
+| `common/sq_ref_truncate_nodes.puml` | CONTEXTSVC-02 truncate nodes | sq_ref_assemble_context, sq_contextservice01 |
+| `common/sq_ref_distill_nodes.puml` | CONTEXTSVC-03 distill nodes | sq_ref_assemble_context, sq_contextservice01 |
+| `common/sq_ref_inject_context.puml` | CONTEXTSVC-04 inject memory + repo intelligence | sq_ref_assemble_context, sq_contextservice01 |
+| `common/sq_ref_compact_nodes.puml` | CONTEXTSVC-05 compact when token budget exceeded | sq_ref_assemble_context, sq_contextservice01 |
+| `common/sq_ref_track_token_budget.puml` | CONTEXTSVC-06 track token usage | sq_ref_assemble_context, sq_contextservice01 |
+| `common/sq_ref_check_task_completion.puml` | EVALSVC-02 check task completion | sq_evaluationservice01 |
+| `common/sq_ref_check_success.puml` | EVALSVC-03 check success criteria | sq_evaluationservice01 |
+| `common/sq_ref_validate_with_llm.puml` | EVALSVC-04 LLM-based code review | sq_evaluationservice01 |
+| `common/sq_ref_validate_test_suite.puml` | EVALSVC-05 run project test suites | sq_evaluationservice01 |
+| `common/sq_ref_coordinate_retry.puml` | EVALSVC-06 coordinate retry with backoff | sq_evaluationservice01 |
+| `common/sq_ref_record_quality_signal.puml` | EVALSVC-07 record quality signal and score | sq_evaluationservice01 |
+| `common/sq_ref_detect_repetition.puml` | EVALSVC-08 detect repetitive tool calls | sq_evaluationservice01 |
+| `common/sq_ref_inject_turn_budget.puml` | EVALSVC-09 inject turn budget constraints | sq_evaluationservice01 |
 
 ### Common Styles
 

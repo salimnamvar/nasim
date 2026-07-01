@@ -31,10 +31,21 @@ activate evalSvc
 
 ref over evalSvc : EVALSVC-01 evaluateTask\nState: <back:#90A4AE>IDLE</back> → <back:#C5CAE9>CHECKING</back>
 
-evalSvc -> evalSvc : EVALSVC-02 checkTaskCompletion({criteria})
-evalSvc -> evalSvc : EVALSVC-03 checkSuccess({criteria})
-evalSvc -> evalSvc : EVALSVC-08 detectRepetition({history})
-evalSvc -> evalSvc : EVALSVC-09 injectTurnBudget({budget})
+ref over evalSvc
+  sq_ref_check_task_completion
+end ref
+
+ref over evalSvc
+  sq_ref_check_success
+end ref
+
+ref over evalSvc
+  sq_ref_detect_repetition
+end ref
+
+ref over evalSvc
+  sq_ref_inject_turn_budget
+end ref
 
 break completion_check_failed
   ref over evalSvc : EVALSVC-02 checkTaskCompletion\nState: <back:#C5CAE9>CHECKING</back> → <back:#AD1457>FAILED</back>
@@ -43,22 +54,26 @@ break completion_check_failed
 end
 
 alt llm_review_required
-  evalSvc -> evalSvc : EVALSVC-04 validateWithLLM({output})
-  ref over evalSvc : EVALSVC-04 validateWithLLM\nState: <back:#C5CAE9>CHECKING</back> → <back:#AB47BC>REVIEWING</back>
+  ref over evalSvc
+    sq_ref_validate_with_llm
+  end ref
 else test_suite_required
-  evalSvc -> evalSvc : EVALSVC-05 validateTestSuite({project})
-  ref over evalSvc : EVALSVC-05 validateTestSuite\nState: <back:#C5CAE9>CHECKING</back> → <back:#D4E157>TESTING</back>
+  ref over evalSvc
+    sq_ref_validate_test_suite
+  end ref
 else direct_scoring
-  evalSvc -> evalSvc : EVALSVC-07 recordQualitySignal({signals})
-  ref over evalSvc : EVALSVC-07 recordQualitySignal\nState: <back:#C5CAE9>CHECKING</back> → <back:#FF8A65>SCORING</back>
+  ref over evalSvc
+    sq_ref_record_quality_signal
+  end ref
 end
 
 alt verdict_passed
   ref over evalSvc : EVALSVC-07 recordQualitySignal\nState: <back:#FF8A65>SCORING</back> → <back:#689F38>PASSED</back>
   evalSvc --> taskSvc : 200 OK — {verdict: passed}
 else verdict_failed_retry_available
-  evalSvc -> evalSvc : EVALSVC-06 coordinateRetry({feedback})
-  ref over evalSvc : EVALSVC-06 coordinateRetry\nState: → <back:#C62828>RETRYING</back> → <back:#C5CAE9>CHECKING</back>
+  ref over evalSvc
+    sq_ref_coordinate_retry
+  end ref
   evalSvc --> taskSvc : 200 OK — {verdict: retry, feedback}
 else retries_exhausted
   ref over evalSvc : EVALSVC-06 coordinateRetry\nState: <back:#C62828>RETRYING</back> → <back:#AD1457>FAILED</back>

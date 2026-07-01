@@ -1,0 +1,19 @@
+@startuml sq_ref_validate_test_suite
+' ============================================================
+' Title:     REF — Validate Test Suite (EVALSVC-05)
+' Purpose:   Reusable sub-flow: run project test suites.
+' Source:    docs/UC/uc_eval_svc.puml
+' SM:        CHECKING → TESTING
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Evaluation Service" as evalSvc
+
+evalSvc -> evalSvc : EVALSVC-05 validateTestSuite({project})
+
+ref over evalSvc : EVALSVC-05 validateTestSuite\nState: <back:#C5CAE9>CHECKING</back> → <back:#D4E157>TESTING</back>
+
+evalSvc --> evalSvc : 200 OK — {testsPassed, feedback}
+
+@enduml

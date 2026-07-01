@@ -1,0 +1,19 @@
+@startuml sq_ref_check_success
+' ============================================================
+' Title:     REF — Check Success (EVALSVC-03)
+' Purpose:   Reusable sub-flow: check if task succeeded.
+' Source:    docs/UC/uc_eval_svc.puml
+' SM:        CHECKING
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Evaluation Service" as evalSvc
+
+evalSvc -> evalSvc : EVALSVC-03 checkSuccess({criteria})
+
+ref over evalSvc : EVALSVC-03 checkSuccess\nState: <back:#C5CAE9>CHECKING</back>
+
+evalSvc --> evalSvc : 200 OK — {success: true|false}
+
+@enduml

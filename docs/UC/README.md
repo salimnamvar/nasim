@@ -1,5 +1,9 @@
 # nasim — UC Inventory
 
+**Design chain position:** `C4` → **`UC`** → `SM` → `SQ` → `ERD` → `CL` → `CT/DATA` → `CT/API` → `Code`
+
+**Authoring policy:** `~/.agent-global/shared/rules/software-design/chain/uc.md`
+
 **Source of truth:** `docs/C4/c4_nasim_component.puml` (v13.0.0)
 
 **CSR entry chain:** External Client → Adapter (`cli_adp` / `http_adp` / `mcp_adp`) → `agent_ctrl` → Service → Repository
@@ -33,6 +37,39 @@
 | `web_repo` | Web Repository | `uc_web_repo.puml` | `WEBREPO-` | 2 | Web fetch: documentation, search results. |
 | `wire_log_repo` | Wire Log Repository | `uc_wire_log_repo.puml` | `WIRELOGREPO-` | 5 | Append-only event store, fork, checkpoint. |
 | **Total** | **24 components** | **24 diagrams** + `uc_overview.puml` | — | **164** | 1:1 C4 component ↔ UC diagram |
+
+---
+
+## C4 → UC Traceability (C4-UC-12)
+
+Every C4 component maps 1:1 to a UC diagram file. This table satisfies C4-UC-12 traceability.
+
+| UC ID | Operation | Component Owner | C4 Group |
+|-------|-----------|-----------------|----------|
+| AGENTCTRL-01..04 | Request → Validate → Adapt → Dispatch | Agent Controller (`agent_ctrl`) | Controller Layer |
+| CLIADP-01..08 | REPL, slash commands, arg parsing, streaming | CLI Adapter (`cli_adp`) | Controller Layer |
+| HTTPADP-01..11 | REST session/tool/config CRUD, dispatch | HTTP Adapter (`http_adp`) | Controller Layer |
+| MCPADP-01..04 | MCP request, tool listing, invocation, events | MCP Adapter (`mcp_adp`) | Controller Layer |
+| TASKSVC-01..15 | Agentic loop, plan, subagent, persona, error recovery | Task Service (`task_svc`) | Service Layer |
+| TOOLSVC-01..22, HK, PLG | File/shell/search/web/git/MCP tools, hooks, plugins | Tool Service (`tool_svc`) | Service Layer |
+| SESSIONSVC-01..09 | Persist, read, list, restore, snapshot, revert, branch, delete | Session Service (`session_svc`) | Service Layer |
+| CONFIGSVC-01..03 | Load, validate, apply layered config | Config Service (`config_svc`) | Service Layer |
+| SAFETYSVC-01..03 | Check permission, request approval, apply safety mode | Safety Service (`safety_svc`) | Service Layer |
+| CONTEXTSVC-01..06 | Process, truncate, distill, inject, compact, track budget | Context Service (`context_svc`) | Service Layer |
+| EVALSVC-01..09 | Evaluate, check completion, retry, quality, turn budget | Evaluation Service (`eval_svc`) | Service Layer |
+| SESSIONREPO-01..03 | Append, read, write session files | Session Repository (`session_repo`) | Repository Layer |
+| HISTORYREPO-01..03 | Snapshot, index search, revert | History Repository (`history_repo`) | Repository Layer |
+| CONFIGREPO-01..03 | Read YAML/env, write config | Config Repository (`config_repo`) | Repository Layer |
+| MEMORYREPO-01..04 | Persist, recall, search, scope knowledge | Memory Repository (`memory_repo`) | Repository Layer |
+| LLMREPO-01..08 | Register provider, request/stream chat, select/fallback/switch | LLM Repository (`llm_repo`) | Repository Layer |
+| FSREPO-01..04 | Read, write, list, search files | Filesystem Repository (`fs_repo`) | Repository Layer |
+| SANDBOXREPO-01..04 | Isolate, apply policy, monitor, limit resources | Sandbox Repository (`sandbox_repo`) | Repository Layer |
+| EDITSTRATEGYREPO-01..10 | Select strategy, apply diff types, stage | Edit Strategy Repository (`edit_strategy_repo`) | Repository Layer |
+| GITREPO-01..04 | Read status, commit, diff, auto-commit | Git Repository (`git_repo`) | Repository Layer |
+| MCPREPO-01..04 | Connect, discover, adapt MCP tools, expose nasim tools | MCP Repository (`mcp_repo`) | Repository Layer |
+| REPOINTELREPO-01..06 | Index, build symbol graph, rank, inject repomap, embed, search | Repo Intelligence Repository (`repo_intel_repo`) | Repository Layer |
+| WEBREPO-01..02 | Fetch URL, search web | Web Repository (`web_repo`) | Repository Layer |
+| WIRELOGREPO-01..05 | Append, read, seek, fork, checkpoint | Wire Log Repository (`wire_log_repo`) | Repository Layer |
 
 ---
 
@@ -654,3 +691,42 @@ Full SQ inventory: `docs/SQ/README.md` (146+ diagrams).
 | CLIADP-02, 05, 07, 08 | Slash commands | AGENTCTRL-01 | Per-command service UC |
 | MCPADP-01, 03 | MCP request / tool invoke | AGENTCTRL-01 | TASKSVC-01 |
 | MCPADP-02 | MCP tools/list | AGENTCTRL-04 | TOOLSVC-14 |
+
+---
+
+## Review Checklist
+
+Before finalising any UC diagram (from `chain/uc.md`):
+
+**Naming:**
+- [ ] UC titles use allowed verbs and precise entity qualifiers
+- [ ] UC IDs follow `{GROUP}-{NN}` format, zero-padded
+- [ ] No banned verbs used (`CREATE`, `GET`, `EXECUTE`, `RUN`, `INVOKE`, `PERFORM`, `TRIGGER`, `MANAGE`)
+- [ ] Names match ubiquitous language in C4 model
+
+**C4 Traceability:**
+- [ ] Every actor traces to a C4 Person, System_Ext, or Component
+- [ ] Every UC traces to a C4 component responsibility or container interaction
+- [ ] Every C4 component has at least one UC owner (no orphan components)
+- [ ] Traceability table (C4-UC-12) in README.md is complete
+
+**Design Chain:**
+- [ ] Every UC has a corresponding SQ diagram (or noted as "not yet designed")
+- [ ] Every UC has a row in `docs/UC/README.md`
+- [ ] Relationships use `<<include>>` downward only, `<<extend>>` for optional paths
+
+**Visual:**
+- [ ] One subject boundary per diagram
+- [ ] No technology/implementation details inside use cases
+- [ ] Diagrams have ≤15 use cases (split if larger)
+
+---
+
+## Scaffold Procedure
+
+From `chain/uc.md` — when adding a new UC:
+
+1. Determine: group, next available UC ID, operation name, C4 component backing, dependencies
+2. Add a row to `docs/UC/README.md` with C4 component owner
+3. Create a placeholder SQ scaffold file
+4. Verify the C4 component has a UC owner (update C4 if orphaned)

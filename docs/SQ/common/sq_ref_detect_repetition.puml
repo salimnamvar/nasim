@@ -1,0 +1,19 @@
+@startuml sq_ref_detect_repetition
+' ============================================================
+' Title:     REF — Detect Repetition (EVALSVC-08)
+' Purpose:   Reusable sub-flow: detect repetitive tool calls.
+' Source:    docs/UC/uc_eval_svc.puml
+' SM:        CHECKING
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Evaluation Service" as evalSvc
+
+evalSvc -> evalSvc : EVALSVC-08 detectRepetition({history})
+
+ref over evalSvc : EVALSVC-08 detectRepetition\nState: <back:#C5CAE9>CHECKING</back>
+
+evalSvc --> evalSvc : 200 OK — {repetitive: true|false}
+
+@enduml

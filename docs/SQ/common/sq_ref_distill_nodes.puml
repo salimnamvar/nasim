@@ -1,0 +1,19 @@
+@startuml sq_ref_distill_nodes
+' ============================================================
+' Title:     REF — Distill Nodes (CONTEXTSVC-03)
+' Purpose:   Reusable sub-flow: distill context graph nodes.
+' Source:    docs/UC/uc_context_svc.puml
+' SM:        THINKING (context pipeline stage)
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Context Service" as ctxSvc
+
+ctxSvc -> ctxSvc : CONTEXTSVC-03 distillNodes({graph})
+
+ref over ctxSvc : CONTEXTSVC-03 distillNodes\nState: <back:#D7CCC8>THINKING</back> (distillation)
+
+ctxSvc --> ctxSvc : 200 OK — {distilledGraph}
+
+@enduml

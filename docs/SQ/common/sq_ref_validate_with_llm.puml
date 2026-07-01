@@ -1,0 +1,19 @@
+@startuml sq_ref_validate_with_llm
+' ============================================================
+' Title:     REF — Validate With LLM (EVALSVC-04)
+' Purpose:   Reusable sub-flow: LLM-based code review.
+' Source:    docs/UC/uc_eval_svc.puml
+' SM:        CHECKING → REVIEWING
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Evaluation Service" as evalSvc
+
+evalSvc -> evalSvc : EVALSVC-04 validateWithLLM({output})
+
+ref over evalSvc : EVALSVC-04 validateWithLLM\nState: <back:#C5CAE9>CHECKING</back> → <back:#AB47BC>REVIEWING</back>
+
+evalSvc --> evalSvc : 200 OK — {verdict, feedback}
+
+@enduml

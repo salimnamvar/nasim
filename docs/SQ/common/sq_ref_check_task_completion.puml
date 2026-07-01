@@ -1,0 +1,19 @@
+@startuml sq_ref_check_task_completion
+' ============================================================
+' Title:     REF — Check Task Completion (EVALSVC-02)
+' Purpose:   Reusable sub-flow: check if task is complete.
+' Source:    docs/UC/uc_eval_svc.puml
+' SM:        IDLE → CHECKING
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Evaluation Service" as evalSvc
+
+evalSvc -> evalSvc : EVALSVC-02 checkTaskCompletion({criteria})
+
+ref over evalSvc : EVALSVC-02 checkTaskCompletion\nState: <back:#90A4AE>IDLE</back> → <back:#C5CAE9>CHECKING</back>
+
+evalSvc --> evalSvc : 200 OK — {completed: true|false}
+
+@enduml

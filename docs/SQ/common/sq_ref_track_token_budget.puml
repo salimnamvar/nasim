@@ -1,0 +1,19 @@
+@startuml sq_ref_track_token_budget
+' ============================================================
+' Title:     REF — Track Token Budget (CONTEXTSVC-06)
+' Purpose:   Reusable sub-flow: track token usage against budget.
+' Source:    docs/UC/uc_context_svc.puml
+' SM:        THINKING (context pipeline stage)
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Context Service" as ctxSvc
+
+ctxSvc -> ctxSvc : CONTEXTSVC-06 trackTokenBudget({graph})
+
+ref over ctxSvc : CONTEXTSVC-06 trackTokenBudget\nState: <back:#D7CCC8>THINKING</back> (budget tracking)
+
+ctxSvc --> ctxSvc : 200 OK — {tokenCount, budget}
+
+@enduml
