@@ -11,11 +11,9 @@
 ' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Container.puml
-!theme plain
 !include common/c4_styles.puml
 
 LAYOUT_TOP_DOWN()
-HIDE_STEREOTYPE()
 
 title NASIM Service — Container Diagram
 
@@ -23,11 +21,11 @@ title NASIM Service — Container Diagram
 Person(user, "Developer", "Uses NASIM as an AI coding assistant", $sprite="person")
 
 ' ── External Clients ────────────────────────────────────────
-Container_Ext(cli, "CLI", "Python 3.10+", "Terminal interface: REPL, arg parsing, slash commands")
-Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface")
-Container_Ext(desktop, "DesktopApp", "Electron / Tauri", "Desktop application")
-Container_Ext(mobile, "MobileApp", "React Native / Flutter", "Mobile application")
-Container_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP")
+Container_Ext(cli, "CLI", "Python 3.10+", "Terminal interface: REPL, arg parsing, slash commands", $tags="external_container")
+Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface", $tags="external_container")
+Container_Ext(desktop, "DesktopApp", "Electron / Tauri", "Desktop application", $tags="external_container")
+Container_Ext(mobile, "MobileApp", "React Native / Flutter", "Mobile application", $tags="external_container")
+Container_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP", $tags="machine_client")
 
 ' ── NASIM Service Boundary ──────────────────────────────────
 System_Boundary(nasim_service, "NASIM Service") {
@@ -52,7 +50,8 @@ Rel(user, desktop, "interacts via desktop app", "local")
 Rel(user, mobile, "interacts via mobile app", "HTTPS")
 
 ' ── External Clients → NASIM Application ────────────────────
-Rel(cli, nasim_app, "delegates tasks", "HTTP/JSON + SSE")
+' Changed: CLI uses stdio (local process IPC), not HTTP/JSON + SSE
+Rel(cli, nasim_app, "delegates tasks", "stdio")
 Rel(webapp, nasim_app, "delegates tasks", "HTTP/JSON + SSE")
 Rel(desktop, nasim_app, "delegates tasks", "HTTP/JSON + SSE")
 Rel(mobile, nasim_app, "delegates tasks", "HTTPS + SSE")
@@ -69,13 +68,14 @@ Rel(nasim_app, repo_intel, "parses code, queries intelligence", "in-process / HT
 
 ' ── Legend ───────────────────────────────────────────────────
 legend right
-    |= Symbol |= Meaning |
-    | Person | Human actor |
-    | System | System of interest |
-    | System_Ext | External system |
-    | Container_Ext | External client |
-    | Container | Internal deployable |
-    | System_Boundary | Service boundary |
-endlegend
+    |= <color:#000000>Symbol |= <color:#000000>Meaning |
+    | <color:#000000>Person | <color:#000000>Human actor |
+    | <color:#000000>System | <color:#000000>System of interest |
+    | <color:#000000>System_Ext | <color:#000000>External system |
+    |<#FAFAFA> <color:#212121>**External Client**</color> | <color:#000000>CLI, WebApp, DesktopApp, MobileApp (human-facing)</color> |
+    |<#F3E5F5> <color:#4A148C>**Machine Client**</color> | <color:#000000>MCP Client (API/machine)</color> |
+    | <color:#000000>Container | <color:#000000>Internal deployable |
+    | <color:#000000>System_Boundary | <color:#000000>Service boundary |
+end legend
 
 @enduml

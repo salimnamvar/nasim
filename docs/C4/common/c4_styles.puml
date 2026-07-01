@@ -31,6 +31,13 @@ AddElementTag("datastore", $bgColor="#FFFDE7", $borderColor="#F9A825", $fontColo
 AddElementTag("infrastructure", $bgColor="#F3E5F5", $borderColor="#7B1FA2", $fontColor="#4A148C", $legendText="Infrastructure")
 AddElementTag("external_container", $bgColor="#FAFAFA", $borderColor="#616161", $fontColor="#212121", $legendText="External Client")
 AddElementTag("deployable", $bgColor="#E8EAF6", $borderColor="#283593", $fontColor="#1A237E", $legendText="Deployable")
+AddElementTag("trusted", $bgColor="#E8F5E9", $borderColor="#2E7D32", $fontColor="#1B5E20", $legendText="Trusted")
+AddElementTag("untrusted", $bgColor="#FFEBEE", $borderColor="#C62828", $fontColor="#B71C1C", $legendText="Untrusted")
+AddElementTag("machine_client", $bgColor="#F3E5F5", $borderColor="#7B1FA2", $fontColor="#4A148C", $legendText="Machine Client")
+
+' --- Legend styling (no !theme plain; need explicit colors) ---
+skinparam legendFontColor #000000
+skinparam legendBackgroundColor #FFFFFF
 
 ' --- Skinparam stereotypes (fallback for Boundary wrappers) ---
 skinparam rectangle<<controller>> {
@@ -73,6 +80,24 @@ skinparam rectangle<<deployable>> {
     BackgroundColor<<deployable>> #E8EAF6
     BorderColor<<deployable>> #283593
     FontColor<<deployable>> #1A237E
+}
+
+skinparam rectangle<<trusted>> {
+    BackgroundColor<<trusted>> #E8F5E9
+    BorderColor<<trusted>> #2E7D32
+    FontColor<<trusted>> #1B5E20
+}
+
+skinparam rectangle<<untrusted>> {
+    BackgroundColor<<untrusted>> #FFEBEE
+    BorderColor<<untrusted>> #C62828
+    FontColor<<untrusted>> #B71C1C
+}
+
+skinparam rectangle<<machine_client>> {
+    BackgroundColor<<machine_client>> #F3E5F5
+    BorderColor<<machine_client>> #7B1FA2
+    FontColor<<machine_client>> #4A148C
 }
 
 @enduml

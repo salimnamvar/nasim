@@ -9,13 +9,22 @@
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_container.puml (v13.0.0)
 ' ============================================================
+' REVIEW CHANGES:
+'   - Grouped repositories into logical domains: Persistence, Intelligence,
+'     Integration, Execution — reduces visual density
+'   - Added EvaluationService → WireLogRepo relationship for retry auditing
+'   - Annotated ConfigStore with transient-source note
+'   - Added skinparam wrapWidth 200 to prevent text clipping in TOP_DOWN layout
+'   - Changed CLI → CLI Adapter protocol to stdio (matches container diagram)
+'   - Removed !theme plain; relies entirely on common/c4_styles.puml
+' ============================================================
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.10.0/C4_Component.puml
-!theme plain
 !include common/c4_styles.puml
 skinparam linetype polyline
 
 LAYOUT_TOP_DOWN()
+skinparam wrapWidth 200
 
 title NASIM Application — Component Diagram (CSR 3-Layer)
 
@@ -24,7 +33,7 @@ Container_Ext(cli, "CLI", "Python 3.10+", "Terminal interface: REPL, arg parsing
 Container_Ext(webapp, "WebApp", "JavaScript SPA", "Browser-based interface", $tags="external_container")
 Container_Ext(desktop, "DesktopApp", "Electron / Tauri", "Desktop application", $tags="external_container")
 Container_Ext(mobile, "MobileApp", "React Native / Flutter", "Mobile application", $tags="external_container")
-Container_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP", $tags="external_container")
+Container_Ext(mcp_client, "MCP Client", "External tools consuming NASIM via MCP", $tags="machine_client")
 
 ' ── NASIM Application Boundary ──
 Container_Boundary(nasim_app, "NASIM Application") {
@@ -48,21 +57,33 @@ Container_Boundary(nasim_app, "NASIM Application") {
         Component(eval_svc, "Evaluation Service", "litellm + heuristics", "Task evaluation: success checks, LLM review, retry coordination, repetition detection, turn budget management", $tags="service")
     }
 
-    ' ── Repository Layer ──
+    ' ── Repository Layer (grouped by logical domain) ──
     Boundary(repository_layer, "Repository Layer") <<repository>> {
-        Component(session_repo, "Session Repository", "JSONL + pathlib", "Message persistence: JSON Lines, turn management", $tags="repository")
-        Component(history_repo, "History Repository", "JSONL + SQLite FTS5", "Snapshots, revert index, search index", $tags="repository")
-        Component(config_repo, "Config Repository", "PyYAML + os.environ", "YAML, env vars, CLI flags, project overrides", $tags="repository")
-        Component(memory_repo, "Memory Repository", "JSON + embeddings", "Cross-session knowledge persistence", $tags="repository")
-        Component(llm_repo, "LLM Repository", "litellm", "LLM API calls + model routing: streaming, fallback chains, capability-based model selection, task classification", $tags="repository")
-        Component(fs_repo, "Filesystem Repository", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep", $tags="repository")
-        Component(sandbox_repo, "Sandbox Repository", "subprocess", "Sandboxed command execution: timeout, isolation", $tags="repository")
-        Component(edit_strategy_repo, "Edit Strategy Repository", "pathlib + unified_diff", "Diff staging, computation, and safe application: staged edits, sandboxed validation", $tags="repository")
-        Component(git_repo, "Git Repository", "gitpython", "Git operations: status, diff, commit, branch", $tags="repository")
-        Component(mcp_repo, "MCP Repository", "mcp.client", "MCP extension tools: discovery, invocation", $tags="repository")
-        Component(repo_intel_repo, "Repo Intelligence Repository", "tree-sitter + API", "Codebase intelligence: AST indexing, symbol graph, embedding generation, semantic search, repo map building", $tags="repository")
-        Component(web_repo, "Web Repository", "httpx", "Web fetch: documentation, search results", $tags="repository")
-        Component(wire_log_repo, "Wire Log Repository", "JSONL append-only", "Append-only event store: interaction recording, replay, session forking, checkpointing", $tags="repository")
+
+        Boundary(persistence_group, "Persistence") <<repository>> {
+            Component(session_repo, "Session Repository", "JSONL + pathlib", "Message persistence: JSON Lines, turn management", $tags="repository")
+            Component(history_repo, "History Repository", "JSONL + SQLite FTS5", "Snapshots, revert index, search index", $tags="repository")
+            Component(config_repo, "Config Repository", "PyYAML + os.environ", "YAML, env vars, CLI flags, project overrides", $tags="repository")
+            Component(wire_log_repo, "Wire Log Repository", "JSONL append-only", "Append-only event store: interaction recording, replay, session forking, checkpointing", $tags="repository")
+        }
+
+        Boundary(intelligence_group, "Intelligence") <<repository>> {
+            Component(memory_repo, "Memory Repository", "JSON + embeddings", "Cross-session knowledge persistence", $tags="repository")
+            Component(llm_repo, "LLM Repository", "litellm", "LLM API calls + model routing: streaming, fallback chains, capability-based model selection, task classification", $tags="repository")
+            Component(repo_intel_repo, "Repo Intelligence Repository", "tree-sitter + API", "Codebase intelligence: AST indexing, symbol graph, embedding generation, semantic search, repo map building", $tags="repository")
+        }
+
+        Boundary(integration_group, "Integration") <<repository>> {
+            Component(git_repo, "Git Repository", "gitpython", "Git operations: status, diff, commit, branch", $tags="repository")
+            Component(mcp_repo, "MCP Repository", "mcp.client", "MCP extension tools: discovery, invocation", $tags="repository")
+            Component(web_repo, "Web Repository", "httpx", "Web fetch: documentation, search results", $tags="repository")
+        }
+
+        Boundary(execution_group, "Execution") <<repository>> {
+            Component(fs_repo, "Filesystem Repository", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep", $tags="repository")
+            Component(sandbox_repo, "Sandbox Repository", "subprocess", "Sandboxed command execution: timeout, isolation", $tags="repository")
+            Component(edit_strategy_repo, "Edit Strategy Repository", "pathlib + unified_diff", "Diff staging, computation, and safe application: staged edits, sandboxed validation", $tags="repository")
+        }
     }
 
     ' ── Data Stores (internal persistence) ──
@@ -70,7 +91,9 @@ Container_Boundary(nasim_app, "NASIM Application") {
         ComponentDb(session_store, "Session Store", "JSONL", "Conversation history: ~/.nasim/sessions/", $tags="datastore")
         ComponentDb(memory_store, "Memory Store", "JSON + embeddings", "Cross-session knowledge: ~/.nasim/memory/", $tags="datastore")
         ComponentDb(wire_log_store, "Wire Log Store", "JSONL", "Append-only interaction log: ~/.nasim/sessions/<id>/wire.jsonl", $tags="datastore")
-        ComponentDb(config_store, "Config Store", "YAML", "Configuration: project overrides, env vars", $tags="datastore")
+        ' Note: ConfigStore reads from persistent YAML + transient env/CLI sources.
+        ' env/CLI overrides are not persisted — they are re-applied on startup.
+        ComponentDb(config_store, "Config Store", "YAML", "Configuration: project overrides, env vars, CLI flags, defaults. Note: env/CLI sources are transient", $tags="datastore")
     }
 }
 
@@ -87,7 +110,8 @@ System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embedding
 ' ── External Clients → Adapters (Container → Component traceability) ──
 ' ══════════════════════════════════════════════════════════════
 
-Rel(cli, cli_adp, "submits tasks", "HTTP/JSON + SSE")
+' Changed: CLI uses stdio (local process IPC), not HTTP/JSON + SSE
+Rel(cli, cli_adp, "submits tasks", "stdio")
 Rel(webapp, http_adp, "submits tasks", "HTTP/JSON + SSE")
 Rel(desktop, http_adp, "submits tasks", "HTTP/JSON + SSE")
 Rel(mobile, http_adp, "submits tasks", "HTTPS + SSE")
@@ -137,6 +161,8 @@ Rel(context_svc, memory_repo, "injects memory context")
 Rel(context_svc, repo_intel_repo, "queries codebase intelligence")
 Rel(task_svc, wire_log_repo, "records agent-provider-tool interactions")
 Rel(session_svc, wire_log_repo, "forks sessions, checkpoints turns")
+' Added: EvaluationService audits retries and quality checks via WireLog
+Rel(eval_svc, wire_log_repo, "audits retries and quality checks")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Repository → Repository (internal dependencies) ──
@@ -168,11 +194,12 @@ Rel(repo_intel_repo, repo_intel, "parses code, queries intelligence", "in-proces
 Rel(web_repo, web, "fetches documentation", "HTTPS")
 
 legend right
-    |<#E3F2FD>  **Controller** | CLI Adapter, HTTP Adapter, MCP Adapter, Agent Controller |
-    |<#FFF3E0>  **Service**    | Task Service, Tool Service, Session Service, Config Service, Safety Service, Context Service, Evaluation Service |
-    |<#E8F5E9>  **Repository** | Session Repository, History Repository, Config Repository, Memory Repository, LLM Repository, Filesystem Repository, Sandbox Repository, Edit Strategy Repository, Git Repository, MCP Repository, Repo Intelligence Repository, Web Repository, Wire Log Repository |
-    |<#FFFDE7>  **Data Store** | SessionStore, MemoryStore, WireLogStore, ConfigStore |
-    |<#FAFAFA>  **External Client** | CLI, WebApp, DesktopApp, MobileApp, MCP Client |
+    |<#E3F2FD> <color:#0D47A1>**Controller**</color> | <color:#000000>CLI Adapter, HTTP Adapter, MCP Adapter, Agent Controller</color> |
+    |<#FFF3E0> <color:#BF360C>**Service**</color> | <color:#000000>Task Service, Tool Service, Session Service, Config Service, Safety Service, Context Service, Evaluation Service</color> |
+    |<#E8F5E9> <color:#1B5E20>**Repository**</color> | <color:#000000>Grouped: Persistence / Intelligence / Integration / Execution</color> |
+    |<#FFFDE7> <color:#F57F17>**Data Store**</color> | <color:#000000>SessionStore, MemoryStore, WireLogStore, ConfigStore</color> |
+    |<#FAFAFA> <color:#212121>**External Client**</color> | <color:#000000>CLI, WebApp, DesktopApp, MobileApp</color> |
+    |<#F3E5F5> <color:#4A148C>**Machine Client**</color> | <color:#000000>MCP Client</color> |
 end legend
 
 @enduml
