@@ -5,92 +5,36 @@
 
 ' ============================================================
 ' Title:     nasim — UC: Safety Service Group
-' Group:     SAFETYSERVICE (Safety Service)
-' Boundary:  NASIM Service
+' C4 ID:     safety_svc
+' C4 Name:   Safety Service
+' Boundary:  NASIM Application — Service Layer
 ' Purpose:   Permission gating, injection scanning, egress inspection.
-'            Entry chain: User → Interface → Agent Controller → Task Service → Safety Service
-' Milestone: v1.0
-' Version:   13.0.0
+'            C4 Rel: task_svc → safety_svc
+' Entry:     Adapter → agent_ctrl → task_svc → safety_svc
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
 ' SQ:        sq_safetyservice01..sq_safetyservice03
 ' ============================================================
 
 
-left to right direction
-
-
-title nasim — Safety Use Cases
-
-
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-
-
-skinparam usecase {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-  ArrowColor #424242
-  FontSize 12
-}
-
-
-skinparam actor {
-  BackgroundColor #E8EAF6
-  BorderColor #3949AB
-  FontColor #1A237E
-  FontSize 12
-}
-
-
-skinparam actor<<system>> {
-  BackgroundColor #E3F2FD
-  BorderColor #1565C0
-  FontColor #0D47A1
-}
-
-
-' ============================================================
-' Actors
-' ============================================================
+title nasim — UC: Safety Service Group
 
 
 actor "User" as User
 
 
-
-' ============================================================
-' System Boundary
-' ============================================================
-
-
 rectangle "nasim" {
-  package "Safety Group (SAF)" {
-    usecase "**SAFETYSERVICE-01 CHECK Permission**\n--\nCheck permission against safety rules" <<include>> as SAF01
-    usecase "**SAFETYSERVICE-02 REQUEST Approval**\n--\nPrompt user for approval" <<master>> as SAF02
-    usecase "**SAFETYSERVICE-03 APPLY Safety Mode**\n--\nApply safety mode configuration" <<master>> as SAF03
+  package "Safety Service Group" {
+    usecase "**SAFETYSVC-01 CHECK Permission**\n--\nCheck permission against\nsafety rules" <<include>> as SF01
+    usecase "**SAFETYSVC-02 REQUEST Approval**\n--\nPrompt user for approval" <<master>> as SF02
+    usecase "**SAFETYSVC-03 APPLY Safety Mode**\n--\nApply safety mode configuration" <<include>> as SF03
   }
 }
 
 
-' ============================================================
-' Actor -> Use Case Associations
-' ============================================================
+User --> SF02
 
-
-User --> SAF02
-User --> SAF03
-
-
-
-' ============================================================
-' Relationships
-' ============================================================
-
-
-SAF02 ..> SAF01 : <<include>>
-
+SF02 ..> SF01 : <<include>>
+SF03 ..> SF01 : <<include>>
 
 
 @enduml

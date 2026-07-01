@@ -1,29 +1,38 @@
-# nasim — UC Inventory (API-First)
+# nasim — UC Inventory
+
+**Source of truth:** `docs/C4/c4_nasim_component.puml` (v13.0.0)
+
+**CSR entry chain:** External Client → Adapter (`cli_adp` / `http_adp` / `mcp_adp`) → `agent_ctrl` → Service → Repository
 
 ## UC Groups
 
-| Group | C4 Component ID | UC Diagram | UC ID Prefix | SQ Diagrams | Description |
-|-------|-----------------|------------|--------------|:-----------:|-------------|
-| Agent Controller | `agent_ctrl` | `uc_agent_ctrl.puml` | `AGENTCTRL-` | 4 | Single convergence point for all interface adapters. Routes validated requests to services. |
-| HTTP Adapter | `http_adp` | `uc_http_adp.puml` | `HTTPADP-` | 11 | Core business operations exposed via HTTP API (ROD-compliant). Delegates through Agent Controller. |
-| CLI Adapter | `cli_adp` | `uc_cli_adp.puml` | `CLIADP-` | 8 | CLI-specific interface UCs: REPL, slash commands, rendering. All business operations delegate through Agent Controller. |
-| MCP Adapter | `mcp_adp` | `uc_mcp_adp.puml` | `MCPADP-` | 4 | MCP protocol interface: tool exposure, stdio/SSE transport. External MCP clients discover and invoke nasim tools. |
-| AGENT | Task Service | 14 | Core agentic loop, permissions, context, plans, subagents |
-| LLM | LLM Repository | 8 | LLM API calls + model routing via litellm |
-| CONFIG | Config Service | 3 | Config loading, validation, layered overrides |
-| SESSION | Session Service | 9 | Session persistence, versioning, search, fork |
-| SAFETY | Safety Service | 3 | Permission gates, injection scanning, egress inspection |
-| CONTEXT | Context Service | 6 | Context pipeline: graph construction, truncation, distillation, injection, compaction |
-| MCP | MCP Repository | 4 | MCP extension tools: discovery, invocation |
-| TOOL | Tool Service | 34 | All tool implementations, hooks, and plugins |
-| MEMORY | Memory Repository | 4 | Cross-session knowledge persistence |
-| GIT | Git Repository | 4 | Version control integration |
-| SANDBOX | Sandbox Repository | 4 | Sandboxed command execution: timeout, isolation |
-| REPOINTELLIGENCE | Repo Intelligence Repository | 6 | Codebase intelligence: AST indexing, symbol graph, embedding |
-| EDITSTRATEGY | Edit Strategy Repository | 10 | Diff staging, computation, and safe application |
-| EVALUATION | Evaluation Service | 9 | Task evaluation and quality checks |
-| WIRELOG | Wire Log Repository | 5 | Append-only event store, fork, checkpoint |
-| **Total** | **19 groups** | **150** | **1:1 UC↔SQ mapping (100%)** |
+| C4 Component ID | Title | UC Diagram | UC ID Prefix | UCs | Description |
+|-----------------|-------|------------|--------------|:---:|-------------|
+| `agent_ctrl` | Agent Controller | `uc_agent_ctrl.puml` | `AGENTCTRL-` | 4 | Single convergence point. Routes to `task_svc`, `session_svc`, `config_svc`. |
+| `cli_adp` | CLI Adapter | `uc_cli_adp.puml` | `CLIADP-` | 8 | REPL, slash commands, arg parsing. All business via `agent_ctrl`. |
+| `http_adp` | HTTP Adapter | `uc_http_adp.puml` | `HTTPADP-` | 11 | REST/SSE API for WebApp, DesktopApp, MobileApp. All via `agent_ctrl`. |
+| `mcp_adp` | MCP Adapter | `uc_mcp_adp.puml` | `MCPADP-` | 4 | MCP protocol for external MCP clients. All via `agent_ctrl`. |
+| `task_svc` | Task Service | `uc_task_svc.puml` | `TASKSVC-` | 14 | Agentic loop, tool dispatch, subagents, personas, error recovery. |
+| `tool_svc` | Tool Service | `uc_tool_svc.puml` | `TOOLSVC-` | 34 | Tool registry, hooks, plugins, execution dispatch. |
+| `session_svc` | Session Service | `uc_session_svc.puml` | `SESSIONSVC-` | 9 | Session lifecycle: create, load, save, snapshot, revert. |
+| `config_svc` | Config Service | `uc_config_svc.puml` | `CONFIGSVC-` | 3 | Config loading, validation, layered overrides. |
+| `safety_svc` | Safety Service | `uc_safety_svc.puml` | `SAFETYSVC-` | 3 | Permission gating, injection scanning, egress inspection. |
+| `context_svc` | Context Service | `uc_context_svc.puml` | `CONTEXTSVC-` | 6 | Context pipeline: graph, truncation, distillation, injection, compaction. |
+| `eval_svc` | Evaluation Service | `uc_eval_svc.puml` | `EVALSVC-` | 9 | Task evaluation, retries, repetition detection, turn budget. |
+| `session_repo` | Session Repository | `uc_session_repo.puml` | `SESSIONREPO-` | 3 | JSONL message persistence, turn management. |
+| `history_repo` | History Repository | `uc_history_repo.puml` | `HISTORYREPO-` | 3 | Snapshots, revert index, FTS5 search index. |
+| `config_repo` | Config Repository | `uc_config_repo.puml` | `CONFIGREPO-` | 3 | YAML, env vars, CLI flags, project overrides. |
+| `memory_repo` | Memory Repository | `uc_memory_repo.puml` | `MEMORYREPO-` | 4 | Cross-session knowledge persistence. |
+| `llm_repo` | LLM Repository | `uc_llm_repo.puml` | `LLMREPO-` | 8 | LLM API calls + model routing via litellm. |
+| `fs_repo` | Filesystem Repository | `uc_fs_repo.puml` | `FSREPO-` | 4 | Host filesystem I/O: read, write, glob, grep. |
+| `sandbox_repo` | Sandbox Repository | `uc_sandbox_repo.puml` | `SANDBOXREPO-` | 4 | Sandboxed command execution: timeout, isolation. |
+| `edit_strategy_repo` | Edit Strategy Repository | `uc_edit_strategy_repo.puml` | `EDITSTRATEGYREPO-` | 10 | Diff staging, computation, safe application. |
+| `git_repo` | Git Repository | `uc_git_repo.puml` | `GITREPO-` | 4 | Git operations: status, diff, commit, branch. |
+| `mcp_repo` | MCP Repository | `uc_mcp_repo.puml` | `MCPREPO-` | 4 | MCP extension tools: discovery, invocation. |
+| `repo_intel_repo` | Repo Intelligence Repository | `uc_repo_intel_repo.puml` | `REPOINTELREPO-` | 6 | AST indexing, symbol graph, embeddings, semantic search. |
+| `web_repo` | Web Repository | `uc_web_repo.puml` | `WEBREPO-` | 2 | Web fetch: documentation, search results. |
+| `wire_log_repo` | Wire Log Repository | `uc_wire_log_repo.puml` | `WIRELOGREPO-` | 5 | Append-only event store, fork, checkpoint. |
+| **Total** | **24 components** | **24 diagrams** + `uc_overview.puml` | — | **~175** | 1:1 C4 component ↔ UC diagram |
 
 ---
 
@@ -90,25 +99,27 @@ All business operations MUST delegate through Agent Controller (`agent_ctrl`). N
 
 ---
 
-## Task Service Group (AGT)
+## Task Service Group (`task_svc`)
+
+Entry: Adapter → `agent_ctrl` → `task_svc`. C4 orchestration: `task_svc` → `tool_svc`, `safety_svc`, `context_svc`, `eval_svc`.
 
 | UC ID | Operation | Component Owner | SQ Diagram | Notes |
 |-------|-----------|-----------------|------------|-------|
-| TASKSERVICE-01 | PROCESS User Task | Task Service | `sq_taskservice01_process_user_task.puml` | Primary orchestrator. `<<include>>` TASKSERVICE-02, TASKSERVICE-03, TASKSERVICE-15 |
-| TASKSERVICE-02 | DISPATCH Tool Call | Task Service | `sq_taskservice02_dispatch_tool_call.puml` | Routes to Tool Service. `<<include>>` SAFETYSERVICE-01 |
-| TASKSERVICE-03 | UPDATE Conversation | Task Service | `sq_taskservice03_update_conversation.puml` | Appends messages, tracks token count |
-| TASKSERVICE-04 | DELETE History | Task Service | `sq_taskservice04_delete_history.puml` | Resets conversation history |
-| TASKSERVICE-05 | *(vacant — ID retired per permanence rule)* | — | — | Numbering gap preserved; IDs are permanent. No SQ assigned. |
-| TASKSERVICE-06 | COMPACT Context | Context Service | `sq_taskservice06_compact_context.puml` | Summarizes old exchanges via secondary LLM |
-| TASKSERVICE-07 | QUEUE Plan | Task Service | `sq_taskservice07_queue_plan.puml` | Holds queued tool calls in plan mode |
-| TASKSERVICE-08 | APPROVE Plan | Task Service | `sq_taskservice08_approve_plan.puml` | Drains queued plan calls. `<<include>>` TASKSERVICE-02 |
-| TASKSERVICE-09 | SPAWN Subagent | Task Service | `sq_taskservice09_spawn_subagent.puml` | Creates child agent with restricted tools |
-| TASKSERVICE-10 | COLLECT Subagent Result | Task Service | `sq_taskservice10_collect_subagent_result.puml` | Gathers results from child agents |
-| TASKSERVICE-11 | DELEGATE to Persona | Task Service | `sq_taskservice11_delegate_to_persona.puml` | Assigns tasks to specialized persona roles |
-| TASKSERVICE-12 | LOAD Persona | Task Service | `sq_taskservice12_load_persona.puml` | Loads persona configuration |
-| TASKSERVICE-13 | SWITCH Persona | Task Service | `sq_taskservice13_switch_persona.puml` | Switches persona at runtime |
-| TASKSERVICE-14 | HANDLE Error | Task Service | `sq_taskservice14_handle_error.puml` | Structured error handling with recovery |
-| TASKSERVICE-15 | DISPATCH Safety Pipeline | Safety Service | `sq_taskservice15_dispatch_safety_pipeline.puml` | Runs permission, injection, egress checks |
+| TASKSVC-01 | PROCESS User Task | Task Service | `sq_taskservice01_process_user_task.puml` | Primary orchestrator. `<<include>>` TASKSVC-02, TASKSVC-03, TASKSVC-15, CONTEXTSVC-01 |
+| TASKSVC-02 | DISPATCH Tool Call | Task Service | `sq_taskservice02_dispatch_tool_call.puml` | Routes to `tool_svc`. `<<include>>` SAFETYSVC-01, LLMREPO-02/03 |
+| TASKSVC-03 | UPDATE Conversation | Task Service | `sq_taskservice03_update_conversation.puml` | Appends messages. `<<include>>` SESSIONREPO-01, WIRELOGREPO-01 |
+| TASKSVC-04 | DELETE History | Task Service | `sq_taskservice04_delete_history.puml` | Resets conversation history |
+| TASKSVC-05 | *(vacant — ID retired per permanence rule)* | — | — | Numbering gap preserved |
+| TASKSVC-06 | *(deprecated — moved to CONTEXTSVC-05)* | Context Service | `sq_taskservice06_compact_context.puml` | SQ retained; UC ownership transferred to `context_svc` |
+| TASKSVC-07 | QUEUE Plan | Task Service | `sq_taskservice07_queue_plan.puml` | Holds queued tool calls in plan mode |
+| TASKSVC-08 | APPROVE Plan | Task Service | `sq_taskservice08_approve_plan.puml` | Drains queued plan calls. `<<include>>` TASKSVC-02 |
+| TASKSVC-09 | SPAWN Subagent | Task Service | `sq_taskservice09_spawn_subagent.puml` | Creates child agent with restricted tools |
+| TASKSVC-10 | COLLECT Subagent Result | Task Service | `sq_taskservice10_collect_subagent_result.puml` | Gathers results from child agents |
+| TASKSVC-11 | DELEGATE to Persona | Task Service | `sq_taskservice11_delegate_to_persona.puml` | Assigns tasks to specialized persona roles |
+| TASKSVC-12 | LOAD Persona | Task Service | `sq_taskservice12_load_persona.puml` | Loads persona configuration |
+| TASKSVC-13 | SWITCH Persona | Task Service | `sq_taskservice13_switch_persona.puml` | Switches persona at runtime |
+| TASKSVC-14 | HANDLE Error | Task Service | `sq_taskservice14_handle_error.puml` | Structured error handling with recovery |
+| TASKSVC-15 | DISPATCH Safety Pipeline | Task Service | `sq_taskservice15_dispatch_safety_pipeline.puml` | `<<include>>` SAFETYSVC-01, SAFETYSVC-03 |
 
 ---
 
@@ -127,54 +138,62 @@ All business operations MUST delegate through Agent Controller (`agent_ctrl`). N
 
 ---
 
-## Config Service Group (CFG)
+## Config Service Group (`config_svc`)
+
+Entry: Adapter → `agent_ctrl` → `config_svc` → `config_repo`.
 
 | UC ID | Operation | Component Owner | SQ Diagram |
 |-------|-----------|-----------------|------------|
-| CONFIGSERVICE-01 | LOAD Config | Config Service | `sq_configservice01_load_config.puml` |
-| CONFIGSERVICE-02 | VALIDATE Config | Config Service | `sq_configservice02_validate_config.puml` |
-| CONFIGSERVICE-03 | APPLY Layered Config | Config Service | `sq_configservice03_apply_layered_config.puml` |
+| CONFIGSVC-01 | LOAD Config | Config Service | `sq_configservice01_load_config.puml` |
+| CONFIGSVC-02 | VALIDATE Config | Config Service | `sq_configservice02_validate_config.puml` |
+| CONFIGSVC-03 | APPLY Layered Config | Config Service | `sq_configservice03_apply_layered_config.puml` |
 
 ---
 
-## Session Service Group (SSN)
+## Session Service Group (`session_svc`)
+
+Entry: Adapter → `agent_ctrl` → `session_svc` → `session_repo`, `history_repo`, `wire_log_repo`.
 
 | UC ID | Operation | Component Owner | SQ Diagram |
 |-------|-----------|-----------------|------------|
-| SESSIONSERVICE-01 | PERSIST Session | Session Service | `sq_sessionservice01_persist_session.puml` |
-| SESSIONSERVICE-02 | READ Session | Session Service | `sq_sessionservice02_read_session.puml` |
-| SESSIONSERVICE-03 | LIST Sessions | Session Service | `sq_sessionservice03_list_sessions.puml` |
-| SESSIONSERVICE-04 | RESTORE Session | Session Service | `sq_sessionservice04_restore_session.puml` |
-| SESSIONSERVICE-05 | SNAPSHOT Session | Session Service | `sq_sessionservice05_snapshot_session.puml` |
-| SESSIONSERVICE-06 | REVERT Turn | Session Service | `sq_sessionservice06_revert_turn.puml` |
-| SESSIONSERVICE-07 | SEARCH Sessions | Session Service | `sq_sessionservice07_search_sessions.puml` |
-| SESSIONSERVICE-08 | BRANCH Session | Session Service | `sq_sessionservice08_branch_session.puml` |
-| SESSIONSERVICE-09 | DELETE Session | Session Service | `sq_sessionservice09_delete_session.puml` |
+| SESSIONSVC-01 | PERSIST Session | Session Service | `sq_sessionservice01_persist_session.puml` |
+| SESSIONSVC-02 | READ Session | Session Service | `sq_sessionservice02_read_session.puml` |
+| SESSIONSVC-03 | LIST Sessions | Session Service | `sq_sessionservice03_list_sessions.puml` |
+| SESSIONSVC-04 | RESTORE Session | Session Service | `sq_sessionservice04_restore_session.puml` |
+| SESSIONSVC-05 | SNAPSHOT Session | Session Service | `sq_sessionservice05_snapshot_session.puml` |
+| SESSIONSVC-06 | REVERT Turn | Session Service | `sq_sessionservice06_revert_turn.puml` |
+| SESSIONSVC-07 | SEARCH Sessions | Session Service | `sq_sessionservice07_search_sessions.puml` |
+| SESSIONSVC-08 | BRANCH Session | Session Service | `sq_sessionservice08_branch_session.puml` |
+| SESSIONSVC-09 | DELETE Session | Session Service | `sq_sessionservice09_delete_session.puml` |
 
 ---
 
-## Safety Service Group (SAF)
+## Safety Service Group (`safety_svc`)
+
+Entry: Adapter → `agent_ctrl` → `task_svc` → `safety_svc`.
 
 | UC ID | Operation | Component Owner | SQ Diagram |
 |-------|-----------|-----------------|------------|
-| SAFETYSERVICE-01 | CHECK Permission | Safety Service | `sq_safetyservice01_check_permission.puml` |
-| SAFETYSERVICE-02 | REQUEST Approval | Safety Service | `sq_safetyservice02_request_approval.puml` |
-| SAFETYSERVICE-03 | APPLY Safety Mode | Safety Service | `sq_safetyservice03_apply_safety_mode.puml` |
+| SAFETYSVC-01 | CHECK Permission | Safety Service | `sq_safetyservice01_check_permission.puml` |
+| SAFETYSVC-02 | REQUEST Approval | Safety Service | `sq_safetyservice02_request_approval.puml` |
+| SAFETYSVC-03 | APPLY Safety Mode | Safety Service | `sq_safetyservice03_apply_safety_mode.puml` |
 
 ---
 
-## Context Service Group (CTX)
+## Context Service Group (`context_svc`)
 
-CONTEXTSERVICE-02..06 are sub-use-cases of CONTEXTSERVICE-01. They use `<<include>>` from CONTEXTSERVICE-01 and are modeled as process decomposition.
+Entry: Adapter → `agent_ctrl` → `task_svc` → `context_svc` → `memory_repo`, `repo_intel_repo`.
+
+CONTEXTSVC-02..06 are sub-use-cases of CONTEXTSVC-01.
 
 | UC ID | Operation | Component Owner | SQ Diagram | Notes |
 |-------|-----------|-----------------|------------|-------|
-| CONTEXTSERVICE-01 | PROCESS Context | Context Service | `sq_contextservice01_process_context.puml` | Primary orchestrator. `<<include>>` CONTEXTSERVICE-02..06 |
-| CONTEXTSERVICE-02 | TRUNCATE Nodes | Context Service | `sq_contextservice02_truncate_nodes.puml` | Sub-UC of CONTEXTSERVICE-01 |
-| CONTEXTSERVICE-03 | DISTILL Nodes | Context Service | `sq_contextservice03_distill_nodes.puml` | Sub-UC of CONTEXTSERVICE-01 |
-| CONTEXTSERVICE-04 | INJECT Context | Context Service | `sq_contextservice04_inject_context.puml` | Sub-UC of CONTEXTSERVICE-01 |
-| CONTEXTSERVICE-05 | COMPACT Nodes | Context Service | `sq_contextservice05_compact_nodes.puml` | Sub-UC of CONTEXTSERVICE-01 |
-| CONTEXTSERVICE-06 | TRACK Token Budget | Context Service | `sq_contextservice06_track_token_budget.puml` | Sub-UC of CONTEXTSERVICE-01 |
+| CONTEXTSVC-01 | PROCESS Context | Context Service | `sq_contextservice01_process_context.puml` | Primary. `<<include>>` CONTEXTSVC-02..06 |
+| CONTEXTSVC-02 | TRUNCATE Nodes | Context Service | `sq_contextservice02_truncate_nodes.puml` | Sub-UC of CONTEXTSVC-01 |
+| CONTEXTSVC-03 | DISTILL Nodes | Context Service | `sq_contextservice03_distill_nodes.puml` | Sub-UC of CONTEXTSVC-01 |
+| CONTEXTSVC-04 | INJECT Context | Context Service | `sq_contextservice04_inject_context.puml` | Sub-UC of CONTEXTSVC-01. `<<include>>` MEMORYREPO-02, REPOINTELREPO-04 |
+| CONTEXTSVC-05 | COMPACT Nodes | Context Service | `sq_contextservice05_compact_nodes.puml` | Sub-UC of CONTEXTSVC-01 (absorbed legacy TASKSVC-06) |
+| CONTEXTSVC-06 | TRACK Token Budget | Context Service | `sq_contextservice06_track_token_budget.puml` | Sub-UC of CONTEXTSVC-01 |
 
 ---
 
@@ -191,46 +210,46 @@ CONTEXTSERVICE-02..06 are sub-use-cases of CONTEXTSERVICE-01. They use `<<includ
 
 ---
 
-## Tool Service Group (TL) — Tools + Hooks + Plugins
+## Tool Service Group (`tool_svc`)
 
-TOOLSERVICE-01..22 are the current tool set. TOOLSERVICE-23 (QUERY Repo Map), TOOLSERVICE-24 (SEARCH Semantic), and TOOLSERVICE-25 (REVIEW Code) were removed from the top-level list — they lacked corresponding SQ diagrams and were speculative per YAGNI (SE-09). If re-added later, they must first receive SQ diagrams.
+Entry: Adapter → `agent_ctrl` → `task_svc` → `tool_svc` → repositories.
 
 | UC ID | Operation | Component Owner | SQ Diagram | Category |
 |-------|-----------|-----------------|------------|----------|
-| TOOLSERVICE-01 | READ File | Tool Service | `sq_toolservice01_read_file.puml` | File Operations |
-| TOOLSERVICE-02 | INSERT File | Tool Service | `sq_toolservice02_insert_file.puml` | File Operations |
-| TOOLSERVICE-03 | UPDATE File | Tool Service | `sq_toolservice03_update_file.puml` | File Operations |
-| TOOLSERVICE-04 | LIST Directory | Tool Service | `sq_toolservice04_list_directory.puml` | File Operations |
-| TOOLSERVICE-05 | DISPATCH Shell Command | Tool Service | `sq_toolservice05_dispatch_shell_command.puml` | Execution |
-| TOOLSERVICE-06 | SEARCH Grep | Tool Service | `sq_toolservice06_search_grep.puml` | Search Tools |
-| TOOLSERVICE-07 | SEARCH Glob | Tool Service | `sq_toolservice07_search_glob.puml` | Search Tools |
-| TOOLSERVICE-08 | SEARCH Find | Tool Service | `sq_toolservice08_search_find.puml` | Search Tools |
-| TOOLSERVICE-09 | FETCH Web Content | Tool Service | `sq_toolservice09_fetch_web_content.puml` | Web Tools |
-| TOOLSERVICE-10 | SEARCH Web | Tool Service | `sq_toolservice10_search_web.puml` | Web Tools |
-| TOOLSERVICE-11 | READ Git Status | Tool Service | `sq_toolservice11_read_git_status.puml` | Git Tools |
-| TOOLSERVICE-12 | DISPATCH MCP Extension | Tool Service | `sq_toolservice12_dispatch_mcp_extension.puml` | MCP Dispatch |
-| TOOLSERVICE-13 | READ LSP | Tool Service | `sq_toolservice13_read_lsp.puml` | LSP Tools |
-| TOOLSERVICE-14 | LIST Registered Tools | Tool Service | `sq_toolservice14_list_registered_tools.puml` | Registry |
-| TOOLSERVICE-15 | SPAWN Subagent | Tool Service | `sq_toolservice15_spawn_subagent.puml` | Agent Tools |
-| TOOLSERVICE-16 | INSERT Todo | Tool Service | `sq_toolservice16_insert_todo.puml` | Task Tracking |
-| TOOLSERVICE-17 | UPDATE Todo | Tool Service | `sq_toolservice17_update_todo.puml` | Task Tracking |
-| TOOLSERVICE-18 | READ Todos | Tool Service | `sq_toolservice18_read_todos.puml` | Task Tracking |
-| TOOLSERVICE-19 | PERSIST Memory | Tool Service | `sq_toolservice19_persist_memory.puml` | Memory |
-| TOOLSERVICE-20 | RECALL Memory | Tool Service | `sq_toolservice20_recall_memory.puml` | Memory |
-| TOOLSERVICE-21 | INSERT Plan | Tool Service | `sq_toolservice21_insert_plan.puml` | Planning |
-| TOOLSERVICE-22 | UPDATE Plan | Tool Service | `sq_toolservice22_update_plan.puml` | Planning |
-| TOOLSERVICE-HK01 | REGISTER Hook | Tool Service | `sq_toolservice_hk01_register_hook.puml` | Hooks |
-| TOOLSERVICE-HK02 | DISPATCH Pre-Tool Hook | Tool Service | `sq_toolservice_hk02_dispatch_pre_tool_hook.puml` | Hooks |
-| TOOLSERVICE-HK03 | DISPATCH Post-Tool Hook | Tool Service | `sq_toolservice_hk03_dispatch_post_tool_hook.puml` | Hooks |
-| TOOLSERVICE-HK04 | DISPATCH Pre-LLM Hook | Tool Service | `sq_toolservice_hk04_dispatch_pre_llm_hook.puml` | Hooks |
-| TOOLSERVICE-HK05 | DISPATCH Post-LLM Hook | Tool Service | `sq_toolservice_hk05_dispatch_post_llm_hook.puml` | Hooks |
-| TOOLSERVICE-HK06 | VALIDATE Hook Result | Tool Service | `sq_toolservice_hk06_validate_hook_result.puml` | Hooks |
-| TOOLSERVICE-PLG01 | DISCOVER Plugins | Tool Service | `sq_toolservice_plg01_discover_plugins.puml` | Plugins |
-| TOOLSERVICE-PLG02 | LOAD Manifest | Tool Service | `sq_toolservice_plg02_load_manifest.puml` | Plugins |
-| TOOLSERVICE-PLG03 | REGISTER Plugin Tools | Tool Service | `sq_toolservice_plg03_register_plugin_tools.puml` | Plugins |
-| TOOLSERVICE-PLG04 | REGISTER Plugin Hooks | Tool Service | `sq_toolservice_plg04_register_plugin_hooks.puml` | Plugins |
-| TOOLSERVICE-PLG05 | ENABLE Plugin | Tool Service | `sq_toolservice_plg05_enable_plugin.puml` | Plugins |
-| TOOLSERVICE-PLG06 | DISABLE Plugin | Tool Service | `sq_toolservice_plg06_disable_plugin.puml` | Plugins |
+| TOOLSVC-01 | READ File | Tool Service | `sq_toolservice01_read_file.puml` | File Operations |
+| TOOLSVC-02 | INSERT File | Tool Service | `sq_toolservice02_insert_file.puml` | File Operations |
+| TOOLSVC-03 | UPDATE File | Tool Service | `sq_toolservice03_update_file.puml` | File Operations |
+| TOOLSVC-04 | LIST Directory | Tool Service | `sq_toolservice04_list_directory.puml` | File Operations |
+| TOOLSVC-05 | DISPATCH Shell Command | Tool Service | `sq_toolservice05_dispatch_shell_command.puml` | Execution |
+| TOOLSVC-06 | SEARCH Grep | Tool Service | `sq_toolservice06_search_grep.puml` | Search Tools |
+| TOOLSVC-07 | SEARCH Glob | Tool Service | `sq_toolservice07_search_glob.puml` | Search Tools |
+| TOOLSVC-08 | SEARCH Find | Tool Service | `sq_toolservice08_search_find.puml` | Search Tools |
+| TOOLSVC-09 | FETCH Web Content | Tool Service | `sq_toolservice09_fetch_web_content.puml` | Web Tools |
+| TOOLSVC-10 | SEARCH Web | Tool Service | `sq_toolservice10_search_web.puml` | Web Tools |
+| TOOLSVC-11 | READ Git Status | Tool Service | `sq_toolservice11_read_git_status.puml` | Git Tools |
+| TOOLSVC-12 | DISPATCH MCP Extension | Tool Service | `sq_toolservice12_dispatch_mcp_extension.puml` | MCP Dispatch |
+| TOOLSVC-13 | READ LSP | Tool Service | `sq_toolservice13_read_lsp.puml` | LSP Tools |
+| TOOLSVC-14 | LIST Registered Tools | Tool Service | `sq_toolservice14_list_registered_tools.puml` | Registry |
+| TOOLSVC-15 | SPAWN Subagent | Tool Service | `sq_toolservice15_spawn_subagent.puml` | Agent Tools |
+| TOOLSVC-16 | INSERT Todo | Tool Service | `sq_toolservice16_insert_todo.puml` | Task Tracking |
+| TOOLSVC-17 | UPDATE Todo | Tool Service | `sq_toolservice17_update_todo.puml` | Task Tracking |
+| TOOLSVC-18 | READ Todos | Tool Service | `sq_toolservice18_read_todos.puml` | Task Tracking |
+| TOOLSVC-19 | PERSIST Memory | Tool Service | `sq_toolservice19_persist_memory.puml` | Memory |
+| TOOLSVC-20 | RECALL Memory | Tool Service | `sq_toolservice20_recall_memory.puml` | Memory |
+| TOOLSVC-21 | INSERT Plan | Tool Service | `sq_toolservice21_insert_plan.puml` | Planning |
+| TOOLSVC-22 | UPDATE Plan | Tool Service | `sq_toolservice22_update_plan.puml` | Planning |
+| TOOLSVC-HK01 | REGISTER Hook | Tool Service | `sq_toolservice_hk01_register_hook.puml` | Hooks |
+| TOOLSVC-HK02 | DISPATCH Pre-Tool Hook | Tool Service | `sq_toolservice_hk02_dispatch_pre_tool_hook.puml` | Hooks |
+| TOOLSVC-HK03 | DISPATCH Post-Tool Hook | Tool Service | `sq_toolservice_hk03_dispatch_post_tool_hook.puml` | Hooks |
+| TOOLSVC-HK04 | DISPATCH Pre-LLM Hook | Tool Service | `sq_toolservice_hk04_dispatch_pre_llm_hook.puml` | Hooks |
+| TOOLSVC-HK05 | DISPATCH Post-LLM Hook | Tool Service | `sq_toolservice_hk05_dispatch_post_llm_hook.puml` | Hooks |
+| TOOLSVC-HK06 | VALIDATE Hook Result | Tool Service | `sq_toolservice_hk06_validate_hook_result.puml` | Hooks |
+| TOOLSVC-PLG01 | DISCOVER Plugins | Tool Service | `sq_toolservice_plg01_discover_plugins.puml` | Plugins |
+| TOOLSVC-PLG02 | LOAD Manifest | Tool Service | `sq_toolservice_plg02_load_manifest.puml` | Plugins |
+| TOOLSVC-PLG03 | REGISTER Plugin Tools | Tool Service | `sq_toolservice_plg03_register_plugin_tools.puml` | Plugins |
+| TOOLSVC-PLG04 | REGISTER Plugin Hooks | Tool Service | `sq_toolservice_plg04_register_plugin_hooks.puml` | Plugins |
+| TOOLSVC-PLG05 | ENABLE Plugin | Tool Service | `sq_toolservice_plg05_enable_plugin.puml` | Plugins |
+| TOOLSVC-PLG06 | DISABLE Plugin | Tool Service | `sq_toolservice_plg06_disable_plugin.puml` | Plugins |
 
 ---
 
@@ -299,21 +318,23 @@ EDITSTRATEGYREPOSITORY-02..10 are sub-use-cases of EDITSTRATEGYREPOSITORY-01. Th
 
 ---
 
-## Evaluation Service Group (EVL)
+## Evaluation Service Group (`eval_svc`)
 
-EVALUATIONSERVICE-02..09 are sub-use-cases of EVALUATIONSERVICE-01. They use `<<include>>` from EVALUATIONSERVICE-01 and are modeled as process decomposition.
+Entry: Adapter → `agent_ctrl` → `task_svc` → `eval_svc`.
+
+EVALSVC-02..09 are sub-use-cases of EVALSVC-01.
 
 | UC ID | Operation | Component Owner | SQ Diagram | Notes |
 |-------|-----------|-----------------|------------|-------|
-| EVALUATIONSERVICE-01 | EVALUATE Task | Evaluation Service | `sq_evaluationservice01_evaluate_task.puml` | Primary. `<<include>>` EVALUATIONSERVICE-02..09 |
-| EVALUATIONSERVICE-02 | CHECK Task Completion | Evaluation Service | `sq_evaluationservice02_check_task_completion.puml` | Sub-UC of EVALUATIONSERVICE-01 |
-| EVALUATIONSERVICE-03 | CHECK Success | Evaluation Service | `sq_evaluationservice03_check_success.puml` | Sub-UC of EVALUATIONSERVICE-01 |
-| EVALUATIONSERVICE-04 | VALIDATE With LLM | Evaluation Service | `sq_evaluationservice04_validate_with_llm.puml` | Sub-UC of EVALUATIONSERVICE-01 |
-| EVALUATIONSERVICE-05 | VALIDATE Test Suite | Evaluation Service | `sq_evaluationservice05_validate_test_suite.puml` | Sub-UC of EVALUATIONSERVICE-01 |
-| EVALUATIONSERVICE-06 | COORDINATE Retry | Evaluation Service | `sq_evaluationservice06_coordinate_retry.puml` | Sub-UC of EVALUATIONSERVICE-01 |
-| EVALUATIONSERVICE-07 | RECORD Quality Signal | Evaluation Service | `sq_evaluationservice07_record_quality_signal.puml` | Sub-UC of EVALUATIONSERVICE-01 |
-| EVALUATIONSERVICE-08 | DETECT Repetition | Evaluation Service | `sq_evaluationservice08_detect_repetition.puml` | Sub-UC of EVALUATIONSERVICE-01 |
-| EVALUATIONSERVICE-09 | INJECT Turn Budget | Evaluation Service | `sq_evaluationservice09_inject_turn_budget.puml` | Sub-UC of EVALUATIONSERVICE-01 |
+| EVALSVC-01 | EVALUATE Task | Evaluation Service | `sq_evaluationservice01_evaluate_task.puml` | Primary. `<<include>>` EVALSVC-02..09 |
+| EVALSVC-02 | CHECK Task Completion | Evaluation Service | `sq_evaluationservice02_check_task_completion.puml` | Sub-UC of EVALSVC-01 |
+| EVALSVC-03 | CHECK Success | Evaluation Service | `sq_evaluationservice03_check_success.puml` | Sub-UC of EVALSVC-01 |
+| EVALSVC-04 | VALIDATE With LLM | Evaluation Service | `sq_evaluationservice04_validate_with_llm.puml` | Sub-UC of EVALSVC-01 |
+| EVALSVC-05 | VALIDATE Test Suite | Evaluation Service | `sq_evaluationservice05_validate_test_suite.puml` | Sub-UC of EVALSVC-01 |
+| EVALSVC-06 | COORDINATE Retry | Evaluation Service | `sq_evaluationservice06_coordinate_retry.puml` | Sub-UC of EVALSVC-01 |
+| EVALSVC-07 | RECORD Quality Signal | Evaluation Service | `sq_evaluationservice07_record_quality_signal.puml` | Sub-UC of EVALSVC-01 |
+| EVALSVC-08 | DETECT Repetition | Evaluation Service | `sq_evaluationservice08_detect_repetition.puml` | Sub-UC of EVALSVC-01 |
+| EVALSVC-09 | INJECT Turn Budget | Evaluation Service | `sq_evaluationservice09_inject_turn_budget.puml` | Sub-UC of EVALSVC-01 |
 
 ---
 
@@ -345,9 +366,9 @@ Sub-use-cases inherit the Component Owner of their parent UC and are modeled wit
 | Parent UC | Sub-UCs | Pattern |
 |-----------|---------|---------|
 | AGENTCTRL-01 (PROCESS Request) | AGENTCTRL-02..04 | `AGENTCTRL-01 ..> AGENTCTRL-02 : <<include>>` etc. |
-| CONTEXTSERVICE-01 (PROCESS Context) | CONTEXTSERVICE-02..06 | `CONTEXTSERVICE-01 ..> CONTEXTSERVICE-02 : <<include>>` etc. |
-| EDITSTRATEGYREPOSITORY-01 (SELECT Strategy) | EDITSTRATEGYREPOSITORY-02..10 | `EDITSTRATEGYREPOSITORY-01 ..> EDITSTRATEGYREPOSITORY-02 : <<include>>` etc. |
-| EVALUATIONSERVICE-01 (EVALUATE Task) | EVALUATIONSERVICE-02..09 | `EVALUATIONSERVICE-01 ..> EVALUATIONSERVICE-02 : <<include>>` etc. |
+| CONTEXTSVC-01 (PROCESS Context) | CONTEXTSVC-02..06 | `CONTEXTSVC-01 ..> CONTEXTSVC-02 : <<include>>` etc. |
+| EDITSTRATEGYREPO-01 (SELECT Strategy) | EDITSTRATEGYREPO-02..10 | `EDITSTRATEGYREPO-01 ..> EDITSTRATEGYREPO-02 : <<include>>` etc. |
+| EVALSVC-01 (EVALUATE Task) | EVALSVC-02..09 | `EVALSVC-01 ..> EVALSVC-02 : <<include>>` etc. |
 
 No sub-UC has its own sub-UCs (no nesting beyond one level).
 
@@ -397,15 +418,15 @@ Every C4 component maps 1:1 to a UC diagram file. UC ID prefixes are derived fro
 
 ### Service Layer
 
-| C4 Component | C4 ID | UC Group | UC IDs | Description |
-|--------------|-------|----------|--------|-------------|
-| Task Service | `task_svc` | AGT | TASKSERVICE-01..15 | Core agentic loop |
-| Tool Service | `tool_svc` | TL | TOOLSERVICE-01..22, HK01..06, PLG01..06 | Tool registry, hooks, plugins |
-| Session Service | `session_svc` | SSN | SESSIONSERVICE-01..09 | Session lifecycle |
-| Config Service | `config_svc` | CFG | CONFIGSERVICE-01..03 | Config loading and validation |
-| Safety Service | `safety_svc` | SAF | SAFETYSERVICE-01..03 | Permission gating, injection scanning |
-| Context Service | `context_svc` | CTX | CONTEXTSERVICE-01..06 | Context pipeline |
-| Evaluation Service | `eval_svc` | EVL | EVALUATIONSERVICE-01..09 | Task evaluation |
+| C4 Component | C4 ID | UC Diagram | UC IDs | C4 Entry Chain |
+|--------------|-------|------------|--------|----------------|
+| Task Service | `task_svc` | `uc_task_svc.puml` | TASKSVC-01..15 | `agent_ctrl` → `task_svc` |
+| Tool Service | `tool_svc` | `uc_tool_svc.puml` | TOOLSVC-01..22, HK, PLG | `agent_ctrl` → `task_svc` → `tool_svc` |
+| Session Service | `session_svc` | `uc_session_svc.puml` | SESSIONSVC-01..09 | `agent_ctrl` → `session_svc` |
+| Config Service | `config_svc` | `uc_config_svc.puml` | CONFIGSVC-01..03 | `agent_ctrl` → `config_svc` |
+| Safety Service | `safety_svc` | `uc_safety_svc.puml` | SAFETYSVC-01..03 | `agent_ctrl` → `task_svc` → `safety_svc` |
+| Context Service | `context_svc` | `uc_context_svc.puml` | CONTEXTSVC-01..06 | `agent_ctrl` → `task_svc` → `context_svc` |
+| Evaluation Service | `eval_svc` | `uc_eval_svc.puml` | EVALSVC-01..09 | `agent_ctrl` → `task_svc` → `eval_svc` |
 
 ### Repository Layer
 

@@ -5,153 +5,80 @@
 
 ' ============================================================
 ' Title:     nasim — UC: Task Service Group
-' Group:     TASKSERVICE (Task Service)
-' Boundary:  NASIM Service
+' C4 ID:     task_svc
+' C4 Name:   Task Service
+' Boundary:  NASIM Application — Service Layer
 ' Purpose:   Agentic loop: LLM call, tool dispatch, context assembly,
 '            subagent orchestration, error recovery, persona management.
-'            Entry chain: User → Interface → Agent Controller → Task Service
-' Milestone: v1.0
-' Version:   13.0.0
+'            C4 Rel: agent_ctrl → task_svc; task_svc → tool_svc,
+'            safety_svc, context_svc, eval_svc, session_repo,
+'            llm_repo, wire_log_repo
+' Entry:     Adapter → agent_ctrl → task_svc
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
 ' SQ:        sq_taskservice01..sq_taskservice15
 ' ============================================================
 
 
-left to right direction
-
-
-title nasim — Agent Use Cases
-
-
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-
-
-skinparam usecase {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-  ArrowColor #424242
-  FontSize 12
-}
-
-
-skinparam actor {
-  BackgroundColor #E8EAF6
-  BorderColor #3949AB
-  FontColor #1A237E
-  FontSize 12
-}
-
-
-skinparam actor<<system>> {
-  BackgroundColor #E3F2FD
-  BorderColor #1565C0
-  FontColor #0D47A1
-}
-
-
-skinparam usecase<<extref>> {
-  BackgroundColor #FFF9C4
-  BorderColor #F9A825
-  FontColor #5D4037
-  BorderStyle dashed
-}
-
-
-' ============================================================
-' Actors
-' ============================================================
+title nasim — UC: Task Service Group
 
 
 actor "User" as User
-actor "LLM Repository" as Router <<system>>
-actor "Task Service" as Agent <<system>>
 
 
-' ============================================================
-' Cross-Group External References
-' ============================================================
-
-
-usecase "SAFETYSERVICE-01\nCHECK Permission\n[uc_safety_svc]" as SAF01_ext <<extref>>
-usecase "LLMREPOSITORY-02\nREQUEST Chat\n[uc_llm_repo]" as PRV02_ext <<extref>>
-usecase "LLMREPOSITORY-03\nSTREAM Chat\n[uc_llm_repo]" as PRV03_ext <<extref>>
-
-
-' ============================================================
-' System Boundary
-' ============================================================
+usecase "SAFETYSVC-01\nCHECK Permission\n[uc_safety_svc]" as SAF01_ext <<extref>>
+usecase "SAFETYSVC-03\nAPPLY Safety Mode\n[uc_safety_svc]" as SAF03_ext <<extref>>
+usecase "CONTEXTSVC-01\nPROCESS Context\n[uc_context_svc]" as CTX01_ext <<extref>>
+usecase "EVALSVC-01\nEVALUATE Task\n[uc_eval_svc]" as EVL01_ext <<extref>>
+usecase "LLMREPO-02\nREQUEST Chat\n[uc_llm_repo]" as LLM02_ext <<extref>>
+usecase "LLMREPO-03\nSTREAM Chat\n[uc_llm_repo]" as LLM03_ext <<extref>>
+usecase "SESSIONREPO-01\nAPPEND Message\n[uc_session_repo]" as SR01_ext <<extref>>
+usecase "WIRELOGREPO-01\nAPPEND Event\n[uc_wire_log_repo]" as WL01_ext <<extref>>
 
 
 rectangle "nasim" {
-  package "Agent Group (AGT)" {
-    usecase "**TASKSERVICE-01 PROCESS User Task**\n--\nCore agentic loop:\nprovider call, tool dispatch" <<master>> as AGT01
-    usecase "**TASKSERVICE-02 DISPATCH Tool Call**\n--\nRoute tool call to registry" <<include>> as AGT02
-    usecase "**TASKSERVICE-03 UPDATE Conversation**\n--\nManage message list and token count" <<include>> as AGT03
-    usecase "**TASKSERVICE-04 DELETE History**\n--\nReset conversation history" <<include>> as AGT04
-    usecase "**TASKSERVICE-06 COMPACT Context**\n--\nSummarize old exchanges\nvia secondary LLM" <<extend>> as AGT06
-    usecase "**TASKSERVICE-07 QUEUE Plan**\n--\nHold queued tool calls in plan mode" <<extend>> as AGT07
-    usecase "**TASKSERVICE-08 APPROVE Plan**\n--\nDrain queued plan calls" <<extend>> as AGT08
-    usecase "**TASKSERVICE-09 SPAWN Subagent**\n--\nCreate child agent\nwith restricted tools" <<master>> as AGT09
-    usecase "**TASKSERVICE-10 COLLECT Subagent Result**\n--\nGather results from\ncompleted child agents" <<include>> as AGT10
-    usecase "**TASKSERVICE-11 DELEGATE to Persona**\n--\nAssign tasks to\nspecialized persona roles" <<extend>> as AGT11
-    usecase "**TASKSERVICE-12 LOAD Persona**\n--\nLoad persona configuration" <<extend>> as AGT12
-    usecase "**TASKSERVICE-13 SWITCH Persona**\n--\nSwitch to different persona at runtime" <<extend>> as AGT13
-    usecase "**TASKSERVICE-14 HANDLE Error**\n--\nStructured error handling with recovery" <<master>> as AGT14
-    usecase "**TASKSERVICE-15 DISPATCH Safety Pipeline**\n--\nRun permission, injection,\negress checks" <<include>> as AGT15
+  package "Task Service Group" {
+    usecase "**TASKSVC-01 PROCESS User Task**\n--\nCore agentic loop: context,\nLLM call, tool dispatch" <<master>> as TS01
+    usecase "**TASKSVC-02 DISPATCH Tool Call**\n--\nRoute tool call to tool_svc" <<include>> as TS02
+    usecase "**TASKSVC-03 UPDATE Conversation**\n--\nAppend messages, track tokens" <<include>> as TS03
+    usecase "**TASKSVC-04 DELETE History**\n--\nReset conversation history" <<include>> as TS04
+    usecase "**TASKSVC-07 QUEUE Plan**\n--\nHold queued tool calls\nin plan mode" <<extend>> as TS07
+    usecase "**TASKSVC-08 APPROVE Plan**\n--\nDrain queued plan calls" <<extend>> as TS08
+    usecase "**TASKSVC-09 SPAWN Subagent**\n--\nCreate child agent with\nrestricted tools" <<extend>> as TS09
+    usecase "**TASKSVC-10 COLLECT Subagent Result**\n--\nGather child agent results" <<include>> as TS10
+    usecase "**TASKSVC-11 DELEGATE to Persona**\n--\nAssign tasks to persona roles" <<extend>> as TS11
+    usecase "**TASKSVC-12 LOAD Persona**\n--\nLoad persona configuration" <<extend>> as TS12
+    usecase "**TASKSVC-13 SWITCH Persona**\n--\nSwitch persona at runtime" <<extend>> as TS13
+    usecase "**TASKSVC-14 HANDLE Error**\n--\nStructured error handling\nwith recovery" <<extend>> as TS14
+    usecase "**TASKSVC-15 DISPATCH Safety Pipeline**\n--\nPermission, injection,\negress checks" <<include>> as TS15
   }
 }
 
 
-' ============================================================
-' Actor -> Use Case Associations
-' ============================================================
+User --> TS01
+User --> TS09
 
+TS01 ..> TS02 : <<include>>
+TS01 ..> TS03 : <<include>>
+TS01 ..> TS04 : <<include>>
+TS01 ..> TS07 : <<extend>>
+TS01 ..> TS08 : <<extend>>
+TS01 ..> TS09 : <<extend>>
+TS01 ..> TS11 : <<extend>>
+TS01 ..> TS12 : <<extend>>
+TS01 ..> TS13 : <<extend>>
+TS01 ..> TS14 : <<extend>>
+TS01 ..> TS15 : <<include>>
 
-User --> AGT09
-User --> AGT14
-Agent --> AGT06
-Agent --> AGT07
-Agent --> AGT08
-Agent --> AGT11
-Agent --> AGT12
-Agent --> AGT13
-Agent --> AGT06
-Agent --> AGT07
-Agent --> AGT08
-Agent --> AGT11
-Agent --> AGT12
-Agent --> AGT13
-
-
-' ============================================================
-' Relationships (downward <<include>> only)
-' ============================================================
-
-
-AGT01 ..> AGT02 : <<include>>
-AGT01 ..> AGT03 : <<include>>
-AGT01 ..> AGT04 : <<include>>
-AGT01 ..> AGT06 : <<extend>>
-AGT01 ..> AGT07 : <<extend>>
-AGT01 ..> AGT08 : <<extend>>
-AGT01 ..> AGT09 : <<extend>>
-AGT01 ..> AGT11 : <<extend>>
-AGT01 ..> AGT12 : <<extend>>
-AGT01 ..> AGT13 : <<extend>>
-AGT01 ..> AGT14 : <<extend>>
-AGT01 ..> AGT15 : <<include>>
-
-
-AGT02 ..> SAF01_ext : <<include>>
-AGT02 ..> PRV02_ext : <<include>>
-AGT02 ..> PRV03_ext : <<extend>>
-
-
-AGT09 ..> AGT10 : <<include>>
-
+TS02 ..> SAF01_ext : <<include>>
+TS02 ..> LLM02_ext : <<include>>
+TS02 ..> LLM03_ext : <<extend>>
+TS03 ..> SR01_ext : <<include>>
+TS03 ..> WL01_ext : <<include>>
+TS01 ..> CTX01_ext : <<include>>
+TS01 ..> EVL01_ext : <<extend>>
+TS08 ..> TS02 : <<include>>
+TS09 ..> TS10 : <<include>>
+TS15 ..> SAF03_ext : <<include>>
 
 
 @enduml

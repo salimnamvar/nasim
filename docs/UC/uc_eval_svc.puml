@@ -5,105 +5,49 @@
 
 ' ============================================================
 ' Title:     nasim — UC: Evaluation Service Group
-' Group:     EVALUATIONSERVICE (Evaluation Service)
-' Boundary:  NASIM Service
-' Purpose:   Task evaluation: success checks, LLM review, retry coordination,
-'            repetition detection, turn budget management.
-'            Entry chain: User → Interface → Agent Controller → Task Service → Evaluation Service
-' Milestone: v1.0
-' Version:   13.0.0
+' C4 ID:     eval_svc
+' C4 Name:   Evaluation Service
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Task evaluation: success checks, LLM review, retry
+'            coordination, repetition detection, turn budget.
+'            C4 Rel: task_svc → eval_svc
+' Entry:     Adapter → agent_ctrl → task_svc → eval_svc
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
 ' SQ:        sq_evaluationservice01..sq_evaluationservice09
 ' ============================================================
 
 
-left to right direction
-
-
-title nasim — Evaluation Use Cases
-
-
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-
-
-skinparam usecase {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-  ArrowColor #424242
-  FontSize 12
-}
-
-
-skinparam actor {
-  BackgroundColor #E8EAF6
-  BorderColor #3949AB
-  FontColor #1A237E
-  FontSize 12
-}
-
-
-skinparam actor<<system>> {
-  BackgroundColor #E3F2FD
-  BorderColor #1565C0
-  FontColor #0D47A1
-}
-
-
-' ------------------------------------------------------------
-' Actors
-' ------------------------------------------------------------
+title nasim — UC: Evaluation Service Group
 
 
 actor "User" as User
 
 
-
-' ------------------------------------------------------------
-' System Boundary
-' ------------------------------------------------------------
-
-
 rectangle "nasim" {
-  package "Evaluation Group (EVL)" {
-    usecase "**EVALUATIONSERVICE-01 EVALUATE Task**\n--\nOrchestrate task evaluation:\nchecks, scores, retries" <<master>> as EVL01
-    usecase "**EVALUATIONSERVICE-02 CHECK Task Completion**\n--\nEvaluate task completion\nagainst success criteria" <<include>> as EVL02
-    usecase "**EVALUATIONSERVICE-03 CHECK Success**\n--\nRun user-defined success checks" <<include>> as EVL03
-    usecase "**EVALUATIONSERVICE-04 VALIDATE With LLM**\n--\nLLM-based code review\nand quality assessment" <<include>> as EVL04
-    usecase "**EVALUATIONSERVICE-05 VALIDATE Test Suite**\n--\nRun project test suites" <<include>> as EVL05
-    usecase "**EVALUATIONSERVICE-06 COORDINATE Retry**\n--\nCoordinate retry with\nbackoff and escalation" <<include>> as EVL06
-    usecase "**EVALUATIONSERVICE-07 RECORD Quality Signal**\n--\nProduce accept/reject\nwith feedback" <<include>> as EVL07
-    usecase "**EVALUATIONSERVICE-08 DETECT Repetition**\n--\nDetect repeated failures\nor loops" <<include>> as EVL08
-    usecase "**EVALUATIONSERVICE-09 INJECT Turn Budget**\n--\nInject turn budget limits\ninto context" <<include>> as EVL09
+  package "Evaluation Service Group" {
+    usecase "**EVALSVC-01 EVALUATE Task**\n--\nOrchestrate task evaluation:\nchecks, scores, retries" <<master>> as EV01
+    usecase "**EVALSVC-02 CHECK Task Completion**\n--\nEvaluate against success criteria" <<include>> as EV02
+    usecase "**EVALSVC-03 CHECK Success**\n--\nRun user-defined success checks" <<include>> as EV03
+    usecase "**EVALSVC-04 VALIDATE With LLM**\n--\nLLM-based code review" <<include>> as EV04
+    usecase "**EVALSVC-05 VALIDATE Test Suite**\n--\nRun project test suites" <<include>> as EV05
+    usecase "**EVALSVC-06 COORDINATE Retry**\n--\nRetry with backoff and escalation" <<include>> as EV06
+    usecase "**EVALSVC-07 RECORD Quality Signal**\n--\nProduce accept/reject with feedback" <<include>> as EV07
+    usecase "**EVALSVC-08 DETECT Repetition**\n--\nDetect repeated failures or loops" <<include>> as EV08
+    usecase "**EVALSVC-09 INJECT Turn Budget**\n--\nInject turn budget limits" <<include>> as EV09
   }
 }
 
 
-' ------------------------------------------------------------
-' Actor -> Use Case Associations
-' ------------------------------------------------------------
+User --> EV01
 
-
-User --> EVL01
-
-
-' ------------------------------------------------------------
-' Relationships
-' ------------------------------------------------------------
-
-
-EVL01 ..> EVL02 : <<include>>
-EVL01 ..> EVL03 : <<include>>
-EVL01 ..> EVL04 : <<include>>
-EVL01 ..> EVL05 : <<include>>
-EVL01 ..> EVL06 : <<include>>
-EVL01 ..> EVL07 : <<include>>
-EVL01 ..> EVL08 : <<include>>
-EVL01 ..> EVL09 : <<include>>
-
-
+EV01 ..> EV02 : <<include>>
+EV01 ..> EV03 : <<include>>
+EV01 ..> EV04 : <<include>>
+EV01 ..> EV05 : <<include>>
+EV01 ..> EV06 : <<include>>
+EV01 ..> EV07 : <<include>>
+EV01 ..> EV08 : <<include>>
+EV01 ..> EV09 : <<include>>
 
 
 @enduml

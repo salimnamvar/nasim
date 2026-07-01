@@ -4,123 +4,95 @@
 
 
 ' ============================================================
-' Title:     nasim — UC Overview (Architecture Navigation Map)
-' Group:     ALL (All Groups)
-' Boundary:  NASIM Application
-' Purpose:   High-level group overview showing all UC groups
-'            and their actor interactions. Agent Controller
-'            (agent_ctrl) is the central convergence point.
-'            This is a NAVIGATION MAP — no individual UC IDs shown.
+' Title:     nasim — UC Group Overview
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Milestone: v1.0
-' Version:   13.0.0
-' Review:    —
+' Purpose:   Navigation map — CSR delegation chain only.
+'            No individual UC IDs shown.
 ' ============================================================
 
 
-title nasim — UC Group Overview (Architecture Navigation)
-
-
-' ------------------------------------------------------------
-' Actors
-' ------------------------------------------------------------
+title nasim — UC Group Overview (C4 v13.0.0)
 
 
 actor "User" as User
-
-
 actor "MCP Client" as MCPClient <<system>>
-
-
-
-' ------------------------------------------------------------
-' System Boundary — UC Groups (C4 component ID traceability)
-' ------------------------------------------------------------
 
 
 rectangle "nasim" {
 
-  usecase "**Agent Controller Group**\n[agent_ctrl]" <<master>> as AC_GROUP
-  usecase "**HTTP Adapter Group**\n[http_adp]" <<master>> as HTTP_GROUP
-  usecase "**CLI Adapter Group**\n[cli_adp]" <<master>> as CLI_GROUP
-  usecase "**MCP Adapter Group**\n[mcp_adp]" <<master>> as MCP_ADP_GROUP
+  ' Controller Layer
+  usecase "**CLI Adapter**\n[cli_adp]" <<master>> as CLI_ADP
+  usecase "**HTTP Adapter**\n[http_adp]" <<master>> as HTTP_ADP
+  usecase "**MCP Adapter**\n[mcp_adp]" <<master>> as MCP_ADP
+  usecase "**Agent Controller**\n[agent_ctrl]" <<master>> as AGENT_CTRL
 
-  usecase "**Task Service Group**\n[task_svc]" <<master>> as TASK_GROUP
-  usecase "**Session Service Group**\n[session_svc]" <<master>> as SESSION_GROUP
-  usecase "**Config Service Group**\n[config_svc]" <<master>> as CONFIG_GROUP
-  usecase "**Tool Service Group**\n[tool_svc]" <<master>> as TOOL_GROUP
+  ' Service Layer
+  usecase "**Task Service**\n[task_svc]" <<master>> as TASK_SVC
+  usecase "**Session Service**\n[session_svc]" <<master>> as SESSION_SVC
+  usecase "**Config Service**\n[config_svc]" <<master>> as CONFIG_SVC
+  usecase "**Tool Service**\n[tool_svc]" <<master>> as TOOL_SVC
+  usecase "**Safety Service**\n[safety_svc]" <<master>> as SAFETY_SVC
+  usecase "**Context Service**\n[context_svc]" <<master>> as CONTEXT_SVC
+  usecase "**Evaluation Service**\n[eval_svc]" <<master>> as EVAL_SVC
 
-  usecase "**LLM Repository Group**\n[llm_repo]" <<master>> as LLM_GROUP
-  usecase "**Context Service Group**\n[context_svc]" <<master>> as CTX_GROUP
-  usecase "**Safety Service Group**\n[safety_svc]" <<master>> as SAFETY_GROUP
-  usecase "**Sandbox Repository Group**\n[sandbox_repo]" <<master>> as SANDBOX_GROUP
-  usecase "**Edit Strategy Repository Group**\n[edit_strategy_repo]" <<master>> as EDIT_GROUP
-  usecase "**Evaluation Service Group**\n[eval_svc]" <<master>> as EVAL_GROUP
-  usecase "**Git Repository Group**\n[git_repo]" <<master>> as GIT_GROUP
-  usecase "**MCP Repository Group**\n[mcp_repo]" <<master>> as MCP_GROUP
-  usecase "**Memory Repository Group**\n[memory_repo]" <<master>> as MEMORY_GROUP
-  usecase "**Repo Intelligence Repository Group**\n[repo_intel_repo]" <<master>> as REPO_INTEL_GROUP
-  usecase "**Wire Log Repository Group**\n[wire_log_repo]" <<master>> as WIRE_LOG_GROUP
-  usecase "**Session Repository Group**\n[session_repo]" <<master>> as SESSION_REPO_GROUP
-  usecase "**History Repository Group**\n[history_repo]" <<master>> as HISTORY_REPO_GROUP
-  usecase "**Config Repository Group**\n[config_repo]" <<master>> as CONFIG_REPO_GROUP
-  usecase "**Filesystem Repository Group**\n[fs_repo]" <<master>> as FS_REPO_GROUP
-  usecase "**Web Repository Group**\n[web_repo]" <<master>> as WEB_REPO_GROUP
+  ' Repository Layer
+  usecase "**Session Repository**\n[session_repo]" <<master>> as SESSION_REPO
+  usecase "**History Repository**\n[history_repo]" <<master>> as HISTORY_REPO
+  usecase "**Config Repository**\n[config_repo]" <<master>> as CONFIG_REPO
+  usecase "**LLM Repository**\n[llm_repo]" <<master>> as LLM_REPO
+  usecase "**Filesystem Repository**\n[fs_repo]" <<master>> as FS_REPO
+  usecase "**Sandbox Repository**\n[sandbox_repo]" <<master>> as SANDBOX_REPO
+  usecase "**Edit Strategy Repository**\n[edit_strategy_repo]" <<master>> as EDIT_REPO
+  usecase "**Git Repository**\n[git_repo]" <<master>> as GIT_REPO
+  usecase "**MCP Repository**\n[mcp_repo]" <<master>> as MCP_REPO
+  usecase "**Memory Repository**\n[memory_repo]" <<master>> as MEMORY_REPO
+  usecase "**Repo Intelligence Repository**\n[repo_intel_repo]" <<master>> as REPO_INTEL
+  usecase "**Web Repository**\n[web_repo]" <<master>> as WEB_REPO
+  usecase "**Wire Log Repository**\n[wire_log_repo]" <<master>> as WIRE_LOG
 }
 
 
-' ------------------------------------------------------------
-' Actor -> Group Associations
-' ------------------------------------------------------------
+' External clients → adapters (C4 Container_Ext → Component)
+User --> CLI_ADP
+User --> HTTP_ADP
+MCPClient --> MCP_ADP
 
+' Adapters → convergence point
+CLI_ADP ..> AGENT_CTRL : <<include>>
+HTTP_ADP ..> AGENT_CTRL : <<include>>
+MCP_ADP ..> AGENT_CTRL : <<include>>
 
-User --> AC_GROUP
-User --> HTTP_GROUP
-User --> CLI_GROUP
+' Controller → services (C4 Rel)
+AGENT_CTRL ..> TASK_SVC : <<include>>
+AGENT_CTRL ..> SESSION_SVC : <<include>>
+AGENT_CTRL ..> CONFIG_SVC : <<include>>
 
-MCPClient --> MCP_ADP_GROUP
+' Service orchestration (C4 Rel)
+TASK_SVC ..> TOOL_SVC : <<include>>
+TASK_SVC ..> SAFETY_SVC : <<include>>
+TASK_SVC ..> CONTEXT_SVC : <<include>>
+TASK_SVC ..> EVAL_SVC : <<extend>>
 
+' Service → repository (C4 Rel)
+TASK_SVC ..> SESSION_REPO : <<include>>
+TASK_SVC ..> LLM_REPO : <<include>>
+TASK_SVC ..> WIRE_LOG : <<include>>
+SESSION_SVC ..> SESSION_REPO : <<include>>
+SESSION_SVC ..> HISTORY_REPO : <<include>>
+SESSION_SVC ..> WIRE_LOG : <<include>>
+CONFIG_SVC ..> CONFIG_REPO : <<include>>
+TOOL_SVC ..> FS_REPO : <<include>>
+TOOL_SVC ..> SANDBOX_REPO : <<include>>
+TOOL_SVC ..> EDIT_REPO : <<include>>
+TOOL_SVC ..> GIT_REPO : <<include>>
+TOOL_SVC ..> MCP_REPO : <<include>>
+TOOL_SVC ..> WEB_REPO : <<include>>
+CONTEXT_SVC ..> MEMORY_REPO : <<include>>
+CONTEXT_SVC ..> REPO_INTEL : <<include>>
 
-
-' ------------------------------------------------------------
-' Group Relationships — Convergence Point Delegation Chain
-' ------------------------------------------------------------
-
-' All interface adapters route through Agent Controller
-CLI_GROUP ..> AC_GROUP : <<include>>
-HTTP_GROUP ..> AC_GROUP : <<include>>
-MCP_ADP_GROUP ..> AC_GROUP : <<include>>
-
-' Agent Controller -> downstream core groups (mandatory)
-AC_GROUP ..> TASK_GROUP : <<include>>
-AC_GROUP ..> SESSION_GROUP : <<include>>
-AC_GROUP ..> CONFIG_GROUP : <<include>>
-AC_GROUP ..> TOOL_GROUP : <<include>>
-
-' Task Service -> execution groups (mandatory includes)
-TASK_GROUP ..> LLM_GROUP : <<include>>
-TASK_GROUP ..> CTX_GROUP : <<include>>
-TASK_GROUP ..> SAFETY_GROUP : <<include>>
-TASK_GROUP ..> SANDBOX_GROUP : <<include>>
-
-' Service -> repository groups (data access)
-SESSION_GROUP ..> SESSION_REPO_GROUP : <<include>>
-SESSION_GROUP ..> HISTORY_REPO_GROUP : <<include>>
-CONFIG_GROUP ..> CONFIG_REPO_GROUP : <<include>>
-TOOL_GROUP ..> FS_REPO_GROUP : <<include>>
-TOOL_GROUP ..> WEB_REPO_GROUP : <<include>>
-
-' Task Service -> specialized/cross-cutting groups (optional extends)
-TASK_GROUP ..> EDIT_GROUP : <<extend>>
-TASK_GROUP ..> EVAL_GROUP : <<extend>>
-TASK_GROUP ..> GIT_GROUP : <<extend>>
-TASK_GROUP ..> MCP_GROUP : <<extend>>
-TASK_GROUP ..> MEMORY_GROUP : <<extend>>
-TASK_GROUP ..> REPO_INTEL_GROUP : <<extend>>
-TASK_GROUP ..> WIRE_LOG_GROUP : <<extend>>
-TASK_GROUP ..> SESSION_REPO_GROUP : <<include>>
-EDIT_GROUP ..> FS_REPO_GROUP : <<include>>
-EDIT_GROUP ..> SANDBOX_GROUP : <<include>>
+' Repository → repository (C4 Rel)
+EDIT_REPO ..> SANDBOX_REPO : <<include>>
+EDIT_REPO ..> FS_REPO : <<include>>
 
 
 @enduml

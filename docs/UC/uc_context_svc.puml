@@ -5,100 +5,50 @@
 
 ' ============================================================
 ' Title:     nasim — UC: Context Service Group
-' Group:     CONTEXTSERVICE (Context Service)
-' Boundary:  NASIM Service
-' Purpose:   Context pipeline: graph construction, truncation, distillation,
-'            injection, and compaction.
-'            Entry chain: User → Interface → Agent Controller → Task Service → Context Service
-' Milestone: v1.0
-' Version:   13.0.0
+' C4 ID:     context_svc
+' C4 Name:   Context Service
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Context pipeline: graph construction, truncation,
+'            distillation, injection, and compaction.
+'            C4 Rel: task_svc → context_svc; context_svc →
+'            memory_repo, repo_intel_repo
+' Entry:     Adapter → agent_ctrl → task_svc → context_svc
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
 ' SQ:        sq_contextservice01..sq_contextservice06
 ' ============================================================
 
 
-left to right direction
-
-
-title nasim — Context Service Use Cases
-
-
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-
-
-skinparam usecase {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-  ArrowColor #424242
-  FontSize 12
-}
-
-
-skinparam actor {
-  BackgroundColor #E8EAF6
-  BorderColor #3949AB
-  FontColor #1A237E
-  FontSize 12
-}
-
-
-skinparam actor<<system>> {
-  BackgroundColor #E3F2FD
-  BorderColor #1565C0
-  FontColor #0D47A1
-}
-
-
-' ------------------------------------------------------------
-' Actors
-' ------------------------------------------------------------
+title nasim — UC: Context Service Group
 
 
 actor "User" as User
 
 
-
-' ------------------------------------------------------------
-' System Boundary
-' ------------------------------------------------------------
+usecase "MEMORYREPO-02\nRECALL Knowledge\n[uc_memory_repo]" as MR02_ext <<extref>>
+usecase "REPOINTELREPO-04\nINJECT RepoMap\n[uc_repo_intel_repo]" as RI04_ext <<extref>>
 
 
 rectangle "nasim" {
-  package "Context Service Group (CTX)" {
-    usecase "**CONTEXTSERVICE-01 PROCESS Context**\n--\nOrchestrate context pipeline stages" <<master>> as CTX01
-    usecase "**CONTEXTSERVICE-02 TRUNCATE Nodes**\n--\nTruncate context nodes to fit token budget" <<include>> as CTX02
-    usecase "**CONTEXTSERVICE-03 DISTILL Nodes**\n--\nSummarize long context nodes via LLM" <<include>> as CTX03
-    usecase "**CONTEXTSERVICE-04 INJECT Context**\n--\nInject memory and repo-map into graph" <<include>> as CTX04
-    usecase "**CONTEXTSERVICE-05 COMPACT Nodes**\n--\nMerge redundant context nodes" <<include>> as CTX05
-    usecase "**CONTEXTSERVICE-06 TRACK Token Budget**\n--\nTrack cumulative token usage" <<include>> as CTX06
+  package "Context Service Group" {
+    usecase "**CONTEXTSVC-01 PROCESS Context**\n--\nOrchestrate context pipeline stages" <<master>> as CX01
+    usecase "**CONTEXTSVC-02 TRUNCATE Nodes**\n--\nTruncate nodes to fit\ntoken budget" <<include>> as CX02
+    usecase "**CONTEXTSVC-03 DISTILL Nodes**\n--\nSummarize long nodes via LLM" <<include>> as CX03
+    usecase "**CONTEXTSVC-04 INJECT Context**\n--\nInject memory and repo-map" <<include>> as CX04
+    usecase "**CONTEXTSVC-05 COMPACT Nodes**\n--\nMerge redundant context nodes" <<include>> as CX05
+    usecase "**CONTEXTSVC-06 TRACK Token Budget**\n--\nTrack cumulative token usage" <<include>> as CX06
   }
 }
 
 
-' ------------------------------------------------------------
-' Actor -> Use Case Associations
-' ------------------------------------------------------------
+User --> CX01
 
-
-User --> CTX01
-
-
-
-
-' ------------------------------------------------------------
-' Relationships
-' ------------------------------------------------------------
-
-
-CTX01 ..> CTX02 : <<include>>
-CTX01 ..> CTX03 : <<include>>
-CTX01 ..> CTX04 : <<include>>
-CTX01 ..> CTX05 : <<include>>
-CTX01 ..> CTX06 : <<include>>
-
+CX01 ..> CX02 : <<include>>
+CX01 ..> CX03 : <<include>>
+CX01 ..> CX04 : <<include>>
+CX01 ..> CX05 : <<include>>
+CX01 ..> CX06 : <<include>>
+CX04 ..> MR02_ext : <<include>>
+CX04 ..> RI04_ext : <<include>>
 
 
 @enduml

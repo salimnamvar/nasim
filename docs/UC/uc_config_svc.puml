@@ -5,94 +5,45 @@
 
 ' ============================================================
 ' Title:     nasim — UC: Config Service Group
-' Group:     CONFIGSERVICE (Config Service)
-' Boundary:  NASIM Service
+' C4 ID:     config_svc
+' C4 Name:   Config Service
+' Boundary:  NASIM Application — Service Layer
 ' Purpose:   Config loading, validation, layered overrides
-'            (project YAML, env vars, CLI flags, defaults);
-'            single source for all configuration access.
-'            Entry chain: User → Interface → Agent Controller → Config Service
-' Milestone: v1.0
-' Version:   13.0.0
+'            (project YAML, env vars, CLI flags, defaults).
+'            C4 Rel: agent_ctrl → config_svc; config_svc → config_repo
+' Entry:     Adapter → agent_ctrl → config_svc
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
 ' SQ:        sq_configservice01..sq_configservice03
 ' ============================================================
 
 
-left to right direction
-
-
-title nasim — Config Use Cases
-
-
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-
-
-skinparam usecase {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-  ArrowColor #424242
-  FontSize 12
-}
-
-
-skinparam actor {
-  BackgroundColor #E8EAF6
-  BorderColor #3949AB
-  FontColor #1A237E
-  FontSize 12
-}
-
-
-skinparam actor<<system>> {
-  BackgroundColor #E3F2FD
-  BorderColor #1565C0
-  FontColor #0D47A1
-}
-
-
-' ------------------------------------------------------------
-' Actors
-' ------------------------------------------------------------
+title nasim — UC: Config Service Group
 
 
 actor "User" as User
 
 
-
-' ------------------------------------------------------------
-' System Boundary
-' ------------------------------------------------------------
+usecase "CONFIGREPO-01\nREAD YAML\n[uc_config_repo]" as CR01_ext <<extref>>
+usecase "CONFIGREPO-02\nREAD Environment\n[uc_config_repo]" as CR02_ext <<extref>>
+usecase "CONFIGREPO-03\nWRITE Config\n[uc_config_repo]" as CR03_ext <<extref>>
 
 
 rectangle "nasim" {
-  package "Config Group (CFG)" {
-    usecase "**CONFIGSERVICE-01 LOAD Config**\n--\nLoad global YAML, project YAML, env vars, CLI flags" <<master>> as CFG01
-    usecase "**CONFIGSERVICE-02 VALIDATE Config**\n--\nValidate config schema at load time" <<include>> as CFG02
-    usecase "**CONFIGSERVICE-03 APPLY Layered Config**\n--\nMerge layered config with precedence rules" <<include>> as CFG03
+  package "Config Service Group" {
+    usecase "**CONFIGSVC-01 LOAD Config**\n--\nLoad YAML, env vars, CLI flags" <<master>> as CS01
+    usecase "**CONFIGSVC-02 VALIDATE Config**\n--\nValidate config schema at load time" <<include>> as CS02
+    usecase "**CONFIGSVC-03 APPLY Layered Config**\n--\nMerge layered config with\nprecedence rules" <<include>> as CS03
   }
 }
 
 
-' ------------------------------------------------------------
-' Actor -> Use Case Associations
-' ------------------------------------------------------------
+User --> CS01
 
-
-User --> CFG01
-
-
-
-' ------------------------------------------------------------
-' Relationships
-' ------------------------------------------------------------
-
-
-CFG01 ..> CFG03 : <<include>>
-CFG03 ..> CFG02 : <<include>>
-
+CS01 ..> CR01_ext : <<include>>
+CS01 ..> CR02_ext : <<include>>
+CS01 ..> CS03 : <<include>>
+CS03 ..> CS02 : <<include>>
+CS03 ..> CR03_ext : <<include>>
 
 
 @enduml

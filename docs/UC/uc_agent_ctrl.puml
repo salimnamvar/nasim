@@ -5,17 +5,14 @@
 
 ' ============================================================
 ' Title:     nasim — UC: Agent Controller Group
-' Group:     AGENTCTRL (Agent Controller)
 ' C4 ID:     agent_ctrl
-' Boundary:  NASIM Application
-' Purpose:   Single convergence point for all interface
-'            containers (CLI Adapter, HTTP Adapter, MCP Adapter).
-'            Routes validated requests to services. Protocol-agnostic.
-'            Entry chain: User → Interface Adapter → Agent Controller → Services
-' Milestone: v1.0
-' Version:   13.0.0
+' C4 Name:   Agent Controller
+' Boundary:  NASIM Application — Controller Layer
+' Purpose:   Central entry gate. All adapters (cli_adp, http_adp,
+'            mcp_adp) converge here. Delegates to services only.
+'            C4 Rel: agent_ctrl → task_svc, session_svc, config_svc
+' Entry:     External Client → Adapter → agent_ctrl → Service
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
 ' SQ:        sq_agentcontroller01..sq_agentcontroller04
 ' ============================================================
 
@@ -23,19 +20,10 @@
 title nasim — UC: Agent Controller Group
 
 
-' ------------------------------------------------------------
-' Actors
-' ------------------------------------------------------------
-
-
 actor "User" as User
 
 
-' ------------------------------------------------------------
-' Cross-Group External References (downstream services)
-' ------------------------------------------------------------
-
-
+' Downstream service entry points (CSR: Controller → Service)
 usecase "TASKSVC-01\nPROCESS User Task\n[uc_task_svc]" as TASK01_ext <<extref>>
 usecase "SESSIONSVC-01\nPERSIST Session\n[uc_session_svc]" as SSN01_ext <<extref>>
 usecase "SESSIONSVC-02\nREAD Session\n[uc_session_svc]" as SSN02_ext <<extref>>
@@ -43,36 +31,19 @@ usecase "SESSIONSVC-03\nLIST Sessions\n[uc_session_svc]" as SSN03_ext <<extref>>
 usecase "SESSIONSVC-09\nDELETE Session\n[uc_session_svc]" as SSN09_ext <<extref>>
 usecase "CONFIGSVC-01\nLOAD Config\n[uc_config_svc]" as CFG01_ext <<extref>>
 usecase "CONFIGSVC-03\nAPPLY Layered Config\n[uc_config_svc]" as CFG03_ext <<extref>>
-usecase "TOOLSVC-14\nLIST Registered Tools\n[uc_tool_svc]" as TL14_ext <<extref>>
-
-
-' ------------------------------------------------------------
-' System Boundary
-' ------------------------------------------------------------
 
 
 rectangle "nasim" {
   package "Agent Controller Group" {
-    usecase "**AGENTCTRL-01 PROCESS Request**\n--\nRoute incoming request\nfrom any interface adapter to services" <<master>> as AC01
-    usecase "**AGENTCTRL-02 VALIDATE Request**\n--\nValidate request format,\npermissions, and protocol" <<include>> as AC02
-    usecase "**AGENTCTRL-03 ADAPT Protocol**\n--\nAdapt between interface\nprotocols (CLI, HTTP, MCP)" <<include>> as AC03
-    usecase "**AGENTCTRL-04 DISPATCH to Services**\n--\nForward validated request\nto Task Service, Session Service, Config Service" <<include>> as AC04
+    usecase "**AGENTCTRL-01 PROCESS Request**\n--\nRoute incoming request from\ncli_adp, http_adp, or mcp_adp" <<master>> as AC01
+    usecase "**AGENTCTRL-02 VALIDATE Request**\n--\nValidate format, permissions,\nand protocol" <<include>> as AC02
+    usecase "**AGENTCTRL-03 ADAPT Protocol**\n--\nAdapt between CLI, HTTP,\nand MCP protocols" <<include>> as AC03
+    usecase "**AGENTCTRL-04 DISPATCH to Services**\n--\nForward to task_svc,\nsession_svc, or config_svc" <<include>> as AC04
   }
 }
 
 
-' ------------------------------------------------------------
-' Actor -> Use Case Associations
-' ------------------------------------------------------------
-
-
 User --> AC01
-
-
-' ------------------------------------------------------------
-' Relationships (downward <<include>> only)
-' ------------------------------------------------------------
-
 
 AC01 ..> AC02 : <<include>>
 AC01 ..> AC03 : <<include>>
@@ -85,7 +56,6 @@ AC04 ..> SSN03_ext : <<include>>
 AC04 ..> SSN09_ext : <<include>>
 AC04 ..> CFG01_ext : <<include>>
 AC04 ..> CFG03_ext : <<include>>
-AC04 ..> TL14_ext : <<include>>
 
 
 @enduml

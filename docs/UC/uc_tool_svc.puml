@@ -5,205 +5,129 @@
 
 ' ============================================================
 ' Title:     nasim — UC: Tool Service Group
-' Group:     TOOLSERVICE (Tool Service)
-' Boundary:  NASIM Service
+' C4 ID:     tool_svc
+' C4 Name:   Tool Service
+' Boundary:  NASIM Application — Service Layer
 ' Purpose:   Tool registry, parameter validation, execution dispatch;
-'            subagent, todo, plan, review tools, dynamic plugin-loaded
-'            tools, and lifecycle hook dispatch (PreToolUse, PostToolUse,
-'            PreLLMCall, PostLLMCall).
-'            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service
-' Milestone: v1.0
-' Version:   13.0.0
+'            hooks, plugins, and lifecycle hook dispatch.
+'            C4 Rel: task_svc → tool_svc; tool_svc → fs_repo,
+'            sandbox_repo, edit_strategy_repo, git_repo,
+'            mcp_repo, web_repo
+' Entry:     Adapter → agent_ctrl → task_svc → tool_svc
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
-' SQ:        sq_toolservice01..sq_toolservice22
+' SQ:        sq_toolservice01..sq_toolservice22, hk01..06, plg01..06
 ' ============================================================
 
 
-left to right direction
-
-
-title nasim — Tool Service Use Cases
-
-
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-
-
-skinparam usecase {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-  ArrowColor #424242
-  FontSize 12
-}
-
-
-skinparam actor {
-  BackgroundColor #E8EAF6
-  BorderColor #3949AB
-  FontColor #1A237E
-  FontSize 12
-}
-
-
-skinparam actor<<system>> {
-  BackgroundColor #E3F2FD
-  BorderColor #1565C0
-  FontColor #0D47A1
-}
-
-
-skinparam usecase<<extref>> {
-  BackgroundColor #FFF9C4
-  BorderColor #F9A825
-  FontColor #5D4037
-  BorderStyle dashed
-}
-
-
-' ------------------------------------------------------------
-' Actors
-' ------------------------------------------------------------
+title nasim — UC: Tool Service Group
 
 
 actor "User" as User
 
 
-
-' ------------------------------------------------------------
-' Cross-Group External References
-' ------------------------------------------------------------
-
-
-usecase "SAFETYSERVICE-01\nCHECK Permission\n[uc_safety_svc]" as SAF01_ext <<extref>>
-
-
-' ------------------------------------------------------------
-' System Boundary
-' ------------------------------------------------------------
+usecase "FSREPO-01\nREAD File\n[uc_fs_repo]" as FR01_ext <<extref>>
+usecase "FSREPO-02\nWRITE File\n[uc_fs_repo]" as FR02_ext <<extref>>
+usecase "SANDBOXREPO-01\nISOLATE Command\n[uc_sandbox_repo]" as SB01_ext <<extref>>
+usecase "EDITSTRATEGYREPO-01\nSELECT Strategy\n[uc_edit_strategy_repo]" as ES01_ext <<extref>>
+usecase "GITREPO-01\nREAD Git Status\n[uc_git_repo]" as GR01_ext <<extref>>
+usecase "MCPREPO-03\nADAPT MCP Tool\n[uc_mcp_repo]" as MP03_ext <<extref>>
+usecase "WEBREPO-01\nFETCH URL\n[uc_web_repo]" as WR01_ext <<extref>>
+usecase "WEBREPO-02\nSEARCH Web\n[uc_web_repo]" as WR02_ext <<extref>>
+usecase "SAFETYSVC-01\nCHECK Permission\n[uc_safety_svc]" as SAF01_ext <<extref>>
 
 
 rectangle "nasim" {
-  package "Tool Service Group (TL)" {
+  package "Tool Service Group" {
 
-    package "File Operations" as FILE_PKG {
-      usecase "**TOOLSERVICE-01 READ File**\n--\nRead file contents with offset/limit" <<master>> as TL01
-      usecase "**TOOLSERVICE-02 INSERT File**\n--\nCreate or overwrite files" <<master>> as TL02
-      usecase "**TOOLSERVICE-03 UPDATE File**\n--\nReplace exact strings in files" <<master>> as TL03
-      usecase "**TOOLSERVICE-04 LIST Directory**\n--\nList directory contents" <<master>> as TL04
+    package "File Operations" {
+      usecase "**TOOLSVC-01 READ File**\n--\nRead file with offset/limit" <<master>> as TL01
+      usecase "**TOOLSVC-02 INSERT File**\n--\nCreate or overwrite files" <<master>> as TL02
+      usecase "**TOOLSVC-03 UPDATE File**\n--\nReplace exact strings in files" <<master>> as TL03
+      usecase "**TOOLSVC-04 LIST Directory**\n--\nList directory contents" <<master>> as TL04
     }
 
-    package "Shell Execution" as SHL_PKG {
-      usecase "**TOOLSERVICE-05 DISPATCH Shell Command**\n--\nExecute shell command via sandbox" <<master>> as TL05
+    package "Shell Execution" {
+      usecase "**TOOLSVC-05 DISPATCH Shell Command**\n--\nExecute command via sandbox" <<master>> as TL05
     }
 
-    package "Search Tools" as SRCH_PKG {
-      usecase "**TOOLSERVICE-06 SEARCH Grep**\n--\nSearch file contents by regex" <<master>> as TL06
-      usecase "**TOOLSERVICE-07 SEARCH Glob**\n--\nFind files by glob pattern" <<master>> as TL07
-      usecase "**TOOLSERVICE-08 SEARCH Find**\n--\nFind files by name pattern" <<master>> as TL08
+    package "Search Tools" {
+      usecase "**TOOLSVC-06 SEARCH Grep**\n--\nSearch file contents by regex" <<master>> as TL06
+      usecase "**TOOLSVC-07 SEARCH Glob**\n--\nFind files by glob pattern" <<master>> as TL07
+      usecase "**TOOLSVC-08 SEARCH Find**\n--\nFind files by name pattern" <<master>> as TL08
     }
 
-    package "Web Tools" as WEB_PKG {
-      usecase "**TOOLSERVICE-09 FETCH Web Content**\n--\nFetch URL content as markdown" <<master>> as TL09
-      usecase "**TOOLSERVICE-10 SEARCH Web**\n--\nSearch the web for information" <<master>> as TL10
+    package "Web Tools" {
+      usecase "**TOOLSVC-09 FETCH Web Content**\n--\nFetch URL as markdown" <<master>> as TL09
+      usecase "**TOOLSVC-10 SEARCH Web**\n--\nSearch the web" <<master>> as TL10
     }
 
-    package "Integration Tools" as INT_PKG {
-      usecase "**TOOLSERVICE-11 READ Git Status**\n--\nGit status, diff, commit operations" <<master>> as TL11
-      usecase "**TOOLSERVICE-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" <<master>> as TL12
-      usecase "**TOOLSERVICE-13 READ LSP**\n--\nLSP ops: hover, definition, references" <<master>> as TL13
-      usecase "**TOOLSERVICE-14 LIST Registered Tools**\n--\nList all registered tools" <<master>> as TL14
+    package "Integration Tools" {
+      usecase "**TOOLSVC-11 READ Git Status**\n--\nGit status, diff, commit" <<master>> as TL11
+      usecase "**TOOLSVC-12 DISPATCH MCP Extension**\n--\nInvoke MCP extension tools" <<master>> as TL12
+      usecase "**TOOLSVC-13 READ LSP**\n--\nLSP hover, definition, references" <<master>> as TL13
+      usecase "**TOOLSVC-14 LIST Registered Tools**\n--\nList all registered tools" <<master>> as TL14
     }
 
-    package "Agent Tools" as AGT_PKG {
-      usecase "**TOOLSERVICE-15 SPAWN Subagent**\n--\nSpawn child agent with restricted tools" <<master>> as TL15
+    package "Agent Tools" {
+      usecase "**TOOLSVC-15 SPAWN Subagent**\n--\nSpawn child agent" <<master>> as TL15
     }
 
-    package "Task Tracking" as TODO_PKG {
-      usecase "**TOOLSERVICE-16 INSERT Todo**\n--\nCreate task tracking entry" <<master>> as TL16
-      usecase "**TOOLSERVICE-17 UPDATE Todo**\n--\nUpdate task tracking entry" <<master>> as TL17
-      usecase "**TOOLSERVICE-18 READ Todos**\n--\nList task tracking entries" <<master>> as TL18
+    package "Task Tracking" {
+      usecase "**TOOLSVC-16 INSERT Todo**\n--\nCreate task entry" <<master>> as TL16
+      usecase "**TOOLSVC-17 UPDATE Todo**\n--\nUpdate task entry" <<master>> as TL17
+      usecase "**TOOLSVC-18 READ Todos**\n--\nList task entries" <<master>> as TL18
     }
 
-    package "Memory" as MEM_PKG {
-      usecase "**TOOLSERVICE-19 PERSIST Memory**\n--\nStore cross-session knowledge" <<master>> as TL19
-      usecase "**TOOLSERVICE-20 RECALL Memory**\n--\nRetrieve cross-session knowledge" <<master>> as TL20
+    package "Memory" {
+      usecase "**TOOLSVC-19 PERSIST Memory**\n--\nStore cross-session knowledge" <<master>> as TL19
+      usecase "**TOOLSVC-20 RECALL Memory**\n--\nRetrieve cross-session knowledge" <<master>> as TL20
     }
 
-    package "Planning" as PLAN_PKG {
-      usecase "**TOOLSERVICE-21 INSERT Plan**\n--\nCreate plan entry" <<master>> as TL21
-      usecase "**TOOLSERVICE-22 UPDATE Plan**\n--\nUpdate plan entry" <<master>> as TL22
+    package "Planning" {
+      usecase "**TOOLSVC-21 INSERT Plan**\n--\nCreate plan entry" <<master>> as TL21
+      usecase "**TOOLSVC-22 UPDATE Plan**\n--\nUpdate plan entry" <<master>> as TL22
     }
 
-    package "Hooks" as HOOK_PKG {
-      usecase "**TOOLSERVICE-HK01 REGISTER Hook**\n--\nRegister hook with name, event type, handler, priority" <<master>> as HK01
-      usecase "**TOOLSERVICE-HK02 DISPATCH Pre-Tool Hook**\n--\nExecute hook before tool use" <<master>> as HK02
-      usecase "**TOOLSERVICE-HK03 DISPATCH Post-Tool Hook**\n--\nExecute hook after tool use" <<master>> as HK03
-      usecase "**TOOLSERVICE-HK04 DISPATCH Pre-LLM Hook**\n--\nExecute hook before LLM call" <<master>> as HK04
-      usecase "**TOOLSERVICE-HK05 DISPATCH Post-LLM Hook**\n--\nExecute hook after LLM call" <<master>> as HK05
-      usecase "**TOOLSERVICE-HK06 VALIDATE Hook Result**\n--\nValidate hook result: allow, deny, modify" <<include>> as HK06
+    package "Hooks" {
+      usecase "**TOOLSVC-HK01 REGISTER Hook**\n--\nRegister lifecycle hook" <<master>> as HK01
+      usecase "**TOOLSVC-HK02 DISPATCH Pre-Tool Hook**\n--\nExecute pre-tool hook" <<master>> as HK02
+      usecase "**TOOLSVC-HK03 DISPATCH Post-Tool Hook**\n--\nExecute post-tool hook" <<master>> as HK03
+      usecase "**TOOLSVC-HK04 DISPATCH Pre-LLM Hook**\n--\nExecute pre-LLM hook" <<master>> as HK04
+      usecase "**TOOLSVC-HK05 DISPATCH Post-LLM Hook**\n--\nExecute post-LLM hook" <<master>> as HK05
+      usecase "**TOOLSVC-HK06 VALIDATE Hook Result**\n--\nValidate hook result" <<include>> as HK06
     }
 
-    package "Plugins" as PLG_PKG {
-      usecase "**TOOLSERVICE-PLG01 DISCOVER Plugins**\n--\nDiscover plugins from ~/.nasim/plugins/" <<master>> as PLG01
-      usecase "**TOOLSERVICE-PLG02 LOAD Manifest**\n--\nParse plugin manifest metadata" <<include>> as PLG02
-      usecase "**TOOLSERVICE-PLG03 REGISTER Plugin Tools**\n--\nRegister plugin tools with ToolRegistry" <<include>> as PLG03
-      usecase "**TOOLSERVICE-PLG04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks with HookManager" <<include>> as PLG04
-      usecase "**TOOLSERVICE-PLG05 ENABLE Plugin**\n--\nEnable a plugin" <<master>> as PLG05
-      usecase "**TOOLSERVICE-PLG06 DISABLE Plugin**\n--\nDisable a plugin" <<master>> as PLG06
+    package "Plugins" {
+      usecase "**TOOLSVC-PLG01 DISCOVER Plugins**\n--\nDiscover local plugins" <<master>> as PLG01
+      usecase "**TOOLSVC-PLG02 LOAD Manifest**\n--\nParse plugin manifest" <<include>> as PLG02
+      usecase "**TOOLSVC-PLG03 REGISTER Plugin Tools**\n--\nRegister plugin tools" <<include>> as PLG03
+      usecase "**TOOLSVC-PLG04 REGISTER Plugin Hooks**\n--\nRegister plugin hooks" <<include>> as PLG04
+      usecase "**TOOLSVC-PLG05 ENABLE Plugin**\n--\nEnable a plugin" <<master>> as PLG05
+      usecase "**TOOLSVC-PLG06 DISABLE Plugin**\n--\nDisable a plugin" <<master>> as PLG06
     }
   }
 }
 
 
-' ------------------------------------------------------------
-' Actor -> Use Case Associations
-' ------------------------------------------------------------
-
-
-User --> TL01
-User --> TL02
-User --> TL03
-User --> TL04
-User --> TL05
-User --> TL06
-User --> TL07
-User --> TL08
-User --> TL09
-User --> TL10
-User --> TL11
-User --> TL12
-User --> TL13
 User --> TL14
-User --> TL15
-User --> TL16
-User --> TL17
-User --> TL18
-User --> TL19
-User --> TL20
-User --> TL21
-User --> TL22
-User --> HK01
-User --> HK02
-User --> HK03
-User --> HK04
-User --> HK05
-User --> PLG01
-User --> PLG05
-User --> PLG06
 
-
-' ------------------------------------------------------------
-' Relationships
-' ------------------------------------------------------------
-
+TL01 ..> FR01_ext : <<include>>
+TL02 ..> FR02_ext : <<include>>
+TL03 ..> ES01_ext : <<include>>
+TL03 ..> FR02_ext : <<include>>
+TL04 ..> FR01_ext : <<include>>
+TL05 ..> SB01_ext : <<include>>
+TL05 ..> SAF01_ext : <<include>>
+TL06 ..> FR01_ext : <<include>>
+TL09 ..> WR01_ext : <<include>>
+TL10 ..> WR02_ext : <<include>>
+TL11 ..> GR01_ext : <<include>>
+TL12 ..> MP03_ext : <<include>>
 
 HK02 ..> HK06 : <<include>>
 HK03 ..> HK06 : <<include>>
 HK04 ..> HK06 : <<include>>
 HK05 ..> HK06 : <<include>>
-
 PLG01 ..> PLG02 : <<include>>
 PLG02 ..> PLG03 : <<include>>
 PLG02 ..> PLG04 : <<include>>

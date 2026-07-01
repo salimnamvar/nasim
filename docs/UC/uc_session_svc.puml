@@ -5,106 +5,65 @@
 
 ' ============================================================
 ' Title:     nasim — UC: Session Service Group
-' Group:     SESSIONSERVICE (Session Service)
-' Boundary:  NASIM Service
-' Purpose:   Session lifecycle: create, load, save, snapshot, revert
-'            Entry chain: User → Interface → Agent Controller → Session Service
-' Milestone: v1.0
-' Version:   13.0.0
+' C4 ID:     session_svc
+' C4 Name:   Session Service
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Session lifecycle: create, load, save, snapshot, revert.
+'            C4 Rel: agent_ctrl → session_svc; session_svc →
+'            session_repo, history_repo, wire_log_repo
+' Entry:     Adapter → agent_ctrl → session_svc
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
 ' SQ:        sq_sessionservice01..sq_sessionservice09
 ' ============================================================
 
 
-left to right direction
-
-
-title nasim — Session Use Cases
-
-
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-
-
-skinparam usecase {
-  BackgroundColor #FFFFFF
-  BorderColor #424242
-  FontColor #000000
-  ArrowColor #424242
-  FontSize 12
-}
-
-
-skinparam actor {
-  BackgroundColor #E8EAF6
-  BorderColor #3949AB
-  FontColor #1A237E
-  FontSize 12
-}
-
-
-skinparam actor<<system>> {
-  BackgroundColor #E3F2FD
-  BorderColor #1565C0
-  FontColor #0D47A1
-}
-
-
-' ------------------------------------------------------------
-' Actors
-' ------------------------------------------------------------
+title nasim — UC: Session Service Group
 
 
 actor "User" as User
 
 
-
-' ------------------------------------------------------------
-' System Boundary
-' ------------------------------------------------------------
+usecase "SESSIONREPO-01\nAPPEND Message\n[uc_session_repo]" as SR01_ext <<extref>>
+usecase "SESSIONREPO-02\nREAD Messages\n[uc_session_repo]" as SR02_ext <<extref>>
+usecase "HISTORYREPO-01\nSNAPSHOT State\n[uc_history_repo]" as HR01_ext <<extref>>
+usecase "HISTORYREPO-03\nREVERT Turn\n[uc_history_repo]" as HR03_ext <<extref>>
+usecase "WIRELOGREPO-04\nFORK Session\n[uc_wire_log_repo]" as WL04_ext <<extref>>
+usecase "WIRELOGREPO-05\nCHECKPOINT Turn\n[uc_wire_log_repo]" as WL05_ext <<extref>>
 
 
 rectangle "nasim" {
-  package "Session Group (SSN)" {
-    usecase "**SESSIONSERVICE-01 PERSIST Session**\n--\nSave session to storage" <<include>> as SSN01
-    usecase "**SESSIONSERVICE-02 READ Session**\n--\nLoad session from storage" <<include>> as SSN02
-    usecase "**SESSIONSERVICE-03 LIST Sessions**\n--\nList all saved sessions" <<master>> as SSN03
-    usecase "**SESSIONSERVICE-04 RESTORE Session**\n--\nResume a previously saved session" <<master>> as SSN04
-    usecase "**SESSIONSERVICE-05 SNAPSHOT Session**\n--\nCreate session state snapshot" <<master>> as SSN05
-    usecase "**SESSIONSERVICE-06 REVERT Turn**\n--\nUndo last turn in session" <<master>> as SSN06
-    usecase "**SESSIONSERVICE-07 SEARCH Sessions**\n--\nCross-session search via FTS5" <<master>> as SSN07
-    usecase "**SESSIONSERVICE-08 BRANCH Session**\n--\nFork conversation from any point" <<master>> as SSN08
-    usecase "**SESSIONSERVICE-09 DELETE Session**\n--\nDelete session from storage" <<master>> as SSN09
+  package "Session Service Group" {
+    usecase "**SESSIONSVC-01 PERSIST Session**\n--\nSave session to storage" <<include>> as SS01
+    usecase "**SESSIONSVC-02 READ Session**\n--\nLoad session from storage" <<include>> as SS02
+    usecase "**SESSIONSVC-03 LIST Sessions**\n--\nList all saved sessions" <<master>> as SS03
+    usecase "**SESSIONSVC-04 RESTORE Session**\n--\nResume a previously saved session" <<master>> as SS04
+    usecase "**SESSIONSVC-05 SNAPSHOT Session**\n--\nCreate session state snapshot" <<master>> as SS05
+    usecase "**SESSIONSVC-06 REVERT Turn**\n--\nUndo last turn in session" <<master>> as SS06
+    usecase "**SESSIONSVC-07 SEARCH Sessions**\n--\nCross-session search via FTS5" <<master>> as SS07
+    usecase "**SESSIONSVC-08 BRANCH Session**\n--\nFork conversation from any point" <<master>> as SS08
+    usecase "**SESSIONSVC-09 DELETE Session**\n--\nDelete session from storage" <<master>> as SS09
   }
 }
 
 
-' ------------------------------------------------------------
-' Actor -> Use Case Associations
-' ------------------------------------------------------------
+User --> SS03
+User --> SS04
+User --> SS05
+User --> SS06
+User --> SS07
+User --> SS08
+User --> SS09
 
-
-User --> SSN03
-User --> SSN04
-User --> SSN05
-User --> SSN06
-User --> SSN07
-User --> SSN08
-User --> SSN09
-
-
-' ------------------------------------------------------------
-' Relationships
-' ------------------------------------------------------------
-
-
-SSN04 ..> SSN02 : <<include>>
-SSN05 ..> SSN01 : <<include>>
-SSN06 ..> SSN02 : <<include>>
-SSN08 ..> SSN01 : <<include>>
-
-
+SS01 ..> SR01_ext : <<include>>
+SS02 ..> SR02_ext : <<include>>
+SS04 ..> SS02 : <<include>>
+SS05 ..> SS01 : <<include>>
+SS05 ..> HR01_ext : <<include>>
+SS06 ..> SS02 : <<include>>
+SS06 ..> HR03_ext : <<include>>
+SS08 ..> SS01 : <<include>>
+SS08 ..> WL04_ext : <<include>>
+SS05 ..> WL05_ext : <<include>>
 
 
 @enduml

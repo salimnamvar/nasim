@@ -5,16 +5,13 @@
 
 ' ============================================================
 ' Title:     nasim — UC: CLI Adapter Group
-' Group:     CLIADP (CLI Adapter)
 ' C4 ID:     cli_adp
-' Boundary:  NASIM Application
-' Purpose:   CLI-specific interface UCs: REPL, slash commands, rendering.
-'            ALL business operations delegate through Agent Controller.
-'            Entry chain: User → CLI Adapter → Agent Controller → Services
-' Milestone: v1.0
-' Version:   13.0.0
+' C4 Name:   CLI Adapter
+' Boundary:  NASIM Application — Controller Layer
+' Purpose:   Terminal REPL session, arg parsing, slash commands.
+'            C4 Rel: CLI → cli_adp → agent_ctrl
+' Entry:     User → CLI (container) → cli_adp → agent_ctrl → Services
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
-' Review:    —
 ' SQ:        sq_cli01..sq_cli08
 ' ============================================================
 
@@ -22,47 +19,24 @@
 title nasim — UC: CLI Adapter Group
 
 
-' ------------------------------------------------------------
-' Actors
-' ------------------------------------------------------------
-
-
 actor "User" as User
 
 
-' ------------------------------------------------------------
-' Cross-Group External References
-' ------------------------------------------------------------
-
-
 usecase "AGENTCTRL-01\nPROCESS Request\n[uc_agent_ctrl]" as AC01_ext <<extref>>
-usecase "HTTPADP-01\nLIST Sessions\n[uc_http_adp]" as HTTP01_ext <<extref>>
-usecase "HTTPADP-06\nDISPATCH Message\n[uc_http_adp]" as HTTP06_ext <<extref>>
-usecase "HTTPADP-11\nUPDATE Config\n[uc_http_adp]" as HTTP11_ext <<extref>>
-
-
-' ------------------------------------------------------------
-' System Boundary
-' ------------------------------------------------------------
 
 
 rectangle "nasim" {
   package "CLI Adapter Group" {
-    usecase "**CLIADP-01 PROCESS User Input**\n--\nREPL loop, input handling.\nDelegates ALL business ops to Agent Controller." <<master>> as CLI01
-    usecase "**CLIADP-02 DISPATCH Slash Command**\n--\nMap /cmd strings to API calls.\n/sessions → HTTPADP-01, /model → HTTPADP-11" <<master>> as CLI02
-    usecase "**CLIADP-03 STREAM Output**\n--\nRender AgentEvents from API SSE stream to terminal" <<include>> as CLI03
-    usecase "**CLIADP-04 READ CLI Arguments**\n--\nParse startup CLI arguments.\n<<include>> CONFIGSVC-01" <<master>> as CLI04
-    usecase "**CLIADP-05 ENABLE Plan Mode**\n--\n/plan command.\n<<include>> TASKSVC-07" <<master>> as CLI05
-    usecase "**CLIADP-06 REQUEST Approval**\n--\nSafety approval prompt.\n<<include>> SAFETYSVC-02" <<master>> as CLI06
-    usecase "**CLIADP-07 SWITCH Model**\n--\n/model command.\n<<include>> LLMREPO-08" <<master>> as CLI07
-    usecase "**CLIADP-08 LIST Sessions**\n--\n/sessions command.\n<<include>> HTTPADP-01" <<master>> as CLI08
+    usecase "**CLIADP-01 PROCESS User Input**\n--\nREPL loop and input handling.\nAll business ops via agent_ctrl." <<master>> as CLI01
+    usecase "**CLIADP-02 DISPATCH Slash Command**\n--\nMap /cmd to agent_ctrl dispatch.\n/sessions, /plan, /model, etc." <<master>> as CLI02
+    usecase "**CLIADP-03 STREAM Output**\n--\nRender AgentEvents from SSE\nto terminal" <<include>> as CLI03
+    usecase "**CLIADP-04 READ CLI Arguments**\n--\nParse startup CLI arguments" <<master>> as CLI04
+    usecase "**CLIADP-05 ENABLE Plan Mode**\n--\n/plan command via agent_ctrl" <<master>> as CLI05
+    usecase "**CLIADP-06 REQUEST Approval**\n--\nSafety approval prompt\nvia agent_ctrl" <<master>> as CLI06
+    usecase "**CLIADP-07 SWITCH Model**\n--\n/model command via agent_ctrl" <<master>> as CLI07
+    usecase "**CLIADP-08 LIST Sessions**\n--\n/sessions command via agent_ctrl" <<master>> as CLI08
   }
 }
-
-
-' ------------------------------------------------------------
-' Actor -> Use Case Associations
-' ------------------------------------------------------------
 
 
 User --> CLI01
@@ -73,18 +47,14 @@ User --> CLI06
 User --> CLI07
 User --> CLI08
 
-
-' ------------------------------------------------------------
-' Relationships (downward <<include>> only)
-' ------------------------------------------------------------
-
-
 CLI01 ..> CLI03 : <<include>>
 CLI01 ..> AC01_ext : <<include>>
 CLI02 ..> AC01_ext : <<include>>
-CLI02 ..> HTTP01_ext : <<include>>
-CLI02 ..> HTTP11_ext : <<include>>
-CLI08 ..> HTTP01_ext : <<include>>
+CLI04 ..> AC01_ext : <<include>>
+CLI05 ..> AC01_ext : <<include>>
+CLI06 ..> AC01_ext : <<include>>
+CLI07 ..> AC01_ext : <<include>>
+CLI08 ..> AC01_ext : <<include>>
 
 
 @enduml
