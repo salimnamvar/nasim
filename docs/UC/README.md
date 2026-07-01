@@ -7,6 +7,7 @@
 | AC | Agent Controller | 4 | Single convergence point for all interface containers. Routes validated requests to services. |
 | API | HTTP Adapter | 11 | Core business operations exposed via API (ROD-compliant). Delegates through Agent Controller. |
 | CLI | CLI Adapter | 8 | CLI-specific interface UCs: REPL, slash commands, rendering. All business operations delegate through Agent Controller. |
+| MCP-ADP | MCP Adapter | 4 | MCP protocol interface: tool exposure, stdio/SSE transport. External MCP clients discover and invoke nasim tools. |
 | AGENT | Task Service | 14 | Core agentic loop, permissions, context, plans, subagents |
 | LLM | LLM Repository | 8 | LLM API calls + model routing via litellm |
 | CONFIG | Config Service | 3 | Config loading, validation, layered overrides |
@@ -22,7 +23,7 @@
 | EDITSTRATEGY | Edit Strategy Repository | 10 | Diff staging, computation, and safe application |
 | EVALUATION | Evaluation Service | 9 | Task evaluation and quality checks |
 | WIRELOG | Wire Log Repository | 5 | Append-only event store, fork, checkpoint |
-| **Total** | **18 groups** | **146** | **1:1 UC↔SQ mapping (100%)** |
+| **Total** | **19 groups** | **150** | **1:1 UC↔SQ mapping (100%)** |
 
 ---
 
@@ -69,6 +70,21 @@ All business operations MUST delegate through Agent Controller. No direct calls 
 | CLI-06 | REQUEST Approval | CLI Adapter | `sq_cli06_request_approval.puml` | Safety prompt. `<<include>>` SAFETYSERVICE-02 |
 | CLI-07 | SWITCH Model | CLI Adapter | `sq_cli07_switch_model.puml` | `/model` command. `<<include>>` LLMREPOSITORY-08 |
 | CLI-08 | LIST Sessions | CLI Adapter | `sq_cli08_list_sessions.puml` | `/sessions` command. `<<include>>` HTTPADAPTER-01 |
+
+---
+
+---
+
+## MCP Adapter Group (Interface Container) — MCP-ADP
+
+All business operations MUST delegate through Agent Controller. No direct calls to core services.
+
+| UC ID | Operation | Component Owner | SQ Diagram | Notes |
+|-------|-----------|-----------------|------------|-------|
+| MCPADAPTER-01 | PROCESS MCP Request | MCP Adapter | `sq_mcp_adapter01_process_mcp_request.puml` | Accept and parse incoming MCP protocol request |
+| MCPADAPTER-02 | LIST nasim Tools | MCP Adapter | `sq_mcp_adapter02_list_nasim_tools.puml` | Expose available tools via MCP tools/list |
+| MCPADAPTER-03 | INVOKE nasim Tool | MCP Adapter | `sq_mcp_adapter03_invoke_nasim_tool.puml` | Execute tool via MCP tools/call |
+| MCPADAPTER-04 | STREAM Events | MCP Adapter | `sq_mcp_adapter04_stream_events.puml` | Stream agent events via MCP notification |
 
 ---
 
@@ -337,27 +353,56 @@ No sub-UC has its own sub-UCs (no nesting beyond one level).
 
 ## Traceability Matrix (C4 Component → UC)
 
-| C4 Component | UC Group | UC IDs | Description |
-|--------------|----------|--------|-------------|
-| Agent Controller | AC | AGENTCONTROLLER-01..04 | Single convergence point: routes requests to services |
-| HTTP Adapter | API | HTTPADAPTER-01..11 | Core business operations (HTTP API) |
-| CLI Adapter | CLI | CLI-01..08 | CLI-specific interface UCs |
-| Task Service | AGT | TASKSERVICE-01..15 | Core agentic loop |
-| LLM Repository | LLM | LLMREPOSITORY-01..08 | LLM API calls and model routing |
-| Config Service | CFG | CONFIGSERVICE-01..03 | Config loading and validation |
-| Session Service | SSN | SESSIONSERVICE-01..09 | Session lifecycle |
-| Safety Service | SAF | SAFETYSERVICE-01..03 | Permission gating, injection scanning |
-| Context Service | CTX | CONTEXTSERVICE-01..06 | Context pipeline |
-| MCP Repository | MCP | MCPREPOSITORY-01..04 | MCP extension tools |
-| Tool Service | TL | TOOLSERVICE-01..22, TOOLSERVICE-HK01..06, TOOLSERVICE-PLG01..06 | Tool registry, hooks, plugins |
-| Wire Log Repository | WRL | WIRELOGREPOSITORY-01..05 | Append-only event store |
-| Memory Repository | MEM | MEMORYREPOSITORY-01..04 | Cross-session knowledge |
-| Git Repository | VCS | GITREPOSITORY-01..04 | Version control |
-| Sandbox Repository | SBX | SANDBOXREPOSITORY-01..04 | Sandboxed execution |
-| Repo Intelligence Repository | RIM | REPOINTELLIGENCEREPOSITORY-01..06 | Codebase intelligence |
-| Edit Strategy Repository | EDT | EDITSTRATEGYREPOSITORY-01..10 | Edit strategies |
-| Evaluation Service | EVL | EVALUATIONSERVICE-01..09 | Task evaluation |
+Every C4 component has at least one owning UC Group. Thin data-access repositories whose behavior is surfaced through their owning service's UC group are noted as *covered-by*.
+
+### Controller Layer
+
+| C4 Component | C4 ID | UC Group | UC IDs | Description |
+|--------------|-------|----------|--------|-------------|
+| CLI Adapter | `cli_adp` | CLI | CLI-01..08 | CLI-specific interface: REPL, slash commands, rendering |
+| HTTP Adapter | `http_adp` | API | HTTPADAPTER-01..11 | Core business operations (HTTP API) |
+| MCP Adapter | `mcp_adp` | MCP-ADP | MCPADAPTER-01..04 | MCP protocol interface: tool exposure, stdio/SSE transport |
+| Agent Controller | `agent_ctrl` | AC | AGENTCONTROLLER-01..04 | Single convergence point: routes requests to services |
+
+### Service Layer
+
+| C4 Component | C4 ID | UC Group | UC IDs | Description |
+|--------------|-------|----------|--------|-------------|
+| Task Service | `task_svc` | AGT | TASKSERVICE-01..15 | Core agentic loop |
+| Tool Service | `tool_svc` | TL | TOOLSERVICE-01..22, HK01..06, PLG01..06 | Tool registry, hooks, plugins |
+| Session Service | `session_svc` | SSN | SESSIONSERVICE-01..09 | Session lifecycle |
+| Config Service | `config_svc` | CFG | CONFIGSERVICE-01..03 | Config loading and validation |
+| Safety Service | `safety_svc` | SAF | SAFETYSERVICE-01..03 | Permission gating, injection scanning |
+| Context Service | `context_svc` | CTX | CONTEXTSERVICE-01..06 | Context pipeline |
+| Evaluation Service | `eval_svc` | EVL | EVALUATIONSERVICE-01..09 | Task evaluation |
+
+### Repository Layer
+
+| C4 Component | C4 ID | UC Group | UC IDs | Description |
+|--------------|-------|----------|--------|-------------|
+| LLM Repository | `llm_repo` | LLM | LLMREPOSITORY-01..08 | LLM API calls and model routing |
+| Memory Repository | `memory_repo` | MEM | MEMORYREPOSITORY-01..04 | Cross-session knowledge |
+| Sandbox Repository | `sandbox_repo` | SBX | SANDBOXREPOSITORY-01..04 | Sandboxed execution |
+| Edit Strategy Repository | `edit_strategy_repo` | EDT | EDITSTRATEGYREPOSITORY-01..10 | Edit strategies |
+| Git Repository | `git_repo` | VCS | GITREPOSITORY-01..04 | Version control |
+| MCP Repository | `mcp_repo` | MCP | MCPREPOSITORY-01..04 | MCP extension tools |
+| Repo Intelligence Repository | `repo_intel_repo` | RIM | REPOINTELLIGENCEREPOSITORY-01..06 | Codebase intelligence |
+| Wire Log Repository | `wire_log_repo` | WRL | WIRELOGREPOSITORY-01..05 | Append-only event store |
+| Session Repository | `session_repo` | SSN | *covered-by* SESSIONSERVICE UCs | Data-access: turn persistence, loaded by Session Service |
+| History Repository | `history_repo` | SSN | *covered-by* SESSIONSERVICE UCs | Data-access: snapshots, revert index, search |
+| Config Repository | `config_repo` | CFG | *covered-by* CONFIGSERVICE UCs | Data-access: YAML/env/CLI reads, loaded by Config Service |
+| Filesystem Repository | `fs_repo` | TL | *covered-by* TOOLSERVICE UCs | Data-access: file I/O, used by Tool Service |
+| Web Repository | `web_repo` | TL | *covered-by* TOOLSERVICE UCs | Data-access: web fetch, used by Tool Service |
+
+### Data Stores (passive persistence — no behavioral UC)
+
+| C4 Component | C4 ID | Persistence Target | Backed By |
+|--------------|-------|-------------------|-----------|
+| Session Store | `session_store` | Session data (JSONL) | Session Repository (SSN) |
+| Memory Store | `memory_store` | Knowledge (JSON + vectors) | Memory Repository (MEM) |
+| Wire Log Store | `wire_log_store` | Event log (JSONL) | Wire Log Repository (WRL) |
+| Config Store | `config_store` | Configuration (YAML) | Config Repository (CFG) |
 
 ---
 
-**Total: 146 UCs** across 18 groups matching 146 SQ diagrams (1:1 mapping, excluding TASKSERVICE-05 which is a vacant ID per permanence rule).
+**Total: 150 UCs** across 19 groups (18 original + MCP Adapter) matching 150 SQ diagrams (1:1 mapping, excluding TASKSERVICE-05 which is a vacant ID per permanence rule).

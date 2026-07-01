@@ -43,6 +43,7 @@ rectangle "nasim" {
   usecase "**Agent Controller (Convergence Point)**" <<master>> as AC_GROUP
   usecase "**HTTP Adapter Group (Entry Gate)**" <<master>> as API_GROUP
   usecase "**CLI Group (Interface Container)**" <<master>> as CLI_GROUP
+  usecase "**MCP Adapter Group (Interface Container)**" <<master>> as MCP_ADP_GROUP
 
   usecase "**Task Service Group**" <<master>> as TASK_GROUP
   usecase "**Session Service Group**" <<master>> as SESSION_GROUP
@@ -72,7 +73,7 @@ rectangle "nasim" {
 
 User --> AC_GROUP
 
-MCPClient --> AC_GROUP
+MCPClient --> MCP_ADP_GROUP
 
 
 
@@ -80,10 +81,10 @@ MCPClient --> AC_GROUP
 ' Group Relationships — Convergence Point Delegation Chain
 ' ------------------------------------------------------------
 
-' All interfaces route through Agent Controller
+' All interface containers route through Agent Controller
 CLI_GROUP ..> AC_GROUP : <<include>>
 API_GROUP ..> AC_GROUP : <<include>>
-MCP_GROUP ..> AC_GROUP : <<include>>
+MCP_ADP_GROUP ..> AC_GROUP : <<include>>
 
 ' Agent Controller -> API Group (business operations)
 AC_GROUP ..> API_GROUP : <<include>>
@@ -104,6 +105,7 @@ TASK_GROUP ..> SANDBOX_GROUP : <<include>>
 TASK_GROUP ..> EDIT_GROUP : <<extend>>
 TASK_GROUP ..> EVAL_GROUP : <<extend>>
 TASK_GROUP ..> GIT_GROUP : <<extend>>
+TASK_GROUP ..> MCP_GROUP : <<extend>>
 TASK_GROUP ..> HOOKS_GROUP : <<extend>>
 TASK_GROUP ..> PLUGINS_GROUP : <<extend>>
 TASK_GROUP ..> MEMORY_GROUP : <<extend>>
