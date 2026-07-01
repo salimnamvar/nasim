@@ -6,7 +6,7 @@
 '            All interfaces (CLI, WebApp, DesktopApp, MobileApp,
 '            MCP Client) are external clients connecting to it.
 ' Milestone: v1.0
-' Version:   13.0.0
+' Version:   13.1.0
 ' Source:    docs/C4/c4_nasim_context.puml (v13.0.0)
 ' ============================================================
 
@@ -66,16 +66,6 @@ Rel(nasim_app, mcp_server, "invokes extension tools", "stdio / SSE")
 Rel(nasim_app, git, "reads state, creates commits", "git CLI")
 Rel(nasim_app, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
 
-' ── Legend ───────────────────────────────────────────────────
-legend right
-    |= <color:#000000>Symbol |= <color:#000000>Meaning |
-    | <color:#000000>Person | <color:#000000>Human actor |
-    | <color:#000000>System | <color:#000000>System of interest |
-    | <color:#000000>System_Ext | <color:#000000>External system |
-    |<#FAFAFA> <color:#212121>**External Client**</color> | <color:#000000>CLI, WebApp, DesktopApp, MobileApp (human-facing)</color> |
-    |<#F3E5F5> <color:#4A148C>**Machine Client**</color> | <color:#000000>MCP Client (API/machine)</color> |
-    | <color:#000000>Container | <color:#000000>Internal deployable |
-    | <color:#000000>System_Boundary | <color:#000000>Service boundary |
-end legend
+$nasim_legend_container()
 
 @enduml

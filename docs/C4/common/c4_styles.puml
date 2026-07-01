@@ -100,4 +100,44 @@ skinparam rectangle<<machine_client>> {
     FontColor<<machine_client>> #4A148C
 }
 
+' --- Legend Procedures ---
+' Each diagram calls the appropriate procedure at the end of its body.
+' Entries use <color:#RRGGBB> to ensure readability without !theme plain.
+
+!procedure $nasim_legend_context()
+legend right
+    |= <color:#000000>Symbol |= <color:#000000>Meaning |
+    |<#08427B> <color:#FFFFFF>**Person**</color> | <color:#000000>Human actor</color> |
+    |<#1168BD> <color:#FFFFFF>**System**</color> | <color:#000000>System of interest</color> |
+    |<#999999> <color:#FFFFFF>**System_Ext**</color> | <color:#000000>External system</color> |
+    |<#E8F5E9> <color:#1B5E20>**Trusted**</color> | <color:#000000>Internal / controlled external system</color> |
+    |<#FFEBEE> <color:#B71C1C>**Untrusted**</color> | <color:#000000>External / uncontrolled system</color> |
+end legend
+!endprocedure
+
+!procedure $nasim_legend_container()
+legend right
+    |= <color:#000000>Symbol |= <color:#000000>Meaning |
+    |<#08427B> <color:#FFFFFF>**Person**</color> | <color:#000000>Human actor</color> |
+    |<#1168BD> <color:#FFFFFF>**System**</color> | <color:#000000>System of interest</color> |
+    |<#999999> <color:#FFFFFF>**System_Ext**</color> | <color:#000000>External system</color> |
+    |<#438DD5> <color:#FFFFFF>**Container**</color> | <color:#000000>Internal deployable</color> |
+    |<#FAFAFA> <color:#212121>**External Client**</color> | <color:#000000>CLI, WebApp, DesktopApp, MobileApp (human-facing)</color> |
+    |<#F3E5F5> <color:#4A148C>**Machine Client**</color> | <color:#000000>MCP Client (API / machine)</color> |
+    | <color:#000000>System_Boundary | <color:#000000>Service boundary |
+end legend
+!endprocedure
+
+!procedure $nasim_legend_component()
+legend right
+    |= <color:#000000>Symbol |= <color:#000000>Meaning |
+    |<#E3F2FD> <color:#0D47A1>**Controller**</color> | <color:#000000>CLI Adapter, HTTP Adapter, MCP Adapter, Agent Controller</color> |
+    |<#FFF3E0> <color:#BF360C>**Service**</color> | <color:#000000>Task, Tool, Session, Config, Safety, Context, Evaluation</color> |
+    |<#E8F5E9> <color:#1B5E20>**Repository**</color> | <color:#000000>Grouped: Persistence, Intelligence, Integration, Execution</color> |
+    |<#FFFDE7> <color:#F57F17>**Data Store**</color> | <color:#000000>SessionStore, MemoryStore, WireLogStore, ConfigStore</color> |
+    |<#FAFAFA> <color:#212121>**External Client**</color> | <color:#000000>CLI, WebApp, DesktopApp, MobileApp</color> |
+    |<#F3E5F5> <color:#4A148C>**Machine Client**</color> | <color:#000000>MCP Client</color> |
+end legend
+!endprocedure
+
 @enduml

@@ -4,7 +4,7 @@
 ' Boundary:  NASIM Service System
 ' Purpose:   Show NASIM Service with users and external systems
 ' Milestone: v1.0
-' Version:   13.0.0
+' Version:   13.1.0
 ' Source:    docs/C4/README.md
 ' ============================================================
 ' REVIEW CHANGES:
@@ -53,13 +53,6 @@ Rel(mcp_client, nasim_service, "→ consumes NASIM tools via MCP")
 Rel(nasim_service, git, "⟷ reads state, creates commits")
 Rel(nasim_service, repo_intel, "⟷ parses code, queries intelligence")
 
-legend right
-    |= <color:#000000>Symbol |= <color:#000000>Meaning |
-    | <color:#000000>Person | <color:#000000>Human actor |
-    | <color:#000000>System | <color:#000000>System of interest |
-    | <color:#000000>System_Ext | <color:#000000>External system |
-    |<#E8F5E9> <color:#1B5E20>**Trusted**</color> | <color:#000000>Internal/controlled external system</color> |
-    |<#FFEBEE> <color:#B71C1C>**Untrusted**</color> | <color:#000000>External/uncontrolled system</color> |
-end legend
+$nasim_legend_context()
 
 @enduml

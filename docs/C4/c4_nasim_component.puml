@@ -6,7 +6,7 @@
 '            External clients connect to adapters → Agent Controller (single entry)
 '            → services → repositories → data stores → external systems.
 ' Milestone: v1.0
-' Version:   13.0.0
+' Version:   13.1.0
 ' Source:    docs/C4/c4_nasim_container.puml (v13.0.0)
 ' ============================================================
 ' REVIEW CHANGES:
@@ -193,13 +193,6 @@ Rel(mcp_repo, mcp_server, "invokes extension tools", "stdio / SSE")
 Rel(repo_intel_repo, repo_intel, "parses code, queries intelligence", "in-process / HTTP")
 Rel(web_repo, web, "fetches documentation", "HTTPS")
 
-legend right
-    |<#E3F2FD> <color:#0D47A1>**Controller**</color> | <color:#000000>CLI Adapter, HTTP Adapter, MCP Adapter, Agent Controller</color> |
-    |<#FFF3E0> <color:#BF360C>**Service**</color> | <color:#000000>Task Service, Tool Service, Session Service, Config Service, Safety Service, Context Service, Evaluation Service</color> |
-    |<#E8F5E9> <color:#1B5E20>**Repository**</color> | <color:#000000>Grouped: Persistence / Intelligence / Integration / Execution</color> |
-    |<#FFFDE7> <color:#F57F17>**Data Store**</color> | <color:#000000>SessionStore, MemoryStore, WireLogStore, ConfigStore</color> |
-    |<#FAFAFA> <color:#212121>**External Client**</color> | <color:#000000>CLI, WebApp, DesktopApp, MobileApp</color> |
-    |<#F3E5F5> <color:#4A148C>**Machine Client**</color> | <color:#000000>MCP Client</color> |
-end legend
+$nasim_legend_component()
 
 @enduml
