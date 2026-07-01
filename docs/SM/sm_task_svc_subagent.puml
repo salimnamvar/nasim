@@ -6,9 +6,9 @@
 ' Purpose:   Entity lifecycle for Task Service (Subagent child processes).
 '            States: IDLE → SPAWNING → RUNNING → COMPLETED | FAILED
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    C4 component diagram (Task Service), docs/UC/README.md
-' Review:    CAR audit 2026-06-26
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_task_svc.puml
+' Review:    SM Architect extraction 2026-07-01 (C4+UC source of truth)
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
 ' ============================================================

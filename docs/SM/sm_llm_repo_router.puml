@@ -2,20 +2,18 @@
 !include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — LLM Repository: Router Lifecycle State Machine
-' Boundary:  nasim code agent
-' Purpose:   Selection lifecycle for LLM Repository (Router).
-'            States: IDLE → CLASSIFYING → SELECTING → IDLE | FALLBACK
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Model routing lifecycle (classify, select, fallback, switch).
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    C4 component diagram (LLM Repository), docs/UC/README.md (LLMREPO-01, LLMREPO-02, LLMREPO-03, LLMREPO-04)
-' Review:    CAR audit 2026-06-27
-' Convention: All transitions are triggered by the corresponding UC ID
-'             as listed in docs/UC/README.md.
+' Version:   2.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_llm_repo.puml
+' Review:    SM Architect extraction 2026-07-01 (C4+UC source of truth)
+' Note:      Router UCs are LLMREPOSITORY-05..08 per uc_llm_repo.puml.
 ' ============================================================
 
 title nasim — LLM Repository: Router Lifecycle
 
-[*] --> IDLE : LLMREPO-01
+[*] --> IDLE : LLMREPOSITORY-05
 
 state "IDLE" as IDLE #EEEEEE
 IDLE : No routing in progress.
@@ -23,36 +21,36 @@ IDLE : Default state.
 
 state "CLASSIFYING" as CLASSIFYING #5C6BC0
 CLASSIFYING : Task classification for model routing.
-CLASSIFYING : LLMREPO-03 CLASSIFY Task.
+CLASSIFYING : LLMREPOSITORY-07 CLASSIFY Task.
 
 state "SELECTING" as SELECTING #3F51B5
 SELECTING : Model selection in progress.
-SELECTING : LLMREPO-01 SELECT Model.
+SELECTING : LLMREPOSITORY-05 SELECT Model.
 
 state "SWITCHING" as SWITCHING #FF8F00
 SWITCHING : Runtime model switch in progress.
-SWITCHING : LLMREPO-04 SWITCH Model.
+SWITCHING : LLMREPOSITORY-08 SWITCH Model.
 
 state "FALLBACK" as FALLBACK #EF6C00
 FALLBACK : Falling back to next available model.
-FALLBACK : LLMREPO-02 APPLY Fallback.
+FALLBACK : LLMREPOSITORY-06 APPLY Fallback.
 
 state "ERROR" as ERROR #BF360C
 ERROR : Routing or fallback failed.
 ERROR : All models exhausted or classification failed.
 
-IDLE --> CLASSIFYING : LLMREPO-03
-CLASSIFYING --> SELECTING : LLMREPO-01
-CLASSIFYING --> ERROR : LLMREPO-03
-SELECTING --> IDLE : LLMREPO-01
-SELECTING --> FALLBACK : LLMREPO-02
-FALLBACK --> SELECTING : LLMREPO-02
-FALLBACK --> ERROR : LLMREPO-02
-IDLE --> SWITCHING : LLMREPO-04
-SWITCHING --> IDLE : LLMREPO-04
-SWITCHING --> ERROR : LLMREPO-04
-ERROR --> IDLE : LLMREPO-01
+IDLE --> CLASSIFYING : LLMREPOSITORY-07
+CLASSIFYING --> SELECTING : LLMREPOSITORY-05
+CLASSIFYING --> ERROR : LLMREPOSITORY-07
+SELECTING --> IDLE : LLMREPOSITORY-05
+SELECTING --> FALLBACK : LLMREPOSITORY-06 / [primary_unavailable]
+FALLBACK --> SELECTING : LLMREPOSITORY-06
+FALLBACK --> ERROR : LLMREPOSITORY-06 / [exhausted]
+IDLE --> SWITCHING : LLMREPOSITORY-08
+SWITCHING --> IDLE : LLMREPOSITORY-08
+SWITCHING --> ERROR : LLMREPOSITORY-08
+ERROR --> IDLE : LLMREPOSITORY-05
 
-IDLE --> [*] : LLMREPO-01
+IDLE --> [*] : LLMREPOSITORY-05
 
 @enduml

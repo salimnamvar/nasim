@@ -6,9 +6,9 @@
 ' Purpose:   Process FSM showing all agent states and transitions.
 '            All entry points route through the API (HTTPADP-06).
 ' Milestone: v1.0
-' Version:   8.0.0
-' Source:    C4 component diagram (Task Service), docs/UC/README.md
-' Review:    —
+' Version:   9.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_task_svc.puml
+' Review:    SM Architect extraction 2026-07-01 (C4+UC source of truth)
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
 '            do not apply (documented deviation).
 ' Convention: All transitions are triggered by the corresponding UC ID
@@ -47,7 +47,7 @@ ERROR : TASKSVC-14 HANDLE Error.
 
 state "COMPACTING" as COMPACTING #E0F2F1
 COMPACTING : Summarizing old exchanges.
-COMPACTING : TASKSVC-06 COMPACT Context.
+COMPACTING : CONTEXTSVC-05 COMPACT Nodes.
 
 state "AWAITING_APPROVAL" as AWAITING_APPROVAL #FFF9C4
 AWAITING_APPROVAL : Waiting for user permission.
@@ -59,11 +59,11 @@ PLANNING : TASKSVC-07 QUEUE Plan.
 
 state "HOOK_RUNNING" as HOOK_RUNNING #FFFDE7
 HOOK_RUNNING : Pre/post hook executing.
-HOOK_RUNNING : TOOLSVC-02..05 DISPATCH Hook.
+HOOK_RUNNING : TOOLSVC-HK02..HK05 DISPATCH Hook.
 
 state "ROUTING" as ROUTING #EDE7F6
 ROUTING : Model selection in progress.
-ROUTING : LLMREPOSITORY-01 SELECT Model.
+ROUTING : LLMREPOSITORY-05 SELECT Model.
 
 state "SERVING" as SERVING #E0F7FA
 SERVING : API processing request from any interface.
@@ -98,29 +98,29 @@ IDLE --> SERVING : HTTPADP-06
 
 LISTENING --> THINKING : HTTPADP-06
 
-THINKING --> RESPONDING : LLMREPOSITORY-02
-THINKING --> TOOL_EXEC : LLMREPOSITORY-02
-THINKING --> COMPACTING : TASKSVC-06
-THINKING --> ROUTING : LLMREPOSITORY-01
+THINKING --> RESPONDING : LLMREPOSITORY-02 / [text_only]
+THINKING --> TOOL_EXEC : LLMREPOSITORY-02 / [tool_calls]
+THINKING --> COMPACTING : CONTEXTSVC-05 / [token_count > budget]
+THINKING --> ROUTING : LLMREPOSITORY-05
 THINKING --> ERROR : LLMREPOSITORY-02
 THINKING --> RESPONDING : HTTPADP-06
 THINKING --> EVALUATING : EVALSVC-01
 
-ROUTING --> THINKING : LLMREPOSITORY-01
+ROUTING --> THINKING : LLMREPOSITORY-05
 
 TOOL_EXEC --> THINKING : TASKSVC-02
 TOOL_EXEC --> AWAITING_APPROVAL : SAFETYSVC-02
-TOOL_EXEC --> HOOK_RUNNING : TOOLSVC-02
+TOOL_EXEC --> HOOK_RUNNING : TOOLSVC-HK02
 TOOL_EXEC --> ERROR : TASKSVC-02
 TOOL_EXEC --> STAGING : EDITSTRATEGYREPO-10
 
-HOOK_RUNNING --> TOOL_EXEC : TOOLSVC-02
-HOOK_RUNNING --> IDLE : TOOLSVC-02
+HOOK_RUNNING --> TOOL_EXEC : TOOLSVC-HK02
+HOOK_RUNNING --> IDLE : TOOLSVC-HK02
 
-AWAITING_APPROVAL --> TOOL_EXEC : SAFETYSVC-02
-AWAITING_APPROVAL --> IDLE : SAFETYSVC-02
+AWAITING_APPROVAL --> TOOL_EXEC : SAFETYSVC-02 / [approved]
+AWAITING_APPROVAL --> IDLE : SAFETYSVC-02 / [denied]
 
-COMPACTING --> THINKING : TASKSVC-06
+COMPACTING --> THINKING : CONTEXTSVC-05
 
 ' ============================================================
 ' Exit transitions: response flows back through HTTPADP-06

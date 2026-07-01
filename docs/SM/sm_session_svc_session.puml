@@ -7,9 +7,9 @@
 '            Lifecycle-write UCs: SESSIONSVC-01..09 (Session Service Group).
 '            External API entry: HTTPADP-02..05 (HTTP Adapter Group).
 ' Milestone: v1.0
-' Version:   9.0.0
-' Source:    C4 component diagram (Session Service), docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/README.md
-' Review:    SM Architect review 2026-07-01
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_session_svc.puml
+' Review:    SM Architect extraction 2026-07-01 (C4+UC source of truth)
 ' Convention: All transitions use SESSIONSVC-XX UC IDs (lifecycle-write owners).
 '             HTTPADP-XX are external API wrappers; SESSIONSVC-XX are domain mutators.
 ' ============================================================

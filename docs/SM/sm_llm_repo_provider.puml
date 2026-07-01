@@ -2,20 +2,18 @@
 !include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — LLM Repository: Provider Connection Lifecycle State Machine
-' Boundary:  nasim code agent
-' Purpose:   Connection lifecycle for LLM Repository (Provider).
-'            States: UNREGISTERED → REGISTERING → ACTIVE → SELECTING
+' Boundary:  NASIM Application — Repository Layer
+' Purpose:   Provider registration and backend selection lifecycle.
 ' Milestone: v1.0
-' Version:   1.0.0
-' Source:    C4 component diagram (LLM Repository), docs/UC/README.md (LLMREPO-01, LLMREPO-04)
-' Review:    CAR audit 2026-06-27
-' Convention: All transitions are triggered by the corresponding UC ID
-'             as listed in docs/UC/README.md.
+' Version:   2.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_llm_repo.puml
+' Review:    SM Architect extraction 2026-07-01 (C4+UC source of truth)
+' Note:      Provider UCs are LLMREPOSITORY-01..04 per uc_llm_repo.puml.
 ' ============================================================
 
 title nasim — LLM Repository: Provider Connection Lifecycle
 
-[*] --> UNREGISTERED : LLMREPO-01
+[*] --> UNREGISTERED : LLMREPOSITORY-01
 
 state "UNREGISTERED" as UNREGISTERED #455A64
 UNREGISTERED : No provider registered.
@@ -23,29 +21,29 @@ UNREGISTERED : Default state.
 
 state "REGISTERING" as REGISTERING #29B6F6
 REGISTERING : Provider registration in progress.
-REGISTERING : LLMREPO-01 REGISTER Provider.
+REGISTERING : LLMREPOSITORY-01 REGISTER Provider.
 
 state "ACTIVE" as ACTIVE #03A9F4
 ACTIVE : Provider registered and ready for chat.
-ACTIVE : LLMREPO-02 REQUEST Chat, LLMREPO-03 STREAM Chat.
+ACTIVE : LLMREPOSITORY-02 REQUEST Chat, LLMREPOSITORY-03 STREAM Chat.
 
 state "SELECTING" as SELECTING #FBC02D
 SELECTING : Backend selection in progress.
-SELECTING : LLMREPO-04 SELECT Provider Backend.
+SELECTING : LLMREPOSITORY-04 SELECT Provider Backend.
 
 state "ERROR" as ERROR #E64A19
 ERROR : Registration or selection failed.
 ERROR : Provider unavailable or invalid.
 
-UNREGISTERED --> REGISTERING : LLMREPO-01
-REGISTERING --> ACTIVE : LLMREPO-01
-REGISTERING --> ERROR : LLMREPO-01
-ACTIVE --> SELECTING : LLMREPO-04
-SELECTING --> ACTIVE : LLMREPO-04
-SELECTING --> ERROR : LLMREPO-04
-ACTIVE --> UNREGISTERED : LLMREPO-01
-ERROR --> UNREGISTERED : LLMREPO-01
+UNREGISTERED --> REGISTERING : LLMREPOSITORY-01
+REGISTERING --> ACTIVE : LLMREPOSITORY-01
+REGISTERING --> ERROR : LLMREPOSITORY-01
+ACTIVE --> SELECTING : LLMREPOSITORY-04
+SELECTING --> ACTIVE : LLMREPOSITORY-04
+SELECTING --> ERROR : LLMREPOSITORY-04
+ACTIVE --> UNREGISTERED : LLMREPOSITORY-01
+ERROR --> UNREGISTERED : LLMREPOSITORY-01
 
-UNREGISTERED --> [*] : LLMREPO-01
+UNREGISTERED --> [*] : LLMREPOSITORY-01
 
 @enduml

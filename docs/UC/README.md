@@ -487,6 +487,81 @@ Extref stubs use the short prefix for readability; the owning diagram always use
 
 ---
 
+## State Machine Layer (SM)
+
+**Source of truth:** Derived from `docs/C4/c4_nasim_component.puml` (v13.0.0) and the UC diagrams in this directory. Existing SM diagrams were **not** used as design input — only as output targets.
+
+**Design chain position:** C4 → UC → **SM** → SQ
+
+**Diagram location:** `docs/SM/` (one `.puml` file per entity lifecycle)
+
+### Stateful Entities (15 State Machines)
+
+| Priority | Entity | C4 Component | Layer | SM File | Type | Justification |
+|:--------:|--------|--------------|-------|---------|------|---------------|
+| 1 | Session | `session_svc` | Service | `sm_session_svc_session.puml` | Entity | SESSIONSVC-01..09 define create, persist, restore, snapshot, revert, branch, delete — a persisted conversation lifecycle. |
+| 1 | Agent Run | `task_svc` | Service | `sm_task_svc_agent.puml` | Process FSM | TASKSVC-01 orchestrates the agentic loop (context → LLM → tools → safety → eval). Transient runtime states, not persisted. |
+| 2 | Plan | `task_svc` | Service | `sm_task_svc_plan.puml` | Entity | TASKSVC-07/08 queue and approve tool calls in plan mode (CLIADP-05 `/plan`). Distinct approval-gated lifecycle. |
+| 2 | Subagent | `task_svc` | Service | `sm_task_svc_subagent.puml` | Entity | TASKSVC-09/10 spawn and collect child agents with restricted tools. |
+| 2 | Persona | `task_svc` | Service | `sm_task_svc_persona.puml` | Entity | TASKSVC-11..13 load, delegate, and switch persona roles at runtime. |
+| 2 | Evaluation | `eval_svc` | Service | `sm_eval_svc_evaluation.puml` | Process | EVALSVC-01..09 orchestrate completion checks, LLM review, test validation, scoring, and retry. |
+| 3 | Diff Staging | `edit_strategy_repo` | Repository | `sm_edit_strategy_repo_diff.puml` | Entity | EDITSTRATEGYREPOSITORY-10 stages diffs; SAFETYSVC-02 gates user approval before apply. |
+| 3 | Sandbox Run | `sandbox_repo` | Repository | `sm_sandbox_repo_sandbox.puml` | Entity | SANDBOXREPOSITORY-01..04 isolate, monitor, and limit subprocess execution. |
+| 3 | Safety Mode | `safety_svc` | Service | `sm_safety_svc_safety.puml` | Entity | SAFETYSVC-03 configures permissive/ask/block modes that gate agent transitions. |
+| 4 | Plugin | `tool_svc` | Service | `sm_tool_svc_plugin.puml` | Entity | TOOLSVC-PLG01..06 discover, load, register, enable, and disable dynamic plugins. |
+| 4 | MCP Client | `mcp_repo` | Repository | `sm_mcp_repo_client.puml` | Entity | MCPREPOSITORY-01/02 connect and discover extension tools from external MCP servers. |
+| 4 | MCP Server | `mcp_repo` | Repository | `sm_mcp_repo_server.puml` | Entity | MCPREPOSITORY-04 exposes nasim tools (distinct from `mcp_adp` protocol adaptation). |
+| 4 | LLM Router | `llm_repo` | Repository | `sm_llm_repo_router.puml` | Entity | LLMREPOSITORY-05..08 classify, select, fallback, and switch models. |
+| 4 | LLM Provider | `llm_repo` | Repository | `sm_llm_repo_provider.puml` | Entity | LLMREPOSITORY-01..04 register providers and select backends for chat. |
+| 5 | Repo Index | `repo_intel_repo` | Repository | `sm_repo_intel_repo_index.puml` | Entity | REPOINTELLIGENCEREPOSITORY-01/02/05 index, build symbol graph, embed code; index goes stale on file changes. |
+
+### SM → UC Traceability Matrix
+
+| State Machine | Related UC(s) | Driving Operations |
+|---------------|---------------|-------------------|
+| Session | SESSIONSVC-01, SESSIONSVC-02, SESSIONSVC-04, SESSIONSVC-08, SESSIONSVC-09 | PERSIST, READ, RESTORE, BRANCH, DELETE (+ HISTORYREPO-01/03, WIRELOGREPO-04/05 via includes) |
+| Agent Run | TASKSVC-01..03, TASKSVC-07, TASKSVC-08, TASKSVC-14, TASKSVC-15, HTTPADP-06, CLIADP-01, CONTEXTSVC-05, LLMREPOSITORY-02..05, TOOLSVC-HK02, SAFETYSVC-02, EVALSVC-01..06, EDITSTRATEGYREPOSITORY-10 | PROCESS User Task loop; plan mode; compaction; routing; hooks; approval; evaluation; diff staging |
+| Plan | TASKSVC-07, TASKSVC-08, TASKSVC-01, TASKSVC-14, CLIADP-05 | QUEUE Plan, APPROVE Plan, execution drain, error recovery |
+| Subagent | TASKSVC-09, TASKSVC-10, TASKSVC-14, TOOLSVC-15 | SPAWN Subagent, COLLECT Subagent Result, HANDLE Error |
+| Persona | TASKSVC-11, TASKSVC-12, TASKSVC-13 | DELEGATE to Persona, LOAD Persona, SWITCH Persona |
+| Evaluation | EVALSVC-01..09 | EVALUATE Task and all sub-checks (completion, success, LLM review, tests, retry, repetition, turn budget) |
+| Diff Staging | EDITSTRATEGYREPOSITORY-10, SAFETYSVC-02 | STAGE Diff, REQUEST Approval |
+| Sandbox Run | SANDBOXREPOSITORY-01..04 | ISOLATE Command, APPLY Sandbox Policy, MONITOR Process, LIMIT Resources |
+| Safety Mode | SAFETYSVC-01, SAFETYSVC-03, CLIADP-06 | CHECK Permission, APPLY Safety Mode, REQUEST Approval |
+| Plugin | TOOLSVC-PLG01..06 | DISCOVER, LOAD Manifest, REGISTER Tools/Hooks, ENABLE, DISABLE |
+| MCP Client | MCPREPOSITORY-01, MCPREPOSITORY-02, MCPREPOSITORY-03 | CONNECT MCP Server, DISCOVER MCP Tools, ADAPT MCP Tool |
+| MCP Server | MCPREPOSITORY-04, MCPADP-02 | EXPOSE nasim Tools (outbound repo + inbound adapter) |
+| LLM Router | LLMREPOSITORY-05..08, CLIADP-07 | SELECT Model, APPLY Fallback, CLASSIFY Task, SWITCH Model |
+| LLM Provider | LLMREPOSITORY-01..04 | REGISTER Provider, REQUEST/STREAM Chat, SELECT Provider Backend |
+| Repo Index | REPOINTELLIGENCEREPOSITORY-01, REPOINTELLIGENCEREPOSITORY-02, REPOINTELLIGENCEREPOSITORY-05 | INDEX Codebase, BUILD Symbol Graph, EMBED Code |
+
+### Entities Considered — No Dedicated State Machine
+
+| C4 Component | Reason |
+|--------------|--------|
+| `agent_ctrl`, `cli_adp`, `http_adp`, `mcp_adp` | Controller/adapters: protocol routing and presentation only (CSR rule). Lifecycle is request-scoped, not domain-persisted. |
+| `config_svc`, `config_repo` | Load/validate/apply configuration — idempotent reads and writes, no multi-state lifecycle. |
+| `context_svc` | CONTEXTSVC-01..06 are synchronous pipeline stages within one invocation. Compaction appears as Agent FSM `COMPACTING` state (CONTEXTSVC-05), not a separate entity. |
+| `session_repo`, `history_repo`, `wire_log_repo` | Data-access repositories; lifecycle owned by `session_svc`. Wire log is append-only (no branching SM needed). |
+| `memory_repo`, `fs_repo`, `web_repo`, `git_repo` | Stateless I/O or CRUD operations without approval-gated multi-step lifecycles. |
+| Data stores (`session_store`, etc.) | Passive persistence — no behavioral UC. |
+
+### Design Decisions (DRY / KISS / SRP / Encapsulation)
+
+| Decision | Rationale |
+|----------|-----------|
+| **Agent Process FSM** is separate from entity SMs | SRP: `task_svc` runtime loop (THINKING, TOOL_EXEC) is transient; Session/Plan/Subagent have persisted or scoped lifecycles. |
+| **Plan, Subagent, Persona** are three SMs under `task_svc` | Encapsulation: each cohesive entity gets one SM; avoids a monolithic task_svc diagram. |
+| **LLM Router + Provider** split | SRP: routing (05..08) and provider connection (01..04) are distinct concerns in `uc_llm_repo.puml`. |
+| **MCP Client + Server** split | C4 boundary: `mcp_repo` connects outbound (01..03) vs exposes inbound (04); `mcp_adp` handles protocol only. |
+| **No Context Pipeline SM** | KISS: pipeline stages complete in one CONTEXTSVC-01 pass; only compaction triggers a visible agent state change. |
+| **Diff Staging SM** encapsulates approval | DRY: AWAITING_APPROVAL in Agent FSM delegates to `edit_strategy_repo` + `safety_svc` entity lifecycles. |
+| **Guards on transitions** | Used sparingly where UC behavior is conditional (e.g., `TASKSVC-08 / [approved]`, `LLMREPOSITORY-02 / [tool_calls]`). |
+
+Full transition matrices and hex color registry: `docs/SM/README.md`.
+
+---
+
 **Total: 164 UCs** across 24 C4 component groups (+ `uc_overview.puml` navigation map). Excludes overview group nodes and the vacant TASKSVC-05 ID (permanence rule). Repository-layer UCs use canonical `*REPOSITORY-*` IDs; extref stubs use short prefixes per the naming convention above.
 
 ### Adapter → Agent Controller → Service Routing

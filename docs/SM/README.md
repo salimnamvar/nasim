@@ -1,5 +1,9 @@
 # nasim — State Machine Inventory (API-First)
 
+> **Extraction date:** 2026-07-01 — State machines re-derived from `docs/C4/c4_nasim_component.puml` (v13.0.0) and UC diagrams only. Traceability matrix lives in `docs/UC/README.md` § State Machine Layer.
+>
+> **Key UC alignments (v13.0.0):** Agent compaction → `CONTEXTSVC-05`; plugin lifecycle → `TOOLSVC-PLG01..06`; LLM router → `LLMREPOSITORY-05..08`; LLM provider → `LLMREPOSITORY-01..04`; pre-tool hooks → `TOOLSVC-HK02`.
+
 ## Agent Lifecycle States (Process FSM)
 
 | State | Description | Entry Condition | Hex Color |

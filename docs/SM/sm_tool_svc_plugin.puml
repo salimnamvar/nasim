@@ -2,56 +2,56 @@
 !include common/sm_common_lifecycle.puml
 ' ============================================================
 ' Title:     nasim — Tool Service: Plugin Lifecycle State Machine
-' Boundary:  nasim code agent
-' Purpose:   Entity lifecycle for Plugin (persisted in config)
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Entity lifecycle for dynamically loaded plugins.
 ' Milestone: v1.0
-' Version:   6.0.0
-' Source:    C4 component diagram (Tool Service), docs/UC/README.md
-' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
+' Version:   7.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_tool_svc.puml
+' Review:    SM Architect extraction 2026-07-01 (C4+UC source of truth)
 ' ============================================================
 
 title nasim — Tool Service: Plugin Lifecycle
 
-[*] --> DISCOVERED : TOOLSVC-01
+[*] --> DISCOVERED : TOOLSVC-PLG01
 
 state "DISCOVERED" as DISCOVERED #E0E0E0
 DISCOVERED : Plugin found on filesystem.
-DISCOVERED : TOOLSVC-01 DISCOVER Plugins.
+DISCOVERED : TOOLSVC-PLG01 DISCOVER Plugins.
 
 state "LOADING" as LOADING #FFCC80
 LOADING : Plugin manifest being parsed.
-LOADING : TOOLSVC-02 LOAD Manifest.
+LOADING : TOOLSVC-PLG02 LOAD Manifest.
 
 state "LOADED" as LOADED #90CAF9
-LOADED : Plugin manifest parsed, tools registered.
-LOADED : TOOLSVC-03 REGISTER Plugin Tools.
+LOADED : Manifest parsed; tools and hooks registered.
+LOADED : TOOLSVC-PLG03 REGISTER Plugin Tools.
 
 state "ENABLED" as ENABLED #4CAF50
 ENABLED : Plugin active and available.
-ENABLED : TOOLSVC-05 ENABLE Plugin.
+ENABLED : TOOLSVC-PLG05 ENABLE Plugin.
 
 state "DISABLED" as DISABLED #CE93D8
 DISABLED : Plugin deactivated.
-DISABLED : TOOLSVC-06 DISABLE Plugin.
+DISABLED : TOOLSVC-PLG06 DISABLE Plugin.
 
 state "ERROR" as ERROR #EF5350
 ERROR : Plugin failed to load or crashed.
-ERROR : Load error or runtime exception.
+ERROR : Entry: re-discovery via TOOLSVC-PLG01.
 
-DISCOVERED --> LOADING : TOOLSVC-02
-DISCOVERED --> ERROR : TOOLSVC-01
-LOADING --> LOADED : TOOLSVC-03
-LOADING --> ERROR : TOOLSVC-02
-LOADED --> ENABLED : TOOLSVC-05
-LOADED --> DISABLED : TOOLSVC-06
-ENABLED --> DISABLED : TOOLSVC-06
-DISABLED --> ENABLED : TOOLSVC-05
-ENABLED --> ERROR : TOOLSVC-01
-LOADED --> ERROR : TOOLSVC-03
+DISCOVERED --> LOADING : TOOLSVC-PLG02
+DISCOVERED --> ERROR : TOOLSVC-PLG01
+LOADING --> LOADED : TOOLSVC-PLG03
+LOADING --> ERROR : TOOLSVC-PLG02
+LOADED --> ENABLED : TOOLSVC-PLG05
+LOADED --> DISABLED : TOOLSVC-PLG06
+ENABLED --> DISABLED : TOOLSVC-PLG06
+DISABLED --> ENABLED : TOOLSVC-PLG05
+ENABLED --> ERROR : TOOLSVC-PLG01
+LOADED --> ERROR : TOOLSVC-PLG03
 
-ERROR --> DISCOVERED : TOOLSVC-01
+ERROR --> DISCOVERED : TOOLSVC-PLG01
 
-ENABLED --> [*] : TOOLSVC-06
-DISABLED --> [*] : TOOLSVC-06
+ENABLED --> [*] : TOOLSVC-PLG06
+DISABLED --> [*] : TOOLSVC-PLG06
 
 @enduml
