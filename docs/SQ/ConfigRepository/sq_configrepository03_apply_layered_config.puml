@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigService -> ConfigRepository
+' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigLoader
 ' SM States: SERVING (#E0F7FA)
 ' ============================================================
 

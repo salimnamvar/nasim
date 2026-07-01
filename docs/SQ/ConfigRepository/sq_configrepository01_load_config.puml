@@ -25,10 +25,6 @@ box "API" API_COLOR
   participant "AgentController" as router
 end box
 
-box "Service" SERVICE_COLOR
-  participant "ConfigService" as cfg_svc
-end box
-
 box "Repository" REPOSITORY_COLOR
   participant "ConfigRepository" as mgr
 end box
@@ -39,29 +35,23 @@ user -> iface : CONFIGREPOSITORY-01 LOAD Config({cli_args})
 activate iface
 iface -> router : CONFIGREPOSITORY-01 LOAD Config({cli_args})
 activate router
-router -> cfg_svc : CONFIGREPOSITORY-01 LOAD Config({cli_args})
-activate cfg_svc
-cfg_svc -> mgr : CONFIGREPOSITORY-01 LOAD Config({cli_args})
+router -> mgr : CONFIGREPOSITORY-01 LOAD Config({cli_args})
 activate mgr
 
 alt validation succeeds
   ref over mgr : CONFIGREPOSITORY-01 LOAD Config <back:#E0F7FA>SERVING</back>
-  mgr --> cfg_svc : 200 OK
+  mgr --> router : 200 OK
   deactivate mgr
-  cfg_svc --> router : 200 OK
-  deactivate cfg_svc
   router --> iface : 200 OK
-  deactivate router
   iface --> user : 200 OK
+  deactivate router
   deactivate iface
 else validation fails
-  mgr --> cfg_svc : 422 UNPROCESSABLE\n{error: {code: "CONFIGREPOSITORY-01_VALIDATION_ERROR", message: "Config validation failed", status: 422}}
+  mgr --> router : 422 UNPROCESSABLE\n{error: {code: "CONFIGREPOSITORY-01_VALIDATION_ERROR", message: "Config validation failed", status: 422}}
   deactivate mgr
-  cfg_svc --> router : 422 UNPROCESSABLE
-  deactivate cfg_svc
   router --> iface : 422 UNPROCESSABLE
-  deactivate router
   iface --> user : 422 UNPROCESSABLE
+  deactivate router
   deactivate iface
 end
 
