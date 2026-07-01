@@ -17,7 +17,7 @@ that translates natural language into file changes via agentic tool orchestratio
 1. **Context** — what NASIM Service is and what it talks to.
 2. **Container** — the single deployable application, its external clients,
    and system dependencies.
-3. **Component** — internal architecture: adapters → AgentController →
+3. **Component** — internal architecture: adapters → Agent Controller →
    services → repositories → data stores → external systems.
 
 ## Architecture summary
@@ -29,14 +29,14 @@ same NASIM Application container via HTTP/JSON + SSE or stdio.
 ### CSR pattern
 
 ```
-User → Controller (CLIAdapter, HTTPAdapter, MCPAdapter → AgentController)
-     → Service (TaskService, ToolService, SessionService, ConfigService,
-                SafetyService, ContextService, EvaluationService)
-     → Repository (SessionRepository, LLMRepository, FilesystemRepository,
-                    SandboxRepository, EditStrategyRepository, GitRepository,
-                    MCPRepository, RepoIntelligenceRepository, WebRepository,
-                    WireLogRepository, MemoryRepository, ConfigRepository,
-                    HistoryRepository)
+User → Controller (CLI Adapter, HTTP Adapter, MCP Adapter → Agent Controller)
+     → Service (Task Service, Tool Service, Session Service, Config Service,
+                Safety Service, Context Service, Evaluation Service)
+     → Repository (Session Repository, LLM Repository, Filesystem Repository,
+                    Sandbox Repository, Edit Strategy Repository, Git Repository,
+                    MCP Repository, Repo Intelligence Repository, Web Repository,
+                    Wire Log Repository, Memory Repository, Config Repository,
+                    History Repository)
      → Data Stores (Session, Memory, WireLog, Config)
 ```
 

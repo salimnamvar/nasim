@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> SandboxPolicy
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> SandboxPolicy
 ' SM States: IDLE (#78909C)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- SANDBOXREPOSITORY-02 APPLY Sandbox Policy
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "SandboxRepository" as mgr
+  participant "Sandbox Repository" as mgr
 end box
 
 == SANDBOXREPOSITORY-02 APPLY Sandbox Policy ==

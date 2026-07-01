@@ -2,12 +2,12 @@
 ' ============================================================
 ' Title:     SESSIONSERVICE-01 — PERSIST Session
 ' Boundary:  nasim code agent
-' Purpose:   Persist session messages to disk via SessionService
+' Purpose:   Persist session messages to disk via Session Service
 ' Milestone: v1.0
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionStore
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> Session Service -> SessionStore
 ' SM States: ACTIVE (#43A047), SAVED (#1565C0)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- SESSIONSERVICE-01 PERSIST Session
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SessionService" as svc
+  participant "Session Service" as svc
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "SessionService" as store
+  participant "Session Service" as store
 end box
 
 database "SessionStore" as storage

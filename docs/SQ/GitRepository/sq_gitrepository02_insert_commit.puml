@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> GitIntegration
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> GitIntegration
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- GITREPOSITORY-02 INSERT Commit
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "GitRepository" as mgr
+  participant "Git Repository" as mgr
 end box
 
 == GITREPOSITORY-02 INSERT Commit ==

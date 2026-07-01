@@ -4,12 +4,12 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: EditStrategyRepository Group
-' Group:     EDITSTRATEGYREPOSITORY (EditStrategyRepository)
+' Title:     nasim — UC: Edit Strategy Repository Group
+' Group:     EDITSTRATEGYREPOSITORY (Edit Strategy Repository)
 ' Boundary:  NASIM Service
 ' Purpose:   Diff staging, computation, and safe application:
 '            staged edits, sandboxed validation.
-'            Entry chain: User → Interface → AgentController → TaskService → ToolService → EditStrategyRepository
+'            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service → Edit Strategy Repository
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

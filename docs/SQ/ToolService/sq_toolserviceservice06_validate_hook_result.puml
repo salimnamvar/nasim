@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> HookManager
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> HookManager
 ' SM States: HOOK_RUNNING (#FFFDE7)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- TOOLSERVICE-06 VALIDATE Hook Result
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "ToolService" as mgr
+  participant "Tool Service" as mgr
 end box
 
 == TOOLSERVICE-06 VALIDATE Hook Result ==

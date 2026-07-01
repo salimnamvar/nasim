@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> {C4_Component} -> {C4_Component} -> {Storage}
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> {C4_Component} -> {C4_Component} -> {Storage}
 ' SM States: {STATE} (#{hex})[, {STATE2} (#{hex2})]
 ' ============================================================
 
@@ -18,17 +18,17 @@ title nasim -- {UC_ID} {VERB} {Resource}({params})
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 ' --- CSR Layer Box ---
 ' Use correct CSR macro for your group:
-'   INTERFACE_COLOR   — CLIAdapter, WebApp, DesktopApp
-'   API_COLOR         — AgentController, controllers
+'   INTERFACE_COLOR   — CLI Adapter, WebApp, DesktopApp
+'   API_COLOR         — Agent Controller, controllers
 '   SERVICE_COLOR     — Agent, Router, Safety, Context, Edit Strategy, Evaluation, Provider
 '   REPOSITORY_COLOR  — Session, Tool, Memory, Config, Git, Repo Intelligence
 '   DATASTORE_COLOR   — SessionStore, FileSystem, databases

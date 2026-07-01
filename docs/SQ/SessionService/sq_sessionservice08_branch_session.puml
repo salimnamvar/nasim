@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> SessionService -> SessionService -> SessionStore
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> Session Service -> Session Service -> SessionStore
 ' SM States: ACTIVE (#43A047), BRANCHED (#7B1FA2)
 ' ============================================================
 
@@ -18,20 +18,20 @@ title nasim -- SESSIONSERVICE-08 BRANCH Session
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SessionService" as svc
+  participant "Session Service" as svc
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "SessionService" as fork
-  participant "SessionService" as store
+  participant "Session Service" as fork
+  participant "Session Service" as store
 end box
 
 database "SessionStore" as storage

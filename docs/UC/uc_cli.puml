@@ -5,11 +5,11 @@
 
 ' ============================================================
 ' Title:     nasim — UC: CLI Group (Interface Container)
-' Group:     CLI (CLIAdapter)
+' Group:     CLI (CLI Adapter)
 ' Boundary:  NASIM Service
 ' Purpose:   CLI-specific interface UCs: REPL, slash commands, rendering.
-'            ALL business operations delegate through AgentController.
-'            Entry chain: User → CLIAdapter → AgentController → Services
+'            ALL business operations delegate through Agent Controller.
+'            Entry chain: User → CLI Adapter → Agent Controller → Services
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
@@ -86,7 +86,7 @@ usecase "HTTPADAPTER-11\nUPDATE Config\n[uc_api_group]" as API11_ext <<extref>>
 
 rectangle "nasim" {
   package "CLI Group (Interface Container)" {
-    usecase "**CLI-01 PROCESS User Input**\n--\nREPL loop, input handling.\nDelegates ALL business ops to AgentController." <<master>> as CLI01
+    usecase "**CLI-01 PROCESS User Input**\n--\nREPL loop, input handling.\nDelegates ALL business ops to Agent Controller." <<master>> as CLI01
     usecase "**CLI-02 DISPATCH Slash Command**\n--\nMap /cmd strings to API calls.\n/sessions → HTTPADAPTER-01, /model → HTTPADAPTER-11" <<master>> as CLI02
     usecase "**CLI-03 STREAM Output**\n--\nRender AgentEvents from API SSE stream to terminal" <<include>> as CLI03
     usecase "**CLI-04 READ CLI Arguments**\n--\nParse startup CLI arguments.\n<<master>> CONFIGREPOSITORY-01" <<master>> as CLI04

@@ -3,7 +3,7 @@
 ' Title:     NASIM Application — Component Diagram
 ' Boundary:  NASIM Application
 ' Purpose:   Container-to-Component traceability with strict 3-layer CSR.
-'            External clients connect to adapters → AgentController (single entry)
+'            External clients connect to adapters → Agent Controller (single entry)
 '            → services → repositories → data stores → external systems.
 ' Milestone: v1.0
 ' Version:   13.0.0
@@ -31,38 +31,38 @@ Container_Boundary(nasim_app, "NASIM Application") {
 
     ' ── Controller Layer (single convergence point) ──
     Boundary(controller_layer, "Controller Layer") <<controller>> {
-        Component(cli_adapter, "CLIAdapter", "argparse + REPL", "Terminal REPL session, arg parsing, slash commands", $tags="controller")
-        Component(http_adapter, "HTTPAdapter", "FastAPI", "ASGI routes, middleware, SSE streaming", $tags="controller")
-        Component(mcp_adapter, "MCPAdapter", "mcp.server", "MCP protocol: tool exposure, stdio/SSE transport", $tags="controller")
-        Component(agent_ctrl, "AgentController", "asyncio", "Central entry gate. All adapters converge here. Delegates to services.", $tags="controller")
+        Component(cli_adp, "CLI Adapter", "argparse + REPL", "Terminal REPL session, arg parsing, slash commands", $tags="controller")
+        Component(http_adp, "HTTP Adapter", "FastAPI", "ASGI routes, middleware, SSE streaming", $tags="controller")
+        Component(mcp_adp, "MCP Adapter", "mcp.server", "MCP protocol: tool exposure, stdio/SSE transport", $tags="controller")
+        Component(agent_ctrl, "Agent Controller", "asyncio", "Central entry gate. All adapters converge here. Delegates to services.", $tags="controller")
     }
 
     ' ── Service Layer ──
     Boundary(service_layer, "Service Layer") <<service>> {
-        Component(task_svc, "TaskService", "asyncio", "Agentic loop: LLM call, tool dispatch, context assembly, subagent orchestration, error recovery, persona management", $tags="service")
-        Component(tool_svc, "ToolService", "registry", "Tool registry, parameter validation, execution dispatch; includes subagent, todo, plan, review tools, dynamic plugin-loaded tools, and lifecycle hook dispatch (PreToolUse, PostToolUse, PreLLMCall, PostLLMCall)", $tags="service")
-        Component(session_svc, "SessionService", "asyncio", "Session lifecycle: create, load, save, snapshot, revert", $tags="service")
-        Component(config_svc, "ConfigService", "pydantic + PyYAML", "Config loading, validation, layered overrides (project YAML, env vars, CLI flags, defaults); single source for all configuration access", $tags="service")
-        Component(safety_svc, "SafetyService", "policy pipeline", "Permission gating, injection scanning, egress inspection", $tags="service")
-        Component(context_svc, "ContextService", "graph", "Context pipeline: graph construction, truncation, distillation, injection, and compaction", $tags="service")
-        Component(eval_svc, "EvaluationService", "litellm + heuristics", "Task evaluation: success checks, LLM review, retry coordination, repetition detection, turn budget management", $tags="service")
+        Component(task_svc, "Task Service", "asyncio", "Agentic loop: LLM call, tool dispatch, context assembly, subagent orchestration, error recovery, persona management", $tags="service")
+        Component(tool_svc, "Tool Service", "registry", "Tool registry, parameter validation, execution dispatch; includes subagent, todo, plan, review tools, dynamic plugin-loaded tools, and lifecycle hook dispatch (PreToolUse, PostToolUse, PreLLMCall, PostLLMCall)", $tags="service")
+        Component(session_svc, "Session Service", "asyncio", "Session lifecycle: create, load, save, snapshot, revert", $tags="service")
+        Component(config_svc, "Config Service", "pydantic + PyYAML", "Config loading, validation, layered overrides (project YAML, env vars, CLI flags, defaults); single source for all configuration access", $tags="service")
+        Component(safety_svc, "Safety Service", "policy pipeline", "Permission gating, injection scanning, egress inspection", $tags="service")
+        Component(context_svc, "Context Service", "graph", "Context pipeline: graph construction, truncation, distillation, injection, and compaction", $tags="service")
+        Component(eval_svc, "Evaluation Service", "litellm + heuristics", "Task evaluation: success checks, LLM review, retry coordination, repetition detection, turn budget management", $tags="service")
     }
 
     ' ── Repository Layer ──
     Boundary(repository_layer, "Repository Layer") <<repository>> {
-        Component(session_repo, "SessionRepository", "JSONL + pathlib", "Message persistence: JSON Lines, turn management", $tags="repository")
-        Component(history_repo, "HistoryRepository", "JSONL + SQLite FTS5", "Snapshots, revert index, search index", $tags="repository")
-        Component(config_repo, "ConfigRepository", "PyYAML + os.environ", "YAML, env vars, CLI flags, project overrides", $tags="repository")
-        Component(memory_repo, "MemoryRepository", "JSON + embeddings", "Cross-session knowledge persistence", $tags="repository")
-        Component(llm_repo, "LLMRepository", "litellm", "LLM API calls + model routing: streaming, fallback chains, capability-based model selection, task classification", $tags="repository")
-        Component(fs_repo, "FilesystemRepository", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep", $tags="repository")
-        Component(sandbox_repo, "SandboxRepository", "subprocess", "Sandboxed command execution: timeout, isolation", $tags="repository")
-        Component(edit_strategy_repo, "EditStrategyRepository", "pathlib + unified_diff", "Diff staging, computation, and safe application: staged edits, sandboxed validation", $tags="repository")
-        Component(git_repo, "GitRepository", "gitpython", "Git operations: status, diff, commit, branch", $tags="repository")
-        Component(mcp_repo, "MCPRepository", "mcp.client", "MCP extension tools: discovery, invocation", $tags="repository")
-        Component(repo_intel_repo, "RepoIntelligenceRepository", "tree-sitter + API", "Codebase intelligence: AST indexing, symbol graph, embedding generation, semantic search, repo map building", $tags="repository")
-        Component(web_repo, "WebRepository", "httpx", "Web fetch: documentation, search results", $tags="repository")
-        Component(wire_log_repo, "WireLogRepository", "JSONL append-only", "Append-only event store: interaction recording, replay, session forking, checkpointing", $tags="repository")
+        Component(session_repo, "Session Repository", "JSONL + pathlib", "Message persistence: JSON Lines, turn management", $tags="repository")
+        Component(history_repo, "History Repository", "JSONL + SQLite FTS5", "Snapshots, revert index, search index", $tags="repository")
+        Component(config_repo, "Config Repository", "PyYAML + os.environ", "YAML, env vars, CLI flags, project overrides", $tags="repository")
+        Component(memory_repo, "Memory Repository", "JSON + embeddings", "Cross-session knowledge persistence", $tags="repository")
+        Component(llm_repo, "LLM Repository", "litellm", "LLM API calls + model routing: streaming, fallback chains, capability-based model selection, task classification", $tags="repository")
+        Component(fs_repo, "Filesystem Repository", "pathlib", "Host filesystem I/O: read, write, edit, glob, grep", $tags="repository")
+        Component(sandbox_repo, "Sandbox Repository", "subprocess", "Sandboxed command execution: timeout, isolation", $tags="repository")
+        Component(edit_strategy_repo, "Edit Strategy Repository", "pathlib + unified_diff", "Diff staging, computation, and safe application: staged edits, sandboxed validation", $tags="repository")
+        Component(git_repo, "Git Repository", "gitpython", "Git operations: status, diff, commit, branch", $tags="repository")
+        Component(mcp_repo, "MCP Repository", "mcp.client", "MCP extension tools: discovery, invocation", $tags="repository")
+        Component(repo_intel_repo, "Repo Intelligence Repository", "tree-sitter + API", "Codebase intelligence: AST indexing, symbol graph, embedding generation, semantic search, repo map building", $tags="repository")
+        Component(web_repo, "Web Repository", "httpx", "Web fetch: documentation, search results", $tags="repository")
+        Component(wire_log_repo, "Wire Log Repository", "JSONL append-only", "Append-only event store: interaction recording, replay, session forking, checkpointing", $tags="repository")
     }
 
     ' ── Data Stores (internal persistence) ──
@@ -87,19 +87,19 @@ System_Ext(repo_intel, "Repo Intelligence Backend", "Tree-sitter, LSP, embedding
 ' ── External Clients → Adapters (Container → Component traceability) ──
 ' ══════════════════════════════════════════════════════════════
 
-Rel(cli, cli_adapter, "submits tasks", "HTTP/JSON + SSE")
-Rel(webapp, http_adapter, "submits tasks", "HTTP/JSON + SSE")
-Rel(desktop, http_adapter, "submits tasks", "HTTP/JSON + SSE")
-Rel(mobile, http_adapter, "submits tasks", "HTTPS + SSE")
-Rel(mcp_client, mcp_adapter, "invokes tools", "stdio / SSE")
+Rel(cli, cli_adp, "submits tasks", "HTTP/JSON + SSE")
+Rel(webapp, http_adp, "submits tasks", "HTTP/JSON + SSE")
+Rel(desktop, http_adp, "submits tasks", "HTTP/JSON + SSE")
+Rel(mobile, http_adp, "submits tasks", "HTTPS + SSE")
+Rel(mcp_client, mcp_adp, "invokes tools", "stdio / SSE")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Adapters → Controller (single convergence point) ──
 ' ══════════════════════════════════════════════════════════════
 
-Rel(cli_adapter, agent_ctrl, "delegates validated request")
-Rel(http_adapter, agent_ctrl, "delegates validated request")
-Rel(mcp_adapter, agent_ctrl, "delegates validated request")
+Rel(cli_adp, agent_ctrl, "delegates validated request")
+Rel(http_adp, agent_ctrl, "delegates validated request")
+Rel(mcp_adp, agent_ctrl, "delegates validated request")
 
 ' ══════════════════════════════════════════════════════════════
 ' ── Controller → Services (CSR: Controller → Service) ──
@@ -168,9 +168,9 @@ Rel(repo_intel_repo, repo_intel, "parses code, queries intelligence", "in-proces
 Rel(web_repo, web, "fetches documentation", "HTTPS")
 
 legend right
-    |<#E3F2FD>  **Controller** | CLIAdapter, HTTPAdapter, MCPAdapter, AgentController |
-    |<#FFF3E0>  **Service**    | TaskService, ToolService, SessionService, ConfigService, SafetyService, ContextService, EvaluationService |
-    |<#E8F5E9>  **Repository** | SessionRepository, HistoryRepository, ConfigRepository, MemoryRepository, LLMRepository, FilesystemRepository, SandboxRepository, EditStrategyRepository, GitRepository, MCPRepository, RepoIntelligenceRepository, WebRepository, WireLogRepository |
+    |<#E3F2FD>  **Controller** | CLI Adapter, HTTP Adapter, MCP Adapter, Agent Controller |
+    |<#FFF3E0>  **Service**    | Task Service, Tool Service, Session Service, Config Service, Safety Service, Context Service, Evaluation Service |
+    |<#E8F5E9>  **Repository** | Session Repository, History Repository, Config Repository, Memory Repository, LLM Repository, Filesystem Repository, Sandbox Repository, Edit Strategy Repository, Git Repository, MCP Repository, Repo Intelligence Repository, Web Repository, Wire Log Repository |
     |<#FFFDE7>  **Data Store** | SessionStore, MemoryStore, WireLogStore, ConfigStore |
     |<#FAFAFA>  **External Client** | CLI, WebApp, DesktopApp, MobileApp, MCP Client |
 end legend

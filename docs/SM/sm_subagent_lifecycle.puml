@@ -3,7 +3,7 @@
 ' ============================================================
 ' Title:     nasim — Subagent Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Entity lifecycle for TaskService (Subagent child processes).
+' Purpose:   Entity lifecycle for Task Service (Subagent child processes).
 '            States: IDLE → SPAWNING → RUNNING → COMPLETED | FAILED
 ' Milestone: v1.0
 ' Version:   9.1.0

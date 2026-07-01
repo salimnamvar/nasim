@@ -17,7 +17,7 @@
 skinparam classAttributeIconSize 0
 
 package "Controller Layer" #E8EAF6 {
-    class CLIAdapter {
+    class CLI Adapter {
         + process_input(raw_input) : AgentEvent
         + parse_args(argv) : Namespace
         + dispatch_slash_command(cmd) : Response
@@ -25,14 +25,14 @@ package "Controller Layer" #E8EAF6 {
         + request_approval(action) : bool
     }
 
-    class MCPAdapter {
+    class MCP Adapter {
         + expose_tools(registry) : list[ToolDef]
         + handle_call(tool_name, args) : ToolResult
         + start_transport(transport_type) : None
         + discover_tools() : list[MCPToolDef]
     }
 
-    class AgentController {
+    class Agent Controller {
         - adapters : dict[str, Adapter]
         - services : dict[str, Service]
         + handle_input(source, input) : Iterator[AgentEvent]
@@ -43,7 +43,7 @@ package "Controller Layer" #E8EAF6 {
 }
 
 package "Service Layer" #E8F5E9 {
-    class SessionService {
+    class Session Service {
         + create_session() : Session
         + load_session(session_id) : Session
         + save_session(session)
@@ -291,7 +291,7 @@ package "Session Layer" #F1F8E9 {
         + list_sessions() : list[tuple]
     }
 
-    class HistoryRepository {
+    class History Repository {
         + save_snapshot(session_id, turn) : str
         + load_snapshot(snapshot_id) : Session
         + search_sessions(query) : list[SearchResult]
@@ -669,14 +669,14 @@ TokenBudgetTracker --> ContextGraph : tracks
 ContextGraph --> MemoryRetriever : injects memory
 
 ' Controller & Service relationships
-CLIAdapter --> AgentController : delegates input
-MCPAdapter --> AgentController : delegates calls
-AgentController --> SessionService : manages sessions
-AgentController --> AgentOrchestrator : dispatches tasks
-AgentController --> PermissionGate : enforces gates
-SessionService --> SessionStore : persists
-SessionService --> HistoryRepository : snapshots
-HistoryRepository --> SessionStore : reads from
+CLI Adapter --> Agent Controller : delegates input
+MCP Adapter --> Agent Controller : delegates calls
+Agent Controller --> Session Service : manages sessions
+Agent Controller --> AgentOrchestrator : dispatches tasks
+Agent Controller --> PermissionGate : enforces gates
+Session Service --> SessionStore : persists
+Session Service --> History Repository : snapshots
+History Repository --> SessionStore : reads from
 
 ' Data Store relationships
 MemoryStore --> MemoryRetriever : backs

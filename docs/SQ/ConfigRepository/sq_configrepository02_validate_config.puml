@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> ConfigLoader
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> ConfigLoader
 ' SM States: SERVING (#E0F7FA)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- CONFIGREPOSITORY-02 VALIDATE Config
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "ConfigService" as cfg_svc
+  participant "Config Service" as cfg_svc
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "ConfigRepository" as mgr
+  participant "Config Repository" as mgr
 end box
 
 == CONFIGREPOSITORY-02 VALIDATE Config ==

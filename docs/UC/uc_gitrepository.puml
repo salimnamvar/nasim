@@ -4,11 +4,11 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: GitRepository Group
-' Group:     GITREPOSITORY (GitRepository)
+' Title:     nasim — UC: Git Repository Group
+' Group:     GITREPOSITORY (Git Repository)
 ' Boundary:  NASIM Service
 ' Purpose:   Git operations: status, diff, commit, branch
-'            Entry chain: User → Interface → AgentController → TaskService → ToolService → GitRepository
+'            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service → Git Repository
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

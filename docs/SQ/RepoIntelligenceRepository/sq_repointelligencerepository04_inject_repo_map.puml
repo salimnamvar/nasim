@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> RepoMapService -> RepoMapRepository
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> RepoMapService -> RepoMapRepository
 ' SM States: INDEXED (#7CB342)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- REPOINTELLIGENCEREPOSITORY-04 INJECT RepoMap
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "RepoIntelligenceRepository" as mgr
+  participant "Repo Intelligence Repository" as mgr
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "RepoIntelligenceRepository" as repoMapRepo
+  participant "Repo Intelligence Repository" as repoMapRepo
 end box
 
 == REPOINTELLIGENCEREPOSITORY-04 INJECT RepoMap ==

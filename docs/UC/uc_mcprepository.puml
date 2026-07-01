@@ -4,11 +4,11 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: MCPRepository Group
-' Group:     MCPREPOSITORY (MCPRepository)
+' Title:     nasim — UC: MCP Repository Group
+' Group:     MCPREPOSITORY (MCP Repository)
 ' Boundary:  NASIM Service
 ' Purpose:   MCP extension tools: discovery, invocation
-'            Entry chain: User → Interface → AgentController → TaskService → ToolService → MCPRepository
+'            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service → MCP Repository
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

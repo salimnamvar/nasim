@@ -3,7 +3,7 @@
 ' ============================================================
 ' Title:     nasim — MCP Server Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Serving lifecycle for MCPRepository (MCP Server).
+' Purpose:   Serving lifecycle for MCP Repository (MCP Server).
 '            States: STOPPED → STARTING → RUNNING → STOPPING
 ' Milestone: v1.0
 ' Version:   1.0.0

@@ -70,14 +70,14 @@ Back to [docs/](../README.md).
 
 | Resource | Collection Path | Methods | Owner (C4) |
 | -------- | --------------- | ------- | ---------- |
-| Session | `/v1/sessions` | List, Get, Create, Update, Delete | HTTPAdapter → SessionService |
-| Message | `/v1/sessions/{session}/messages` | List, Create (SSE via `:dispatch`) | HTTPAdapter → AgentController |
-| Tool | `/v1/tools` | List, Get | HTTPAdapter → ToolService |
-| Config | `/v1/config` | Get, Update | HTTPAdapter → ConfigRepository |
-| Subagent | `/v1/sessions/{session}/subagents` | List, Create, Get | HTTPAdapter → TaskService |
-| Memory | `/v1/memory` | List, Create, Search | HTTPAdapter → MemoryRepository |
-| Snapshot | `/v1/sessions/{session}/snapshots` | List, Create, Restore | HTTPAdapter → SessionService |
-| Todo | `/v1/sessions/{session}/todos` | List, Create, Update | HTTPAdapter → TaskService |
+| Session | `/v1/sessions` | List, Get, Create, Update, Delete | HTTP Adapter → Session Service |
+| Message | `/v1/sessions/{session}/messages` | List, Create (SSE via `:dispatch`) | HTTP Adapter → Agent Controller |
+| Tool | `/v1/tools` | List, Get | HTTP Adapter → Tool Service |
+| Config | `/v1/config` | Get, Update | HTTP Adapter → Config Repository |
+| Subagent | `/v1/sessions/{session}/subagents` | List, Create, Get | HTTP Adapter → Task Service |
+| Memory | `/v1/memory` | List, Create, Search | HTTP Adapter → Memory Repository |
+| Snapshot | `/v1/sessions/{session}/snapshots` | List, Create, Restore | HTTP Adapter → Session Service |
+| Todo | `/v1/sessions/{session}/todos` | List, Create, Update | HTTP Adapter → Task Service |
 
 ## Design Chain Position
 
@@ -93,5 +93,5 @@ and SQ (message flow), and outputs to Code (route handlers, schemas).
 | Layer | Path | Relationship |
 | ----- | ---- | ------------ |
 | UC (source) | `docs/UC/` | Defines operations that map to HTTP endpoints |
-| SQ (source) | `docs/SQ/` | Validates message flow through HTTPAdapter |
+| SQ (source) | `docs/SQ/` | Validates message flow through HTTP Adapter |
 | CT/DATA (sibling) | `docs/CT/DATA/` | Shares schema definitions for request/response bodies |

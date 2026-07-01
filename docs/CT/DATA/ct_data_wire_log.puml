@@ -1,7 +1,7 @@
 @startuml ct_data_wire_log
 ' ============================================================
 ' Title:     nasim — Wire Log Data Structures
-' Boundary:  NASIM Application — WireLogRepository (wire event data structures)
+' Boundary:  NASIM Application — Wire Log Repository (wire event data structures)
 ' Purpose:   Data models for append-only wire event store
 ' Milestone: v1.0
 ' Version:   1.0.0

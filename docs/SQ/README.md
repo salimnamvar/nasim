@@ -11,27 +11,27 @@ Back to [docs/](../README.md).
 
 | Group | C4 Components (Authoritative) |
 |-------|-------------------------------|
-| API | HTTPAdapter, AgentController, SessionService, ToolService, ConfigRepository |
-| Agent | TaskService, ToolService, SafetyService, ContextService, SessionService, EvaluationService, LLMRepository |
-| CLI | CLIAdapter, AgentController, TaskService |
-| Session | SessionService, SessionRepository, HistoryRepository |
-| Tool | ToolService, FilesystemRepository, SandboxRepository, GitRepository, WebRepository, MCPRepository, RepoIntelligenceRepository, MemoryRepository |
-| Provider | LLMRepository |
-| Config | ConfigRepository |
-| Memory | MemoryRepository |
-| Git | GitRepository |
-| RepoIntelligence | RepoIntelligenceRepository |
-| ContextGraph | ContextService |
-| EditStrategy | EditStrategyRepository |
-| Evaluation | EvaluationService |
-| Router | LLMRepository |
-| Safety | SafetyService |
-| MCP | MCPRepository |
-| Sandbox | SandboxRepository |
-| Observability | WireLogRepository |
-| Hooks | ToolService |
-| Plugins | ToolService |
-| WireLog | WireLogRepository |
+| API | HTTP Adapter, Agent Controller, Session Service, Tool Service, Config Repository |
+| Agent | Task Service, Tool Service, Safety Service, Context Service, Session Service, Evaluation Service, LLM Repository |
+| CLI | CLI Adapter, Agent Controller, Task Service |
+| Session | Session Service, Session Repository, History Repository |
+| Tool | Tool Service, Filesystem Repository, Sandbox Repository, Git Repository, Web Repository, MCP Repository, Repo Intelligence Repository, Memory Repository |
+| Provider | LLM Repository |
+| Config | Config Repository |
+| Memory | Memory Repository |
+| Git | Git Repository |
+| RepoIntelligence | Repo Intelligence Repository |
+| ContextGraph | Context Service |
+| EditStrategy | Edit Strategy Repository |
+| Evaluation | Evaluation Service |
+| Router | LLM Repository |
+| Safety | Safety Service |
+| MCP | MCP Repository |
+| Sandbox | Sandbox Repository |
+| Observability | Wire Log Repository |
+| Hooks | Tool Service |
+| Plugins | Tool Service |
+| WireLog | Wire Log Repository |
 
 ## State Write Convention
 
@@ -55,7 +55,7 @@ ref over mgr : HTTPADAPTER-02 CREATE Session
 
 | Group | Canonical (C4) Name | Boundary | Diagrams |
 | ----- | :-----------------: | -------- | :------: |
-| AC | AgentController | Agent Controller — single convergence point for all interface containers | 4 |
+| AC | Agent Controller | Agent Controller — single convergence point for all interface containers | 4 |
 | AGENT | Agent | Agent Core — orchestrator, history, permissions, plans, subagents | 14 |
 | CLI | CLI | CLI Interface Container — REPL, parsing, rendering | 8 |
 | CONFIG | Config | Configuration — config loading and validation | 3 |

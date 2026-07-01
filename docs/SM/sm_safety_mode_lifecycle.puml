@@ -3,12 +3,12 @@
 ' ============================================================
 ' Title:     nasim — Safety Mode Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Mode lifecycle for SafetyService.
+' Purpose:   Mode lifecycle for Safety Service.
 '            Modes: PERMISSIVE, ASK, BLOCK.
 '            All mode transitions via SAFETYSERVICE-03 APPLY Safety Mode.
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (SafetyService), docs/UC/README.md (SAFETYSERVICE-01, SAFETYSERVICE-03)
+' Source:    C4 component diagram (Safety Service), docs/UC/README.md (SAFETYSERVICE-01, SAFETYSERVICE-03)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.

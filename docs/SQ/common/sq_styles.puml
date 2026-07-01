@@ -10,8 +10,8 @@
 ' ------------------------------------------------------------
 ' CSR Layer Colours — 7 distinct layers (left-to-right order)
 '   Actor           #BBDEFB  — blue         (external user/actor)
-'   Interface       #E3F2FD  — light blue   (CLIAdapter, WebApp, DesktopApp)
-'   API/Controller  #C5CAE9  — indigo       (AgentController, controllers)
+'   Interface       #E3F2FD  — light blue   (CLI Adapter, WebApp, DesktopApp)
+'   API/Controller  #C5CAE9  — indigo       (Agent Controller, controllers)
 '   Service         #FFF3E0  — orange       (Agent, Router, Safety, Context,
 '                                            Edit Strategy, Evaluation, Provider)
 '   Repository      #E8F5E9  — green        (Session, Tool, Memory, Config, Git,
@@ -111,9 +111,9 @@ skinparam SequenceReferenceBorderThickness 1
 ' ------------------------------------------------------------
 
 !define CSR_ACTOR actor "User" as user
-!define CSR_CTRL participant "AgentController" as ctrl
-!define CSR_SVC participant "TaskService" as svc
-!define CSR_REPO participant "SessionRepository" as repo
+!define CSR_CTRL participant "Agent Controller" as ctrl
+!define CSR_SVC participant "Task Service" as svc
+!define CSR_REPO participant "Session Repository" as repo
 !define CSR_ACT activate actorUser
 !define CSR_DEACT deactivate actorUser
 

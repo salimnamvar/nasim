@@ -1,7 +1,7 @@
 @startuml ct_api_evaluation
 ' ============================================================
 ' Title:     nasim — Evaluation API
-' Boundary:  NASIM Application — HTTPAdapter API surface
+' Boundary:  NASIM Application — HTTP Adapter API surface
 ' Purpose:   Public interfaces for task evaluation and retry coordination
 ' Milestone: v1.0
 ' Version:   1.0.0

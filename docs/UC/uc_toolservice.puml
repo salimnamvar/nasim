@@ -4,14 +4,14 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: ToolService Group
-' Group:     TOOLSERVICE (ToolService)
+' Title:     nasim — UC: Tool Service Group
+' Group:     TOOLSERVICE (Tool Service)
 ' Boundary:  NASIM Service
 ' Purpose:   Tool registry, parameter validation, execution dispatch;
 '            subagent, todo, plan, review tools, dynamic plugin-loaded
 '            tools, and lifecycle hook dispatch (PreToolUse, PostToolUse,
 '            PreLLMCall, PostLLMCall).
-'            Entry chain: User → Interface → AgentController → TaskService → ToolService
+'            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
@@ -23,7 +23,7 @@
 left to right direction
 
 
-title nasim — ToolService Use Cases
+title nasim — Tool Service Use Cases
 
 
 skinparam actorStyle awesome
@@ -85,7 +85,7 @@ usecase "SAFETYSERVICE-01\nCHECK Permission\n[uc_safety]" as SAF01_ext <<extref>
 
 
 rectangle "nasim" {
-  package "ToolService Group (TL)" {
+  package "Tool Service Group (TL)" {
 
     package "File Operations" as FILE_PKG {
       usecase "**TOOLSERVICE-01 READ File**\n--\nRead file contents with offset/limit" <<master>> as TL01

@@ -3,10 +3,10 @@
 ' ============================================================
 ' Title:     nasim — Plan Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Entity lifecycle for Plan (owned by TaskService)
+' Purpose:   Entity lifecycle for Plan (owned by Task Service)
 ' Milestone: v1.0
 ' Version:   6.0.0
-' Source:    C4 component diagram (TaskService), docs/UC/README.md
+' Source:    C4 component diagram (Task Service), docs/UC/README.md
 ' Review:    docs/audit/audit.2026.06.20.sq-sm-chain.car.md
 ' ============================================================
 

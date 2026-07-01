@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> SafetyService
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> Safety Service
 ' SM States: PERMISSIVE (#9CCC65), ERROR (#F4511E)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- SAFETYSERVICE-01 CHECK Permission
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SafetyService" as mgr
+  participant "Safety Service" as mgr
 end box
 
 == SAFETYSERVICE-01 CHECK Permission ==

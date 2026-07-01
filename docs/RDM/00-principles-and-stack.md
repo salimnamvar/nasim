@@ -13,11 +13,11 @@ Back to [docs/rdm/](./README.md).
    alt paths, and rollback.
 2. **Layered architecture.** CLI → Agent → Provider/Tools/Config/Session. Each layer
    owns its concern. No circular dependencies. Agent core never imports CLI or rendering.
-3. **Event-driven agent.** TaskService yields `AgentEvent` objects. CLI/renderer
+3. **Event-driven agent.** Task Service yields `AgentEvent` objects. CLI/renderer
    subscribes. No `print()` in agent core. No direct user I/O from agent layer.
 4. **C4 fidelity.** Implement exactly the components in `docs/c4/c4_nasim_component*.puml`.
-   Public class names follow C4 (`TaskService`, `ContextService`, ...).
-5. **Safety-first permission model.** `SafetyService` with `ask | auto | off` modes.
+   Public class names follow C4 (`Task Service`, `Context Service`, ...).
+5. **Safety-first permission model.** `Safety Service` with `ask | auto | off` modes.
    Unsafe tools always prompt in `ask` mode. No bypass without explicit user approval.
 
 ## Implementation Standards (Apply Immediately — No Postponement)

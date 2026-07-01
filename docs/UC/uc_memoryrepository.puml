@@ -4,11 +4,11 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: MemoryRepository Group
-' Group:     MEMORYREPOSITORY (MemoryRepository)
+' Title:     nasim — UC: Memory Repository Group
+' Group:     MEMORYREPOSITORY (Memory Repository)
 ' Boundary:  NASIM Service
 ' Purpose:   Cross-session knowledge persistence
-'            Entry chain: User → Interface → AgentController → TaskService → ContextService → MemoryRepository
+'            Entry chain: User → Interface → Agent Controller → Task Service → Context Service → Memory Repository
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

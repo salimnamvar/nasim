@@ -4,12 +4,12 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: TaskService Group
-' Group:     TASKSERVICE (TaskService)
+' Title:     nasim — UC: Task Service Group
+' Group:     TASKSERVICE (Task Service)
 ' Boundary:  NASIM Service
 ' Purpose:   Agentic loop: LLM call, tool dispatch, context assembly,
 '            subagent orchestration, error recovery, persona management.
-'            Entry chain: User → Interface → AgentController → TaskService
+'            Entry chain: User → Interface → Agent Controller → Task Service
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
@@ -66,8 +66,8 @@ skinparam usecase<<extref>> {
 
 
 actor "User" as User
-actor "LLMRepository" as Router <<system>>
-actor "TaskService" as Agent <<system>>
+actor "LLM Repository" as Router <<system>>
+actor "Task Service" as Agent <<system>>
 
 
 ' ============================================================

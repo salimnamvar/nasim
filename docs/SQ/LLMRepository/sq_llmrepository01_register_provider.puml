@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> Provider
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> Provider
 ' SM States: REGISTERING (#29B6F6), ACTIVE (#03A9F4), ERROR (#E64A19)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- LLMREPOSITORY-01 REGISTER Provider
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "LLMRepository" as mgr
+  participant "LLM Repository" as mgr
 end box
 
 == LLMREPOSITORY-01 REGISTER Provider ==

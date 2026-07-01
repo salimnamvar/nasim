@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> SessionSearch -> SessionStore
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> SessionSearch -> SessionStore
 ' SM States: (no state change — read-only search)
 ' ============================================================
 
@@ -18,19 +18,19 @@ title nasim -- SESSIONSERVICE-07 SEARCH Sessions
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SessionService" as svc
+  participant "Session Service" as svc
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "SessionService" as search
+  participant "Session Service" as search
 end box
 
 database "SessionStore" as storage

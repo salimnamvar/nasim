@@ -4,7 +4,7 @@
 ' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Repo Intelligence ERD
-' Boundary:  NASIM Application — RepoIntelligenceRepository manages this index
+' Boundary:  NASIM Application — Repo Intelligence Repository manages this index
 ' Purpose:   Physical schema for repository intelligence index
 ' Milestone: v1.0
 ' Version:   2.0.0

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> EditStrategyRepository
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> Edit Strategy Repository
 ' SM States: TOOL_EXEC (#B2DFDB)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- EDITSTRATEGYREPOSITORY-03 APPLY Whole-File
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "EditStrategyRepository" as coder
+  participant "Edit Strategy Repository" as coder
 end box
 
 == EDITSTRATEGYREPOSITORY-03 APPLY Whole-File ==

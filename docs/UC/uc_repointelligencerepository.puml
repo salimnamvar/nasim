@@ -4,12 +4,12 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: RepoIntelligenceRepository Group
-' Group:     REPOINTELLIGENCEREPOSITORY (RepoIntelligenceRepository)
+' Title:     nasim — UC: Repo Intelligence Repository Group
+' Group:     REPOINTELLIGENCEREPOSITORY (Repo Intelligence Repository)
 ' Boundary:  NASIM Service
 ' Purpose:   Codebase intelligence: AST indexing, symbol graph, embedding
 '            generation, semantic search, repo map building.
-'            Entry chain: User → Interface → AgentController → TaskService → ContextService → RepoIntelligenceRepository
+'            Entry chain: User → Interface → Agent Controller → Task Service → Context Service → Repo Intelligence Repository
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

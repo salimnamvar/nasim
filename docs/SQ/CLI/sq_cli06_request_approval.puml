@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> REPLSession -> AgentController
+' CSR Chain: User -> CLI Adapter -> REPLSession -> Agent Controller
 ' SM States: AWAITING_APPROVAL (#FFF9C4)
 ' ============================================================
 
@@ -18,12 +18,12 @@ title nasim -- CLI-06 REQUEST Approval
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
-  participant "CLIAdapter" as repl
+  participant "CLI Adapter" as iface
+  participant "CLI Adapter" as repl
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 == CLI-06 REQUEST Approval ==

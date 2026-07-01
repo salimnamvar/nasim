@@ -4,11 +4,11 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: SessionService Group
-' Group:     SESSIONSERVICE (SessionService)
+' Title:     nasim — UC: Session Service Group
+' Group:     SESSIONSERVICE (Session Service)
 ' Boundary:  NASIM Service
 ' Purpose:   Session lifecycle: create, load, save, snapshot, revert
-'            Entry chain: User → Interface → AgentController → SessionService
+'            Entry chain: User → Interface → Agent Controller → Session Service
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

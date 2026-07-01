@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> REPLSession -> AgentController
+' CSR Chain: User -> CLI Adapter -> REPLSession -> Agent Controller
 ' SM States: LISTENING (#E8EAF6), THINKING (#D7CCC8), RESPONDING (#D1C4E9), IDLE (#ECEFF1)
 ' ============================================================
 
@@ -18,12 +18,12 @@ title nasim -- CLI-01 PROCESS User Input
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
-  participant "CLIAdapter" as repl
+  participant "CLI Adapter" as iface
+  participant "CLI Adapter" as repl
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 == CLI-01 PROCESS User Input ==

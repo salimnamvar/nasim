@@ -4,12 +4,12 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: LLMRepository Group
-' Group:     LLMREPOSITORY (LLMRepository)
+' Title:     nasim — UC: LLM Repository Group
+' Group:     LLMREPOSITORY (LLM Repository)
 ' Boundary:  NASIM Service
 ' Purpose:   LLM API calls + model routing: streaming, fallback chains,
 '            capability-based model selection, task classification.
-'            Entry chain: User → Interface → AgentController → TaskService → LLMRepository
+'            Entry chain: User → Interface → Agent Controller → Task Service → LLM Repository
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
@@ -21,7 +21,7 @@
 left to right direction
 
 
-title nasim — LLMRepository Use Cases
+title nasim — LLM Repository Use Cases
 
 
 skinparam actorStyle awesome
@@ -67,7 +67,7 @@ actor "User" as User
 
 
 rectangle "nasim" {
-  package "LLMRepository Group (LLM)" {
+  package "LLM Repository Group (LLM)" {
 
     package "Provider" as PRV_PKG {
       usecase "**LLMREPOSITORY-01 REGISTER Provider**\n--\nRegister provider with LiteLLM proxy" <<include>> as PRV01

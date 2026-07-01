@@ -4,11 +4,11 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: SandboxRepository Group
-' Group:     SANDBOXREPOSITORY (SandboxRepository)
+' Title:     nasim — UC: Sandbox Repository Group
+' Group:     SANDBOXREPOSITORY (Sandbox Repository)
 ' Boundary:  NASIM Service
 ' Purpose:   Sandboxed command execution: timeout, isolation
-'            Entry chain: User → Interface → AgentController → TaskService → ToolService → SandboxRepository
+'            Entry chain: User → Interface → Agent Controller → Task Service → Tool Service → Sandbox Repository
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

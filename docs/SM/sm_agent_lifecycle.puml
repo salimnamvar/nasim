@@ -7,7 +7,7 @@
 '            All entry points route through the API (HTTPADAPTER-06).
 ' Milestone: v1.0
 ' Version:   8.0.0
-' Source:    C4 component diagram (TaskService), docs/UC/README.md
+' Source:    C4 component diagram (Task Service), docs/UC/README.md
 ' Review:    —
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
 '            do not apply (documented deviation).

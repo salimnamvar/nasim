@@ -4,12 +4,12 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: ContextService Group
-' Group:     CONTEXTSERVICE (ContextService)
+' Title:     nasim — UC: Context Service Group
+' Group:     CONTEXTSERVICE (Context Service)
 ' Boundary:  NASIM Service
 ' Purpose:   Context pipeline: graph construction, truncation, distillation,
 '            injection, and compaction.
-'            Entry chain: User → Interface → AgentController → TaskService → ContextService
+'            Entry chain: User → Interface → Agent Controller → Task Service → Context Service
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)
@@ -21,7 +21,7 @@
 left to right direction
 
 
-title nasim — ContextService Use Cases
+title nasim — Context Service Use Cases
 
 
 skinparam actorStyle awesome
@@ -67,7 +67,7 @@ actor "User" as User
 
 
 rectangle "nasim" {
-  package "ContextService Group (CTX)" {
+  package "Context Service Group (CTX)" {
     usecase "**CONTEXTSERVICE-01 PROCESS Context**\n--\nOrchestrate context pipeline stages" <<master>> as CTX01
     usecase "**CONTEXTSERVICE-02 TRUNCATE Nodes**\n--\nTruncate context nodes to fit token budget" <<include>> as CTX02
     usecase "**CONTEXTSERVICE-03 DISTILL Nodes**\n--\nSummarize long context nodes via LLM" <<include>> as CTX03

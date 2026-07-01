@@ -18,7 +18,7 @@ title Apply C4 Shared Styles
 '   - Valid tags: controller | service | repository | datastore
 '   - Example:
 '       Boundary(ctrl_layer, "Controller Layer") {
-'           Component(agent_ctrl, "AgentController", "asyncio", "...", $tags="controller")
+'           Component(agent_ctrl, "Agent Controller", "asyncio", "...", $tags="controller")
 '       }
 '   - Do NOT put Sequence Diagram defines here — use docs/SQ/common/sq_styles.puml.
 '   - Do NOT use LAYOUT_WITH_LEGEND() — use a manual 'legend right' block instead.

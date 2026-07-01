@@ -3,11 +3,11 @@
 ' ============================================================
 ' Title:     nasim — Repository Index Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Index lifecycle for RepoIntelligenceRepository.
+' Purpose:   Index lifecycle for Repo Intelligence Repository.
 '            States: UNINDEXED → INDEXING → INDEXED → BUILDING_GRAPH | EMBEDDING
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (RepoIntelligenceRepository), docs/UC/README.md (REPOINTELLIGENCEREPOSITORY-01, REPOINTELLIGENCEREPOSITORY-02, REPOINTELLIGENCEREPOSITORY-05)
+' Source:    C4 component diagram (Repo Intelligence Repository), docs/UC/README.md (REPOINTELLIGENCEREPOSITORY-01, REPOINTELLIGENCEREPOSITORY-02, REPOINTELLIGENCEREPOSITORY-05)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.

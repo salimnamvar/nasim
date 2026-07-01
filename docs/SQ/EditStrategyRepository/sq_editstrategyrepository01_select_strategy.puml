@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> EditStrategyRepository
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> Edit Strategy Repository
 ' SM States: THINKING (#D7CCC8)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- EDITSTRATEGYREPOSITORY-01 SELECT Strategy
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "EditStrategyRepository" as sel
+  participant "Edit Strategy Repository" as sel
 end box
 
 == EDITSTRATEGYREPOSITORY-01 SELECT Strategy ==

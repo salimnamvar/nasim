@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> WireLog -> WireReader -> FileSystem
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> WireLog -> WireReader -> FileSystem
 ' SM States: (no session state change — seek is read-only)
 ' ============================================================
 
@@ -18,16 +18,16 @@ title nasim -- WIRELOGREPOSITORY-03 SEEK Turn
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Infrastructure" INFRASTRUCTURE_COLOR
-  participant "WireLogRepository" as wl
-  participant "WireLogRepository" as reader
+  participant "Wire Log Repository" as wl
+  participant "Wire Log Repository" as reader
 end box
 
 database "WireLogStore" as storage

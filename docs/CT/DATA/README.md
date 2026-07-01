@@ -17,10 +17,10 @@ Back to [docs/](../README.md).
 
 | File | Store Boundary | C4 Component | Entity Count | Description |
 | ---- | -------------- | ------------ | :----------: | ----------- |
-| `ct_data_wire_log.puml` | Wire Log | WireLogRepository | 3 | WireEvent, TurnIndexEntry, WireMetadata |
-| `ct_data_repo_intelligence.puml` | Repo Intelligence | RepoIntelligenceRepository | 8 | ASTTag, SymbolNode, SymbolEdge, RankedSymbol, SearchResult, RepoMap, SymbolType, EdgeType |
-| `ct_data_evaluation.puml` | Evaluation | EvaluationService | 6 | SuccessCheck, QualitySignal, ReviewResult, RetryConfig, TurnBudget, FailureStrategy |
-| `ct_data_context_graph.puml` | Context Graph | ContextService | 5 | ContextNode, ContextEdge, PipelineResult, NodeType, EdgeType |
+| `ct_data_wire_log.puml` | Wire Log | Wire Log Repository | 3 | WireEvent, TurnIndexEntry, WireMetadata |
+| `ct_data_repo_intelligence.puml` | Repo Intelligence | Repo Intelligence Repository | 8 | ASTTag, SymbolNode, SymbolEdge, RankedSymbol, SearchResult, RepoMap, SymbolType, EdgeType |
+| `ct_data_evaluation.puml` | Evaluation | Evaluation Service | 6 | SuccessCheck, QualitySignal, ReviewResult, RetryConfig, TurnBudget, FailureStrategy |
+| `ct_data_context_graph.puml` | Context Graph | Context Service | 5 | ContextNode, ContextEdge, PipelineResult, NodeType, EdgeType |
 
 ### Missing Contracts (Gap Analysis)
 

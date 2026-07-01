@@ -27,7 +27,7 @@
 
 ## Classification Algorithm
 
-`LLMRepository.classify_task(input, context)`:
+`LLM Repository.classify_task(input, context)`:
 
 1. Extract signals from input:
    - Input length (token count)
@@ -68,5 +68,5 @@ routing:
 
 - UC: LLMREPOSITORY-03 CLASSIFY Task
 - SQ: `sq_rtg03_classify_task.puml`
-- CL: `LLMRepository.classify_task()`, `RoutingStrategy`, `TaskClassifierStrategy`
+- CL: `LLM Repository.classify_task()`, `RoutingStrategy`, `TaskClassifierStrategy`
 - C4: `c4_nasim_component.puml` → Service Layer (Provider group)

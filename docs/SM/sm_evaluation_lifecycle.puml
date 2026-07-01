@@ -3,11 +3,11 @@
 ' ============================================================
 ' Title:     nasim — Evaluation Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Process lifecycle for EvaluationService.
+' Purpose:   Process lifecycle for Evaluation Service.
 '            Orchestrates: checks, LLM review, test suites, scoring, retry.
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (EvaluationService), docs/UC/README.md (EVALUATIONSERVICE-01..EVALUATIONSERVICE-09)
+' Source:    C4 component diagram (Evaluation Service), docs/UC/README.md (EVALUATIONSERVICE-01..EVALUATIONSERVICE-09)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.

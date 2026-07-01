@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> CLIAdapter -> AgentController -> TurnBudgetInjector
+' CSR Chain: User -> CLI Adapter -> Agent Controller -> TurnBudgetInjector
 ' SM States: CHECKING (#C5CAE9)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- EVALUATIONSERVICE-09 INJECT Turn Budget
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "EvaluationService" as injector
+  participant "Evaluation Service" as injector
 end box
 
 == EVALUATIONSERVICE-09 INJECT Turn Budget ==

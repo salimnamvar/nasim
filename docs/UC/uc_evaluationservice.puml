@@ -4,12 +4,12 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: EvaluationService Group
-' Group:     EVALUATIONSERVICE (EvaluationService)
+' Title:     nasim — UC: Evaluation Service Group
+' Group:     EVALUATIONSERVICE (Evaluation Service)
 ' Boundary:  NASIM Service
 ' Purpose:   Task evaluation: success checks, LLM review, retry coordination,
 '            repetition detection, turn budget management.
-'            Entry chain: User → Interface → AgentController → TaskService → EvaluationService
+'            Entry chain: User → Interface → Agent Controller → Task Service → Evaluation Service
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

@@ -4,11 +4,11 @@
 
 
 ' ============================================================
-' Title:     nasim — UC: SafetyService Group
-' Group:     SAFETYSERVICE (SafetyService)
+' Title:     nasim — UC: Safety Service Group
+' Group:     SAFETYSERVICE (Safety Service)
 ' Boundary:  NASIM Service
 ' Purpose:   Permission gating, injection scanning, egress inspection.
-'            Entry chain: User → Interface → AgentController → TaskService → SafetyService
+'            Entry chain: User → Interface → Agent Controller → Task Service → Safety Service
 ' Milestone: v1.0
 ' Version:   13.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0)

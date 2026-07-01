@@ -1,7 +1,7 @@
 @startuml ct_api_repo_intelligence
 ' ============================================================
 ' Title:     nasim — Repo Intelligence API
-' Boundary:  NASIM Application — HTTPAdapter API surface
+' Boundary:  NASIM Application — HTTP Adapter API surface
 ' Purpose:   Public interfaces for repository intelligence module
 ' Milestone: v1.0
 ' Version:   1.0.0

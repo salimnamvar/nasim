@@ -4,7 +4,7 @@
 ' Legend:  * = mandatory;  <<PK>> = primary key;  <<FK>> = foreign key
 ' ============================================================
 ' Title:     nasim — Config Store ERD
-' Boundary:  NASIM Application — ConfigRepository owns this store
+' Boundary:  NASIM Application — Config Repository owns this store
 ' Purpose:   Logical schema for layered YAML configuration
 ' Milestone: v1.0
 ' Version:   1.0.0

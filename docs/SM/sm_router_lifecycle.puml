@@ -3,11 +3,11 @@
 ' ============================================================
 ' Title:     nasim — Router Lifecycle State Machine
 ' Boundary:  nasim code agent
-' Purpose:   Selection lifecycle for LLMRepository (Router).
+' Purpose:   Selection lifecycle for LLM Repository (Router).
 '            States: IDLE → CLASSIFYING → SELECTING → IDLE | FALLBACK
 ' Milestone: v1.0
 ' Version:   1.0.0
-' Source:    C4 component diagram (LLMRepository), docs/UC/README.md (LLMREPOSITORY-01, LLMREPOSITORY-02, LLMREPOSITORY-03, LLMREPOSITORY-04)
+' Source:    C4 component diagram (LLM Repository), docs/UC/README.md (LLMREPOSITORY-01, LLMREPOSITORY-02, LLMREPOSITORY-03, LLMREPOSITORY-04)
 ' Review:    CAR audit 2026-06-27
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.

@@ -1,7 +1,7 @@
 @startuml ct_data_repo_intelligence
 ' ============================================================
 ' Title:     nasim — Repo Intelligence Data Structures
-' Boundary:  NASIM Application — RepoIntelligenceRepository (in-memory + persisted index)
+' Boundary:  NASIM Application — Repo Intelligence Repository (in-memory + persisted index)
 ' Purpose:   Data models for AST index, symbol graph, ranking, and search
 ' Milestone: v1.0
 ' Version:   1.0.0

@@ -7,7 +7,7 @@
 ' Version:   9.1.0
 ' Source:    docs/UC/README.md, docs/SM/README.md
 ' Review:    —
-' CSR Chain: User -> InterfaceAdapter -> AgentController -> SafetyService
+' CSR Chain: User -> InterfaceAdapter -> Agent Controller -> Safety Service
 ' SM States: LISTENING (#E8EAF6), IDLE (#ECEFF1)
 ' ============================================================
 
@@ -18,15 +18,15 @@ title nasim -- AGENTCONTROLLER-02 VALIDATE Request
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLIAdapter" as iface
+  participant "CLI Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "AgentController" as router
+  participant "Agent Controller" as router
 end box
 
 box "Service" SERVICE_COLOR
-  participant "SafetyService" as safety
+  participant "Safety Service" as safety
 end box
 
 == AGENTCONTROLLER-02 VALIDATE Request ==
