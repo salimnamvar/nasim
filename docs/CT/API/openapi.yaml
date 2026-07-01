@@ -17,7 +17,7 @@ paths:
   /v1/sessions:
     get:
       operationId: listSessions
-      summary: "[SESSIONSERVICE-03] LIST Sessions"
+      summary: "[SESSIONSVC-03] LIST Sessions"
       description: Returns a paginated list of agent sessions.
       tags: [Sessions]
       parameters:
@@ -32,7 +32,7 @@ paths:
                 $ref: '#/components/schemas/ListSessionsResponse'
     post:
       operationId: createSession
-      summary: "[SESSIONSERVICE-01] INSERT Session"
+      summary: "[SESSIONSVC-01] INSERT Session"
       description: Creates a new agent session.
       tags: [Sessions]
       requestBody:
@@ -58,7 +58,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     get:
       operationId: getSession
-      summary: "[SESSIONSERVICE-02] READ Session"
+      summary: "[SESSIONSVC-02] READ Session"
       description: Returns the specified session.
       tags: [Sessions]
       responses:
@@ -72,7 +72,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     patch:
       operationId: updateSession
-      summary: "[SESSIONSERVICE-04] UPDATE Session"
+      summary: "[SESSIONSVC-04] UPDATE Session"
       description: Updates the specified session.
       tags: [Sessions]
       parameters:
@@ -96,7 +96,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
     delete:
       operationId: deleteSession
-      summary: "[SESSIONSERVICE-09] DELETE Session"
+      summary: "[SESSIONSVC-09] DELETE Session"
       description: Deletes the specified session.
       tags: [Sessions]
       responses:
@@ -114,7 +114,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     post:
       operationId: sendMessage
-      summary: "[TASKSERVICE-01] PROCESS User Task"
+      summary: "[TASKSVC-01] PROCESS User Task"
       description: |
         Custom method (AIP-136) for submitting a user message and receiving
         an agent response as an SSE stream of AgentEvents.
@@ -142,7 +142,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     get:
       operationId: listMessages
-      summary: "[HTTPADAPTER-07] LIST Messages"
+      summary: "[HTTPADP-07] LIST Messages"
       description: Returns a paginated list of messages in the session.
       tags: [Messages]
       parameters:
@@ -161,7 +161,7 @@ paths:
   /v1/tools:
     get:
       operationId: listTools
-      summary: "[TOOLSERVICE-14] LIST Tools"
+      summary: "[TOOLSVC-14] LIST Tools"
       description: Returns a list of registered tools.
       tags: [Tools]
       responses:
@@ -182,7 +182,7 @@ paths:
         description: Tool name
     get:
       operationId: getTool
-      summary: "[TOOLSERVICE-14] READ Tool"
+      summary: "[TOOLSVC-14] READ Tool"
       description: Returns the specified tool.
       tags: [Tools]
       responses:
@@ -198,7 +198,7 @@ paths:
   /v1/config:
     get:
       operationId: getConfig
-      summary: "[CONFIGREPOSITORY-01] READ Config"
+      summary: "[CONFIGREPO-01] READ Config"
       description: Returns the agent configuration.
       tags: [Config]
       responses:
@@ -210,7 +210,7 @@ paths:
                 $ref: '#/components/schemas/Config'
     patch:
       operationId: updateConfig
-      summary: "[CONFIGREPOSITORY-02] UPDATE Config"
+      summary: "[CONFIGREPO-02] UPDATE Config"
       description: Updates the agent configuration.
       tags: [Config]
       parameters:
@@ -236,7 +236,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     get:
       operationId: listSubagents
-      summary: "[TASKSERVICE-09] LIST Subagents"
+      summary: "[TASKSVC-09] LIST Subagents"
       description: Returns a list of child agents spawned in the session.
       tags: [Subagents]
       responses:
@@ -250,7 +250,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     post:
       operationId: spawnSubagent
-      summary: "[TASKSERVICE-09] SPAWN Subagent"
+      summary: "[TASKSVC-09] SPAWN Subagent"
       description: Spawns a child agent for a subtask.
       tags: [Subagents]
       requestBody:
@@ -281,7 +281,7 @@ paths:
         description: Subagent UUID
     get:
       operationId: getSubagent
-      summary: "[TASKSERVICE-10] READ Subagent"
+      summary: "[TASKSVC-10] READ Subagent"
       description: Returns the subagent's result.
       tags: [Subagents]
       responses:
@@ -371,7 +371,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     get:
       operationId: listSnapshots
-      summary: "[SESSIONSERVICE-05] LIST Snapshots"
+      summary: "[SESSIONSVC-05] LIST Snapshots"
       description: Lists session snapshots.
       tags: [Snapshots]
       responses:
@@ -385,7 +385,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     post:
       operationId: createSnapshot
-      summary: "[SESSIONSERVICE-05] INSERT Snapshot"
+      summary: "[SESSIONSVC-05] INSERT Snapshot"
       description: Creates a session snapshot.
       tags: [Snapshots]
       responses:
@@ -410,7 +410,7 @@ paths:
         description: Snapshot UUID
     post:
       operationId: restoreSnapshot
-      summary: "[SESSIONSERVICE-06] RESTORE Snapshot"
+      summary: "[SESSIONSVC-06] RESTORE Snapshot"
       description: Restores a session from a snapshot.
       tags: [Snapshots]
       responses:
@@ -428,7 +428,7 @@ paths:
       - $ref: '#/components/parameters/sessionId'
     get:
       operationId: listTodos
-      summary: "[TOOLSERVICE-18] LIST Todos"
+      summary: "[TOOLSVC-18] LIST Todos"
       description: Lists todo items in the session.
       tags: [Todos]
       responses:
@@ -442,7 +442,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     post:
       operationId: createTodo
-      summary: "[TOOLSERVICE-16] INSERT Todo"
+      summary: "[TOOLSVC-16] INSERT Todo"
       description: Creates a todo item.
       tags: [Todos]
       requestBody:
@@ -473,7 +473,7 @@ paths:
         description: Todo UUID
     patch:
       operationId: updateTodo
-      summary: "[TOOLSERVICE-17] UPDATE Todo"
+      summary: "[TOOLSVC-17] UPDATE Todo"
       description: Updates a todo item.
       tags: [Todos]
       requestBody:
