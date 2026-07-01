@@ -82,8 +82,8 @@ usecase "SESSIONSERVICE-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>
 
 usecase "TASKSERVICE-01\nPROCESS User Task\n[uc_agent]" as AGT01_ext <<extref>>
 
-usecase "CONFIGREPOSITORY-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
-usecase "CONFIGREPOSITORY-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
+usecase "CONFIGSERVICE-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
+usecase "CONFIGSERVICE-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
 
 usecase "TOOLSERVICE-14\nLIST Registered Tools\n[uc_tool_advanced]" as TL14_ext <<extref>>
 

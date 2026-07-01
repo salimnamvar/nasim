@@ -79,8 +79,8 @@ usecase "SESSIONSERVICE-01\nPERSIST Session\n[uc_session]" as SSN01_ext <<extref
 usecase "SESSIONSERVICE-02\nREAD Session\n[uc_session]" as SSN02_ext <<extref>>
 usecase "SESSIONSERVICE-03\nLIST Sessions\n[uc_session]" as SSN03_ext <<extref>>
 usecase "SESSIONSERVICE-09\nDELETE Session\n[uc_session]" as SSN09_ext <<extref>>
-usecase "CONFIGREPOSITORY-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
-usecase "CONFIGREPOSITORY-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
+usecase "CONFIGSERVICE-01\nLOAD Config\n[uc_config]" as CFG01_ext <<extref>>
+usecase "CONFIGSERVICE-03\nAPPLY Layered Config\n[uc_config]" as CFG03_ext <<extref>>
 usecase "TOOLSERVICE-14\nLIST Registered Tools\n[uc_tool_advanced]" as TL14_ext <<extref>>
 
 
