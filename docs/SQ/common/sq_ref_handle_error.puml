@@ -1,0 +1,23 @@
+@startuml sq_ref_handle_error
+' ============================================================
+' Title:     REF — Handle Error (TASKSVC-14)
+' Purpose:   Reusable sub-flow: structured error recovery.
+' Source:    docs/UC/uc_task_svc.puml, docs/SM/sm_task_svc_agent.puml
+' SM:        ERROR → IDLE
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Task Service" as taskSvc
+
+ref over taskSvc : TASKSVC-14 handleError\nState: <back:#FFEBEE>ERROR</back> → <back:#ECEFF1>IDLE</back>
+
+taskSvc -> taskSvc : TASKSVC-14 handleError({error, context})
+
+alt recoverable
+  taskSvc --> taskSvc : 200 OK — {recovered: true, retryHint}
+else terminal
+  taskSvc --> taskSvc : 500 INTERNAL\n{error: {code: "TASKSVC-14_UNRECOVERABLE"}}
+end
+
+@enduml

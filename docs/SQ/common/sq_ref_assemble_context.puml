@@ -1,0 +1,42 @@
+@startuml sq_ref_assemble_context
+' ============================================================
+' Title:     REF — Assemble Context (CONTEXTSVC-01)
+' Purpose:   Reusable sub-flow: context pipeline invoked by Task Service.
+' Source:    docs/UC/uc_context_svc.puml, docs/SM/sm_task_svc_agent.puml
+' SM:        THINKING (pre-LLM context assembly)
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Task Service" as taskSvc
+participant "Context Service" as ctxSvc
+participant "Memory Repository" as memRepo
+participant "Repo Intelligence Repository" as rimRepo
+
+taskSvc -> ctxSvc : CONTEXTSVC-01 processContext({graph, tokenBudget})
+activate ctxSvc
+
+ctxSvc -> ctxSvc : CONTEXTSVC-02 truncateNodes({graph})
+ctxSvc -> ctxSvc : CONTEXTSVC-03 distillNodes({graph})
+ctxSvc -> memRepo : MEMORYREPO-02 recallKnowledge({scope})
+activate memRepo
+memRepo --> ctxSvc : 200 OK — {knowledge}
+deactivate memRepo
+ctxSvc -> rimRepo : REPOINTELREPO-04 injectRepoMap({budget})
+activate rimRepo
+rimRepo --> ctxSvc : 200 OK — {repoMap}
+deactivate rimRepo
+ctxSvc -> ctxSvc : CONTEXTSVC-04 injectContext({graph, injections})
+ctxSvc -> ctxSvc : CONTEXTSVC-06 trackTokenBudget({graph})
+
+alt token_count > budget
+  ctxSvc -> ctxSvc : CONTEXTSVC-05 compactNodes({graph})
+  ref over taskSvc, ctxSvc : CONTEXTSVC-05 compactNodes\nState: <back:#E0F2F1>COMPACTING</back> → <back:#D7CCC8>THINKING</back>
+else within_budget
+  ref over taskSvc, ctxSvc : CONTEXTSVC-01 processContext\nState: <back:#D7CCC8>THINKING</back> (context ready)
+end
+
+ctxSvc --> taskSvc : 200 OK — {assembledContext}
+deactivate ctxSvc
+
+@enduml

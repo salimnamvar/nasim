@@ -1,66 +1,83 @@
-@startuml sq_agent07_queue_plan
+@startuml sq_taskservice07_queue_plan
 ' ============================================================
-' Title:     TASKSERVICE-07 — QUEUE Plan
-' Boundary:  nasim code agent
-' Purpose:   Queue tool calls in plan mode without executing
+' Title:     TASKSVC-07 — queuePlan
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Hold queued tool calls in plan mode without executing them.
+' Intro:     Triggered by CLIADP-05 /plan or TASKSVC-01 when plan_mode active.
+'             Entry: User → CLI Adapter → agent_ctrl → task_svc.
+' Summary:   Plan entity transitions EMPTY → BUILDING → QUEUED per sm_task_svc_plan;
+'             tool calls are stored in-memory until TASKSVC-08 approval.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> CLI Adapter -> Agent Controller -> PlanService -> PlanStore
-' SM States: WAITING (#CE93D8)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_task_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: User → CLI Adapter → Agent Controller → Task Service
+' SM States: sm_task_svc_plan.puml — EMPTY, BUILDING, QUEUED; sm_task_svc_agent PLANNING
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- TASKSERVICE-07 QUEUE Plan
+title nasim — TASKSVC-07 queuePlan
 
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
+  participant "CLI Adapter" as cliAdp
 end box
 
 box "API" API_COLOR
-  participant "Agent Controller" as router
+  participant "Agent Controller" as agentCtrl
 end box
 
 box "Service" SERVICE_COLOR
-  participant "Task Service" as plan
+  participant "Task Service" as taskSvc
 end box
 
-box "Repository" REPOSITORY_COLOR
-  participant "Task Service" as planStore
-end box
+== TASKSVC-07 queuePlan — entry ==
 
-== TASKSERVICE-07 QUEUE Plan ==
+user -> cliAdp : CLIADP-05 enablePlanMode()
+activate cliAdp
+cliAdp -> agentCtrl : AGENTCTRL-01 processRequest({planMode: true})
+activate agentCtrl
+agentCtrl -> taskSvc : TASKSVC-07 queuePlan({toolCall})
+activate taskSvc
 
-user -> iface : POST /v1/agents/{agent_id}:queue-plan
-activate iface
-iface -> router : POST /v1/agents/{agent_id}:queue-plan
-activate router
-router -> plan : TASKSERVICE-07 QUEUE Plan({tool_name, args})
-activate plan
+ref over taskSvc : TASKSVC-07 queuePlan\nState: <back:#ECEFF1>IDLE</back> → <back:#FFCCBC>PLANNING</back>
 
-alt plan queued without error
-  ref over plan : TASKSERVICE-07 QUEUE Plan({tool_name, args}) <back:#CE93D8>WAITING</back>
-  plan -> planStore : TASKSERVICE-07 PERSIST Plan({agent_id, tool_name, args})
-  activate planStore
-  planStore --> plan : 200 OK
-  deactivate planStore
-  plan --> router : 200 OK
-  deactivate plan
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else queue full
-  plan --> router : 409 FAILED_PRECONDITION\n{error: {code: "TASKSERVICE-07_QUEUE_FULL", message: "Plan queue capacity exceeded", status: 409}}
-  deactivate plan
-  router --> iface : 409 FAILED_PRECONDITION\n{error: {code: "TASKSERVICE-07_QUEUE_FULL", message: "Plan queue capacity exceeded", status: 409}}
-  iface --> user : 409 FAILED_PRECONDITION\n{error: {code: "TASKSERVICE-07_QUEUE_FULL", message: "Plan queue capacity exceeded", status: 409}}
-  deactivate router
-  deactivate iface
+alt plan_state == EMPTY
+  ref over taskSvc : TASKSVC-07 queuePlan\nPlan: <back:#F5F5F5>EMPTY</back> → <back:#FFE0B2>BUILDING</back>
+  taskSvc -> taskSvc : TASKSVC-07 queuePlan({toolCall})
+else plan_state == BUILDING
+  taskSvc -> taskSvc : TASKSVC-07 queuePlan({toolCall})
+  ref over taskSvc : TASKSVC-07 queuePlan\nPlan: <back:#FFE0B2>BUILDING</back> → <back:#E3F2FD>QUEUED</back>
+else plan_cancelled
+  ref over taskSvc : TASKSVC-07 queuePlan\nPlan: <back:#FFE0B2>BUILDING</back> → <back:#F5F5F5>EMPTY</back>
+  taskSvc --> agentCtrl : 200 OK — {cancelled: true}
+  deactivate taskSvc
+  agentCtrl --> cliAdp : 200 OK
+  cliAdp --> user : 200 OK
+  deactivate agentCtrl
+  deactivate cliAdp
 end
+
+break queue_full
+  taskSvc --> agentCtrl : 409 FAILED_PRECONDITION\n{error: {code: "TASKSVC-07_QUEUE_FULL"}}
+  agentCtrl --> cliAdp : 409 FAILED_PRECONDITION
+  cliAdp --> user : 409 FAILED_PRECONDITION
+  deactivate taskSvc
+  deactivate agentCtrl
+  deactivate cliAdp
+end
+
+taskSvc --> agentCtrl : 200 OK — {queued: true, planId}
+deactivate taskSvc
+agentCtrl --> cliAdp : 200 OK
+cliAdp --> user : 200 OK — plan queued
+deactivate agentCtrl
+deactivate cliAdp
+
+== Summary ==
+' In PLANNING agent state, TASKSVC-02 tool dispatch is suppressed; calls accumulate
+' in the plan queue until TASKSVC-08 approvePlan drains them.
 
 @enduml

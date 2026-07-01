@@ -1,77 +1,150 @@
-@startuml sq_agent01_process_user_task
+@startuml sq_taskservice01_process_user_task
 ' ============================================================
-' Title:     TASKSERVICE-01 — PROCESS User Task
-' Boundary:  nasim code agent
-' Purpose:   Primary orchestrator — core agentic loop
+' Title:     TASKSVC-01 — processUserTask
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Core agentic loop: assemble context, route model, call LLM,
+'            dispatch tools, persist turns, optionally evaluate completion.
+' Intro:     Entry via any adapter → agent_ctrl → task_svc. Orchestrates
+'             CONTEXTSVC-01, LLMREPOSITORY-02/03, TASKSVC-02/03/15, EVALSVC-01.
+' Summary:   Loop continues until LLM returns text-only response or task completes;
+'             all sub-service calls are mediated by task_svc (CSR orchestration).
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> CLI Adapter -> Agent Controller -> AgentOrchestrator -> Session Service -> SessionStore
-' SM States: RUNNING (#43A047)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_task_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: User → Adapter → Agent Controller → Task Service → {Context, LLM, Tool, Eval} → Repositories
+' SM States: sm_task_svc_agent.puml — IDLE, RECEIVING, THINKING, TOOL_EXEC, RESPONDING, COMPACTING, ROUTING, EVALUATING, ERROR
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- TASKSERVICE-01 PROCESS User Task
+title nasim — TASKSVC-01 processUserTask
 
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
+  participant "HTTP Adapter" as iface
 end box
 
 box "API" API_COLOR
-  participant "Agent Controller" as router
+  participant "Agent Controller" as agentCtrl
 end box
 
 box "Service" SERVICE_COLOR
-  participant "Task Service" as orchestrator
-  participant "LLM Repository" as provider
+  participant "Task Service" as taskSvc
+  participant "Context Service" as ctxSvc
+  participant "Evaluation Service" as evalSvc
 end box
 
 box "Repository" REPOSITORY_COLOR
-  participant "Session Service" as store
+  participant "LLM Repository" as llmRepo
+  participant "Tool Service" as toolSvc
 end box
 
-database "SessionStore" as storage
+== TASKSVC-01 processUserTask — entry ==
 
-== TASKSERVICE-01 PROCESS User Task ==
-
-user -> iface : TASKSERVICE-01 PROCESS UserTask({session_id, message})
+user -> iface : HTTPADP-06 dispatchMessage({sessionId, message})
 activate iface
-iface -> router : TASKSERVICE-01 PROCESS UserTask({session_id, message})
-activate router
-router -> orchestrator : TASKSERVICE-01 PROCESS UserTask({session_id, message})
-activate orchestrator
+iface -> agentCtrl : AGENTCTRL-01 processRequest({sessionId, message})
+activate agentCtrl
 
-alt task_input validates without error
-  ref over orchestrator : TASKSERVICE-01 PROCESS UserTask({session_id, message}) <back:#43A047>RUNNING</back>
-  orchestrator -> provider : TASKSERVICE-01 PROCESS UserTask({session_id, message})
-  activate provider
-  provider --> orchestrator : 200 OK
-  deactivate provider
-  orchestrator -> store : TASKSERVICE-01 PERSIST History({session_id, messages})
-  activate store
-  store -> storage : TASKSERVICE-01 PERSIST History({session_id, messages})
-  activate storage
-  storage --> store : 200 OK
-  deactivate storage
-  store --> orchestrator : 200 OK
-  deactivate store
-  orchestrator --> router : 200 OK
-  deactivate orchestrator
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else validation fails
-  orchestrator --> router : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
-  deactivate orchestrator
-  router --> iface : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
-  iface --> user : 422 INVALID_ARGUMENT\n{error: {code: "TASKSERVICE-01_VALIDATION_ERROR", message: "Invalid task input", status: 422}}
-  deactivate router
+ref over agentCtrl
+  AGENTCTRL-02 validateRequest
+  AGENTCTRL-03 adaptProtocol
+  AGENTCTRL-04 dispatchToServices
+end ref
+
+agentCtrl -> taskSvc : TASKSVC-01 processUserTask({sessionId, message})
+activate taskSvc
+
+ref over taskSvc : HTTPADP-06 dispatchMessage\nState: <back:#ECEFF1>IDLE</back> → <back:#E8EAF6>RECEIVING</back>
+
+break invalid_payload
+  taskSvc --> agentCtrl : 422 UNPROCESSABLE\n{error: {code: "TASKSVC-01_VALIDATION_ERROR"}}
+  agentCtrl --> iface : 422 UNPROCESSABLE
+  iface --> user : 422 UNPROCESSABLE
+  deactivate taskSvc
+  deactivate agentCtrl
   deactivate iface
 end
+
+loop agentic_turn [until task_complete]
+
+  ref over taskSvc, ctxSvc
+    sq_ref_assemble_context
+  end ref
+
+  taskSvc -> llmRepo : LLMREPOSITORY-05 selectModel({task})
+  activate llmRepo
+  ref over taskSvc, llmRepo : LLMREPOSITORY-05 selectModel\nState: <back:#EDE7F6>ROUTING</back> → <back:#D7CCC8>THINKING</back>
+  llmRepo --> taskSvc : 200 OK — {modelId}
+  deactivate llmRepo
+
+  taskSvc -> llmRepo : LLMREPOSITORY-03 streamChat({context, modelId})
+  activate llmRepo
+  ref over taskSvc : LLMREPOSITORY-03 streamChat\nState: <back:#D7CCC8>THINKING</back>
+
+  alt llm_returns_text_only
+    llmRepo --> taskSvc : 200 OK — {text, tool_calls: []}
+    deactivate llmRepo
+    ref over taskSvc : LLMREPOSITORY-02 streamChat\nState: <back:#D7CCC8>THINKING</back> → <back:#D1C4E9>RESPONDING</back>
+
+    ref over taskSvc
+      sq_ref_persist_conversation
+    end ref
+
+  else llm_returns_tool_calls
+    llmRepo --> taskSvc : 200 OK — {tool_calls}
+    deactivate llmRepo
+    ref over taskSvc : LLMREPOSITORY-02 streamChat\nState: <back:#D7CCC8>THINKING</back> → <back:#B2DFDB>TOOL_EXEC</back>
+
+    alt plan_mode_active
+      ref over taskSvc : TASKSVC-07 queuePlan\nState: <back:#FFCCBC>PLANNING</back> — tool queued, not executed
+      taskSvc -> taskSvc : TASKSVC-07 queuePlan({tool_calls})
+    else normal_execution
+      ref over taskSvc
+        sq_taskservice02_dispatch_tool_call
+      end ref
+      ref over taskSvc : TASKSVC-02 dispatchToolCall\nState: <back:#B2DFDB>TOOL_EXEC</back> → <back:#D7CCC8>THINKING</back>
+    end
+
+  else provider_failure
+    llmRepo --> taskSvc : 502 BAD_GATEWAY\n{error: {code: "LLMREPOSITORY-03_PROVIDER_ERROR"}}
+    deactivate llmRepo
+    ref over taskSvc
+      sq_ref_handle_error
+    end ref
+    break unrecoverable
+      taskSvc --> agentCtrl : 500 INTERNAL
+      agentCtrl --> iface : 500 INTERNAL
+      iface --> user : 500 INTERNAL
+      deactivate taskSvc
+      deactivate agentCtrl
+      deactivate iface
+    end
+  end
+
+end
+
+opt evaluation_enabled
+  taskSvc -> evalSvc : EVALSVC-01 evaluateTask({sessionId, criteria})
+  activate evalSvc
+  ref over taskSvc, evalSvc : EVALSVC-01 evaluateTask\nState: <back:#F9FBE7>EVALUATING</back>
+  evalSvc --> taskSvc : 200 OK — {verdict, feedback}
+  deactivate evalSvc
+end
+
+ref over taskSvc : HTTPADP-06 dispatchMessage\nState: <back:#D1C4E9>RESPONDING</back> → <back:#ECEFF1>IDLE</back>
+
+taskSvc --> agentCtrl : 200 OK — {events}
+deactivate taskSvc
+agentCtrl --> iface : 200 OK — {events}
+deactivate agentCtrl
+iface --> user : 200 OK — SSE {events}
+deactivate iface
+
+== Summary ==
+' TASKSVC-01 owns the agentic loop. All orchestrated services (context, safety,
+' tool, eval) are reached only via task_svc. State guards follow sm_task_svc_agent.
 
 @enduml

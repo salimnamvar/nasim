@@ -1,85 +1,81 @@
-@startuml sq_api06_dispatch_message
+@startuml sq_httpadapter06_dispatch_message
 ' ============================================================
-' Title:     HTTPADAPTER-06 — DISPATCH Message
-' Boundary:  nasim code agent
-' Purpose:   Dispatch a user message through the agent and stream SSE response
+' Title:     HTTPADP-06 — dispatchMessage
+' Boundary:  NASIM Application — Controller Layer
+' Purpose:   HTTP/SSE entry gate for user messages — sole API-first entry
+'            for agent processing (sm_task_svc_agent: IDLE → RECEIVING).
+' Intro:     POST /v1/sessions/{id}:dispatch converges at agent_ctrl before
+'             reaching task_svc. No adapter bypasses the convergence point.
+' Summary:   Successful dispatch streams AgentEvents via SSE; validation and
+'             session errors break early with HTTP error codes.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> CLI Adapter -> Agent Controller -> AgentOrchestrator -> Session Service -> SessionStore
-' SM States: SERVING (#E0F7FA), THINKING (#D7CCC8), RESPONDING (#D1C4E9)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_http_adp.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: User → HTTP Adapter → Agent Controller → Task Service
+' SM States: IDLE → RECEIVING → THINKING → RESPONDING → IDLE
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- HTTPADAPTER-06 DISPATCH Message
+title nasim — HTTPADP-06 dispatchMessage
 
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
+  participant "HTTP Adapter" as httpAdp
 end box
 
 box "API" API_COLOR
-  participant "Agent Controller" as router
+  participant "Agent Controller" as agentCtrl
 end box
 
 box "Service" SERVICE_COLOR
-  participant "Task Service" as orchestrator
+  participant "Task Service" as taskSvc
 end box
 
-box "Repository" REPOSITORY_COLOR
-  participant "Session Service" as store
-end box
+== HTTPADP-06 dispatchMessage — entry ==
 
-== HTTPADAPTER-06 DISPATCH Message ==
+user -> httpAdp : POST /v1/sessions/{id}:dispatch\n{message}
+activate httpAdp
 
-user -> iface : HTTPADAPTER-06 DISPATCH Message({sessionId, message})
-activate iface
-iface -> router : HTTPADAPTER-06 DISPATCH Message({sessionId, message})
-activate router
+httpAdp -> agentCtrl : AGENTCTRL-01 processRequest({sessionId, message})
+activate agentCtrl
 
-router -> orchestrator : HTTPADAPTER-06 DISPATCH Message({sessionId, message})
-activate orchestrator
-
-alt validation fails
-    orchestrator --> router : 422 UNPROCESSABLE\n{error: {code: "HTTPADAPTER-06_VALIDATION_ERROR", message: "Invalid message data", status: 422}}
-    router --> iface : 422 UNPROCESSABLE
-    iface --> user : 422 UNPROCESSABLE
-    deactivate orchestrator
-    deactivate router
-    deactivate iface
-end
-
-orchestrator -> store : HTTPADAPTER-03 GET Session({sessionId})
-activate store
-
-alt session not found
-    store --> orchestrator : 404 NOT_FOUND\n{error: {code: "HTTPADAPTER-06_SESSION_NOT_FOUND", message: "Session not found", status: 404}}
-    orchestrator --> router : 404 NOT_FOUND
-    router --> iface : 404 NOT_FOUND
-    iface --> user : 404 NOT_FOUND
-    deactivate store
-    deactivate orchestrator
-    deactivate router
-    deactivate iface
-end
-
-store --> orchestrator : 200 OK — {session_data}
-deactivate store
-
-ref over orchestrator : HTTPADAPTER-06 DISPATCH Message <back:#E0F7FA>SERVING</back> → <back:#D7CCC8>THINKING</back> → <back:#D1C4E9>RESPONDING</back>
-
-ref over orchestrator
-  TASKSERVICE-01: PROCESS User Task
+ref over agentCtrl
+  AGENTCTRL-02 validateRequest
+  AGENTCTRL-03 adaptProtocol
 end ref
 
-orchestrator --> router : 200 OK — {events}
-deactivate orchestrator
-router --> iface : 200 OK — {events}
-iface --> user : 200 OK — {events}
-deactivate router
-deactivate iface
+break validation_failed
+  agentCtrl --> httpAdp : 422 UNPROCESSABLE\n{error: {code: "AGENTCTRL-02_VALIDATION_ERROR"}}
+  httpAdp --> user : 422 UNPROCESSABLE
+  deactivate agentCtrl
+  deactivate httpAdp
+end
+
+agentCtrl -> taskSvc : AGENTCTRL-04 dispatchToServices → TASKSVC-01 processUserTask({sessionId, message})
+activate taskSvc
+
+ref over taskSvc : HTTPADP-06 dispatchMessage\nState: <back:#ECEFF1>IDLE</back> → <back:#E8EAF6>RECEIVING</back>
+
+ref over taskSvc
+  sq_taskservice01_process_user_task
+end ref
+
+taskSvc --> agentCtrl : 200 OK — {events}
+deactivate taskSvc
+
+agentCtrl --> httpAdp : 200 OK — {events}
+deactivate agentCtrl
+
+httpAdp --> user : 200 OK — SSE stream {events}
+deactivate httpAdp
+
+ref over taskSvc : HTTPADP-06 dispatchMessage\nState: <back:#D1C4E9>RESPONDING</back> → <back:#ECEFF1>IDLE</back>
+
+== Summary ==
+' HTTPADP-06 is the canonical entry gate for all interface containers per
+' sm_task_svc_agent. Agent Controller is the single convergence point.
 
 @enduml

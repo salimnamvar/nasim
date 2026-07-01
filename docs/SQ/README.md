@@ -1,5 +1,7 @@
 # nasim — SQ Inventory (API-First)
 
+> **SQ Architect pass:** 2026-07-01 — Critical task_svc flows rewritten to v10.0.0 with strict CSR layering, SM state guards, RoD method names, and DRY `ref` fragments in `common/sq_ref_*.puml`. Traceability: `docs/UC/README.md` § Sequence Diagram Layer.
+
 Sequence diagrams organised by UC group. 149 diagrams across 22 groups.
 Each diagram covers one UC's collaboration order, guards, alt paths, and rollback.
 
@@ -101,6 +103,15 @@ Each SQ diagram follows this structure:
 2. **Lifelines** — Single `User` actor, participants grouped by CSR layer (colored boxes)
 3. **Body** — Collaboration order with activate/deactivate, alt/break/loop blocks, ref fragments
 4. **State writes** — Via `ref` blocks (NOT self-calls), referencing UC ID from SM/README.md
+
+### Reusable Ref Fragments (DRY)
+
+| File | Purpose | Consumers |
+|------|---------|-----------|
+| `common/sq_ref_assemble_context.puml` | CONTEXTSVC-01..06 + compaction guard | TASKSVC-01 |
+| `common/sq_ref_dispatch_safety_pipeline.puml` | TASKSVC-15 + SAFETYSVC approval alt | TASKSVC-02 |
+| `common/sq_ref_persist_conversation.puml` | TASKSVC-03 + repo persistence | TASKSVC-01, TASKSVC-02 |
+| `common/sq_ref_handle_error.puml` | TASKSVC-14 ERROR → IDLE | TASKSVC-01 |
 
 ### Common Styles
 

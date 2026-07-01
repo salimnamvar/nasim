@@ -1,58 +1,74 @@
-@startuml sq_agent15_dispatch_safety_pipeline
+@startuml sq_taskservice15_dispatch_safety_pipeline
 ' ============================================================
-' Title:     TASKSERVICE-15 — DISPATCH Safety Pipeline
-' Boundary:  nasim code agent
-' Purpose:   Run injection scan, egress inspect, and permission check
+' Title:     TASKSVC-15 — dispatchSafetyPipeline
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Run permission check, injection scan, and egress inspection
+'             before tool dispatch (included by TASKSVC-01 and TASKSVC-02).
+' Intro:     Orchestrated sub-flow — invoked by task_svc, not agent_ctrl directly.
+'             Actor for entry-point view: Task Service (system orchestrator).
+' Summary:   Safety mode (PERMISSIVE/ASK/BLOCK) from sm_safety_svc_safety
+'             determines whether tool proceeds, prompts user, or is blocked.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> CLI Adapter -> Agent Controller -> Safety Service
-' SM States: RUNNING (#43A047)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_task_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Task Service → Safety Service (C4: task_svc → safety_svc)
+' SM States: sm_safety_svc_safety.puml — PERMISSIVE, ASK, BLOCK, AWAITING_APPROVAL
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- TASKSERVICE-15 DISPATCH Safety Pipeline
-
-actor "User" as user
-
-box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
-end box
-
-box "API" API_COLOR
-  participant "Agent Controller" as router
-end box
+title nasim — TASKSVC-15 dispatchSafetyPipeline
 
 box "Service" SERVICE_COLOR
-  participant "Safety Service" as safety
+  participant "Task Service" as taskSvc
+  participant "Safety Service" as safetySvc
 end box
 
-== TASKSERVICE-15 DISPATCH Safety Pipeline ==
+actor "User" as user
+participant "CLI Adapter" as cliAdp
 
-user -> iface : POST /v1/agents/{agent_id}:dispatch-safety
-activate iface
-iface -> router : POST /v1/agents/{agent_id}:dispatch-safety
-activate router
-router -> safety : TASKSERVICE-15 DISPATCH Safety Pipeline({tool_call})
-activate safety
+== TASKSVC-15 dispatchSafetyPipeline ==
 
-alt all checks pass without error
-  ref over safety : TASKSERVICE-15 DISPATCH SafetyPipeline({tool_call}) <back:#43A047>RUNNING</back>
-  safety --> router : 200 OK
-  deactivate safety
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else safety violation
-  safety --> router : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
-  deactivate safety
-  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
-  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-15_SAFETY_VIOLATION", message: "Safety check failed", status: 403}}
-  deactivate router
-  deactivate iface
+taskSvc -> safetySvc : TASKSVC-15 dispatchSafetyPipeline({toolCall})
+activate safetySvc
+
+safetySvc -> safetySvc : SAFETYSVC-01 checkPermission({toolCall})
+
+alt safety_mode == PERMISSIVE
+  ref over safetySvc : SAFETYSVC-03 applySafetyMode\nState: <back:#9CCC65>PERMISSIVE</back>
+  safetySvc --> taskSvc : 200 OK — {cleared: true}
+  deactivate safetySvc
+
+else safety_mode == BLOCK && unsafe_operation
+  ref over safetySvc : SAFETYSVC-01 checkPermission\nState: <back:#E91E63>BLOCK</back>
+  safetySvc --> taskSvc : 403 PERMISSION_DENIED\n{error: {code: "SAFETYSVC-01_BLOCKED"}}
+  deactivate safetySvc
+
+else safety_mode == ASK && unsafe_operation
+  ref over safetySvc : SAFETYSVC-02 requestApproval\nState: <back:#FDD835>ASK</back> → <back:#FFF9C4>AWAITING_APPROVAL</back>
+  safetySvc -> cliAdp : SAFETYSVC-02 requestApproval({toolCall})
+  activate cliAdp
+  cliAdp -> user : CLIADP-06 requestApproval({toolCall})
+  user --> cliAdp : {approved | denied}
+  cliAdp --> safetySvc : 200 OK — {decision}
+  deactivate cliAdp
+  alt user_approved
+    safetySvc --> taskSvc : 200 OK — {cleared: true}
+  else user_denied
+    safetySvc --> taskSvc : 403 PERMISSION_DENIED\n{error: {code: "SAFETYSVC-02_DENIED"}}
+  end
+  deactivate safetySvc
+
+else injection_or_egress_violation
+  break safety_violation
+    safetySvc --> taskSvc : 403 PERMISSION_DENIED\n{error: {code: "TASKSVC-15_SAFETY_VIOLATION"}}
+    deactivate safetySvc
+  end
 end
+
+== Summary ==
+' TASKSVC-15 is the safety gate for all tool execution. Reused via
+' sq_ref_dispatch_safety_pipeline in TASKSVC-02 and TASKSVC-01 flows.
 
 @enduml

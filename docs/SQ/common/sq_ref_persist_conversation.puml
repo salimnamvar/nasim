@@ -1,0 +1,37 @@
+@startuml sq_ref_persist_conversation
+' ============================================================
+' Title:     REF — Persist Conversation (TASKSVC-03)
+' Purpose:   Reusable sub-flow: append messages and wire-log events.
+' Source:    docs/UC/uc_task_svc.puml
+' SM:        sm_session_svc_session.puml (ACTIVE → SAVED)
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Task Service" as taskSvc
+participant "Session Repository" as sessionRepo
+participant "Wire Log Repository" as wireRepo
+database "SessionStore" as sessionStore
+database "WireLogStore" as wireStore
+
+taskSvc -> sessionRepo : SESSIONREPO-01 appendMessage({sessionId, turn})
+activate sessionRepo
+sessionRepo -> sessionStore : SESSIONREPO-01 appendMessage({sessionId, turn})
+activate sessionStore
+sessionStore --> sessionRepo : 200 OK
+deactivate sessionStore
+sessionRepo --> taskSvc : 200 OK
+deactivate sessionRepo
+
+taskSvc -> wireRepo : WIRELOGREPO-01 appendEvent({sessionId, event})
+activate wireRepo
+wireRepo -> wireStore : WIRELOGREPO-01 appendEvent({sessionId, event})
+activate wireStore
+wireStore --> wireRepo : 200 OK
+deactivate wireStore
+wireRepo --> taskSvc : 200 OK
+deactivate wireRepo
+
+ref over taskSvc : TASKSVC-03 updateConversation\nState: <back:#43A047>ACTIVE</back> → <back:#1565C0>SAVED</back>
+
+@enduml

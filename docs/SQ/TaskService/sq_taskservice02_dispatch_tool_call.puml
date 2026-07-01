@@ -1,66 +1,97 @@
-@startuml sq_agent02_dispatch_tool_call
+@startuml sq_taskservice02_dispatch_tool_call
 ' ============================================================
-' Title:     TASKSERVICE-02 — DISPATCH Tool Call
-' Boundary:  nasim code agent
-' Purpose:   Route tool call to ToolRegistry via safety pipeline
+' Title:     TASKSVC-02 — dispatchToolCall
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Route an LLM tool call through safety pipeline and Tool Service.
+' Intro:     Invoked from TASKSVC-01 during TOOL_EXEC state. Never called
+'             directly from agent_ctrl — task_svc mediates all tool dispatch.
+' Summary:   Safety pipeline (TASKSVC-15) gates execution; hooks (TOOLSVC-HK02)
+'             may run pre-dispatch; failures return to TASKSVC-14 recovery.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> CLI Adapter -> Agent Controller -> AgentOrchestrator -> Safety Service
-' SM States: RUNNING (#43A047), WAITING (#CE93D8)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_task_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Task Service → Safety Service → Tool Service → Repositories
+' SM States: TOOL_EXEC, AWAITING_APPROVAL, HOOK_RUNNING (sm_task_svc_agent.puml)
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- TASKSERVICE-02 DISPATCH Tool Call
-
-actor "User" as user
-
-box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
-end box
-
-box "API" API_COLOR
-  participant "Agent Controller" as router
-end box
+title nasim — TASKSVC-02 dispatchToolCall
 
 box "Service" SERVICE_COLOR
-  participant "Task Service" as orchestrator
-  participant "Safety Service" as safety
+  participant "Task Service" as taskSvc
+  participant "Safety Service" as safetySvc
+  participant "Tool Service" as toolSvc
 end box
 
-== TASKSERVICE-02 DISPATCH Tool Call ==
+box "Repository" REPOSITORY_COLOR
+  participant "Sandbox Repository" as sandboxRepo
+  participant "Filesystem Repository" as fsRepo
+end box
 
-user -> iface : TASKSERVICE-02 DISPATCH Tool Call({tool_name, args})
-activate iface
-iface -> router : TASKSERVICE-02 DISPATCH Tool Call({tool_name, args})
-activate router
-router -> orchestrator : TASKSERVICE-02 DISPATCH Tool Call({tool_name, args})
-activate orchestrator
-orchestrator -> safety : TASKSERVICE-02 DISPATCH Safety Check({tool_name, args})
-activate safety
+actor "User" as user
+participant "CLI Adapter" as iface
 
-alt safety_approved
-  ref over orchestrator : TASKSERVICE-02 DISPATCH ToolCall({tool_name, args}) <back:#43A047>RUNNING</back>
-  safety --> orchestrator : 200 OK Approved
-  deactivate safety
-  orchestrator --> router : 200 OK
-  deactivate orchestrator
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else safety_violation
-  ref over orchestrator : TASKSERVICE-02 DISPATCH ToolCall({tool_name, args}) <back:#CE93D8>WAITING</back>
-  safety --> orchestrator : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
-  deactivate safety
-  orchestrator --> router : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
-  deactivate orchestrator
-  router --> iface : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
-  iface --> user : 403 PERMISSION_DENIED\n{error: {code: "TASKSERVICE-02_SAFETY_VIOLATION", message: "Tool call blocked by safety policy", status: 403}}
-  deactivate router
-  deactivate iface
+== TASKSVC-02 dispatchToolCall ==
+
+taskSvc -> taskSvc : TASKSVC-02 dispatchToolCall({toolName, args})
+activate taskSvc
+
+ref over taskSvc, safetySvc, iface, user
+  sq_ref_dispatch_safety_pipeline
+end ref
+
+break safety_denied
+  ref over taskSvc : SAFETYSVC-02 requestApproval\nState: <back:#FFF9C4>AWAITING_APPROVAL</back> → <back:#ECEFF1>IDLE</back>
+  taskSvc --> taskSvc : 403 PERMISSION_DENIED
+  deactivate taskSvc
 end
+
+opt hooks_configured
+  taskSvc -> toolSvc : TOOLSVC-HK02 dispatchPreToolHook({toolName, args})
+  activate toolSvc
+  ref over taskSvc, toolSvc : TOOLSVC-HK02 dispatchPreToolHook\nState: <back:#FFFDE7>HOOK_RUNNING</back>
+  toolSvc --> taskSvc : 200 OK — {hookResult}
+  deactivate toolSvc
+end
+
+taskSvc -> toolSvc : TOOLSVC-01 readFile / TOOLSVC-05 dispatchShellCommand / ...
+activate toolSvc
+
+alt shell_command
+  toolSvc -> sandboxRepo : SANDBOXREPO-01 isolateCommand({cmd})
+  activate sandboxRepo
+  sandboxRepo --> toolSvc : 200 OK — {stdout, stderr, exitCode}
+  deactivate sandboxRepo
+else file_operation
+  toolSvc -> fsRepo : FSREPO-01 readFile({path})
+  activate fsRepo
+  fsRepo --> toolSvc : 200 OK — {content}
+  deactivate fsRepo
+end
+
+toolSvc --> taskSvc : 200 OK — {toolResult}
+deactivate toolSvc
+
+opt hooks_configured
+  taskSvc -> toolSvc : TOOLSVC-HK03 dispatchPostToolHook({toolResult})
+  activate toolSvc
+  toolSvc --> taskSvc : 200 OK
+  deactivate toolSvc
+end
+
+ref over taskSvc
+  sq_ref_persist_conversation
+end ref
+
+ref over taskSvc : TASKSVC-02 dispatchToolCall\nState: <back:#B2DFDB>TOOL_EXEC</back> → <back:#D7CCC8>THINKING</back>
+
+taskSvc --> taskSvc : 200 OK — {toolResult}
+deactivate taskSvc
+
+== Summary ==
+' TASKSVC-02 encapsulates tool routing. Safety mode guards (ASK/BLOCK) from
+' sm_safety_svc_safety determine whether execution proceeds or awaits approval.
 
 @enduml

@@ -1,58 +1,76 @@
-@startuml sq_evaluation01_evaluate_task
+@startuml sq_evaluationservice01_evaluate_task
 ' ============================================================
-' Title:     EVALUATIONSERVICE-01 — EVALUATE Task
-' Boundary:  nasim code agent
-' Purpose:   Evaluate task completion via success checks and quality signals
+' Title:     EVALSVC-01 — evaluateTask
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Orchestrate task evaluation: completion checks, LLM review,
+'             test validation, scoring, retry coordination.
+' Intro:     Orchestrated sub-flow — invoked by TASKSVC-01 when evaluation enabled.
+' Summary:   State machine sm_eval_svc_evaluation governs CHECKING → REVIEWING |
+'             TESTING → SCORING → PASSED | FAILED | RETRYING transitions.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> CLI Adapter -> Agent Controller -> EvaluationEngine
-' SM States: CHECKING (#C5CAE9)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_eval_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Task Service → Evaluation Service
+' SM States: sm_eval_svc_evaluation.puml — IDLE, CHECKING, REVIEWING, TESTING, SCORING, RETRYING, PASSED, FAILED
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- EVALUATIONSERVICE-01 EVALUATE Task
-
-actor "User" as user
-
-box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
-end box
-
-box "API" API_COLOR
-  participant "Agent Controller" as router
-end box
+title nasim — EVALSVC-01 evaluateTask
 
 box "Service" SERVICE_COLOR
-  participant "Evaluation Service" as eng
+  participant "Task Service" as taskSvc
+  participant "Evaluation Service" as evalSvc
 end box
 
-== EVALUATIONSERVICE-01 EVALUATE Task ==
+== EVALSVC-01 evaluateTask ==
 
-user -> iface : EVALUATIONSERVICE-01 EVALUATE Task({task_id, check_commands})
-activate iface
-iface -> router : EVALUATIONSERVICE-01 EVALUATE Task({task_id, check_commands})
-activate router
-router -> eng : EVALUATIONSERVICE-01 EVALUATE Task({task_id, check_commands})
-activate eng
+taskSvc -> evalSvc : EVALSVC-01 evaluateTask({sessionId, criteria})
+activate evalSvc
 
-alt all_checks_pass
-  ref over eng : EVALUATIONSERVICE-01 EVALUATE Task({task_id, check_commands}) <back:#C5CAE9>CHECKING</back>
-  eng --> router : 200 OK
-  deactivate eng
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else check_fails
-  eng --> router : 422 UNPROCESSABLE\n{error: {code: "EVALUATIONSERVICE-01_CHECK_FAILED", message: "Task evaluation check failed", status: 422}}
-  deactivate eng
-  router --> iface : 422 UNPROCESSABLE
-  iface --> user : 422 UNPROCESSABLE
-  deactivate router
-  deactivate iface
+ref over evalSvc : EVALSVC-01 evaluateTask\nState: <back:#90A4AE>IDLE</back> → <back:#C5CAE9>CHECKING</back>
+
+evalSvc -> evalSvc : EVALSVC-02 checkTaskCompletion({criteria})
+evalSvc -> evalSvc : EVALSVC-03 checkSuccess({criteria})
+evalSvc -> evalSvc : EVALSVC-08 detectRepetition({history})
+evalSvc -> evalSvc : EVALSVC-09 injectTurnBudget({budget})
+
+break completion_check_failed
+  ref over evalSvc : EVALSVC-02 checkTaskCompletion\nState: <back:#C5CAE9>CHECKING</back> → <back:#AD1457>FAILED</back>
+  evalSvc --> taskSvc : 422 UNPROCESSABLE\n{error: {code: "EVALSVC-02_INCOMPLETE"}}
+  deactivate evalSvc
 end
+
+alt llm_review_required
+  evalSvc -> evalSvc : EVALSVC-04 validateWithLLM({output})
+  ref over evalSvc : EVALSVC-04 validateWithLLM\nState: <back:#C5CAE9>CHECKING</back> → <back:#AB47BC>REVIEWING</back>
+else test_suite_required
+  evalSvc -> evalSvc : EVALSVC-05 validateTestSuite({project})
+  ref over evalSvc : EVALSVC-05 validateTestSuite\nState: <back:#C5CAE9>CHECKING</back> → <back:#D4E157>TESTING</back>
+else direct_scoring
+  evalSvc -> evalSvc : EVALSVC-07 recordQualitySignal({signals})
+  ref over evalSvc : EVALSVC-07 recordQualitySignal\nState: <back:#C5CAE9>CHECKING</back> → <back:#FF8A65>SCORING</back>
+end
+
+alt verdict_passed
+  ref over evalSvc : EVALSVC-07 recordQualitySignal\nState: <back:#FF8A65>SCORING</back> → <back:#689F38>PASSED</back>
+  evalSvc --> taskSvc : 200 OK — {verdict: passed}
+else verdict_failed_retry_available
+  evalSvc -> evalSvc : EVALSVC-06 coordinateRetry({feedback})
+  ref over evalSvc : EVALSVC-06 coordinateRetry\nState: → <back:#C62828>RETRYING</back> → <back:#C5CAE9>CHECKING</back>
+  evalSvc --> taskSvc : 200 OK — {verdict: retry, feedback}
+else retries_exhausted
+  ref over evalSvc : EVALSVC-06 coordinateRetry\nState: <back:#C62828>RETRYING</back> → <back:#AD1457>FAILED</back>
+  evalSvc --> taskSvc : 422 UNPROCESSABLE\n{error: {code: "EVALSVC-06_EXHAUSTED"}}
+end
+
+deactivate evalSvc
+
+ref over taskSvc, evalSvc : EVALSVC-01 evaluateTask\nAgent SM: <back:#F9FBE7>EVALUATING</back> → <back:#D7CCC8>THINKING</back>
+
+== Summary ==
+' EVALSVC-02..09 are sub-UCs included by EVALSVC-01. Retry feedback loops back
+' to TASKSVC-01 agentic_turn per sm_task_svc_agent RETRYING → THINKING.
 
 @enduml

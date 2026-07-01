@@ -187,7 +187,7 @@
 
 | File | Scope |
 |------|-------|
-| `sm_task_svc_agent.puml` | Agent process FSM — 17 states (API-First) |
+| `sm_task_svc_agent.puml` | Agent process FSM — 16 states (API-First, v11) |
 | `sm_session_svc_session.puml` | Session entity lifecycle — 6 states (API-First) |
 | `sm_task_svc_plan.puml` | Plan entity lifecycle — 7 states |
 | `sm_tool_svc_plugin.puml` | Plugin entity lifecycle — 6 states (+ 2 terminal exits) |
@@ -200,7 +200,7 @@
 | `sm_safety_svc_safety.puml` | Safety mode lifecycle — 5 states (UNINITIALIZED→PERMISSIVE|ASK|BLOCK) |
 | `sm_llm_repo_router.puml` | Router selection lifecycle — 6 states (IDLE→CLASSIFYING→SELECTING→FALLBACK|SWITCHING) |
 | `sm_llm_repo_provider.puml` | Provider connection lifecycle — 5 states (UNREGISTERED→REGISTERING→ACTIVE→SELECTING) |
-| `sm_eval_svc_evaluation.puml` | Evaluation process lifecycle — 9 states (IDLE→CHECKING→REVIEWING|TESTING→SCORING→PASSED|FAILED) |
+| `sm_eval_svc_evaluation.puml` | Evaluation process lifecycle — 8 states (v3, terminal [*] exits only) |
 | `sm_repo_intel_repo_index.puml` | Repository index lifecycle — 7 states (UNINDEXED→INDEXING→INDEXED→BUILDING_GRAPH|EMBEDDING) |
 
 ## Notes
@@ -1015,9 +1015,19 @@ Of the 148 SQ diagrams, 49 are referenced in SM coverage tables (they implement 
 |----------|--------|
 | All stateful entities identified across 21 C4 groups | ✅ |
 | All 15 SMs pass `sm_lint.py --strict` (0 violations) | ✅ |
-| All hex colors unique (92 states, 92 colors, 0 duplicates) | ✅ |
+| All hex colors unique (91 states, 91 colors, 0 duplicates) | ✅ |
 | All terminal transitions have UC-IDs | ✅ |
 | All lifecycle-write states have exactly one owning UC | ✅ |
 | Transition coverage tables complete (all 15 SMs in README) | ✅ |
 | Documentation up to date (state tables, matrices, maps) | ✅ |
-| SQ coverage (orphan resolution) | ✅ — 0 orphans remain (195/195 covered) |
+| SQ coverage (orphan resolution) | ✅ — 0 orphans remain (181/181 covered) |
+
+### Simplifications Applied (2026-07-01)
+
+| # | Change | From | To | Rationale |
+|---|--------|------|----|-----------|
+| 1 | Agent FSM: Merge LISTENING+SERVING → RECEIVING | 17 states | 16 states | Both process requests from adapters via HTTPADP-06; guard `[needs_thinking]` distinguishes CLI input from API requests that complete without thinking |
+| 2 | Agent FSM: Fix THINKING→RESPONDING duplicate | 2 transitions | 1 transition | Consolidated to LLMREPO-02 only (LLM generates content); HTTPADP-06 dispatch is implicit in RESPONDING state |
+| 3 | Agent FSM: Fix UC-ID naming consistency | TOOLSVC-02 | TOOLSVC-HK02 | HOOK transitions use HK02 group, not TOOLSVC-02 |
+| 4 | Agent FSM: Fix UC-ID naming consistency | LLMREPO-01 | LLMREPO-05 | Router transitions use LLMREPO-05 SELECT Model, not LLMREPO-01 |
+| 5 | Evaluation SM: Remove redundant terminal transitions | PASSED→IDLE, FAILED→IDLE | Removed | Terminal states should only have [*] exits; redundant back-transitions removed |

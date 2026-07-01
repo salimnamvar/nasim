@@ -81,7 +81,7 @@ All business operations MUST delegate through Agent Controller (`agent_ctrl`). N
 | CLIADP-03 | STREAM Output | CLI Adapter | `sq_cli03_stream_output.puml` | Renders AgentEvents from SSE stream to terminal |
 | CLIADP-04 | READ CLI Arguments | CLI Adapter | `sq_cli04_read_cli_arguments.puml` | Startup argument parsing. `<<include>>` AGENTCTRL-01 |
 | CLIADP-05 | ENABLE Plan Mode | CLI Adapter | `sq_cli05_enable_plan_mode.puml` | `/plan` slash command. `<<extend>>` CLIADP-02. `<<include>>` AGENTCTRL-01 → TASKSVC-07 |
-| CLIADP-06 | REQUEST Approval | CLI Adapter | `sq_cli06_request_approval.puml` | Safety prompt during task. `<<extend>>` CLIADP-01. `<<include>>` AGENTCTRL-01 → SAFETYSVC-02 |
+| CLIADP-06 | REQUEST Approval | CLI Adapter | `sq_cli06_request_approval.puml` | Safety prompt during task. `<<extend>>` CLIADP-01. No direct actor association — triggered by system during REPL. `<<include>>` AGENTCTRL-01 → SAFETYSVC-02 |
 | CLIADP-07 | SWITCH Model | CLI Adapter | `sq_cli07_switch_model.puml` | `/model` slash command. `<<extend>>` CLIADP-02. `<<include>>` AGENTCTRL-01 → LLMREPOSITORY-08 |
 | CLIADP-08 | LIST Sessions | CLI Adapter | `sq_cli08_list_sessions.puml` | `/sessions` slash command. `<<extend>>` CLIADP-02. `<<include>>` AGENTCTRL-01 → SESSIONSVC-03 |
 
@@ -562,6 +562,84 @@ Full transition matrices and hex color registry: `docs/SM/README.md`.
 
 ---
 
+## Sequence Diagram Layer (SQ)
+
+**Source of truth:** C4 v13.0.0 → UC diagrams → SM diagrams (`docs/SM/`)
+
+**Diagram location:** `docs/SQ/{Group}/sq_{group}{nn}_{description}.puml`
+
+**Shared ref fragments (DRY):** `docs/SQ/common/sq_ref_*.puml`
+
+### SQ Conventions (v10.0.0)
+
+| Rule | Requirement |
+|------|-------------|
+| CSR layering | External Client → Adapter → `agent_ctrl` → Service → Repository |
+| Orchestration | `context_svc`, `safety_svc`, `tool_svc`, `eval_svc` reached **only** via `task_svc` |
+| State guards | `alt`/`else` fragments reflect SM transitions; state writes use `ref` blocks |
+| Failure paths | `break` for early exits |
+| RoD messages | `{UC-ID} camelCaseMethod({params})` e.g. `TASKSVC-01 processUserTask({sessionId})` |
+| Intro/Summary | Documented in header comments + `==` section markers (no `note` blocks per linter) |
+
+### Reusable Ref Fragments
+
+| Ref File | Encapsulates | Used By |
+|----------|--------------|---------|
+| `sq_ref_assemble_context.puml` | CONTEXTSVC-01..06 pipeline + COMPACTING guard | TASKSVC-01 |
+| `sq_ref_dispatch_safety_pipeline.puml` | TASKSVC-15 + SAFETYSVC-01/02/03 + ASK approval | TASKSVC-02 |
+| `sq_ref_persist_conversation.puml` | TASKSVC-03 + SESSIONREPO-01 + WIRELOGREPO-01 | TASKSVC-01, TASKSVC-02 |
+| `sq_ref_handle_error.puml` | TASKSVC-14 ERROR → IDLE recovery | TASKSVC-01 |
+
+### Critical Flows — Updated (2026-07-01)
+
+| SQ File | UC ID | SM Alignment | Status |
+|---------|-------|--------------|--------|
+| `sq_agentcontroller01_process_request.puml` | AGENTCTRL-01 | RECEIVING | ✅ v10.0.0 |
+| `sq_httpadapter06_dispatch_message.puml` | HTTPADP-06 | IDLE → RECEIVING → RESPONDING → IDLE | ✅ v10.0.0 |
+| `sq_taskservice01_process_user_task.puml` | TASKSVC-01 | sm_task_svc_agent (full loop) | ✅ v10.0.0 |
+| `sq_taskservice02_dispatch_tool_call.puml` | TASKSVC-02 | TOOL_EXEC, AWAITING_APPROVAL, HOOK_RUNNING | ✅ v10.0.0 |
+| `sq_taskservice07_queue_plan.puml` | TASKSVC-07 | sm_task_svc_plan + PLANNING | ✅ v10.0.0 |
+| `sq_taskservice15_dispatch_safety_pipeline.puml` | TASKSVC-15 | sm_safety_svc_safety | ✅ v10.0.0 |
+| `sq_contextservice01_process_context.puml` | CONTEXTSVC-01 | COMPACTING (CONTEXTSVC-05) | ✅ v10.0.0 |
+| `sq_evaluationservice01_evaluate_task.puml` | EVALSVC-01 | sm_eval_svc_evaluation | ✅ v10.0.0 |
+| `sq_safetyservice02_request_approval.puml` | SAFETYSVC-02 | AWAITING_APPROVAL | ✅ v10.0.0 |
+
+### UC → SQ Traceability (Core Task Flows)
+
+| UC ID | SQ Diagram | SM Diagram |
+|-------|------------|------------|
+| AGENTCTRL-01 | `sq_agentcontroller01_process_request.puml` | sm_task_svc_agent (RECEIVING) |
+| AGENTCTRL-02..04 | included as `ref` in AGENTCTRL-01 | — |
+| HTTPADP-06 | `sq_httpadapter06_dispatch_message.puml` | sm_task_svc_agent |
+| CLIADP-01, CLIADP-05, CLIADP-06 | `sq_agentcontroller01`, `sq_taskservice07`, `sq_safetyservice02` | sm_task_svc_agent, sm_task_svc_plan |
+| TASKSVC-01 | `sq_taskservice01_process_user_task.puml` | sm_task_svc_agent |
+| TASKSVC-02 | `sq_taskservice02_dispatch_tool_call.puml` | sm_task_svc_agent |
+| TASKSVC-03 | `sq_ref_persist_conversation.puml` | sm_session_svc_session |
+| TASKSVC-07 | `sq_taskservice07_queue_plan.puml` | sm_task_svc_plan |
+| TASKSVC-08 | `sq_taskservice08_approve_plan.puml` | sm_task_svc_plan |
+| TASKSVC-14 | `sq_ref_handle_error.puml` | sm_task_svc_agent (ERROR) |
+| TASKSVC-15 | `sq_taskservice15_dispatch_safety_pipeline.puml` | sm_safety_svc_safety |
+| CONTEXTSVC-01..06 | `sq_contextservice01_process_context.puml` | sm_task_svc_agent (COMPACTING) |
+| EVALSVC-01..09 | `sq_evaluationservice01_evaluate_task.puml` | sm_eval_svc_evaluation |
+| SAFETYSVC-01..03 | `sq_taskservice15`, `sq_safetyservice02` | sm_safety_svc_safety |
+| EDITSTRATEGYREPOSITORY-10 | `sq_editstrategyrepository10_stage_diff.puml` | sm_edit_strategy_repo_diff |
+
+### SM → SQ State Guard Mapping (Agent Core)
+
+| SM Transition | Guard | SQ Fragment |
+|---------------|-------|-------------|
+| IDLE → RECEIVING | HTTPADP-06 entry | `sq_httpadapter06`, `sq_taskservice01` |
+| THINKING → COMPACTING | `token_count > budget` | `sq_ref_assemble_context`, `sq_contextservice01` |
+| THINKING → TOOL_EXEC | `[tool_calls]` | `sq_taskservice01` alt branch |
+| THINKING → RESPONDING | `[text_only]` | `sq_taskservice01` alt branch |
+| TOOL_EXEC → AWAITING_APPROVAL | safety_mode=ASK | `sq_ref_dispatch_safety_pipeline` |
+| PLANNING (agent) | plan_mode_active | `sq_taskservice07` |
+| EVALUATING → THINKING | retry with feedback | `sq_evaluationservice01` |
+
+Full SQ inventory: `docs/SQ/README.md` (146+ diagrams).
+
+---
+
 **Total: 164 UCs** across 24 C4 component groups (+ `uc_overview.puml` navigation map). Excludes overview group nodes and the vacant TASKSVC-05 ID (permanence rule). Repository-layer UCs use canonical `*REPOSITORY-*` IDs; extref stubs use short prefixes per the naming convention above.
 
 ### Adapter → Agent Controller → Service Routing
@@ -574,4 +652,5 @@ Full transition matrices and hex color registry: `docs/SM/README.md`.
 | HTTPADP-10..11 | `/v1/config` | AGENTCTRL-04 | CONFIGSVC-01..03 |
 | CLIADP-01 | REPL input | AGENTCTRL-01 | TASKSVC-01 |
 | CLIADP-02, 05, 07, 08 | Slash commands | AGENTCTRL-01 | Per-command service UC |
-| MCPADP-01..03 | MCP request | AGENTCTRL-01 | TASKSVC-01 / TOOLSVC-14 |
+| MCPADP-01, 03 | MCP request / tool invoke | AGENTCTRL-01 | TASKSVC-01 |
+| MCPADP-02 | MCP tools/list | AGENTCTRL-04 | TOOLSVC-14 |

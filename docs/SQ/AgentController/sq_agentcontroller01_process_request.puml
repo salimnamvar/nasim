@@ -1,70 +1,106 @@
-@startuml sq_ac01_process_request
+@startuml sq_agentcontroller01_process_request
 ' ============================================================
-' Title:     AGENTCONTROLLER-01 — PROCESS Request
-' Boundary:  nasim code agent
-' Purpose:   Route incoming request from any interface to Core Engine
+' Title:     AGENTCTRL-01 — processRequest
+' Boundary:  NASIM Application — Controller Layer
+' Purpose:   Single convergence point — route validated requests from any
+'             adapter to the appropriate service (task, session, config).
+' Intro:     All adapters (CLI, HTTP, MCP) delegate here. Includes validate,
+'             adapt protocol, and dispatch sub-flows as ref blocks.
+' Summary:   Invalid requests break early; valid task requests dispatch to
+'             task_svc via AGENTCTRL-04; session/config routed per request type.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> InterfaceAdapter -> Agent Controller -> Task Service
-' SM States: LISTENING (#E8EAF6), THINKING (#D7CCC8), IDLE (#ECEFF1)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_agent_ctrl.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Adapter → Agent Controller → {Task, Session, Config} Service
+' SM States: RECEIVING (sm_task_svc_agent.puml)
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- AGENTCONTROLLER-01 PROCESS Request
+title nasim — AGENTCTRL-01 processRequest
 
 actor "User" as user
 
 box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
+  participant "CLI Adapter" as cliAdp
+  participant "HTTP Adapter" as httpAdp
+  participant "MCP Adapter" as mcpAdp
 end box
 
 box "API" API_COLOR
-  participant "Agent Controller" as router
+  participant "Agent Controller" as agentCtrl
 end box
 
 box "Service" SERVICE_COLOR
-  participant "Task Service" as engine
+  participant "Task Service" as taskSvc
+  participant "Session Service" as sessionSvc
+  participant "Config Service" as configSvc
 end box
 
-== AGENTCONTROLLER-01 PROCESS Request ==
+== AGENTCTRL-01 processRequest — entry ==
 
-user -> iface : AGENTCONTROLLER-01 PROCESS Request({payload})
-activate iface
-
-iface -> router : AGENTCONTROLLER-01 PROCESS Request({payload})
-activate router
-
-router -> engine : AGENTCONTROLLER-01 PROCESS Request({payload})
-activate engine
-
-alt request valid
-  ref over router
-    AGENTCONTROLLER-02: VALIDATE Request
-  end ref
-  ref over router
-    AGENTCONTROLLER-03: ADAPT Protocol
-  end ref
-  ref over router
-    AGENTCONTROLLER-04: DISPATCH to Core Engine
-  end ref
-
-  engine --> router : 200 OK — {result}
-  deactivate engine
-  router --> iface : 200 OK — {result}
-  deactivate router
-  iface --> user : 200 OK — {result}
-  deactivate iface
-
-else request invalid
-  engine --> router : 422 INVALID_ARGUMENT\n{error: {code: "AGENTCONTROLLER-01_VALIDATION_ERROR", message: "Invalid request format", status: 422}}
-  deactivate engine
-  router --> iface : 422 INVALID_ARGUMENT
-  deactivate router
-  iface --> user : 422 INVALID_ARGUMENT
-  deactivate iface
+alt cli_repl_input
+  user -> cliAdp : CLIADP-01 processUserInput({input})
+  activate cliAdp
+  cliAdp -> agentCtrl : AGENTCTRL-01 processRequest({payload})
+else http_api_call
+  user -> httpAdp : HTTPADP-06 dispatchMessage({sessionId, message})
+  activate httpAdp
+  httpAdp -> agentCtrl : AGENTCTRL-01 processRequest({payload})
+else mcp_tool_invoke
+  user -> mcpAdp : MCPADP-03 invokeNasimTool({tool, args})
+  activate mcpAdp
+  mcpAdp -> agentCtrl : AGENTCTRL-01 processRequest({payload})
 end
+
+activate agentCtrl
+
+ref over agentCtrl
+  AGENTCTRL-02 validateRequest
+end ref
+
+break request_invalid
+  agentCtrl --> cliAdp : 422 UNPROCESSABLE
+  agentCtrl --> httpAdp : 422 UNPROCESSABLE
+  agentCtrl --> mcpAdp : 422 UNPROCESSABLE
+  deactivate agentCtrl
+  deactivate cliAdp
+  deactivate httpAdp
+  deactivate mcpAdp
+end
+
+ref over agentCtrl
+  AGENTCTRL-03 adaptProtocol
+end ref
+
+alt task_orchestration_request
+  agentCtrl -> taskSvc : AGENTCTRL-04 dispatchToServices → TASKSVC-01 processUserTask({payload})
+  activate taskSvc
+  taskSvc --> agentCtrl : 200 OK — {result}
+  deactivate taskSvc
+else session_lifecycle_request
+  agentCtrl -> sessionSvc : AGENTCTRL-04 dispatchToServices → SESSIONSVC-0x ({payload})
+  activate sessionSvc
+  sessionSvc --> agentCtrl : 200 OK — {result}
+  deactivate sessionSvc
+else config_request
+  agentCtrl -> configSvc : AGENTCTRL-04 dispatchToServices → CONFIGSVC-0x ({payload})
+  activate configSvc
+  configSvc --> agentCtrl : 200 OK — {result}
+  deactivate configSvc
+end
+
+agentCtrl --> cliAdp : 200 OK — {result}
+agentCtrl --> httpAdp : 200 OK — {result}
+agentCtrl --> mcpAdp : 200 OK — {result}
+deactivate agentCtrl
+deactivate cliAdp
+deactivate httpAdp
+deactivate mcpAdp
+
+== Summary ==
+' agent_ctrl never calls repositories directly. Orchestrated services (tool,
+' safety, context, eval) are reached only through task_svc per C4 v13.0.0.
 
 @enduml

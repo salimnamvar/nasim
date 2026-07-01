@@ -1,0 +1,46 @@
+@startuml sq_ref_dispatch_safety_pipeline
+' ============================================================
+' Title:     REF — Dispatch Safety Pipeline (TASKSVC-15)
+' Purpose:   Reusable sub-flow: permission, injection scan, egress inspect.
+' Source:    docs/UC/uc_task_svc.puml, docs/UC/uc_safety_svc.puml
+' SM:        sm_safety_svc_safety.puml (PERMISSIVE | ASK | BLOCK)
+' ============================================================
+
+!include sq_styles.puml
+
+participant "Task Service" as taskSvc
+participant "Safety Service" as safetySvc
+actor "User" as user
+participant "CLI Adapter" as iface
+
+taskSvc -> safetySvc : TASKSVC-15 dispatchSafetyPipeline({toolCall})
+activate safetySvc
+
+safetySvc -> safetySvc : SAFETYSVC-01 checkPermission({toolCall})
+
+alt safety_mode == BLOCK && unsafe
+  ref over safetySvc : SAFETYSVC-01 checkPermission\nState: <back:#E91E63>BLOCK</back>
+  safetySvc --> taskSvc : 403 PERMISSION_DENIED
+  deactivate safetySvc
+else safety_mode == ASK && unsafe
+  ref over safetySvc : SAFETYSVC-02 requestApproval\nState: <back:#FFF9C4>AWAITING_APPROVAL</back>
+  safetySvc -> iface : SAFETYSVC-02 requestApproval({toolCall})
+  activate iface
+  iface -> user : promptApproval({toolCall})
+  user --> iface : approvalResponse
+  iface --> safetySvc : 200 OK — {approved|denied}
+  deactivate iface
+  alt user denied
+    safetySvc --> taskSvc : 403 PERMISSION_DENIED
+    deactivate safetySvc
+  else user approved
+    safetySvc --> taskSvc : 200 OK — {cleared}
+    deactivate safetySvc
+  end
+else permitted
+  safetySvc -> safetySvc : SAFETYSVC-03 applySafetyMode({mode})
+  safetySvc --> taskSvc : 200 OK — {cleared}
+  deactivate safetySvc
+end
+
+@enduml

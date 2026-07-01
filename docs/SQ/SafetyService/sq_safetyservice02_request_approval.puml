@@ -1,58 +1,66 @@
-@startuml sq_safety02_request_approval
+@startuml sq_safetyservice02_request_approval
 ' ============================================================
-' Title:     SAFETYSERVICE-02 — REQUEST Approval
-' Boundary:  nasim code agent
-' Purpose:   Display approval prompt for unsafe tool execution
+' Title:     SAFETYSVC-02 — requestApproval
+' Boundary:  NASIM Application — Service Layer
+' Purpose:   Prompt user for approval when safety_mode=ASK and tool is unsafe.
+' Intro:     Invoked by TASKSVC-15 safety pipeline during TOOL_EXEC or diff staging.
+'             User interaction returns via CLIADP-06 or HTTP adapter SSE prompt.
+' Summary:   Approval transitions AWAITING_APPROVAL → TOOL_EXEC (approved) or
+'             IDLE (denied) per sm_task_svc_agent and sm_edit_strategy_repo_diff.
 ' Milestone: v1.0
-' Version:   9.1.0
-' Source:    docs/UC/README.md, docs/SM/README.md
-' Review:    —
-' CSR Chain: User -> CLI Adapter -> Agent Controller -> Safety Service
-' SM States: AWAITING_APPROVAL (#FFF9C4)
+' Version:   10.0.0
+' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_safety_svc.puml
+' Review:    SQ Architect extraction 2026-07-01
+' CSR Chain: Task Service → Safety Service → Adapter → User
+' SM States: AWAITING_APPROVAL, AWAITING_DIFF_APPROVAL
 ' ============================================================
 
 !include ../common/sq_styles.puml
 
-title nasim -- SAFETYSERVICE-02 REQUEST Approval
+title nasim — SAFETYSVC-02 requestApproval
+
+box "Service" SERVICE_COLOR
+  participant "Task Service" as taskSvc
+  participant "Safety Service" as safetySvc
+end box
+
+box "Interface" INTERFACE_COLOR
+  participant "CLI Adapter" as cliAdp
+end box
 
 actor "User" as user
 
-box "Interface" INTERFACE_COLOR
-  participant "CLI Adapter" as iface
-end box
+== SAFETYSVC-02 requestApproval ==
 
-box "API" API_COLOR
-  participant "Agent Controller" as router
-end box
+taskSvc -> safetySvc : SAFETYSVC-02 requestApproval({toolCall})
+activate safetySvc
 
-box "Service" SERVICE_COLOR
-  participant "Safety Service" as mgr
-end box
+safetySvc -> safetySvc : SAFETYSVC-01 checkPermission({toolCall})
 
-== SAFETYSERVICE-02 REQUEST Approval ==
+ref over safetySvc : SAFETYSVC-02 requestApproval\nState: <back:#FDD835>ASK</back> → <back:#FFF9C4>AWAITING_APPROVAL</back>
 
-user -> iface : SAFETYSERVICE-02 REQUEST Approval({tool_name, args})
-activate iface
-iface -> router : SAFETYSERVICE-02 REQUEST Approval({tool_name, args})
-activate router
-router -> mgr : SAFETYSERVICE-02 REQUEST Approval(tool_name, args)
-activate mgr
+safetySvc -> cliAdp : SAFETYSVC-02 requestApproval({toolCall, prompt})
+activate cliAdp
+cliAdp -> user : CLIADP-06 requestApproval({toolCall})
 
-alt user approves
-  ref over mgr : SAFETYSERVICE-02 REQUEST Approval(tool_name, args) <back:#FFF9C4>AWAITING_APPROVAL</back>
-  mgr --> router : 200 OK
-  deactivate mgr
-  router --> iface : 200 OK
-  iface --> user : 200 OK
-  deactivate router
-  deactivate iface
-else user rejects
-  mgr --> router : 403 FORBIDDEN\n{error: {code: "SAFETYSERVICE-02_USER_REJECTED", message: "User rejected tool execution", status: 403}}
-  deactivate mgr
-  router --> iface : 403 FORBIDDEN
-  iface --> user : 403 FORBIDDEN
-  deactivate router
-  deactivate iface
+alt user_approves
+  user --> cliAdp : {approved: true}
+  cliAdp --> safetySvc : 200 OK — {approved: true}
+  deactivate cliAdp
+  ref over taskSvc, safetySvc : SAFETYSVC-02 requestApproval\nState: <back:#FFF9C4>AWAITING_APPROVAL</back> → <back:#B2DFDB>TOOL_EXEC</back>
+  safetySvc --> taskSvc : 200 OK — {cleared: true}
+else user_denies
+  user --> cliAdp : {approved: false}
+  cliAdp --> safetySvc : 403 FORBIDDEN — {approved: false}
+  deactivate cliAdp
+  ref over taskSvc, safetySvc : SAFETYSVC-02 requestApproval\nState: <back:#FFF9C4>AWAITING_APPROVAL</back> → <back:#ECEFF1>IDLE</back>
+  safetySvc --> taskSvc : 403 PERMISSION_DENIED\n{error: {code: "SAFETYSVC-02_USER_REJECTED"}}
 end
+
+deactivate safetySvc
+
+== Summary ==
+' SAFETYSVC-02 is shared between tool execution and diff staging approval paths.
+' Reused via sq_ref_dispatch_safety_pipeline ref block.
 
 @enduml
