@@ -5,10 +5,12 @@
 ' Boundary:  nasim code agent
 ' Purpose:   Process FSM showing all agent states and transitions.
 '            All entry points route through the API (HTTPADP-06).
+'            LISTENING and SERVING merged into RECEIVING (both
+'            process requests from adapters via HTTPADP-06).
 ' Milestone: v1.0
-' Version:   9.0.0
+' Version:   11.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_task_svc.puml
-' Review:    SM Architect extraction 2026-07-01 (C4+UC source of truth)
+' Review:    SM Architect review 2026-07-01 (C4+UC source of truth)
 ' Note:      Process FSM, not entity lifecycle. SMT rules from sm.md
 '            do not apply (documented deviation).
 ' Convention: All transitions are triggered by the corresponding UC ID
@@ -25,9 +27,9 @@ state "IDLE" as IDLE #ECEFF1
 IDLE : Agent waiting for user input.
 IDLE : No active provider call.
 
-state "LISTENING" as LISTENING #E8EAF6
-LISTENING : Receiving and parsing user input.
-LISTENING : HTTPADP-06 DISPATCH Message (via any interface).
+state "RECEIVING" as RECEIVING #E8EAF6
+RECEIVING : Receiving request from any adapter.
+RECEIVING : HTTPADP-06 DISPATCH Message (CLI, HTTP, or MCP).
 
 state "THINKING" as THINKING #D7CCC8
 THINKING : LLM processing messages.
@@ -65,10 +67,6 @@ state "ROUTING" as ROUTING #EDE7F6
 ROUTING : Model selection in progress.
 ROUTING : LLMREPOSITORY-05 SELECT Model.
 
-state "SERVING" as SERVING #E0F7FA
-SERVING : API processing request from any interface.
-SERVING : HTTPADP-06 DISPATCH Message.
-
 state "EVALUATING" as EVALUATING #F9FBE7
 EVALUATING : Evaluating task completion.
 EVALUATING : EVALSVC-01 EVALUATE Task.
@@ -93,17 +91,16 @@ AWAITING_DIFF_APPROVAL : SAFETYSVC-02 REQUEST Approval.
 ' Entry transitions: ALL go through HTTPADP-06 (sole entry gate)
 ' ============================================================
 
-IDLE --> LISTENING : HTTPADP-06
-IDLE --> SERVING : HTTPADP-06
+IDLE --> RECEIVING : HTTPADP-06
 
-LISTENING --> THINKING : HTTPADP-06
+RECEIVING --> THINKING : HTTPADP-06 / [needs_thinking]
+RECEIVING --> IDLE : HTTPADP-06 / [!needs_thinking]
 
 THINKING --> RESPONDING : LLMREPOSITORY-02 / [text_only]
 THINKING --> TOOL_EXEC : LLMREPOSITORY-02 / [tool_calls]
 THINKING --> COMPACTING : CONTEXTSVC-05 / [token_count > budget]
 THINKING --> ROUTING : LLMREPOSITORY-05
 THINKING --> ERROR : LLMREPOSITORY-02
-THINKING --> RESPONDING : HTTPADP-06
 THINKING --> EVALUATING : EVALSVC-01
 
 ROUTING --> THINKING : LLMREPOSITORY-05
@@ -129,9 +126,6 @@ COMPACTING --> THINKING : CONTEXTSVC-05
 RESPONDING --> IDLE : HTTPADP-06
 
 ERROR --> IDLE : TASKSVC-14
-
-SERVING --> THINKING : HTTPADP-06
-SERVING --> IDLE : HTTPADP-06
 
 IDLE --> PLANNING : TASKSVC-07
 PLANNING --> IDLE : TASKSVC-07

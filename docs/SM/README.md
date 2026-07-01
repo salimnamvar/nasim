@@ -9,7 +9,7 @@
 | State | Description | Entry Condition | Hex Color |
 |-------|-------------|-----------------|-----------|
 | IDLE | Agent waiting for user input | Startup or response complete | #ECEFF1 |
-| LISTENING | Receiving and parsing user input | HTTPADP-06 DISPATCH Message received | #E8EAF6 |
+| RECEIVING | Receiving request from any adapter | HTTPADP-06 DISPATCH Message received | #E8EAF6 |
 | THINKING | LLM processing messages | Input parsed, messages built | #D7CCC8 |
 | TOOL_EXEC | Executing a tool call | LLM returns tool_calls | #B2DFDB |
 | RESPONDING | Streaming final text to user via API SSE | LLM returns text only | #D1C4E9 |
@@ -19,7 +19,6 @@
 | PLANNING | Plan mode, tool calls queued | /plan command entered | #FFCCBC |
 | HOOK_RUNNING | Pre/post hook executing | tool or LLM call with hooks | #FFFDE7 |
 | ROUTING | Model selection in progress | LLM Repository resolving model | #EDE7F6 |
-| SERVING | API processing request from any interface | HTTPADP-06 DISPATCH Message | #E0F7FA |
 | EVALUATING | Evaluating task completion | task_complete AND evaluation_enabled | #F9FBE7 |
 | REVIEWING | LLM review of results | success checks passed, optional review | #FFF8E1 |
 | RETRYING | Retrying with feedback | success checks failed or review rejected | #FBE9E7 |
@@ -27,13 +26,7 @@
 | AWAITING_DIFF_APPROVAL | Presenting diff to user | SAFETYSVC-02 REQUEST Approval | #FCE4EC |
 
 > **API-First Entry:** All entry/exit transitions use `HTTPADP-06` (DISPATCH Message) as the sole entry gate. No interface container may bypass the API.
-
-### Transitions from STAGING
-
-| From | To | UC ID | Condition |
-|------|----|-------|-----------|
-| STAGING | AWAITING_DIFF_APPROVAL | EDITSTRATEGYREPO-10 | Diff computed successfully |
-| STAGING | ERROR | EDITSTRATEGYREPO-10 | Diff computation failed (file deleted, conflict, algorithm error) |
+> **Simplification v11:** LISTENING and SERVING merged into RECEIVING (both process requests from adapters via HTTPADP-06; guard `[needs_thinking]` distinguishes CLI input from API requests that complete without thinking).
 
 ## Session Lifecycle States (Entity)
 
@@ -232,26 +225,24 @@
 | From | To | UC-ID | Condition |
 |------|----|-------|-----------|
 | [*] | IDLE | TASKSVC-01 | Process startup |
-| IDLE | LISTENING | HTTPADP-06 | DISPATCH Message received |
-| IDLE | SERVING | HTTPADP-06 | API request received |
+| IDLE | RECEIVING | HTTPADP-06 | Request received (any adapter) |
 | IDLE | PLANNING | TASKSVC-07 | /plan command entered |
-| LISTENING | THINKING | HTTPADP-06 | Input parsed, messages built |
-| SERVING | THINKING | HTTPADP-06 | API request processed |
-| SERVING | IDLE | HTTPADP-06 | API request complete |
+| RECEIVING | THINKING | HTTPADP-06 | [needs_thinking] Input parsed, messages built |
+| RECEIVING | IDLE | HTTPADP-06 | [!needs_thinking] API request complete |
 | THINKING | RESPONDING | LLMREPO-02 | LLM returns text only |
 | THINKING | TOOL_EXEC | LLMREPO-02 | LLM returns tool_calls |
 | THINKING | COMPACTING | TASKSVC-06 | token_count > context_budget |
-| THINKING | ROUTING | LLMREPO-01 | ModelRouter resolving model |
+| THINKING | ROUTING | LLMREPO-05 | ModelRouter resolving model |
 | THINKING | ERROR | LLMREPO-02 | Provider call failed |
 | THINKING | EVALUATING | EVALSVC-01 | task_complete AND evaluation_enabled |
-| ROUTING | THINKING | LLMREPO-01 | Model selected |
+| ROUTING | THINKING | LLMREPO-05 | Model selected |
 | TOOL_EXEC | THINKING | TASKSVC-02 | Tool call complete |
 | TOOL_EXEC | AWAITING_APPROVAL | SAFETYSVC-02 | safety_mode=ask AND unsafe tool |
-| TOOL_EXEC | HOOK_RUNNING | TOOLSVC-02 | Pre/post hook configured |
+| TOOL_EXEC | HOOK_RUNNING | TOOLSVC-HK02 | Pre/post hook configured |
 | TOOL_EXEC | ERROR | TASKSVC-02 | Tool execution failed |
 | TOOL_EXEC | STAGING | EDITSTRATEGYREPO-10 | diff_sandbox mode active |
-| HOOK_RUNNING | TOOL_EXEC | TOOLSVC-02 | Hook execution complete |
-| HOOK_RUNNING | IDLE | TOOLSVC-02 | Hook execution complete (no tool) |
+| HOOK_RUNNING | TOOL_EXEC | TOOLSVC-HK02 | Hook execution complete |
+| HOOK_RUNNING | IDLE | TOOLSVC-HK02 | Hook execution complete (no tool) |
 | AWAITING_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves |
 | AWAITING_APPROVAL | IDLE | SAFETYSVC-02 | User denies |
 | COMPACTING | THINKING | TASKSVC-06 | Context compacted |
@@ -530,9 +521,9 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | Target State | Lifecycle-Write UC | Description |
 |--------------|-------------------|-------------|
 | CLASSIFYING | LLMREPO-03 CLASSIFY Task | Task classification started |
-| SELECTING | LLMREPO-01 SELECT Model | Model selection in progress |
-| SWITCHING | LLMREPO-04 SWITCH Model | Runtime model switch |
-| FALLBACK | LLMREPO-02 APPLY Fallback | Falling back to next model |
+| SELECTING | LLMREPO-05 SELECT Model | Model selection in progress |
+| SWITCHING | LLMREPO-08 SWITCH Model | Runtime model switch |
+| FALLBACK | LLMREPO-06 APPLY Fallback | Falling back to next model |
 | ERROR | LLMREPO-03 CLASSIFY Task | Classification or routing failure |
 
 ### Provider Connection Lifecycle
@@ -577,28 +568,25 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | From State | To State | UC-ID | Trigger | SQ Diagram |
 |------------|----------|-------|---------|------------|
 | [*] | IDLE | TASKSVC-01 | Process startup | sq_agent01_process_user_task.puml |
-| IDLE | LISTENING | HTTPADP-06 | DISPATCH Message received | sq_api06_dispatch_message.puml |
-| IDLE | SERVING | HTTPADP-06 | API request received | sq_api06_dispatch_message.puml |
+| IDLE | RECEIVING | HTTPADP-06 | Request received (any adapter) | sq_api06_dispatch_message.puml |
 | IDLE | PLANNING | TASKSVC-07 | /plan command entered | sq_agent07_queue_plan.puml |
 | IDLE | [*] | TASKSVC-01 | Error handled | — |
-| LISTENING | THINKING | HTTPADP-06 | Input parsed, messages built | sq_api06_dispatch_message.puml |
-| SERVING | THINKING | HTTPADP-06 | API request processed | sq_api06_dispatch_message.puml |
-| SERVING | IDLE | HTTPADP-06 | API request complete | sq_api06_dispatch_message.puml |
+| RECEIVING | THINKING | HTTPADP-06 | [needs_thinking] Input parsed | sq_api06_dispatch_message.puml |
+| RECEIVING | IDLE | HTTPADP-06 | [!needs_thinking] API request complete | sq_api06_dispatch_message.puml |
 | THINKING | RESPONDING | LLMREPO-02 | LLM returns text only | sq_provider02_request_chat.puml |
 | THINKING | TOOL_EXEC | LLMREPO-02 | LLM returns tool_calls | sq_provider02_request_chat.puml |
 | THINKING | COMPACTING | TASKSVC-06 | token_count > context_budget | sq_agent06_compact_context.puml |
-| THINKING | ROUTING | LLMREPO-01 | ModelRouter resolving model | sq_router01_select_model.puml |
+| THINKING | ROUTING | LLMREPO-05 | ModelRouter resolving model | sq_router01_select_model.puml |
 | THINKING | ERROR | LLMREPO-02 | Provider call failed | sq_provider02_request_chat.puml |
-| THINKING | RESPONDING | HTTPADP-06 | Response dispatched | sq_api06_dispatch_message.puml |
 | THINKING | EVALUATING | EVALSVC-01 | task_complete AND evaluation_enabled | sq_evaluation01_evaluate_task.puml |
-| ROUTING | THINKING | LLMREPO-01 | Model selected | sq_router01_select_model.puml |
+| ROUTING | THINKING | LLMREPO-05 | Model selected | sq_router01_select_model.puml |
 | TOOL_EXEC | THINKING | TASKSVC-02 | Tool call complete | sq_agent02_dispatch_tool_call.puml |
 | TOOL_EXEC | AWAITING_APPROVAL | SAFETYSVC-02 | safety_mode=ask AND unsafe tool | sq_safety02_request_approval.puml |
-| TOOL_EXEC | HOOK_RUNNING | TOOLSVC-02 | Pre/post hook configured | sq_hooks02_dispatch_pre_tool_hook.puml |
+| TOOL_EXEC | HOOK_RUNNING | TOOLSVC-HK02 | Pre/post hook configured | sq_hooks02_dispatch_pre_tool_hook.puml |
 | TOOL_EXEC | ERROR | TASKSVC-02 | Tool execution failed | sq_agent02_dispatch_tool_call.puml |
 | TOOL_EXEC | STAGING | EDITSTRATEGYREPO-10 | diff_sandbox mode active | sq_editstrategy10_stage_diff.puml |
-| HOOK_RUNNING | TOOL_EXEC | TOOLSVC-02 | Hook execution complete | sq_hooks02_dispatch_pre_tool_hook.puml |
-| HOOK_RUNNING | IDLE | TOOLSVC-02 | Hook execution complete (no tool) | sq_hooks02_dispatch_pre_tool_hook.puml |
+| HOOK_RUNNING | TOOL_EXEC | TOOLSVC-HK02 | Hook execution complete | sq_hooks02_dispatch_pre_tool_hook.puml |
+| HOOK_RUNNING | IDLE | TOOLSVC-HK02 | Hook execution complete (no tool) | sq_hooks02_dispatch_pre_tool_hook.puml |
 | AWAITING_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves | sq_safety02_request_approval.puml |
 | AWAITING_APPROVAL | IDLE | SAFETYSVC-02 | User denies | sq_safety02_request_approval.puml |
 | COMPACTING | THINKING | TASKSVC-06 | Context compacted | sq_agent06_compact_context.puml |
@@ -617,8 +605,8 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | AWAITING_DIFF_APPROVAL | TOOL_EXEC | SAFETYSVC-02 | User approves diff | sq_safety02_request_approval.puml |
 | AWAITING_DIFF_APPROVAL | IDLE | SAFETYSVC-02 | User rejects diff | sq_safety02_request_approval.puml |
 
-> **Coverage:** 39/39 non-terminal transitions covered. 0 ORPHANs.
-> **Note:** `THINKING→RESPONDING` appears twice with different UC-IDs — `LLMREPO-02` (provider generates content) and `HTTPADP-06` (API dispatches to network) — reflecting two semantically distinct transitions between the same states.
+> **Coverage:** 37/37 non-terminal transitions covered. 0 ORPHANs.
+> **Note:** Merged LISTENING+SERVING→RECEIVING. Removed THINKING→RESPONDING duplicate (was LLMREPO-02 and HTTPADP-06; consolidated to LLMREPO-02 only).
 
 ### sm_session_svc_session — Transition Coverage Table
 
@@ -864,12 +852,11 @@ One lifecycle-write UC per target state. This table is the authoritative referen
 | SCORING | RETRYING | EVALSVC-06 | Scoring below threshold | sq_evaluation06_coordinate_retry.puml |
 | RETRYING | CHECKING | EVALSVC-06 | Retry with feedback | sq_evaluation06_coordinate_retry.puml |
 | RETRYING | FAILED | EVALSVC-06 | Retries exhausted | sq_evaluation06_coordinate_retry.puml |
-| PASSED | IDLE | EVALSVC-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
-| FAILED | IDLE | EVALSVC-01 | Reset for next evaluation | sq_evaluation01_evaluate_task.puml |
-| PASSED | [*] | EVALSVC-01 | Terminal state | — |
-| FAILED | [*] | EVALSVC-01 | Terminal state | — |
+| PASSED | [*] | EVALSVC-07 | Terminal state | — |
+| FAILED | [*] | EVALSVC-06 | Terminal state | — |
 
-> **Coverage:** 16/16 non-terminal transitions covered. 0 ORPHANs.
+> **Coverage:** 14/14 non-terminal transitions covered. 0 ORPHANs.
+> **Simplification v3:** Removed redundant PASSED→IDLE and FAILED→IDLE transitions (terminal states only have [*] exits).
 
 ### sm_repo_intel_repo_index — Transition Coverage Table
 
@@ -902,7 +889,7 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 
 | # | SM File | Entity | C4 Component | Type | States | UCs | Status |
 |---|---------|--------|--------------|------|--------|-----|--------|
-| 1 | sm_task_svc_agent.puml | Task Service | Task Service | Process FSM | 17 | TASKSVC-01..14, HTTPADP-06, LLMREPO-02, EDITSTRATEGYREPO-10, SAFETYSVC-02, TOOLSVC-02, EVALSVC-01..06, LLMREPO-01 | ✅ GREEN |
+| 1 | sm_task_svc_agent.puml | Task Service | Task Service | Process FSM | 16 | TASKSVC-01..14, HTTPADP-06, LLMREPO-02, EDITSTRATEGYREPO-10, SAFETYSVC-02, TOOLSVC-HK02, EVALSVC-01..06, LLMREPO-05 | ✅ GREEN |
 | 2 | sm_session_svc_session.puml | Session | Session Service | Entity | 6 | SESSIONSVC-01..04, SESSIONSVC-08, SESSIONSVC-09 | ✅ GREEN |
 | 3 | sm_task_svc_plan.puml | Task Service (Plan) | Task Service | Entity | 7 | TASKSVC-07, TASKSVC-08, TASKSVC-01, TASKSVC-14 | ✅ GREEN |
 | 4 | sm_tool_svc_plugin.puml | Tool Service (Plugin) | Tool Service | Entity | 6 | TOOLSVC-01..06 | ✅ GREEN |
@@ -925,8 +912,8 @@ Systematic 21-group C4 component audit: every Component() in every `docs/C4/c4_n
 | Total C4 component groups audited | 21 |
 | Total C4 components scanned | ~109 |
 | Total SM files | 15 |
-| Total states across all SMs | 92 |
-| Unique hex colors | 92 (0 duplicates) |
+| Total states across all SMs | 91 |
+| Unique hex colors | 91 (0 duplicates) |
 | Total transitions (all SMs) | 195 |
 | Non-terminal transitions | 195 |
 | Covered by SQ diagrams | 80 |

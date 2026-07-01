@@ -6,11 +6,12 @@
 ' Purpose:   Process lifecycle for Evaluation Service.
 '            Orchestrates: checks, LLM review, test suites, scoring, retry.
 ' Milestone: v1.0
-' Version:   2.0.0
+' Version:   3.0.0
 ' Source:    docs/C4/c4_nasim_component.puml (v13.0.0), docs/UC/uc_eval_svc.puml
-' Review:    SM Architect extraction 2026-07-01 (C4+UC source of truth)
+' Review:    SM Architect review 2026-07-01 (C4+UC source of truth)
 ' Convention: All transitions are triggered by the corresponding UC ID
 '             as listed in docs/UC/README.md.
+' Note:      PASSED and FAILED are terminal states — only [*] exits.
 ' ============================================================
 
 title nasim — Evaluation Service: Evaluation Lifecycle
@@ -63,10 +64,7 @@ SCORING --> RETRYING : EVALSVC-06
 RETRYING --> CHECKING : EVALSVC-06
 RETRYING --> FAILED : EVALSVC-06
 
-PASSED --> IDLE : EVALSVC-01
-FAILED --> IDLE : EVALSVC-01
-
-PASSED --> [*] : EVALSVC-01
-FAILED --> [*] : EVALSVC-01
+PASSED --> [*] : EVALSVC-07
+FAILED --> [*] : EVALSVC-06
 
 @enduml

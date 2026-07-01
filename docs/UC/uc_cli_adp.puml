@@ -42,7 +42,6 @@ rectangle "nasim" {
 User --> CLI01
 User --> CLI02
 User --> CLI04
-User --> CLI06
 
 CLI01 ..> CLI03 : <<include>>
 CLI01 ..> AC01_ext : <<include>>
